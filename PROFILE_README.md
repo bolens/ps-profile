@@ -12,7 +12,6 @@ Quick index
 - `Microsoft.PowerShell_profile.ps1` — main profile loader (keeps itself small).
 - `profile.d/` — modular fragments. Files are loaded in lexical order.
   - `00-bootstrap.ps1` — helper functions for safe registration.
-  - `01-paths.ps1` — PATH normalization.
   - `02-env.ps1` — environment variable defaults.
   - `06-oh-my-posh.ps1` — oh-my-posh prompt initialization.
   - `10-git.ps1` — consolidated git helpers.

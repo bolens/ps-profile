@@ -31,7 +31,6 @@ A modular, performance-optimized PowerShell profile for interactive shells. Feat
 - `Microsoft.PowerShell_profile.ps1` — Main profile loader
 - `profile.d/` — Modular fragments loaded in lexical order
   - `00-bootstrap.ps1` — Helper functions for safe registration
-  - `01-paths.ps1` — PATH normalization
   - `06-oh-my-posh.ps1` / `20-starship.ps1` — Prompt initialization
   - `10-git.ps1` — Git helpers
   - `20-containers.ps1` — Container management utilities

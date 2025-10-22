@@ -26,13 +26,13 @@
     )
 
     # Per-rule configuration (Enable = $true/$false; Severity = 'Error'|'Warning'|'Information')
-    Rules = @{
+    Rules        = @{
         # Profiles frequently use short helper aliases and interactive Write-Host.
         # Disable the alias avoidance rule to avoid noisy reports for intentional aliases.
         'PSAvoidUsingCmdletAliases' = @{ Enable = $false }
 
         # Allow Write-Host in interactive helpers; set to $true to re-enable rule.
-        'PSAvoidUsingWriteHost' = @{ Enable = $false }
+        'PSAvoidUsingWriteHost'     = @{ Enable = $false }
     }
 
     # Example per-file suppressions (uncomment and edit as needed)
@@ -40,7 +40,6 @@
         @{ File = 'profile.d\00-bootstrap.ps1'; Rule = 'PSUseShouldProcessForStateChangingFunctions'; Justification = 'Profile bootstrap functions are safe in this context' }
         @{ File = 'profile.d\00-bootstrap.ps1'; Rule = 'PSAvoidUsingEmptyCatchBlock'; Justification = 'Empty catch blocks are acceptable in bootstrap code' }
         @{ File = 'profile.d\00-bootstrap.ps1'; Rule = 'PSUseDeclaredVarsMoreThanAssignments'; Justification = 'Variable is used in error handling context' }
-        @{ File = 'profile.d\01-paths.ps1'; Rule = 'PSAvoidUsingEmptyCatchBlock'; Justification = 'Empty catch blocks are acceptable in path setup code' }
         @{ File = 'profile.d\02-prompt.ps1'; Rule = 'PSUseBOMForUnicodeEncodedFile'; Justification = 'File contains Unicode characters that require BOM' }
         @{ File = 'profile.d\03-files.ps1'; Rule = 'PSUseApprovedVerbs'; Justification = 'Utility functions use convenient unapproved verbs by design' }
         @{ File = 'profile.d\05-utilities.ps1'; Rule = 'PSUseApprovedVerbs'; Justification = 'Utility functions use convenient unapproved verbs by design' }

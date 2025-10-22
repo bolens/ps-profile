@@ -76,26 +76,27 @@ if ($IsWindows) {
     # Provide an on-demand helper for npm prefix discovery to keep
     # dot-source cheap. Users can call Enable-NpmPaths if they want
     # npm's global bin discovered into PATH.
-    if (-not (Test-Path 'Function:Enable-NpmPaths')) {
-      New-Item -Path 'Function:Enable-NpmPaths' -Value {
-        param()
-        try {
-          if (Test-HasCommand -Name 'npm') {
-            $npmPrefix = (& npm config get prefix 2>$null) -as [string]
-            if ($npmPrefix) {
-              $npmBin = Join-Path $npmPrefix 'bin'
-              if ($npmBin -and (Test-Path $npmBin -PathType Container -ErrorAction SilentlyContinue)) {
-                if ($env:Path -and -not ($env:Path -split ';' | Where-Object { $_ -ieq $npmBin })) {
-                  $env:Path = "$npmBin;$env:Path"
-                  return $true
-                }
-              }
-            }
-          }
-        } catch { Write-Verbose "Failed to add Windows PATH entry: $($_.Exception.Message)" }
-        return $false
-      } -Force | Out-Null
-    }
+    # Temporarily disabled due to npm config issues
+    # if (-not (Test-Path 'Function:Enable-NpmPaths')) {
+    #   New-Item -Path 'Function:Enable-NpmPaths' -Value {
+    #     param()
+    #     try {
+    #       if (Test-HasCommand -Name 'npm') {
+    #         $npmPrefix = (& npm config get prefix 2>$null) -as [string]
+    #         if ($npmPrefix) {
+    #           $npmBin = Join-Path $npmPrefix 'bin'
+    #           if ($npmBin -and (Test-Path $npmBin -PathType Container -ErrorAction SilentlyContinue)) {
+    #             if ($env:Path -and -not ($env:Path -split ';' | Where-Object { $_ -ieq $npmBin })) {
+    #               $env:Path = "$npmBin;$env:Path"
+    #               return $true
+    #             }
+    #           }
+    #         }
+    #       }
+    #     } catch { Write-Verbose "Failed to add Windows PATH entry: $($_.Exception.Message)" }
+    #     return $false
+    #   } -Force | Out-Null
+    # }
   } catch { Write-Verbose "Failed to set up Windows PATH: $($_.Exception.Message)" }
 } else {
   # Cross-platform fallback for non-Windows shells (minimal): ensure ~/.local/bin is on PATH
