@@ -12,7 +12,7 @@ if (-not (Test-Path Function:next-dev -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:next-dev -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand npx) { npx next dev @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:next-dev -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command npx -ErrorAction SilentlyContinue)) { npx next dev @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
+    Set-Item -Path Function:next-dev -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command npx -ErrorAction SilentlyContinue) { npx next dev @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   }
 }
 
@@ -21,7 +21,7 @@ if (-not (Test-Path Function:next-build -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:next-build -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand npx) { npx next build @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:next-build -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command npx -ErrorAction SilentlyContinue)) { npx next build @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
+    Set-Item -Path Function:next-build -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command npx -ErrorAction SilentlyContinue) { npx next build @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   }
 }
 
@@ -30,7 +30,7 @@ if (-not (Test-Path Function:next-start -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:next-start -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand npx) { npx next start @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:next-start -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command npx -ErrorAction SilentlyContinue)) { npx next start @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
+    Set-Item -Path Function:next-start -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command npx -ErrorAction SilentlyContinue) { npx next start @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   }
 }
 
@@ -39,6 +39,8 @@ if (-not (Test-Path Function:create-next-app -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:create-next-app -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand npx) { npx create-next-app @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:create-next-app -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command npx -ErrorAction SilentlyContinue)) { npx create-next-app @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
+    Set-Item -Path Function:create-next-app -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command npx -ErrorAction SilentlyContinue) { npx create-next-app @a } else { Write-Warning 'npx not found' } } -Force | Out-Null
   }
 }
+
+

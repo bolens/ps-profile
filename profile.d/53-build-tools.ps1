@@ -12,7 +12,7 @@ if (-not (Test-Path Function:turbo -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:turbo -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand turbo) { turbo @a } else { npx turbo @a } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:turbo -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command turbo -ErrorAction SilentlyContinue)) { turbo @a } else { npx turbo @a } } -Force | Out-Null
+    Set-Item -Path Function:turbo -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command turbo -ErrorAction SilentlyContinue) { turbo @a } else { npx turbo @a } } -Force | Out-Null
   }
 }
 
@@ -21,7 +21,7 @@ if (-not (Test-Path Function:esbuild -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:esbuild -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand esbuild) { esbuild @a } else { npx esbuild @a } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:esbuild -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command esbuild -ErrorAction SilentlyContinue)) { esbuild @a } else { npx esbuild @a } } -Force | Out-Null
+    Set-Item -Path Function:esbuild -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command esbuild -ErrorAction SilentlyContinue) { esbuild @a } else { npx esbuild @a } } -Force | Out-Null
   }
 }
 
@@ -30,7 +30,7 @@ if (-not (Test-Path Function:rollup -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:rollup -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand rollup) { rollup @a } else { npx rollup @a } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:rollup -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command rollup -ErrorAction SilentlyContinue)) { rollup @a } else { npx rollup @a } } -Force | Out-Null
+    Set-Item -Path Function:rollup -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command rollup -ErrorAction SilentlyContinue) { rollup @a } else { npx rollup @a } } -Force | Out-Null
   }
 }
 
@@ -39,7 +39,7 @@ if (-not (Test-Path Function:serve -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:serve -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand serve) { serve @a } else { npx serve @a } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:serve -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command serve -ErrorAction SilentlyContinue)) { serve @a } else { npx serve @a } } -Force | Out-Null
+    Set-Item -Path Function:serve -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command serve -ErrorAction SilentlyContinue) { serve @a } else { npx serve @a } } -Force | Out-Null
   }
 }
 
@@ -48,6 +48,8 @@ if (-not (Test-Path Function:http-server -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:http-server -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand http-server) { http-server @a } else { npx http-server @a } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:http-server -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command http-server -ErrorAction SilentlyContinue)) { http-server @a } else { npx http-server @a } } -Force | Out-Null
+    Set-Item -Path Function:http-server -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command http-server -ErrorAction SilentlyContinue) { http-server @a } else { npx http-server @a } } -Force | Out-Null
   }
 }
+
+

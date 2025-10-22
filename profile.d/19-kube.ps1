@@ -22,7 +22,7 @@ if (-not (Test-Path Function:\minikube-start)) {
     if (Test-Path "Function:\Test-CachedCommand" -or Test-Path "Function:\global:Test-CachedCommand") {
       try { if (Test-CachedCommand minikube) { minikube start @a } else { Write-Warning 'minikube not found' } } catch { Write-Warning 'minikube check failed' }
     } else {
-      if ($null -ne (Get-Command minikube -ErrorAction SilentlyContinue)) { minikube start @a } else { Write-Warning 'minikube not found' }
+      if (Get-Command minikube -ErrorAction SilentlyContinue) { minikube start @a } else { Write-Warning 'minikube not found' }
     }
   }
   Set-Item -Path Function:\minikube-start -Value $sbStart -Force | Out-Null
@@ -34,10 +34,12 @@ if (-not (Test-Path Function:\minikube-stop)) {
     if (Test-Path "Function:\Test-CachedCommand" -or Test-Path "Function:\global:Test-CachedCommand") {
       try { if (Test-CachedCommand minikube) { minikube stop @a } else { Write-Warning 'minikube not found' } } catch { Write-Warning 'minikube check failed' }
     } else {
-      if ($null -ne (Get-Command minikube -ErrorAction SilentlyContinue)) { minikube stop @a } else { Write-Warning 'minikube not found' }
+      if (Get-Command minikube -ErrorAction SilentlyContinue) { minikube stop @a } else { Write-Warning 'minikube not found' }
     }
   }
   Set-Item -Path Function:\minikube-stop -Value $sbStop -Force | Out-Null
 }
 
 # Do NOT duplicate kctx here; `15-kubectl.ps1` is authoritative for kubectl shorthands.
+
+

@@ -26,3 +26,5 @@ try {
 } catch {
   if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Diagnostics fragment failed: $($_.Exception.Message)" }
 }
+
+

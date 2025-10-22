@@ -16,7 +16,7 @@ Functions
 - `weather` — Weather info for a location (city, zip, etc.)
 - `myip` — Get public IP address
 - `speedtest` — Run speedtest-cli
-- `h` — History helpers
+- `Get-History` — History helpers
 - `hg` — Search history
 - `pwgen` — Generate random password
 - `from-epoch` — Convert Unix timestamp to DateTime

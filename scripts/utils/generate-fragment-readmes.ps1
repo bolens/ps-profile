@@ -33,10 +33,10 @@ foreach ($ps in $psFiles) {
             # Track multiline comment state
             if ($trim -match '^\s*<#') { $inMultilineComment = $true; continue }
             if ($trim -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
-            
+
             # Skip decorative lines
             if ($trim -match '^# =+$' -or $trim -match '^# -+$' -or $trim -eq '#') { continue }
-            
+
             # Look for comment lines (both single-line # and inside multiline comments)
             $m = [regex]::Match($trim, '^\s*#\s*(.+)$')
             if ($m.Success -or ($inMultilineComment -and $trim -and -not ($trim -match '^\s*<#') -and -not ($trim -match '^\s*#'))) {
@@ -63,7 +63,8 @@ foreach ($ps in $psFiles) {
         $enableMatches = Select-String -Path $ps.FullName -Pattern 'function\s+Enable-[A-Za-z0-9_-]+' -AllMatches -ErrorAction SilentlyContinue
         foreach ($m in $enableMatches) { foreach ($mm in $m.Matches) { $enableHelpers += $mm.Value.Trim() } }
         $enableHelpers = $enableHelpers | Sort-Object -Unique
-    } catch {}
+    }
+    catch {}
 
     # Extract top-level function declarations and a short comment above them (if present)
     $functions = @()
@@ -72,7 +73,7 @@ foreach ($ps in $psFiles) {
         for ($i = 0; $i -lt $allLines.Count; $i++) {
             $line = $allLines[$i]
             # Match function declarations (not in comments), including those inside conditional blocks
-            $fm = [regex]::Match($line, '^\s*function\s+([A-Za-z0-9_\-]+)\b')
+            $fm = [regex]::Match($line, '^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b')
             if ($fm.Success) {
                 $fname = $fm.Groups[1].Value
                 $desc = $null
@@ -89,11 +90,11 @@ foreach ($ps in $psFiles) {
                 # Second pass: extract comments
                 for ($j = $i - 1; $j -ge [Math]::Max(0, $i - 10); $j--) {
                     $up = $allLines[$j].Trim()
-                    
+
                     # Track multiline comment state
                     if ($up -match '^\s*<#') { $inMultilineComment = $true; continue }
                     if ($up -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
-                    
+
                     # Check for single-line comment lines above
                     $dm = [regex]::Match($up, '^\s*#\s*(.+)$')
                     if ($dm.Success -and -not $inMultilineComment) {
@@ -114,7 +115,7 @@ foreach ($ps in $psFiles) {
                             break
                         }
                     }
-                    
+
                     # Stop if we hit a non-comment, non-empty line (but allow if statements)
                     if ($up -and -not ($up -match '^\s*$') -and -not ($up -match '^\s*#') -and -not ($up -match '^\s*if\s*\(') -and -not $inMultilineComment) {
                         break
@@ -123,7 +124,8 @@ foreach ($ps in $psFiles) {
                 $functions += [PSCustomObject]@{ Name = $fname; Short = $desc }
             }
         }
-    } catch {}
+    }
+    catch {}
 
     # Detect dynamically-created functions (Set-Item Function:Name, Function:Name references,
     # Set-AgentModeFunction/Set-AgentModeAlias, New-Item Function:Name)
@@ -133,16 +135,18 @@ foreach ($ps in $psFiles) {
             $ln = $line.Trim()
             $fname = $null
             $desc = $null
-            
+
             # Check for different patterns of function creation
             if ($ln -match 'Set-AgentModeFunction\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)') {
                 $fname = $matches[1]
-            } elseif ($ln -match 'Set-AgentModeAlias\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)') {
-                $fname = $matches[1]
-            } elseif ($ln -match '(?:Set-Item|New-Item)\s+(?:-Path\s+)?Function:(?:global:)?([A-Za-z0-9_\-]+)') {
+            }
+            elseif ($ln -match 'Set-AgentModeAlias\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)') {
                 $fname = $matches[1]
             }
-            
+            elseif ($ln -match '(?:Set-Item|New-Item)\s+(?:-Path\s+)?Function:(?:global:)?([A-Za-z0-9_\-\.\~]+)') {
+                $fname = $matches[1]
+            }
+
             if ($fname) {
                 # Look for comments above the function creation (up to 10 lines back)
                 $inMultilineComment = $false
@@ -157,11 +161,11 @@ foreach ($ps in $psFiles) {
                 # Second pass: extract comments
                 for ($j = $i - 1; $j -ge [Math]::Max(0, $i - 10); $j--) {
                     $up = $allLines[$j].Trim()
-                    
+
                     # Track multiline comment state
                     if ($up -match '^\s*<#') { $inMultilineComment = $true; continue }
                     if ($up -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
-                    
+
                     # Check for single-line comment lines above
                     $dm = [regex]::Match($up, '^\s*#\s*(.+)$')
                     if ($dm.Success -and -not $inMultilineComment) {
@@ -182,13 +186,13 @@ foreach ($ps in $psFiles) {
                             break
                         }
                     }
-                    
+
                     # Stop if we hit a non-comment, non-empty line
                     if ($up -and -not ($up -match '^\s*$') -and -not ($up -match '^\s*#') -and -not ($up -match '^\s*if\s*\(') -and -not $inMultilineComment) {
                         break
                     }
                 }
-                
+
                 # If no comment found above, check for inline comment on the function line
                 if (-not $desc) {
                     $functionLine = $allLines[$i].Trim()
@@ -200,7 +204,7 @@ foreach ($ps in $psFiles) {
                         }
                     }
                 }
-                
+
                 # Only add if not already in the list
                 if ($functions.Name -notcontains $fname) {
                     if (-not $desc) { $desc = 'dynamically-created; see fragment source' }
@@ -208,7 +212,8 @@ foreach ($ps in $psFiles) {
                 }
             }
         }
-    } catch {}
+    }
+    catch {}
 
     $title = "profile.d/$($ps.Name)"
     $underline = '=' * $title.Length

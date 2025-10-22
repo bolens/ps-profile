@@ -12,7 +12,7 @@ if (-not (Test-Path Function:vue -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:vue -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand npx) { npx @vue/cli @a } elseif (Test-CachedCommand vue) { vue @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:vue -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command npx -ErrorAction SilentlyContinue)) { npx @vue/cli @a } elseif ($null -ne (Get-Command vue -ErrorAction SilentlyContinue)) { vue @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
+    Set-Item -Path Function:vue -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command npx -ErrorAction SilentlyContinue) { npx @vue/cli @a } elseif (Get-Command vue -ErrorAction SilentlyContinue) { vue @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
   }
 }
 
@@ -21,7 +21,7 @@ if (-not (Test-Path Function:vue-create -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:vue-create -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand npx) { npx @vue/cli create @a } elseif (Test-CachedCommand vue) { vue create @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:vue-create -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command npx -ErrorAction SilentlyContinue)) { npx @vue/cli create @a } elseif ($null -ne (Get-Command vue -ErrorAction SilentlyContinue)) { vue create @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
+    Set-Item -Path Function:vue-create -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command npx -ErrorAction SilentlyContinue) { npx @vue/cli create @a } elseif (Get-Command vue -ErrorAction SilentlyContinue) { vue create @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
   }
 }
 
@@ -30,6 +30,8 @@ if (-not (Test-Path Function:vue-serve -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:vue-serve -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand npx) { npx @vue/cli serve @a } elseif (Test-CachedCommand vue) { vue serve @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:vue-serve -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command npx -ErrorAction SilentlyContinue)) { npx @vue/cli serve @a } elseif ($null -ne (Get-Command vue -ErrorAction SilentlyContinue)) { vue serve @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
+    Set-Item -Path Function:vue-serve -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command npx -ErrorAction SilentlyContinue) { npx @vue/cli serve @a } elseif (Get-Command vue -ErrorAction SilentlyContinue) { vue serve @a } else { Write-Warning 'npx or vue not found' } } -Force | Out-Null
   }
 }
+
+

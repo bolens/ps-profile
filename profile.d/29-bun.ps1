@@ -13,7 +13,7 @@ if (-not (Test-Path Function:bunx -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:bunx -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand bun) { bunx @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:bunx -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command bun -ErrorAction SilentlyContinue)) { bunx @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
+    Set-Item -Path Function:bunx -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command bun -ErrorAction SilentlyContinue) { bunx @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
   }
 }
 
@@ -23,7 +23,7 @@ if (-not (Test-Path Function:bun-run -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:bun-run -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand bun) { bun run @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:bun-run -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command bun -ErrorAction SilentlyContinue)) { bun run @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
+    Set-Item -Path Function:bun-run -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command bun -ErrorAction SilentlyContinue) { bun run @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
   }
 }
 
@@ -33,6 +33,8 @@ if (-not (Test-Path Function:bun-add -ErrorAction SilentlyContinue)) {
   if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
     Set-Item -Path Function:bun-add -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand bun) { bun add @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
   } else {
-    Set-Item -Path Function:bun-add -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if ($null -ne (Get-Command bun -ErrorAction SilentlyContinue)) { bun add @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
+    Set-Item -Path Function:bun-add -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command bun -ErrorAction SilentlyContinue) { bun add @a } else { Write-Warning 'bun not found' } } -Force | Out-Null
   }
 }
+
+

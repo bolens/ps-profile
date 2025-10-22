@@ -19,13 +19,14 @@ try {
   }
   # If not found via env, check the legacy path (cheap single Test-Path).
   # Avoid enumerating all drives; only test the legacy root quickly.
-  if (-not $scoopCompletion) {
-    $legacyRoot = 'A:\'
-    if (Test-Path $legacyRoot -PathType Container -ErrorAction SilentlyContinue) {
-      $legacy = 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
-      if (Test-Path $legacy -PathType Leaf -ErrorAction SilentlyContinue) { $scoopCompletion = $legacy }
-    }
-  }
+  # Skip A: drive check as it's usually slow on Windows
+  # if (-not $scoopCompletion) {
+  #   $legacyRoot = 'A:\'
+  #   if (Test-Path $legacyRoot -PathType Container -ErrorAction SilentlyContinue) {
+  #     $legacy = 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
+  #     if (Test-Path $legacy -PathType Leaf -ErrorAction SilentlyContinue) { $scoopCompletion = $legacy }
+  #   }
+  # }
 
   if ($scoopCompletion) {
     # Register a lazy enabler that imports the Scoop completion PSD1 when the user explicitly
@@ -38,13 +39,17 @@ try {
           Import-Module $using:p -ErrorAction SilentlyContinue
           Set-Variable -Name 'ScoopCompletionLoaded' -Value $true -Scope Global -Force
           Write-Output 'Scoop completion enabled (if available)'
-        } catch {
+        }
+        catch {
           Write-Warning 'Failed to enable Scoop completion'
         }
       }
       New-Item -Path Function:\Enable-ScoopCompletion -Value $wrapper -Force | Out-Null
     }
   }
-} catch {
+}
+catch {
   if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Scoop completion fragment failed: $($_.Exception.Message)" }
 }
+
+

@@ -11,12 +11,12 @@ See the fragment source: `11-ansible.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `ansible` — Ansible wrappers that execute via WSL to ensure Linux toolchain compatibility
-- `ansible-playbook`
-- `ansible-galaxy`
-- `ansible-vault`
-- `ansible-doc`
-- `ansible-inventory`
+- `ansible` — Ansible command wrappers for WSL with UTF-8 locale
+- `ansible-playbook` — Ansible-playbook command wrapper for WSL with UTF-8 locale
+- `ansible-galaxy` — Ansible-galaxy command wrapper for WSL with UTF-8 locale
+- `ansible-vault` — Ansible-vault command wrapper for WSL with UTF-8 locale
+- `ansible-doc` — Ansible-doc command wrapper for WSL with UTF-8 locale
+- `ansible-inventory` — Ansible-inventory command wrapper for WSL with UTF-8 locale
 
 Dependencies
 ------------

@@ -31,3 +31,5 @@ function open-explorer { explorer.exe . }
 function list-functions { Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name,Definition | Format-Table -AutoSize }
 # Backup current profile to timestamped .bak file
 function backup-profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
+
+

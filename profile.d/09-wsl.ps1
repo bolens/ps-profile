@@ -6,3 +6,5 @@
 function wsl-shutdown { wsl --shutdown }
 function wsl-list { wsl --list --verbose }
 function ubuntu { wsl -D Ubuntu @args }
+
+

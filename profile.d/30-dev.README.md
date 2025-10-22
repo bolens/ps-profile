@@ -21,7 +21,7 @@ Functions
 - `pd` — Podman shortcuts
 - `pps`
 - `pi`
-- `ni` — Node.js shortcuts
+- `New-Item` — Node.js shortcuts
 - `nr`
 - `ns`
 - `nt`

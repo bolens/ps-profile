@@ -11,8 +11,8 @@ See the fragment source: `06-oh-my-posh.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Initialize-OhMyPosh`
-- `Prompt` — ScriptBlock object to avoid simple textual recursion.
+- `Initialize-OhMyPosh` — oh-my-posh initialization function
+- `prompt` — ScriptBlock object to avoid simple textual recursion.
 
 Dependencies
 ------------

@@ -10,7 +10,7 @@ Usage: pwsh -NoProfile -File scripts\benchmark-startup.ps1
 
 param(
     [int]$Iterations = 5,
-    [string]$WorkspaceRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$WorkspaceRoot = (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
     [switch]$UpdateBaseline,
     [double]$RegressionThreshold = 1.5  # Allow 50% degradation before failing
 )
@@ -32,17 +32,10 @@ $fullResults = [System.Collections.Generic.List[double]]::new()
 for ($i = 1; $i -le $Iterations; $i++) {
     $marker = "PS_STARTUP_READY_$([guid]::NewGuid().ToString('N'))"
     $profilePath = Join-Path $WorkspaceRoot 'Microsoft.PowerShell_profile.ps1'
-    $tempFull = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "ps_profile_startup_$([guid]::NewGuid().ToString('N')).ps1")
-    $childScript = @"
-. '$($profilePath)'
-Write-Output '$($marker)'
-"@
-    Set-Content -Path $tempFull -Value $childScript -Encoding UTF8
 
     $startInfo = New-Object System.Diagnostics.ProcessStartInfo
     $startInfo.FileName = 'pwsh'
-    # Use -NoProfile -File to avoid complex quoting of -Command
-    $startInfo.Arguments = "-NoProfile -File `"$tempFull`""
+    $startInfo.Arguments = "-NoProfile -Command `"$env:PS_PROFILE_AUTOENABLE_PSREADLINE = '1'; Import-Module PSReadLine -ErrorAction SilentlyContinue; . '$($profilePath)'; Write-Output '$($marker)'`""
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
     $startInfo.UseShellExecute = $false
@@ -66,10 +59,9 @@ Write-Output '$($marker)'
     $fullResults.Add($ms)
     try {
         $proc.Kill()
-    } catch {
+    }
+    catch {
         # ignore any errors when killing the process
-    } finally {
-        Remove-Item -Path $tempFull -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -82,6 +74,8 @@ foreach ($frag in $fragments) {
         $scriptPath = $frag.FullName
         $tempFrag = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "ps_profile_frag_$([guid]::NewGuid().ToString('N')).ps1")
         $child = @"
+$env:PS_PROFILE_AUTOENABLE_PSREADLINE = '1'
+Import-Module PSReadLine -ErrorAction SilentlyContinue
 `$sw = [System.Diagnostics.Stopwatch]::StartNew()
 . '$($scriptPath)'
 `$sw.Stop()
@@ -108,18 +102,18 @@ Write-Output `$sw.Elapsed.TotalMilliseconds
         Remove-Item -Path $tempFrag -Force -ErrorAction SilentlyContinue
     }
     $fragmentResults += [PSCustomObject]@{
-        Fragment = $frag.Name
+        Fragment   = $frag.Name
         Iterations = $Iterations
-        MeanMs = [Math]::Round(($times | Measure-Object -Average).Average,2)
-        MedianMs = [Math]::Round((($times | Sort-Object)[$times.Count/2]),2)
-        Raw = $times -join ','
+        MeanMs     = [Math]::Round(($times | Measure-Object -Average).Average, 2)
+        MedianMs   = [Math]::Round((($times | Sort-Object)[$times.Count / 2]), 2)
+        Raw        = $times -join ','
     }
 }
 
 # Print results
 Write-Output "\nStartup benchmark (ms) - iterations: $Iterations"
 $fullResultsArray = $fullResults.ToArray()
-$currentMean = [Math]::Round(($fullResultsArray | Measure-Object -Average).Average,2)
+$currentMean = [Math]::Round(($fullResultsArray | Measure-Object -Average).Average, 2)
 Write-Output "Full startup times (ms): $($fullResultsArray -join ',')"
 Write-Output "Full startup mean (ms): $currentMean"
 
@@ -160,25 +154,27 @@ if (Test-Path $baselineFile) {
         if (-not $regressionDetected) {
             Write-Output "✓ No performance regressions detected"
         }
-    } catch {
+    }
+    catch {
         Write-Warning "Failed to load or parse baseline file: $($_.Exception.Message)"
     }
-} else {
+}
+else {
     Write-Output "`nNo baseline performance data found. Run with -UpdateBaseline to create baseline."
 }
 
 # Save new baseline if requested
 if ($UpdateBaseline) {
     $baselineData = @{
-        Timestamp = (Get-Date).ToString('o')
+        Timestamp       = (Get-Date).ToString('o')
         FullStartupMean = $currentMean
-        FullStartupRaw = $fullResultsArray
-        Fragments = $fragmentResults | ForEach-Object {
+        FullStartupRaw  = $fullResultsArray
+        Fragments       = $fragmentResults | ForEach-Object {
             @{
                 Fragment = $_.Fragment
-                MeanMs = $_.MeanMs
+                MeanMs   = $_.MeanMs
                 MedianMs = $_.MedianMs
-                Raw = $_.Raw
+                Raw      = $_.Raw
             }
         }
     }

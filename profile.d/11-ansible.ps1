@@ -15,3 +15,5 @@ function ansible-vault { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UT
 function ansible-doc { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-doc $args" }
 # Ansible-inventory command wrapper for WSL with UTF-8 locale
 function ansible-inventory { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-inventory $args" }
+
+

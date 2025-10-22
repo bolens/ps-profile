@@ -16,3 +16,5 @@ if (Test-Path 'Function:Set-AgentModeFunction') {
     if (Test-Path $p) { notepad $p } else { Write-Output 'No agent-mode docs available locally.' }
   }
 }
+
+

@@ -103,3 +103,5 @@ if (-not (Test-Path Function:gsync)) { Set-Item -Path Function:gsync -Value { En
 if (-not (Test-Path Function:gundo)) { Set-Item -Path Function:gundo -Value { Ensure-GitHelper; & (Get-Command gundo -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
 # Git default branch - get default branch name
 if (-not (Test-Path Function:gdefault)) { Set-Item -Path Function:gdefault -Value { Ensure-GitHelper; & (Get-Command gdefault -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+
+

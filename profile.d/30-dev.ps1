@@ -45,3 +45,5 @@ function cc { cargo check $args }
 function cu { cargo update $args }
 function ca { cargo add $args }
 function cw { cargo watch -x run }
+
+

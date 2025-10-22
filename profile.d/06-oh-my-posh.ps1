@@ -25,6 +25,7 @@ try {
     return
   }
 
+  # oh-my-posh initialization function
   function Initialize-OhMyPosh {
     try {
       # oh-my-posh prints a shell init script; write it to a temp file and
@@ -33,11 +34,13 @@ try {
       try {
         $null = oh-my-posh init pwsh --print 2>$null | Out-File -FilePath $temp -Encoding UTF8
         if (Test-Path $temp) {.$temp }
-      } finally {
+      }
+      finally {
         if (Test-Path $temp) { Remove-Item $temp -Force -ErrorAction SilentlyContinue }
       }
       Set-Variable -Name 'OhMyPoshInitialized' -Value $true -Scope Global -Force
-    } catch {
+    }
+    catch {
       if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Initialize-OhMyPosh failed: $($_.Exception.Message)" }
     }
   }
@@ -63,7 +66,8 @@ try {
       if ($cmd -and $cmd.ScriptBlock -and $cmd.ScriptBlock -ne $function:Prompt.ScriptBlock) {
         return & $cmd.ScriptBlock
       }
-    } catch {
+    }
+    catch {
       # If invoking the registered prompt fails for any reason, fall back to a
       # minimal prompt string. We swallow exceptions to keep interactive flow.
     }
@@ -75,6 +79,9 @@ try {
     return "$user@$hostName $cwd > "
   }
 
-} catch {
+}
+catch {
   if ($env:PS_PROFILE_DEBUG) { Write-Verbose "oh-my-posh fragment failed: $($_.Exception.Message)" }
 }
+
+
