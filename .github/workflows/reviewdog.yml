@@ -1,0 +1,33 @@
+name: Reviewdog - lint annotations
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  reviewdog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install cspell
+        run: npm install -g cspell@6
+      - name: Run PSScriptAnalyzer (normalized)
+        run: pwsh -NoProfile -Command ./scripts/utils/run-lint.ps1 | tee lint-output.txt
+      - name: Install reviewdog CLI
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin latest
+      - name: Run reviewdog for PSScriptAnalyzer
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -filter-mode=added -level=warning < lint-output.txt || true
+      - name: Run cspell and pipe to reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cspell "**/*.md" --no-progress --no-summary > cspell-output.txt || true
+          reviewdog -f=rdjson -name=cspell -reporter=github-pr-review -filter-mode=added -level=warning < cspell-output.txt || true

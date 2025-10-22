@@ -1,0 +1,73 @@
+{
+  // PowerShell settings
+  "powershell.powerShellDefaultVersion": "PowerShell",
+  "powershell.enableProfileLoading": false,
+  "powershell.scriptAnalysis.enable": true,
+  "powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
+
+  // Editor settings for PowerShell
+  "[powershell]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "ms-vscode.powershell"
+  },
+
+  // File associations
+  "files.associations": {
+    "*.ps1": "powershell",
+    "*.psd1": "powershell",
+    "*.psm1": "powershell"
+  },
+
+  // Exclude patterns
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/Modules/*/": false
+  },
+
+  // Search excludes
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/Modules/": true,
+    "**/.git": true
+  },
+
+  // Editor settings
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4,
+  "editor.trimAutoWhitespace": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.wordWrap": "on",
+
+  // Terminal settings
+  "terminal.integrated.shell.windows": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+  "terminal.integrated.shell.linux": "/usr/bin/pwsh",
+
+  // Git settings
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+
+  // Spell checking (if cspell extension is installed)
+  "cSpell.language": "en",
+  "cSpell.enabled": true,
+  "cSpell.words": [
+    "PowerShell",
+    "PSScriptAnalyzer",
+    "Pester",
+    "platyPS",
+    "git-cliff",
+    "semantic-release"
+  ],
+
+  // Task settings
+  "task.quickOpen.detail": true,
+  "task.quickOpen.showAll": true,
+
+  // Workspace settings
+  "workspace.trusted": true
+}

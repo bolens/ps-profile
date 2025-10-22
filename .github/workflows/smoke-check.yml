@@ -1,0 +1,26 @@
+name: Smoke check - repro
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  smoke-windows:
+    name: Smoke check (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run repro smoke script (verbose)
+        shell: pwsh
+        env:
+          PS_PROFILE_DEBUG: '1'
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -Command "Write-Verbose 'Starting repro'; Set-PSDebug -Trace 0; & { pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/repro_set_agentmode.ps1 }"
+
+      - name: Run Pester tests
+        shell: pwsh
+        env:
+          PS_PROFILE_DEBUG: '1'
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/utils/run_pester.ps1

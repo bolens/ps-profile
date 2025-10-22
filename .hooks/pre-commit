@@ -1,0 +1,20 @@
+#!/bin/sh
+# Tracked shim. To enable, create an empty file at .hooks/enable
+if [ -f ".hooks/enable" ]; then
+  # If on Windows where pwsh is available, call the PowerShell hook; otherwise run
+  # the shell-friendly fallback.
+  if command -v pwsh 1>/dev/null 2>/dev/null; then
+    pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/git/pre-commit.ps1
+    rc=$?
+    exit $rc
+  else
+    echo "Running local pre-commit checks (sh)..."
+    # fall back to the scripts/utils/spellcheck.ps1 via powershell if available
+    if command -v powershell 1>/dev/null 2>/dev/null; then
+      powershell -NoProfile -ExecutionPolicy Bypass -File scripts\utils\spellcheck.ps1
+      rc=$?
+      exit $rc
+    fi
+  fi
+fi
+exit 0

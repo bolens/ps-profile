@@ -1,0 +1,41 @@
+name: Validate commit messages
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  commit-message-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run commit message validation
+        id: validate
+        run: |
+          set -o pipefail
+          pwsh -NoProfile -File scripts/check-commit-messages.ps1 2>&1 | tee commit-msg-output.txt || true
+          echo "status=$?" >> $GITHUB_OUTPUT
+
+      - name: Prepare comment body (on failure)
+        if: ${{ steps.validate.outputs.status != '0' }}
+        run: |
+          # prepare an idempotent comment body with a marker so create-or-update-comment can find it
+          printf '<!-- commit-message-check -->\n\n**Commit message validation failed.**\n\n' > comment-body.md
+          cat commit-msg-output.txt >> comment-body.md || true
+          printf '\n\nPlease fix the commit subjects to match Conventional Commits.' >> comment-body.md
+
+      - name: Upsert bot comment (on failure)
+        if: ${{ steps.validate.outputs.status != '0' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-file: comment-body.md
+
+      - name: Add label (on failure)
+        if: ${{ steps.validate.outputs.status != '0' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: commit-message-invalid

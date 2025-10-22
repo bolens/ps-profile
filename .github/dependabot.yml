@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # PowerShell modules in the Modules directory
+  - package-ecosystem: "nuget"
+    directory: "/Modules/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    assignees:
+      - "bolens"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    assignees:
+      - "bolens"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

@@ -1,0 +1,64 @@
+name: PSScriptAnalyzer lint
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure pwsh available
+        run: pwsh -c "$PSVersionTable"
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+      - name: Run PSScriptAnalyzer and save report
+        shell: pwsh
+        run: |
+          $paths = @("./profile.d", "./scripts") | Where-Object { Test-Path $_ }
+          if (-not $paths) { Write-Output "No paths found to analyze"; exit 0 }
+          $results = @()
+          foreach ($p in $paths) {
+              Write-Output "Analyzing $p"
+              $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error','Warning','Information') -Verbose -CacheResult:$false
+              $results += $r
+          }
+          $json = $results | Select-Object @{n='FilePath';e={$_.ScriptName}},RuleName,Severity,Message,Line,Column | ConvertTo-Json -Depth 5
+          $out = "psscriptanalyzer-report.json"
+          $json | Out-File -FilePath $out -Encoding utf8
+          Write-Output "Saved report to $out"
+          # Fail if any Error-level findings
+          if ($results | Where-Object { $_.Severity -eq 'Error' }) {
+              Write-Output "Errors found by PSScriptAnalyzer"
+              exit 1
+          }
+      - name: Convert report for reviewdog
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ./.github/scripts/psa_to_reviewdog.ps1 -ReportPath psscriptanalyzer-report.json
+      - name: Run reviewdog (download binary)
+        if: github.event_name == 'pull_request'
+        run: |
+          set -e
+          echo "Downloading reviewdog"
+          RD_VER=0.13.1
+          OS_NAME=$(uname | tr '[:upper:]' '[:lower:]')
+          curl -sSL "https://github.com/reviewdog/reviewdog/releases/download/v${RD_VER}/reviewdog_${RD_VER}_${OS_NAME}_amd64.tar.gz" -o /tmp/reviewdog.tar.gz
+          mkdir -p /tmp/reviewdog
+          tar -xzf /tmp/reviewdog.tar.gz -C /tmp/reviewdog
+          sudo mv /tmp/reviewdog/reviewdog /usr/local/bin/reviewdog
+          reviewdog -version
+      - name: Run reviewdog annotations (rdjson)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Running reviewdog with RDJSON input"
+          reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -level=error < ./.psa_for_reviewdog.rdjson
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: psscriptanalyzer-report
+          path: psscriptanalyzer-report.json

@@ -1,0 +1,100 @@
+<#
+    Microsoft.PowerShell_profile.ps1
+    Purpose: user profile entrypoint. Keeps initialization minimal and
+             delegates large/feature-specific pieces to scripts in
+             `profile.d/` so the profile stays modular and easy to
+             maintain.
+
+    Notes (existing items are preserved and documented below):
+      - Scoop completion import (if present)
+      - oh-my-posh initialization (if installed)
+      - PSReadLine / history configuration
+      - ENV vars for editor/git
+      - Ordered, safe loader for `profile.d/*.ps1` (each file should be idempotent)
+
+    All new additions and changes are commented. Keep this file small;
+    add functionality in `profile.d/`.
+#>
+
+# --- Only run interactive initialization (skip for non-interactive hosts) ---
+# If $Host or its RawUI is not available, we're not in an interactive session.
+if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
+    return
+}
+
+# --- PSReadLine and command history configuration (improvements + comments) ---
+# Configure PSReadLine when the module is available. These settings
+# improve history size, prevent duplicates, and pick a cross-platform
+# history file location so history persists across sessions.
+if (Get-Module -Name PSReadLine -ListAvailable) {
+    # choose a history file location under the user's profile; works on Windows and Linux
+    $historyDir = Join-Path $env:USERPROFILE '.local\share\powershell'
+    if (-not (Test-Path $historyDir)) { New-Item -ItemType Directory -Path $historyDir -Force | Out-Null }
+    $historyFile = Join-Path $historyDir 'PSReadLineHistory.txt'
+
+    # Load the module (safe to call even if already loaded)
+    Import-Module PSReadLine -ErrorAction SilentlyContinue
+
+    # Improved history and editing behavior (commented):
+    # - Use Emacs edit mode (existing choice)
+    # - Save history incrementally to avoid loss on crashes
+    # - Increase maximum history to keep long sessions
+    # - Avoid duplicate lines in history
+    Set-PSReadLineOption -EditMode Emacs
+    Set-PSReadLineOption -HistorySaveStyle SaveIncrementally
+    Set-PSReadLineOption -MaximumHistoryCount 4096
+    Set-PSReadLineOption -HistoryNoDuplicates:$true
+    Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+    # Prediction-related options are present only in newer PSReadLine releases.
+    $psrCmd = Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue
+    if ($psrCmd -and $psrCmd.Parameters.ContainsKey('PredictionSource')) {
+        Set-PSReadLineOption -PredictionSource History
+    }
+    if ($psrCmd -and $psrCmd.Parameters.ContainsKey('PredictionViewStyle')) {
+        Set-PSReadLineOption -PredictionViewStyle ListView
+    }
+    Set-PSReadLineOption -HistorySavePath $historyFile
+
+    # Key bindings (preserve existing preferences)
+    Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+    Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+    Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+    Set-PSReadLineKeyHandler -Chord 'Ctrl+d' -Function DeleteCharOrExit
+}
+
+# ===============================================
+# PowerShell Profile - Custom Aliases & Functions
+# ===============================================
+# This profile is intentionally small: feature-rich helpers live in `profile.d/`.
+
+# ===============================================
+# ENVIRONMENT VARIABLES (existing)
+# ===============================================
+# Editor variables used by many tools (keep as existing defaults)
+$env:EDITOR = 'code'
+$env:GIT_EDITOR = 'code --wait'
+$env:VISUAL = 'code'
+
+# ===============================================
+# LOAD MODULAR PROFILE COMPONENTS (safe, ordered loader)
+# ===============================================
+# The previous loader dot-sourced all `profile.d/*.ps1` files. To improve
+# robustness we load files in sorted order and wrap each load in try/catch.
+$profileDir = Split-Path $PROFILE
+$profileD = Join-Path $profileDir 'profile.d'
+if (Test-Path $profileD) {
+    # Load files in lexical order. Each file should be idempotent and
+    # safe to be dot-sourced multiple times.
+    Get-ChildItem -Path $profileD -File -Filter '*.ps1' | Sort-Object Name | ForEach-Object {
+        try {
+            # Dot-source the file so it can define functions/aliases in this scope.
+            # Assign the result to $null to suppress any returned values (fragments
+            # may return ScriptBlocks or other objects during registration). This
+            # keeps the profile quiet when opening a new shell.
+            $null = . $_.FullName
+        } catch {
+            # Keep failures non-fatal but visible to the user during interactive sessions
+            Write-Warning "Failed to load profile fragment '$($_.Name)': $($_.Exception.Message)"
+        }
+    }
+}

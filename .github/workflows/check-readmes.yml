@@ -1,0 +1,16 @@
+name: Check fragment README consistency
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-readmes:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run README check
+        run: pwsh -NoProfile -File .\scripts\check-fragment-readmes.ps1
+        shell: pwsh

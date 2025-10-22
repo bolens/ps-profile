@@ -1,0 +1,38 @@
+name: CI - PowerShell (matrix)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Validate on ${{ matrix.os }} / PowerShell ${{ matrix.pwsh }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        pwsh: [7.2, 7.6]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure pwsh is available (install if missing)
+        run: |
+          echo "Checking for pwsh..."
+          if command -v pwsh >/dev/null 2>&1; then pwsh -c "Write-Output 'pwsh available'"; exit 0; fi
+          echo "pwsh not found, attempting to install..."
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ] || [ "${{ matrix.os }}" = "macos-latest" ]; then
+            if command -v apt-get >/dev/null 2>&1; then
+              sudo apt-get update && sudo apt-get install -y powershell || true
+            fi
+            if command -v brew >/dev/null 2>&1; then
+              brew install --cask powershell || true
+            fi
+          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
+            echo 'Windows runners should include pwsh by default.'
+          fi
+          if command -v pwsh >/dev/null 2>&1; then pwsh -c "Write-Output 'pwsh installed'"; else echo 'pwsh still missing'; exit 1; fi
+      - name: Install PSScriptAnalyzer
+        run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force"
+      - name: Validate profile (lint + idempotency)
+        run: pwsh -NoProfile -Command ./scripts/validate-profile.ps1

@@ -1,0 +1,2 @@
+# Copy this to .hooks/enable to opt-in to pre-commit validation
+# Touch the file (empty) to opt in

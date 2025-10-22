@@ -1,0 +1,215 @@
+name: CI - repro + tests matrix
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        pwsh: ['7.2', '7.4']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore pwsh cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /opt/pwsh
+            /tmp/pwsh-*.tar.gz
+            C:\pwsh
+            C:\pwsh-*.zip
+            C:\pwsh-*.msi
+          key: pwsh-${{ matrix.pwsh }}-${{ matrix.os }}
+          restore-keys: |
+            pwsh-${{ matrix.pwsh }}-
+            pwsh-
+
+      - name: Ensure pwsh available / try install requested version
+        shell: bash
+        run: |
+          echo "Requested pwsh version: ${{ matrix.pwsh }}"
+          set -e
+          MAJOR_MINOR="${{ matrix.pwsh }}"
+          # Query GitHub releases once and reuse
+          RELEASES_JSON=$(curl -s "https://api.github.com/repos/PowerShell/PowerShell/releases?per_page=200")
+          TAG=$(echo "$RELEASES_JSON" | grep -E '"tag_name":\s*"v'${MAJOR_MINOR}'\.[0-9]+"' | sed -E 's/.*"(v[0-9.]+)".*/\1/' | head -n1)
+          # Prepare cache keys (based on tag if found)
+          if [ -n "$TAG" ]; then
+            TAGNUM=${TAG#v}
+            CACHE_KEY="pwsh-${TAGNUM}-${{ matrix.os }}"
+          else
+            CACHE_KEY="pwsh-${MAJOR_MINOR}-${{ matrix.os }}-no-tag"
+          fi
+          echo "Cache key: $CACHE_KEY"
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            echo "Ubuntu runner: attempting to install pwsh ${MAJOR_MINOR} (best-effort)"
+            if [ -n "$TAG" ]; then
+              TAGNUM=${TAG#v}
+              echo "Found release $TAG -> $TAGNUM"
+              # Try common linux archive names
+              # Try to restore cached extracted folder first
+              if [ -d "/opt/pwsh/$TAGNUM" ]; then
+                echo "/opt/pwsh/$TAGNUM already exists (cache hit)"
+                sudo ln -sf /opt/pwsh/$TAGNUM/pwsh /usr/local/bin/pwsh
+              else
+              for ASSET in "powershell-$TAGNUM-linux-x64.tar.gz" "powershell-$TAGNUM-linux-arm64.tar.gz" "powershell-$TAGNUM-linux-x64.tar.xz"; do
+                URL="https://github.com/PowerShell/PowerShell/releases/download/$TAG/$ASSET"
+                echo "Trying $URL"
+                # Try a few times in case of transient network issues (curl --retry)
+                for attempt in 1 2 3; do
+                    if curl --retry 3 --retry-delay 2 -fSL "$URL" -o /tmp/pwsh.tar.gz; then
+                    echo "Downloaded $ASSET"
+                    sudo mkdir -p /opt/pwsh/$TAGNUM
+                    sudo tar -xzf /tmp/pwsh.tar.gz -C /opt/pwsh/$TAGNUM
+                    sudo ln -sf /opt/pwsh/$TAGNUM/pwsh /usr/local/bin/pwsh
+                      # Save tar to cache area for upload step
+                      mv /tmp/pwsh.tar.gz /tmp/pwsh-${TAGNUM}.tar.gz || true
+                    break 2
+                  else
+                    echo "Attempt $attempt: failed to download $ASSET"
+                    sleep 2
+                  fi
+                done
+                echo "Asset $ASSET not available; trying next"
+              done
+            fi
+            else
+              echo "No matching release found for $MAJOR_MINOR; attempting distro package as fallback"
+              sudo apt-get update -y || true
+              sudo apt-get install -y powershell || true
+            fi
+            echo "pwsh version (if available):"
+            pwsh -NoProfile -Command "$PSVersionTable.PSVersion.ToString()" || true
+          else
+            echo "Windows runner: attempting to install pwsh ${MAJOR_MINOR} (best-effort)"
+            # Print current pwsh if present
+            pwsh -NoProfile -Command "$PSVersionTable.PSVersion.ToString()" || true
+            if [ -n "$TAG" ]; then
+              TAGNUM=${TAG#v}
+              echo "Found release $TAG -> $TAGNUM"
+              # Try zip first, then MSI
+              ZIPNAME="powershell-$TAGNUM-win-x64.zip"
+              MSI="powershell-$TAGNUM-win-x64.msi"
+              URLZIP="https://github.com/PowerShell/PowerShell/releases/download/$TAG/$ZIPNAME"
+              URLMSI="https://github.com/PowerShell/PowerShell/releases/download/$TAG/$MSI"
+              echo "Trying ZIP: $URLZIP"
+              # Try ZIP with retries
+              downloaded=false
+                # if C:\pwsh exists (cache restore), use it
+                if [ -d "C:\pwsh" ]; then
+                  echo "C:\pwsh exists (cache hit); skipping download"
+                  downloaded=true
+                fi
+                for attempt in 1 2 3; do
+                  echo "Attempt $attempt: try ZIP $URLZIP"
+                  if powershell -NoProfile -Command "try { Invoke-WebRequest -Uri '$URLZIP' -OutFile 'C:\\pwsh.zip' -UseBasicParsing; exit 0 } catch { exit 1 }"; then
+                    downloaded=true
+                    break
+                  fi
+                  sleep 2
+                done
+              if [ "$downloaded" = true ]; then
+                powershell -NoProfile -Command "Expand-Archive -LiteralPath 'C:\\pwsh.zip' -DestinationPath 'C:\\pwsh' -Force"
+                echo "Installed to C:\\pwsh; adding to PATH for job"
+                echo "C:\\pwsh" >> $GITHUB_PATH
+                # move archive into cache area
+                if [ -f 'C:\pwsh.zip' ]; then
+                  mv C:\pwsh.zip C:\pwsh-${TAGNUM}.zip || true
+                fi
+              else
+                echo "ZIP not available after retries, trying MSI: $URLMSI"
+                downloaded=false
+                for attempt in 1 2 3; do
+                  echo "Attempt $attempt: try MSI $URLMSI"
+                  if powershell -NoProfile -Command "try { Invoke-WebRequest -Uri '$URLMSI' -OutFile 'C:\\pwsh.msi' -UseBasicParsing; exit 0 } catch { exit 1 }"; then
+                    downloaded=true
+                    break
+                  fi
+                  sleep 2
+                done
+                if [ "$downloaded" = true ]; then
+                  echo "Downloaded MSI; installing via msiexec"
+                  msiexec /i C:\pwsh.msi /qn /norestart || true
+                  if [ -f 'C:\pwsh.msi' ]; then
+                    mv C:\pwsh.msi C:\pwsh-${TAGNUM}.msi || true
+                  fi
+                else
+                  echo "Neither ZIP nor MSI was available for $TAG after retries; skipping install"
+                fi
+              fi
+            else
+              echo "No matching release found for $MAJOR_MINOR on Windows; skipping install"
+            fi
+            echo "pwsh version (if available):"
+            powershell -NoProfile -Command "$PSVersionTable.PSVersion.ToString()" || true
+          fi
+          echo "Final pwsh path and version:"
+          which pwsh || where pwsh || true
+          pwsh -NoProfile -Command "$PSVersionTable.PSVersion.ToString()" || true
+
+      - name: Save pwsh cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: |
+            /opt/pwsh
+            /tmp/pwsh-*.tar.gz
+            C:\pwsh
+            C:\pwsh-*.zip
+            C:\pwsh-*.msi
+          key: pwsh-${{ matrix.pwsh }}-${{ matrix.os }}
+
+      - name: Verify pwsh Major.Minor matches requested matrix value
+        shell: pwsh
+        env:
+          EXPECTED_MAJOR_MINOR: ${{ matrix.pwsh }}
+        run: |
+          try {
+              $v = $PSVersionTable.PSVersion
+              $actual = "{0}.{1}" -f $v.Major, $v.Minor
+              Write-Output "Requested: $env:EXPECTED_MAJOR_MINOR; Actual: $actual"
+              if ($actual -ne $env:EXPECTED_MAJOR_MINOR) {
+                  Write-Warning "pwsh Major.Minor mismatch: expected $env:EXPECTED_MAJOR_MINOR but got $actual. Proceeding with available pwsh (fallback)."
+                  # Set an output so later steps can detect mismatch if needed
+                  Write-Output "pwsh_mismatch=true" | Out-File -FilePath pwsh_install_status.txt -Encoding ascii
+              } else {
+                  Write-Output "pwsh_mismatch=false" | Out-File -FilePath pwsh_install_status.txt -Encoding ascii
+              }
+          } catch {
+              Write-Warning "Unable to determine pwsh version: $($_.Exception.Message). Proceeding with available pwsh (fallback)."
+              Write-Output "pwsh_mismatch=true" | Out-File -FilePath pwsh_install_status.txt -Encoding ascii
+          }
+
+      - name: Run repro (verbose)
+        shell: pwsh
+        env:
+          PS_PROFILE_DEBUG: '1'
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/repro_set_agentmode.ps1
+
+      - name: Upload any downloaded installer artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-artifacts
+          path: |
+            /tmp/pwsh.tar.gz
+            /tmp/pwsh.tar
+            C:\pwsh.zip
+            C:\pwsh.msi
+            C:\pwsh\**
+
+      - name: Run Pester tests
+        shell: pwsh
+        env:
+          PS_PROFILE_DEBUG: '1'
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_pester.ps1

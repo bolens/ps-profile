@@ -1,0 +1,56 @@
+name: Validate PowerShell Profile
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        powershell: [pwsh]
+        include:
+          - os: windows-latest
+            powershell: powershell
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y powershell
+
+      - name: Install PSScriptAnalyzer (optional)
+        run: ${{ matrix.powershell }} -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false" || true
+
+      - name: Install PowerShell-Beautifier (optional)
+        run: ${{ matrix.powershell }} -NoProfile -Command "Install-Module -Name PowerShell-Beautifier -Scope CurrentUser -Force -Confirm:$false" || true
+
+      - name: Run validate-profile (format + security + lint + idempotency)
+        run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/validate-profile.ps1
+
+      - name: Check fragment READMEs
+        run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/check-fragment-readmes.ps1
+
+      - name: Generate API Documentation
+        run: ${{ matrix.powershell }} -NoProfile -File scripts/utils/generate-docs.ps1
+
+      - name: Upload documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-docs-${{ matrix.os }}-${{ matrix.powershell }}
+          path: docs/
+
+      - name: Upload validation artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: validation-results-${{ matrix.os }}-${{ matrix.powershell }}
+          path: |
+            scripts/data/startup-benchmark.csv
+            scripts/data/performance-baseline.json

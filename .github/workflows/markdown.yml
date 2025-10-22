@@ -1,0 +1,20 @@
+name: Docs - Markdown lint + link-check
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          npm install -g markdownlint-cli@0.35.0 markdown-link-check
+      - name: Run markdownlint
+        run: markdownlint '**/*.md' --ignore node_modules
+      - name: Check links in README
+        run: markdown-link-check README.md

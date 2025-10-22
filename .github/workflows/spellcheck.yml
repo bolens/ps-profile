@@ -1,0 +1,25 @@
+name: Spellcheck (cspell)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cspell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '19'
+      - name: Install cspell
+        run: npm install -g cspell@9
+      - name: Run cspell
+        run: |
+          echo "Running cspell..."
+          cspell "**/*" --no-progress --no-summary
+        # NOTE: this step will fail the job if cspell finds issues. Remove or
+        # adjust the config if you prefer warnings instead.

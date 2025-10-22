@@ -1,0 +1,27 @@
+# Ignore user/editor artifacts
+*.user
+*.suo
+
+# Ignore local modules that can be installed
+Modules/
+
+# Ignore PowerShell package artifacts
+*.nupkg
+
+# Ignore temp and backup files
+tmp/
+*.bak
+*~
+
+# Ignore Visual Studio Code history
+.history/
+
+# Ignore compiled binaries
+bin/
+obj/
+
+# Ignore local hooks enabled file
+.hooks/enable
+
+# Ignore generated data files
+scripts/**/*.csv

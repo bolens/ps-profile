@@ -1,0 +1,17 @@
+name: Security - Scan
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PSScriptAnalyzer
+        run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser"
+      - name: Run Security Scan
+        run: pwsh -NoProfile -File scripts/utils/run-security-scan.ps1
