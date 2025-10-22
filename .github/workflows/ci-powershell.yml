@@ -15,7 +15,7 @@ jobs:
         pwsh: [7.2, 7.6]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Ensure pwsh is available (install if missing)
         run: |
           echo "Checking for pwsh..."

@@ -18,7 +18,7 @@ jobs:
             powershell: powershell
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup PowerShell (Linux)
         if: matrix.os == 'ubuntu-latest'
