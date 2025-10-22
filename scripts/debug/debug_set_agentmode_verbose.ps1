@@ -1,5 +1,9 @@
+
+
+. $bootstrapPath Join-Path $repoRoot 'profile.d\00-bootstrap.ps1'
+
 Write-Host 'Loading bootstrap'
-. 'c:\Users\bolen\Documents\PowerShell\profile.d\00-bootstrap.ps1'
+. $bootstrapPath
 Write-Host 'Inspecting function definition of Set-AgentModeFunction'
 Get-Command Set-AgentModeFunction | Format-List *
 

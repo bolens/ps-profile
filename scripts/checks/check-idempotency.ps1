@@ -1,5 +1,7 @@
 # Idempotency checker for profile.d fragments
-$profileD = 'c:\Users\bolen\Documents\PowerShell\profile.d'
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
+$profileD = Join-Path $repoRoot 'profile.d'
 
 Write-Output "Building temporary idempotency runner..."
 $files = Get-ChildItem -Path $profileD -Filter '*.ps1' | Sort-Object Name | ForEach-Object { $_.FullName }
