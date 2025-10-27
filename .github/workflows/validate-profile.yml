@@ -42,13 +42,13 @@ jobs:
         run: ${{ matrix.powershell }} -NoProfile -File scripts/utils/generate-docs.ps1
 
       - name: Upload documentation
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           name: api-docs-${{ matrix.os }}-${{ matrix.powershell }}
           path: docs/
 
       - name: Upload validation artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           name: validation-results-${{ matrix.os }}-${{ matrix.powershell }}
           path: |
