@@ -11,14 +11,14 @@ See the fragment source: `08-package-managers.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Set-Item` — Scoop install
+- `sinstall` — Scoop install
 - `ss` — Scoop search
 - `su` — Scoop update
 - `suu` — Scoop update all
 - `sr` — Scoop uninstall
-- `Set-Location` — Scoop list
+- `slist` — Scoop list
 - `sh` — Scoop info
-- `Set-Content` — Scoop cleanup
+- `scleanup` — Scoop cleanup
 - `uvi` — UV install
 - `uvr` — UV run
 - `uvx` — UV tool run

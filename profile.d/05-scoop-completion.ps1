@@ -19,14 +19,13 @@ try {
   }
   # If not found via env, check the legacy path (cheap single Test-Path).
   # Avoid enumerating all drives; only test the legacy root quickly.
-  # Skip A: drive check as it's usually slow on Windows
-  # if (-not $scoopCompletion) {
-  #   $legacyRoot = 'A:\'
-  #   if (Test-Path $legacyRoot -PathType Container -ErrorAction SilentlyContinue) {
-  #     $legacy = 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
-  #     if (Test-Path $legacy -PathType Leaf -ErrorAction SilentlyContinue) { $scoopCompletion = $legacy }
-  #   }
-  # }
+  if (-not $scoopCompletion) {
+    $legacyRoot = 'A:\'
+    if (Test-Path $legacyRoot -PathType Container -ErrorAction SilentlyContinue) {
+      $legacy = 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
+      if (Test-Path $legacy -PathType Leaf -ErrorAction SilentlyContinue) { $scoopCompletion = $legacy }
+    }
+  }
 
   if ($scoopCompletion) {
     # Register a lazy enabler that imports the Scoop completion PSD1 when the user explicitly
@@ -51,5 +50,3 @@ try {
 catch {
   if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Scoop completion fragment failed: $($_.Exception.Message)" }
 }
-
-

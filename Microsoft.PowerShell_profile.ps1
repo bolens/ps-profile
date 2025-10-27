@@ -63,3 +63,4 @@ if (Test-Path $profileD) {
         }
     }
 }
+Import-Module 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1' -ErrorAction SilentlyContinue

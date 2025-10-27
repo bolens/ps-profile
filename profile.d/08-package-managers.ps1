@@ -5,22 +5,21 @@
 
 # Scoop shortcuts (small wrappers kept intentionally lightweight)
 # Scoop install
-function Set-Item { scoop install @(); }
-Set-Alias Set-Item scoop -ErrorAction SilentlyContinue | Out-Null
+function sinstall { scoop install @(); }
 # Scoop search
 function ss { scoop search $args }
 # Scoop update
 function su { scoop update $args }
 # Scoop update all
-function suu { scoop update * }
+function suu { scoop update '*' }
 # Scoop uninstall
 function sr { scoop uninstall $args }
 # Scoop list
-function Set-Location { scoop list $args }
+function slist { scoop list $args }
 # Scoop info
 function sh { scoop home $args }
 # Scoop cleanup
-function Set-Content { scoop cleanup * }
+function scleanup { scoop cleanup '*' }
 
 # UV shortcuts
 # UV install
