@@ -9,7 +9,7 @@ small fragments under `profile.d/` for maintainability.
 
 Quick index
 -----------
-- `Microsoft.PowerShell_profile.ps1` — main profile loader (keeps itself small).
+- `Microsoft.PowerShell_profile.ps1` — main profile loader (keeps itself small). Includes robust error handling that reports which fragment failed to load.
 - `profile.d/` — modular fragments. Files are loaded in lexical order.
   - `00-bootstrap.ps1` — helper functions for safe registration.
   - `02-env.ps1` — environment variable defaults.

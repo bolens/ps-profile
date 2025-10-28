@@ -39,6 +39,11 @@ $env:EDITOR = 'code'
 $env:GIT_EDITOR = 'code --wait'
 $env:VISUAL = 'code'
 
+Import-Module 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1' -ErrorAction SilentlyContinue
+
+# Add scoop shims to PATH so that installed tools are available
+$env:PATH = "A:\scoop\shims;A:\scoop\bin;$env:PATH"
+
 # ===============================================
 # LOAD MODULAR PROFILE COMPONENTS (safe, ordered loader)
 # ===============================================
@@ -50,6 +55,7 @@ if (Test-Path $profileD) {
     # Load files in lexical order. Each file should be idempotent and
     # safe to be dot-sourced multiple times.
     Get-ChildItem -Path $profileD -File -Filter '*.ps1' | Sort-Object Name | ForEach-Object {
+        $fragmentName = $_.Name
         try {
             # Dot-source the file so it can define functions/aliases in this scope.
             # Assign the result to $null to suppress any returned values (fragments
@@ -59,8 +65,7 @@ if (Test-Path $profileD) {
         }
         catch {
             # Keep failures non-fatal but visible to the user during interactive sessions
-            Write-Warning "Failed to load profile fragment '$($_.Name)': $($_.Exception.Message)"
+            Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
         }
     }
 }
-Import-Module 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1' -ErrorAction SilentlyContinue
