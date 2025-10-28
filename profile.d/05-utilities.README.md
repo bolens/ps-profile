@@ -33,3 +33,4 @@ None explicit; see the fragment for runtime checks and optional tooling dependen
 Notes
 -----
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.
+

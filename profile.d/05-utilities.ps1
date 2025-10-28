@@ -33,3 +33,8 @@ function list-functions { Get-Command -CommandType Function | Where-Object { $_.
 function backup-profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
 
 
+
+
+
+
+

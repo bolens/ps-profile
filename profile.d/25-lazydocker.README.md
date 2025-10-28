@@ -1,18 +1,17 @@
-profile.d/06-oh-my-posh.ps1
+profile.d/25-lazydocker.ps1
 ===========================
 
 Purpose
 -------
-Idempotent initialization for oh-my-posh prompt framework.
+lazydocker wrapper helpers
 
 Usage
 -----
-See the fragment source: `06-oh-my-posh.ps1` for examples and usage notes.
+See the fragment source: `25-lazydocker.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Initialize-OhMyPosh` — oh-my-posh initialization function
-- `prompt` — ScriptBlock object to avoid simple textual recursion.
+- `ld` — lazydocker wrapper helpers
 
 Dependencies
 ------------

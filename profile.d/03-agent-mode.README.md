@@ -1,18 +1,18 @@
-profile.d/06-oh-my-posh.ps1
+profile.d/03-agent-mode.ps1
 ===========================
 
 Purpose
 -------
-Idempotent initialization for oh-my-posh prompt framework.
+Thin compatibility shim for legacy "agent-mode" helpers.
 
 Usage
 -----
-See the fragment source: `06-oh-my-posh.ps1` for examples and usage notes.
+See the fragment source: `03-agent-mode.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Initialize-OhMyPosh` — oh-my-posh initialization function
-- `prompt` — ScriptBlock object to avoid simple textual recursion.
+- `am-list` — Provide a safe, backwards-compatible alias for listing functions
+- `am-doc` — Compatibility: open the legacy agent-mode README if present
 
 Dependencies
 ------------
