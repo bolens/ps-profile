@@ -42,3 +42,5 @@ if (-not (Test-Path Function:sqlite3 -ErrorAction SilentlyContinue)) { Set-Item 
 
 
 
+
+

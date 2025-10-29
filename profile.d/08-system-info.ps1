@@ -22,3 +22,5 @@ function meminfo { Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Obj
 
 
 
+
+

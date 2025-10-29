@@ -30,7 +30,7 @@ jobs:
           $results = @()
           foreach ($p in $paths) {
               Write-Output "Analyzing $p"
-              $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error','Warning','Information') -Verbose -CacheResult:$false
+              $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error','Warning','Information') -Verbose
               $results += $r
           }
           $json = $results | Select-Object @{n='FilePath';e={$_.ScriptName}},RuleName,Severity,Message,Line,Column | ConvertTo-Json -Depth 5
