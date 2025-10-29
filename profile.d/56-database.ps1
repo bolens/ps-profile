@@ -28,28 +28,3 @@ if (-not (Test-Path Function:redis-cli -ErrorAction SilentlyContinue)) {
 
 # SQLite CLI - command-line interface for SQLite databases
 if (-not (Test-Path Function:sqlite3 -ErrorAction SilentlyContinue)) { Set-Item -Path Function:sqlite3 -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command sqlite3 -ErrorAction SilentlyContinue) { sqlite3 @a } else { Write-Warning 'sqlite3 not found' } } -Force | Out-Null }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

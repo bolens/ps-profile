@@ -54,9 +54,24 @@ Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
     Write-Output "Formatting $file"
 
     try {
+        # Read the original content to detect line endings
+        $originalContent = Get-Content -Path $file -Raw -ErrorAction Stop
+        $hasCRLF = $originalContent -match "`r`n"
+
         # Use Invoke-Formatter from PSScriptAnalyzer to format the file
-        $formattedContent = Invoke-Formatter -ScriptDefinition (Get-Content -Path $file -Raw) -ErrorAction Stop
-        $formattedContent | Set-Content -Path $file -Encoding UTF8 -ErrorAction Stop
+        $formattedContent = Invoke-Formatter -ScriptDefinition $originalContent -ErrorAction Stop
+
+        # Trim trailing whitespace and ensure consistent line endings
+        $formattedContent = $formattedContent.TrimEnd()
+        # Add back the appropriate line ending based on original file
+        if ($hasCRLF) {
+            $formattedContent += "`r`n"
+        }
+        else {
+            $formattedContent += "`n"
+        }
+
+        $formattedContent | Set-Content -Path $file -Encoding UTF8 -NoNewline -ErrorAction Stop
         $filesFormatted++
     }
     catch {

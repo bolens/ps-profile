@@ -14,21 +14,3 @@ if (Get-Command procs -ErrorAction SilentlyContinue) {
 else {
     Write-Warning "procs not found. Install with: scoop install procs"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

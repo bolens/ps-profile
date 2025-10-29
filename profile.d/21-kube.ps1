@@ -43,28 +43,3 @@ if (-not (Test-Path Function:\minikube-stop)) {
 }
 
 # Do NOT duplicate kctx here; `15-kubectl.ps1` is authoritative for kubectl shorthands.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -182,28 +182,3 @@ function vim { nvim $args }
     Launches Neovim in vi compatibility mode with the specified files.
 #>
 function vi { nvim $args }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

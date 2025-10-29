@@ -14,21 +14,3 @@ if (Get-Command dust -ErrorAction SilentlyContinue) {
 else {
     Write-Warning "dust not found. Install with: scoop install dust"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

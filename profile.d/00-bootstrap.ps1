@@ -154,28 +154,3 @@ function Test-HasCommand {
     # Last resort: Get-Command (may autoload modules)
     return $null -ne (Get-Command -Name $Name -ErrorAction SilentlyContinue)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

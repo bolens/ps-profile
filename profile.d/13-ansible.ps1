@@ -56,28 +56,3 @@ function ansible-doc { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-
     Executes ansible-inventory commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 #>
 function ansible-inventory { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-inventory $args" }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

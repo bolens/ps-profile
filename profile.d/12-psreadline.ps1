@@ -56,28 +56,3 @@ try {
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "PSReadLine fragment failed: $($_.Exception.Message)" }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

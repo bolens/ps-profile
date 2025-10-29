@@ -22,28 +22,3 @@ if (-not (Test-Path Function:php-server -ErrorAction SilentlyContinue)) {
 
 # Composer - PHP dependency manager
 if (-not (Test-Path Function:composer -ErrorAction SilentlyContinue)) { Set-Item -Path Function:composer -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command composer -ErrorAction SilentlyContinue) { composer @a } else { Write-Warning 'composer not found' } } -Force | Out-Null }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

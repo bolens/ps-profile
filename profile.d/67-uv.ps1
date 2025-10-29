@@ -58,21 +58,3 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
 else {
     Write-Warning "uv not found. Install with: scoop install uv"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

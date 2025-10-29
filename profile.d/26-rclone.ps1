@@ -12,28 +12,3 @@ if (-not (Test-Path Function:rcopy -ErrorAction SilentlyContinue)) {
 if (-not (Test-Path Function:rls -ErrorAction SilentlyContinue)) {
     Set-Item -Path Function:rls -Value { param($p) if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) { if (Test-CachedCommand rclone) { rclone ls $p } else { Write-Warning 'rclone not found' } } else { if (Get-Command rclone -ErrorAction SilentlyContinue) { rclone ls $p } else { Write-Warning 'rclone not found' } } } -Force | Out-Null
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

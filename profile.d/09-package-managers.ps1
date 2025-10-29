@@ -209,21 +209,3 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
 else {
     Write-Warning "PNPM not found. Install with: npm install -g pnpm"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

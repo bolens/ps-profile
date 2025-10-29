@@ -28,28 +28,3 @@ try {
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Git fragment failed: $($_.Exception.Message)" }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

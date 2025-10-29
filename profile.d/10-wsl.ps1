@@ -26,28 +26,3 @@ function wsl-list { wsl --list --verbose }
     Starts the Ubuntu WSL distribution or switches to it if already running. Passes through any additional arguments.
 #>
 function ubuntu { wsl -D Ubuntu @args }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

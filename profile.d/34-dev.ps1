@@ -90,26 +90,3 @@ if (-not (Test-Path Function:cl -ErrorAction SilentlyContinue)) { Set-Item -Path
 if (-not (Test-Path Function:cf -ErrorAction SilentlyContinue)) { Set-Item -Path Function:cf -Value { cargo fmt @Args } -Force | Out-Null }
 # ci: cargo install wrapper
 if (-not (Test-Path Function:ci -ErrorAction SilentlyContinue)) { Set-Item -Path Function:ci -Value { cargo install @Args } -Force | Out-Null }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

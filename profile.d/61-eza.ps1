@@ -104,21 +104,3 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
 else {
     Write-Warning "eza not found. Install with: scoop install eza"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

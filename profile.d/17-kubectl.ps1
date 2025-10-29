@@ -29,28 +29,3 @@ if (-not (Test-Path Function:kd -ErrorAction SilentlyContinue)) {
 if (-not (Test-Path Function:kctx -ErrorAction SilentlyContinue)) {
     Set-Item -Path Function:kctx -Value { if (Get-Command kubectl -ErrorAction SilentlyContinue) { kubectl config current-context } else { Write-Warning 'kubectl not found' } } -Force | Out-Null
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

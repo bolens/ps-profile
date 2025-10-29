@@ -50,26 +50,3 @@ try {
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Scoop completion fragment failed: $($_.Exception.Message)" }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

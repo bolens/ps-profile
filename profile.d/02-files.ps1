@@ -302,28 +302,3 @@ function file-hash { if (-not (Test-Path Function:\file-hash)) { Ensure-FileHelp
     Displays file size in appropriate units (bytes, KB, MB, GB, TB).
 #>
 function filesize { if (-not (Test-Path Function:\filesize)) { Ensure-FileHelper }; return & (Get-Item Function:\filesize -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

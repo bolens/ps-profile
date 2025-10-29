@@ -78,21 +78,3 @@ function Invoke-GumStyle {
     $Text | gum style @args
 }
 Set-Alias -Name style -Value Invoke-GumStyle -Option AllScope -Force
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

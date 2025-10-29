@@ -20,21 +20,3 @@ elseif (Get-Command bottom -ErrorAction SilentlyContinue) {
 else {
     Write-Warning "bottom (btm) not found. Install with: scoop install bottom"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

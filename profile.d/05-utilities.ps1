@@ -115,7 +115,3 @@ function list-functions { Get-Command -CommandType Function | Where-Object { $_.
     Creates a timestamped backup copy of the current PowerShell profile.
 #>
 function backup-profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
-
-
-
-

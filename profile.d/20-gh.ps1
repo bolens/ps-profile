@@ -12,28 +12,3 @@ if (-not (Test-Path Function:gh-open -ErrorAction SilentlyContinue)) {
 if (-not (Test-Path Function:gh-pr -ErrorAction SilentlyContinue)) {
     Set-Item -Path Function:gh-pr -Value { param($Params) gh pr $Params } -Force | Out-Null
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

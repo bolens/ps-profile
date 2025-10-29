@@ -46,28 +46,3 @@ if (-not (Test-Path Function:procs -ErrorAction SilentlyContinue)) {
 if (-not (Test-Path Function:dust -ErrorAction SilentlyContinue)) {
     Set-Item -Path Function:dust -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command dust -ErrorAction SilentlyContinue) { dust @a } else { Write-Warning 'dust not found' } } -Force | Out-Null
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
