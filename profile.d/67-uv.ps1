@@ -35,3 +35,5 @@ else {
     Write-Warning "uv not found. Install with: scoop install uv"
 }
 
+
+

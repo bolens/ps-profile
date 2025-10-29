@@ -30,7 +30,8 @@ if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
         # Set PSGallery as trusted
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
         Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false -ErrorAction Stop
-    } catch {
+    }
+    catch {
         Write-Error "Failed to install PSScriptAnalyzer: $($_.Exception.Message)"
         exit 2
     }
@@ -39,7 +40,8 @@ if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
 # Import the module
 try {
     Import-Module -Name PSScriptAnalyzer -Force -ErrorAction Stop
-} catch {
+}
+catch {
     Write-Error "Failed to import PSScriptAnalyzer: $($_.Exception.Message)"
     exit 2
 }
@@ -56,9 +58,10 @@ Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
         $formattedContent = Invoke-Formatter -ScriptDefinition (Get-Content -Path $file -Raw) -ErrorAction Stop
         $formattedContent | Set-Content -Path $file -Encoding UTF8 -ErrorAction Stop
         $filesFormatted++
-    } catch {
+    }
+    catch {
         $errors += [PSCustomObject]@{
-            File = $file
+            File  = $file
             Error = $_.Exception.Message
         }
         Write-Warning "Failed to format $file`: $($_.Exception.Message)"

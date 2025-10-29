@@ -50,3 +50,5 @@ else {
     Write-Warning "navi not found. Install with: scoop install navi"
 }
 
+
+

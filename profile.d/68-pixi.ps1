@@ -29,3 +29,5 @@ else {
     Write-Warning "pixi not found. Install with: scoop install pixi"
 }
 
+
+

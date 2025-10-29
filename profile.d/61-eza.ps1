@@ -34,3 +34,5 @@ else {
     Write-Warning "eza not found. Install with: scoop install eza"
 }
 
+
+

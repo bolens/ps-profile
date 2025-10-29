@@ -34,3 +34,5 @@ else {
     Write-Warning "pnpm not found. Install with: scoop install pnpm"
 }
 
+
+
