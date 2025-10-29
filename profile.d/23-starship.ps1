@@ -19,36 +19,40 @@ Notes:
 #>
 
 try {
-  # Define a lazy initializer for starship so startup remains snappy. Consumers
-  # (like the prompt proxy) can call Initialize-Starship to set up starship
-  # at the first prompt draw instead of at profile load.
-  if (-not (Test-Path Function:Initialize-Starship -ErrorAction SilentlyContinue)) {
-    function Initialize-Starship {
-      try {
-        if ($null -ne (Get-Variable -Name 'StarshipInitialized' -Scope Global -ErrorAction SilentlyContinue)) { return }
-        $starCmd = Get-Command starship -ErrorAction SilentlyContinue
-        if (-not $starCmd) { return }
-        $initScript = & $starCmd.Source init powershell 2>$null
-        if ($initScript) {
-          # Write the initialization script to a temp file and dot-source it to avoid Invoke-Expression.
-          $temp = [System.IO.Path]::GetTempFileName() + '.ps1'
-          try {
-            $null = $initScript | Out-File -FilePath $temp -Encoding UTF8
-            if (Test-Path $temp) {.$temp }
-          } finally {
-            if (Test-Path $temp) { Remove-Item $temp -Force -ErrorAction SilentlyContinue }
-          }
-          Set-Variable -Name 'StarshipInitialized' -Value $true -Scope Global -Force
-          if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship initialized via $($starCmd.Source)" }
+    # Define a lazy initializer for starship so startup remains snappy. Consumers
+    # (like the prompt proxy) can call Initialize-Starship to set up starship
+    # at the first prompt draw instead of at profile load.
+    if (-not (Test-Path Function:Initialize-Starship -ErrorAction SilentlyContinue)) {
+        function Initialize-Starship {
+            try {
+                if ($null -ne (Get-Variable -Name 'StarshipInitialized' -Scope Global -ErrorAction SilentlyContinue)) { return }
+                $starCmd = Get-Command starship -ErrorAction SilentlyContinue
+                if (-not $starCmd) { return }
+                $initScript = & $starCmd.Source init powershell 2>$null
+                if ($initScript) {
+                    # Write the initialization script to a temp file and dot-source it to avoid Invoke-Expression.
+                    $temp = [System.IO.Path]::GetTempFileName() + '.ps1'
+                    try {
+                        $null = $initScript | Out-File -FilePath $temp -Encoding UTF8
+                        if (Test-Path $temp) { .$temp }
+                    }
+                    finally {
+                        if (Test-Path $temp) { Remove-Item $temp -Force -ErrorAction SilentlyContinue }
+                    }
+                    Set-Variable -Name 'StarshipInitialized' -Value $true -Scope Global -Force
+                    if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship initialized via $($starCmd.Source)" }
+                }
+            }
+            catch {
+                if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Initialize-Starship failed: $($_.Exception.Message)" }
+            }
         }
-      } catch {
-        if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Initialize-Starship failed: $($_.Exception.Message)" }
-      }
     }
-  }
-} catch {
-  if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship fragment failed to define initializer: $($_.Exception.Message)" }
 }
+catch {
+    if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship fragment failed to define initializer: $($_.Exception.Message)" }
+}
+
 
 
 

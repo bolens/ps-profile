@@ -12,21 +12,24 @@ if (-not (Test-Path Function:aws -ErrorAction SilentlyContinue)) { Set-Item -Pat
 
 # AWS profile switcher - set AWS profile
 if (-not (Test-Path Function:aws-profile -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:aws-profile -Value { param($p) if (Test-CachedCommand aws) { $env:AWS_PROFILE = $p; Write-Host "AWS profile set to: $p" } else { Write-Warning 'aws not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:aws-profile -Value { param($p) if (Get-Command aws -ErrorAction SilentlyContinue) { $env:AWS_PROFILE = $p; Write-Host "AWS profile set to: $p" } else { Write-Warning 'aws not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:aws-profile -Value { param($p) if (Test-CachedCommand aws) { $env:AWS_PROFILE = $p; Write-Host "AWS profile set to: $p" } else { Write-Warning 'aws not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:aws-profile -Value { param($p) if (Get-Command aws -ErrorAction SilentlyContinue) { $env:AWS_PROFILE = $p; Write-Host "AWS profile set to: $p" } else { Write-Warning 'aws not found' } } -Force | Out-Null
+    }
 }
 
 # AWS region switcher - set AWS region
 if (-not (Test-Path Function:aws-region -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:aws-region -Value { param($r) if (Test-CachedCommand aws) { $env:AWS_REGION = $r; Write-Host "AWS region set to: $r" } else { Write-Warning 'aws not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:aws-region -Value { param($r) if (Get-Command aws -ErrorAction SilentlyContinue) { $env:AWS_REGION = $r; Write-Host "AWS region set to: $r" } else { Write-Warning 'aws not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:aws-region -Value { param($r) if (Test-CachedCommand aws) { $env:AWS_REGION = $r; Write-Host "AWS region set to: $r" } else { Write-Warning 'aws not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:aws-region -Value { param($r) if (Get-Command aws -ErrorAction SilentlyContinue) { $env:AWS_REGION = $r; Write-Host "AWS region set to: $r" } else { Write-Warning 'aws not found' } } -Force | Out-Null
+    }
 }
+
 
 
 

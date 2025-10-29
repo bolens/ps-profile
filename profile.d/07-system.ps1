@@ -20,7 +20,7 @@ function mv { Move-Item $args }
 # search equivalent
 function search { Get-ChildItem -Recurse -Name $args }
 # df equivalent
-function df { Get-PSDrive -PSProvider FileSystem | Select-Object Name,@{ Name = "Used(GB)"; Expression = { [math]::Round(($_.Used / 1GB),2) } },@{ Name = "Free(GB)"; Expression = { [math]::Round(($_.Free / 1GB),2) } },@{ Name = "Total(GB)"; Expression = { [math]::Round((($_.Used + $_.Free) / 1GB),2) } },Root }
+function df { Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{ Name = "Used(GB)"; Expression = { [math]::Round(($_.Used / 1GB), 2) } }, @{ Name = "Free(GB)"; Expression = { [math]::Round(($_.Free / 1GB), 2) } }, @{ Name = "Total(GB)"; Expression = { [math]::Round((($_.Used + $_.Free) / 1GB), 2) } }, Root }
 # top equivalent
 function htop { Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 }
 
@@ -45,6 +45,7 @@ function code { & "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe" $args 
 function vim { nvim $args }
 # vi alias for neovim
 function vi { nvim $args }
+
 
 
 

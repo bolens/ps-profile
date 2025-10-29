@@ -1,4 +1,4 @@
-﻿# ===============================================
+# ===============================================
 # 11-git.ps1
 # Consolidated Git helpers
 # ===============================================
@@ -33,48 +33,48 @@ if (-not (Test-Path Function:gf)) { Set-Item -Path Function:gf -Value { param([P
 
 # Extras: register heavier helpers lazily so dot-sourcing this fragment remains cheap
 if (-not (Test-Path Function:Ensure-GitHelper)) {
-  function Ensure-GitHelper {
-    if ($script:__GitHelpersInitialized) { return }
-    $script:__GitHelpersInitialized = $true
-    if (-not (Get-Command -Name Set-AgentModeFunction -ErrorAction SilentlyContinue)) { return }
-    $null = Set-AgentModeFunction -Name 'gcl' -Body { git clone @args } # Git clone - clone a repository
-    $null = Set-AgentModeFunction -Name 'gsta' -Body { git stash @args } # Git stash - stash changes
-    $null = Set-AgentModeFunction -Name 'gstp' -Body { git stash pop @args } # Git stash pop - apply stashed changes
-    $null = Set-AgentModeFunction -Name 'gr' -Body { git rebase @args } # Git rebase - rebase commits
-    $null = Set-AgentModeFunction -Name 'grc' -Body { git rebase --continue } # Git rebase continue - continue rebase
-    $null = Set-AgentModeFunction -Name 'gsub' -Body { git submodule update --init --recursive @args } # Git submodule update - update submodules
-    $null = Set-AgentModeFunction -Name 'gclean' -Body { git clean -fdx @args } # Git clean - remove untracked files
-    $null = Set-AgentModeFunction -Name 'cdg' -Body { # Git cd to root - change to repository root
-      $root = (& git rev-parse --show-toplevel) 2>$null
-      if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root } else { Write-Warning 'Not inside a git repository' }
-    }
-    $null = Set-AgentModeFunction -Name 'gob' -Body { git checkout - } # Git checkout previous - switch to previous branch
-    $null = Set-AgentModeFunction -Name 'gprune' -Body { # Git prune merged - remove merged branches
-      $up = (git rev-parse --abbrev-ref --symbolic-full-name '@{u=}') 2>$null
-      if (-not $up) { Write-Warning 'No upstream set for this branch'; return }
-      git fetch --prune
-      git branch --merged | ForEach-Object {
-        $b = $_.Trim().TrimStart('*',' ')
-        if ($b -and $b -notin @('main','master','develop')) { git branch -D $b 2>$null | Out-Null }
-      }
-    }
-    $null = Set-AgentModeFunction -Name 'gsync' -Body { git fetch --prune; git rebase '@{u}' } # Git sync - fetch and rebase
-    $null = Set-AgentModeFunction -Name 'gundo' -Body { git reset --soft HEAD~1 } # Git undo - soft reset last commit
-    $null = Set-AgentModeFunction -Name 'gdefault' -Body { # Git default branch - get default branch name
-      $b = (git symbolic-ref refs/remotes/origin/HEAD 2>$null) -replace '^refs/remotes/origin/',''
-      if ($b) { $b } else { 'main' }
-    }
+    function Ensure-GitHelper {
+        if ($script:__GitHelpersInitialized) { return }
+        $script:__GitHelpersInitialized = $true
+        if (-not (Get-Command -Name Set-AgentModeFunction -ErrorAction SilentlyContinue)) { return }
+        $null = Set-AgentModeFunction -Name 'gcl' -Body { git clone @args } # Git clone - clone a repository
+        $null = Set-AgentModeFunction -Name 'gsta' -Body { git stash @args } # Git stash - stash changes
+        $null = Set-AgentModeFunction -Name 'gstp' -Body { git stash pop @args } # Git stash pop - apply stashed changes
+        $null = Set-AgentModeFunction -Name 'gr' -Body { git rebase @args } # Git rebase - rebase commits
+        $null = Set-AgentModeFunction -Name 'grc' -Body { git rebase --continue } # Git rebase continue - continue rebase
+        $null = Set-AgentModeFunction -Name 'gsub' -Body { git submodule update --init --recursive @args } # Git submodule update - update submodules
+        $null = Set-AgentModeFunction -Name 'gclean' -Body { git clean -fdx @args } # Git clean - remove untracked files
+        $null = Set-AgentModeFunction -Name 'cdg' -Body { # Git cd to root - change to repository root
+            $root = (& git rev-parse --show-toplevel) 2>$null
+            if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root } else { Write-Warning 'Not inside a git repository' }
+        }
+        $null = Set-AgentModeFunction -Name 'gob' -Body { git checkout - } # Git checkout previous - switch to previous branch
+        $null = Set-AgentModeFunction -Name 'gprune' -Body { # Git prune merged - remove merged branches
+            $up = (git rev-parse --abbrev-ref --symbolic-full-name '@{u=}') 2>$null
+            if (-not $up) { Write-Warning 'No upstream set for this branch'; return }
+            git fetch --prune
+            git branch --merged | ForEach-Object {
+                $b = $_.Trim().TrimStart('*', ' ')
+                if ($b -and $b -notin @('main', 'master', 'develop')) { git branch -D $b 2>$null | Out-Null }
+            }
+        }
+        $null = Set-AgentModeFunction -Name 'gsync' -Body { git fetch --prune; git rebase '@{u}' } # Git sync - fetch and rebase
+        $null = Set-AgentModeFunction -Name 'gundo' -Body { git reset --soft HEAD~1 } # Git undo - soft reset last commit
+        $null = Set-AgentModeFunction -Name 'gdefault' -Body { # Git default branch - get default branch name
+            $b = (git symbolic-ref refs/remotes/origin/HEAD 2>$null) -replace '^refs/remotes/origin/', ''
+            if ($b) { $b } else { 'main' }
+        }
 
-    # GitHub CLI helpers
-    if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
-      $null = Set-AgentModeFunction -Name 'prc' -Body { if (Test-CachedCommand gh) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
-      $null = Set-AgentModeFunction -Name 'prv' -Body { if (Test-CachedCommand gh) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+        # GitHub CLI helpers
+        if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
+            $null = Set-AgentModeFunction -Name 'prc' -Body { if (Test-CachedCommand gh) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
+            $null = Set-AgentModeFunction -Name 'prv' -Body { if (Test-CachedCommand gh) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+        }
+        else {
+            $null = Set-AgentModeFunction -Name 'prc' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
+            $null = Set-AgentModeFunction -Name 'prv' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+        }
     }
-    else {
-      $null = Set-AgentModeFunction -Name 'prc' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
-      $null = Set-AgentModeFunction -Name 'prv' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
-    }
-  }
 }
 
 # Register lazy stubs for the heavier Git helpers
@@ -104,6 +104,7 @@ if (-not (Test-Path Function:gsync)) { Set-Item -Path Function:gsync -Value { En
 if (-not (Test-Path Function:gundo)) { Set-Item -Path Function:gundo -Value { Ensure-GitHelper; & (Get-Command gundo -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
 # Git default branch - get default branch name
 if (-not (Test-Path Function:gdefault)) { Set-Item -Path Function:gdefault -Value { Ensure-GitHelper; & (Get-Command gdefault -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+
 
 
 

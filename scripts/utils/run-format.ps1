@@ -17,24 +17,30 @@ if (-not $Path) {
     $Path = Join-Path $repoRoot 'profile.d'
 }
 
-Write-Output "Running PowerShell-Beautifier on: $Path"
+Write-Output "Running PSScriptAnalyzer formatter on: $Path"
 
-# Ensure module is available in current user scope
-if (-not (Get-Module -ListAvailable -Name PowerShell-Beautifier)) {
-    Write-Output "PowerShell-Beautifier not found. Installing to CurrentUser scope..."
+# Ensure PSScriptAnalyzer is available (includes formatting capabilities)
+if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
+    Write-Output "PSScriptAnalyzer not found. Installing to CurrentUser scope..."
     try {
-        Install-Module -Name PowerShell-Beautifier -Scope CurrentUser -Force -Confirm:$false -ErrorAction Stop
+        # Register PSGallery if not already registered
+        if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+            Register-PSRepository -Default
+        }
+        # Set PSGallery as trusted
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false -ErrorAction Stop
     } catch {
-        Write-Error "Failed to install PowerShell-Beautifier: $($_.Exception.Message)"
+        Write-Error "Failed to install PSScriptAnalyzer: $($_.Exception.Message)"
         exit 2
     }
 }
 
 # Import the module
 try {
-    Import-Module -Name PowerShell-Beautifier -Force -ErrorAction Stop
+    Import-Module -Name PSScriptAnalyzer -Force -ErrorAction Stop
 } catch {
-    Write-Error "Failed to import PowerShell-Beautifier: $($_.Exception.Message)"
+    Write-Error "Failed to import PSScriptAnalyzer: $($_.Exception.Message)"
     exit 2
 }
 
@@ -46,8 +52,9 @@ Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
     Write-Output "Formatting $file"
 
     try {
-        # Use Edit-DTWBeautifyScript to format the file in-place
-        Edit-DTWBeautifyScript -SourcePath $file -DestinationPath $file -ErrorAction Stop
+        # Use Invoke-Formatter from PSScriptAnalyzer to format the file
+        $formattedContent = Invoke-Formatter -ScriptDefinition (Get-Content -Path $file -Raw) -ErrorAction Stop
+        $formattedContent | Set-Content -Path $file -Encoding UTF8 -ErrorAction Stop
         $filesFormatted++
     } catch {
         $errors += [PSCustomObject]@{
@@ -66,5 +73,5 @@ if ($errors.Count -gt 0) {
     exit 1
 }
 
-Write-Output "PowerShell-Beautifier: all files formatted successfully"
+Write-Output "PSScriptAnalyzer: all files formatted successfully"
 exit 0

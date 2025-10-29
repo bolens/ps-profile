@@ -15,21 +15,24 @@ if (-not (Test-Path Function:azd -ErrorAction SilentlyContinue)) { Set-Item -Pat
 
 # Azure login - authenticate with Azure CLI
 if (-not (Test-Path Function:az-login -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:az-login -Value { if (Test-CachedCommand az) { az login } else { Write-Warning 'Azure CLI (az) not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:az-login -Value { if (Get-Command az -ErrorAction SilentlyContinue) { az login } else { Write-Warning 'Azure CLI (az) not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:az-login -Value { if (Test-CachedCommand az) { az login } else { Write-Warning 'Azure CLI (az) not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:az-login -Value { if (Get-Command az -ErrorAction SilentlyContinue) { az login } else { Write-Warning 'Azure CLI (az) not found' } } -Force | Out-Null
+    }
 }
 
 # Azure Developer CLI up - provision and deploy
 if (-not (Test-Path Function:azd-up -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:azd-up -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand azd) { azd up @a } else { Write-Warning 'Azure Developer CLI (azd) not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:azd-up -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command azd -ErrorAction SilentlyContinue) { azd up @a } else { Write-Warning 'Azure Developer CLI (azd) not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:azd-up -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand azd) { azd up @a } else { Write-Warning 'Azure Developer CLI (azd) not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:azd-up -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command azd -ErrorAction SilentlyContinue) { azd up @a } else { Write-Warning 'Azure Developer CLI (azd) not found' } } -Force | Out-Null
+    }
 }
+
 
 
 

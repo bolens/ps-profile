@@ -15,12 +15,14 @@ if (-not (Test-Path Function:art -ErrorAction SilentlyContinue)) { Set-Item -Pat
 
 # Laravel new project - create new Laravel application
 if (-not (Test-Path Function:laravel-new -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:laravel-new -Value { param($name) if (Test-CachedCommand composer) { composer create-project laravel/laravel $name } else { Write-Warning 'composer not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:laravel-new -Value { param($name) if (Get-Command composer -ErrorAction SilentlyContinue) { composer create-project laravel/laravel $name } else { Write-Warning 'composer not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:laravel-new -Value { param($name) if (Test-CachedCommand composer) { composer create-project laravel/laravel $name } else { Write-Warning 'composer not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:laravel-new -Value { param($name) if (Get-Command composer -ErrorAction SilentlyContinue) { composer create-project laravel/laravel $name } else { Write-Warning 'composer not found' } } -Force | Out-Null
+    }
 }
+
 
 
 

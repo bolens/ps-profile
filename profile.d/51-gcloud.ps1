@@ -12,30 +12,34 @@ if (-not (Test-Path Function:gcloud -ErrorAction SilentlyContinue)) { Set-Item -
 
 # Google Cloud auth - manage authentication
 if (-not (Test-Path Function:gcloud-auth -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:gcloud-auth -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand gcloud) { gcloud auth @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:gcloud-auth -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command gcloud -ErrorAction SilentlyContinue) { gcloud auth @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:gcloud-auth -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand gcloud) { gcloud auth @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:gcloud-auth -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command gcloud -ErrorAction SilentlyContinue) { gcloud auth @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
+    }
 }
 
 # Google Cloud config - manage configuration
 if (-not (Test-Path Function:gcloud-config -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:gcloud-config -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand gcloud) { gcloud config @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:gcloud-config -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command gcloud -ErrorAction SilentlyContinue) { gcloud config @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:gcloud-config -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand gcloud) { gcloud config @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:gcloud-config -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command gcloud -ErrorAction SilentlyContinue) { gcloud config @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
+    }
 }
 
 # Google Cloud projects - manage GCP projects
 if (-not (Test-Path Function:gcloud-projects -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:gcloud-projects -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand gcloud) { gcloud projects @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:gcloud-projects -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command gcloud -ErrorAction SilentlyContinue) { gcloud projects @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:gcloud-projects -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand gcloud) { gcloud projects @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:gcloud-projects -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command gcloud -ErrorAction SilentlyContinue) { gcloud projects @a } else { Write-Warning 'Google Cloud CLI (gcloud) not found' } } -Force | Out-Null
+    }
 }
+
 
 
 

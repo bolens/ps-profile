@@ -4,7 +4,7 @@
 # ===============================================
 
 # Reload profile in current session
-function reload {.$PROFILE }
+function reload { .$PROFILE }
 # Edit profile in code editor
 function edit-profile { code $PROFILE }
 # Weather info for a location (city, zip, etc.)
@@ -28,9 +28,10 @@ function now { Get-Date -Format "yyyy-MM-dd HH:mm:ss" }
 # Open current directory in File Explorer
 function open-explorer { explorer.exe . }
 # List all user-defined functions in current session
-function list-functions { Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name,Definition | Format-Table -AutoSize }
+function list-functions { Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name, Definition | Format-Table -AutoSize }
 # Backup current profile to timestamped .bak file
 function backup-profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
+
 
 
 

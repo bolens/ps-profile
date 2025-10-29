@@ -18,15 +18,17 @@ if (-not (Test-Path Function:mongosh -ErrorAction SilentlyContinue)) { Set-Item 
 
 # Redis CLI - command-line interface for Redis
 if (-not (Test-Path Function:redis-cli -ErrorAction SilentlyContinue)) {
-  if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-    Set-Item -Path Function:redis-cli -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand redis-cli) { redis-cli @a } else { Write-Warning 'redis-cli not found' } } -Force | Out-Null
-  } else {
-    Set-Item -Path Function:redis-cli -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command redis-cli -ErrorAction SilentlyContinue) { redis-cli @a } else { Write-Warning 'redis-cli not found' } } -Force | Out-Null
-  }
+    if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+        Set-Item -Path Function:redis-cli -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Test-CachedCommand redis-cli) { redis-cli @a } else { Write-Warning 'redis-cli not found' } } -Force | Out-Null
+    }
+    else {
+        Set-Item -Path Function:redis-cli -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command redis-cli -ErrorAction SilentlyContinue) { redis-cli @a } else { Write-Warning 'redis-cli not found' } } -Force | Out-Null
+    }
 }
 
 # SQLite CLI - command-line interface for SQLite databases
 if (-not (Test-Path Function:sqlite3 -ErrorAction SilentlyContinue)) { Set-Item -Path Function:sqlite3 -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) if (Get-Command sqlite3 -ErrorAction SilentlyContinue) { sqlite3 @a } else { Write-Warning 'sqlite3 not found' } } -Force | Out-Null }
+
 
 
 
