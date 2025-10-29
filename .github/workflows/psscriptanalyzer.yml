@@ -15,6 +15,12 @@ jobs:
       - name: Install PSScriptAnalyzer
         shell: pwsh
         run: |
+          # Register PSGallery if not already registered
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+            Register-PSRepository -Default
+          }
+          # Set PSGallery as trusted
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
       - name: Run PSScriptAnalyzer and save report
         shell: pwsh
