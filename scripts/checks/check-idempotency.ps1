@@ -21,8 +21,11 @@ $content += "Write-Output 'Pass 2 complete'"
 
 [System.IO.File]::WriteAllLines($temp, $content)
 
+# Determine which PowerShell executable to use
+$psExe = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
+
 Write-Output "Running idempotency runner: $temp"
-$out = pwsh -NoProfile -File $temp 2>&1
+$out = & $psExe -NoProfile -File $temp 2>&1
 $code = $LASTEXITCODE
 
 Remove-Item -LiteralPath $temp -ErrorAction SilentlyContinue
