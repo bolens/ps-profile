@@ -9,8 +9,8 @@ Usage
 -----
 See the fragment source: `61-eza.ps1` for examples and usage notes.
 
-Functions/Aliases
------------------
+Functions
+---------
 - `ls` — eza (replaces ls)
 - `l` — eza (short alias)
 - `ll` — eza -l (long listing)

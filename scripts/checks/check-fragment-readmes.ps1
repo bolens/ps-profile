@@ -100,31 +100,34 @@ function Get-FunctionsWithoutDocumentation($path) {
 
     $undocumented = @()
 
-    # Find all function definitions
-    $functionMatches = [regex]::Matches($content, '(?s)function\s+(\w+)')
+    # Find all function definitions (same logic as Get-FunctionsFromPs1)
+    $lines = Get-Content -Path $path -ErrorAction SilentlyContinue
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+        $m = [regex]::Match($line, '^\s*function\s+([A-Za-z0-9_\-]+)\b', 'IgnoreCase')
+        if ($m.Success) {
+            $functionName = $m.Groups[1].Value
 
-    foreach ($match in $functionMatches) {
-        $functionName = $match.Groups[1].Value
+            # Look for comment-based help before the function
+            $functionIndex = $lines[$i]
+            $beforeFunction = $content.Substring(0, $content.IndexOf($functionIndex))
 
-        # Look for comment-based help before the function
-        $functionIndex = $match.Index
-        $beforeFunction = $content.Substring(0, $functionIndex)
+            # Check if there's comment-based help (starts with <# and ends with #>)
+            $lastCommentStart = $beforeFunction.LastIndexOf('<#')
+            $lastCommentEnd = $beforeFunction.LastIndexOf('#>')
 
-        # Check if there's comment-based help (starts with <# and ends with #>)
-        $lastCommentStart = $beforeFunction.LastIndexOf('<#')
-        $lastCommentEnd = $beforeFunction.LastIndexOf('#>')
-
-        $hasHelp = $false
-        if ($lastCommentStart -ge 0 -and $lastCommentEnd -gt $lastCommentStart) {
-            # Check if the comment contains SYNOPSIS or DESCRIPTION
-            $commentContent = $beforeFunction.Substring($lastCommentStart, $lastCommentEnd - $lastCommentStart + 2)
-            if ($commentContent -match '\.SYNOPSIS|\.DESCRIPTION') {
-                $hasHelp = $true
+            $hasHelp = $false
+            if ($lastCommentStart -ge 0 -and $lastCommentEnd -gt $lastCommentStart) {
+                # Check if the comment contains SYNOPSIS or DESCRIPTION
+                $commentContent = $beforeFunction.Substring($lastCommentStart, $lastCommentEnd - $lastCommentStart + 2)
+                if ($commentContent -match '\.SYNOPSIS|\.DESCRIPTION') {
+                    $hasHelp = $true
+                }
             }
-        }
 
-        if (-not $hasHelp) {
-            $undocumented += $functionName
+            if (-not $hasHelp) {
+                $undocumented += $functionName
+            }
         }
     }
 

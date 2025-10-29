@@ -9,12 +9,15 @@ Usage
 -----
 See the fragment source: `62-navi.ps1` for examples and usage notes.
 
-Functions/Aliases
------------------
+Functions
+---------
 - `cheats` — navi (main command)
 - `navis` — navi --query (search with query)
 - `navib` — navi --best (best match)
 - `navip` — navi --print (print without executing)
+- `Invoke-NaviSearch` — Search navi cheatsheets
+- `Invoke-NaviBest` — Get best matching command
+- `Invoke-NaviPrint` — Print command without executing
 
 Dependencies
 ------------

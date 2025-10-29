@@ -9,13 +9,16 @@ Usage
 -----
 See the fragment source: `69-pnpm.ps1` for examples and usage notes.
 
-Functions/Aliases
------------------
+Functions
+---------
 - `npm` — pnpm (npm replacement)
 - `yarn` — pnpm (yarn replacement)
 - `pnadd` — pnpm add (install packages)
 - `pndev` — pnpm add -D (install dev packages)
 - `pnrun` — pnpm run (run scripts)
+- `Invoke-PnpmInstall` — Install packages with pnpm
+- `Invoke-PnpmDevInstall` — Install dev packages with pnpm
+- `Invoke-PnpmRun` — Run scripts with pnpm
 
 Dependencies
 ------------
