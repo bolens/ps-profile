@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/bolens/ps-profile/compare/v1.0.1...v1.0.2) (2025-10-29)
+
+
+### Bug Fixes
+
+* Resolve additional CI/CD failures ([260f74a](https://github.com/bolens/ps-profile/commit/260f74a1e24f1528521157e633fe78214fb1c5ff))
+
 ## [1.0.1](https://github.com/bolens/ps-profile/compare/v1.0.0...v1.0.1) (2025-10-29)
 
 
