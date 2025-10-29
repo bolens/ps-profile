@@ -52,7 +52,8 @@ if (-not (Test-Path "Function:\\global:Set-AgentModeFunction")) {
         if (-not (Test-Path $funcPath)) { throw "Set-AgentModeFunction: unable to register function $Name" }
         if ($ReturnScriptBlock) { return $sb } else { return $true }
       }
-    } catch {
+    }
+    catch {
       $err = $_.Exception.Message
       if ($dbgEnabled) { Write-Verbose "Set-AgentModeFunction: creation failed: $err" }
       throw
@@ -81,7 +82,8 @@ if (-not (Test-Path "Function:\\global:Set-AgentModeAlias")) {
           New-Alias -Name $Name -Value $Target -Scope Global -Force -ErrorAction Stop
           if ($ReturnDefinition) { return "New-Alias -Name $Name -Value $Target -Scope Global" } else { return $true }
         }
-      } catch {
+      }
+      catch {
         # Fall back to creating a small function via the Function: provider
         $funcPath = "Function:\global:$Name"
         $sb = [scriptblock]::Create("param([Parameter(ValueFromRemainingArguments=\$true)]\$args) & $Target @args")
@@ -90,7 +92,8 @@ if (-not (Test-Path "Function:\\global:Set-AgentModeAlias")) {
           if ($ReturnDefinition) { return $funcPath } else { return $true }
         }
       }
-    } catch {
+    }
+    catch {
       if ($dbgEnabled) { Write-Verbose ("Set-AgentModeAlias: failed creating {0}: {1}" -f $Name,$_.Exception.Message) }
       return $false
     }

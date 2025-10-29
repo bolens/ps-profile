@@ -22,7 +22,7 @@ if ($LASTEXITCODE -ne 0) { Write-Error "Lint failed"; exit $LASTEXITCODE }
 Write-Output "Running spellcheck: $spellcheck"
 & pwsh -NoProfile -File $spellcheck
 if ($LASTEXITCODE -ne 0) { Write-Error "Spellcheck failed"; exit $LASTEXITCODE }Write-Output "Running idempotency: $idemp"
-& powershell -NoProfile -File $idemp
+& pwsh -NoProfile -File $idemp
 if ($LASTEXITCODE -ne 0) { Write-Error "Idempotency check failed"; exit $LASTEXITCODE }
 
 Write-Output "Validation: format + security + lint + spellcheck + idempotency passed"

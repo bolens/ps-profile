@@ -9,25 +9,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Ensure pwsh available
+        run: pwsh -c "$PSVersionTable"
       - name: Install Node
         uses: actions/setup-node@v6
         with:
           node-version: '18'
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
       - name: Install cspell
-        run: npm install -g cspell@6
-      - name: Run PSScriptAnalyzer (normalized)
-        run: pwsh -NoProfile -Command ./scripts/utils/run-lint.ps1 | tee lint-output.txt
+        run: npm install -g cspell@9
+      - name: Run PSScriptAnalyzer and generate JSON report
+        shell: pwsh
+        run: |
+          $paths = @("./profile.d", "./scripts") | Where-Object { Test-Path $_ }
+          if (-not $paths) { Write-Output "No paths found to analyze"; exit 0 }
+          $results = @()
+          foreach ($p in $paths) {
+              Write-Output "Analyzing $p"
+              $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error','Warning','Information') -Verbose -CacheResult:$false
+              $results += $r
+          }
+          $json = $results | Select-Object @{n='FilePath';e={$_.ScriptName}},RuleName,Severity,Message,Line,Column | ConvertTo-Json -Depth 5
+          $out = "psscriptanalyzer-report.json"
+          $json | Out-File -FilePath $out -Encoding utf8
+          Write-Output "Saved report to $out"
+      - name: Convert PSScriptAnalyzer report for reviewdog
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ./.github/scripts/psa_to_reviewdog.ps1 -ReportPath psscriptanalyzer-report.json
       - name: Install reviewdog CLI
         run: |
-          curl -sSfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin latest
+          curl -sSfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin v0.17.0
       - name: Run reviewdog for PSScriptAnalyzer
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -filter-mode=added -level=warning < lint-output.txt || true
+          reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -filter-mode=added -level=warning < ./psa_for_reviewdog.rdjson || true
       - name: Run cspell and pipe to reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cspell "**/*.md" --no-progress --no-summary > cspell-output.txt || true
-          reviewdog -f=rdjson -name=cspell -reporter=github-pr-review -filter-mode=added -level=warning < cspell-output.txt || true
+          cspell "**/*.md" --format json --no-progress --no-summary > cspell-output.json || true
+          reviewdog -f=cspell -name=cspell -reporter=github-pr-review -filter-mode=added -level=warning < cspell-output.json || true

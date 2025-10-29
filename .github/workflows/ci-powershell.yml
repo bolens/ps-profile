@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        pwsh: [7.2, 7.6]
+        pwsh: [7.2, 7.4]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -35,4 +35,4 @@ jobs:
       - name: Install PSScriptAnalyzer
         run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force"
       - name: Validate profile (lint + idempotency)
-        run: pwsh -NoProfile -Command ./scripts/validate-profile.ps1
+        run: pwsh -NoProfile -Command ./scripts/checks/validate-profile.ps1
