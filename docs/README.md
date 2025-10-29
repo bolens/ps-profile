@@ -1,0 +1,153 @@
+# PowerShell Profile API Documentation
+
+This documentation is automatically generated from comment-based help in the profile functions.
+
+## Functions
+
+- [Set](Set.md) - Creates collision-safe functions for profile fragments.
+- [Set](Set.md) - Creates collision-safe aliases for profile fragments.
+- [Test](Test.md) - Tests for command availability with caching.
+- [Test](Test.md) - Tests if a command is available.
+- [Ensure](Ensure.md) - Initializes file helper functions on first use.
+- [json](json.md) - Pretty-prints JSON data.
+- [yaml](yaml.md) - Converts YAML to JSON format.
+- [json](json.md) - Converts JSON to YAML format.
+- [ll](ll.md) - Lists directory contents with details.
+- [la](la.md) - Lists all directory contents including hidden files.
+- [lx](lx.md) - Lists directory contents excluding hidden files.
+- [tree](tree.md) - Displays directory structure as a tree.
+- [bat](bat.md) - Displays file contents with syntax highlighting.
+- [desktop](desktop.md) - Changes to the parent directory.
+- [downloads](downloads.md) - Changes to the Downloads directory.
+- [docs](docs.md) - Changes to the Documents directory.
+- [head](head.md) - Shows the first N lines of a file.
+- [tail](tail.md) - Shows the last N lines of a file.
+- [to](to.md) - Encodes input to base64 format.
+- [from](from.md) - Decodes base64 input to text.
+- [csv](csv.md) - Converts CSV file to JSON format.
+- [xml](xml.md) - Converts XML file to JSON format.
+- [file](file.md) - Calculates file hash using specified algorithm.
+- [filesize](filesize.md) - Shows human-readable file size.
+- [reload](reload.md) - Reloads the PowerShell profile.
+- [edit](edit.md) - Opens the profile in VS Code.
+- [weather](weather.md) - Shows weather information.
+- [myip](myip.md) - Shows public IP address.
+- [speedtest](speedtest.md) - Runs internet speed test.
+- [Get](Get.md) - Shows recent command history.
+- [hg](hg.md) - Searches command history.
+- [pwgen](pwgen.md) - Generates a random password.
+- [from](from.md) - Converts Unix timestamp to DateTime.
+- [epoch](epoch.md) - Gets current Unix timestamp.
+- [now](now.md) - Shows current date and time.
+- [open](open.md) - Opens current directory in File Explorer.
+- [list](list.md) - Lists user-defined functions.
+- [backup](backup.md) - Creates a backup of the profile.
+- [Initialize](Initialize.md) - 
+- [prompt](prompt.md) - PowerShell prompt function with lazy oh-my-posh initialization.
+- [which](which.md) - Shows information about commands.
+- [pgrep](pgrep.md) - Searches for patterns in files.
+- [touch](touch.md) - Creates empty files.
+- [mkdir](mkdir.md) - Creates directories.
+- [rm](rm.md) - Removes files and directories.
+- [cp](cp.md) - Copies files and directories.
+- [mv](mv.md) - Moves files and directories.
+- [search](search.md) - Searches for files recursively.
+- [df](df.md) - Shows disk usage information.
+- [htop](htop.md) - Shows top CPU-consuming processes.
+- [ports](ports.md) - Shows network port information.
+- [ptest](ptest.md) - Tests network connectivity.
+- [dns](dns.md) - Resolves DNS names.
+- [rest](rest.md) - Makes REST API calls.
+- [web](web.md) - Makes HTTP web requests.
+- [unzip](unzip.md) - Extracts ZIP archives.
+- [zip](zip.md) - Creates ZIP archives.
+- [code](code.md) - Opens files in Visual Studio Code.
+- [vim](vim.md) - Opens files in Neovim.
+- [vi](vi.md) - Opens files in Neovim (vi mode).
+- [uptime](uptime.md) - Shows system uptime.
+- [sysinfo](sysinfo.md) - Shows battery information.
+- [cpuinfo](cpuinfo.md) - Shows system information.
+- [meminfo](meminfo.md) - Shows CPU information.
+- [sinstall](sinstall.md) - Installs packages using Scoop.
+- [ss](ss.md) - Searches for packages in Scoop.
+- [su](su.md) - Updates packages using Scoop.
+- [suu](suu.md) - Updates all installed Scoop packages.
+- [sr](sr.md) - Uninstalls packages using Scoop.
+- [slist](slist.md) - Lists installed Scoop packages.
+- [sh](sh.md) - Shows information about Scoop packages.
+- [scleanup](scleanup.md) - Cleans up Scoop cache and old versions.
+- [uvi](uvi.md) - Installs Python tools using UV.
+- [uvr](uvr.md) - Runs Python commands with UV.
+- [uvx](uvx.md) - Runs tools installed with UV.
+- [uva](uva.md) - Adds dependencies to UV project.
+- [uvs](uvs.md) - Syncs UV project dependencies.
+- [pni](pni.md) - Installs dependencies using PNPM.
+- [pna](pna.md) - Adds packages using PNPM.
+- [pnd](pnd.md) - Adds dev dependencies using PNPM.
+- [pnr](pnr.md) - Runs scripts using PNPM.
+- [pns](pns.md) - Starts the project using PNPM.
+- [pnb](pnb.md) - Builds the project using PNPM.
+- [pnt](pnt.md) - Runs tests using PNPM.
+- [pndev](pndev.md) - Runs development server using PNPM.
+- [wsl](wsl.md) - Shuts down all WSL distributions.
+- [wsl](wsl.md) - Lists all WSL distributions with their status.
+- [ubuntu](ubuntu.md) - Launches or switches to Ubuntu WSL distribution.
+- [Ensure](Ensure.md) - Ensures Git helper functions are initialized.
+- [ansible](ansible.md) - Runs Ansible commands via WSL with UTF-8 locale.
+- [ansible](ansible.md) - Runs Ansible playbook commands via WSL with UTF-8 locale.
+- [ansible](ansible.md) - Runs Ansible Galaxy commands via WSL with UTF-8 locale.
+- [ansible](ansible.md) - Runs Ansible Vault commands via WSL with UTF-8 locale.
+- [ansible](ansible.md) - Runs Ansible documentation commands via WSL with UTF-8 locale.
+- [ansible](ansible.md) - Runs Ansible inventory commands via WSL with UTF-8 locale.
+- [vsc](vsc.md) - Opens current directory in VS Code.
+- [project](project.md) - Changes to project root directory.
+- [cb](cb.md) - Copies input to the clipboard.
+- [pb](pb.md) - Pastes content from the clipboard.
+- [Get](Get.md) - Gets information about available container engines and compose tools.
+- [dcu](dcu.md) - Starts container services using compose (Docker-first).
+- [dcd](dcd.md) - Stops container services using compose (Docker-first).
+- [dcl](dcl.md) - Shows container logs using compose (Docker-first).
+- [dprune](dprune.md) - Prunes unused container system resources (Docker-first).
+- [pcu](pcu.md) - Starts container services using compose (Podman-first).
+- [pcd](pcd.md) - Stops container services using compose (Podman-first).
+- [pcl](pcl.md) - Shows container logs using compose (Podman-first).
+- [pprune](pprune.md) - Prunes unused container system resources (Podman-first).
+- [Initialize](Initialize.md) - 
+- [Test](Test.md) - Tests for available container engines and compose tools.
+- [Set](Set.md) - Sets the preferred container engine for the session.
+- [open](open.md) - Opens files or URLs using the system's default application.
+- [registration](registration.md) - 
+- [Show](Show.md) - 
+- [ls](ls.md) - Lists directory contents using eza.
+- [l](l.md) - Lists directory contents using eza (short alias).
+- [ll](ll.md) - Lists directory contents in long format using eza.
+- [la](la.md) - Lists all directory contents including hidden files using eza.
+- [lla](lla.md) - Lists all directory contents in long format using eza.
+- [lt](lt.md) - Lists directory contents in tree format using eza.
+- [lta](lta.md) - Lists all directory contents in tree format using eza.
+- [lg](lg.md) - Lists directory contents with git status using eza.
+- [llg](llg.md) - Lists directory contents in long format with git status using eza.
+- [lS](lS.md) - Lists directory contents sorted by size using eza.
+- [ltime](ltime.md) - Lists directory contents sorted by modification time using eza.
+- [Invoke](Invoke.md) - Searches navi cheatsheets interactively.
+- [Invoke](Invoke.md) - Finds the best matching command from navi cheatsheets.
+- [Invoke](Invoke.md) - Prints commands from navi cheatsheets without executing them.
+- [Invoke](Invoke.md) - Shows a confirmation prompt using gum.
+- [Invoke](Invoke.md) - Shows an interactive selection menu using gum.
+- [Invoke](Invoke.md) - Shows an input prompt using gum.
+- [Invoke](Invoke.md) - Shows a spinner while executing a script block using gum.
+- [Invoke](Invoke.md) - Styles text output using gum.
+- [pip](pip.md) - Python package manager using uv instead of pip.
+- [Invoke](Invoke.md) - Runs Python commands in temporary virtual environments using uv.
+- [Install](Install.md) - Installs Python tools globally using uv.
+- [New](New.md) - Creates Python virtual environments using uv.
+- [Invoke](Invoke.md) - Installs packages using pixi.
+- [Invoke](Invoke.md) - Runs commands in the pixi environment.
+- [Invoke](Invoke.md) - Activates the pixi shell environment.
+- [Invoke](Invoke.md) - Installs packages using pnpm.
+- [Invoke](Invoke.md) - Installs development packages using pnpm.
+- [Invoke](Invoke.md) - Runs npm scripts using pnpm.
+
+## Generation
+
+This documentation was generated from the comment-based help in the profile fragments.

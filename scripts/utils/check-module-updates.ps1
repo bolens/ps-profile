@@ -24,12 +24,13 @@ if (Test-Path $localModulesPath) {
             try {
                 $moduleInfo = Import-PowerShellDataFile -Path $modulePath
                 [PSCustomObject]@{
-                    Name = $_.Name
+                    Name    = $_.Name
                     Version = $moduleInfo.ModuleVersion
-                    Path = $_.FullName
-                    Source = "Local"
+                    Path    = $_.FullName
+                    Source  = "Local"
                 }
-            } catch {
+            }
+            catch {
                 Write-Warning "Failed to read module info for $($_.Name): $($_.Exception.Message)"
             }
         }
@@ -43,8 +44,7 @@ $modulesToCheck = @(
     # Commonly used modules that might be installed
     'PSScriptAnalyzer',
     'Pester',
-    'PowerShell-Beautifier',
-    'platyPS'
+    'PowerShell-Beautifier'
 ) | Select-Object -Unique
 
 $updatesAvailable = @()
@@ -55,7 +55,7 @@ foreach ($moduleName in $modulesToCheck) {
 
         # Get installed version
         $installed = Get-Module -Name $moduleName -ListAvailable -ErrorAction SilentlyContinue |
-            Sort-Object Version -Descending | Select-Object -First 1
+        Sort-Object Version -Descending | Select-Object -First 1
 
         if ($installed) {
             # Check PowerShell Gallery for latest version
@@ -63,16 +63,18 @@ foreach ($moduleName in $modulesToCheck) {
 
             if ($galleryInfo -and [version]$galleryInfo.Version -gt [version]$installed.Version) {
                 $updatesAvailable += [PSCustomObject]@{
-                    Name = $moduleName
+                    Name           = $moduleName
                     CurrentVersion = $installed.Version.ToString()
-                    LatestVersion = $galleryInfo.Version
-                    Source = if ($localModules | Where-Object { $_.Name -eq $moduleName }) { "Local" } else { "System" }
+                    LatestVersion  = $galleryInfo.Version
+                    Source         = if ($localModules | Where-Object { $_.Name -eq $moduleName }) { "Local" } else { "System" }
                 }
             }
-        } else {
+        }
+        else {
             Write-Warning "Module $moduleName is not installed"
         }
-    } catch {
+    }
+    catch {
         Write-Warning "Failed to check updates for $moduleName`: $($_.Exception.Message)"
     }
 }
@@ -89,19 +91,23 @@ if ($updatesAvailable.Count -gt 0) {
                 if ($update.Source -eq "Local") {
                     # For local modules, update in place
                     Update-Module -Name $update.Name -RequiredVersion $update.LatestVersion -Force -ErrorAction Stop
-                } else {
+                }
+                else {
                     # For system modules, update normally
                     Install-Module -Name $update.Name -RequiredVersion $update.LatestVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
                 }
                 Write-Output "✓ Updated $($update.Name)"
-            } catch {
+            }
+            catch {
                 Write-Warning "Failed to update $($update.Name): $($_.Exception.Message)"
             }
         }
-    } else {
+    }
+    else {
         Write-Output "`nRun with -Update switch to install updates"
     }
-} else {
+}
+else {
     Write-Output "`nAll modules are up to date"
 }
 

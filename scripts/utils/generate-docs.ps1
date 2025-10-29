@@ -1,7 +1,7 @@
 <#
 scripts/utils/generate-docs.ps1
 
-Generates API documentation using platyPS from comment-based help in PowerShell functions.
+Generates API documentation from comment-based help in PowerShell functions.
 
 Usage: pwsh -NoProfile -File scripts/utils/generate-docs.ps1
 #>
@@ -15,19 +15,6 @@ $docsPath = Join-Path $repoRoot $OutputPath
 $profilePath = Join-Path $repoRoot 'profile.d'
 
 Write-Output "Generating API documentation..."
-
-# Ensure platyPS is available
-if (-not (Get-Module -ListAvailable -Name platyPS)) {
-    Write-Output "platyPS not found. Installing to CurrentUser scope..."
-    try {
-        Install-Module -Name platyPS -Scope CurrentUser -Force -Confirm:$false -ErrorAction Stop
-    } catch {
-        Write-Error "Failed to install platyPS: $($_.Exception.Message)"
-        exit 2
-    }
-}
-
-Import-Module -Name platyPS -Force -ErrorAction Stop
 
 # Create docs directory if it doesn't exist
 if (-not (Test-Path $docsPath)) {
@@ -71,7 +58,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         $paramMatches = [regex]::Matches($helpContent, '\.PARAMETER\s+(\w+)\s*\n\s*(.+?)(?=\n\s*\.)')
         foreach ($paramMatch in $paramMatches) {
             $parameters += [PSCustomObject]@{
-                Name = $paramMatch.Groups[1].Value
+                Name        = $paramMatch.Groups[1].Value
                 Description = $paramMatch.Groups[2].Value.Trim()
             }
         }
@@ -83,12 +70,12 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         }
 
         $functions += [PSCustomObject]@{
-            Name = $functionName
-            Synopsis = $synopsis
+            Name        = $functionName
+            Synopsis    = $synopsis
             Description = $description
-            Parameters = $parameters
-            Examples = $examples
-            File = $file
+            Parameters  = $parameters
+            Examples    = $examples
+            File        = $file
         }
     }
 }
@@ -127,7 +114,8 @@ $($function.Description)
 $($param.Description)
 "@
         }
-    } else {
+    }
+    else {
         $content += "`nNo parameters."
     }
 
@@ -147,7 +135,8 @@ $($function.Examples[$i])
 ``````
 "@
         }
-    } else {
+    }
+    else {
         $content += "`nNo examples provided."
     }
 
@@ -167,7 +156,7 @@ $(($functions | ForEach-Object { "- [$($_.Name)]($($_.Name).md) - $($_.Synopsis)
 
 ## Generation
 
-This documentation was generated using [platyPS](https://github.com/PowerShell/platyPS) from the comment-based help in the profile fragments.
+This documentation was generated from the comment-based help in the profile fragments.
 "@
 
 $indexContent | Out-File -FilePath (Join-Path $docsPath 'README.md') -Encoding UTF8

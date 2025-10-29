@@ -5,7 +5,7 @@
 
 * Resolve CI/CD failures ([e6a6ea7](https://github.com/bolens/ps-profile/commit/e6a6ea7a6163b6c20cfdafe7aac6d168dfecebf7))
 
-# 1.0.0 (2025-10-29)
+## 1.0.0 (2025-10-29)
 
 
 ### Bug Fixes
