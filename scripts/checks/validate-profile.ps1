@@ -1,10 +1,11 @@
 # Run format, security scan, lint then idempotency checks; fail if any step fails
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
-$format = Join-Path (Split-Path -Parent $scriptDir) 'utils' 'run-format.ps1'
-$security = Join-Path (Split-Path -Parent $scriptDir) 'utils' 'run-security-scan.ps1'
-$lint = Join-Path (Split-Path -Parent $scriptDir) 'utils' 'run-lint.ps1'
-$spellcheck = Join-Path (Split-Path -Parent $scriptDir) 'utils' 'spellcheck.ps1'
+$utilsDir = Join-Path (Split-Path -Parent $scriptDir) 'utils'
+$format = Join-Path $utilsDir 'run-format.ps1'
+$security = Join-Path $utilsDir 'run-security-scan.ps1'
+$lint = Join-Path $utilsDir 'run-lint.ps1'
+$spellcheck = Join-Path $utilsDir 'spellcheck.ps1'
 $idemp = Join-Path $scriptDir 'check-idempotency.ps1'
 
 # Determine which PowerShell executable to use
