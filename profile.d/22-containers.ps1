@@ -6,6 +6,13 @@
 # implementation before calling.
 # ===============================================
 
+<#
+.SYNOPSIS
+    Gets information about available container engines and compose tools.
+.DESCRIPTION
+    Returns cached information about available container engines (Docker/Podman) and their compose capabilities.
+    Checks for docker, docker-compose, podman, and podman-compose availability and compose subcommand support.
+#>
 function Get-ContainerEngineInfo {
     # Return cached container engine info as a hashtable in script scope
     if ($script:__ContainerEngineInfo) { return $script:__ContainerEngineInfo }
@@ -45,6 +52,13 @@ function Get-ContainerEngineInfo {
 
 # docker-compose / docker compose up
 if (-not (Test-Path Function:dcu)) {
+    <#
+    .SYNOPSIS
+        Starts container services using compose (Docker-first).
+    .DESCRIPTION
+        Runs 'compose up -d' using the available container engine, preferring Docker over Podman.
+        Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
+    #>
     function dcu {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -60,6 +74,13 @@ if (-not (Test-Path Function:dcu)) {
 
 # docker-compose down
 if (-not (Test-Path Function:dcd)) {
+    <#
+    .SYNOPSIS
+        Stops container services using compose (Docker-first).
+    .DESCRIPTION
+        Runs 'compose down' using the available container engine, preferring Docker over Podman.
+        Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
+    #>
     function dcd {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -75,6 +96,13 @@ if (-not (Test-Path Function:dcd)) {
 
 # docker-compose logs -f
 if (-not (Test-Path Function:dcl)) {
+    <#
+    .SYNOPSIS
+        Shows container logs using compose (Docker-first).
+    .DESCRIPTION
+        Runs 'compose logs -f' using the available container engine, preferring Docker over Podman.
+        Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
+    #>
     function dcl {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -91,6 +119,13 @@ if (-not (Test-Path Function:dcl)) {
 # prune system for whichever engine
 # prune system for whichever engine
 if (-not (Test-Path Function:dprune)) {
+    <#
+    .SYNOPSIS
+        Prunes unused container system resources (Docker-first).
+    .DESCRIPTION
+        Runs 'system prune -f' using the available container engine, preferring Docker over Podman.
+        Removes unused containers, networks, images, and build cache.
+    #>
     function dprune {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -102,6 +137,13 @@ if (-not (Test-Path Function:dprune)) {
 
 # Podman-first compose helpers (separate functions for convenience)
 if (-not (Test-Path Function:pcu)) {
+    <#
+    .SYNOPSIS
+        Starts container services using compose (Podman-first).
+    .DESCRIPTION
+        Runs 'compose up -d' using the available container engine, preferring Podman over Docker.
+        Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+    #>
     function pcu {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -116,6 +158,13 @@ if (-not (Test-Path Function:pcu)) {
 }
 
 if (-not (Test-Path Function:pcd)) {
+    <#
+    .SYNOPSIS
+        Stops container services using compose (Podman-first).
+    .DESCRIPTION
+        Runs 'compose down' using the available container engine, preferring Podman over Docker.
+        Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+    #>
     function pcd {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -130,6 +179,13 @@ if (-not (Test-Path Function:pcd)) {
 }
 
 if (-not (Test-Path Function:pcl)) {
+    <#
+    .SYNOPSIS
+        Shows container logs using compose (Podman-first).
+    .DESCRIPTION
+        Runs 'compose logs -f' using the available container engine, preferring Podman over Docker.
+        Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+    #>
     function pcl {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -144,6 +200,13 @@ if (-not (Test-Path Function:pcl)) {
 }
 
 if (-not (Test-Path Function:pprune)) {
+    <#
+    .SYNOPSIS
+        Prunes unused container system resources (Podman-first).
+    .DESCRIPTION
+        Runs 'system prune -f' using the available container engine, preferring Podman over Docker.
+        Removes unused containers, networks, images, and build cache.
+    #>
     function pprune {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -152,6 +215,9 @@ if (-not (Test-Path Function:pprune)) {
         else { Write-Warning 'neither podman nor docker found' }
     }
 }
+
+
+
 
 
 

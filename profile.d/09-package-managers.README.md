@@ -19,7 +19,7 @@ Functions
 - `slist` — Scoop list
 - `sh` — Scoop info
 - `scleanup` — Scoop cleanup
-- `uvi` — UV install
+- `uvi` — UV tool install
 - `uvr` — UV run
 - `uvx` — UV tool run
 - `uva` — UV add
@@ -28,7 +28,7 @@ Functions
 - `pna` — PNPM add
 - `pnd` — PNPM add -D
 - `pnr` — PNPM run
-- `pns` — PNPM start, build, test, dev
+- `pns` — PNPM start
 - `pnb` — PNPM build
 - `pnt` — PNPM test
 - `pndev` — PNPM dev

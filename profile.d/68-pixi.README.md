@@ -11,12 +11,15 @@ See the fragment source: `68-pixi.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `pxadd` — pixi add (install package)
-- `pxrun` — pixi run (run command in environment)
-- `pxshell` — pixi shell (activate environment)
-- `Invoke-PixiInstall` — Install packages with pixi
-- `Invoke-PixiRun` — Run commands with pixi
-- `Invoke-PixiShell` — Activate pixi shell
+- `Invoke-PixiInstall` — Installs packages using pixi
+- `Invoke-PixiRun` — Runs commands in the pixi environment
+- `Invoke-PixiShell` — Activates the pixi shell environment
+
+Aliases
+-------
+- `pxadd` — Invoke-PixiInstall
+- `pxrun` — Invoke-PixiRun
+- `pxshell` — Invoke-PixiShell
 
 Dependencies
 ------------

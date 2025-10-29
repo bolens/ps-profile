@@ -11,13 +11,16 @@ See the fragment source: `62-navi.ps1` for examples and usage notes.
 
 Functions
 ---------
+- `Invoke-NaviSearch` — Search navi cheatsheets interactively
+- `Invoke-NaviBest` — Get best matching command from cheatsheets
+- `Invoke-NaviPrint` — Print command from cheatsheets without executing
+
+Aliases
+-------
 - `cheats` — navi (main command)
-- `navis` — navi --query (search with query)
-- `navib` — navi --best (best match)
-- `navip` — navi --print (print without executing)
-- `Invoke-NaviSearch` — Search navi cheatsheets
-- `Invoke-NaviBest` — Get best matching command
-- `Invoke-NaviPrint` — Print command without executing
+- `navis` — Invoke-NaviSearch
+- `navib` — Invoke-NaviBest
+- `navip` — Invoke-NaviPrint
 
 Dependencies
 ------------

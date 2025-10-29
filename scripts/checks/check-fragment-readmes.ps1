@@ -109,8 +109,7 @@ function Get-FunctionsWithoutDocumentation($path) {
             $functionName = $m.Groups[1].Value
 
             # Look for comment-based help before the function
-            $functionIndex = $lines[$i]
-            $beforeFunction = $content.Substring(0, $content.IndexOf($functionIndex))
+            $beforeFunction = $lines[0..($i - 1)] -join "`n"
 
             # Check if there's comment-based help (starts with <# and ends with #>)
             $lastCommentStart = $beforeFunction.LastIndexOf('<#')

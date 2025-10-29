@@ -3,13 +3,15 @@
 # Container engine helpers: report available engine and allow preference override
 # ===============================================
 
+<#
+.SYNOPSIS
+    Tests for available container engines and compose tools.
+.DESCRIPTION
+    Returns information about available container engines (Docker/Podman) and their compose capabilities.
+    Checks for docker, docker-compose, podman, and podman-compose availability and compose subcommand support.
+    Returns a PSCustomObject with Engine, Compose, and Preferred fields.
+#>
 function Test-ContainerEngine {
-    <#
-    Returns a PSCustomObject with fields:
-      - Engine: 'docker' | 'podman' | $null
-      - Compose: 'subcommand' | 'legacy' | $null
-      - Preferred: value of CONTAINER_ENGINE_PREFERENCE or $null
-    #>
     $pref = ($env:CONTAINER_ENGINE_PREFERENCE) -as [string]
     # Use Test-Path Function: first to avoid triggering module/autoload discovery.
     if (Test-Path Function:docker -ErrorAction SilentlyContinue) { $hasDocker = $true } elseif (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) { $hasDocker = Test-CachedCommand docker } else { $hasDocker = $null -ne (Get-Command docker -ErrorAction SilentlyContinue) }
@@ -44,6 +46,13 @@ function Test-ContainerEngine {
     }
 }
 
+<#
+.SYNOPSIS
+    Sets the preferred container engine for the session.
+.DESCRIPTION
+    Sets the CONTAINER_ENGINE_PREFERENCE environment variable to specify whether to prefer Docker or Podman.
+    This affects which container engine is used by container-related functions in the profile.
+#>
 function Set-ContainerEnginePreference {
     param(
         [Parameter(Mandatory)][ValidateSet('docker', 'podman')] [string]$Engine
@@ -53,6 +62,9 @@ function Set-ContainerEnginePreference {
     $env:CONTAINER_ENGINE_PREFERENCE = $Engine
     Write-Output "Container engine preference set to: $Engine"
 }
+
+
+
 
 
 

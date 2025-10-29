@@ -4,6 +4,13 @@
 # ===============================================
 
 # Lazy bulk initializer for file helpers
+<#
+.SYNOPSIS
+    Initializes file helper functions on first use.
+.DESCRIPTION
+    Sets up all file-related utility functions when any of them is called for the first time.
+    This lazy loading approach improves profile startup performance.
+#>
 if (-not (Test-Path "Function:\\Ensure-FileHelper")) {
     function Ensure-FileHelper {
         # Replace this initializer with the real implementations. Use the cached
@@ -86,51 +93,218 @@ if (-not (Test-Path "Function:\\Ensure-FileHelper")) {
 
 # Lightweight stubs that ensure the real implementations are created on first use
 # Pretty-print JSON
+<#
+.SYNOPSIS
+    Pretty-prints JSON data.
+.DESCRIPTION
+    Formats JSON data with proper indentation and structure.
+#>
 function json-pretty { if (-not (Test-Path Function:\json-pretty)) { Ensure-FileHelper }; return & (Get-Item Function:\json-pretty -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Convert YAML to JSON
+<#
+.SYNOPSIS
+    Converts YAML to JSON format.
+.DESCRIPTION
+    Transforms YAML input to JSON output using yq.
+#>
 function yaml-to-json { if (-not (Test-Path Function:\yaml-to-json)) { Ensure-FileHelper }; return & (Get-Item Function:\yaml-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Convert JSON to YAML
+<#
+.SYNOPSIS
+    Converts JSON to YAML format.
+.DESCRIPTION
+    Transforms JSON input to YAML output using yq.
+#>
 function json-to-yaml { if (-not (Test-Path Function:\json-to-yaml)) { Ensure-FileHelper }; return & (Get-Item Function:\json-to-yaml -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # List files in a directory
+<#
+.SYNOPSIS
+    Lists directory contents with details.
+.DESCRIPTION
+    Shows files and directories with permissions, sizes, and dates. Uses eza if available.
+#>
 function ll { if (-not (Test-Path Function:\ll)) { Ensure-FileHelper }; return & (Get-Item Function:\ll -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # List all files including hidden
+<#
+.SYNOPSIS
+    Lists all directory contents including hidden files.
+.DESCRIPTION
+    Shows all files and directories including hidden ones. Uses eza if available.
+#>
 function la { if (-not (Test-Path Function:\la)) { Ensure-FileHelper }; return & (Get-Item Function:\la -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # List files excluding hidden
+<#
+.SYNOPSIS
+    Lists directory contents excluding hidden files.
+.DESCRIPTION
+    Shows files and directories but excludes hidden ones. Uses eza if available.
+#>
 function lx { if (-not (Test-Path Function:\lx)) { Ensure-FileHelper }; return & (Get-Item Function:\lx -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Display directory tree
+<#
+.SYNOPSIS
+    Displays directory structure as a tree.
+.DESCRIPTION
+    Shows hierarchical directory structure. Uses eza if available.
+#>
 function tree { if (-not (Test-Path Function:\tree)) { Ensure-FileHelper }; return & (Get-Item Function:\tree -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 # cat with syntax highlighting (bat)
+<#
+.SYNOPSIS
+    Displays file contents with syntax highlighting.
+.DESCRIPTION
+    Shows file contents with syntax highlighting using bat, or falls back to Get-Content.
+#>
 function bat-cat { if (-not (Test-Path Function:\bat-cat)) { Ensure-FileHelper }; return & (Get-Item Function:\bat-cat -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Up one directory
 Set-Item -Path Function:\.. -Value { if (-not (Test-Path Function:\..)) { Ensure-FileHelper }; return & (Get-Item Function:\.. -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null
+
 # Up two directories
+<#
+.SYNOPSIS
+    Changes to the parent directory.
+.DESCRIPTION
+    Moves up one directory level in the file system.
+#>
+function .. { if (-not (Test-Path Function:\..)) { Ensure-FileHelper }; return & (Get-Item Function:\.. -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
+# Up two directories
+<#
+.SYNOPSIS
+    Changes to the grandparent directory.
+.DESCRIPTION
+    Moves up two directory levels in the file system.
+#>
 function ... { if (-not (Test-Path Function:\...)) { Ensure-FileHelper }; return & (Get-Item Function:\... -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Up three directories
+<#
+.SYNOPSIS
+    Changes to the great-grandparent directory.
+.DESCRIPTION
+    Moves up three directory levels in the file system.
+#>
 function .... { if (-not (Test-Path Function:\....)) { Ensure-FileHelper }; return & (Get-Item Function:\.... -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Go to user home directory
 Set-Item -Path Function:\~ -Value { if (-not (Test-Path Function:\~)) { Ensure-FileHelper }; return & (Get-Item Function:\~ -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null
+
 # Go to Desktop directory
+<#
+.SYNOPSIS
+    Changes to the user's home directory.
+.DESCRIPTION
+    Navigates to the user's home directory.
+#>
+function ~ { if (-not (Test-Path Function:\~)) { Ensure-FileHelper }; return & (Get-Item Function:\~ -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
+# Go to Desktop directory
+<#
+.SYNOPSIS
+    Changes to the Desktop directory.
+.DESCRIPTION
+    Navigates to the user's Desktop folder.
+#>
 function desktop { if (-not (Test-Path Function:\desktop)) { Ensure-FileHelper }; return & (Get-Item Function:\desktop -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Go to Downloads directory
+<#
+.SYNOPSIS
+    Changes to the Downloads directory.
+.DESCRIPTION
+    Navigates to the user's Downloads folder.
+#>
 function downloads { if (-not (Test-Path Function:\downloads)) { Ensure-FileHelper }; return & (Get-Item Function:\downloads -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Go to Documents directory
+<#
+.SYNOPSIS
+    Changes to the Documents directory.
+.DESCRIPTION
+    Navigates to the user's Documents folder.
+#>
 function docs { if (-not (Test-Path Function:\docs)) { Ensure-FileHelper }; return & (Get-Item Function:\docs -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 # Head (first 10 lines) of a file
+<#
+.SYNOPSIS
+    Shows the first N lines of a file.
+.DESCRIPTION
+    Displays the beginning of a file or pipeline input. Defaults to 10 lines.
+#>
 function head { if (-not (Test-Path Function:\head)) { Ensure-FileHelper }; return & (Get-Item Function:\head -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Tail (last 10 lines) of a file
+<#
+.SYNOPSIS
+    Shows the last N lines of a file.
+.DESCRIPTION
+    Displays the end of a file or pipeline input. Defaults to 10 lines.
+#>
 function tail { if (-not (Test-Path Function:\tail)) { Ensure-FileHelper }; return & (Get-Item Function:\tail -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Encode to base64
+<#
+.SYNOPSIS
+    Encodes input to base64 format.
+.DESCRIPTION
+    Converts file contents or string input to base64 encoded string.
+#>
 function to-base64 { if (-not (Test-Path Function:\to-base64)) { Ensure-FileHelper }; return & (Get-Item Function:\to-base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Decode from base64
+<#
+.SYNOPSIS
+    Decodes base64 input to text.
+.DESCRIPTION
+    Converts base64 encoded string back to readable text.
+#>
 function from-base64 { if (-not (Test-Path Function:\from-base64)) { Ensure-FileHelper }; return & (Get-Item Function:\from-base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Convert CSV to JSON
+<#
+.SYNOPSIS
+    Converts CSV file to JSON format.
+.DESCRIPTION
+    Reads a CSV file and outputs its contents as JSON.
+#>
 function csv-to-json { if (-not (Test-Path Function:\csv-to-json)) { Ensure-FileHelper }; return & (Get-Item Function:\csv-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Convert XML to JSON
+<#
+.SYNOPSIS
+    Converts XML file to JSON format.
+.DESCRIPTION
+    Parses an XML file and converts it to JSON representation.
+#>
 function xml-to-json { if (-not (Test-Path Function:\xml-to-json)) { Ensure-FileHelper }; return & (Get-Item Function:\xml-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Get file hash
+<#
+.SYNOPSIS
+    Calculates file hash using specified algorithm.
+.DESCRIPTION
+    Computes cryptographic hash of a file. Defaults to SHA256.
+#>
 function file-hash { if (-not (Test-Path Function:\file-hash)) { Ensure-FileHelper }; return & (Get-Item Function:\file-hash -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
 # Get file size
+<#
+.SYNOPSIS
+    Shows human-readable file size.
+.DESCRIPTION
+    Displays file size in appropriate units (bytes, KB, MB, GB, TB).
+#>
 function filesize { if (-not (Test-Path Function:\filesize)) { Ensure-FileHelper }; return & (Get-Item Function:\filesize -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+
+
+
 
 
 

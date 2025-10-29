@@ -12,6 +12,14 @@ try {
 
     if ($env:PS_PROFILE_DEBUG) {
         # Show profile diagnostics - PowerShell version, PATH, Podman status
+        <#
+        .SYNOPSIS
+            Shows profile diagnostic information.
+        .DESCRIPTION
+            Displays diagnostic information including PowerShell version, PATH entries,
+            Podman machine status, and configured Podman connections. Only available
+            when PS_PROFILE_DEBUG environment variable is set.
+        #>
         function Show-ProfileDiagnostic {
             Write-Host "-- Profile diagnostic --"
             Write-Host "PowerShell: $($PSVersionTable.PSVersion)"
@@ -27,6 +35,9 @@ try {
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Diagnostics fragment failed: $($_.Exception.Message)" }
 }
+
+
+
 
 
 

@@ -13,7 +13,14 @@
 
 # Collision-safe function creator for profile fragments
 if (-not (Test-Path "Function:\\global:Set-AgentModeFunction")) {
-    # Define a collision-safe helper to create small convenience functions or wrappers without overwriting existing user or module commands
+    <#
+    .SYNOPSIS
+        Creates collision-safe functions for profile fragments.
+    .DESCRIPTION
+        Defines a helper function that creates small convenience functions or wrappers
+        without overwriting existing user or module commands. Used by profile fragments
+        to safely register functions.
+    #>
     function Set-AgentModeFunction {
         [CmdletBinding(SupportsShouldProcess)]
         param(
@@ -63,6 +70,14 @@ if (-not (Test-Path "Function:\\global:Set-AgentModeFunction")) {
 
 # Collision-safe alias creator for profile fragments
 if (-not (Test-Path "Function:\\global:Set-AgentModeAlias")) {
+    <#
+    .SYNOPSIS
+        Creates collision-safe aliases for profile fragments.
+    .DESCRIPTION
+        Defines a helper function that creates aliases or function wrappers
+        without overwriting existing user or module commands. Used by profile fragments
+        to safely register aliases.
+    #>
     function Set-AgentModeAlias {
         [CmdletBinding(SupportsShouldProcess)]
         param(
@@ -102,6 +117,13 @@ if (-not (Test-Path "Function:\\global:Set-AgentModeAlias")) {
 
 # Lightweight cached command-test used by multiple fragments to avoid repeated Get-Command calls
 if (-not (Test-Path "Function:\\global:Test-CachedCommand")) {
+    <#
+    .SYNOPSIS
+        Tests for command availability with caching.
+    .DESCRIPTION
+        Lightweight cached command testing used by profile fragments to avoid
+        repeated Get-Command calls. Results are cached in script scope for performance.
+    #>
     function Test-CachedCommand {
         param([Parameter(Mandatory)] [string]$Name)
         if (-not $script:__cmdCache) { $script:__cmdCache = @{} }
@@ -114,6 +136,13 @@ if (-not (Test-Path "Function:\\global:Test-CachedCommand")) {
 }
 
 # Small utility exported for fragments: prefer provider checks first to avoid module autoload
+<#
+.SYNOPSIS
+    Tests if a command is available.
+.DESCRIPTION
+    Utility function to check if a command exists. Uses fast provider checks first
+    to avoid module autoload, then falls back to cached or direct command testing.
+#>
 function Test-HasCommand {
     param([Parameter(Mandatory)] [string]$Name)
     # Fast provider checks avoid triggering module autoload/discovery
@@ -125,6 +154,9 @@ function Test-HasCommand {
     # Last resort: Get-Command (may autoload modules)
     return $null -ne (Get-Command -Name $Name -ErrorAction SilentlyContinue)
 }
+
+
+
 
 
 

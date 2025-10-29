@@ -11,14 +11,17 @@ See the fragment source: `69-pnpm.ps1` for examples and usage notes.
 
 Functions
 ---------
+- `Invoke-PnpmInstall` — Installs packages using pnpm
+- `Invoke-PnpmDevInstall` — Installs development packages using pnpm
+- `Invoke-PnpmRun` — Runs npm scripts using pnpm
+
+Aliases
+-------
 - `npm` — pnpm (npm replacement)
 - `yarn` — pnpm (yarn replacement)
-- `pnadd` — pnpm add (install packages)
-- `pndev` — pnpm add -D (install dev packages)
-- `pnrun` — pnpm run (run scripts)
-- `Invoke-PnpmInstall` — Install packages with pnpm
-- `Invoke-PnpmDevInstall` — Install dev packages with pnpm
-- `Invoke-PnpmRun` — Run scripts with pnpm
+- `pnadd` — Invoke-PnpmInstall
+- `pndev` — Invoke-PnpmDevInstall
+- `pnrun` — Invoke-PnpmRun
 
 Dependencies
 ------------

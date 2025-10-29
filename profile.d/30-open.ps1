@@ -4,6 +4,14 @@
 # ===============================================
 
 if (-not (Test-Path Function:open -ErrorAction SilentlyContinue)) {
+    <#
+    .SYNOPSIS
+        Opens files or URLs using the system's default application.
+
+    .DESCRIPTION
+        Opens the specified file or URL using the appropriate system command.
+        On Windows, uses Start-Process. On Linux/macOS, uses xdg-open or open.
+    #>
     function open {
         param($p)
         if ($IsWindows) { Start-Process -FilePath $p } else {
@@ -13,6 +21,9 @@ if (-not (Test-Path Function:open -ErrorAction SilentlyContinue)) {
         }
     }
 }
+
+
+
 
 
 

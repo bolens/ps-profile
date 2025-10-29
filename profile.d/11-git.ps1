@@ -33,6 +33,13 @@ if (-not (Test-Path Function:gf)) { Set-Item -Path Function:gf -Value { param([P
 
 # Extras: register heavier helpers lazily so dot-sourcing this fragment remains cheap
 if (-not (Test-Path Function:Ensure-GitHelper)) {
+    <#
+    .SYNOPSIS
+        Ensures Git helper functions are initialized.
+    .DESCRIPTION
+        Lazily initializes additional Git helper functions when first called.
+        This keeps the initial profile loading fast by deferring heavier Git helpers.
+    #>
     function Ensure-GitHelper {
         if ($script:__GitHelpersInitialized) { return }
         $script:__GitHelpersInitialized = $true
@@ -104,6 +111,9 @@ if (-not (Test-Path Function:gsync)) { Set-Item -Path Function:gsync -Value { En
 if (-not (Test-Path Function:gundo)) { Set-Item -Path Function:gundo -Value { Ensure-GitHelper; & (Get-Command gundo -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
 # Git default branch - get default branch name
 if (-not (Test-Path Function:gdefault)) { Set-Item -Path Function:gdefault -Value { Ensure-GitHelper; & (Get-Command gdefault -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+
+
+
 
 
 

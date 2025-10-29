@@ -5,6 +5,14 @@
 
 # Copy text to clipboard (uses Set-Clipboard when available)
 if (-not (Test-Path Function:cb -ErrorAction SilentlyContinue)) {
+    <#
+    .SYNOPSIS
+        Copies input to the clipboard.
+
+    .DESCRIPTION
+        Copies text or objects to the clipboard. Uses Set-Clipboard if available,
+        otherwise falls back to the 'clip' command.
+    #>
     function cb {
         [CmdletBinding()] param([Parameter(ValueFromPipeline = $true)] $input)
         process {
@@ -20,6 +28,14 @@ if (-not (Test-Path Function:cb -ErrorAction SilentlyContinue)) {
 
 # Paste from clipboard
 if (-not (Test-Path Function:pb -ErrorAction SilentlyContinue)) {
+    <#
+    .SYNOPSIS
+        Pastes content from the clipboard.
+
+    .DESCRIPTION
+        Retrieves content from the clipboard. Uses Get-Clipboard if available,
+        otherwise falls back to the 'paste' command.
+    #>
     function pb {
         if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
             if (Test-CachedCommand Get-Clipboard) { Get-Clipboard } else { cmd /c paste }
@@ -29,6 +45,9 @@ if (-not (Test-Path Function:pb -ErrorAction SilentlyContinue)) {
         }
     }
 }
+
+
+
 
 
 

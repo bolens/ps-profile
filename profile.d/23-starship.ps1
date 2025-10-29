@@ -23,6 +23,14 @@ try {
     # (like the prompt proxy) can call Initialize-Starship to set up starship
     # at the first prompt draw instead of at profile load.
     if (-not (Test-Path Function:Initialize-Starship -ErrorAction SilentlyContinue)) {
+        <#
+        .SYNOPSIS
+            Initializes the Starship prompt for PowerShell.
+        .DESCRIPTION
+            Sets up Starship as the PowerShell prompt if the starship command is available.
+            Uses lazy initialization to avoid slowing down profile startup. Creates a global
+            flag to ensure initialization happens only once per session.
+        #>
         function Initialize-Starship {
             try {
                 if ($null -ne (Get-Variable -Name 'StarshipInitialized' -Scope Global -ErrorAction SilentlyContinue)) { return }
@@ -52,6 +60,9 @@ try {
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship fragment failed to define initializer: $($_.Exception.Message)" }
 }
+
+
+
 
 
 

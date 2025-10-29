@@ -11,16 +11,19 @@ See the fragment source: `63-gum.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `confirm` — gum confirm (yes/no prompt)
-- `choose` — gum choose (select from list)
-- `input` — gum input (text input)
-- `spin` — gum spin (spinner for long operations)
-- `style` — gum style (style text output)
-- `Invoke-GumConfirm` — Confirm with gum
-- `Invoke-GumChoose` — Choose from list with gum
-- `Invoke-GumInput` — Input with gum
-- `Invoke-GumSpin` — Spin with gum
-- `Invoke-GumStyle` — Style text with gum
+- `Invoke-GumConfirm` — Shows confirmation prompt using gum
+- `Invoke-GumChoose` — Shows interactive selection menu using gum
+- `Invoke-GumInput` — Shows input prompt using gum
+- `Invoke-GumSpin` — Shows spinner while executing script block
+- `Invoke-GumStyle` — Styles text output using gum
+
+Aliases
+-------
+- `confirm` — Invoke-GumConfirm
+- `choose` — Invoke-GumChoose
+- `input` — Invoke-GumInput
+- `spin` — Invoke-GumSpin
+- `style` — Invoke-GumStyle
 
 Dependencies
 ------------
