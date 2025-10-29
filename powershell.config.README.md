@@ -1,4 +1,4 @@
-powershell.config.json
+# powershell.config.json
 
 This file contains PowerShell preferences for the distribution. JSON does not
 support comments; to document settings we keep this README alongside it.

@@ -38,7 +38,7 @@ Commit messages and hooks
 --------------------------
 We use Conventional Commits for commit messages. A valid subject looks like:
 
-```
+```text
 feat(cli): add new command
 fix: correct edge-case handling
 docs: update README

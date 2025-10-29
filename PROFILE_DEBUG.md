@@ -1,6 +1,6 @@
-PS_PROFILE_DEBUG — profile debug guide
+# PS_PROFILE_DEBUG — profile debug guide
 
-Purpose
+## Purpose
 
 This repository exposes a small runtime debug toggle for development and CI.
 

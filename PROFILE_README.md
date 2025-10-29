@@ -153,8 +153,7 @@ Add a CI badge
 After this repo is pushed to GitHub and the workflow runs, add a status badge to
 this README:
 
-```
-
+```markdown
 [![Validate PowerShell Profile](https://github.com/bolens/ps-profile/actions/workflows/validate-profile.yml/badge.svg)](https://github.com/bolens/ps-profile/actions/workflows/validate-profile.yml)
 
 [![Commit message check](https://github.com/bolens/ps-profile/actions/workflows/commit-message-check.yml/badge.svg)](https://github.com/bolens/ps-profile/actions/workflows/commit-message-check.yml)
