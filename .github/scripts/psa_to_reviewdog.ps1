@@ -1,6 +1,6 @@
 Param(
-    [Parameter(Mandatory=$true)][string]$ReportPath,
-    [Parameter(Mandatory=$true)][string]$ReviewdogLevel = 'error'
+    [Parameter(Mandatory = $true)][string]$ReportPath,
+    [Parameter(Mandatory = $false)][string]$ReviewdogLevel = 'error'
 )
 
 if (-not (Test-Path $ReportPath)) {
@@ -12,19 +12,19 @@ $items = Get-Content $ReportPath -Raw | ConvertFrom-Json
 $diagnostics = @()
 foreach ($it in $items) {
     $severity = switch ($it.Severity) {
-        'Error'   { 'ERROR' }
+        'Error' { 'ERROR' }
         'Warning' { 'WARNING' }
-        default   { 'INFO' }
+        default { 'INFO' }
     }
     $diag = [PSCustomObject]@{
-        message = $it.Message
+        message  = $it.Message
         severity = $severity
-        code = $it.RuleName
+        code     = $it.RuleName
         location = [PSCustomObject]@{
-            path = $it.FilePath
+            path      = $it.FilePath
             positions = [PSCustomObject]@{
                 begin = [PSCustomObject]@{ line = ($it.Line -as [int]); column = ($it.Column -as [int]) }
-                end = [PSCustomObject]@{ line = ($it.Line -as [int]); column = ($it.Column -as [int]) }
+                end   = [PSCustomObject]@{ line = ($it.Line -as [int]); column = ($it.Column -as [int]) }
             }
         }
     }
@@ -32,7 +32,7 @@ foreach ($it in $items) {
 }
 
 $rdjson = [PSCustomObject]@{
-    source = 'PSScriptAnalyzer'
+    source      = 'PSScriptAnalyzer'
     diagnostics = $diagnostics
 }
 

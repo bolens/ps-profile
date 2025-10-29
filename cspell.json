@@ -40,6 +40,7 @@
     "gsync",
     "gum",
     "gundo",
+    "hostnames",
     "idemp",
     "idempotently",
     "jq",
@@ -137,6 +138,7 @@
     "wez",
     "wezterm",
     "winget",
+    "wttr",
     "xdg-open",
     "yq"
   ],

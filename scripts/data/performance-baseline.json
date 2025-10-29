@@ -1,433 +1,431 @@
 {
+  "FullStartupMean": 1360.6,
   "FullStartupRaw": [
-    1325.9654,
-    1404.6755,
-    1276.0742,
-    1292.544,
-    1270.975
+    1374.1866,
+    1370.6188,
+    1337.0043
   ],
-  "FullStartupMean": 1314.05,
-  "Timestamp": "2025-10-29T15:25:35.4259470-06:00",
   "Fragments": [
     {
-      "Raw": "25.8934,26.2617,25.5597,25.0839,25.1898",
-      "MedianMs": 25.56,
-      "MeanMs": 25.6,
-      "Fragment": "00-bootstrap.ps1"
+      "Raw": "27.5789,25.1789,25.485",
+      "Fragment": "00-bootstrap.ps1",
+      "MedianMs": 27.58,
+      "MeanMs": 26.08
     },
     {
-      "Raw": "51.6159,50.3412,50.6659,53.3274,50.1229",
-      "MedianMs": 50.67,
-      "MeanMs": 51.21,
-      "Fragment": "01-env.ps1"
+      "Raw": "53.2591,54.9312,50.8153",
+      "Fragment": "01-env.ps1",
+      "MedianMs": 54.93,
+      "MeanMs": 53.0
     },
     {
-      "Raw": "31.1954,27.8429,27.5167,27.9509,28.3757",
-      "MedianMs": 27.95,
-      "MeanMs": 28.58,
-      "Fragment": "02-files.ps1"
+      "Raw": "29.0405,27.5024,28.0489",
+      "Fragment": "02-files.ps1",
+      "MedianMs": 29.04,
+      "MeanMs": 28.2
     },
     {
-      "Raw": "24.1283,24.9721,24.3781,24.4051,24.468",
-      "MedianMs": 24.41,
-      "MeanMs": 24.47,
-      "Fragment": "03-agent-mode.ps1"
+      "Raw": "24.4593,23.97,24.4548",
+      "Fragment": "03-agent-mode.ps1",
+      "MedianMs": 24.46,
+      "MeanMs": 24.29
     },
     {
-      "Raw": "51.2351,54.0753,50.892,52.2531,52.1831",
-      "MedianMs": 52.18,
-      "MeanMs": 52.13,
-      "Fragment": "04-scoop-completion.ps1"
+      "Raw": "51.2678,52.0544,51.9329",
+      "Fragment": "04-scoop-completion.ps1",
+      "MedianMs": 52.05,
+      "MeanMs": 51.75
     },
     {
-      "Raw": "7.8896,7.3621,8.4085,7.5266,7.8833",
-      "MedianMs": 7.88,
-      "MeanMs": 7.81,
-      "Fragment": "05-utilities.ps1"
+      "Raw": "7.9431,7.494,7.4737",
+      "Fragment": "05-utilities.ps1",
+      "MedianMs": 7.94,
+      "MeanMs": 7.64
     },
     {
-      "Raw": "27.4842,29.049,27.4151,27.1926,27.574",
-      "MedianMs": 27.48,
-      "MeanMs": 27.74,
-      "Fragment": "06-oh-my-posh.ps1"
+      "Raw": "28.1484,29.2197,28.4067",
+      "Fragment": "06-oh-my-posh.ps1",
+      "MedianMs": 29.22,
+      "MeanMs": 28.59
     },
     {
-      "Raw": "8.0606,7.5215,7.1893,8.1464,8.1858",
-      "MedianMs": 8.06,
-      "MeanMs": 7.82,
-      "Fragment": "07-system.ps1"
+      "Raw": "7.8149,7.4184,7.5762",
+      "Fragment": "07-system.ps1",
+      "MedianMs": 7.81,
+      "MeanMs": 7.6
     },
     {
-      "Raw": "7.7781,7.9856,7.6931,7.663,7.2423",
-      "MedianMs": 7.69,
-      "MeanMs": 7.67,
-      "Fragment": "08-system-info.ps1"
+      "Raw": "7.3627,7.2317,7.5244",
+      "Fragment": "08-system-info.ps1",
+      "MedianMs": 7.52,
+      "MeanMs": 7.37
     },
     {
-      "Raw": "7.1346,8.9393,7.096,6.7265,7.741",
-      "MedianMs": 7.13,
-      "MeanMs": 7.53,
-      "Fragment": "09-package-managers.ps1"
+      "Raw": "40.0668,38.5562,43.8027",
+      "Fragment": "09-package-managers.ps1",
+      "MedianMs": 43.8,
+      "MeanMs": 40.81
     },
     {
-      "Raw": "7.4804,7.3496,6.8338,7.0303,7.0366",
-      "MedianMs": 7.04,
-      "MeanMs": 7.15,
-      "Fragment": "10-wsl.ps1"
+      "Raw": "8.1597,7.2531,7.3879",
+      "Fragment": "10-wsl.ps1",
+      "MedianMs": 8.16,
+      "MeanMs": 7.6
     },
     {
-      "Raw": "30.4853,33.7183,30.3716,31.3555,30.5429",
-      "MedianMs": 30.54,
-      "MeanMs": 31.29,
-      "Fragment": "11-git.ps1"
+      "Raw": "33.6248,30.9519,29.3419",
+      "Fragment": "11-git.ps1",
+      "MedianMs": 33.62,
+      "MeanMs": 31.31
     },
     {
-      "Raw": "51.993,52.0357,51.0066,53.357,51.4127",
-      "MedianMs": 51.99,
-      "MeanMs": 51.96,
-      "Fragment": "12-psreadline.ps1"
+      "Raw": "49.5135,53.007,53.2666",
+      "Fragment": "12-psreadline.ps1",
+      "MedianMs": 53.27,
+      "MeanMs": 51.93
     },
     {
-      "Raw": "6.7896,7.03,6.9347,8.4025,7.2935",
-      "MedianMs": 7.03,
-      "MeanMs": 7.29,
-      "Fragment": "13-ansible.ps1"
+      "Raw": "8.056,8.6853,7.5265",
+      "Fragment": "13-ansible.ps1",
+      "MedianMs": 8.69,
+      "MeanMs": 8.09
     },
     {
-      "Raw": "27.1479,26.33,26.7042,27.698,26.4154",
-      "MedianMs": 26.7,
-      "MeanMs": 26.86,
-      "Fragment": "14-ssh.ps1"
+      "Raw": "27.4076,28.7123,26.2154",
+      "Fragment": "14-ssh.ps1",
+      "MedianMs": 28.71,
+      "MeanMs": 27.45
     },
     {
-      "Raw": "25.708,24.9203,25.4742,24.7315,24.6069",
-      "MedianMs": 24.92,
-      "MeanMs": 25.09,
-      "Fragment": "15-shortcuts.ps1"
+      "Raw": "29.2274,24.3675,24.0772",
+      "Fragment": "15-shortcuts.ps1",
+      "MedianMs": 29.23,
+      "MeanMs": 25.89
     },
     {
-      "Raw": "24.917,24.0301,25.7992,24.4367,25.4436",
-      "MedianMs": 24.92,
-      "MeanMs": 24.93,
-      "Fragment": "16-clipboard.ps1"
+      "Raw": "24.7721,27.3136,24.6456",
+      "Fragment": "16-clipboard.ps1",
+      "MedianMs": 27.31,
+      "MeanMs": 25.58
     },
     {
-      "Raw": "26.6224,26.8922,26.1133,25.9483,27.1144",
-      "MedianMs": 26.62,
-      "MeanMs": 26.54,
-      "Fragment": "17-kubectl.ps1"
-    },
-    {
-      "Raw": "28.5881,27.7026,27.116,27.7091,28.9679",
-      "MedianMs": 27.71,
-      "MeanMs": 28.02,
-      "Fragment": "18-terraform.ps1"
-    },
-    {
-      "Raw": "26.8159,26.95,28.3591,28.268,27.6654",
-      "MedianMs": 27.67,
-      "MeanMs": 27.61,
-      "Fragment": "19-fzf.ps1"
-    },
-    {
-      "Raw": "26.691,25.9365,25.4187,25.3752,27.2951",
-      "MedianMs": 25.94,
-      "MeanMs": 26.14,
-      "Fragment": "20-gh.ps1"
-    },
-    {
-      "Raw": "27.1207,25.9212,25.9388,30.0024,24.9475",
-      "MedianMs": 25.94,
-      "MeanMs": 26.79,
-      "Fragment": "21-kube.ps1"
-    },
-    {
-      "Raw": "25.7367,25.3106,26.2052,27.0256,26.5583",
-      "MedianMs": 26.21,
-      "MeanMs": 26.17,
-      "Fragment": "22-containers.ps1"
-    },
-    {
-      "Raw": "25.1009,26.8504,27.6184,31.234,25.7577",
-      "MedianMs": 26.85,
-      "MeanMs": 27.31,
-      "Fragment": "23-starship.ps1"
-    },
-    {
-      "Raw": "8.7672,8.3842,8.0422,8.0153,7.5711",
-      "MedianMs": 8.04,
-      "MeanMs": 8.16,
-      "Fragment": "24-container-utils.ps1"
-    },
-    {
-      "Raw": "26.1786,25.2596,25.1064,24.6421,25.1785",
-      "MedianMs": 25.18,
-      "MeanMs": 25.27,
-      "Fragment": "25-lazydocker.ps1"
-    },
-    {
-      "Raw": "25.5774,25.5417,26.3976,24.6788,26.7877",
-      "MedianMs": 25.58,
-      "MeanMs": 25.8,
-      "Fragment": "26-rclone.ps1"
-    },
-    {
-      "Raw": "26.8278,27.1234,26.8059,27.2641,27.5367",
-      "MedianMs": 27.12,
-      "MeanMs": 27.11,
-      "Fragment": "27-minio.ps1"
-    },
-    {
-      "Raw": "31.7275,27.6096,26.5838,26.5296,27.1259",
-      "MedianMs": 27.13,
-      "MeanMs": 27.92,
-      "Fragment": "28-jq-yq.ps1"
-    },
-    {
-      "Raw": "25.0683,28.0602,24.6563,25.5359,25.3521",
-      "MedianMs": 25.35,
-      "MeanMs": 25.73,
-      "Fragment": "29-rg.ps1"
-    },
-    {
-      "Raw": "23.2792,24.2208,23.3373,23.7206,23.6546",
-      "MedianMs": 23.65,
-      "MeanMs": 23.64,
-      "Fragment": "30-open.ps1"
-    },
-    {
-      "Raw": "26.9147,28.767,27.6517,27.3191,26.6824",
-      "MedianMs": 27.32,
-      "MeanMs": 27.47,
-      "Fragment": "31-aws.ps1"
-    },
-    {
-      "Raw": "28.9815,27.7746,26.8479,26.7155,27.0291",
-      "MedianMs": 27.03,
-      "MeanMs": 27.47,
-      "Fragment": "32-bun.ps1"
-    },
-    {
-      "Raw": "71.3251,69.1585,69.6727,80.5764,70.5201",
-      "MedianMs": 70.52,
-      "MeanMs": 72.25,
-      "Fragment": "33-aliases.ps1"
-    },
-    {
-      "Raw": "33.0944,31.8392,35.4933,33.2929,32.4904",
-      "MedianMs": 33.09,
-      "MeanMs": 33.24,
-      "Fragment": "34-dev.ps1"
-    },
-    {
-      "Raw": "27.0616,27.3004,27.0231,28.3508,27.3869",
-      "MedianMs": 27.3,
-      "MeanMs": 27.42,
-      "Fragment": "35-ollama.ps1"
-    },
-    {
-      "Raw": "27.1831,26.9693,26.9533,27.4064,26.7255",
-      "MedianMs": 26.97,
-      "MeanMs": 27.05,
-      "Fragment": "36-ngrok.ps1"
-    },
-    {
-      "Raw": "27.4111,29.3987,29.0352,26.6574,27.0738",
-      "MedianMs": 27.41,
-      "MeanMs": 27.92,
-      "Fragment": "37-deno.ps1"
-    },
-    {
-      "Raw": "26.9795,27.4304,27.1202,27.0889,28.8651",
-      "MedianMs": 27.12,
-      "MeanMs": 27.5,
-      "Fragment": "38-firebase.ps1"
-    },
-    {
-      "Raw": "27.5337,30.0839,27.9185,28.8053,28.2168",
-      "MedianMs": 28.22,
-      "MeanMs": 28.51,
-      "Fragment": "39-rustup.ps1"
-    },
-    {
-      "Raw": "27.324,27.114,28.3883,27.4895,27.7185",
-      "MedianMs": 27.49,
-      "MeanMs": 27.61,
-      "Fragment": "40-tailscale.ps1"
-    },
-    {
-      "Raw": "27.2775,26.8766,27.3871,26.8735,27.055",
-      "MedianMs": 27.06,
-      "MeanMs": 27.09,
-      "Fragment": "41-yarn.ps1"
-    },
-    {
-      "Raw": "27.0412,27.3412,30.3462,27.1498,27.8838",
+      "Raw": "27.3446,25.639,26.0934",
+      "Fragment": "17-kubectl.ps1",
       "MedianMs": 27.34,
-      "MeanMs": 27.95,
-      "Fragment": "42-php.ps1"
+      "MeanMs": 26.36
     },
     {
-      "Raw": "26.8889,30.0059,26.8485,26.8092,28.0814",
+      "Raw": "27.2219,28.2785,27.0815",
+      "Fragment": "18-terraform.ps1",
+      "MedianMs": 28.28,
+      "MeanMs": 27.53
+    },
+    {
+      "Raw": "26.18,29.4061,28.2426",
+      "Fragment": "19-fzf.ps1",
+      "MedianMs": 29.41,
+      "MeanMs": 27.94
+    },
+    {
+      "Raw": "25.7197,25.1366,26.014",
+      "Fragment": "20-gh.ps1",
+      "MedianMs": 26.01,
+      "MeanMs": 25.62
+    },
+    {
+      "Raw": "26.0282,26.0309,26.3873",
+      "Fragment": "21-kube.ps1",
+      "MedianMs": 26.39,
+      "MeanMs": 26.15
+    },
+    {
+      "Raw": "25.6489,25.3797,26.8889",
+      "Fragment": "22-containers.ps1",
       "MedianMs": 26.89,
-      "MeanMs": 27.73,
-      "Fragment": "43-laravel.ps1"
+      "MeanMs": 25.97
     },
     {
-      "Raw": "53.5286,49.927,48.5812,48.9407,49.3402",
-      "MedianMs": 49.34,
-      "MeanMs": 50.06,
-      "Fragment": "44-git.ps1"
+      "Raw": "24.7588,26.5317,25.6382",
+      "Fragment": "23-starship.ps1",
+      "MedianMs": 26.53,
+      "MeanMs": 25.64
     },
     {
-      "Raw": "28.0948,28.0692,26.9956,27.0609,26.8145",
-      "MedianMs": 27.06,
-      "MeanMs": 27.41,
-      "Fragment": "45-nextjs.ps1"
+      "Raw": "8.4897,7.3324,8.0497",
+      "Fragment": "24-container-utils.ps1",
+      "MedianMs": 8.49,
+      "MeanMs": 7.96
     },
     {
-      "Raw": "27.2178,28.6754,27.5199,27.4123,27.9431",
+      "Raw": "25.3251,24.7408,25.7363",
+      "Fragment": "25-lazydocker.ps1",
+      "MedianMs": 25.74,
+      "MeanMs": 25.27
+    },
+    {
+      "Raw": "25.2482,26.8146,25.3015",
+      "Fragment": "26-rclone.ps1",
+      "MedianMs": 26.81,
+      "MeanMs": 25.79
+    },
+    {
+      "Raw": "26.3559,27.2311,27.6578",
+      "Fragment": "27-minio.ps1",
+      "MedianMs": 27.66,
+      "MeanMs": 27.08
+    },
+    {
+      "Raw": "26.707,26.0953,26.22",
+      "Fragment": "28-jq-yq.ps1",
+      "MedianMs": 26.71,
+      "MeanMs": 26.34
+    },
+    {
+      "Raw": "27.3176,24.7003,25.3767",
+      "Fragment": "29-rg.ps1",
+      "MedianMs": 27.32,
+      "MeanMs": 25.8
+    },
+    {
+      "Raw": "23.5995,24.1917,23.3183",
+      "Fragment": "30-open.ps1",
+      "MedianMs": 24.19,
+      "MeanMs": 23.7
+    },
+    {
+      "Raw": "26.1182,26.4835,27.8406",
+      "Fragment": "31-aws.ps1",
+      "MedianMs": 27.84,
+      "MeanMs": 26.81
+    },
+    {
+      "Raw": "28.111,27.999,27.9241",
+      "Fragment": "32-bun.ps1",
+      "MedianMs": 28.11,
+      "MeanMs": 28.01
+    },
+    {
+      "Raw": "68.6497,68.0058,69.9074",
+      "Fragment": "33-aliases.ps1",
+      "MedianMs": 69.91,
+      "MeanMs": 68.85
+    },
+    {
+      "Raw": "33.5801,30.8357,31.9127",
+      "Fragment": "34-dev.ps1",
+      "MedianMs": 33.58,
+      "MeanMs": 32.11
+    },
+    {
+      "Raw": "27.4825,30.1123,28.1968",
+      "Fragment": "35-ollama.ps1",
+      "MedianMs": 30.11,
+      "MeanMs": 28.6
+    },
+    {
+      "Raw": "27.234,26.3834,26.8021",
+      "Fragment": "36-ngrok.ps1",
+      "MedianMs": 27.23,
+      "MeanMs": 26.81
+    },
+    {
+      "Raw": "26.0973,27.521,25.8303",
+      "Fragment": "37-deno.ps1",
       "MedianMs": 27.52,
-      "MeanMs": 27.75,
-      "Fragment": "46-vite.ps1"
+      "MeanMs": 26.48
     },
     {
-      "Raw": "27.8809,27.2854,27.1926,27.3916,27.9744",
-      "MedianMs": 27.39,
-      "MeanMs": 27.54,
-      "Fragment": "47-angular.ps1"
+      "Raw": "26.8608,28.3005,27.2629",
+      "Fragment": "38-firebase.ps1",
+      "MedianMs": 28.3,
+      "MeanMs": 27.47
     },
     {
-      "Raw": "27.9977,28.0248,27.1286,26.6907,27.5352",
-      "MedianMs": 27.54,
-      "MeanMs": 27.48,
-      "Fragment": "48-vue.ps1"
+      "Raw": "26.5605,27.87,27.2035",
+      "Fragment": "39-rustup.ps1",
+      "MedianMs": 27.87,
+      "MeanMs": 27.21
     },
     {
-      "Raw": "26.943,26.9654,27.5221,27.3857,27.1051",
-      "MedianMs": 27.11,
-      "MeanMs": 27.18,
-      "Fragment": "49-nuxt.ps1"
-    },
-    {
-      "Raw": "27.6089,31.3768,27.6035,28.2314,28.1432",
-      "MedianMs": 28.14,
-      "MeanMs": 28.59,
-      "Fragment": "50-azure.ps1"
-    },
-    {
-      "Raw": "28.2139,27.4761,26.966,27.7907,29.6206",
-      "MedianMs": 27.79,
-      "MeanMs": 28.01,
-      "Fragment": "51-gcloud.ps1"
-    },
-    {
-      "Raw": "27.7226,26.6497,27.2774,27.4621,27.5883",
-      "MedianMs": 27.46,
-      "MeanMs": 27.34,
-      "Fragment": "52-helm.ps1"
-    },
-    {
-      "Raw": "28.6078,27.1559,28.1761,28.041,27.1193",
-      "MedianMs": 28.04,
-      "MeanMs": 27.82,
-      "Fragment": "53-go.ps1"
-    },
-    {
-      "Raw": "29.3969,34.8845,26.7263,27.7973,26.4542",
-      "MedianMs": 27.8,
-      "MeanMs": 29.05,
-      "Fragment": "54-modern-cli.ps1"
-    },
-    {
-      "Raw": "50.5472,49.5973,52.7236,48.8058,48.1462",
-      "MedianMs": 49.6,
-      "MeanMs": 49.96,
-      "Fragment": "55-modules.ps1"
-    },
-    {
-      "Raw": "27.3578,28.7852,29.6675,27.6503,26.916",
-      "MedianMs": 27.65,
-      "MeanMs": 28.08,
-      "Fragment": "56-database.ps1"
-    },
-    {
-      "Raw": "28.1093,27.6093,29.6095,27.9223,28.017",
+      "Raw": "26.6026,28.0153,26.8006",
+      "Fragment": "40-tailscale.ps1",
       "MedianMs": 28.02,
-      "MeanMs": 28.25,
-      "Fragment": "57-testing.ps1"
+      "MeanMs": 27.14
     },
     {
-      "Raw": "28.8139,27.5158,27.4063,27.7767,27.1359",
-      "MedianMs": 27.52,
-      "MeanMs": 27.73,
-      "Fragment": "58-build-tools.ps1"
+      "Raw": "27.5294,28.5896,26.6936",
+      "Fragment": "41-yarn.ps1",
+      "MedianMs": 28.59,
+      "MeanMs": 27.6
     },
     {
-      "Raw": "33.7257,33.8026,43.1601,32.0112,34.1937",
-      "MedianMs": 33.8,
-      "MeanMs": 35.38,
-      "Fragment": "59-diagnostics.ps1"
+      "Raw": "27.9902,27.2897,28.0181",
+      "Fragment": "42-php.ps1",
+      "MedianMs": 28.02,
+      "MeanMs": 27.77
     },
     {
-      "Raw": "26.875,32.3491,27.3682,27.0785,29.7475",
-      "MedianMs": 27.37,
-      "MeanMs": 28.68,
-      "Fragment": "60-local-overrides.ps1"
+      "Raw": "26.7682,28.4803,26.4162",
+      "Fragment": "43-laravel.ps1",
+      "MedianMs": 28.48,
+      "MeanMs": 27.22
     },
     {
-      "Raw": "20.257,19.6304,20.9939,21.8894,20.0136",
-      "MedianMs": 20.26,
-      "MeanMs": 20.56,
-      "Fragment": "61-eza.ps1"
+      "Raw": "51.5818,48.059,49.8365",
+      "Fragment": "44-git.ps1",
+      "MedianMs": 51.58,
+      "MeanMs": 49.83
     },
     {
-      "Raw": "36.1313,36.087,37.318,36.1445,36.4407",
-      "MedianMs": 36.14,
-      "MeanMs": 36.42,
-      "Fragment": "62-navi.ps1"
+      "Raw": "30.5629,30.9307,29.5183",
+      "Fragment": "45-nextjs.ps1",
+      "MedianMs": 30.93,
+      "MeanMs": 30.34
     },
     {
-      "Raw": "33.3565,27.7471,26.8527,28.0418,27.298",
-      "MedianMs": 27.75,
-      "MeanMs": 28.66,
-      "Fragment": "63-gum.ps1"
+      "Raw": "29.3336,27.7107,31.4034",
+      "Fragment": "46-vite.ps1",
+      "MedianMs": 31.4,
+      "MeanMs": 29.48
     },
     {
-      "Raw": "43.8581,40.1417,39.9714,39.8745,38.798",
-      "MedianMs": 39.97,
-      "MeanMs": 40.53,
-      "Fragment": "64-bottom.ps1"
+      "Raw": "27.7631,29.1809,27.9341",
+      "Fragment": "47-angular.ps1",
+      "MedianMs": 29.18,
+      "MeanMs": 28.29
     },
     {
-      "Raw": "36.2191,36.7413,38.7024,35.7591,35.8109",
-      "MedianMs": 36.22,
-      "MeanMs": 36.65,
-      "Fragment": "65-procs.ps1"
+      "Raw": "32.9828,27.7536,27.1883",
+      "Fragment": "48-vue.ps1",
+      "MedianMs": 32.98,
+      "MeanMs": 29.31
     },
     {
-      "Raw": "41.84,39.9529,39.5479,40.789,40.6903",
-      "MedianMs": 40.69,
-      "MeanMs": 40.56,
-      "Fragment": "66-dust.ps1"
+      "Raw": "29.5443,29.9799,31.7062",
+      "Fragment": "49-nuxt.ps1",
+      "MedianMs": 31.71,
+      "MeanMs": 30.41
     },
     {
-      "Raw": "41.5424,39.2777,40.1552,40.0841,40.4519",
-      "MedianMs": 40.16,
-      "MeanMs": 40.3,
-      "Fragment": "67-uv.ps1"
+      "Raw": "32.5096,31.6644,33.0872",
+      "Fragment": "50-azure.ps1",
+      "MedianMs": 33.09,
+      "MeanMs": 32.42
     },
     {
-      "Raw": "39.9903,41.8387,40.3051,49.224,40.3253",
-      "MedianMs": 40.33,
-      "MeanMs": 42.34,
-      "Fragment": "68-pixi.ps1"
+      "Raw": "29.5266,30.6357,29.6562",
+      "Fragment": "51-gcloud.ps1",
+      "MedianMs": 30.64,
+      "MeanMs": 29.94
     },
     {
-      "Raw": "43.0443,39.8535,39.6657,40.2764,39.7398",
-      "MedianMs": 39.85,
-      "MeanMs": 40.52,
-      "Fragment": "69-pnpm.ps1"
+      "Raw": "27.6871,29.8964,29.2802",
+      "Fragment": "52-helm.ps1",
+      "MedianMs": 29.9,
+      "MeanMs": 28.95
+    },
+    {
+      "Raw": "27.9384,29.1105,29.0612",
+      "Fragment": "53-go.ps1",
+      "MedianMs": 29.11,
+      "MeanMs": 28.7
+    },
+    {
+      "Raw": "26.3188,26.9328,25.2934",
+      "Fragment": "54-modern-cli.ps1",
+      "MedianMs": 26.93,
+      "MeanMs": 26.18
+    },
+    {
+      "Raw": "47.0817,51.7948,53.7003",
+      "Fragment": "55-modules.ps1",
+      "MedianMs": 53.7,
+      "MeanMs": 50.86
+    },
+    {
+      "Raw": "26.6581,26.7459,28.2512",
+      "Fragment": "56-database.ps1",
+      "MedianMs": 28.25,
+      "MeanMs": 27.22
+    },
+    {
+      "Raw": "26.6696,28.6915,27.5212",
+      "Fragment": "57-testing.ps1",
+      "MedianMs": 28.69,
+      "MeanMs": 27.63
+    },
+    {
+      "Raw": "29.6088,27.6797,27.162",
+      "Fragment": "58-build-tools.ps1",
+      "MedianMs": 29.61,
+      "MeanMs": 28.15
+    },
+    {
+      "Raw": "32.1447,33.6487,31.8843",
+      "Fragment": "59-diagnostics.ps1",
+      "MedianMs": 33.65,
+      "MeanMs": 32.56
+    },
+    {
+      "Raw": "25.9293,29.5579,25.8469",
+      "Fragment": "60-local-overrides.ps1",
+      "MedianMs": 29.56,
+      "MeanMs": 27.11
+    },
+    {
+      "Raw": "20.0562,19.2488,18.8683",
+      "Fragment": "61-eza.ps1",
+      "MedianMs": 20.06,
+      "MeanMs": 19.39
+    },
+    {
+      "Raw": "35.6794,36.5968,35.4288",
+      "Fragment": "62-navi.ps1",
+      "MedianMs": 36.6,
+      "MeanMs": 35.9
+    },
+    {
+      "Raw": "30.1456,26.6461,37.997",
+      "Fragment": "63-gum.ps1",
+      "MedianMs": 38.0,
+      "MeanMs": 31.6
+    },
+    {
+      "Raw": "39.3439,37.6301,38.6539",
+      "Fragment": "64-bottom.ps1",
+      "MedianMs": 39.34,
+      "MeanMs": 38.54
+    },
+    {
+      "Raw": "35.8134,34.8401,34.3202",
+      "Fragment": "65-procs.ps1",
+      "MedianMs": 35.81,
+      "MeanMs": 34.99
+    },
+    {
+      "Raw": "38.1046,40.7179,37.7526",
+      "Fragment": "66-dust.ps1",
+      "MedianMs": 40.72,
+      "MeanMs": 38.86
+    },
+    {
+      "Raw": "38.9633,38.638,38.4641",
+      "Fragment": "67-uv.ps1",
+      "MedianMs": 38.96,
+      "MeanMs": 38.69
+    },
+    {
+      "Raw": "38.6971,38.2767,38.5599",
+      "Fragment": "68-pixi.ps1",
+      "MedianMs": 38.7,
+      "MeanMs": 38.51
+    },
+    {
+      "Raw": "39.1405,38.8504,39.9953",
+      "Fragment": "69-pnpm.ps1",
+      "MedianMs": 40.0,
+      "MeanMs": 39.33
     }
-  ]
+  ],
+  "Timestamp": "2025-10-29T16:46:53.8506711-06:00"
 }
