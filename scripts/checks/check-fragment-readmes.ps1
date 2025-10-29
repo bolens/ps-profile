@@ -1,12 +1,12 @@
 <#
-scripts/check-fragment-readmes.ps1
+scripts/checks/check-fragment-readmes.ps1
 
 Compare top-level function names in profile.d/*.ps1 fragments against the
 Functions section of profile.d/*.README.md files. Exit with code 0 when all
 fragments match, and non-zero when any mismatch is found.
 
 Usage:
-  pwsh -NoProfile -File scripts\check-fragment-readmes.ps1
+  pwsh -NoProfile -File scripts\checks\check-fragment-readmes.ps1
 #>
 
 param(
