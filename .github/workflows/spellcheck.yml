@@ -14,7 +14,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '19'
+          node-version: '20'
       - name: Install cspell
         run: npm install -g cspell@9
       - name: Run cspell

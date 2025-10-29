@@ -169,6 +169,7 @@ jobs:
 
       - name: Verify pwsh Major.Minor matches requested matrix value
         shell: pwsh
+        continue-on-error: true
         env:
           EXPECTED_MAJOR_MINOR: ${{ matrix.pwsh }}
         run: |

@@ -47,7 +47,7 @@ function Get-FunctionsFromPs1($path) {
     }
 
     # Filter out invalid names
-    $keywords = 'if','for','foreach','while','switch','param','return','else','try','catch','function','global'
+    $keywords = 'if', 'for', 'foreach', 'while', 'switch', 'param', 'return', 'else', 'try', 'catch', 'function', 'global'
     $names = $names | Where-Object {
         ($_ -match '^[A-Za-z_][A-Za-z0-9_\-]*$') -and
         ($_ -notin $keywords) -and
@@ -66,7 +66,7 @@ function Get-FunctionsFromReadme($path) {
     }
     if ($null -eq $start) { return @() }
     $funcs = @()
-    for ($j = $start+1; $j -lt $lines.Count; $j++) {
+    for ($j = $start + 1; $j -lt $lines.Count; $j++) {
         $l = $lines[$j].Trim()
         if ($l -eq '') { continue }
 
@@ -74,7 +74,7 @@ function Get-FunctionsFromReadme($path) {
         if ($l -match '^[=\-]{2,}$') { continue }
 
         # If this line looks like the start of a new section (heading) followed by an underline, stop
-        if ($l -match '^[A-Za-z].+' -and ($j + 1 -lt $lines.Count) -and ($lines[$j+1] -match '^[=\-]{2,}$')) { break }
+        if ($l -match '^[A-Za-z].+' -and ($j + 1 -lt $lines.Count) -and ($lines[$j + 1] -match '^[=\-]{2,}$')) { break }
 
         # Stop at other simple section headers like 'Something:'
         if ($l -match '^[A-Za-z].+:$') { break }
@@ -90,6 +90,10 @@ function Get-FunctionsFromReadme($path) {
         $m2 = [regex]::Match($l, '^`?([A-Za-z0-9][A-Za-z0-9_\-]*)`?')
         if ($m2.Success) { $funcs += $m2.Groups[1].Value }
     }
+
+    return $funcs
+}
+
 function Get-FunctionsWithoutDocumentation($path) {
     $content = Get-Content -Path $path -Raw -ErrorAction SilentlyContinue
     if (-not $content) { return @() }
@@ -157,7 +161,8 @@ foreach ($ps in $psFiles) {
 
     if ($hasIssues) {
         Write-Output "  Readme: $([System.IO.Path]::GetFileName($readme))`n"
-    } elseif ($Verbose) {
+    }
+    elseif ($Verbose) {
         Write-Output "OK: $($ps.Name)"
     }
 }
@@ -165,7 +170,8 @@ foreach ($ps in $psFiles) {
 if ($mismatchCount -gt 0) {
     Write-Output "Found $mismatchCount fragments with issues (mismatched functions or missing documentation)."
     exit 2
-} else {
+}
+else {
     Write-Output "All fragment READMEs appear to list functions that match their PS1 files, and all functions have documentation."
     exit 0
 }

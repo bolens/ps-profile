@@ -21,7 +21,9 @@ if ($LASTEXITCODE -ne 0) { Write-Error "Lint failed"; exit $LASTEXITCODE }
 
 Write-Output "Running spellcheck: $spellcheck"
 & pwsh -NoProfile -File $spellcheck
-if ($LASTEXITCODE -ne 0) { Write-Error "Spellcheck failed"; exit $LASTEXITCODE }Write-Output "Running idempotency: $idemp"
+if ($LASTEXITCODE -ne 0) { Write-Error "Spellcheck failed"; exit $LASTEXITCODE }
+
+Write-Output "Running idempotency: $idemp"
 & pwsh -NoProfile -File $idemp
 if ($LASTEXITCODE -ne 0) { Write-Error "Idempotency check failed"; exit $LASTEXITCODE }
 
