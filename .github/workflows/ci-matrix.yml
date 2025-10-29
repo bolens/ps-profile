@@ -58,6 +58,7 @@ jobs:
               # Try to restore cached extracted folder first
               if [ -d "/opt/pwsh/$TAGNUM" ]; then
                 echo "/opt/pwsh/$TAGNUM already exists (cache hit)"
+                sudo chmod +x /opt/pwsh/$TAGNUM/pwsh
                 sudo ln -sf /opt/pwsh/$TAGNUM/pwsh /usr/local/bin/pwsh
               else
               for ASSET in "powershell-$TAGNUM-linux-x64.tar.gz" "powershell-$TAGNUM-linux-arm64.tar.gz" "powershell-$TAGNUM-linux-x64.tar.xz"; do
@@ -69,6 +70,7 @@ jobs:
                     echo "Downloaded $ASSET"
                     sudo mkdir -p /opt/pwsh/$TAGNUM
                     sudo tar -xzf /tmp/pwsh.tar.gz -C /opt/pwsh/$TAGNUM
+                    sudo chmod +x /opt/pwsh/$TAGNUM/pwsh
                     sudo ln -sf /opt/pwsh/$TAGNUM/pwsh /usr/local/bin/pwsh
                       # Save tar to cache area for upload step
                       mv /tmp/pwsh.tar.gz /tmp/pwsh-${TAGNUM}.tar.gz || true
