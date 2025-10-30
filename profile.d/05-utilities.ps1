@@ -115,3 +115,108 @@ function list-functions { Get-Command -CommandType Function | Where-Object { $_.
     Creates a timestamped backup copy of the current PowerShell profile.
 #>
 function backup-profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
+
+# Environment variable management functions (for Scoop compatibility)
+<#
+.SYNOPSIS
+    Gets an environment variable value from the registry.
+.DESCRIPTION
+    Retrieves the value of an environment variable from the Windows registry.
+.PARAMETER Name
+    The name of the environment variable.
+.PARAMETER Global
+    If specified, gets the variable from the system-wide registry; otherwise, from user registry.
+#>
+function Get-EnvVar {
+    param(
+        [string]$Name,
+        [switch]$Global
+    )
+
+    $registerKey = if ($Global) {
+        Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager'
+    }
+    else {
+        Get-Item -Path 'HKCU:'
+    }
+    $envRegisterKey = $registerKey.OpenSubKey('Environment')
+    $registryValueOption = [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames
+    $envRegisterKey.GetValue($Name, $null, $registryValueOption)
+}
+
+<#
+.SYNOPSIS
+    Sets an environment variable value in the registry.
+.DESCRIPTION
+    Sets the value of an environment variable in the Windows registry and broadcasts the change.
+.PARAMETER Name
+    The name of the environment variable.
+.PARAMETER Value
+    The value to set. If null or empty, the variable is removed.
+.PARAMETER Global
+    If specified, sets the variable in the system-wide registry; otherwise, in user registry.
+#>
+function Set-EnvVar {
+    param(
+        [string]$Name,
+        [string]$Value,
+        [switch]$Global
+    )
+
+    $registerKey = if ($Global) {
+        Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager'
+    }
+    else {
+        Get-Item -Path 'HKCU:'
+    }
+    $envRegisterKey = $registerKey.OpenSubKey('Environment', $true)
+    if ($null -eq $Value -or $Value -eq '') {
+        if ($envRegisterKey.GetValue($Name)) {
+            $envRegisterKey.DeleteValue($Name)
+        }
+    }
+    else {
+        $registryValueKind = if ($Value.Contains('%')) {
+            [Microsoft.Win32.RegistryValueKind]::ExpandString
+        }
+        elseif ($envRegisterKey.GetValue($Name)) {
+            $envRegisterKey.GetValueKind($Name)
+        }
+        else {
+            [Microsoft.Win32.RegistryValueKind]::String
+        }
+        $envRegisterKey.SetValue($Name, $Value, $registryValueKind)
+    }
+    Publish-EnvVar
+}
+
+<#
+.SYNOPSIS
+    Broadcasts environment variable changes to all windows.
+.DESCRIPTION
+    Sends a WM_SETTINGCHANGE message to notify all windows of environment variable changes.
+#>
+function Publish-EnvVar {
+    if (-not ('Win32.NativeMethods' -as [Type])) {
+        Add-Type -Namespace Win32 -Name NativeMethods -MemberDefinition @'
+[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+public static extern IntPtr SendMessageTimeout(
+    IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam,
+    uint fuFlags, uint uTimeout, out UIntPtr lpdwResult
+);
+'@
+    }
+
+    $HWND_BROADCAST = [IntPtr] 0xffff
+    $WM_SETTINGCHANGE = 0x1a
+    $result = [UIntPtr]::Zero
+
+    [Win32.NativeMethods]::SendMessageTimeout($HWND_BROADCAST,
+        $WM_SETTINGCHANGE,
+        [UIntPtr]::Zero,
+        'Environment',
+        2,
+        5000,
+        [ref] $result
+    ) | Out-Null
+}

@@ -20,6 +20,12 @@ if (-not (Test-Path "Function:\\global:Set-AgentModeFunction")) {
         Defines a helper function that creates small convenience functions or wrappers
         without overwriting existing user or module commands. Used by profile fragments
         to safely register functions.
+    .PARAMETER Name
+        The name of the function to create.
+    .PARAMETER Body
+        The script block containing the function body.
+    .PARAMETER ReturnScriptBlock
+        If specified, returns the created script block instead of a boolean.
     #>
     function Set-AgentModeFunction {
         [CmdletBinding(SupportsShouldProcess)]
@@ -77,6 +83,12 @@ if (-not (Test-Path "Function:\\global:Set-AgentModeAlias")) {
         Defines a helper function that creates aliases or function wrappers
         without overwriting existing user or module commands. Used by profile fragments
         to safely register aliases.
+    .PARAMETER Name
+        The name of the alias to create.
+    .PARAMETER Target
+        The target command for the alias.
+    .PARAMETER ReturnDefinition
+        If specified, returns the alias definition instead of a boolean.
     #>
     function Set-AgentModeAlias {
         [CmdletBinding(SupportsShouldProcess)]
@@ -123,6 +135,8 @@ if (-not (Test-Path "Function:\\global:Test-CachedCommand")) {
     .DESCRIPTION
         Lightweight cached command testing used by profile fragments to avoid
         repeated Get-Command calls. Results are cached in script scope for performance.
+    .PARAMETER Name
+        The name of the command to test.
     #>
     function Test-CachedCommand {
         param([Parameter(Mandatory)] [string]$Name)
@@ -142,6 +156,8 @@ if (-not (Test-Path "Function:\\global:Test-CachedCommand")) {
 .DESCRIPTION
     Utility function to check if a command exists. Uses fast provider checks first
     to avoid module autoload, then falls back to cached or direct command testing.
+.PARAMETER Name
+    The name of the command to test.
 #>
 function Test-HasCommand {
     param([Parameter(Mandatory)] [string]$Name)

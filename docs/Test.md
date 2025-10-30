@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Tests for available container engines and compose tools.
+Tests for command availability with caching.
 
 ## Description
 

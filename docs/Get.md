@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Gets information about available container engines and compose tools.
+Shows recent command history.
 
 ## Description
 

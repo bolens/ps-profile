@@ -3,7 +3,7 @@ profile.d/05-utilities.ps1
 
 Purpose
 -------
-Utility functions migrated from utilities.ps1
+Utility functions migrated from utilities.ps1 and environment variable management functions (for Scoop compatibility)
 
 Usage
 -----
@@ -25,6 +25,9 @@ Functions
 - `open-explorer` — Open current directory in File Explorer
 - `list-functions` — List all user-defined functions in current session
 - `backup-profile` — Backup current profile to timestamped .bak file
+- `Get-EnvVar` — Gets an environment variable value from the registry
+- `Set-EnvVar` — Sets an environment variable value in the registry
+- `Publish-EnvVar` — Broadcasts environment variable changes to all windows
 
 Dependencies
 ------------
@@ -32,5 +35,5 @@ None explicit; see the fragment for runtime checks and optional tooling dependen
 
 Notes
 -----
-Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.
+Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers. Environment variable functions provide Scoop compatibility for package installation scripts.
 

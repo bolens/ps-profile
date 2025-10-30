@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Lists all WSL distributions with their status.
+Shuts down all WSL distributions.
 
 ## Description
 

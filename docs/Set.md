@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Sets the preferred container engine for the session.
+Creates collision-safe functions for profile fragments.
 
 ## Description
 

@@ -237,6 +237,8 @@ function docs { if (-not (Test-Path Function:\docs)) { Ensure-FileHelper }; retu
     Shows the first N lines of a file.
 .DESCRIPTION
     Displays the beginning of a file or pipeline input. Defaults to 10 lines.
+.PARAMETER Lines
+    The number of lines to display. Default is 10.
 #>
 function head { if (-not (Test-Path Function:\head)) { Ensure-FileHelper }; return & (Get-Item Function:\head -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 
@@ -246,6 +248,8 @@ function head { if (-not (Test-Path Function:\head)) { Ensure-FileHelper }; retu
     Shows the last N lines of a file.
 .DESCRIPTION
     Displays the end of a file or pipeline input. Defaults to 10 lines.
+.PARAMETER Lines
+    The number of lines to display. Default is 10.
 #>
 function tail { if (-not (Test-Path Function:\tail)) { Ensure-FileHelper }; return & (Get-Item Function:\tail -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 
@@ -255,6 +259,8 @@ function tail { if (-not (Test-Path Function:\tail)) { Ensure-FileHelper }; retu
     Encodes input to base64 format.
 .DESCRIPTION
     Converts file contents or string input to base64 encoded string.
+.PARAMETER InputObject
+    The file path or string to encode.
 #>
 function to-base64 { if (-not (Test-Path Function:\to-base64)) { Ensure-FileHelper }; return & (Get-Item Function:\to-base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 
@@ -264,6 +270,8 @@ function to-base64 { if (-not (Test-Path Function:\to-base64)) { Ensure-FileHelp
     Decodes base64 input to text.
 .DESCRIPTION
     Converts base64 encoded string back to readable text.
+.PARAMETER InputObject
+    The base64 string to decode.
 #>
 function from-base64 { if (-not (Test-Path Function:\from-base64)) { Ensure-FileHelper }; return & (Get-Item Function:\from-base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 
@@ -273,6 +281,8 @@ function from-base64 { if (-not (Test-Path Function:\from-base64)) { Ensure-File
     Converts CSV file to JSON format.
 .DESCRIPTION
     Reads a CSV file and outputs its contents as JSON.
+.PARAMETER Path
+    The path to the CSV file to convert.
 #>
 function csv-to-json { if (-not (Test-Path Function:\csv-to-json)) { Ensure-FileHelper }; return & (Get-Item Function:\csv-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 
@@ -282,6 +292,8 @@ function csv-to-json { if (-not (Test-Path Function:\csv-to-json)) { Ensure-File
     Converts XML file to JSON format.
 .DESCRIPTION
     Parses an XML file and converts it to JSON representation.
+.PARAMETER Path
+    The path to the XML file to convert.
 #>
 function xml-to-json { if (-not (Test-Path Function:\xml-to-json)) { Ensure-FileHelper }; return & (Get-Item Function:\xml-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 
@@ -291,6 +303,10 @@ function xml-to-json { if (-not (Test-Path Function:\xml-to-json)) { Ensure-File
     Calculates file hash using specified algorithm.
 .DESCRIPTION
     Computes cryptographic hash of a file. Defaults to SHA256.
+.PARAMETER Path
+    The path to the file to hash.
+.PARAMETER Algorithm
+    The hash algorithm to use. Valid values are MD5, SHA1, SHA256, SHA384, SHA512. Default is SHA256.
 #>
 function file-hash { if (-not (Test-Path Function:\file-hash)) { Ensure-FileHelper }; return & (Get-Item Function:\file-hash -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
 
@@ -300,5 +316,7 @@ function file-hash { if (-not (Test-Path Function:\file-hash)) { Ensure-FileHelp
     Shows human-readable file size.
 .DESCRIPTION
     Displays file size in appropriate units (bytes, KB, MB, GB, TB).
+.PARAMETER Path
+    The path to the file to check size.
 #>
 function filesize { if (-not (Test-Path Function:\filesize)) { Ensure-FileHelper }; return & (Get-Item Function:\filesize -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }

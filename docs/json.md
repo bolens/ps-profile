@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Converts JSON to YAML format.
+Pretty-prints JSON data.
 
 ## Description
 

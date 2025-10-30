@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Converts Unix timestamp to DateTime.
+Decodes base64 input to text.
 
 ## Description
 

@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Runs npm scripts using pnpm.
+Searches navi cheatsheets interactively.
 
 ## Description
 

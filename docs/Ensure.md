@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Ensures Git helper functions are initialized.
+Initializes file helper functions on first use.
 
 ## Description
 

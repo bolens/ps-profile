@@ -32,7 +32,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
     $content = Get-Content $file -Raw
 
     # Simple regex to find function definitions and their help
-    $functionMatches = [regex]::Matches($content, '(?s)<#(.*?)#>.*?function\s+(\w+)')
+    $functionMatches = [regex]::Matches($content, '(?s)<#(.*?)#>.*?function\s+([\w-]+)')
 
     foreach ($match in $functionMatches) {
         $helpContent = $match.Groups[1].Value
@@ -152,7 +152,7 @@ This documentation is automatically generated from comment-based help in the pro
 
 ## Functions
 
-$(($functions | ForEach-Object { "- [$($_.Name)]($($_.Name).md) - $($_.Synopsis)" }) -join "`n")
+$(($functions | Sort-Object Name | ForEach-Object { "- [$($_.Name)]($($_.Name).md) - $($_.Synopsis)" }) -join "`n")
 
 ## Generation
 

@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Runs Ansible inventory commands via WSL with UTF-8 locale.
+Runs Ansible commands via WSL with UTF-8 locale.
 
 ## Description
 
