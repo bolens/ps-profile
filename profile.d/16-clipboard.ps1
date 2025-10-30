@@ -16,11 +16,16 @@ if (-not (Test-Path Function:cb -ErrorAction SilentlyContinue)) {
     function cb {
         [CmdletBinding()] param([Parameter(ValueFromPipeline = $true)] $input)
         process {
-            if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-                if (Test-CachedCommand Set-Clipboard) { $input | Set-Clipboard } else { $input | Out-String | clip }
+            try {
+                if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+                    if (Test-CachedCommand Set-Clipboard) { $input | Set-Clipboard } else { $input | Out-String | clip }
+                }
+                else {
+                    if ($null -ne (Get-Command -Name Set-Clipboard -ErrorAction SilentlyContinue)) { $input | Set-Clipboard } else { $input | Out-String | clip }
+                }
             }
-            else {
-                if ($null -ne (Get-Command -Name Set-Clipboard -ErrorAction SilentlyContinue)) { $input | Set-Clipboard } else { $input | Out-String | clip }
+            catch {
+                Write-Warning "Failed to copy to clipboard: $_"
             }
         }
     }
@@ -37,11 +42,17 @@ if (-not (Test-Path Function:pb -ErrorAction SilentlyContinue)) {
         otherwise falls back to the 'paste' command.
     #>
     function pb {
-        if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-            if (Test-CachedCommand Get-Clipboard) { Get-Clipboard } else { cmd /c paste }
+        try {
+            if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
+                if (Test-CachedCommand Get-Clipboard) { Get-Clipboard } else { cmd /c paste }
+            }
+            else {
+                if ($null -ne (Get-Command -Name Get-Clipboard -ErrorAction SilentlyContinue)) { Get-Clipboard } else { cmd /c paste }
+            }
         }
-        else {
-            if ($null -ne (Get-Command -Name Get-Clipboard -ErrorAction SilentlyContinue)) { Get-Clipboard } else { cmd /c paste }
+        catch {
+            Write-Warning "Failed to paste from clipboard: $_"
+            $null
         }
     }
 }

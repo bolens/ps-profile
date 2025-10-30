@@ -34,6 +34,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [filesize](filesize.md) - Shows human-readable file size.
 - [from-base64](from-base64.md) - Decodes base64 input to text.
 - [from-epoch](from-epoch.md) - Converts Unix timestamp to DateTime.
+- [function](function.md) - 
 - [Get-ContainerEngineInfo](Get-ContainerEngineInfo.md) - Gets information about available container engines and compose tools.
 - [Get-EnvVar](Get-EnvVar.md) - Gets an environment variable value from the registry.
 - [Get-History](Get-History.md) - Shows recent command history.
@@ -61,16 +62,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [json-pretty](json-pretty.md) - Pretty-prints JSON data.
 - [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format.
 - [l](l.md) - Lists directory contents using eza (short alias).
-- [la](la.md) - Lists all directory contents including hidden files using eza.
 - [la](la.md) - Lists all directory contents including hidden files.
+- [la](la.md) - Lists all directory contents including hidden files using eza.
 - [lg](lg.md) - Lists directory contents with git status using eza.
 - [list-functions](list-functions.md) - Lists user-defined functions.
 - [ll](ll.md) - Lists directory contents in long format using eza.
 - [ll](ll.md) - Lists directory contents with details.
 - [lla](lla.md) - Lists all directory contents in long format using eza.
 - [llg](llg.md) - Lists directory contents in long format with git status using eza.
-- [ls](ls.md) - Lists directory contents using eza.
 - [lS](lS.md) - Lists directory contents sorted by size using eza.
+- [ls](ls.md) - Lists directory contents using eza.
 - [lt](lt.md) - Lists directory contents in tree format using eza.
 - [lta](lta.md) - Lists all directory contents in tree format using eza.
 - [ltime](ltime.md) - Lists directory contents sorted by modification time using eza.
@@ -104,7 +105,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [ptest](ptest.md) - Tests network connectivity.
 - [Publish-EnvVar](Publish-EnvVar.md) - Broadcasts environment variable changes to all windows.
 - [pwgen](pwgen.md) - Generates a random password.
-- [registration](registration.md) - 
 - [reload](reload.md) - Reloads the PowerShell profile.
 - [rest](rest.md) - Makes REST API calls.
 - [rm](rm.md) - Removes files and directories.

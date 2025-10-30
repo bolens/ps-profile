@@ -20,9 +20,23 @@ if (-not (Test-Path "Function:\\Ensure-FileHelper")) {
 
         # JSON pretty-print
         Set-Item -Path Function:json-pretty -Value {
-            param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
-            if ($fileArgs) { Get-Content -Raw -LiteralPath @fileArgs | ConvertFrom-Json | ConvertTo-Json -Depth 10 }
-            else { $input | ConvertFrom-Json | ConvertTo-Json -Depth 10 }
+            param(
+                [Parameter(ValueFromPipeline = $true)]
+                $InputObject,
+                [Parameter(ValueFromRemainingArguments = $true)]
+                $fileArgs
+            )
+            process {
+                if ($fileArgs) {
+                    Get-Content -Raw -LiteralPath @fileArgs | ConvertFrom-Json | ConvertTo-Json -Depth 10
+                }
+                elseif ($InputObject) {
+                    $InputObject | ConvertFrom-Json | ConvertTo-Json -Depth 10
+                }
+                else {
+                    $input | ConvertFrom-Json | ConvertTo-Json -Depth 10
+                }
+            }
         } -Force | Out-Null
 
         # YAML to JSON
@@ -40,11 +54,11 @@ if (-not (Test-Path "Function:\\Ensure-FileHelper")) {
         Set-Item -Path Function:bat-cat -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if ($fileArgs) { if (Test-CachedCommand bat) { bat @fileArgs } else { Get-Content -LiteralPath @fileArgs | Out-Host } } else { if (Test-CachedCommand bat) { bat } else { $input | Out-Host } } } -Force | Out-Null
 
         # Up directory
-        Set-Item -Path Function:.. -Value { Set-Location .. } -Force | Out-Null
+        function global:.. { Set-Location .. }
         # Up two directories
-        Set-Item -Path Function:... -Value { Set-Location ..\..\ } -Force | Out-Null
+        function global:... { Set-Location ..\..\ }
         # Up three directories
-        Set-Item -Path Function:.... -Value { Set-Location ..\..\..\ } -Force | Out-Null
+        function global:.... { Set-Location ..\..\..\ }
         # Go to user's Home directory
         Set-Item -Path Function:~ -Value { Set-Location $env:USERPROFILE } -Force | Out-Null
         # Go to user's Desktop directory
@@ -75,7 +89,7 @@ if (-not (Test-Path "Function:\\Ensure-FileHelper")) {
         } -Force | Out-Null
 
         # Base64 encode
-        Set-Item -Path Function:to-base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { if ($InputObject -is [string] -and (Test-Path -LiteralPath $InputObject)) { [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $InputObject))) } else { $bytes = [Text.Encoding]::UTF8.GetBytes(($InputObject | Out-String)); [Convert]::ToBase64String($bytes) } } } -Force | Out-Null
+        Set-Item -Path Function:to-base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { if ($InputObject -is [string] -and (Test-Path -LiteralPath $InputObject)) { [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $InputObject))) } else { $bytes = [Text.Encoding]::UTF8.GetBytes($InputObject); [Convert]::ToBase64String($bytes) } } } -Force | Out-Null
         # Base64 decode
         Set-Item -Path Function:from-base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { $s = ($InputObject -join "") -replace '\s+', ''; try { $bytes = [Convert]::FromBase64String($s); [Text.Encoding]::UTF8.GetString($bytes) } catch { Write-Error "Invalid base64 input" } } } -Force | Out-Null
 

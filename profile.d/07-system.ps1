@@ -19,7 +19,15 @@ function which { Get-Command $args }
 .DESCRIPTION
     Searches for text patterns in files using Select-String.
 #>
-function pgrep { Select-String $args }
+function pgrep {
+    param([string]$Pattern, [string]$Path)
+    if ($Path) {
+        Select-String -Pattern $Pattern -Path $Path
+    }
+    else {
+        $input | Select-String -Pattern $Pattern
+    }
+}
 
 # touch equivalent
 <#
@@ -73,7 +81,7 @@ function mv { Move-Item $args }
 .DESCRIPTION
     Finds files by name in the current directory and subdirectories.
 #>
-function search { Get-ChildItem -Recurse -Name $args }
+function search { Get-ChildItem -Recurse -Name -Filter $args[0] }
 
 # df equivalent
 <#
@@ -118,7 +126,7 @@ function ptest { Test-Connection $args }
 .DESCRIPTION
     Performs DNS lookups for hostnames or IP addresses.
 #>
-function dns { Resolve-DnsName $args }
+function dns { Resolve-DnsName @args }
 
 # rest equivalent
 <#
@@ -154,7 +162,7 @@ function unzip { Expand-Archive $args }
 .DESCRIPTION
     Compresses files and directories into ZIP archives.
 #>
-function zip { Compress-Archive $args }
+function zip { & Compress-Archive @args }
 
 # code alias for VS Code
 <#

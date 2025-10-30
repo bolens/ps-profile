@@ -13,18 +13,23 @@ if (-not (Test-Path Function:vsc)) {
     #>
     function vsc {
         [CmdletBinding()] param()
-        # Runtime check: prefer Test-CachedCommand if available to avoid Get-Command cost
-        if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
-            if (Test-CachedCommand code) { code . } else { Write-Warning 'code (VS Code) not found in PATH' }
+        try {
+            # Runtime check: prefer Test-CachedCommand if available to avoid Get-Command cost
+            if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
+                if (Test-CachedCommand code) { code . } else { Write-Warning 'code (VS Code) not found in PATH' }
+            }
+            else {
+                if (Test-Path Function:code -ErrorAction SilentlyContinue -or (Get-Command -Name code -ErrorAction SilentlyContinue)) { code . } else { Write-Warning 'code (VS Code) not found in PATH' }
+            }
         }
-        else {
-            if (Test-Path Function:code -ErrorAction SilentlyContinue -or (Get-Command -Name code -ErrorAction SilentlyContinue)) { code . } else { Write-Warning 'code (VS Code) not found in PATH' }
+        catch {
+            Write-Warning "Failed to open VS Code: $_"
         }
     }
 }
 
 # Open file in editor quickly
-if (-not (Test-Path Function:e)) { function e { param($p) if (-not $p) { Write-Warning 'Usage: e <path>'; return } if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) { if (Test-CachedCommand code) { code $p } else { Write-Warning 'code (VS Code) not found in PATH' } } else { code $p } } }
+if (-not (Test-Path Function:e)) { function e { param($p) if (-not $p) { Write-Warning 'Usage: e <path>'; return } try { if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) { if (Test-CachedCommand code) { code $p } else { Write-Warning 'code (VS Code) not found in PATH' } } else { code $p } } catch { Write-Warning "Failed to open file in editor: $_" } } }
 
 # Jump to project root (uses git if available)
 if (-not (Test-Path Function:project-root)) {
@@ -35,7 +40,12 @@ if (-not (Test-Path Function:project-root)) {
         Changes the current directory to the root of the git repository if inside a git repo.
     #>
     function project-root {
-        $root = (& git rev-parse --show-toplevel) 2>$null
-        if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root } else { Write-Warning 'Not inside a git repository' }
+        try {
+            $root = (& git rev-parse --show-toplevel) 2>$null
+            if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root } else { Write-Warning 'Not inside a git repository' }
+        }
+        catch {
+            Write-Warning "Failed to find project root: $_"
+        }
     }
 }

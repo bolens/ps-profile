@@ -90,6 +90,14 @@
       "problemMatcher": []
     },
     {
+      "label": "Run Spellcheck",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\utils\\spellcheck.ps1"],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Install Git hooks",
       "type": "shell",
       "command": "pwsh",
