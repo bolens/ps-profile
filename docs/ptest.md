@@ -6,9 +6,20 @@ Tests network connectivity.
 
 ## Description
 
+Tests connectivity to specified hosts using ping.
 
+## Signature
 
-## Parameters
+```powershell
+ptest
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\07-system.ps1

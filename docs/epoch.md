@@ -6,9 +6,20 @@ Gets current Unix timestamp.
 
 ## Description
 
+Returns the current date and time as a Unix timestamp (seconds since epoch).
 
+## Signature
 
-## Parameters
+```powershell
+epoch
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\05-utilities.ps1

@@ -2,13 +2,26 @@
 
 ## Synopsis
 
-
+Shows profile diagnostic information.
 
 ## Description
 
+Displays diagnostic information including PowerShell version, PATH entries,
+            Podman machine status, and configured Podman connections. Only available
+            when PS_PROFILE_DEBUG environment variable is set.
 
+## Signature
 
-## Parameters
+```powershell
+Show-ProfileDiagnostic
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\59-diagnostics.ps1

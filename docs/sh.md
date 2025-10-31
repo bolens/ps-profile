@@ -6,9 +6,20 @@ Shows information about Scoop packages.
 
 ## Description
 
+Displays detailed information about specified packages.
 
+## Signature
 
-## Parameters
+```powershell
+sh
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\09-package-managers.ps1

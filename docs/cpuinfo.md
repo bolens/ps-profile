@@ -2,13 +2,24 @@
 
 ## Synopsis
 
-Shows system information.
+Shows CPU information.
 
 ## Description
 
+Displays processor information including name, number of cores, logical processors, and max clock speed.
 
+## Signature
 
-## Parameters
+```powershell
+cpuinfo
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\08-system-info.ps1

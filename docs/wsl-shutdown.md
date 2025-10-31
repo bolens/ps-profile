@@ -6,9 +6,20 @@ Shuts down all WSL distributions.
 
 ## Description
 
+Terminates all running WSL distributions and shuts down the WSL subsystem.
 
+## Signature
 
-## Parameters
+```powershell
+wsl-shutdown
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\10-wsl.ps1

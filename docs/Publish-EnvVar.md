@@ -6,9 +6,20 @@ Broadcasts environment variable changes to all windows.
 
 ## Description
 
+Sends a WM_SETTINGCHANGE message to notify all windows of environment variable changes.
 
+## Signature
 
-## Parameters
+```powershell
+Publish-EnvVar
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\05-utilities.ps1

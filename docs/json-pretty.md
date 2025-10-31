@@ -6,9 +6,20 @@ Pretty-prints JSON data.
 
 ## Description
 
+Formats JSON data with proper indentation and structure.
 
+## Signature
 
-## Parameters
+```powershell
+json-pretty
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\02-files.ps1

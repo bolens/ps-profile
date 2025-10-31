@@ -6,9 +6,20 @@ Runs Python commands in temporary virtual environments using uv.
 
 ## Description
 
+Executes Python commands with their dependencies automatically managed in isolated environments.
 
+## Signature
 
-## Parameters
+```powershell
+Invoke-UVRun
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\67-uv.ps1

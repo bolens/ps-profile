@@ -8,9 +8,20 @@ Calculates file hash using specified algorithm.
 
 Computes cryptographic hash of a file. Defaults to SHA256.
 
-## Parameters
+## Signature
+
+```powershell
+file-hash
+```
+
 ### -Path
 
 The path to the file to hash.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\02-files.ps1

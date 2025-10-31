@@ -7,7 +7,7 @@ $security = Join-Path $utilsDir 'run-security-scan.ps1'
 $lint = Join-Path $utilsDir 'run-lint.ps1'
 $spellcheck = Join-Path $utilsDir 'spellcheck.ps1'
 $idemp = Join-Path $scriptDir 'check-idempotency.ps1'
-$fragReadme = Join-Path $scriptDir 'check-fragment-readmes.ps1'
+$fragReadme = Join-Path $scriptDir 'check-comment-help.ps1'
 
 # Determine which PowerShell executable to use
 $psExe = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
@@ -28,13 +28,13 @@ Write-Output "Running spellcheck: $spellcheck"
 & $psExe -NoProfile -File $spellcheck
 if ($LASTEXITCODE -ne 0) { Write-Error "Spellcheck failed"; exit $LASTEXITCODE }
 
-Write-Output "Running fragment README check: $fragReadme"
+Write-Output "Running comment-based help check: $fragReadme"
 & $psExe -NoProfile -File $fragReadme
-if ($LASTEXITCODE -ne 0) { Write-Error "Fragment README check failed"; exit $LASTEXITCODE }
+if ($LASTEXITCODE -ne 0) { Write-Error "Comment-based help check failed"; exit $LASTEXITCODE }
 
 Write-Output "Running idempotency: $idemp"
 & $psExe -NoProfile -File $idemp
 if ($LASTEXITCODE -ne 0) { Write-Error "Idempotency check failed"; exit $LASTEXITCODE }
 
-Write-Output "Validation: format + security + lint + spellcheck + fragment README + idempotency passed"
+Write-Output "Validation: format + security + lint + spellcheck + comment help + idempotency passed"
 exit 0

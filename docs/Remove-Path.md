@@ -8,9 +8,20 @@ Removes a directory from the PATH environment variable.
 
 Removes the specified directory from the PATH environment variable if it exists.
 
-## Parameters
+## Signature
+
+```powershell
+Remove-Path
+```
+
 ### -Path
 
 The directory path to remove from PATH.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\05-utilities.ps1

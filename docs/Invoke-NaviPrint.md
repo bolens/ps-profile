@@ -6,9 +6,20 @@ Prints commands from navi cheatsheets without executing them.
 
 ## Description
 
+Searches navi cheatsheets and prints the selected command without executing it. If a query is provided, uses it for searching.
 
+## Signature
 
-## Parameters
+```powershell
+Invoke-NaviPrint
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\62-navi.ps1

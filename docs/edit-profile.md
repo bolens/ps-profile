@@ -6,9 +6,20 @@ Opens the profile in VS Code.
 
 ## Description
 
+Launches VS Code to edit the current PowerShell profile file.
 
+## Signature
 
-## Parameters
+```powershell
+edit-profile
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\05-utilities.ps1

@@ -8,7 +8,18 @@ Decodes base64 input to text.
 
 Converts base64 encoded string back to readable text.
 
-## Parameters
+## Signature
+
+```powershell
+from-base64
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\02-files.ps1

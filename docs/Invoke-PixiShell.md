@@ -6,9 +6,20 @@ Activates the pixi shell environment.
 
 ## Description
 
+Starts a shell session with the pixi environment activated.
 
+## Signature
 
-## Parameters
+```powershell
+Invoke-PixiShell
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\68-pixi.ps1

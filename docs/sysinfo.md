@@ -2,13 +2,24 @@
 
 ## Synopsis
 
-Shows battery information.
+Shows system information.
 
 ## Description
 
+Displays basic computer system information including name, manufacturer, model, and total memory.
 
+## Signature
 
-## Parameters
+```powershell
+sysinfo
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\08-system-info.ps1

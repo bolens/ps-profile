@@ -29,6 +29,14 @@ if (-not (Test-Path Function:vsc)) {
 }
 
 # Open file in editor quickly
+<#
+.SYNOPSIS
+    Opens file in editor quickly.
+.DESCRIPTION
+    Opens the specified file in VS Code if available.
+.PARAMETER p
+    The path to the file to open.
+#>
 if (-not (Test-Path Function:e)) { function e { param($p) if (-not $p) { Write-Warning 'Usage: e <path>'; return } try { if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) { if (Test-CachedCommand code) { code $p } else { Write-Warning 'code (VS Code) not found in PATH' } } else { code $p } } catch { Write-Warning "Failed to open file in editor: $_" } } }
 
 # Jump to project root (uses git if available)

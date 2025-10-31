@@ -2,13 +2,24 @@
 
 ## Synopsis
 
-Shows CPU information.
+Shows memory information.
 
 ## Description
 
+Displays total physical memory capacity in GB.
 
+## Signature
 
-## Parameters
+```powershell
+meminfo
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\08-system-info.ps1

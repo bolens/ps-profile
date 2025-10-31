@@ -6,9 +6,20 @@ Converts YAML to JSON format.
 
 ## Description
 
+Transforms YAML input to JSON output using yq.
 
+## Signature
 
-## Parameters
+```powershell
+yaml-to-json
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\02-files.ps1

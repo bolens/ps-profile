@@ -2,13 +2,24 @@
 
 ## Synopsis
 
-Changes to the parent directory.
+Changes to the Desktop directory.
 
 ## Description
 
+Navigates to the user's Desktop folder.
 
+## Signature
 
-## Parameters
+```powershell
+desktop
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\02-files.ps1

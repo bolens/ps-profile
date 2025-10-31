@@ -6,9 +6,20 @@ Shows a confirmation prompt using gum.
 
 ## Description
 
+Displays an interactive confirmation dialog using gum. Returns true if confirmed, false otherwise.
 
+## Signature
 
-## Parameters
+```powershell
+Invoke-GumConfirm
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\63-gum.ps1

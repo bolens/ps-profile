@@ -12,39 +12,39 @@
 function uptime {
     (Get-Date) - (Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime
 }
+<#
+.SYNOPSIS
+    Shows battery information.
+.DESCRIPTION
+    Displays battery status including charge remaining, battery status, and estimated runtime.
+#>
 function battery {
-    <#
-    .SYNOPSIS
-        Shows battery information.
-    .DESCRIPTION
-        Displays battery status including charge remaining, battery status, and estimated runtime.
-    #>
     Get-CimInstance -ClassName Win32_Battery | Select-Object Name, EstimatedChargeRemaining, BatteryStatus, EstimatedRunTime
 }
+<#
+.SYNOPSIS
+    Shows system information.
+.DESCRIPTION
+    Displays basic computer system information including name, manufacturer, model, and total memory.
+#>
 function sysinfo {
-    <#
-    .SYNOPSIS
-        Shows system information.
-    .DESCRIPTION
-        Displays basic computer system information including name, manufacturer, model, and total memory.
-    #>
     Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object Name, Manufacturer, Model, TotalPhysicalMemory
 }
+<#
+.SYNOPSIS
+    Shows CPU information.
+.DESCRIPTION
+    Displays processor information including name, number of cores, logical processors, and max clock speed.
+#>
 function cpuinfo {
-    <#
-    .SYNOPSIS
-        Shows CPU information.
-    .DESCRIPTION
-        Displays processor information including name, number of cores, logical processors, and max clock speed.
-    #>
     Get-CimInstance -ClassName Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed
 }
+<#
+.SYNOPSIS
+    Shows memory information.
+.DESCRIPTION
+    Displays total physical memory capacity in GB.
+#>
 function meminfo {
-    <#
-    .SYNOPSIS
-        Shows memory information.
-    .DESCRIPTION
-        Displays total physical memory capacity in GB.
-    #>
     Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum | Select-Object @{ Name = "TotalMemory(GB)"; Expression = { [math]::Round(($_.Sum / 1GB), 2) } }
 }

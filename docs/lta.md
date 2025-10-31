@@ -6,9 +6,20 @@ Lists all directory contents in tree format using eza.
 
 ## Description
 
+Shows all files including hidden ones in tree format.
 
+## Signature
 
-## Parameters
+```powershell
+lta
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\61-eza.ps1

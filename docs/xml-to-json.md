@@ -8,7 +8,18 @@ Converts XML file to JSON format.
 
 Parses an XML file and converts it to JSON representation.
 
-## Parameters
+## Signature
+
+```powershell
+xml-to-json
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\02-files.ps1

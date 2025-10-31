@@ -6,14 +6,28 @@ Creates collision-safe aliases for profile fragments.
 
 ## Description
 
+Defines a helper function that creates aliases or function wrappers
+        without overwriting existing user or module commands. Used by profile fragments
+        to safely register aliases.
 
+## Signature
 
-## Parameters
+```powershell
+Set-AgentModeAlias
+```
+
 ### -Name
 
 The name of the alias to create.
+
 ### -Target
 
 The target command for the alias.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\00-bootstrap.ps1

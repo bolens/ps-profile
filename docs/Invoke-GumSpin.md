@@ -6,9 +6,20 @@ Shows a spinner while executing a script block using gum.
 
 ## Description
 
+Displays a spinning indicator with a title while executing the provided script block.
 
+## Signature
 
-## Parameters
+```powershell
+Invoke-GumSpin
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\63-gum.ps1

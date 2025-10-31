@@ -8,7 +8,18 @@ Encodes input to base64 format.
 
 Converts file contents or string input to base64 encoded string.
 
-## Parameters
+## Signature
+
+```powershell
+to-base64
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\02-files.ps1

@@ -6,9 +6,20 @@ Installs packages using pixi.
 
 ## Description
 
+Adds packages to the pixi project environment.
 
+## Signature
 
-## Parameters
+```powershell
+Invoke-PixiInstall
+```
+
 No parameters.
+
 ## Examples
+
 No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\68-pixi.ps1
