@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/bolens/ps-profile/compare/v1.0.2...v1.1.0) (2025-10-31)
+
+
+### Features
+
+* Add Add-Path function for PATH manipulation ([f060c89](https://github.com/bolens/ps-profile/commit/f060c89cf9201e23ec6db94db938a7b875f7b92c))
+
 # [1.0.2](https://github.com/bolens/ps-profile/compare/v1.0.1...v1.0.2) (2025-10-29)
 
 
