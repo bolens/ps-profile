@@ -35,8 +35,8 @@ jobs:
       - name: Run validate-profile (format + security + lint + idempotency)
         run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/validate-profile.ps1
 
-      - name: Check fragment READMEs
-        run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/check-fragment-readmes.ps1
+      - name: Check comment-based help
+        run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/check-comment-help.ps1
 
       - name: Generate API Documentation
         run: ${{ matrix.powershell }} -NoProfile -File scripts/utils/generate-docs.ps1
