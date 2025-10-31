@@ -2,8 +2,8 @@
 
 This documentation is automatically generated from comment-based help in the profile functions.
 
-**Total Functions:** 186
-**Generated:** 2025-10-31 15:00:10
+**Total Functions:** 217
+**Generated:** 2025-10-31 15:14:18
 
 ## Functions by Fragment
 
@@ -282,6 +282,49 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-ProfileErrorHandler](Invoke-ProfileErrorHandler.md) - Enhanced global error handler with recovery suggestions.
 - [Invoke-SafeFragmentLoad](Invoke-SafeFragmentLoad.md) - Loads profile fragments with enhanced error handling and retry logic.
 - [Write-ProfileError](Write-ProfileError.md) - Logs errors with enhanced context and formatting.
+
+### 73-performance-insights (5 functions)
+
+- [Clear-PerformanceData](Clear-PerformanceData.md) - Clears all collected performance data.
+- [Show-PerformanceInsights](Show-PerformanceInsights.md) - Shows performance insights for command execution.
+- [Start-CommandTimer](Start-CommandTimer.md) - Tracks command execution performance and provides insights.
+- [Stop-CommandTimer](Stop-CommandTimer.md) - Stops command timing and records the duration.
+- [Test-PerformanceHealth](Test-PerformanceHealth.md) - Performs a quick performance check of the current session.
+
+### 74-enhanced-history (9 functions)
+
+- [fh](fh.md) - Quick fuzzy search in command history.
+- [Find-HistoryFuzzy](Find-HistoryFuzzy.md) - Performs fuzzy search on command history.
+- [Invoke-LastCommand](Invoke-LastCommand.md) - Shows the last command matching a pattern.
+- [r](r.md) - Executes a command from recent history by number or pattern.
+- [Remove-HistoryDuplicates](Remove-HistoryDuplicates.md) - Removes duplicate commands from history.
+- [Remove-OldHistory](Remove-OldHistory.md) - Removes old commands from history.
+- [Search-HistoryInteractive](Search-HistoryInteractive.md) - Interactive history search with preview.
+- [Show-HistoryStats](Show-HistoryStats.md) - Shows statistics about command history usage.
+- [Show-RecentCommands](Show-RecentCommands.md) - Shows recent commands with quick selection.
+
+### 75-system-monitor (6 functions)
+
+- [Show-CPUInfo](Show-CPUInfo.md) - Shows detailed CPU information and usage.
+- [Show-DiskInfo](Show-DiskInfo.md) - Shows detailed disk usage information.
+- [Show-MemoryInfo](Show-MemoryInfo.md) - Shows detailed memory usage information.
+- [Show-NetworkInfo](Show-NetworkInfo.md) - Shows detailed network information.
+- [Show-SystemDashboard](Show-SystemDashboard.md) - Shows a comprehensive system status dashboard.
+- [Show-SystemStatus](Show-SystemStatus.md) - Shows a compact system status overview.
+
+### 76-smart-navigation (11 functions)
+
+- [Add-DirectoryBookmark](Add-DirectoryBookmark.md) - Creates a directory bookmark.
+- [Get-DirectoryBookmark](Get-DirectoryBookmark.md) - Jumps to a bookmarked directory.
+- [j](j.md) - Quick directory jumping alias.
+- [Jump-Directory](Jump-Directory.md) - Jumps to frequently used directories.
+- [Remove-DirectoryBookmark](Remove-DirectoryBookmark.md) - Removes a directory bookmark.
+- [Set-LocationBack](Set-LocationBack.md) - Goes back to the previous directory.
+- [Set-LocationForward](Set-LocationForward.md) - Goes forward in the navigation history.
+- [Set-LocationTracked](Set-LocationTracked.md) - Enhanced change directory with navigation tracking.
+- [Show-DirectoryBookmarks](Show-DirectoryBookmarks.md) - Lists all directory bookmarks.
+- [Show-FrequentDirectories](Show-FrequentDirectories.md) - Lists frequently used directories.
+- [Update-DirectoryStats](Update-DirectoryStats.md) - Tracks directory navigation for smart jumping.
 
 
 ## Generation

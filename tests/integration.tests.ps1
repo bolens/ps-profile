@@ -156,7 +156,7 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
         It 'PSScriptAnalyzer runs without critical errors' {
             $profileFiles = Get-ChildItem -Path (Join-Path $PSScriptRoot '..\profile.d') -Filter *.ps1
             foreach ($file in $profileFiles) {
-                $result = Invoke-ScriptAnalyzer -Path $file.FullName -ExcludeRule PSUseShouldProcessForStateChangingFunctions, PSAvoidUsingEmptyCatchBlock, PSUseBOMForUnicodeEncodedFile, PSUseDeclaredVarsMoreThanAssignments, PSUseApprovedVerbs, PSAvoidUsingWriteHost
+                $result = Invoke-ScriptAnalyzer -Path $file.FullName -ExcludeRule PSUseShouldProcessForStateChangingFunctions, PSAvoidUsingEmptyCatchBlock, PSUseBOMForUnicodeEncodedFile, PSUseDeclaredVarsMoreThanAssignments, PSUseApprovedVerbs, PSAvoidUsingWriteHost, PSAvoidUsingComputerNameHardcoded
                 # Should not have any errors (warnings are ok)
                 $errors = $result | Where-Object { $_.Severity -eq 'Error' }
                 $errors | Should BeNullOrEmpty

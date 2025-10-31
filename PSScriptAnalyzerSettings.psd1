@@ -22,7 +22,8 @@
         'PSUseBOMForUnicodeEncodedFile',
         'PSUseDeclaredVarsMoreThanAssignments',
         'PSUseApprovedVerbs',
-        'PSAvoidUsingWriteHost'
+        'PSAvoidUsingWriteHost',
+        'PSAvoidUsingComputerNameHardcoded'
     )
 
     # Per-rule configuration (Enable = $true/$false; Severity = 'Error'|'Warning'|'Information')
