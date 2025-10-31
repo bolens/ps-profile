@@ -4,6 +4,7 @@ This documentation is automatically generated from comment-based help in the pro
 
 ## Functions
 
+- [Add-Path](Add-Path.md) - Adds a directory to the PATH environment variable.
 - [ansible](ansible.md) - Runs Ansible commands via WSL with UTF-8 locale.
 - [ansible-doc](ansible-doc.md) - Runs Ansible documentation commands via WSL with UTF-8 locale.
 - [ansible-galaxy](ansible-galaxy.md) - Runs Ansible Galaxy commands via WSL with UTF-8 locale.
@@ -29,20 +30,20 @@ This documentation is automatically generated from comment-based help in the pro
 - [edit-profile](edit-profile.md) - Opens the profile in VS Code.
 - [Ensure-FileHelper](Ensure-FileHelper.md) - Initializes file helper functions on first use.
 - [Ensure-GitHelper](Ensure-GitHelper.md) - Ensures Git helper functions are initialized.
+- [ensures](ensures.md) - 
 - [epoch](epoch.md) - Gets current Unix timestamp.
 - [file-hash](file-hash.md) - Calculates file hash using specified algorithm.
 - [filesize](filesize.md) - Shows human-readable file size.
 - [from-base64](from-base64.md) - Decodes base64 input to text.
 - [from-epoch](from-epoch.md) - Converts Unix timestamp to DateTime.
-- [function](function.md) -
 - [Get-ContainerEngineInfo](Get-ContainerEngineInfo.md) - Gets information about available container engines and compose tools.
 - [Get-EnvVar](Get-EnvVar.md) - Gets an environment variable value from the registry.
 - [Get-History](Get-History.md) - Shows recent command history.
 - [head](head.md) - Shows the first N lines of a file.
 - [hg](hg.md) - Searches command history.
 - [htop](htop.md) - Shows top CPU-consuming processes.
-- [Initialize-OhMyPosh](Initialize-OhMyPosh.md) -
-- [Initialize-Starship](Initialize-Starship.md) -
+- [Initialize-OhMyPosh](Initialize-OhMyPosh.md) - 
+- [Initialize-Starship](Initialize-Starship.md) - 
 - [Install-UVTool](Install-UVTool.md) - Installs Python tools globally using uv.
 - [Invoke-GumChoose](Invoke-GumChoose.md) - Shows an interactive selection menu using gum.
 - [Invoke-GumConfirm](Invoke-GumConfirm.md) - Shows a confirmation prompt using gum.
@@ -62,8 +63,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [json-pretty](json-pretty.md) - Pretty-prints JSON data.
 - [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format.
 - [l](l.md) - Lists directory contents using eza (short alias).
-- [la](la.md) - Lists all directory contents including hidden files.
 - [la](la.md) - Lists all directory contents including hidden files using eza.
+- [la](la.md) - Lists all directory contents including hidden files.
 - [lg](lg.md) - Lists directory contents with git status using eza.
 - [list-functions](list-functions.md) - Lists user-defined functions.
 - [ll](ll.md) - Lists directory contents with details.
@@ -116,7 +117,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Set-ContainerEnginePreference](Set-ContainerEnginePreference.md) - Sets the preferred container engine for the session.
 - [Set-EnvVar](Set-EnvVar.md) - Sets an environment variable value in the registry.
 - [sh](sh.md) - Shows information about Scoop packages.
-- [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) -
+- [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) - 
 - [sinstall](sinstall.md) - Installs packages using Scoop.
 - [slist](slist.md) - Lists installed Scoop packages.
 - [speedtest](speedtest.md) - Runs internet speed test.

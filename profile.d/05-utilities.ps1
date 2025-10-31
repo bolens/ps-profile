@@ -269,3 +269,61 @@ function Remove-Path {
         $env:PATH = $newPath
     }
 }
+
+<#
+.SYNOPSIS
+    Adds a directory to the PATH environment variable.
+.DESCRIPTION
+    Adds the specified directory to the PATH environment variable if it doesn't already exist.
+.PARAMETER Path
+    The directory path to add to PATH.
+.PARAMETER Global
+    If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
+#>
+function Add-Path {
+    param(
+        [string]$Path,
+        [switch]$Global
+    )
+
+    if (-not $Path) {
+        Write-Warning "No path specified to add"
+        return
+    }
+
+    # Get current PATH
+    $currentPath = if ($Global) {
+        Get-EnvVar -Name 'PATH' -Global
+    }
+    else {
+        $env:PATH
+    }
+
+    if (-not $currentPath) {
+        # If PATH doesn't exist, create it with the new path
+        $newPath = $Path
+    }
+    else {
+        # Split PATH into array
+        $pathArray = $currentPath -split ';' | Where-Object { $_ -and $_.Trim() }
+
+        # Check if path already exists
+        $normalizedPath = $Path.Trim()
+        if ($pathArray -contains $normalizedPath) {
+            Write-Verbose "Path '$normalizedPath' is already in PATH"
+            return
+        }
+
+        # Add the new path
+        $pathArray = @($normalizedPath) + $pathArray
+        $newPath = $pathArray -join ';'
+    }
+
+    # Update PATH
+    if ($Global) {
+        Set-EnvVar -Name 'PATH' -Value $newPath -Global
+    }
+    else {
+        $env:PATH = $newPath
+    }
+}

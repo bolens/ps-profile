@@ -110,6 +110,34 @@ Describe 'Profile fragments' {
             # Restore original PATH
             $env:PATH = $originalPath
         }
+
+        It 'Add-Path adds directory to PATH' {
+            # Test Add-Path function
+            $testPath = 'C:\Test\AddPath'
+
+            # Store original PATH
+            $originalPath = $env:PATH
+
+            # Ensure test path is not already in PATH
+            if ($env:PATH -split ';' -contains $testPath) {
+                Remove-Path -Path $testPath
+            }
+
+            # Add the test path
+            Add-Path -Path $testPath
+
+            # Verify path was added
+            $env:PATH | Should Match ([regex]::Escape($testPath))
+
+            # Clean up - remove the test path
+            Remove-Path -Path $testPath
+
+            # Verify path was removed
+            $env:PATH | Should Not Match ([regex]::Escape($testPath))
+
+            # Restore original PATH
+            $env:PATH = $originalPath
+        }
     }
 
     Context 'File utility functions' {
