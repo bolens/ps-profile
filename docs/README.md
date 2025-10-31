@@ -66,8 +66,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [la](la.md) - Lists all directory contents including hidden files using eza.
 - [lg](lg.md) - Lists directory contents with git status using eza.
 - [list-functions](list-functions.md) - Lists user-defined functions.
-- [ll](ll.md) - Lists directory contents in long format using eza.
 - [ll](ll.md) - Lists directory contents with details.
+- [ll](ll.md) - Lists directory contents in long format using eza.
 - [lla](lla.md) - Lists all directory contents in long format using eza.
 - [llg](llg.md) - Lists directory contents in long format with git status using eza.
 - [lS](lS.md) - Lists directory contents sorted by size using eza.
@@ -106,6 +106,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Publish-EnvVar](Publish-EnvVar.md) - Broadcasts environment variable changes to all windows.
 - [pwgen](pwgen.md) - Generates a random password.
 - [reload](reload.md) - Reloads the PowerShell profile.
+- [Remove-Path](Remove-Path.md) - Removes a directory from the PATH environment variable.
 - [rest](rest.md) - Makes REST API calls.
 - [rm](rm.md) - Removes files and directories.
 - [scleanup](scleanup.md) - Cleans up Scoop cache and old versions.
