@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/bolens/ps-profile/compare/v1.1.1...v1.1.2) (2025-10-31)
+
+
+### Bug Fixes
+
+* resolve all markdownlint formatting issues ([e21f761](https://github.com/bolens/ps-profile/commit/e21f7618e6eba24b61a2fe20fee5cd44f6430bc3))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
