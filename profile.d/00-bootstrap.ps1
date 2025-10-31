@@ -11,6 +11,16 @@
 # helpers if already defined.
 # ===============================================
 
+# Initialize profile timing tracking
+if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
+    $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
+}
+
+# Command usage tracking (only when debugging)
+if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileCommandUsage) {
+    $global:PSProfileCommandUsage = [System.Collections.Concurrent.ConcurrentDictionary[string, int]]::new()
+}
+
 # Collision-safe function creator for profile fragments
 if (-not (Test-Path "Function:\\global:Set-AgentModeFunction")) {
     <#

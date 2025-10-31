@@ -45,6 +45,49 @@ Import-Module 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Com
 $env:PATH = "A:\scoop\shims;A:\scoop\bin;$env:PATH"
 
 # ===============================================
+# FRAGMENT LOADING HELPERS
+# ===============================================
+# Initialize profile timing tracking
+if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
+    $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
+}
+
+# Helper function to track fragment load times
+function Measure-FragmentLoadTime {
+    <#
+    .SYNOPSIS
+        Measures and tracks the execution time of profile fragments.
+    .DESCRIPTION
+        Wraps the execution of profile fragments to measure their load time.
+        Only tracks timing when PS_PROFILE_DEBUG environment variable is set.
+        Results are stored in a global list for later analysis.
+    .PARAMETER FragmentName
+        The name of the fragment being measured.
+    .PARAMETER Action
+        The script block to execute and measure.
+    #>
+    param([string]$FragmentName, [scriptblock]$Action)
+
+    if (-not $env:PS_PROFILE_DEBUG) {
+        & $Action
+        return
+    }
+
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    try {
+        & $Action
+    }
+    finally {
+        $sw.Stop()
+        $global:PSProfileFragmentTimes.Add([PSCustomObject]@{
+                Fragment  = $FragmentName
+                Duration  = $sw.Elapsed.TotalMilliseconds
+                Timestamp = [DateTime]::Now
+            })
+    }
+}
+
+# ===============================================
 # LOAD MODULAR PROFILE COMPONENTS (safe, ordered loader)
 # ===============================================
 # The previous loader dot-sourced all `profile.d/*.ps1` files. To improve
@@ -61,7 +104,9 @@ if (Test-Path $profileD) {
             # Assign the result to $null to suppress any returned values (fragments
             # may return ScriptBlocks or other objects during registration). This
             # keeps the profile quiet when opening a new shell.
-            $null = . $_.FullName
+            Measure-FragmentLoadTime -FragmentName $fragmentName -Action {
+                $null = . $_.FullName
+            }
         }
         catch {
             # Keep failures non-fatal but visible to the user during interactive sessions

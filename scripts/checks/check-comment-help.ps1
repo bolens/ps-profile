@@ -37,19 +37,33 @@ function Get-FunctionsWithoutCommentHelp($path) {
                 continue
             }
 
-            # Get text before the function
-            $start = $funcAst.Extent.StartOffset
-            $beforeText = $content.Substring(0, $start)
-
-            # Find the last comment block before the function
-            $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
             $hasHelp = $false
 
+            # Check for comment-based help before the function
+            $start = $funcAst.Extent.StartOffset
+            $beforeText = $content.Substring(0, $start)
+            $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
             if ($commentMatches.Count -gt 0) {
                 $helpContent = $commentMatches[-1].Value  # Last comment block
                 # Check if it contains SYNOPSIS or DESCRIPTION
                 if ($helpContent -match '\.SYNOPSIS|\.DESCRIPTION') {
                     $hasHelp = $true
+                }
+            }
+
+            # Also check for comment-based help at the beginning of the function body
+            if (-not $hasHelp -and $funcAst.Body -and $funcAst.Body.Extent) {
+                $bodyStart = $funcAst.Body.Extent.StartOffset
+                $bodyEnd = $funcAst.Body.Extent.EndOffset
+                $bodyText = $content.Substring($bodyStart, $bodyEnd - $bodyStart)
+
+                # Look for comment block at the beginning of the body
+                $bodyCommentMatches = [regex]::Matches($bodyText, '^[\s]*<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+                if ($bodyCommentMatches.Count -gt 0) {
+                    $helpContent = $bodyCommentMatches[0].Value
+                    if ($helpContent -match '\.SYNOPSIS|\.DESCRIPTION') {
+                        $hasHelp = $true
+                    }
                 }
             }
 

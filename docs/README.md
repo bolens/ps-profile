@@ -2,8 +2,8 @@
 
 This documentation is automatically generated from comment-based help in the profile functions.
 
-**Total Functions:** 174
-**Generated:** 2025-10-31 14:13:33
+**Total Functions:** 182
+**Generated:** 2025-10-31 14:45:11
 
 ## Functions by Fragment
 
@@ -211,9 +211,12 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Enable-Aliases](Enable-Aliases.md) - Enables user-defined aliases and helper functions for enhanced shell experience.
 
-### 59-diagnostics (1 functions)
+### 59-diagnostics (4 functions)
 
+- [Show-CommandUsageStats](Show-CommandUsageStats.md) - Shows command usage statistics for optimization insights.
 - [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) - Shows profile diagnostic information.
+- [Show-ProfileStartupTime](Show-ProfileStartupTime.md) - Shows profile startup time information.
+- [Test-ProfileHealth](Test-ProfileHealth.md) - Performs basic health checks for critical dependencies.
 
 ### 61-eza (11 functions)
 
@@ -261,6 +264,17 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-PnpmDevInstall](Invoke-PnpmDevInstall.md) - Installs development packages using pnpm.
 - [Invoke-PnpmInstall](Invoke-PnpmInstall.md) - Installs packages using pnpm.
 - [Invoke-PnpmRun](Invoke-PnpmRun.md) - Runs npm scripts using pnpm.
+
+### 70-profile-updates (1 functions)
+
+- [Test-ProfileUpdates](Test-ProfileUpdates.md) - Checks for profile updates and displays changelog.
+
+### 71-network-utils (4 functions)
+
+- [Invoke-HttpRequestWithRetry](Invoke-HttpRequestWithRetry.md) - Makes HTTP requests with retry logic and timeout handling.
+- [Invoke-WithRetry](Invoke-WithRetry.md) - Executes a network operation with retry logic and timeout handling.
+- [Resolve-HostWithRetry](Resolve-HostWithRetry.md) - Resolves hostnames with retry logic.
+- [Test-NetworkConnectivity](Test-NetworkConnectivity.md) - Tests network connectivity with retry logic.
 
 
 ## Generation
