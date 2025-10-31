@@ -1,3 +1,11 @@
+## [1.1.1](https://github.com/bolens/ps-profile/compare/v1.1.0...v1.1.1) (2025-10-31)
+
+
+### Bug Fixes
+
+* Remove PSScriptAnalyzer -SettingsPath warning ([48153f7](https://github.com/bolens/ps-profile/commit/48153f776b040895c322ca0de2a5a41d0c8be49e))
+* Remove trailing spaces from docs/README.md ([1483cf7](https://github.com/bolens/ps-profile/commit/1483cf78586fd40c7769f60ee354e8e99efa4ac7))
+
 # [1.1.0](https://github.com/bolens/ps-profile/compare/v1.0.2...v1.1.0) (2025-10-31)
 
 
