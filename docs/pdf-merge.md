@@ -1,22 +1,25 @@
-# yaml-to-json
+# pdf-merge
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Merges multiple PDF files.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Uses pdftk to combine multiple PDF files into one.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+pdf-merge
 ```
 
 ## Parameters
 
-No parameters.
+### -InputPaths
+
+Array of paths to PDF files to merge.
+
 
 ## Examples
 

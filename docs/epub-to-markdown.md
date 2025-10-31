@@ -1,22 +1,25 @@
-# yaml-to-json
+# epub-to-markdown
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Converts EPUB file to Markdown.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Uses pandoc to convert an EPUB file to Markdown format.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+epub-to-markdown
 ```
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+The path to the EPUB file.
+
 
 ## Examples
 

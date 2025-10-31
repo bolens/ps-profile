@@ -1,17 +1,17 @@
-# head
+# hex-dump
 
 ## Synopsis
 
-Shows the first N lines of a file.
+Shows hex dump of a file.
 
 ## Description
 
-Displays the beginning of a file or pipeline input. Defaults to 10 lines.
+Displays the hexadecimal representation of a file's contents.
 
 ## Signature
 
 ```powershell
-head
+hex-dump
 ```
 
 ## Parameters

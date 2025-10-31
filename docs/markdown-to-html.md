@@ -1,22 +1,25 @@
-# yaml-to-json
+# markdown-to-html
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Converts Markdown file to HTML.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Uses pandoc to convert a Markdown file to HTML format.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+markdown-to-html
 ```
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+The path to the Markdown file.
+
 
 ## Examples
 

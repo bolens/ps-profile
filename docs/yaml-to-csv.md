@@ -1,17 +1,17 @@
-# yaml-to-json
+# yaml-to-csv
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Converts YAML file to CSV format.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Reads a YAML file and outputs its contents as CSV.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+yaml-to-csv
 ```
 
 ## Parameters

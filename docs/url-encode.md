@@ -1,17 +1,17 @@
-# desktop
+# url-encode
 
 ## Synopsis
 
-Changes to the Desktop directory.
+URL-encodes a string.
 
 ## Description
 
-Navigates to the user's Desktop folder.
+Encodes a string for use in URLs.
 
 ## Signature
 
 ```powershell
-desktop
+url-encode
 ```
 
 ## Parameters
@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: profile.d\02-files-navigation.ps1
+Defined in: profile.d\05-utilities.ps1

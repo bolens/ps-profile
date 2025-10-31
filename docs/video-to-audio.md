@@ -1,22 +1,25 @@
-# yaml-to-json
+# video-to-audio
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Extracts audio from video file.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Uses ffmpeg to extract audio track from a video file as MP3.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+video-to-audio
 ```
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+The path to the video file.
+
 
 ## Examples
 

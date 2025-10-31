@@ -67,6 +67,22 @@ function hg { Get-History | Select-String $args }
     Creates a 16-character random password using alphanumeric characters.
 #>
 function pwgen { -join ((1..16) | ForEach-Object { [char]((65..90) + (97..122) + (48..57) | Get-Random) }) }
+# URL encode
+<#
+.SYNOPSIS
+    URL-encodes a string.
+.DESCRIPTION
+    Encodes a string for use in URLs.
+#>
+function url-encode { param([string]$text) [uri]::EscapeDataString($text) }
+# URL decode
+<#
+.SYNOPSIS
+    URL-decodes a string.
+.DESCRIPTION
+    Decodes a URL-encoded string.
+#>
+function url-decode { param([string]$text) [uri]::UnescapeDataString($text) }
 # Convert Unix timestamp to DateTime
 <#
 .SYNOPSIS
@@ -75,6 +91,14 @@ function pwgen { -join ((1..16) | ForEach-Object { [char]((65..90) + (97..122) +
     Converts a Unix timestamp (seconds since epoch) to a local DateTime.
 #>
 function from-epoch { param([long]$epoch) [DateTimeOffset]::FromUnixTimeSeconds($epoch).ToLocalTime() }
+# Convert DateTime to Unix timestamp
+<#
+.SYNOPSIS
+    Converts DateTime to Unix timestamp.
+.DESCRIPTION
+    Converts a DateTime object or string to a Unix timestamp (seconds since epoch).
+#>
+function to-epoch { param([DateTime]$date = (Get-Date)) [DateTimeOffset]::new($date).ToUnixTimeSeconds() }
 # Convert DateTime to Unix timestamp
 <#
 .SYNOPSIS

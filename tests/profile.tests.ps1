@@ -142,9 +142,11 @@ Describe 'Profile fragments' {
 
     Context 'File utility functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\02-files.ps1"
+            . "$PSScriptRoot/..\profile.d\02-files-conversion.ps1"
+            . "$PSScriptRoot/..\profile.d\02-files-utilities.ps1"
             # Ensure file helper functions are initialized
-            Ensure-FileHelper
+            Ensure-FileConversion
+            Ensure-FileUtilities
         }
 
         It 'json-pretty formats JSON correctly' {
@@ -177,7 +179,7 @@ Describe 'Profile fragments' {
         It 'filesize returns human-readable size' {
             # Ensure filesize function is available
             if (-not (Get-Command filesize -ErrorAction SilentlyContinue)) {
-                Ensure-FileHelper
+                Ensure-FileUtilities
             }
             $tempFile = [IO.Path]::GetTempFileName()
             try {

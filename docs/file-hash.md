@@ -20,10 +20,11 @@ file-hash
 
 The path to the file to hash.
 
+
 ## Examples
 
 No examples provided.
 
 ## Source
 
-Defined in: profile.d\02-files.ps1
+Defined in: profile.d\02-files-utilities.ps1

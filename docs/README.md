@@ -2,8 +2,8 @@
 
 This documentation is automatically generated from comment-based help in the profile functions.
 
-**Total Functions:** 153
-**Generated:** 2025-10-31 13:00:54
+**Total Functions:** 174
+**Generated:** 2025-10-31 14:13:33
 
 ## Functions by Fragment
 
@@ -14,33 +14,60 @@ This documentation is automatically generated from comment-based help in the pro
 - [Test-CachedCommand](Test-CachedCommand.md) - Tests for command availability with caching.
 - [Test-HasCommand](Test-HasCommand.md) - Tests if a command is available.
 
-### 02-files (23 functions)
+### 02-files-conversion (22 functions)
+
+- [audio-convert](audio-convert.md) - Converts audio file formats.
+- [csv-to-json](csv-to-json.md) - Converts CSV file to JSON format.
+- [csv-to-yaml](csv-to-yaml.md) - Converts CSV file to YAML format.
+- [docx-to-markdown](docx-to-markdown.md) - Converts DOCX file to Markdown.
+- [Ensure-FileConversion](Ensure-FileConversion.md) - Initializes file conversion utility functions on first use.
+- [epub-to-markdown](epub-to-markdown.md) - Converts EPUB file to Markdown.
+- [from-base64](from-base64.md) - Decodes base64 input to text.
+- [html-to-markdown](html-to-markdown.md) - Converts HTML file to Markdown.
+- [image-convert](image-convert.md) - Converts image file formats.
+- [image-resize](image-resize.md) - Resizes an image.
+- [json-pretty](json-pretty.md) - Pretty-prints JSON data.
+- [json-to-csv](json-to-csv.md) - Converts JSON file to CSV format.
+- [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format.
+- [markdown-to-html](markdown-to-html.md) - Converts Markdown file to HTML.
+- [pdf-merge](pdf-merge.md) - Merges multiple PDF files.
+- [pdf-to-text](pdf-to-text.md) - Extracts text from PDF file.
+- [to-base64](to-base64.md) - Encodes input to base64 format.
+- [video-to-audio](video-to-audio.md) - Extracts audio from video file.
+- [video-to-gif](video-to-gif.md) - Converts video to GIF.
+- [xml-to-json](xml-to-json.md) - Converts XML file to JSON format.
+- [yaml-to-csv](yaml-to-csv.md) - Converts YAML file to CSV format.
+- [yaml-to-json](yaml-to-json.md) - Converts YAML to JSON format.
+
+### 02-files-listing (6 functions)
+
+- [bat-cat](bat-cat.md) - Displays file contents with syntax highlighting.
+- [Ensure-FileListing](Ensure-FileListing.md) - Initializes file listing utility functions on first use.
+- [la](la.md) - Lists all directory contents including hidden files.
+- [ll](ll.md) - Lists directory contents with details.
+- [lx](lx.md) - Lists directory contents excluding hidden files.
+- [tree](tree.md) - Displays directory structure as a tree.
+
+### 02-files-navigation (7 functions)
 
 - [..](...md) - Changes to the parent directory.
 - [...](....md) - Changes to the grandparent directory.
 - [....](.....md) - Changes to the great-grandparent directory.
-- [bat-cat](bat-cat.md) - Displays file contents with syntax highlighting.
-- [csv-to-json](csv-to-json.md) - Converts CSV file to JSON format.
 - [desktop](desktop.md) - Changes to the Desktop directory.
 - [docs](docs.md) - Changes to the Documents directory.
 - [downloads](downloads.md) - Changes to the Downloads directory.
-- [Ensure-FileHelper](Ensure-FileHelper.md) - Initializes file helper functions on first use.
+- [Ensure-FileNavigation](Ensure-FileNavigation.md) - Initializes file navigation utility functions on first use.
+
+### 02-files-utilities (6 functions)
+
+- [Ensure-FileUtilities](Ensure-FileUtilities.md) - Initializes file utility functions on first use.
 - [file-hash](file-hash.md) - Calculates file hash using specified algorithm.
 - [filesize](filesize.md) - Shows human-readable file size.
-- [from-base64](from-base64.md) - Decodes base64 input to text.
 - [head](head.md) - Shows the first N lines of a file.
-- [json-pretty](json-pretty.md) - Pretty-prints JSON data.
-- [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format.
-- [la](la.md) - Lists all directory contents including hidden files.
-- [ll](ll.md) - Lists directory contents with details.
-- [lx](lx.md) - Lists directory contents excluding hidden files.
+- [hex-dump](hex-dump.md) - Shows hex dump of a file.
 - [tail](tail.md) - Shows the last N lines of a file.
-- [to-base64](to-base64.md) - Encodes input to base64 format.
-- [tree](tree.md) - Displays directory structure as a tree.
-- [xml-to-json](xml-to-json.md) - Converts XML file to JSON format.
-- [yaml-to-json](yaml-to-json.md) - Converts YAML to JSON format.
 
-### 05-utilities (19 functions)
+### 05-utilities (22 functions)
 
 - [Add-Path](Add-Path.md) - Adds a directory to the PATH environment variable.
 - [backup-profile](backup-profile.md) - Creates a backup of the profile.
@@ -60,6 +87,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-Path](Remove-Path.md) - Removes a directory from the PATH environment variable.
 - [Set-EnvVar](Set-EnvVar.md) - Sets an environment variable value in the registry.
 - [speedtest](speedtest.md) - Runs internet speed test.
+- [to-epoch](to-epoch.md) - Converts DateTime to Unix timestamp.
+- [url-decode](url-decode.md) - URL-decodes a string.
+- [url-encode](url-encode.md) - URL-encodes a string.
 - [weather](weather.md) - Shows weather information.
 
 ### 06-oh-my-posh (2 functions)
@@ -231,6 +261,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-PnpmDevInstall](Invoke-PnpmDevInstall.md) - Installs development packages using pnpm.
 - [Invoke-PnpmInstall](Invoke-PnpmInstall.md) - Installs packages using pnpm.
 - [Invoke-PnpmRun](Invoke-PnpmRun.md) - Runs npm scripts using pnpm.
+
 
 ## Generation
 

@@ -1,22 +1,25 @@
-# yaml-to-json
+# pdf-to-text
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Extracts text from PDF file.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Uses pdftotext to extract plain text from a PDF file.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+pdf-to-text
 ```
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+The path to the PDF file.
+
 
 ## Examples
 

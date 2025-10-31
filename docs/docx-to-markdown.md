@@ -1,22 +1,25 @@
-# yaml-to-json
+# docx-to-markdown
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Converts DOCX file to Markdown.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Uses pandoc to convert a DOCX file to Markdown format.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+docx-to-markdown
 ```
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+The path to the DOCX file.
+
 
 ## Examples
 

@@ -1,22 +1,25 @@
-# yaml-to-json
+# video-to-gif
 
 ## Synopsis
 
-Converts YAML to JSON format.
+Converts video to GIF.
 
 ## Description
 
-Transforms YAML input to JSON output using yq.
+Uses ffmpeg to convert a video file to animated GIF.
 
 ## Signature
 
 ```powershell
-yaml-to-json
+video-to-gif
 ```
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+The path to the video file.
+
 
 ## Examples
 
