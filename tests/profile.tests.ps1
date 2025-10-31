@@ -89,6 +89,27 @@ Describe 'Profile fragments' {
             $password.Length | Should Be 16
             $password | Should Match '^[a-zA-Z0-9]+$'
         }
+
+        It 'Remove-Path removes directory from PATH' {
+            # Test Remove-Path function
+            $testPath = 'C:\Test\Path'
+
+            # Add test path to PATH temporarily
+            $originalPath = $env:PATH
+            $env:PATH = "$env:PATH;$testPath"
+
+            # Verify path was added
+            $env:PATH | Should Match ([regex]::Escape($testPath))
+
+            # Remove the path
+            Remove-Path -Path $testPath
+
+            # Verify path was removed
+            $env:PATH | Should Not Match ([regex]::Escape($testPath))
+
+            # Restore original PATH
+            $env:PATH = $originalPath
+        }
     }
 
     Context 'File utility functions' {
@@ -346,12 +367,28 @@ Describe 'Profile fragments' {
 
         It 'vsc opens current directory in VS Code' {
             # Test that vsc function doesn't throw (actual VS Code testing might require UI)
-            { vsc } | Should Not Throw
+            # Suppress warnings since VS Code may not be available in test environment
+            $originalWarningPreference = $WarningPreference
+            $WarningPreference = 'SilentlyContinue'
+            try {
+                { vsc } | Should Not Throw
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
+            }
         }
 
         It 'e requires a path parameter' {
-            # Test that e function warns when no path is provided
-            { e } | Should Not Throw  # Should warn but not throw
+            # Test that e function shows usage warning when no path is provided
+            # Suppress the expected usage warning
+            $originalWarningPreference = $WarningPreference
+            $WarningPreference = 'SilentlyContinue'
+            try {
+                { e } | Should Not Throw
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
+            }
         }
     }
 

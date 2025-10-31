@@ -220,3 +220,52 @@ public static extern IntPtr SendMessageTimeout(
         [ref] $result
     ) | Out-Null
 }
+
+<#
+.SYNOPSIS
+    Removes a directory from the PATH environment variable.
+.DESCRIPTION
+    Removes the specified directory from the PATH environment variable if it exists.
+.PARAMETER Path
+    The directory path to remove from PATH.
+.PARAMETER Global
+    If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
+#>
+function Remove-Path {
+    param(
+        [string]$Path,
+        [switch]$Global
+    )
+
+    if (-not $Path) {
+        Write-Warning "No path specified to remove"
+        return
+    }
+
+    # Get current PATH
+    $currentPath = if ($Global) {
+        Get-EnvVar -Name 'PATH' -Global
+    }
+    else {
+        $env:PATH
+    }
+
+    if (-not $currentPath) {
+        Write-Warning "PATH environment variable not found"
+        return
+    }
+
+    # Split PATH into array and remove the specified path
+    $pathArray = $currentPath -split ';' | Where-Object { $_ -and $_.Trim() -ne $Path.Trim() }
+
+    # Join back into PATH string
+    $newPath = $pathArray -join ';'
+
+    # Update PATH
+    if ($Global) {
+        Set-EnvVar -Name 'PATH' -Value $newPath -Global
+    }
+    else {
+        $env:PATH = $newPath
+    }
+}

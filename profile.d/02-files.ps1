@@ -213,15 +213,6 @@ Set-Item -Path Function:\~ -Value { if (-not (Test-Path Function:\~)) { Ensure-F
 # Go to Desktop directory
 <#
 .SYNOPSIS
-    Changes to the user's home directory.
-.DESCRIPTION
-    Navigates to the user's home directory.
-#>
-function ~ { if (-not (Test-Path Function:\~)) { Ensure-FileHelper }; return & (Get-Item Function:\~ -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
-
-# Go to Desktop directory
-<#
-.SYNOPSIS
     Changes to the Desktop directory.
 .DESCRIPTION
     Navigates to the user's Desktop folder.

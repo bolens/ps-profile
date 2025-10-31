@@ -27,6 +27,7 @@ Functions
 - `backup-profile` — Backup current profile to timestamped .bak file
 - `Get-EnvVar` — Gets an environment variable value from the registry
 - `Set-EnvVar` — Sets an environment variable value in the registry
+- `Remove-Path` — Removes a directory from the PATH environment variable
 - `Publish-EnvVar` — Broadcasts environment variable changes to all windows
 
 Dependencies
