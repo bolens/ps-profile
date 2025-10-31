@@ -14,6 +14,8 @@ Shows file contents with syntax highlighting using bat, or falls back to Get-Con
 bat-cat
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: profile.d\02-files.ps1

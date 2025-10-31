@@ -14,6 +14,8 @@ Formats JSON data with proper indentation and structure.
 json-pretty
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: profile.d\02-files.ps1

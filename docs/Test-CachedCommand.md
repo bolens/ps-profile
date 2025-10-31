@@ -15,6 +15,8 @@ Lightweight cached command testing used by profile fragments to avoid
 Test-CachedCommand
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\00-bootstrap.ps1
+Defined in: profile.d\00-bootstrap.ps1

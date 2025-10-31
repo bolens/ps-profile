@@ -16,10 +16,11 @@ Defines a helper function that creates small convenience functions or wrappers
 Set-AgentModeFunction
 ```
 
+## Parameters
+
 ### -Name
 
 The name of the function to create.
-
 ### -Body
 
 The script block containing the function body.
@@ -30,4 +31,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\00-bootstrap.ps1
+Defined in: profile.d\00-bootstrap.ps1

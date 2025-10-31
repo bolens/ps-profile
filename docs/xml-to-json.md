@@ -14,6 +14,8 @@ Parses an XML file and converts it to JSON representation.
 xml-to-json
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: profile.d\02-files.ps1

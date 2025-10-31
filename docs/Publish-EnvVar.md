@@ -14,6 +14,8 @@ Sends a WM_SETTINGCHANGE message to notify all windows of environment variable c
 Publish-EnvVar
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\05-utilities.ps1
+Defined in: profile.d\05-utilities.ps1

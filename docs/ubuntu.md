@@ -14,6 +14,8 @@ Starts the Ubuntu WSL distribution or switches to it if already running. Passes 
 ubuntu
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\10-wsl.ps1
+Defined in: profile.d\10-wsl.ps1

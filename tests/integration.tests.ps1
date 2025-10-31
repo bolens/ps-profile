@@ -101,7 +101,6 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
             & "$PSScriptRoot/..\scripts/utils/generate-docs.ps1"
 
             $newFiles = Get-ChildItem -Path $docsPath -Filter *.md | Measure-Object | Select-Object -ExpandProperty Count
-            # Documentation generation should not fail and should maintain file count
             # Documentation generation should not fail and should maintain or increase file count
             ($newFiles -ge $originalFiles) | Should Be $true
 
@@ -109,8 +108,10 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
             $readmePath = Join-Path $docsPath 'README.md'
             Test-Path $readmePath | Should Be $true
             $readmeContent = Get-Content $readmePath -Raw
-            $readmeContent | Should Match '## Functions'
+            $readmeContent | Should Match '## Functions by Fragment'
             $readmeContent | Should Match '\[.*\]\(.*\.md\)'
+            $readmeContent | Should Match 'Total Functions:'
+            $readmeContent | Should Match 'Generated:'
         }
 
         It 'documentation includes proper function signatures' {
@@ -121,10 +122,14 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
                 $content = Get-Content $setEnvVarDoc -Raw
                 $content | Should Match '## Synopsis'
                 $content | Should Match '## Description'
+                $content | Should Match '## Signature'
                 $content | Should Match '## Parameters'
+                $content | Should Match '## Examples'
+                $content | Should Match '## Source'
                 $content | Should Match '-Name'
                 $content | Should Match '-Value'
-                # Note: -Global parameter may not be documented if parsing fails
+                $content | Should Match 'powershell'
+                $content | Should Match 'Defined in:'
             }
         }
     }

@@ -14,6 +14,8 @@ Short alias for eza directory listing.
 l
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\61-eza.ps1
+Defined in: profile.d\61-eza.ps1

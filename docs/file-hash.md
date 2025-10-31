@@ -14,6 +14,8 @@ Computes cryptographic hash of a file. Defaults to SHA256.
 file-hash
 ```
 
+## Parameters
+
 ### -Path
 
 The path to the file to hash.
@@ -24,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: profile.d\02-files.ps1

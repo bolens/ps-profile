@@ -14,6 +14,8 @@ Shows all packages currently installed via Scoop.
 slist
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\09-package-managers.ps1
+Defined in: profile.d\09-package-managers.ps1

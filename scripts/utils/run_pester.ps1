@@ -24,7 +24,12 @@ if ($Coverage) {
     # Add code coverage for profile.d directory
     $profilePath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'profile.d'
     $pesterParams.CodeCoverage = "$profilePath/*.ps1"
-    $pesterParams.CodeCoverageOutputFile = 'coverage.xml'
+
+    # CodeCoverageOutputFile parameter is only available in Pester 4.0+
+    $pesterModule = Get-Module -ListAvailable Pester | Sort-Object Version -Descending | Select-Object -First 1
+    if ($pesterModule.Version -ge [version]'4.0.0') {
+        $pesterParams.CodeCoverageOutputFile = 'coverage.xml'
+    }
     Write-Host "Code coverage enabled for: $profilePath"
 }
 

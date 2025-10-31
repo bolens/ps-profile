@@ -15,6 +15,8 @@ Opens the specified file or URL using the appropriate system command.
 open
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\30-open.ps1
+Defined in: profile.d\30-open.ps1

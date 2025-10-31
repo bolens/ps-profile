@@ -14,6 +14,8 @@ Displays information about PowerShell commands and their locations.
 which
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\07-system.ps1
+Defined in: profile.d\07-system.ps1

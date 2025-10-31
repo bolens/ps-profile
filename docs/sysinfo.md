@@ -14,6 +14,8 @@ Displays basic computer system information including name, manufacturer, model, 
 sysinfo
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\08-system-info.ps1
+Defined in: profile.d\08-system-info.ps1

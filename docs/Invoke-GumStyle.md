@@ -14,6 +14,8 @@ Applies foreground and background colors to text using gum's styling capabilitie
 Invoke-GumStyle
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\63-gum.ps1
+Defined in: profile.d\63-gum.ps1

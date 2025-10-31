@@ -14,6 +14,8 @@ Displays a spinning indicator with a title while executing the provided script b
 Invoke-GumSpin
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\63-gum.ps1
+Defined in: profile.d\63-gum.ps1

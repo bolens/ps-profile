@@ -14,6 +14,8 @@ Opens the specified file in VS Code if available.
 e
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\15-shortcuts.ps1
+Defined in: profile.d\15-shortcuts.ps1

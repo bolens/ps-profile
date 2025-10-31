@@ -15,6 +15,8 @@ Sets the CONTAINER_ENGINE_PREFERENCE environment variable to specify whether to 
 Set-ContainerEnginePreference
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\24-container-utils.ps1
+Defined in: profile.d\24-container-utils.ps1

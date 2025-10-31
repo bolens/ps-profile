@@ -14,6 +14,8 @@ Displays all user-defined functions in the current PowerShell session.
 list-functions
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\05-utilities.ps1
+Defined in: profile.d\05-utilities.ps1

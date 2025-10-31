@@ -14,6 +14,8 @@ Displays a verbose list of all installed WSL distributions including their state
 wsl-list
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\10-wsl.ps1
+Defined in: profile.d\10-wsl.ps1

@@ -14,6 +14,8 @@ Adds packages as dev dependencies to the project using pnpm.
 Invoke-PnpmDevInstall
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\69-pnpm.ps1
+Defined in: profile.d\69-pnpm.ps1

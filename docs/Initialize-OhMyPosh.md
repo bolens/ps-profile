@@ -16,6 +16,8 @@ Checks for oh-my-posh command availability and initializes the prompt
 Initialize-OhMyPosh
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -24,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\06-oh-my-posh.ps1
+Defined in: profile.d\06-oh-my-posh.ps1

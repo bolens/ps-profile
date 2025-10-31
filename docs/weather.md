@@ -14,6 +14,8 @@ Retrieves and displays weather information for a specified location using wttr.i
 weather
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\05-utilities.ps1
+Defined in: profile.d\05-utilities.ps1

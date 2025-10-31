@@ -14,10 +14,11 @@ Sets the value of an environment variable in the Windows registry and broadcasts
 Set-EnvVar
 ```
 
+## Parameters
+
 ### -Name
 
 The name of the environment variable.
-
 ### -Value
 
 The value to set. If null or empty, the variable is removed.
@@ -28,4 +29,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\05-utilities.ps1
+Defined in: profile.d\05-utilities.ps1

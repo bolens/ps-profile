@@ -14,6 +14,8 @@ Copies files and directories to specified destinations.
 cp
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\07-system.ps1
+Defined in: profile.d\07-system.ps1

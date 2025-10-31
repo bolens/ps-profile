@@ -14,6 +14,8 @@ Displays file size in appropriate units (bytes, KB, MB, GB, TB).
 filesize
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: profile.d\02-files.ps1

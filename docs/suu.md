@@ -14,6 +14,8 @@ Updates all installed packages and Scoop itself.
 suu
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\09-package-managers.ps1
+Defined in: profile.d\09-package-managers.ps1

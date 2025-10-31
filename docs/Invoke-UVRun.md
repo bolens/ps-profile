@@ -14,6 +14,8 @@ Executes Python commands with their dependencies automatically managed in isolat
 Invoke-UVRun
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\67-uv.ps1
+Defined in: profile.d\67-uv.ps1

@@ -16,6 +16,8 @@ Returns information about available container engines (Docker/Podman) and their 
 Test-ContainerEngine
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -24,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\24-container-utils.ps1
+Defined in: profile.d\24-container-utils.ps1

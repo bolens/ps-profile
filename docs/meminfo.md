@@ -14,6 +14,8 @@ Displays total physical memory capacity in GB.
 meminfo
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\08-system-info.ps1
+Defined in: profile.d\08-system-info.ps1

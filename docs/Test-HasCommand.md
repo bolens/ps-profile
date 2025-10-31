@@ -15,6 +15,8 @@ Utility function to check if a command exists. Uses fast provider checks first
 Test-HasCommand
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\00-bootstrap.ps1
+Defined in: profile.d\00-bootstrap.ps1

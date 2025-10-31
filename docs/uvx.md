@@ -14,6 +14,8 @@ Executes tools that were installed using uv tool install.
 uvx
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\09-package-managers.ps1
+Defined in: profile.d\09-package-managers.ps1

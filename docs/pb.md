@@ -15,6 +15,8 @@ Retrieves content from the clipboard. Uses Get-Clipboard if available,
 pb
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\16-clipboard.ps1
+Defined in: profile.d\16-clipboard.ps1

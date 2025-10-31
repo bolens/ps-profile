@@ -15,6 +15,8 @@ Lazily initializes additional Git helper functions when first called.
 Ensure-GitHelper
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\11-git.ps1
+Defined in: profile.d\11-git.ps1

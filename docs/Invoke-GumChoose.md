@@ -14,6 +14,8 @@ Displays a list of options for the user to choose from using gum's interactive c
 Invoke-GumChoose
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\63-gum.ps1
+Defined in: profile.d\63-gum.ps1

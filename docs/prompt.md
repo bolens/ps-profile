@@ -16,6 +16,8 @@ This prompt function initializes oh-my-posh on first invocation and then
 prompt
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -24,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\06-oh-my-posh.ps1
+Defined in: profile.d\06-oh-my-posh.ps1

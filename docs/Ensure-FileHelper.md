@@ -15,6 +15,8 @@ Sets up all file-related utility functions when any of them is called for the fi
 Ensure-FileHelper
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: profile.d\02-files.ps1

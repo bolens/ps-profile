@@ -10,8 +10,38 @@ param(
     [string]$OutputPath = "docs"
 )
 
+# Helper function for GetRelativePath compatibility with older .NET versions
+function Get-RelativePath {
+    param([string]$From, [string]$To)
+
+    $fromUri = [Uri]::new($From)
+    $toUri = [Uri]::new($To)
+
+    if ($fromUri.Scheme -ne $toUri.Scheme) {
+        return $To
+    }
+
+    $relativeUri = $fromUri.MakeRelativeUri($toUri)
+    $relativePath = [Uri]::UnescapeDataString($relativeUri.ToString())
+
+    # Convert forward slashes to backslashes on Windows
+    if ([Environment]::OSVersion.Platform -eq 'Win32NT') {
+        $relativePath = $relativePath -replace '/', '\'
+    }
+
+    return $relativePath
+}
+
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$docsPath = Join-Path $repoRoot $OutputPath
+
+# Handle OutputPath - if it's absolute, use it directly, otherwise join with repo root
+if ([System.IO.Path]::IsPathRooted($OutputPath)) {
+    $docsPath = $OutputPath
+}
+else {
+    $docsPath = Join-Path $repoRoot $OutputPath
+}
+
 $profilePath = Join-Path $repoRoot 'profile.d'
 
 Write-Output "Generating API documentation..."
@@ -157,12 +187,13 @@ $($function.Signature)
 "@
 
     if ($function.Parameters.Count -gt 0) {
+        $content += "`n`n## Parameters`n"
         foreach ($param in $function.Parameters) {
-            $content += "`n`n### -$($param.Name)`n`n$($param.Description)"
+            $content += "`n### -$($param.Name)`n`n$($param.Description)"
         }
     }
     else {
-        $content += "`n`nNo parameters."
+        $content += "`n`n## Parameters`n`nNo parameters."
     }
 
     $content += "`n`n## Examples"
@@ -176,7 +207,7 @@ $($function.Signature)
         $content += "`n`nNo examples provided."
     }
 
-    $content += "`n`n## Source`n`nDefined in: $([System.IO.Path]::GetRelativePath($docsPath, $function.File))"
+    $content += "`n`n## Source`n`nDefined in: $(Get-RelativePath $docsPath $function.File)"
 
     $content | Out-File -FilePath $mdFile -Encoding UTF8 -NoNewline:$false
     Write-Output "Generated documentation: $mdFile"

@@ -14,6 +14,8 @@ Executes commands within the pixi-managed environment with all dependencies avai
 Invoke-PixiRun
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\68-pixi.ps1
+Defined in: profile.d\68-pixi.ps1

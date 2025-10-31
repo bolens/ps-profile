@@ -16,10 +16,11 @@ Defines a helper function that creates aliases or function wrappers
 Set-AgentModeAlias
 ```
 
+## Parameters
+
 ### -Name
 
 The name of the alias to create.
-
 ### -Target
 
 The target command for the alias.
@@ -30,4 +31,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\00-bootstrap.ps1
+Defined in: profile.d\00-bootstrap.ps1

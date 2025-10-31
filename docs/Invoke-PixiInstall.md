@@ -14,6 +14,8 @@ Adds packages to the pixi project environment.
 Invoke-PixiInstall
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\68-pixi.ps1
+Defined in: profile.d\68-pixi.ps1

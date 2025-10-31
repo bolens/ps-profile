@@ -14,6 +14,8 @@ Calculates and displays the time elapsed since the system was last booted.
 uptime
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\08-system-info.ps1
+Defined in: profile.d\08-system-info.ps1

@@ -14,6 +14,8 @@ Replacement for pip that uses uv for faster Python package management.
 pip
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\67-uv.ps1
+Defined in: profile.d\67-uv.ps1

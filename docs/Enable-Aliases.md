@@ -16,6 +16,8 @@ Registers common aliases and small interactive helper functions in an idempotent
 Enable-Aliases
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -24,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\33-aliases.ps1
+Defined in: profile.d\33-aliases.ps1

@@ -14,6 +14,8 @@ Terminates all running WSL distributions and shuts down the WSL subsystem.
 wsl-shutdown
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\10-wsl.ps1
+Defined in: profile.d\10-wsl.ps1

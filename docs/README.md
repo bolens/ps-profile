@@ -3,7 +3,7 @@
     This documentation is automatically generated from comment-based help in the profile functions.
 
     **Total Functions:** 153
-    **Generated:** 2025-10-31 11:46:06
+    **Generated:** 2025-10-31 12:25:55
 
     ## Functions by Fragment
 

@@ -14,6 +14,8 @@ Executes ansible-playbook commands through WSL bash shell with proper UTF-8 loca
 ansible-playbook
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\13-ansible.ps1
+Defined in: profile.d\13-ansible.ps1

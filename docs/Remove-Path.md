@@ -14,6 +14,8 @@ Removes the specified directory from the PATH environment variable if it exists.
 Remove-Path
 ```
 
+## Parameters
+
 ### -Path
 
 The directory path to remove from PATH.
@@ -24,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\05-utilities.ps1
+Defined in: profile.d\05-utilities.ps1

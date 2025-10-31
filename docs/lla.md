@@ -14,6 +14,8 @@ Shows all files including hidden ones in detailed long format.
 lla
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\61-eza.ps1
+Defined in: profile.d\61-eza.ps1

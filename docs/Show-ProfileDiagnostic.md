@@ -16,6 +16,8 @@ Displays diagnostic information including PowerShell version, PATH entries,
 Show-ProfileDiagnostic
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -24,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\59-diagnostics.ps1
+Defined in: profile.d\59-diagnostics.ps1

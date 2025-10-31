@@ -15,6 +15,8 @@ Runs 'compose up -d' using the available container engine, preferring Docker ove
 dcu
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -23,4 +25,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\22-containers.ps1
+Defined in: profile.d\22-containers.ps1

@@ -14,6 +14,8 @@ Searches navi cheatsheets and returns the best matching command. If a query is p
 Invoke-NaviBest
 ```
 
+## Parameters
+
 No parameters.
 
 ## Examples
@@ -22,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\62-navi.ps1
+Defined in: profile.d\62-navi.ps1
