@@ -11,6 +11,7 @@ See the fragment source: `33-aliases.ps1` for examples and usage notes.
 
 Functions
 ---------
+- `Enable-Aliases` — Enables user-defined aliases and helper functions for enhanced shell experience
 - `ll` — List directory contents - enhanced ls
 - `la` — List all directory contents - enhanced ls -a
 - `Show-Path` — Show PATH entries as an array

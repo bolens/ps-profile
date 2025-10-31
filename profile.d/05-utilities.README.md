@@ -36,5 +36,6 @@ None explicit; see the fragment for runtime checks and optional tooling dependen
 
 Notes
 -----
-Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers. Environment variable functions provide Scoop compatibility for package installation scripts.
+Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.
+Environment variable functions provide Scoop compatibility for package installation scripts.
 

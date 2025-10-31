@@ -34,15 +34,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [filesize](filesize.md) - Shows human-readable file size.
 - [from-base64](from-base64.md) - Decodes base64 input to text.
 - [from-epoch](from-epoch.md) - Converts Unix timestamp to DateTime.
-- [function](function.md) - 
+- [function](function.md) -
 - [Get-ContainerEngineInfo](Get-ContainerEngineInfo.md) - Gets information about available container engines and compose tools.
 - [Get-EnvVar](Get-EnvVar.md) - Gets an environment variable value from the registry.
 - [Get-History](Get-History.md) - Shows recent command history.
 - [head](head.md) - Shows the first N lines of a file.
 - [hg](hg.md) - Searches command history.
 - [htop](htop.md) - Shows top CPU-consuming processes.
-- [Initialize-OhMyPosh](Initialize-OhMyPosh.md) - 
-- [Initialize-Starship](Initialize-Starship.md) - 
+- [Initialize-OhMyPosh](Initialize-OhMyPosh.md) -
+- [Initialize-Starship](Initialize-Starship.md) -
 - [Install-UVTool](Install-UVTool.md) - Installs Python tools globally using uv.
 - [Invoke-GumChoose](Invoke-GumChoose.md) - Shows an interactive selection menu using gum.
 - [Invoke-GumConfirm](Invoke-GumConfirm.md) - Shows a confirmation prompt using gum.
@@ -116,7 +116,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Set-ContainerEnginePreference](Set-ContainerEnginePreference.md) - Sets the preferred container engine for the session.
 - [Set-EnvVar](Set-EnvVar.md) - Sets an environment variable value in the registry.
 - [sh](sh.md) - Shows information about Scoop packages.
-- [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) - 
+- [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) -
 - [sinstall](sinstall.md) - Installs packages using Scoop.
 - [slist](slist.md) - Lists installed Scoop packages.
 - [speedtest](speedtest.md) - Runs internet speed test.

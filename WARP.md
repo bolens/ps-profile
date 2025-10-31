@@ -147,7 +147,7 @@ Two prompt systems are supported with lazy initialization:
 ## Commit Messages
 
 Use Conventional Commits format:
-```
+```text
 feat(cli): add new command
 fix: correct edge-case handling
 docs: update README

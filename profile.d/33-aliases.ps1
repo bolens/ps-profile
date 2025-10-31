@@ -6,6 +6,20 @@ idempotent, non-destructive way.
 #>
 
 # Define Enable-Aliases function
+<#
+.SYNOPSIS
+    Enables user-defined aliases and helper functions for enhanced shell experience.
+
+.DESCRIPTION
+    Registers common aliases and small interactive helper functions in an idempotent way.
+    This includes enhanced directory listing functions and PATH display utilities.
+    The function ensures aliases are only loaded once per session.
+
+.EXAMPLE
+    Enable-Aliases
+
+    Enables all user-defined aliases for the current session.
+#>
 function Enable-Aliases {
     param()
     try {
