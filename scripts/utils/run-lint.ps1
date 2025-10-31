@@ -109,7 +109,6 @@ Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
         $results = Invoke-ScriptAnalyzer -Path $file -Recurse -Severity Error -SettingsPath $settingsFile
     }
     elseif ($settingsFile -and -not $supportsSettings) {
-        Write-Output "Warning: installed PSScriptAnalyzer does not support -SettingsPath; falling back to defaults."
         $results = Invoke-ScriptAnalyzer -Path $file -Recurse -Severity Error
         # Manually filter out excluded rules
         if ($excludeRules.Count -gt 0) {
