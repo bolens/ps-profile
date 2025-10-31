@@ -1,20 +1,20 @@
-    # PowerShell Profile API Documentation
+# PowerShell Profile API Documentation
 
-    This documentation is automatically generated from comment-based help in the profile functions.
+This documentation is automatically generated from comment-based help in the profile functions.
 
-    **Total Functions:** 153
-    **Generated:** 2025-10-31 12:25:55
+**Total Functions:** 153
+**Generated:** 2025-10-31 13:00:54
 
-    ## Functions by Fragment
+## Functions by Fragment
 
-    ### 00-bootstrap (4 functions)
+### 00-bootstrap (4 functions)
 
 - [Set-AgentModeAlias](Set-AgentModeAlias.md) - Creates collision-safe aliases for profile fragments.
 - [Set-AgentModeFunction](Set-AgentModeFunction.md) - Creates collision-safe functions for profile fragments.
 - [Test-CachedCommand](Test-CachedCommand.md) - Tests for command availability with caching.
 - [Test-HasCommand](Test-HasCommand.md) - Tests if a command is available.
 
- ### 02-files (23 functions)
+### 02-files (23 functions)
 
 - [..](...md) - Changes to the parent directory.
 - [...](....md) - Changes to the grandparent directory.
@@ -40,7 +40,7 @@
 - [xml-to-json](xml-to-json.md) - Converts XML file to JSON format.
 - [yaml-to-json](yaml-to-json.md) - Converts YAML to JSON format.
 
- ### 05-utilities (19 functions)
+### 05-utilities (19 functions)
 
 - [Add-Path](Add-Path.md) - Adds a directory to the PATH environment variable.
 - [backup-profile](backup-profile.md) - Creates a backup of the profile.
@@ -62,12 +62,12 @@
 - [speedtest](speedtest.md) - Runs internet speed test.
 - [weather](weather.md) - Shows weather information.
 
- ### 06-oh-my-posh (2 functions)
+### 06-oh-my-posh (2 functions)
 
 - [Initialize-OhMyPosh](Initialize-OhMyPosh.md) - Initializes oh-my-posh prompt framework lazily.
 - [prompt](prompt.md) - PowerShell prompt function with lazy oh-my-posh initialization.
 
- ### 07-system (20 functions)
+### 07-system (20 functions)
 
 - [code](code.md) - Opens files in Visual Studio Code.
 - [cp](cp.md) - Copies files and directories.
@@ -90,7 +90,7 @@
 - [which](which.md) - Shows information about commands.
 - [zip](zip.md) - Creates ZIP archives.
 
- ### 08-system-info (5 functions)
+### 08-system-info (5 functions)
 
 - [battery](battery.md) - Shows battery information.
 - [cpuinfo](cpuinfo.md) - Shows CPU information.
@@ -98,7 +98,7 @@
 - [sysinfo](sysinfo.md) - Shows system information.
 - [uptime](uptime.md) - Shows system uptime.
 
- ### 09-package-managers (21 functions)
+### 09-package-managers (21 functions)
 
 - [pna](pna.md) - Adds packages using PNPM.
 - [pnb](pnb.md) - Builds the project using PNPM.
@@ -122,17 +122,17 @@
 - [uvs](uvs.md) - Syncs UV project dependencies.
 - [uvx](uvx.md) - Runs tools installed with UV.
 
- ### 10-wsl (3 functions)
+### 10-wsl (3 functions)
 
 - [ubuntu](ubuntu.md) - Launches or switches to Ubuntu WSL distribution.
 - [wsl-list](wsl-list.md) - Lists all WSL distributions with their status.
 - [wsl-shutdown](wsl-shutdown.md) - Shuts down all WSL distributions.
 
- ### 11-git (1 functions)
+### 11-git (1 functions)
 
 - [Ensure-GitHelper](Ensure-GitHelper.md) - Ensures Git helper functions are initialized.
 
- ### 13-ansible (6 functions)
+### 13-ansible (6 functions)
 
 - [ansible](ansible.md) - Runs Ansible commands via WSL with UTF-8 locale.
 - [ansible-doc](ansible-doc.md) - Runs Ansible documentation commands via WSL with UTF-8 locale.
@@ -141,18 +141,18 @@
 - [ansible-playbook](ansible-playbook.md) - Runs Ansible playbook commands via WSL with UTF-8 locale.
 - [ansible-vault](ansible-vault.md) - Runs Ansible Vault commands via WSL with UTF-8 locale.
 
- ### 15-shortcuts (3 functions)
+### 15-shortcuts (3 functions)
 
 - [e](e.md) - Opens file in editor quickly.
 - [project-root](project-root.md) - Changes to project root directory.
 - [vsc](vsc.md) - Opens current directory in VS Code.
 
- ### 16-clipboard (2 functions)
+### 16-clipboard (2 functions)
 
 - [cb](cb.md) - Copies input to the clipboard.
 - [pb](pb.md) - Pastes content from the clipboard.
 
- ### 22-containers (9 functions)
+### 22-containers (9 functions)
 
 - [dcd](dcd.md) - Stops container services using compose (Docker-first).
 - [dcl](dcl.md) - Shows container logs using compose (Docker-first).
@@ -164,28 +164,28 @@
 - [pcu](pcu.md) - Starts container services using compose (Podman-first).
 - [pprune](pprune.md) - Prunes unused container system resources (Podman-first).
 
- ### 23-starship (1 functions)
+### 23-starship (1 functions)
 
 - [Initialize-Starship](Initialize-Starship.md) - Initializes the Starship prompt for PowerShell.
 
- ### 24-container-utils (2 functions)
+### 24-container-utils (2 functions)
 
 - [Set-ContainerEnginePreference](Set-ContainerEnginePreference.md) - Sets the preferred container engine for the session.
 - [Test-ContainerEngine](Test-ContainerEngine.md) - Tests for available container engines and compose tools.
 
- ### 30-open (1 functions)
+### 30-open (1 functions)
 
 - [open](open.md) - Opens files or URLs using the system's default application.
 
- ### 33-aliases (1 functions)
+### 33-aliases (1 functions)
 
 - [Enable-Aliases](Enable-Aliases.md) - Enables user-defined aliases and helper functions for enhanced shell experience.
 
- ### 59-diagnostics (1 functions)
+### 59-diagnostics (1 functions)
 
 - [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) - Shows profile diagnostic information.
 
- ### 61-eza (11 functions)
+### 61-eza (11 functions)
 
 - [l](l.md) - Lists directory contents using eza (short alias).
 - [la](la.md) - Lists all directory contents including hidden files using eza.
@@ -199,13 +199,13 @@
 - [lta](lta.md) - Lists all directory contents in tree format using eza.
 - [ltime](ltime.md) - Lists directory contents sorted by modification time using eza.
 
- ### 62-navi (3 functions)
+### 62-navi (3 functions)
 
 - [Invoke-NaviBest](Invoke-NaviBest.md) - Finds the best matching command from navi cheatsheets.
 - [Invoke-NaviPrint](Invoke-NaviPrint.md) - Prints commands from navi cheatsheets without executing them.
 - [Invoke-NaviSearch](Invoke-NaviSearch.md) - Searches navi cheatsheets interactively.
 
- ### 63-gum (5 functions)
+### 63-gum (5 functions)
 
 - [Invoke-GumChoose](Invoke-GumChoose.md) - Shows an interactive selection menu using gum.
 - [Invoke-GumConfirm](Invoke-GumConfirm.md) - Shows a confirmation prompt using gum.
@@ -213,27 +213,25 @@
 - [Invoke-GumSpin](Invoke-GumSpin.md) - Shows a spinner while executing a script block using gum.
 - [Invoke-GumStyle](Invoke-GumStyle.md) - Styles text output using gum.
 
- ### 67-uv (4 functions)
+### 67-uv (4 functions)
 
 - [Install-UVTool](Install-UVTool.md) - Installs Python tools globally using uv.
 - [Invoke-UVRun](Invoke-UVRun.md) - Runs Python commands in temporary virtual environments using uv.
 - [New-UVVenv](New-UVVenv.md) - Creates Python virtual environments using uv.
 - [pip](pip.md) - Python package manager using uv instead of pip.
 
- ### 68-pixi (3 functions)
+### 68-pixi (3 functions)
 
 - [Invoke-PixiInstall](Invoke-PixiInstall.md) - Installs packages using pixi.
 - [Invoke-PixiRun](Invoke-PixiRun.md) - Runs commands in the pixi environment.
 - [Invoke-PixiShell](Invoke-PixiShell.md) - Activates the pixi shell environment.
 
- ### 69-pnpm (3 functions)
+### 69-pnpm (3 functions)
 
 - [Invoke-PnpmDevInstall](Invoke-PnpmDevInstall.md) - Installs development packages using pnpm.
 - [Invoke-PnpmInstall](Invoke-PnpmInstall.md) - Installs packages using pnpm.
 - [Invoke-PnpmRun](Invoke-PnpmRun.md) - Runs npm scripts using pnpm.
 
+## Generation
 
-
-    ## Generation
-
-    This documentation was generated from the comment-based help in the profile fragments.
+This documentation was generated from the comment-based help in the profile fragments.

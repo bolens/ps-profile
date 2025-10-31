@@ -189,7 +189,7 @@ $($function.Signature)
     if ($function.Parameters.Count -gt 0) {
         $content += "`n`n## Parameters`n"
         foreach ($param in $function.Parameters) {
-            $content += "`n### -$($param.Name)`n`n$($param.Description)"
+            $content += "`n### -$($param.Name)`n`n$($param.Description)`n"
         }
     }
     else {
@@ -217,24 +217,29 @@ $($function.Signature)
 $groupedFunctions = $functions | Group-Object { [System.IO.Path]::GetFileName($_.File) } | Sort-Object Name
 
 $indexContent = @"
-    # PowerShell Profile API Documentation
+# PowerShell Profile API Documentation
 
-    This documentation is automatically generated from comment-based help in the profile functions.
+This documentation is automatically generated from comment-based help in the profile functions.
 
-    **Total Functions:** $($functions.Count)
-    **Generated:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+**Total Functions:** $($functions.Count)
+**Generated:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 
-    ## Functions by Fragment
+## Functions by Fragment
 
-    $(foreach ($group in $groupedFunctions) {
-            $fragmentName = $group.Name -replace '\.ps1$', ''
-            $functionList = $group.Group | Sort-Object Name | ForEach-Object { "- [$($_.Name)]($($_.Name).md) - $($_.Synopsis)" }
-            "### $fragmentName ($($group.Count) functions)`n`n$($functionList -join "`n")`n`n"
-        })
+"@
 
-    ## Generation
+foreach ($group in $groupedFunctions) {
+    $fragmentName = $group.Name -replace '\.ps1$', ''
+    $functionList = $group.Group | Sort-Object Name | ForEach-Object { "- [$($_.Name)]($($_.Name).md) - $($_.Synopsis)" }
+    $indexContent += "`n### $fragmentName ($($group.Count) functions)`n`n$($functionList -join "`n")`n"
+}
 
-    This documentation was generated from the comment-based help in the profile fragments.
+$indexContent += @"
+
+
+## Generation
+
+This documentation was generated from the comment-based help in the profile fragments.
 "@
 
 $indexContent | Out-File -FilePath (Join-Path $docsPath 'README.md') -Encoding UTF8 -NoNewline:$false

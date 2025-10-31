@@ -19,6 +19,7 @@ Set-EnvVar
 ### -Name
 
 The name of the environment variable.
+
 ### -Value
 
 The value to set. If null or empty, the variable is removed.

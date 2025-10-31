@@ -4,6 +4,7 @@ This directory contains small, focused PowerShell scripts that are dot-sourced
 from `Microsoft.PowerShell_profile.ps1` during interactive session startup.
 
 Guidelines:
+
 - Keep fragments idempotent: avoid re-defining existing functions/aliases unless
   necessary. Use `Get-Command -ErrorAction SilentlyContinue` to guard.
 - Prefer `Set-Item -Path "Function:<name>" -Value <scriptblock> -Option AllScope`
@@ -19,13 +20,13 @@ Files are loaded in lexical order (sorted by filename). To control load order,
 prefix names with numeric or alphabetic prefixes (e.g., `00-init.ps1`, `10-git.ps1`).
 
 Examples/Helpers:
+
 - Use `reload` to reload your profile: `reload` (already provided in `utilities.ps1`).
 - Use `backup-profile` to create a timestamped backup of the main profile.
 
 Keep this README updated whenever you add new fragments.
 
-Common quick examples
----------------------
+## Common quick examples
 
 - Convert JSON to YAML (03-files provides helpers):
   - Get-Content data.json | ConvertFrom-Json | ConvertTo-Yaml
@@ -36,22 +37,22 @@ Common quick examples
 - Copy output to clipboard:
   - Get-Process | Out-String | cb
 
-Where to add fragments
-----------------------
+## Where to add fragments
+
 Add short, focused files in this directory and prefix them with numbers to
 control load order. Keep each fragment idempotent and guard calls to external
 tools with `Get-Command` checks to avoid noisy errors.
 
-Spellcheck
----------
+## Spellcheck
+
 - This repository includes a GitHub Actions workflow that runs `cspell` on
   pushes and PRs (`.github/workflows/spellcheck.yml`). Locally you can run
   `scripts\spellcheck.ps1`. To opt into a local pre-commit hook, create the
   file `.hooks/enable` — a tracked shim lives at `.hooks/pre-commit` which will
   invoke the script (non-blocking by default).
 
-Performance & lazy helpers
---------------------------
+## Performance & lazy helpers
+
 To keep interactive startup time low, many fragments avoid doing expensive
 discovery or imports at dot-source. Instead, heavy work is deferred behind
 small Enable-* helpers. Examples:

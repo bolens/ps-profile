@@ -34,6 +34,7 @@ Notes
 
 Timings / micro-instrumentation
 --------------------------------
+
 Some fragments include lightweight instrumentation that appends CSV rows to
 `scripts/*.csv` when enabled. To enable per-step timing for development:
 

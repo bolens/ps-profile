@@ -5,6 +5,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 ## Development Commands
 
 ### Validation & Testing
+
 ```powershell
 # Full validation (format + security + lint + idempotency)
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1
@@ -25,6 +26,7 @@ pwsh -NoProfile -File scripts/utils/check-module-updates.ps1
 ```
 
 ### Git Hooks
+
 ```powershell
 # Install pre-commit, pre-push, and commit-msg hooks
 pwsh -NoProfile -File scripts/git/install-githooks.ps1
@@ -34,6 +36,7 @@ chmod +x .git/hooks/*
 ```
 
 ### Performance Benchmarking
+
 ```powershell
 # Measure startup performance (30 iterations recommended)
 pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
@@ -41,6 +44,7 @@ pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
 ```
 
 ### Documentation Generation
+
 ```powershell
 # Generate API documentation from comment-based help
 pwsh -NoProfile -File scripts/utils/generate-docs.ps1
@@ -48,6 +52,7 @@ pwsh -NoProfile -File scripts/utils/generate-docs.ps1
 ```
 
 ### Testing Profile Changes
+
 ```powershell
 # Reload profile in current session
 . $PROFILE
@@ -64,6 +69,7 @@ pwsh -NoProfile -File scripts/utils/generate-docs.ps1
 ### Profile Fragment Loading Order
 
 Fragments use numeric prefixes to control load order:
+
 - **00-09**: Core bootstrap, environment, and helpers
 - **10-19**: Terminal configuration (PSReadLine, prompts, Git)
 - **20-29**: Container engines, cloud tools
@@ -78,16 +84,19 @@ Fragments use numeric prefixes to control load order:
 Three collision-safe registration helpers are available to all fragments:
 
 1. **Set-AgentModeFunction**: Creates functions without overwriting existing commands
+
    ```powershell
    Set-AgentModeFunction -Name 'MyFunc' -Body { Write-Output "Hello" }
    ```
 
 2. **Set-AgentModeAlias**: Creates aliases or function wrappers without overwriting
+
    ```powershell
    Set-AgentModeAlias -Name 'gs' -Target 'git status'
    ```
 
 3. **Test-CachedCommand**: Fast command existence check with caching
+
    ```powershell
    if (Test-CachedCommand 'docker') { # configure docker helpers }
    ```
@@ -95,6 +104,7 @@ Three collision-safe registration helpers are available to all fragments:
 #### Fragment Idempotency
 
 All fragments MUST be idempotent (safe to source multiple times). Use:
+
 - `Set-AgentModeFunction` / `Set-AgentModeAlias` for registration
 - `Test-Path Function:\Name` or `Test-Path Alias:\Name` for fast provider checks
 - `Get-Command -ErrorAction SilentlyContinue` guards for external tools
@@ -107,6 +117,7 @@ All fragments MUST be idempotent (safe to source multiple times). Use:
 - **No Side Effects at Load**: Keep fragment dot-sourcing fast; defer work to functions
 
 Example lazy loading pattern:
+
 ```powershell
 # In fragment: register enabler function only
 Set-AgentModeFunction -Name 'Enable-MyTool' -Body {
@@ -119,6 +130,7 @@ Set-AgentModeFunction -Name 'Enable-MyTool' -Body {
 ### Container Engine Support
 
 Fragments in `profile.d/22-containers.ps1` and `profile.d/24-container-utils.ps1` provide:
+
 - Auto-detection of Docker or Podman with compose support
 - Unified aliases (dcu, dcd, dcl, dps, dprune, etc.) that work with either engine
 - `Set-ContainerEnginePreference docker|podman` to force preference
@@ -127,12 +139,14 @@ Fragments in `profile.d/22-containers.ps1` and `profile.d/24-container-utils.ps1
 ### Prompt Frameworks
 
 Two prompt systems are supported with lazy initialization:
+
 - **oh-my-posh** (06-oh-my-posh.ps1): Use `Initialize-OhMyPosh` to activate
 - **Starship** (23-starship.ps1): Use `Initialize-Starship` to activate
 
 ### PSScriptAnalyzer Configuration
 
 `PSScriptAnalyzerSettings.psd1` disables noisy rules for interactive profile code:
+
 - Allows cmdlet aliases
 - Allows Write-Host for user feedback
 - Per-file suppressions for known acceptable patterns
@@ -147,6 +161,7 @@ Two prompt systems are supported with lazy initialization:
 ## Commit Messages
 
 Use Conventional Commits format:
+
 ```text
 feat(cli): add new command
 fix: correct edge-case handling

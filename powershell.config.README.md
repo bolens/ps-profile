@@ -8,11 +8,13 @@ Current content:
     {"Microsoft.PowerShell:ExecutionPolicy":"RemoteSigned"}
 
 Meaning:
+
 - Microsoft.PowerShell:ExecutionPolicy — sets the PowerShell execution policy for
   this user/machine when using PowerShell Core. "RemoteSigned" allows running
   local scripts and requires that downloaded scripts are signed.
 
 Suggestions:
+
 - If you prefer a stricter policy, consider `AllSigned` (requires signing of
   all scripts).
 - For local development machines, `RemoteSigned` is a good compromise.

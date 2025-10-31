@@ -8,11 +8,13 @@ A modular, performance-optimized PowerShell profile for interactive shells. Feat
 ## Quick Start
 
 1. Clone this repository to your PowerShell profile location:
+
    ```powershell
    git clone https://github.com/bolens/ps-profile.git $HOME\Documents\PowerShell
    ```
 
 2. Reload your profile:
+
    ```powershell
    . $PROFILE
    ```

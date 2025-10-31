@@ -4,8 +4,8 @@ Contributing
 Thanks for contributing to this PowerShell profile workspace. A few quick notes to
 make contributions smooth:
 
-Local validation
-----------------
+## Local validation
+
 Run these locally before opening a PR:
 
 ```powershell
@@ -34,8 +34,8 @@ pwsh -NoProfile -File scripts/utils/check-module-updates.ps1
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1
 ```
 
-Commit messages and hooks
---------------------------
+## Commit messages and hooks
+
 We use Conventional Commits for commit messages. A valid subject looks like:
 
 ```text
@@ -61,14 +61,14 @@ the generated hooks executable:
 chmod +x .git/*
 ```
 
-Style notes
------------
+## Style notes
+
 - Keep fragments idempotent. Use `Set-AgentModeFunction` / `Set-AgentModeAlias`
   and `Get-Command -ErrorAction SilentlyContinue` guards.
 - Keep side-effecting code out of early fragments (e.g., `00-bootstrap.ps1`).
 - Use clear comments and add fragment-level README files.
 
-Questions
----------
+## Questions
+
 If you're unsure about a change, open an issue or a draft PR and tag someone
 who maintains the profile.
