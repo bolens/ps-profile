@@ -53,19 +53,19 @@ if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
 }
 
 # Helper function to track fragment load times
+<#
+.SYNOPSIS
+    Measures and tracks the execution time of profile fragments.
+.DESCRIPTION
+    Wraps the execution of profile fragments to measure their load time.
+    Only tracks timing when PS_PROFILE_DEBUG environment variable is set.
+    Results are stored in a global list for later analysis.
+.PARAMETER FragmentName
+    The name of the fragment being measured.
+.PARAMETER Action
+    The script block to execute and measure.
+#>
 function Measure-FragmentLoadTime {
-    <#
-    .SYNOPSIS
-        Measures and tracks the execution time of profile fragments.
-    .DESCRIPTION
-        Wraps the execution of profile fragments to measure their load time.
-        Only tracks timing when PS_PROFILE_DEBUG environment variable is set.
-        Results are stored in a global list for later analysis.
-    .PARAMETER FragmentName
-        The name of the fragment being measured.
-    .PARAMETER Action
-        The script block to execute and measure.
-    #>
     param([string]$FragmentName, [scriptblock]$Action)
 
     if (-not $env:PS_PROFILE_DEBUG) {
@@ -109,8 +109,32 @@ if (Test-Path $profileD) {
             }
         }
         catch {
-            # Keep failures non-fatal but visible to the user during interactive sessions
-            Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
+            # Enhanced error handling with recovery suggestions
+            if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                Write-ProfileError -ErrorRecord $_ -Context "Profile fragment loading" -Category 'Fragment'
+            }
+            else {
+                # Fallback to basic error reporting
+                Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
+            }
         }
+    }
+}
+
+# ===============================================
+# INITIALIZE ENHANCED FEATURES
+# ===============================================
+# Initialize Starship or smart fallback prompt
+try {
+    if (Get-Command Initialize-Starship -ErrorAction SilentlyContinue) {
+        Initialize-Starship
+    }
+}
+catch {
+    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+        Write-ProfileError -ErrorRecord $_ -Context "Prompt initialization" -Category 'Profile'
+    }
+    else {
+        Write-Warning "Failed to initialize prompt: $($_.Exception.Message)"
     }
 }

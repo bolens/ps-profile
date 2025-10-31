@@ -2,8 +2,8 @@
 
 This documentation is automatically generated from comment-based help in the profile functions.
 
-**Total Functions:** 182
-**Generated:** 2025-10-31 14:45:11
+**Total Functions:** 186
+**Generated:** 2025-10-31 15:00:10
 
 ## Functions by Fragment
 
@@ -194,8 +194,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [pcu](pcu.md) - Starts container services using compose (Podman-first).
 - [pprune](pprune.md) - Prunes unused container system resources (Podman-first).
 
-### 23-starship (1 functions)
+### 23-starship (2 functions)
 
+- [Initialize-SmartPrompt](Initialize-SmartPrompt.md) - Initializes a smart fallback prompt when Starship is not available.
 - [Initialize-Starship](Initialize-Starship.md) - Initializes the Starship prompt for PowerShell.
 
 ### 24-container-utils (2 functions)
@@ -275,6 +276,12 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-WithRetry](Invoke-WithRetry.md) - Executes a network operation with retry logic and timeout handling.
 - [Resolve-HostWithRetry](Resolve-HostWithRetry.md) - Resolves hostnames with retry logic.
 - [Test-NetworkConnectivity](Test-NetworkConnectivity.md) - Tests network connectivity with retry logic.
+
+### 72-error-handling (3 functions)
+
+- [Invoke-ProfileErrorHandler](Invoke-ProfileErrorHandler.md) - Enhanced global error handler with recovery suggestions.
+- [Invoke-SafeFragmentLoad](Invoke-SafeFragmentLoad.md) - Loads profile fragments with enhanced error handling and retry logic.
+- [Write-ProfileError](Write-ProfileError.md) - Logs errors with enhanced context and formatting.
 
 
 ## Generation
