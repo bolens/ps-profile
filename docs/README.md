@@ -30,7 +30,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [edit-profile](edit-profile.md) - Opens the profile in VS Code.
 - [Ensure-FileHelper](Ensure-FileHelper.md) - Initializes file helper functions on first use.
 - [Ensure-GitHelper](Ensure-GitHelper.md) - Ensures Git helper functions are initialized.
-- [ensures](ensures.md) - 
+- [ensures](ensures.md) -
 - [epoch](epoch.md) - Gets current Unix timestamp.
 - [file-hash](file-hash.md) - Calculates file hash using specified algorithm.
 - [filesize](filesize.md) - Shows human-readable file size.
@@ -42,8 +42,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [head](head.md) - Shows the first N lines of a file.
 - [hg](hg.md) - Searches command history.
 - [htop](htop.md) - Shows top CPU-consuming processes.
-- [Initialize-OhMyPosh](Initialize-OhMyPosh.md) - 
-- [Initialize-Starship](Initialize-Starship.md) - 
+- [Initialize-OhMyPosh](Initialize-OhMyPosh.md) -
+- [Initialize-Starship](Initialize-Starship.md) -
 - [Install-UVTool](Install-UVTool.md) - Installs Python tools globally using uv.
 - [Invoke-GumChoose](Invoke-GumChoose.md) - Shows an interactive selection menu using gum.
 - [Invoke-GumConfirm](Invoke-GumConfirm.md) - Shows a confirmation prompt using gum.
@@ -117,7 +117,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Set-ContainerEnginePreference](Set-ContainerEnginePreference.md) - Sets the preferred container engine for the session.
 - [Set-EnvVar](Set-EnvVar.md) - Sets an environment variable value in the registry.
 - [sh](sh.md) - Shows information about Scoop packages.
-- [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) - 
+- [Show-ProfileDiagnostic](Show-ProfileDiagnostic.md) -
 - [sinstall](sinstall.md) - Installs packages using Scoop.
 - [slist](slist.md) - Lists installed Scoop packages.
 - [speedtest](speedtest.md) - Runs internet speed test.
