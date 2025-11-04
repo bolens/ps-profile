@@ -50,7 +50,7 @@ function speedtest { speedtest-cli }
 .DESCRIPTION
     Displays the last 20 commands from the PowerShell command history.
 #>
-function Get-History { Get-History | Select-Object -Last 20 }
+function Get-History { Microsoft.PowerShell.Core\Get-History | Select-Object -Last 20 }
 # Search history
 <#
 .SYNOPSIS
@@ -58,7 +58,7 @@ function Get-History { Get-History | Select-Object -Last 20 }
 .DESCRIPTION
     Searches through PowerShell command history for the specified pattern.
 #>
-function hg { Get-History | Select-String $args }
+function hg { Microsoft.PowerShell.Core\Get-History | Select-String $args }
 # Generate random password
 <#
 .SYNOPSIS

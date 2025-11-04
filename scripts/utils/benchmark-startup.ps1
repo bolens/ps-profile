@@ -111,13 +111,13 @@ Write-Output `$sw.Elapsed.TotalMilliseconds
 }
 
 # Print results
-Write-Output "\nStartup benchmark (ms) - iterations: $Iterations"
+Write-Output "Startup benchmark (ms) - iterations: $Iterations"
 $fullResultsArray = $fullResults.ToArray()
 $currentMean = [Math]::Round(($fullResultsArray | Measure-Object -Average).Average, 2)
 Write-Output "Full startup times (ms): $($fullResultsArray -join ',')"
 Write-Output "Full startup mean (ms): $currentMean"
 
-Write-Output "\nPer-fragment dot-source timings (ms):"
+Write-Output "Per-fragment dot-source timings (ms):"
 $fragmentResults | Sort-Object -Property MeanMs -Descending | Format-Table -AutoSize
 
 # Performance regression detection

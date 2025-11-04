@@ -40,12 +40,18 @@ try {
             return
         }
 
-        # Convert pattern to regex for fuzzy matching
-        $regexPattern = $Pattern.ToCharArray() | ForEach-Object { [regex]::Escape($_) } | Join-String -Separator '.*'
-        $regex = [regex]::new($regexPattern, $(if (-not $CaseSensitive) { [System.Text.RegularExpressions.RegexOptions]::IgnoreCase }))
+        # Limit history to last 500 items for performance and safety
+        $history = $history | Select-Object -Last 500
 
+        # Simple substring matching (much safer than complex patterns)
         $fuzzyMatches = $history | Where-Object {
-            $regex.IsMatch($_.CommandLine)
+            $cmd = $_.CommandLine
+            if (-not $CaseSensitive) {
+                $cmd.ToLower().Contains($Pattern.ToLower())
+            }
+            else {
+                $cmd.Contains($Pattern)
+            }
         } | Select-Object -First $MaxResults
 
         if ($fuzzyMatches.Count -eq 0) {
@@ -56,38 +62,89 @@ try {
         Write-Host "🔍 Fuzzy search results for '$Pattern' ($($fuzzyMatches.Count) matches):" -ForegroundColor Cyan
         Write-Host ""
 
-        $fuzzyMatches | Format-Table -Property @{
-            Name       = "Id"
-            Expression = { $_.Id }
-            Width      = 5
-            Alignment  = "Right"
-        }, @{
-            Name       = "Command"
-            Expression = {
+        try {
+            $fuzzyMatches | Format-Table -Property @(
+                @{
+                    Name       = "Id"
+                    Expression = { $_.Id }
+                    Width      = 5
+                    Alignment  = "Right"
+                },
+                @{
+                    Name       = "Command"
+                    Expression = {
+                        $cmd = $_.CommandLine
+                        if ($cmd.Length -gt 80) {
+                            $cmd.Substring(0, 77) + "..."
+                        }
+                        else {
+                            $cmd
+                        }
+                    }
+                    Width      = 80
+                },
+                @{
+                    Name       = "Time"
+                    Expression = { $_.StartExecutionTime.ToString("HH:mm:ss") }
+                    Width      = 8
+                }
+            ) -AutoSize
+        }
+        catch {
+            # Fallback to simple output if Format-Table fails
+            Write-Host "Error displaying results, showing simple list:" -ForegroundColor Yellow
+            $fuzzyMatches | ForEach-Object {
                 $cmd = $_.CommandLine
-                if ($cmd.Length -gt 80) {
-                    $cmd.Substring(0, 77) + "..."
+                if ($cmd.Length -gt 60) {
+                    $cmd = $cmd.Substring(0, 57) + "..."
                 }
-                else {
-                    $cmd
-                }
+                Write-Host ("{0,5} {1} {2}" -f $_.Id, $cmd, $_.StartExecutionTime.ToString("HH:mm:ss"))
             }
-            Width      = 80
-        }, @{
-            Name       = "Time"
-            Expression = { $_.StartExecutionTime.ToString("HH:mm:ss") }
-            Width      = 8
-        } -AutoSize
+        }
     }
 
-    # Quick history search (alias for Find-HistoryFuzzy)
+    # Quick history search - optimized implementation
     <#
     .SYNOPSIS
-        Quick fuzzy search in command history.
+        Quick search in command history.
     .DESCRIPTION
-        Alias for Find-HistoryFuzzy for quick history searching.
+        Searches command history for the specified pattern.
     #>
-    function fh { Find-HistoryFuzzy @args }
+    function fh {
+        param([string]$Pattern)
+
+        if (-not $Pattern) {
+            Write-Warning "Please provide a search pattern."
+            return
+        }
+
+        $history = Get-History | Select-Object -Last 200  # Limit for performance
+        if (-not $history -or $history.Count -eq 0) {
+            Write-Host "No command history available."
+            return
+        }
+
+        # Use efficient array operations
+        $matches = @()
+        foreach ($item in $history) {
+            if ($item.CommandLine -like "*$Pattern*") {
+                $matches += $item
+                if ($matches.Count -ge 10) { break }  # Limit results
+            }
+        }
+
+        if ($matches.Count -eq 0) {
+            Write-Host "No matches found for: $Pattern"
+            return
+        }
+
+        Write-Host "Search results for '$Pattern' ($($matches.Count) matches):" -ForegroundColor Cyan
+        foreach ($item in $matches) {
+            $cmd = $item.CommandLine
+            if ($cmd.Length -gt 60) { $cmd = $cmd.Substring(0, 57) + "..." }
+            Write-Host ("{0,5} {1}" -f $item.Id, $cmd)
+        }
+    }
 
     # History statistics and insights
     <#
@@ -308,7 +365,7 @@ try {
 
         # Try to parse as number
         if ($CommandInput -match '^\d+$') {
-            $number = [int]$Input
+            $number = [int]$CommandInput
             $command = Get-History | Sort-Object Id -Descending | Select-Object -Skip ($number - 1) -First 1
 
             if (-not $command) {
@@ -336,7 +393,7 @@ try {
         }
         else {
             # Treat as pattern
-            Invoke-LastCommand -Pattern $Input
+            Invoke-LastCommand -Pattern $CommandInput
         }
     }
 

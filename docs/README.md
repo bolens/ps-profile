@@ -3,7 +3,7 @@
 This documentation is automatically generated from comment-based help in the profile functions.
 
 **Total Functions:** 217
-**Generated:** 2025-10-31 15:14:18
+**Generated:** 2025-11-04 09:09:59
 
 ## Functions by Fragment
 
@@ -293,7 +293,7 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### 74-enhanced-history (9 functions)
 
-- [fh](fh.md) - Quick fuzzy search in command history.
+- [fh](fh.md) - Quick search in command history.
 - [Find-HistoryFuzzy](Find-HistoryFuzzy.md) - Performs fuzzy search on command history.
 - [Invoke-LastCommand](Invoke-LastCommand.md) - Shows the last command matching a pattern.
 - [r](r.md) - Executes a command from recent history by number or pattern.

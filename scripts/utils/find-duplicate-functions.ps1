@@ -1,5 +1,5 @@
 # Scans profile.d for functions and prints ones defined in multiple files
-$root = Split-Path -Path $PSScriptRoot -Parent
+$root = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 $profileDir = Join-Path $root 'profile.d'
 if (-not (Test-Path $profileDir)) { Write-Error "profile.d not found at $profileDir"; exit 2 }
 $files = Get-ChildItem -Path $profileDir -Filter '*.ps1' -File

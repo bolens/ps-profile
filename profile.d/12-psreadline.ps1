@@ -15,18 +15,19 @@ try {
 
     # Register a lazy enabler that imports and configures PSReadLine on demand.
     if (-not (Test-Path Function:\Enable-PSReadLine)) {
-        $sb = {
+        # Simplified lazy loading - create function directly without complex scriptblock
+        function global:Enable-PSReadLine {
             try {
+                if ($global:PSReadLineConfigured) { return }
+
                 $historyDir = Join-Path $env:USERPROFILE '.local\share\powershell'
                 if (-not (Test-Path $historyDir)) { New-Item -ItemType Directory -Path $historyDir -Force | Out-Null }
                 $historyFile = Join-Path $historyDir 'PSReadLineHistory.txt'
 
                 Import-Module PSReadLine -ErrorAction SilentlyContinue
-                Set-PSReadLineOption -EditMode Emacs
-                Set-PSReadLineOption -HistorySaveStyle SaveIncrementally
-                Set-PSReadLineOption -MaximumHistoryCount 4096
-                Set-PSReadLineOption -HistoryNoDuplicates:$true
-                Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+                Set-PSReadLineOption -EditMode Emacs -HistorySaveStyle SaveIncrementally -MaximumHistoryCount 4096 -HistoryNoDuplicates:$true -HistorySearchCursorMovesToEnd -HistorySavePath $historyFile
+
+                # Feature detection for newer options
                 $psrCmd = Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue
                 if ($psrCmd -and $psrCmd.Parameters.ContainsKey('PredictionSource')) {
                     Set-PSReadLineOption -PredictionSource Get-History
@@ -34,20 +35,18 @@ try {
                 if ($psrCmd -and $psrCmd.Parameters.ContainsKey('PredictionViewStyle')) {
                     Set-PSReadLineOption -PredictionViewStyle ListView
                 }
-                Set-PSReadLineOption -HistorySavePath $historyFile
 
                 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
                 Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
                 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
                 Set-PSReadLineKeyHandler -Chord 'Ctrl+d' -Function DeleteCharOrExit
 
-                Set-Variable -Name 'PSReadLineConfigured' -Value $true -Scope Global -Force
+                $global:PSReadLineConfigured = $true
             }
             catch {
                 if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Enable-PSReadLine failed: $($_.Exception.Message)" }
             }
         }
-        New-Item -Path Function:\Enable-PSReadLine -Value $sb -Force | Out-Null
     }
 
     # Optionally auto-enable in very interactive cases (only when explicitly requested via env)

@@ -85,21 +85,21 @@ if ($updatesAvailable.Count -gt 0) {
 
     if ($Update) {
         Write-Output "`nUpdating modules..."
-        foreach ($update in $updatesAvailable) {
+        foreach ($moduleUpdate in $updatesAvailable) {
             try {
-                Write-Output "Updating $($update.Name) from $($update.CurrentVersion) to $($update.LatestVersion)..."
-                if ($update.Source -eq "Local") {
+                Write-Output "Updating $($moduleUpdate.Name) from $($moduleUpdate.CurrentVersion) to $($moduleUpdate.LatestVersion)..."
+                if ($moduleUpdate.Source -eq "Local") {
                     # For local modules, update in place
-                    Update-Module -Name $update.Name -RequiredVersion $update.LatestVersion -Force -ErrorAction Stop
+                    Update-Module -Name $moduleUpdate.Name -RequiredVersion $moduleUpdate.LatestVersion -Force -ErrorAction Stop
                 }
                 else {
                     # For system modules, update normally
-                    Install-Module -Name $update.Name -RequiredVersion $update.LatestVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+                    Install-Module -Name $moduleUpdate.Name -RequiredVersion $moduleUpdate.LatestVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
                 }
-                Write-Output "✓ Updated $($update.Name)"
+                Write-Output "✓ Updated $($moduleUpdate.Name)"
             }
             catch {
-                Write-Warning "Failed to update $($update.Name): $($_.Exception.Message)"
+                Write-Warning "Failed to update $($moduleUpdate.Name): $($_.Exception.Message)"
             }
         }
     }

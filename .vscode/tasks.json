@@ -66,6 +66,14 @@
       "problemMatcher": []
     },
     {
+      "label": "Install Module Updates",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\utils\\check-module-updates.ps1", "-Update"],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Generate Changelog",
       "type": "shell",
       "command": "pwsh",
@@ -102,6 +110,43 @@
       "type": "shell",
       "command": "pwsh",
       "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\git\\install-githooks.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Format Code",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\utils\\run-format.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Find Duplicate Functions",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\utils\\find-duplicate-functions.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Fragment READMEs",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\utils\\generate-fragment-readmes.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check Commit Messages",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\checks\\check-commit-messages.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
       "problemMatcher": []
     }

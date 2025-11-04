@@ -8,9 +8,21 @@ Tracks frequently used directories and provides quick jumping functionality.
 try {
     if ($null -ne (Get-Variable -Name 'SmartNavigationLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
 
-    # Initialize directory tracking
-    if (-not $global:PSProfileDirectoryStats) {
-        $global:PSProfileDirectoryStats = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new()
+    # Initialize directory tracking (lazy initialization)
+    if (-not $global:PSProfileDirectoryStats -or
+        -not ($global:PSProfileDirectoryStats.PSObject.Methods.Name -contains 'Initialize')) {
+        # Use Add-Member to ensure the method is properly attached
+        $global:PSProfileDirectoryStats = [PSCustomObject]@{
+            _initialized = $false
+            _data        = $null
+        }
+        $global:PSProfileDirectoryStats | Add-Member -MemberType ScriptMethod -Name 'Initialize' -Value {
+            if (-not $this._initialized) {
+                $this._data = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new()
+                $this._initialized = $true
+            }
+            return $this._data
+        }
     }
 
     # Track directory changes
@@ -29,16 +41,17 @@ try {
         }
 
         $normalizedPath = Resolve-Path $Path
+        $statsDict = $global:PSProfileDirectoryStats.Initialize()
 
         # Update visit count and timestamp
-        if ($global:PSProfileDirectoryStats.ContainsKey($normalizedPath)) {
-            $stats = $global:PSProfileDirectoryStats[$normalizedPath]
+        if ($statsDict.ContainsKey($normalizedPath)) {
+            $stats = $statsDict[$normalizedPath]
             $stats.VisitCount++
             $stats.LastVisited = Get-Date
             $stats.Score = [math]::Round($stats.Score * 0.9 + 10, 2)  # Decay existing score, add new points
         }
         else {
-            $global:PSProfileDirectoryStats[$normalizedPath] = [PSCustomObject]@{
+            $statsDict[$normalizedPath] = [PSCustomObject]@{
                 Path         = $normalizedPath
                 VisitCount   = 1
                 FirstVisited = Get-Date
@@ -48,14 +61,14 @@ try {
         }
 
         # Keep only top 1000 directories to prevent memory bloat
-        if ($global:PSProfileDirectoryStats.Count -gt 1000) {
-            $toRemove = $global:PSProfileDirectoryStats.GetEnumerator() |
+        if ($statsDict.Count -gt 1000) {
+            $toRemove = $statsDict.GetEnumerator() |
                 Sort-Object { $_.Value.Score } |
-                Select-Object -First ($global:PSProfileDirectoryStats.Count - 1000) |
+                Select-Object -First ($statsDict.Count - 1000) |
                 ForEach-Object { $_.Key }
 
             foreach ($key in $toRemove) {
-                $global:PSProfileDirectoryStats.TryRemove($key, [ref]$null)
+                $statsDict.TryRemove($key, [ref]$null)
             }
         }
     }
@@ -78,13 +91,13 @@ try {
             return
         }
 
-        if ($global:PSProfileDirectoryStats.Count -eq 0) {
+        if ($global:PSProfileDirectoryStats.Initialize().Count -eq 0) {
             Write-Host "No directory history available. Start navigating to build history."
             return
         }
 
         # Find matching directories
-        $matchingDirs = $global:PSProfileDirectoryStats.GetEnumerator() | Where-Object {
+        $matchingDirs = $global:PSProfileDirectoryStats.Initialize().GetEnumerator() | Where-Object {
             $_.Key -like "*$Pattern*" -or
             (Split-Path $_.Key -Leaf) -like "*$Pattern*"
         } | Sort-Object {
@@ -137,7 +150,7 @@ try {
             [string]$Pattern
         )
 
-        if ($global:PSProfileDirectoryStats.Count -eq 0) {
+        if ($global:PSProfileDirectoryStats.Initialize().Count -eq 0) {
             Write-Host "No directory history available."
             return
         }
@@ -145,7 +158,7 @@ try {
         Write-Host "📁 Frequent Directories" -ForegroundColor Cyan
         Write-Host "======================" -ForegroundColor Cyan
 
-        $directories = $global:PSProfileDirectoryStats.GetEnumerator()
+        $directories = $global:PSProfileDirectoryStats.Initialize().GetEnumerator()
 
         # Apply pattern filter if provided
         if ($Pattern) {
@@ -304,11 +317,11 @@ try {
         Maintains a navigation history and allows going back to previous directories.
     #>
     function Set-LocationBack {
-        if (-not $global:PSProfileNavigationHistory) {
+        if (-not $global:PSProfileNavigationHistory -or $global:PSProfileNavigationHistory.GetType().Name -ne 'Stack`1') {
             $global:PSProfileNavigationHistory = [System.Collections.Generic.Stack[string]]::new()
         }
 
-        if (-not $global:PSProfileNavigationFuture) {
+        if (-not $global:PSProfileNavigationFuture -or $global:PSProfileNavigationFuture.GetType().Name -ne 'Stack`1') {
             $global:PSProfileNavigationFuture = [System.Collections.Generic.Stack[string]]::new()
         }
 
@@ -333,7 +346,7 @@ try {
         Moves forward in the directory navigation history.
     #>
     function Set-LocationForward {
-        if (-not $global:PSProfileNavigationFuture) {
+        if (-not $global:PSProfileNavigationFuture -or $global:PSProfileNavigationFuture.GetType().Name -ne 'Stack`1') {
             $global:PSProfileNavigationFuture = [System.Collections.Generic.Stack[string]]::new()
         }
 
@@ -370,10 +383,10 @@ try {
         }
 
         # Initialize navigation stacks if needed
-        if (-not $global:PSProfileNavigationHistory) {
+        if (-not $global:PSProfileNavigationHistory -or $global:PSProfileNavigationHistory.GetType().Name -ne 'Stack`1') {
             $global:PSProfileNavigationHistory = [System.Collections.Generic.Stack[string]]::new()
         }
-        if (-not $global:PSProfileNavigationFuture) {
+        if (-not $global:PSProfileNavigationFuture -or $global:PSProfileNavigationFuture.GetType().Name -ne 'Stack`1') {
             $global:PSProfileNavigationFuture = [System.Collections.Generic.Stack[string]]::new()
         }
 
@@ -437,8 +450,8 @@ try {
     Set-Alias -Name f -Value Set-LocationForward -ErrorAction SilentlyContinue
     Set-Alias -Name bm -Value Show-DirectoryBookmarks -ErrorAction SilentlyContinue
 
-    # Initialize navigation tracking for current directory
-    Update-DirectoryStats (Get-Location)
+    # Directory tracking will be initialized lazily on first use
+    # Update-DirectoryStats (Get-Location)  # Removed synchronous call during profile load
 
     Set-Variable -Name 'SmartNavigationLoaded' -Value $true -Scope Global -Force
 }

@@ -355,15 +355,71 @@ try {
 
             # Connectivity tests
             Write-Host "Connectivity Tests:"
-            $testHosts = @("8.8.8.8", "google.com", "github.com")
-            foreach ($hostname in $testHosts) {
+            $testHosts = @(
+                @{ Name = "8.8.8.8"; Port = 53 },
+                @{ Name = "google.com"; Port = 443 },
+                @{ Name = "github.com"; Port = 443 }
+            )
+            foreach ($testHost in $testHosts) {
+                $connected = $false
+                $startTime = Get-Date
+                $tcpClient = $null
+                $connectAsync = $null
+                
                 try {
-                    # Suppress PSAvoidUsingComputerNameHardcoded for public test hosts
-                    $ping = Test-Connection -ComputerName $hostname -Count 1 -TimeoutSeconds 2 -ErrorAction Stop # Suppress PSAvoidUsingComputerNameHardcoded
-                    Write-Host ("  {0}: ✓ ({1}ms)" -f $hostname, $ping.ResponseTime) -ForegroundColor Green
+                    # Use direct TCP connection with timeout for faster and more reliable testing
+                    $tcpClient = New-Object System.Net.Sockets.TcpClient
+                    $connectAsync = $tcpClient.BeginConnect($testHost.Name, $testHost.Port, $null, $null)
+                    $waitResult = $connectAsync.AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds(5), $false)
+                    
+                    if ($waitResult) {
+                        try {
+                            $tcpClient.EndConnect($connectAsync)
+                            if ($tcpClient.Connected) {
+                                $connected = $true
+                                $elapsed = ((Get-Date) - $startTime).TotalMilliseconds
+                                Write-Host ("  {0}: ✓ (TCP port {1}, {2:N0}ms)" -f $testHost.Name, $testHost.Port, $elapsed) -ForegroundColor Green
+                            }
+                        }
+                        catch {
+                            $connected = $false
+                        }
+                    }
+                    else {
+                        # Timeout
+                        $connected = $false
+                    }
                 }
                 catch {
-                    Write-Host ("  {0}: ✗ (timeout)" -f $hostname) -ForegroundColor Red
+                    $connected = $false
+                }
+                finally {
+                    # Clean up TCP connection
+                    if ($null -ne $tcpClient) {
+                        if ($tcpClient.Connected) {
+                            $tcpClient.Close()
+                        }
+                        $tcpClient.Dispose()
+                    }
+                    if ($null -ne $connectAsync) {
+                        $connectAsync.AsyncWaitHandle.Close()
+                    }
+                }
+                
+                # Fallback to ping for IP addresses if TCP fails
+                if (-not $connected -and $testHost.Name -match '^\d+\.\d+\.\d+\.\d+$') {
+                    try {
+                        $ping = Test-Connection -ComputerName $testHost.Name -Count 1 -TimeoutSeconds 3 -ErrorAction Stop
+                        Write-Host ("  {0}: ✓ (ping {1}ms)" -f $testHost.Name, $ping.ResponseTime) -ForegroundColor Green
+                        $connected = $true
+                    }
+                    catch {
+                        # Ignore ping failures for IP addresses, already tried TCP
+                    }
+                }
+                
+                if (-not $connected) {
+                    Write-Host ("  {0}: ✗ (unreachable)" -f $testHost.Name) -ForegroundColor Red
                 }
             }
         }

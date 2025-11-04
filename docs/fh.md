@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Quick fuzzy search in command history.
+Quick search in command history.
 
 ## Description
 
-Alias for Find-HistoryFuzzy for quick history searching.
+Searches command history for the specified pattern.
 
 ## Signature
 

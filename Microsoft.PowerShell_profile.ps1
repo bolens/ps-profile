@@ -92,7 +92,7 @@ function Measure-FragmentLoadTime {
 # ===============================================
 # The previous loader dot-sourced all `profile.d/*.ps1` files. To improve
 # robustness we load files in sorted order and wrap each load in try/catch.
-$profileDir = Split-Path $PROFILE
+$profileDir = Split-Path -Parent $PSCommandPath
 $profileD = Join-Path $profileDir 'profile.d'
 if (Test-Path $profileD) {
     # Load files in lexical order. Each file should be idempotent and
@@ -104,9 +104,7 @@ if (Test-Path $profileD) {
             # Assign the result to $null to suppress any returned values (fragments
             # may return ScriptBlocks or other objects during registration). This
             # keeps the profile quiet when opening a new shell.
-            Measure-FragmentLoadTime -FragmentName $fragmentName -Action {
-                $null = . $_.FullName
-            }
+            $null = . $_.FullName
         }
         catch {
             # Enhanced error handling with recovery suggestions
@@ -120,6 +118,7 @@ if (Test-Path $profileD) {
         }
     }
 }
+
 
 # ===============================================
 # INITIALIZE ENHANCED FEATURES

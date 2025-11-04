@@ -109,26 +109,62 @@ function Test-ProfileUpdates {
 
 # Auto-check for updates (but only occasionally and not in CI)
 if ($env:CI -ne 'true' -and $env:GITHUB_ACTIONS -ne 'true' -and -not $env:PS_PROFILE_SKIP_UPDATES) {
-    # Check for updates in background (don't block startup)
-    $job = Start-Job -ScriptBlock {
-        param($profileDir)
-        try {
-            Set-Location $profileDir
-            Test-ProfileUpdates -MaxChanges 5
-        }
-        catch {
-            # Silently fail background update checks
-        }
-    } -ArgumentList (Split-Path $PROFILE)
+    # Schedule update check to run after profile load completes (truly async)
+    # Use a timer to delay execution and avoid blocking startup
+    try {
+        $timer = New-Object System.Timers.Timer
+        $timer.Interval = 5000  # 5 seconds delay to let profile finish loading
+        $timer.AutoReset = $false
 
-    # Clean up the job after a reasonable time
-    Start-Job -ScriptBlock {
-        param($jobId)
-        Start-Sleep -Seconds 30
-        if (Get-Job -Id $jobId -ErrorAction SilentlyContinue) {
-            Remove-Job -Id $jobId -Force -ErrorAction SilentlyContinue
+        $timerAction = {
+            try {
+                $job = Start-Job -ScriptBlock {
+                    param($profileDir)
+                    try {
+                        Set-Location $profileDir
+                        Test-ProfileUpdates -MaxChanges 5
+                    }
+                    catch {
+                        # Silently fail background update checks
+                    }
+                } -ArgumentList (Split-Path $PROFILE)
+
+                # Clean up the job after a reasonable time (shorter timeout)
+                Start-Job -ScriptBlock {
+                    param($jobId)
+                    Start-Sleep -Seconds 15  # Reduced from 30 seconds
+                    if (Get-Job -Id $jobId -ErrorAction SilentlyContinue) {
+                        Remove-Job -Id $jobId -Force -ErrorAction SilentlyContinue
+                    }
+                } -ArgumentList $job.Id | Out-Null
+            }
+            catch {
+                # Silently fail timer-based update checks
+            }
+            finally {
+                # Clean up timer
+                $timer.Stop()
+                $timer.Dispose()
+            }
         }
-    } -ArgumentList $job.Id | Out-Null
+
+        Register-ObjectEvent -InputObject $timer -EventName Elapsed -Action $timerAction | Out-Null
+        $timer.Start()
+    }
+    catch {
+        # Fallback: try to schedule with a simple delay if timer fails
+        Start-Job -ScriptBlock {
+            param($profileDir)
+            try {
+                Start-Sleep -Seconds 10  # Delay before running
+                Set-Location $profileDir
+                Test-ProfileUpdates -MaxChanges 5
+            }
+            catch {
+                # Silently fail background update checks
+            }
+        } -ArgumentList (Split-Path $PROFILE) | Out-Null
+    }
 }
 
 Set-Variable -Name 'ProfileUpdatesLoaded' -Value $true -Scope Global -Force
