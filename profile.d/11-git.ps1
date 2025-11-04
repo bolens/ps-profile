@@ -9,27 +9,60 @@
 # forwarding helpers.
 
 # Git status - show status
-if (-not (Test-Path Function:gs)) { Set-Item -Path Function:gs -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Invoke-GitStatus)) { 
+    function Invoke-GitStatus { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gs -Value Invoke-GitStatus -ErrorAction SilentlyContinue
+}
 # Git add - stage changes
-if (-not (Test-Path Function:ga)) { Set-Item -Path Function:ga -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Add-GitChanges)) { 
+    function Add-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name ga -Value Add-GitChanges -ErrorAction SilentlyContinue
+}
 # Git commit - commit changes
-if (-not (Test-Path Function:gc)) { Set-Item -Path Function:gc -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Save-GitCommit)) { 
+    function Save-GitCommit { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gc -Value Save-GitCommit -ErrorAction SilentlyContinue
+}
 # Git push - push to remote
-if (-not (Test-Path Function:gp)) { Set-Item -Path Function:gp -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Publish-GitChanges)) { 
+    function Publish-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gp -Value Publish-GitChanges -ErrorAction SilentlyContinue
+}
 # Git log - show commit log
-if (-not (Test-Path Function:gl)) { Set-Item -Path Function:gl -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Get-GitLog)) { 
+    function Get-GitLog { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gl -Value Get-GitLog -ErrorAction SilentlyContinue
+}
 # Git diff - show changes
-if (-not (Test-Path Function:gd)) { Set-Item -Path Function:gd -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Compare-GitChanges)) { 
+    function Compare-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gd -Value Compare-GitChanges -ErrorAction SilentlyContinue
+}
 # Git branch - manage branches
-if (-not (Test-Path Function:gb)) { Set-Item -Path Function:gb -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Get-GitBranch)) { 
+    function Get-GitBranch { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gb -Value Get-GitBranch -ErrorAction SilentlyContinue
+}
 # Git checkout - switch branches
-if (-not (Test-Path Function:gco)) { Set-Item -Path Function:gco -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Switch-GitBranch)) { 
+    function Switch-GitBranch { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gco -Value Switch-GitBranch -ErrorAction SilentlyContinue
+}
 # Git commit with message - commit changes with message
-if (-not (Test-Path Function:gcm)) { Set-Item -Path Function:gcm -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Save-GitCommitWithMessage)) { 
+    function Save-GitCommitWithMessage { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gcm -Value Save-GitCommitWithMessage -ErrorAction SilentlyContinue
+}
 # Git pull - pull from remote
-if (-not (Test-Path Function:gpl)) { Set-Item -Path Function:gpl -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Get-GitChanges)) { 
+    function Get-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gpl -Value Get-GitChanges -ErrorAction SilentlyContinue
+}
 # Git fetch - fetch from remote
-if (-not (Test-Path Function:gf)) { Set-Item -Path Function:gf -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a } -Force | Out-Null }
+if (-not (Test-Path Function:Receive-GitChanges)) { 
+    function Receive-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git @a }
+    Set-Alias -Name gf -Value Receive-GitChanges -ErrorAction SilentlyContinue
+}
 
 # Extras: register heavier helpers lazily so dot-sourcing this fragment remains cheap
 if (-not (Test-Path Function:Ensure-GitHelper)) {
@@ -44,19 +77,28 @@ if (-not (Test-Path Function:Ensure-GitHelper)) {
         if ($script:__GitHelpersInitialized) { return }
         $script:__GitHelpersInitialized = $true
         if (-not (Get-Command -Name Set-AgentModeFunction -ErrorAction SilentlyContinue)) { return }
-        $null = Set-AgentModeFunction -Name 'gcl' -Body { git clone @args } # Git clone - clone a repository
-        $null = Set-AgentModeFunction -Name 'gsta' -Body { git stash @args } # Git stash - stash changes
-        $null = Set-AgentModeFunction -Name 'gstp' -Body { git stash pop @args } # Git stash pop - apply stashed changes
-        $null = Set-AgentModeFunction -Name 'gr' -Body { git rebase @args } # Git rebase - rebase commits
-        $null = Set-AgentModeFunction -Name 'grc' -Body { git rebase --continue } # Git rebase continue - continue rebase
-        $null = Set-AgentModeFunction -Name 'gsub' -Body { git submodule update --init --recursive @args } # Git submodule update - update submodules
-        $null = Set-AgentModeFunction -Name 'gclean' -Body { git clean -fdx @args } # Git clean - remove untracked files
-        $null = Set-AgentModeFunction -Name 'cdg' -Body { # Git cd to root - change to repository root
+        $null = Set-AgentModeFunction -Name 'Invoke-GitClone' -Body { git clone @args } # Git clone - clone a repository
+        Set-Alias -Name gcl -Value Invoke-GitClone -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Save-GitStash' -Body { git stash @args } # Git stash - stash changes
+        Set-Alias -Name gsta -Value Save-GitStash -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Restore-GitStash' -Body { git stash pop @args } # Git stash pop - apply stashed changes
+        Set-Alias -Name gstp -Value Restore-GitStash -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Merge-GitRebase' -Body { git rebase @args } # Git rebase - rebase commits
+        Set-Alias -Name gr -Value Merge-GitRebase -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Continue-GitRebase' -Body { git rebase --continue } # Git rebase continue - continue rebase
+        Set-Alias -Name grc -Value Continue-GitRebase -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Update-GitSubmodule' -Body { git submodule update --init --recursive @args } # Git submodule update - update submodules
+        Set-Alias -Name gsub -Value Update-GitSubmodule -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Clear-GitUntracked' -Body { git clean -fdx @args } # Git clean - remove untracked files
+        Set-Alias -Name gclean -Value Clear-GitUntracked -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Set-LocationGitRoot' -Body { # Git cd to root - change to repository root
             $root = (& git rev-parse --show-toplevel) 2>$null
             if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root } else { Write-Warning 'Not inside a git repository' }
         }
-        $null = Set-AgentModeFunction -Name 'gob' -Body { git checkout - } # Git checkout previous - switch to previous branch
-        $null = Set-AgentModeFunction -Name 'gprune' -Body { # Git prune merged - remove merged branches
+        Set-Alias -Name cdg -Value Set-LocationGitRoot -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Switch-GitPreviousBranch' -Body { git checkout - } # Git checkout previous - switch to previous branch
+        Set-Alias -Name gob -Value Switch-GitPreviousBranch -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Remove-GitMergedBranches' -Body { # Git prune merged - remove merged branches
             $up = (git rev-parse --abbrev-ref --symbolic-full-name '@{u=}') 2>$null
             if (-not $up) { Write-Warning 'No upstream set for this branch'; return }
             git fetch --prune
@@ -65,49 +107,57 @@ if (-not (Test-Path Function:Ensure-GitHelper)) {
                 if ($b -and $b -notin @('main', 'master', 'develop')) { git branch -D $b 2>$null | Out-Null }
             }
         }
-        $null = Set-AgentModeFunction -Name 'gsync' -Body { git fetch --prune; git rebase '@{u}' } # Git sync - fetch and rebase
-        $null = Set-AgentModeFunction -Name 'gundo' -Body { git reset --soft HEAD~1 } # Git undo - soft reset last commit
-        $null = Set-AgentModeFunction -Name 'gdefault' -Body { # Git default branch - get default branch name
+        Set-Alias -Name gprune -Value Remove-GitMergedBranches -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Sync-GitRepository' -Body { git fetch --prune; git rebase '@{u}' } # Git sync - fetch and rebase
+        Set-Alias -Name gsync -Value Sync-GitRepository -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Undo-GitCommit' -Body { git reset --soft HEAD~1 } # Git undo - soft reset last commit
+        Set-Alias -Name gundo -Value Undo-GitCommit -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Get-GitDefaultBranch' -Body { # Git default branch - get default branch name
             $b = (git symbolic-ref refs/remotes/origin/HEAD 2>$null) -replace '^refs/remotes/origin/', ''
             if ($b) { $b } else { 'main' }
         }
+        Set-Alias -Name gdefault -Value Get-GitDefaultBranch -ErrorAction SilentlyContinue
 
         # GitHub CLI helpers
         if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
-            $null = Set-AgentModeFunction -Name 'prc' -Body { if (Test-CachedCommand gh) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
-            $null = Set-AgentModeFunction -Name 'prv' -Body { if (Test-CachedCommand gh) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+            $null = Set-AgentModeFunction -Name 'New-GitHubPullRequest' -Body { if (Test-CachedCommand gh) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
+            Set-Alias -Name prc -Value New-GitHubPullRequest -ErrorAction SilentlyContinue
+            $null = Set-AgentModeFunction -Name 'Show-GitHubPullRequest' -Body { if (Test-CachedCommand gh) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+            Set-Alias -Name prv -Value Show-GitHubPullRequest -ErrorAction SilentlyContinue
         }
         else {
-            $null = Set-AgentModeFunction -Name 'prc' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
-            $null = Set-AgentModeFunction -Name 'prv' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+            $null = Set-AgentModeFunction -Name 'New-GitHubPullRequest' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
+            Set-Alias -Name prc -Value New-GitHubPullRequest -ErrorAction SilentlyContinue
+            $null = Set-AgentModeFunction -Name 'Show-GitHubPullRequest' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+            Set-Alias -Name prv -Value Show-GitHubPullRequest -ErrorAction SilentlyContinue
         }
     }
 }
 
 # Register lazy stubs for the heavier Git helpers
 # Git clone - clone a repository
-if (-not (Test-Path Function:gcl)) { Set-Item -Path Function:gcl -Value { Ensure-GitHelper; & (Get-Command gcl -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Invoke-GitClone)) { Set-Item -Path Function:Invoke-GitClone -Value { Ensure-GitHelper; & (Get-Command Invoke-GitClone -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gcl -Value Invoke-GitClone -ErrorAction SilentlyContinue }
 # Git stash - stash changes
-if (-not (Test-Path Function:gsta)) { Set-Item -Path Function:gsta -Value { Ensure-GitHelper; & (Get-Command gsta -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Save-GitStash)) { Set-Item -Path Function:Save-GitStash -Value { Ensure-GitHelper; & (Get-Command Save-GitStash -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gsta -Value Save-GitStash -ErrorAction SilentlyContinue }
 # Git stash pop - apply stashed changes
-if (-not (Test-Path Function:gstp)) { Set-Item -Path Function:gstp -Value { Ensure-GitHelper; & (Get-Command gstp -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Restore-GitStash)) { Set-Item -Path Function:Restore-GitStash -Value { Ensure-GitHelper; & (Get-Command Restore-GitStash -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gstp -Value Restore-GitStash -ErrorAction SilentlyContinue }
 # Git rebase - rebase commits
-if (-not (Test-Path Function:gr)) { Set-Item -Path Function:gr -Value { Ensure-GitHelper; & (Get-Command gr -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Merge-GitRebase)) { Set-Item -Path Function:Merge-GitRebase -Value { Ensure-GitHelper; & (Get-Command Merge-GitRebase -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gr -Value Merge-GitRebase -ErrorAction SilentlyContinue }
 # Git rebase continue - continue rebase
-if (-not (Test-Path Function:grc)) { Set-Item -Path Function:grc -Value { Ensure-GitHelper; & (Get-Command grc -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Continue-GitRebase)) { Set-Item -Path Function:Continue-GitRebase -Value { Ensure-GitHelper; & (Get-Command Continue-GitRebase -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name grc -Value Continue-GitRebase -ErrorAction SilentlyContinue }
 # Git submodule update - update submodules
-if (-not (Test-Path Function:gsub)) { Set-Item -Path Function:gsub -Value { Ensure-GitHelper; & (Get-Command gsub -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Update-GitSubmodule)) { Set-Item -Path Function:Update-GitSubmodule -Value { Ensure-GitHelper; & (Get-Command Update-GitSubmodule -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gsub -Value Update-GitSubmodule -ErrorAction SilentlyContinue }
 # Git clean - remove untracked files
-if (-not (Test-Path Function:gclean)) { Set-Item -Path Function:gclean -Value { Ensure-GitHelper; & (Get-Command gclean -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Clear-GitUntracked)) { Set-Item -Path Function:Clear-GitUntracked -Value { Ensure-GitHelper; & (Get-Command Clear-GitUntracked -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gclean -Value Clear-GitUntracked -ErrorAction SilentlyContinue }
 # Git cd to root - change to repository root
-if (-not (Test-Path Function:cdg)) { Set-Item -Path Function:cdg -Value { Ensure-GitHelper; & (Get-Command cdg -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Set-LocationGitRoot)) { Set-Item -Path Function:Set-LocationGitRoot -Value { Ensure-GitHelper; & (Get-Command Set-LocationGitRoot -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name cdg -Value Set-LocationGitRoot -ErrorAction SilentlyContinue }
 # Git checkout previous - switch to previous branch
-if (-not (Test-Path Function:gob)) { Set-Item -Path Function:gob -Value { Ensure-GitHelper; & (Get-Command gob -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Switch-GitPreviousBranch)) { Set-Item -Path Function:Switch-GitPreviousBranch -Value { Ensure-GitHelper; & (Get-Command Switch-GitPreviousBranch -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gob -Value Switch-GitPreviousBranch -ErrorAction SilentlyContinue }
 # Git prune merged - remove merged branches
-if (-not (Test-Path Function:gprune)) { Set-Item -Path Function:gprune -Value { Ensure-GitHelper; & (Get-Command gprune -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Remove-GitMergedBranches)) { Set-Item -Path Function:Remove-GitMergedBranches -Value { Ensure-GitHelper; & (Get-Command Remove-GitMergedBranches -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gprune -Value Remove-GitMergedBranches -ErrorAction SilentlyContinue }
 # Git sync - fetch and rebase
-if (-not (Test-Path Function:gsync)) { Set-Item -Path Function:gsync -Value { Ensure-GitHelper; & (Get-Command gsync -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Sync-GitRepository)) { Set-Item -Path Function:Sync-GitRepository -Value { Ensure-GitHelper; & (Get-Command Sync-GitRepository -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gsync -Value Sync-GitRepository -ErrorAction SilentlyContinue }
 # Git undo - soft reset last commit
-if (-not (Test-Path Function:gundo)) { Set-Item -Path Function:gundo -Value { Ensure-GitHelper; & (Get-Command gundo -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Undo-GitCommit)) { Set-Item -Path Function:Undo-GitCommit -Value { Ensure-GitHelper; & (Get-Command Undo-GitCommit -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gundo -Value Undo-GitCommit -ErrorAction SilentlyContinue }
 # Git default branch - get default branch name
-if (-not (Test-Path Function:gdefault)) { Set-Item -Path Function:gdefault -Value { Ensure-GitHelper; & (Get-Command gdefault -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null }
+if (-not (Test-Path Function:Get-GitDefaultBranch)) { Set-Item -Path Function:Get-GitDefaultBranch -Value { Ensure-GitHelper; & (Get-Command Get-GitDefaultBranch -CommandType Function).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null; Set-Alias -Name gdefault -Value Get-GitDefaultBranch -ErrorAction SilentlyContinue }

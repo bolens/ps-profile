@@ -14,7 +14,7 @@
 if (-not (Test-Path "Function:\\Ensure-FileUtilities")) {
     function Ensure-FileUtilities {
         # head (first N lines))
-        Set-Item -Path Function:head -Value {
+        Set-Item -Path Function:Get-FileHead -Value {
             param([Parameter(ValueFromPipeline = $true)] $InputObject, [int]$Lines = 10, [Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
             process {
                 if ($InputObject) { $InputObject | Select-Object -First $Lines }
@@ -22,9 +22,10 @@ if (-not (Test-Path "Function:\\Ensure-FileUtilities")) {
                 else { $input | Select-Object -First $Lines }
             }
         } -Force | Out-Null
+        Set-Alias -Name head -Value Get-FileHead -ErrorAction SilentlyContinue
 
         # tail (last N lines)
-        Set-Item -Path Function:tail -Value {
+        Set-Item -Path Function:Get-FileTail -Value {
             param([Parameter(ValueFromPipeline = $true)] $InputObject, [int]$Lines = 10, [Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
             process {
                 if ($InputObject) { $InputObject | Select-Object -Last $Lines }
@@ -32,14 +33,18 @@ if (-not (Test-Path "Function:\\Ensure-FileUtilities")) {
                 else { $input | Select-Object -Last $Lines }
             }
         } -Force | Out-Null
+        Set-Alias -Name tail -Value Get-FileTail -ErrorAction SilentlyContinue
 
         # File hash
-        Set-Item -Path Function:file-hash -Value { param([string]$Path, [ValidateSet('MD5', 'SHA1', 'SHA256', 'SHA384', 'SHA512')] [string]$Algorithm = 'SHA256') if (-not (Test-Path -LiteralPath $Path)) { Write-Error "File not found: $Path"; return } Get-FileHash -Algorithm $Algorithm -Path $Path } -Force | Out-Null
+        Set-Item -Path Function:Get-FileHashValue -Value { param([string]$Path, [ValidateSet('MD5', 'SHA1', 'SHA256', 'SHA384', 'SHA512')] [string]$Algorithm = 'SHA256') if (-not (Test-Path -LiteralPath $Path)) { Write-Error "File not found: $Path"; return } Microsoft.PowerShell.Utility\Get-FileHash -Algorithm $Algorithm -Path $Path } -Force | Out-Null
+        Set-Alias -Name file-hash -Value Get-FileHashValue -ErrorAction SilentlyContinue
         # File size
-        Set-Item -Path Function:filesize -Value { param([string]$Path) if (-not (Test-Path -LiteralPath $Path)) { Write-Error "File not found: $Path"; return } $len = (Get-Item -LiteralPath $Path).Length; switch ($len) { { $_ -ge 1TB } { "{0:N2} TB" -f ($len / 1TB); break } { $_ -ge 1GB } { "{0:N2} GB" -f ($len / 1GB); break } { $_ -ge 1MB } { "{0:N2} MB" -f ($len / 1MB); break } { $_ -ge 1KB } { "{0:N2} KB" -f ($len / 1KB); break } default { "{0} bytes" -f $len } } } -Force | Out-Null
+        Set-Item -Path Function:Get-FileSize -Value { param([string]$Path) if (-not (Test-Path -LiteralPath $Path)) { Write-Error "File not found: $Path"; return } $len = (Get-Item -LiteralPath $Path).Length; switch ($len) { { $_ -ge 1TB } { "{0:N2} TB" -f ($len / 1TB); break } { $_ -ge 1GB } { "{0:N2} GB" -f ($len / 1GB); break } { $_ -ge 1MB } { "{0:N2} MB" -f ($len / 1MB); break } { $_ -ge 1KB } { "{0:N2} KB" -f ($len / 1KB); break } default { "{0} bytes" -f $len } } } -Force | Out-Null
+        Set-Alias -Name filesize -Value Get-FileSize -ErrorAction SilentlyContinue
 
         # Hex dump
-        Set-Item -Path Function:hex-dump -Value { param([string]$Path) Format-Hex -Path $Path } -Force | Out-Null
+        Set-Item -Path Function:Get-HexDump -Value { param([string]$Path) Format-Hex -Path $Path } -Force | Out-Null
+        Set-Alias -Name hex-dump -Value Get-HexDump -ErrorAction SilentlyContinue
     }
 }
 
@@ -52,7 +57,8 @@ if (-not (Test-Path "Function:\\Ensure-FileUtilities")) {
 .PARAMETER Lines
     The number of lines to display. Default is 10.
 #>
-function head { if (-not (Test-Path Function:\head)) { Ensure-FileUtilities }; return & (Get-Item Function:\head -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Get-FileHead { if (-not (Test-Path Function:\Get-FileHead)) { Ensure-FileUtilities }; return & (Get-Item Function:\Get-FileHead -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name head -Value Get-FileHead -ErrorAction SilentlyContinue
 
 # Tail (last 10 lines) of a file
 <#
@@ -63,7 +69,8 @@ function head { if (-not (Test-Path Function:\head)) { Ensure-FileUtilities }; r
 .PARAMETER Lines
     The number of lines to display. Default is 10.
 #>
-function tail { if (-not (Test-Path Function:\tail)) { Ensure-FileUtilities }; return & (Get-Item Function:\tail -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Get-FileTail { if (-not (Test-Path Function:\Get-FileTail)) { Ensure-FileUtilities }; return & (Get-Item Function:\Get-FileTail -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name tail -Value Get-FileTail -ErrorAction SilentlyContinue
 
 # Get file hash
 <#
@@ -76,7 +83,8 @@ function tail { if (-not (Test-Path Function:\tail)) { Ensure-FileUtilities }; r
 .PARAMETER Algorithm
     The hash algorithm to use. Valid values are MD5, SHA1, SHA256, SHA384, SHA512. Default is SHA256.
 #>
-function file-hash { if (-not (Test-Path Function:\file-hash)) { Ensure-FileUtilities }; return & (Get-Item Function:\file-hash -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Get-FileHashValue { if (-not (Test-Path Function:\Get-FileHashValue)) { Ensure-FileUtilities }; return & (Get-Item Function:\Get-FileHashValue -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name file-hash -Value Get-FileHashValue -ErrorAction SilentlyContinue
 
 # Get file size
 <#
@@ -87,7 +95,8 @@ function file-hash { if (-not (Test-Path Function:\file-hash)) { Ensure-FileUtil
 .PARAMETER Path
     The path to the file to check size.
 #>
-function filesize { if (-not (Test-Path Function:\filesize)) { Ensure-FileUtilities }; return & (Get-Item Function:\filesize -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Get-FileSize { if (-not (Test-Path Function:\Get-FileSize)) { Ensure-FileUtilities }; return & (Get-Item Function:\Get-FileSize -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name filesize -Value Get-FileSize -ErrorAction SilentlyContinue
 
 # Display hex dump of file
 <#
@@ -98,4 +107,5 @@ function filesize { if (-not (Test-Path Function:\filesize)) { Ensure-FileUtilit
 .PARAMETER Path
     The path to the file to dump.
 #>
-function hex-dump { if (-not (Test-Path Function:\hex-dump)) { Ensure-FileUtilities }; return & (Get-Item Function:\hex-dump -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Get-HexDump { if (-not (Test-Path Function:\Get-HexDump)) { Ensure-FileUtilities }; return & (Get-Item Function:\Get-HexDump -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name hex-dump -Value Get-HexDump -ErrorAction SilentlyContinue

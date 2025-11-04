@@ -14,7 +14,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Replacement for ls command using eza for modern directory listing.
     #>
-    function ls { eza @args }
+    function Get-ChildItemEza { eza @args }
+    Set-Alias -Name ls -Value Get-ChildItemEza -ErrorAction SilentlyContinue
 
     <#
     .SYNOPSIS
@@ -22,7 +23,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Short alias for eza directory listing.
     #>
-    function l { eza @args }
+    function Get-ChildItemEzaShort { eza @args }
+    Set-Alias -Name l -Value Get-ChildItemEzaShort -ErrorAction SilentlyContinue
 
     # Long listing
     <#
@@ -31,7 +33,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows detailed directory listing with permissions, sizes, and dates.
     #>
-    function ll { eza -l @args }
+    function Get-ChildItemEzaLong { eza -l @args }
+    Set-Alias -Name ll -Value Get-ChildItemEzaLong -ErrorAction SilentlyContinue
 
     <#
     .SYNOPSIS
@@ -39,7 +42,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows all files including hidden ones in long format.
     #>
-    function la { eza -la @args }
+    function Get-ChildItemEzaAll { eza -la @args }
+    Set-Alias -Name la -Value Get-ChildItemEzaAll -ErrorAction SilentlyContinue
 
     <#
     .SYNOPSIS
@@ -47,7 +51,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows all files including hidden ones in detailed long format.
     #>
-    function lla { eza -la @args }
+    function Get-ChildItemEzaAllLong { eza -la @args }
+    Set-Alias -Name lla -Value Get-ChildItemEzaAllLong -ErrorAction SilentlyContinue
 
     # Tree view
     <#
@@ -56,7 +61,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows directory structure as a tree view.
     #>
-    function lt { eza --tree @args }
+    function Get-ChildItemEzaTree { eza --tree @args }
+    Set-Alias -Name lt -Value Get-ChildItemEzaTree -ErrorAction SilentlyContinue
 
     <#
     .SYNOPSIS
@@ -64,7 +70,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows all files including hidden ones in tree format.
     #>
-    function lta { eza --tree -a @args }
+    function Get-ChildItemEzaTreeAll { eza --tree -a @args }
+    Set-Alias -Name lta -Value Get-ChildItemEzaTreeAll -ErrorAction SilentlyContinue
 
     # With git status
     <#
@@ -73,7 +80,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows files with git status indicators.
     #>
-    function lg { eza --git @args }
+    function Get-ChildItemEzaGit { eza --git @args }
+    Set-Alias -Name lg -Value Get-ChildItemEzaGit -ErrorAction SilentlyContinue
 
     <#
     .SYNOPSIS
@@ -81,7 +89,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows detailed listing with git status indicators.
     #>
-    function llg { eza -l --git @args }
+    function Get-ChildItemEzaLongGit { eza -l --git @args }
+    Set-Alias -Name llg -Value Get-ChildItemEzaLongGit -ErrorAction SilentlyContinue
 
     # By size
     <#
@@ -90,7 +99,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows files sorted by file size in descending order.
     #>
-    function lS { eza -l -s size @args }
+    function Get-ChildItemEzaBySize { eza -l -s size @args }
+    Set-Alias -Name lS -Value Get-ChildItemEzaBySize -ErrorAction SilentlyContinue
 
     # By time
     <#
@@ -99,7 +109,8 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows files sorted by modification time, newest first.
     #>
-    function ltime { eza -l -s modified @args }
+    function Get-ChildItemEzaByTime { eza -l -s modified @args }
+    Set-Alias -Name ltime -Value Get-ChildItemEzaByTime -ErrorAction SilentlyContinue
 }
 else {
     Write-Warning "eza not found. Install with: scoop install eza"

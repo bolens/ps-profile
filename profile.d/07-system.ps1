@@ -10,7 +10,8 @@
 .DESCRIPTION
     Displays information about PowerShell commands and their locations.
 #>
-function which { Get-Command $args }
+function Get-CommandInfo { Get-Command $args }
+Set-Alias -Name which -Value Get-CommandInfo -ErrorAction SilentlyContinue
 
 # pgrep equivalent
 <#
@@ -19,7 +20,7 @@ function which { Get-Command $args }
 .DESCRIPTION
     Searches for text patterns in files using Select-String.
 #>
-function pgrep {
+function Find-String {
     param([string]$Pattern, [string]$Path)
     if ($Path) {
         Select-String -Pattern $Pattern -Path $Path
@@ -28,6 +29,7 @@ function pgrep {
         $input | Select-String -Pattern $Pattern
     }
 }
+Set-Alias -Name pgrep -Value Find-String -ErrorAction SilentlyContinue
 
 # touch equivalent
 <#
@@ -36,43 +38,52 @@ function pgrep {
 .DESCRIPTION
     Creates new empty files at the specified paths.
 #>
-function touch { New-Item -ItemType File $args }
+function New-EmptyFile { New-Item -ItemType File $args }
+Set-Alias -Name touch -Value New-EmptyFile -ErrorAction SilentlyContinue
 
-# mkdir equivalent
+# mkdir equivalent - Note: mkdir is already a built-in alias for New-Item
+# This function is kept for consistency but won't override the built-in
 <#
 .SYNOPSIS
     Creates directories.
 .DESCRIPTION
     Creates new directories at the specified paths.
 #>
-function mkdir { New-Item -ItemType Directory $args }
+function New-Directory { New-Item -ItemType Directory $args }
+# Note: mkdir is already a built-in alias, so we don't create a conflicting alias
 
-# rm equivalent
+# rm equivalent - Note: rm is already a built-in alias for Remove-Item
+# This function is kept for consistency but won't override the built-in
 <#
 .SYNOPSIS
     Removes files and directories.
 .DESCRIPTION
     Deletes files and directories recursively if needed.
 #>
-function rm { Remove-Item $args }
+function Remove-ItemCustom { Remove-Item $args }
+# Note: rm is already a built-in alias, so we don't create a conflicting alias
 
-# cp equivalent
+# cp equivalent - Note: cp is already a built-in alias for Copy-Item
+# This function is kept for consistency but won't override the built-in
 <#
 .SYNOPSIS
     Copies files and directories.
 .DESCRIPTION
     Copies files and directories to specified destinations.
 #>
-function cp { Copy-Item $args }
+function Copy-ItemCustom { Copy-Item $args }
+# Note: cp is already a built-in alias, so we don't create a conflicting alias
 
-# mv equivalent
+# mv equivalent - Note: mv is already a built-in alias for Move-Item
+# This function is kept for consistency but won't override the built-in
 <#
 .SYNOPSIS
     Moves files and directories.
 .DESCRIPTION
     Moves or renames files and directories.
 #>
-function mv { Move-Item $args }
+function Move-ItemCustom { Move-Item $args }
+# Note: mv is already a built-in alias, so we don't create a conflicting alias
 
 # search equivalent
 <#
@@ -81,7 +92,8 @@ function mv { Move-Item $args }
 .DESCRIPTION
     Finds files by name in the current directory and subdirectories.
 #>
-function search { Get-ChildItem -Recurse -Name -Filter $args[0] }
+function Find-File { Get-ChildItem -Recurse -Name -Filter $args[0] }
+Set-Alias -Name search -Value Find-File -ErrorAction SilentlyContinue
 
 # df equivalent
 <#
@@ -90,7 +102,8 @@ function search { Get-ChildItem -Recurse -Name -Filter $args[0] }
 .DESCRIPTION
     Displays disk space usage for all file system drives.
 #>
-function df { Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{ Name = "Used(GB)"; Expression = { [math]::Round(($_.Used / 1GB), 2) } }, @{ Name = "Free(GB)"; Expression = { [math]::Round(($_.Free / 1GB), 2) } }, @{ Name = "Total(GB)"; Expression = { [math]::Round((($_.Used + $_.Free) / 1GB), 2) } }, Root }
+function Get-DiskUsage { Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{ Name = "Used(GB)"; Expression = { [math]::Round(($_.Used / 1GB), 2) } }, @{ Name = "Free(GB)"; Expression = { [math]::Round(($_.Free / 1GB), 2) } }, @{ Name = "Total(GB)"; Expression = { [math]::Round((($_.Used + $_.Free) / 1GB), 2) } }, Root }
+Set-Alias -Name df -Value Get-DiskUsage -ErrorAction SilentlyContinue
 
 # top equivalent
 <#
@@ -99,7 +112,8 @@ function df { Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{ Name =
 .DESCRIPTION
     Displays the top 10 processes sorted by CPU usage.
 #>
-function htop { Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 }
+function Get-TopProcesses { Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 }
+Set-Alias -Name htop -Value Get-TopProcesses -ErrorAction SilentlyContinue
 
 # ports equivalent
 <#
@@ -108,7 +122,8 @@ function htop { Get-Process | Sort-Object CPU -Descending | Select-Object -First
 .DESCRIPTION
     Displays active network connections and listening ports.
 #>
-function ports { netstat -an $args }
+function Get-NetworkPorts { netstat -an $args }
+Set-Alias -Name ports -Value Get-NetworkPorts -ErrorAction SilentlyContinue
 
 # ptest equivalent
 <#
@@ -117,7 +132,8 @@ function ports { netstat -an $args }
 .DESCRIPTION
     Tests connectivity to specified hosts using ping.
 #>
-function ptest { Test-Connection $args }
+function Test-NetworkConnection { Test-Connection $args }
+Set-Alias -Name ptest -Value Test-NetworkConnection -ErrorAction SilentlyContinue
 
 # dns equivalent
 <#
@@ -126,7 +142,8 @@ function ptest { Test-Connection $args }
 .DESCRIPTION
     Performs DNS lookups for hostnames or IP addresses.
 #>
-function dns { Resolve-DnsName @args }
+function Resolve-DnsNameCustom { Resolve-DnsName @args }
+Set-Alias -Name dns -Value Resolve-DnsNameCustom -ErrorAction SilentlyContinue
 
 # rest equivalent
 <#
@@ -135,7 +152,8 @@ function dns { Resolve-DnsName @args }
 .DESCRIPTION
     Sends HTTP requests to REST APIs and returns the response.
 #>
-function rest { Invoke-RestMethod $args }
+function Invoke-RestApi { Invoke-RestMethod $args }
+Set-Alias -Name rest -Value Invoke-RestApi -ErrorAction SilentlyContinue
 
 # web equivalent
 <#
@@ -144,7 +162,8 @@ function rest { Invoke-RestMethod $args }
 .DESCRIPTION
     Downloads content from web URLs or sends HTTP requests.
 #>
-function web { Invoke-WebRequest $args }
+function Invoke-WebRequestCustom { Invoke-WebRequest $args }
+Set-Alias -Name web -Value Invoke-WebRequestCustom -ErrorAction SilentlyContinue
 
 # unzip equivalent
 <#
@@ -153,7 +172,8 @@ function web { Invoke-WebRequest $args }
 .DESCRIPTION
     Extracts files from ZIP archives to specified destinations.
 #>
-function unzip { Expand-Archive $args }
+function Expand-ArchiveCustom { Expand-Archive $args }
+Set-Alias -Name unzip -Value Expand-ArchiveCustom -ErrorAction SilentlyContinue
 
 # zip equivalent
 <#
@@ -162,7 +182,8 @@ function unzip { Expand-Archive $args }
 .DESCRIPTION
     Compresses files and directories into ZIP archives.
 #>
-function zip { & Compress-Archive @args }
+function Compress-ArchiveCustom { & Compress-Archive @args }
+Set-Alias -Name zip -Value Compress-ArchiveCustom -ErrorAction SilentlyContinue
 
 # code alias for VS Code
 <#
@@ -171,7 +192,8 @@ function zip { & Compress-Archive @args }
 .DESCRIPTION
     Launches Visual Studio Code with the specified files or directories.
 #>
-function code { & "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe" $args }
+function Open-VSCode { & "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe" $args }
+Set-Alias -Name code -Value Open-VSCode -ErrorAction SilentlyContinue
 
 # vim alias for neovim
 <#
@@ -180,7 +202,8 @@ function code { & "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe" $args 
 .DESCRIPTION
     Launches Neovim text editor with the specified files.
 #>
-function vim { nvim $args }
+function Open-Neovim { nvim $args }
+Set-Alias -Name vim -Value Open-Neovim -ErrorAction SilentlyContinue
 
 # vi alias for neovim
 <#
@@ -189,4 +212,5 @@ function vim { nvim $args }
 .DESCRIPTION
     Launches Neovim in vi compatibility mode with the specified files.
 #>
-function vi { nvim $args }
+function Open-NeovimVi { nvim $args }
+Set-Alias -Name vi -Value Open-NeovimVi -ErrorAction SilentlyContinue

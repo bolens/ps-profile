@@ -11,7 +11,7 @@ if (-not (Test-Path Function:vsc)) {
     .DESCRIPTION
         Launches VS Code in the current directory if VS Code is available.
     #>
-    function vsc {
+    function Open-VSCode {
         [CmdletBinding()] param()
         try {
             # Runtime check: prefer Test-CachedCommand if available to avoid Get-Command cost
@@ -26,6 +26,7 @@ if (-not (Test-Path Function:vsc)) {
             Write-Warning "Failed to open VS Code: $_"
         }
     }
+    Set-Alias -Name vsc -Value Open-VSCode -ErrorAction SilentlyContinue
 }
 
 # Open file in editor quickly
@@ -37,7 +38,24 @@ if (-not (Test-Path Function:vsc)) {
 .PARAMETER p
     The path to the file to open.
 #>
-if (-not (Test-Path Function:e)) { function e { param($p) if (-not $p) { Write-Warning 'Usage: e <path>'; return } try { if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) { if (Test-CachedCommand code) { code $p } else { Write-Warning 'code (VS Code) not found in PATH' } } else { code $p } } catch { Write-Warning "Failed to open file in editor: $_" } } }
+if (-not (Test-Path Function:Open-Editor)) {
+    function Open-Editor {
+        param($p)
+        if (-not $p) { Write-Warning 'Usage: Open-Editor <path>'; return }
+        try {
+            if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
+                if (Test-CachedCommand code) { code $p } else { Write-Warning 'code (VS Code) not found in PATH' }
+            }
+            else {
+                code $p
+            }
+        }
+        catch {
+            Write-Warning "Failed to open file in editor: $_"
+        }
+    }
+    Set-Alias -Name e -Value Open-Editor -ErrorAction SilentlyContinue
+}
 
 # Jump to project root (uses git if available)
 if (-not (Test-Path Function:project-root)) {
@@ -47,7 +65,7 @@ if (-not (Test-Path Function:project-root)) {
     .DESCRIPTION
         Changes the current directory to the root of the git repository if inside a git repo.
     #>
-    function project-root {
+    function Get-ProjectRoot {
         try {
             $root = (& git rev-parse --show-toplevel) 2>$null
             if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root } else { Write-Warning 'Not inside a git repository' }
@@ -56,4 +74,5 @@ if (-not (Test-Path Function:project-root)) {
             Write-Warning "Failed to find project root: $_"
         }
     }
+    Set-Alias -Name project-root -Value Get-ProjectRoot -ErrorAction SilentlyContinue
 }

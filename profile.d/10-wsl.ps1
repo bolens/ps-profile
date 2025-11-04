@@ -9,7 +9,8 @@
 .DESCRIPTION
     Terminates all running WSL distributions and shuts down the WSL subsystem.
 #>
-function wsl-shutdown { wsl --shutdown }
+function Stop-WSL { wsl --shutdown }
+Set-Alias -Name wsl-shutdown -Value Stop-WSL -ErrorAction SilentlyContinue
 
 <#
 .SYNOPSIS
@@ -17,7 +18,8 @@ function wsl-shutdown { wsl --shutdown }
 .DESCRIPTION
     Displays a verbose list of all installed WSL distributions including their state and version.
 #>
-function wsl-list { wsl --list --verbose }
+function Get-WSLDistribution { wsl --list --verbose }
+Set-Alias -Name wsl-list -Value Get-WSLDistribution -ErrorAction SilentlyContinue
 
 <#
 .SYNOPSIS
@@ -25,4 +27,5 @@ function wsl-list { wsl --list --verbose }
 .DESCRIPTION
     Starts the Ubuntu WSL distribution or switches to it if already running. Passes through any additional arguments.
 #>
-function ubuntu { wsl -D Ubuntu @args }
+function Start-UbuntuWSL { wsl -D Ubuntu @args }
+Set-Alias -Name ubuntu -Value Start-UbuntuWSL -ErrorAction SilentlyContinue

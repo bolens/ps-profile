@@ -99,6 +99,7 @@ if (Test-Path $profileD) {
     # safe to be dot-sourced multiple times.
     Get-ChildItem -Path $profileD -File -Filter '*.ps1' | Sort-Object Name | ForEach-Object {
         $fragmentName = $_.Name
+        if ($env:PS_PROFILE_DEBUG) { Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan }
         try {
             # Dot-source the file so it can define functions/aliases in this scope.
             # Assign the result to $null to suppress any returned values (fragments
@@ -108,6 +109,7 @@ if (Test-Path $profileD) {
         }
         catch {
             # Enhanced error handling with recovery suggestions
+            if ($env:PS_PROFILE_DEBUG) { Write-Host "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)" -ForegroundColor Red }
             if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
                 Write-ProfileError -ErrorRecord $_ -Context "Profile fragment loading" -Category 'Fragment'
             }
@@ -125,11 +127,18 @@ if (Test-Path $profileD) {
 # ===============================================
 # Initialize Starship or smart fallback prompt
 try {
+    if ($env:PS_PROFILE_DEBUG) { Write-Host "Checking for Initialize-Starship function..." -ForegroundColor Yellow }
     if (Get-Command Initialize-Starship -ErrorAction SilentlyContinue) {
+        if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship function found, calling it..." -ForegroundColor Green }
         Initialize-Starship
+        if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship completed" -ForegroundColor Green }
+    }
+    else {
+        if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship function not found" -ForegroundColor Red }
     }
 }
 catch {
+    if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship failed: $($_.Exception.Message)" -ForegroundColor Red }
     if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
         Write-ProfileError -ErrorRecord $_ -Context "Prompt initialization" -Category 'Profile'
     }

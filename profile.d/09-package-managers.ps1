@@ -12,7 +12,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Installs one or more packages using the Scoop package manager.
     #>
-    function sinstall { scoop install @args }
+    function Install-ScoopPackage { scoop install @args }
+    Set-Alias -Name sinstall -Value Install-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop search
     <#
@@ -21,7 +22,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Searches for available packages in Scoop repositories.
     #>
-    function ss { scoop search @args }
+    function Find-ScoopPackage { scoop search @args }
+    Set-Alias -Name ss -Value Find-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop update
     <#
@@ -30,7 +32,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
     #>
-    function su { scoop update @args }
+    function Update-ScoopPackage { scoop update @args }
+    Set-Alias -Name su -Value Update-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop update all
     <#
@@ -39,7 +42,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Updates all installed packages and Scoop itself.
     #>
-    function suu { scoop update * }
+    function Update-ScoopAll { scoop update * }
+    Set-Alias -Name suu -Value Update-ScoopAll -ErrorAction SilentlyContinue
 
     # Scoop uninstall
     <#
@@ -48,7 +52,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Removes installed packages from the system.
     #>
-    function sr { scoop uninstall @args }
+    function Uninstall-ScoopPackage { scoop uninstall @args }
+    Set-Alias -Name sr -Value Uninstall-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop list
     <#
@@ -57,7 +62,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Shows all packages currently installed via Scoop.
     #>
-    function slist { scoop list @args }
+    function Get-ScoopPackage { scoop list @args }
+    Set-Alias -Name slist -Value Get-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop info
     <#
@@ -66,7 +72,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Displays detailed information about specified packages.
     #>
-    function sh { scoop info @args }
+    function Get-ScoopPackageInfo { scoop info @args }
+    Set-Alias -Name sh -Value Get-ScoopPackageInfo -ErrorAction SilentlyContinue
 
     # Scoop cleanup
     <#
@@ -75,7 +82,8 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Removes old package versions and cleans the download cache.
     #>
-    function scleanup { scoop cleanup *; scoop cache rm * }
+    function Clear-ScoopCache { scoop cleanup *; scoop cache rm * }
+    Set-Alias -Name scleanup -Value Clear-ScoopCache -ErrorAction SilentlyContinue
 }
 else {
     Write-Warning "Scoop not found. Install from: https://scoop.sh/"
@@ -90,7 +98,8 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Installs Python applications as standalone executables.
     #>
-    function uvi { uv tool install @args }
+    function Install-UVTool { uv tool install @args }
+    Set-Alias -Name uvi -Value Install-UVTool -ErrorAction SilentlyContinue
 
     # UV run
     <#
@@ -99,7 +108,8 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Executes Python commands in temporary virtual environments.
     #>
-    function uvr { uv run @args }
+    function Invoke-UVRun { uv run @args }
+    Set-Alias -Name uvr -Value Invoke-UVRun -ErrorAction SilentlyContinue
 
     # UV tool run
     <#
@@ -108,7 +118,8 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Executes tools that were installed using uv tool install.
     #>
-    function uvx { uv tool run @args }
+    function Invoke-UVTool { uv tool run @args }
+    Set-Alias -Name uvx -Value Invoke-UVTool -ErrorAction SilentlyContinue
 
     # UV add
     <#
@@ -117,7 +128,8 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Adds packages as dependencies to the current UV project.
     #>
-    function uva { uv add @args }
+    function Add-UVDependency { uv add @args }
+    Set-Alias -Name uva -Value Add-UVDependency -ErrorAction SilentlyContinue
 
     # UV sync
     <#
@@ -126,7 +138,8 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Installs and synchronizes all project dependencies.
     #>
-    function uvs { uv sync @args }
+    function Sync-UVDependencies { uv sync @args }
+    Set-Alias -Name uvs -Value Sync-UVDependencies -ErrorAction SilentlyContinue
 }
 else {
     Write-Warning "UV not found. Install with: pip install uv"
@@ -141,7 +154,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Installs project dependencies defined in package.json.
     #>
-    function pni { pnpm install @args }
+    function Install-PnpmPackage { pnpm install @args }
+    Set-Alias -Name pni -Value Install-PnpmPackage -ErrorAction SilentlyContinue
 
     # PNPM add
     <#
@@ -150,7 +164,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Adds packages as dependencies to the project.
     #>
-    function pna { pnpm add @args }
+    function Add-PnpmPackage { pnpm add @args }
+    Set-Alias -Name pna -Value Add-PnpmPackage -ErrorAction SilentlyContinue
 
     # PNPM add dev
     <#
@@ -159,7 +174,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Adds packages as development dependencies to the project.
     #>
-    function pnd { pnpm add -D @args }
+    function Add-PnpmDevPackage { pnpm add -D @args }
+    Set-Alias -Name pnd -Value Add-PnpmDevPackage -ErrorAction SilentlyContinue
 
     # PNPM run
     <#
@@ -168,7 +184,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Executes scripts defined in package.json.
     #>
-    function pnr { pnpm run @args }
+    function Invoke-PnpmScript { pnpm run @args }
+    Set-Alias -Name pnr -Value Invoke-PnpmScript -ErrorAction SilentlyContinue
 
     # PNPM start
     <#
@@ -177,7 +194,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Runs the start script defined in package.json.
     #>
-    function pns { pnpm start @args }
+    function Start-PnpmProject { pnpm start @args }
+    Set-Alias -Name pns -Value Start-PnpmProject -ErrorAction SilentlyContinue
 
     # PNPM build
     <#
@@ -186,7 +204,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Runs the build script defined in package.json.
     #>
-    function pnb { pnpm run build @args }
+    function Build-PnpmProject { pnpm run build @args }
+    Set-Alias -Name pnb -Value Build-PnpmProject -ErrorAction SilentlyContinue
 
     # PNPM test
     <#
@@ -195,7 +214,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Runs the test script defined in package.json.
     #>
-    function pnt { pnpm run test @args }
+    function Test-PnpmProject { pnpm run test @args }
+    Set-Alias -Name pnt -Value Test-PnpmProject -ErrorAction SilentlyContinue
 
     # PNPM dev
     <#
@@ -204,7 +224,8 @@ if (Get-Command pnpm -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Runs the dev script defined in package.json.
     #>
-    function pndev { pnpm run dev @args }
+    function Start-PnpmDev { pnpm run dev @args }
+    Set-Alias -Name pndev -Value Start-PnpmDev -ErrorAction SilentlyContinue
 }
 else {
     Write-Warning "PNPM not found. Install with: npm install -g pnpm"

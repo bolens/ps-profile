@@ -10,7 +10,8 @@
 .DESCRIPTION
     Executes ansible commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 #>
-function ansible { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible $args" }
+function Invoke-Ansible { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible $args" }
+Set-Alias -Name ansible -Value Invoke-Ansible -ErrorAction SilentlyContinue
 
 # Ansible-playbook command wrapper for WSL with UTF-8 locale
 <#
@@ -19,7 +20,8 @@ function ansible { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 &&
 .DESCRIPTION
     Executes ansible-playbook commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 #>
-function ansible-playbook { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-playbook $args" }
+function Invoke-AnsiblePlaybook { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-playbook $args" }
+Set-Alias -Name ansible-playbook -Value Invoke-AnsiblePlaybook -ErrorAction SilentlyContinue
 
 # Ansible-galaxy command wrapper for WSL with UTF-8 locale
 <#
@@ -28,7 +30,8 @@ function ansible-playbook { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C
 .DESCRIPTION
     Executes ansible-galaxy commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 #>
-function ansible-galaxy { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-galaxy $args" }
+function Invoke-AnsibleGalaxy { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-galaxy $args" }
+Set-Alias -Name ansible-galaxy -Value Invoke-AnsibleGalaxy -ErrorAction SilentlyContinue
 
 # Ansible-vault command wrapper for WSL with UTF-8 locale
 <#
@@ -37,7 +40,8 @@ function ansible-galaxy { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.U
 .DESCRIPTION
     Executes ansible-vault commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 #>
-function ansible-vault { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-vault $args" }
+function Invoke-AnsibleVault { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-vault $args" }
+Set-Alias -Name ansible-vault -Value Invoke-AnsibleVault -ErrorAction SilentlyContinue
 
 # Ansible-doc command wrapper for WSL with UTF-8 locale
 <#
@@ -46,7 +50,8 @@ function ansible-vault { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UT
 .DESCRIPTION
     Executes ansible-doc commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 #>
-function ansible-doc { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-doc $args" }
+function Get-AnsibleDoc { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-doc $args" }
+Set-Alias -Name ansible-doc -Value Get-AnsibleDoc -ErrorAction SilentlyContinue
 
 # Ansible-inventory command wrapper for WSL with UTF-8 locale
 <#
@@ -55,4 +60,5 @@ function ansible-doc { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-
 .DESCRIPTION
     Executes ansible-inventory commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 #>
-function ansible-inventory { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-inventory $args" }
+function Get-AnsibleInventory { wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-inventory $args" }
+Set-Alias -Name ansible-inventory -Value Get-AnsibleInventory -ErrorAction SilentlyContinue

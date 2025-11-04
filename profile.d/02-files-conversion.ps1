@@ -14,7 +14,7 @@
 if (-not (Test-Path "Function:\\Ensure-FileConversion")) {
     function Ensure-FileConversion {
         # JSON pretty-print
-        Set-Item -Path Function:json-pretty -Value {
+        Set-Item -Path Function:Format-Json -Value {
             param(
                 [Parameter(ValueFromPipeline = $true)]
                 $InputObject,
@@ -33,62 +33,83 @@ if (-not (Test-Path "Function:\\Ensure-FileConversion")) {
                 }
             }
         } -Force | Out-Null
+        Set-Alias -Name json-pretty -Value Format-Json -ErrorAction SilentlyContinue
 
         # YAML to JSON
-        Set-Item -Path Function:yaml-to-json -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) yq eval -o=json @fileArgs } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-Yaml -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) yq eval -o=json @fileArgs } -Force | Out-Null
+        Set-Alias -Name yaml-to-json -Value ConvertFrom-Yaml -ErrorAction SilentlyContinue
         # JSON to YAML
-        Set-Item -Path Function:json-to-yaml -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) yq eval -P @fileArgs } -Force | Out-Null
+        Set-Item -Path Function:ConvertTo-Yaml -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) yq eval -P @fileArgs } -Force | Out-Null
+        Set-Alias -Name json-to-yaml -Value ConvertTo-Yaml -ErrorAction SilentlyContinue
 
         # Base64 encode
-        Set-Item -Path Function:to-base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { if ($InputObject -is [string] -and (Test-Path -LiteralPath $InputObject)) { [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $InputObject))) } else { $bytes = [Text.Encoding]::UTF8.GetBytes($InputObject); [Convert]::ToBase64String($bytes) } } } -Force | Out-Null
+        Set-Item -Path Function:ConvertTo-Base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { if ($InputObject -is [string] -and (Test-Path -LiteralPath $InputObject)) { [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $InputObject))) } else { $bytes = [Text.Encoding]::UTF8.GetBytes($InputObject); [Convert]::ToBase64String($bytes) } } } -Force | Out-Null
+        Set-Alias -Name to-base64 -Value ConvertTo-Base64 -ErrorAction SilentlyContinue
         # Base64 decode
-        Set-Item -Path Function:from-base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { $s = ($InputObject -join "") -replace '\s+', ''; try { $bytes = [Convert]::FromBase64String($s); [Text.Encoding]::UTF8.GetString($bytes) } catch { Write-Error "Invalid base64 input" } } } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-Base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { $s = ($InputObject -join "") -replace '\s+', ''; try { $bytes = [Convert]::FromBase64String($s); [Text.Encoding]::UTF8.GetString($bytes) } catch { Write-Error "Invalid base64 input" } } } -Force | Out-Null
+        Set-Alias -Name from-base64 -Value ConvertFrom-Base64 -ErrorAction SilentlyContinue
 
         # CSV to JSON
-        Set-Item -Path Function:csv-to-json -Value { param([string]$Path) Import-Csv -Path $Path | ConvertTo-Json -Depth 10 } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-CsvToJson -Value { param([string]$Path) Import-Csv -Path $Path | ConvertTo-Json -Depth 10 } -Force | Out-Null
+        Set-Alias -Name csv-to-json -Value ConvertFrom-CsvToJson -ErrorAction SilentlyContinue
         # JSON to CSV
-        Set-Item -Path Function:json-to-csv -Value { param([string]$Path) try { $data = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json; if ($data -is [array]) { $data | Export-Csv -NoTypeInformation -Path $Path.Replace('.json', '.csv') } else { Write-Error "JSON must be an array of objects" } } catch { Write-Error "Failed to convert JSON to CSV: $_" } } -Force | Out-Null
+        Set-Item -Path Function:ConvertTo-CsvFromJson -Value { param([string]$Path) try { $data = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json; if ($data -is [array]) { $data | Export-Csv -NoTypeInformation -Path $Path.Replace('.json', '.csv') } else { Write-Error "JSON must be an array of objects" } } catch { Write-Error "Failed to convert JSON to CSV: $_" } } -Force | Out-Null
+        Set-Alias -Name json-to-csv -Value ConvertTo-CsvFromJson -ErrorAction SilentlyContinue
 
         # XML to JSON
-        Set-Item -Path Function:xml-to-json -Value { param([string]$Path) try { $xml = [xml](Get-Content -LiteralPath $Path -Raw); $xml | ConvertTo-Json -Depth 100 } catch { Write-Error "Failed to parse XML: $_" } } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-XmlToJson -Value { param([string]$Path) try { $xml = [xml](Get-Content -LiteralPath $Path -Raw); $xml | ConvertTo-Json -Depth 100 } catch { Write-Error "Failed to parse XML: $_" } } -Force | Out-Null
+        Set-Alias -Name xml-to-json -Value ConvertFrom-XmlToJson -ErrorAction SilentlyContinue
 
         # Markdown to HTML
-        Set-Item -Path Function:markdown-to-html -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.md$', '.html' }; pandoc $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:ConvertTo-HtmlFromMarkdown -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.md$', '.html' }; pandoc $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Alias -Name markdown-to-html -Value ConvertTo-HtmlFromMarkdown -ErrorAction SilentlyContinue
         # HTML to Markdown
-        Set-Item -Path Function:html-to-markdown -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.html$', '.md' }; pandoc -f html -t markdown $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-HtmlToMarkdown -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.html$', '.md' }; pandoc -f html -t markdown $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Alias -Name html-to-markdown -Value ConvertFrom-HtmlToMarkdown -ErrorAction SilentlyContinue
 
         # Image convert
-        Set-Item -Path Function:image-convert -Value { param([string]$InputPath, [string]$OutputPath) magick convert $InputPath $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:Convert-Image -Value { param([string]$InputPath, [string]$OutputPath) magick convert $InputPath $OutputPath } -Force | Out-Null
+        Set-Alias -Name image-convert -Value Convert-Image -ErrorAction SilentlyContinue
 
         # Audio convert
-        Set-Item -Path Function:audio-convert -Value { param([string]$InputPath, [string]$OutputPath) ffmpeg -i $InputPath $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:Convert-Audio -Value { param([string]$InputPath, [string]$OutputPath) ffmpeg -i $InputPath $OutputPath } -Force | Out-Null
+        Set-Alias -Name audio-convert -Value Convert-Audio -ErrorAction SilentlyContinue
 
         # PDF to text
-        Set-Item -Path Function:pdf-to-text -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.pdf$', '.txt' }; pdftotext $InputPath $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-PdfToText -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.pdf$', '.txt' }; pdftotext $InputPath $OutputPath } -Force | Out-Null
+        Set-Alias -Name pdf-to-text -Value ConvertFrom-PdfToText -ErrorAction SilentlyContinue
 
         # Video to audio
-        Set-Item -Path Function:video-to-audio -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = [IO.Path]::ChangeExtension($InputPath, 'mp3') }; ffmpeg -i $InputPath -vn -acodec libmp3lame $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-VideoToAudio -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = [IO.Path]::ChangeExtension($InputPath, 'mp3') }; ffmpeg -i $InputPath -vn -acodec libmp3lame $OutputPath } -Force | Out-Null
+        Set-Alias -Name video-to-audio -Value ConvertFrom-VideoToAudio -ErrorAction SilentlyContinue
 
         # Video to GIF
-        Set-Item -Path Function:video-to-gif -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = [IO.Path]::ChangeExtension($InputPath, 'gif') }; ffmpeg -i $InputPath -vf "fps=10,scale=320:-1:flags=lanczos" $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-VideoToGif -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = [IO.Path]::ChangeExtension($InputPath, 'gif') }; ffmpeg -i $InputPath -vf "fps=10,scale=320:-1:flags=lanczos" $OutputPath } -Force | Out-Null
+        Set-Alias -Name video-to-gif -Value ConvertFrom-VideoToGif -ErrorAction SilentlyContinue
 
         # Image resize
-        Set-Item -Path Function:image-resize -Value { param([string]$InputPath, [string]$OutputPath, [int]$Width, [int]$Height) if (-not $OutputPath) { $OutputPath = $InputPath }; magick convert $InputPath -resize ${Width}x${Height} $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:Resize-Image -Value { param([string]$InputPath, [string]$OutputPath, [int]$Width, [int]$Height) if (-not $OutputPath) { $OutputPath = $InputPath }; magick convert $InputPath -resize ${Width}x${Height} $OutputPath } -Force | Out-Null
+        Set-Alias -Name image-resize -Value Resize-Image -ErrorAction SilentlyContinue
 
         # PDF merge
-        Set-Item -Path Function:pdf-merge -Value { param([string[]]$InputPaths, [string]$OutputPath) pdftk $InputPaths cat output $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:Merge-Pdf -Value { param([string[]]$InputPaths, [string]$OutputPath) pdftk $InputPaths cat output $OutputPath } -Force | Out-Null
+        Set-Alias -Name pdf-merge -Value Merge-Pdf -ErrorAction SilentlyContinue
 
         # EPUB to Markdown
-        Set-Item -Path Function:epub-to-markdown -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.epub$', '.md' }; pandoc -f epub -t markdown $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-EpubToMarkdown -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.epub$', '.md' }; pandoc -f epub -t markdown $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Alias -Name epub-to-markdown -Value ConvertFrom-EpubToMarkdown -ErrorAction SilentlyContinue
 
         # DOCX to Markdown
-        Set-Item -Path Function:docx-to-markdown -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.docx$', '.md' }; pandoc -f docx -t markdown $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-DocxToMarkdown -Value { param([string]$InputPath, [string]$OutputPath) if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.docx$', '.md' }; pandoc -f docx -t markdown $InputPath -o $OutputPath } -Force | Out-Null
+        Set-Alias -Name docx-to-markdown -Value ConvertFrom-DocxToMarkdown -ErrorAction SilentlyContinue
 
         # CSV to YAML
-        Set-Item -Path Function:csv-to-yaml -Value { param([string]$Path) Import-Csv -Path $Path | ConvertTo-Json -Depth 10 | yq eval -P | Out-File -FilePath ($Path -replace '\.csv$', '.yaml') -Encoding UTF8 } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-CsvToYaml -Value { param([string]$Path) Import-Csv -Path $Path | ConvertTo-Json -Depth 10 | yq eval -P | Out-File -FilePath ($Path -replace '\.csv$', '.yaml') -Encoding UTF8 } -Force | Out-Null
+        Set-Alias -Name csv-to-yaml -Value ConvertFrom-CsvToYaml -ErrorAction SilentlyContinue
 
         # YAML to CSV
-        Set-Item -Path Function:yaml-to-csv -Value { param([string]$Path) yq eval -o=json $Path | ConvertFrom-Json | Export-Csv -NoTypeInformation -Path ($Path -replace '\.ya?ml$', '.csv') } -Force | Out-Null
+        Set-Item -Path Function:ConvertFrom-YamlToCsv -Value { param([string]$Path) yq eval -o=json $Path | ConvertFrom-Json | Export-Csv -NoTypeInformation -Path ($Path -replace '\.ya?ml$', '.csv') } -Force | Out-Null
+        Set-Alias -Name yaml-to-csv -Value ConvertFrom-YamlToCsv -ErrorAction SilentlyContinue
     }
 }
 
@@ -99,7 +120,8 @@ if (-not (Test-Path "Function:\\Ensure-FileConversion")) {
 .DESCRIPTION
     Formats JSON data with proper indentation and structure.
 #>
-function json-pretty { if (-not (Test-Path Function:\json-pretty)) { Ensure-FileConversion }; return & (Get-Item Function:\json-pretty -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Format-Json { if (-not (Test-Path Function:\Format-Json)) { Ensure-FileConversion }; return & (Get-Item Function:\Format-Json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name json-pretty -Value Format-Json -ErrorAction SilentlyContinue
 
 # Convert YAML to JSON
 <#
@@ -108,7 +130,8 @@ function json-pretty { if (-not (Test-Path Function:\json-pretty)) { Ensure-File
 .DESCRIPTION
     Transforms YAML input to JSON output using yq.
 #>
-function yaml-to-json { if (-not (Test-Path Function:\yaml-to-json)) { Ensure-FileConversion }; return & (Get-Item Function:\yaml-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-Yaml { if (-not (Test-Path Function:\ConvertFrom-Yaml)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-Yaml -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name yaml-to-json -Value ConvertFrom-Yaml -ErrorAction SilentlyContinue
 
 # Convert JSON to YAML
 <#
@@ -117,7 +140,8 @@ function yaml-to-json { if (-not (Test-Path Function:\yaml-to-json)) { Ensure-Fi
 .DESCRIPTION
     Transforms JSON input to YAML output using yq.
 #>
-function json-to-yaml { if (-not (Test-Path Function:\json-to-yaml)) { Ensure-FileConversion }; return & (Get-Item Function:\json-to-yaml -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertTo-Yaml { if (-not (Test-Path Function:\ConvertTo-Yaml)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertTo-Yaml -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name json-to-yaml -Value ConvertTo-Yaml -ErrorAction SilentlyContinue
 
 # Encode to base64
 <#
@@ -128,7 +152,8 @@ function json-to-yaml { if (-not (Test-Path Function:\json-to-yaml)) { Ensure-Fi
 .PARAMETER InputObject
     The file path or string to encode.
 #>
-function to-base64 { if (-not (Test-Path Function:\to-base64)) { Ensure-FileConversion }; return & (Get-Item Function:\to-base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertTo-Base64 { if (-not (Test-Path Function:\ConvertTo-Base64)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertTo-Base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name to-base64 -Value ConvertTo-Base64 -ErrorAction SilentlyContinue
 
 # Decode from base64
 <#
@@ -139,7 +164,8 @@ function to-base64 { if (-not (Test-Path Function:\to-base64)) { Ensure-FileConv
 .PARAMETER InputObject
     The base64 string to decode.
 #>
-function from-base64 { if (-not (Test-Path Function:\from-base64)) { Ensure-FileConversion }; return & (Get-Item Function:\from-base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-Base64 { if (-not (Test-Path Function:\ConvertFrom-Base64)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-Base64 -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name from-base64 -Value ConvertFrom-Base64 -ErrorAction SilentlyContinue
 
 # Convert CSV to JSON
 <#
@@ -150,7 +176,8 @@ function from-base64 { if (-not (Test-Path Function:\from-base64)) { Ensure-File
 .PARAMETER Path
     The path to the CSV file to convert.
 #>
-function csv-to-json { if (-not (Test-Path Function:\csv-to-json)) { Ensure-FileConversion }; return & (Get-Item Function:\csv-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-CsvToJson { if (-not (Test-Path Function:\ConvertFrom-CsvToJson)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-CsvToJson -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name csv-to-json -Value ConvertFrom-CsvToJson -ErrorAction SilentlyContinue
 
 # Convert JSON to CSV
 <#
@@ -161,7 +188,8 @@ function csv-to-json { if (-not (Test-Path Function:\csv-to-json)) { Ensure-File
 .PARAMETER Path
     The path to the JSON file to convert.
 #>
-function json-to-csv { if (-not (Test-Path Function:\json-to-csv)) { Ensure-FileConversion }; return & (Get-Item Function:\json-to-csv -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertTo-CsvFromJson { if (-not (Test-Path Function:\ConvertTo-CsvFromJson)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertTo-CsvFromJson -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name json-to-csv -Value ConvertTo-CsvFromJson -ErrorAction SilentlyContinue
 
 # Convert XML to JSON
 <#
@@ -172,7 +200,8 @@ function json-to-csv { if (-not (Test-Path Function:\json-to-csv)) { Ensure-File
 .PARAMETER Path
     The path to the XML file to convert.
 #>
-function xml-to-json { if (-not (Test-Path Function:\xml-to-json)) { Ensure-FileConversion }; return & (Get-Item Function:\xml-to-json -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-XmlToJson { if (-not (Test-Path Function:\ConvertFrom-XmlToJson)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-XmlToJson -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name xml-to-json -Value ConvertFrom-XmlToJson -ErrorAction SilentlyContinue
 
 # Convert Markdown to HTML
 <#
@@ -185,7 +214,8 @@ function xml-to-json { if (-not (Test-Path Function:\xml-to-json)) { Ensure-File
 .PARAMETER OutputPath
     The path for the output HTML file. If not specified, uses input path with .html extension.
 #>
-function markdown-to-html { if (-not (Test-Path Function:\markdown-to-html)) { Ensure-FileConversion }; return & (Get-Item Function:\markdown-to-html -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertTo-HtmlFromMarkdown { if (-not (Test-Path Function:\ConvertTo-HtmlFromMarkdown)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertTo-HtmlFromMarkdown -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name markdown-to-html -Value ConvertTo-HtmlFromMarkdown -ErrorAction SilentlyContinue
 
 # Convert HTML to Markdown
 <#
@@ -198,7 +228,8 @@ function markdown-to-html { if (-not (Test-Path Function:\markdown-to-html)) { E
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
 #>
-function html-to-markdown { if (-not (Test-Path Function:\html-to-markdown)) { Ensure-FileConversion }; return & (Get-Item Function:\html-to-markdown -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-HtmlToMarkdown { if (-not (Test-Path Function:\ConvertFrom-HtmlToMarkdown)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-HtmlToMarkdown -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name html-to-markdown -Value ConvertFrom-HtmlToMarkdown -ErrorAction SilentlyContinue
 
 # Convert image formats
 <#
@@ -211,7 +242,8 @@ function html-to-markdown { if (-not (Test-Path Function:\html-to-markdown)) { E
 .PARAMETER OutputPath
     The path for the output image file with desired format.
 #>
-function image-convert { if (-not (Test-Path Function:\image-convert)) { Ensure-FileConversion }; return & (Get-Item Function:\image-convert -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Convert-Image { if (-not (Test-Path Function:\Convert-Image)) { Ensure-FileConversion }; return & (Get-Item Function:\Convert-Image -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name image-convert -Value Convert-Image -ErrorAction SilentlyContinue
 
 # Convert audio formats
 <#
@@ -224,7 +256,8 @@ function image-convert { if (-not (Test-Path Function:\image-convert)) { Ensure-
 .PARAMETER OutputPath
     The path for the output audio file with desired format.
 #>
-function audio-convert { if (-not (Test-Path Function:\audio-convert)) { Ensure-FileConversion }; return & (Get-Item Function:\audio-convert -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Convert-Audio { if (-not (Test-Path Function:\Convert-Audio)) { Ensure-FileConversion }; return & (Get-Item Function:\Convert-Audio -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name audio-convert -Value Convert-Audio -ErrorAction SilentlyContinue
 
 # Convert PDF to text
 <#
@@ -237,7 +270,8 @@ function audio-convert { if (-not (Test-Path Function:\audio-convert)) { Ensure-
 .PARAMETER OutputPath
     The path for the output text file. If not specified, uses input path with .txt extension.
 #>
-function pdf-to-text { if (-not (Test-Path Function:\pdf-to-text)) { Ensure-FileConversion }; return & (Get-Item Function:\pdf-to-text -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-PdfToText { if (-not (Test-Path Function:\ConvertFrom-PdfToText)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-PdfToText -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name pdf-to-text -Value ConvertFrom-PdfToText -ErrorAction SilentlyContinue
 
 # Extract audio from video
 <#
@@ -250,7 +284,8 @@ function pdf-to-text { if (-not (Test-Path Function:\pdf-to-text)) { Ensure-File
 .PARAMETER OutputPath
     The path for the output audio file. If not specified, uses input path with .mp3 extension.
 #>
-function video-to-audio { if (-not (Test-Path Function:\video-to-audio)) { Ensure-FileConversion }; return & (Get-Item Function:\video-to-audio -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-VideoToAudio { if (-not (Test-Path Function:\ConvertFrom-VideoToAudio)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-VideoToAudio -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name video-to-audio -Value ConvertFrom-VideoToAudio -ErrorAction SilentlyContinue
 
 # Convert video to GIF
 <#
@@ -263,7 +298,8 @@ function video-to-audio { if (-not (Test-Path Function:\video-to-audio)) { Ensur
 .PARAMETER OutputPath
     The path for the output GIF file. If not specified, uses input path with .gif extension.
 #>
-function video-to-gif { if (-not (Test-Path Function:\video-to-gif)) { Ensure-FileConversion }; return & (Get-Item Function:\video-to-gif -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-VideoToGif { if (-not (Test-Path Function:\ConvertFrom-VideoToGif)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-VideoToGif -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name video-to-gif -Value ConvertFrom-VideoToGif -ErrorAction SilentlyContinue
 
 # Resize image
 <#
@@ -280,7 +316,8 @@ function video-to-gif { if (-not (Test-Path Function:\video-to-gif)) { Ensure-Fi
 .PARAMETER Height
     The desired height.
 #>
-function image-resize { if (-not (Test-Path Function:\image-resize)) { Ensure-FileConversion }; return & (Get-Item Function:\image-resize -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Resize-Image { if (-not (Test-Path Function:\Resize-Image)) { Ensure-FileConversion }; return & (Get-Item Function:\Resize-Image -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name image-resize -Value Resize-Image -ErrorAction SilentlyContinue
 
 # Merge PDF files
 <#
@@ -293,7 +330,8 @@ function image-resize { if (-not (Test-Path Function:\image-resize)) { Ensure-Fi
 .PARAMETER OutputPath
     The path for the output merged PDF file.
 #>
-function pdf-merge { if (-not (Test-Path Function:\pdf-merge)) { Ensure-FileConversion }; return & (Get-Item Function:\pdf-merge -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Merge-Pdf { if (-not (Test-Path Function:\Merge-Pdf)) { Ensure-FileConversion }; return & (Get-Item Function:\Merge-Pdf -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name pdf-merge -Value Merge-Pdf -ErrorAction SilentlyContinue
 
 # Convert EPUB to Markdown
 <#
@@ -306,7 +344,8 @@ function pdf-merge { if (-not (Test-Path Function:\pdf-merge)) { Ensure-FileConv
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
 #>
-function epub-to-markdown { if (-not (Test-Path Function:\epub-to-markdown)) { Ensure-FileConversion }; return & (Get-Item Function:\epub-to-markdown -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-EpubToMarkdown { if (-not (Test-Path Function:\ConvertFrom-EpubToMarkdown)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-EpubToMarkdown -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name epub-to-markdown -Value ConvertFrom-EpubToMarkdown -ErrorAction SilentlyContinue
 
 # Convert DOCX to Markdown
 <#
@@ -319,7 +358,8 @@ function epub-to-markdown { if (-not (Test-Path Function:\epub-to-markdown)) { E
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
 #>
-function docx-to-markdown { if (-not (Test-Path Function:\docx-to-markdown)) { Ensure-FileConversion }; return & (Get-Item Function:\docx-to-markdown -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-DocxToMarkdown { if (-not (Test-Path Function:\ConvertFrom-DocxToMarkdown)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-DocxToMarkdown -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name docx-to-markdown -Value ConvertFrom-DocxToMarkdown -ErrorAction SilentlyContinue
 
 # Convert CSV to YAML
 <#
@@ -330,7 +370,8 @@ function docx-to-markdown { if (-not (Test-Path Function:\docx-to-markdown)) { E
 .PARAMETER Path
     The path to the CSV file to convert.
 #>
-function csv-to-yaml { if (-not (Test-Path Function:\csv-to-yaml)) { Ensure-FileConversion }; return & (Get-Item Function:\csv-to-yaml -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-CsvToYaml { if (-not (Test-Path Function:\ConvertFrom-CsvToYaml)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-CsvToYaml -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name csv-to-yaml -Value ConvertFrom-CsvToYaml -ErrorAction SilentlyContinue
 
 # Convert YAML to CSV
 <#
@@ -341,4 +382,5 @@ function csv-to-yaml { if (-not (Test-Path Function:\csv-to-yaml)) { Ensure-File
 .PARAMETER Path
     The path to the YAML file to convert.
 #>
-function yaml-to-csv { if (-not (Test-Path Function:\yaml-to-csv)) { Ensure-FileConversion }; return & (Get-Item Function:\yaml-to-csv -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ConvertFrom-YamlToCsv { if (-not (Test-Path Function:\ConvertFrom-YamlToCsv)) { Ensure-FileConversion }; return & (Get-Item Function:\ConvertFrom-YamlToCsv -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name yaml-to-csv -Value ConvertFrom-YamlToCsv -ErrorAction SilentlyContinue
