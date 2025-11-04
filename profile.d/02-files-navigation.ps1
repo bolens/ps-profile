@@ -22,11 +22,14 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
         # Go to user's Home directory
         Set-Item -Path Function:~ -Value { Set-Location $env:USERPROFILE } -Force | Out-Null
         # Go to user's Desktop directory
-        Set-Item -Path Function:desktop -Value { Set-Location "$env:USERPROFILE\Desktop" } -Force | Out-Null
+        Set-Item -Path Function:Set-LocationDesktop -Value { Set-Location "$env:USERPROFILE\Desktop" } -Force | Out-Null
+        Set-Alias -Name desktop -Value Set-LocationDesktop -ErrorAction SilentlyContinue
         # Go to user's Downloads directory
-        Set-Item -Path Function:downloads -Value { Set-Location "$env:USERPROFILE\Downloads" } -Force | Out-Null
+        Set-Item -Path Function:Set-LocationDownloads -Value { Set-Location "$env:USERPROFILE\Downloads" } -Force | Out-Null
+        Set-Alias -Name downloads -Value Set-LocationDownloads -ErrorAction SilentlyContinue
         # Go to user's Documents directory
-        Set-Item -Path Function:docs -Value { Set-Location "$env:USERPROFILE\Documents" } -Force | Out-Null
+        Set-Item -Path Function:Set-LocationDocuments -Value { Set-Location "$env:USERPROFILE\Documents" } -Force | Out-Null
+        Set-Alias -Name docs -Value Set-LocationDocuments -ErrorAction SilentlyContinue
     }
 }
 
@@ -67,7 +70,8 @@ Set-Item -Path Function:\~ -Value { if (-not (Test-Path Function:\~)) { Ensure-F
 .DESCRIPTION
     Navigates to the user's Desktop folder.
 #>
-function desktop { if (-not (Test-Path Function:\desktop)) { Ensure-FileNavigation }; return & (Get-Item Function:\desktop -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Set-LocationDesktop { if (-not (Test-Path Function:\Set-LocationDesktop)) { Ensure-FileNavigation }; return & (Get-Item Function:\Set-LocationDesktop -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name desktop -Value Set-LocationDesktop -ErrorAction SilentlyContinue
 
 # Go to Downloads directory
 <#
@@ -76,7 +80,8 @@ function desktop { if (-not (Test-Path Function:\desktop)) { Ensure-FileNavigati
 .DESCRIPTION
     Navigates to the user's Downloads folder.
 #>
-function downloads { if (-not (Test-Path Function:\downloads)) { Ensure-FileNavigation }; return & (Get-Item Function:\downloads -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Set-LocationDownloads { if (-not (Test-Path Function:\Set-LocationDownloads)) { Ensure-FileNavigation }; return & (Get-Item Function:\Set-LocationDownloads -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name downloads -Value Set-LocationDownloads -ErrorAction SilentlyContinue
 
 # Go to Documents directory
 <#
@@ -85,4 +90,5 @@ function downloads { if (-not (Test-Path Function:\downloads)) { Ensure-FileNavi
 .DESCRIPTION
     Navigates to the user's Documents folder.
 #>
-function docs { if (-not (Test-Path Function:\docs)) { Ensure-FileNavigation }; return & (Get-Item Function:\docs -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Set-LocationDocuments { if (-not (Test-Path Function:\Set-LocationDocuments)) { Ensure-FileNavigation }; return & (Get-Item Function:\Set-LocationDocuments -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+Set-Alias -Name docs -Value Set-LocationDocuments -ErrorAction SilentlyContinue

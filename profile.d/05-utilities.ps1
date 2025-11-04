@@ -10,7 +10,9 @@
 .DESCRIPTION
     Dots-sources the current profile file to reload all functions and settings.
 #>
-function reload { .$PROFILE }
+function Reload-Profile { .$PROFILE }
+Set-Alias -Name reload -Value Reload-Profile -ErrorAction SilentlyContinue
+
 # Edit profile in code editor
 <#
 .SYNOPSIS
@@ -18,7 +20,9 @@ function reload { .$PROFILE }
 .DESCRIPTION
     Launches VS Code to edit the current PowerShell profile file.
 #>
-function edit-profile { code $PROFILE }
+function Edit-Profile { code $PROFILE }
+Set-Alias -Name edit-profile -Value Edit-Profile -ErrorAction SilentlyContinue
+
 # Weather info for a location (city, zip, etc.)
 <#
 .SYNOPSIS
@@ -26,7 +30,9 @@ function edit-profile { code $PROFILE }
 .DESCRIPTION
     Retrieves and displays weather information for a specified location using wttr.in.
 #>
-function weather { Invoke-WebRequest -Uri "https://wttr.in/$args" }
+function Get-Weather { Invoke-WebRequest -Uri "https://wttr.in/$args" }
+Set-Alias -Name weather -Value Get-Weather -ErrorAction SilentlyContinue
+
 # Get public IP address
 <#
 .SYNOPSIS
@@ -34,7 +40,9 @@ function weather { Invoke-WebRequest -Uri "https://wttr.in/$args" }
 .DESCRIPTION
     Retrieves and displays the current public IP address.
 #>
-function myip { (Invoke-RestMethod ifconfig.me).Trim() }
+function Get-MyIP { (Invoke-RestMethod ifconfig.me).Trim() }
+Set-Alias -Name myip -Value Get-MyIP -ErrorAction SilentlyContinue
+
 # Run speedtest-cli
 <#
 .SYNOPSIS
@@ -42,7 +50,9 @@ function myip { (Invoke-RestMethod ifconfig.me).Trim() }
 .DESCRIPTION
     Executes speedtest-cli to measure internet connection speed.
 #>
-function speedtest { speedtest-cli }
+function Start-SpeedTest { speedtest-cli }
+Set-Alias -Name speedtest -Value Start-SpeedTest -ErrorAction SilentlyContinue
+
 # History helpers
 <#
 .SYNOPSIS
@@ -51,6 +61,7 @@ function speedtest { speedtest-cli }
     Displays the last 20 commands from the PowerShell command history.
 #>
 function Get-History { Microsoft.PowerShell.Core\Get-History | Select-Object -Last 20 }
+
 # Search history
 <#
 .SYNOPSIS
@@ -58,7 +69,9 @@ function Get-History { Microsoft.PowerShell.Core\Get-History | Select-Object -La
 .DESCRIPTION
     Searches through PowerShell command history for the specified pattern.
 #>
-function hg { Microsoft.PowerShell.Core\Get-History | Select-String $args }
+function Find-History { Microsoft.PowerShell.Core\Get-History | Select-String $args }
+Set-Alias -Name hg -Value Find-History -ErrorAction SilentlyContinue
+
 # Generate random password
 <#
 .SYNOPSIS
@@ -66,7 +79,9 @@ function hg { Microsoft.PowerShell.Core\Get-History | Select-String $args }
 .DESCRIPTION
     Creates a 16-character random password using alphanumeric characters.
 #>
-function pwgen { -join ((1..16) | ForEach-Object { [char]((65..90) + (97..122) + (48..57) | Get-Random) }) }
+function New-RandomPassword { -join ((1..16) | ForEach-Object { [char]((65..90) + (97..122) + (48..57) | Get-Random) }) }
+Set-Alias -Name pwgen -Value New-RandomPassword -ErrorAction SilentlyContinue
+
 # URL encode
 <#
 .SYNOPSIS
@@ -74,7 +89,9 @@ function pwgen { -join ((1..16) | ForEach-Object { [char]((65..90) + (97..122) +
 .DESCRIPTION
     Encodes a string for use in URLs.
 #>
-function url-encode { param([string]$text) [uri]::EscapeDataString($text) }
+function ConvertTo-UrlEncoded { param([string]$text) [uri]::EscapeDataString($text) }
+Set-Alias -Name url-encode -Value ConvertTo-UrlEncoded -ErrorAction SilentlyContinue
+
 # URL decode
 <#
 .SYNOPSIS
@@ -82,7 +99,9 @@ function url-encode { param([string]$text) [uri]::EscapeDataString($text) }
 .DESCRIPTION
     Decodes a URL-encoded string.
 #>
-function url-decode { param([string]$text) [uri]::UnescapeDataString($text) }
+function ConvertFrom-UrlEncoded { param([string]$text) [uri]::UnescapeDataString($text) }
+Set-Alias -Name url-decode -Value ConvertFrom-UrlEncoded -ErrorAction SilentlyContinue
+
 # Convert Unix timestamp to DateTime
 <#
 .SYNOPSIS
@@ -90,7 +109,9 @@ function url-decode { param([string]$text) [uri]::UnescapeDataString($text) }
 .DESCRIPTION
     Converts a Unix timestamp (seconds since epoch) to a local DateTime.
 #>
-function from-epoch { param([long]$epoch) [DateTimeOffset]::FromUnixTimeSeconds($epoch).ToLocalTime() }
+function ConvertFrom-Epoch { param([long]$epoch) [DateTimeOffset]::FromUnixTimeSeconds($epoch).ToLocalTime() }
+Set-Alias -Name from-epoch -Value ConvertFrom-Epoch -ErrorAction SilentlyContinue
+
 # Convert DateTime to Unix timestamp
 <#
 .SYNOPSIS
@@ -98,7 +119,9 @@ function from-epoch { param([long]$epoch) [DateTimeOffset]::FromUnixTimeSeconds(
 .DESCRIPTION
     Converts a DateTime object or string to a Unix timestamp (seconds since epoch).
 #>
-function to-epoch { param([DateTime]$date = (Get-Date)) [DateTimeOffset]::new($date).ToUnixTimeSeconds() }
+function ConvertTo-Epoch { param([DateTime]$date = (Get-Date)) [DateTimeOffset]::new($date).ToUnixTimeSeconds() }
+Set-Alias -Name to-epoch -Value ConvertTo-Epoch -ErrorAction SilentlyContinue
+
 # Convert DateTime to Unix timestamp
 <#
 .SYNOPSIS
@@ -106,7 +129,9 @@ function to-epoch { param([DateTime]$date = (Get-Date)) [DateTimeOffset]::new($d
 .DESCRIPTION
     Returns the current date and time as a Unix timestamp (seconds since epoch).
 #>
-function epoch { [DateTimeOffset]::Now.ToUnixTimeSeconds() }
+function Get-Epoch { [DateTimeOffset]::Now.ToUnixTimeSeconds() }
+Set-Alias -Name epoch -Value Get-Epoch -ErrorAction SilentlyContinue
+
 # Get current date and time in standard format
 <#
 .SYNOPSIS
@@ -114,7 +139,9 @@ function epoch { [DateTimeOffset]::Now.ToUnixTimeSeconds() }
 .DESCRIPTION
     Displays the current date and time in a standard format.
 #>
-function now { Get-Date -Format "yyyy-MM-dd HH:mm:ss" }
+function Get-DateTime { Get-Date -Format "yyyy-MM-dd HH:mm:ss" }
+Set-Alias -Name now -Value Get-DateTime -ErrorAction SilentlyContinue
+
 # Open current directory in File Explorer
 <#
 .SYNOPSIS
@@ -122,7 +149,9 @@ function now { Get-Date -Format "yyyy-MM-dd HH:mm:ss" }
 .DESCRIPTION
     Launches Windows File Explorer in the current directory.
 #>
-function open-explorer { explorer.exe . }
+function Open-Explorer { explorer.exe . }
+Set-Alias -Name open-explorer -Value Open-Explorer -ErrorAction SilentlyContinue
+
 # List all user-defined functions in current session
 <#
 .SYNOPSIS
@@ -130,7 +159,9 @@ function open-explorer { explorer.exe . }
 .DESCRIPTION
     Displays all user-defined functions in the current PowerShell session.
 #>
-function list-functions { Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name, Definition | Format-Table -AutoSize }
+function Get-Functions { Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name, Definition | Format-Table -AutoSize }
+Set-Alias -Name list-functions -Value Get-Functions -ErrorAction SilentlyContinue
+
 # Backup current profile to timestamped .bak file
 <#
 .SYNOPSIS
@@ -138,7 +169,8 @@ function list-functions { Get-Command -CommandType Function | Where-Object { $_.
 .DESCRIPTION
     Creates a timestamped backup copy of the current PowerShell profile.
 #>
-function backup-profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
+function Backup-Profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
+Set-Alias -Name backup-profile -Value Backup-Profile -ErrorAction SilentlyContinue
 
 # Environment variable management functions (for Scoop compatibility)
 <#

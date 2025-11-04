@@ -14,7 +14,8 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Replacement for pip that uses uv for faster Python package management.
     #>
-    function pip { uv pip @args }
+    function Invoke-Pip { uv pip @args }
+    Set-Alias -Name pip -Value Invoke-Pip -ErrorAction SilentlyContinue
 
     # UV run
     <#

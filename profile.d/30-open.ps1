@@ -3,7 +3,7 @@
 # Cross-platform 'open' helper
 # ===============================================
 
-if (-not (Test-Path Function:open -ErrorAction SilentlyContinue)) {
+if (-not (Test-Path Function:Open-Item -ErrorAction SilentlyContinue)) {
     <#
     .SYNOPSIS
         Opens files or URLs using the system's default application.
@@ -12,7 +12,7 @@ if (-not (Test-Path Function:open -ErrorAction SilentlyContinue)) {
         Opens the specified file or URL using the appropriate system command.
         On Windows, uses Start-Process. On Linux/macOS, uses xdg-open or open.
     #>
-    function open {
+    function Open-Item {
         param($p)
         if ($IsWindows) { Start-Process -FilePath $p } else {
             if (Test-Path Function:'xdg-open' -ErrorAction SilentlyContinue -or $null -NE (Get-Command xdg-open -ErrorAction SilentlyContinue)) { xdg-open $p }
@@ -20,4 +20,5 @@ if (-not (Test-Path Function:open -ErrorAction SilentlyContinue)) {
             else { Write-Warning "No opener found for $p" }
         }
     }
+    Set-Alias -Name open -Value Open-Item -ErrorAction SilentlyContinue
 }

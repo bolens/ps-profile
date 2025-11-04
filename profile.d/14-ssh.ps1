@@ -4,27 +4,29 @@
 # ===============================================
 
 # Show loaded keys
-if (-not (Test-Path Function:\ssh-list)) {
+if (-not (Test-Path Function:\Get-SSHKeys)) {
     $sbList = { ssh-add -l }
     # Create directly via Function: provider to keep dot-source cheap
-    New-Item -Path Function:\ssh-list -Value $sbList -Force | Out-Null
+    New-Item -Path Function:\Get-SSHKeys -Value $sbList -Force | Out-Null
+    Set-Alias -Name ssh-list -Value Get-SSHKeys -ErrorAction SilentlyContinue
 }
 
 # Add a private key to the agent (idempotent wrapper)
-if (-not (Test-Path Function:\ssh-add-if)) {
+if (-not (Test-Path Function:\Add-SSHKeyIfNotLoaded)) {
     $sbAddIf = {
         param($path)
-        if (-not $path) { Write-Warning 'Usage: ssh-add-if <path-to-key>'; return }
+        if (-not $path) { Write-Warning 'Usage: Add-SSHKeyIfNotLoaded <path-to-key>'; return }
         if (-not (Test-Path $path)) { Write-Warning 'Key not found: ' + $path; return }
         $existing = (ssh-add -l 2>$null) -join "`n"
         if ($existing -and $existing -match (Split-Path $path -Leaf)) { Write-Output 'Key already loaded'; return }
         ssh-add $path
     }
-    New-Item -Path Function:\ssh-add-if -Value $sbAddIf -Force | Out-Null
+    New-Item -Path Function:\Add-SSHKeyIfNotLoaded -Value $sbAddIf -Force | Out-Null
+    Set-Alias -Name ssh-add-if -Value Add-SSHKeyIfNotLoaded -ErrorAction SilentlyContinue
 }
 
 # Start Pageant/ssh-agent on Windows (if not running)
-if (-not (Test-Path Function:\ssh-agent-start)) {
+if (-not (Test-Path Function:\Start-SSHAgent)) {
     # Register a lazy starter for ssh-agent; do not probe or start at dot-source
     $sb = {
         # Start ssh-agent in the background and set env vars for the current session
@@ -43,7 +45,8 @@ if (-not (Test-Path Function:\ssh-agent-start)) {
             Write-Verbose "ssh-agent starter failed: $($_.Exception.Message)"
         }
     }
-    if (-not (Test-Path Function:\ssh-agent-start)) {
-        New-Item -Path Function:\ssh-agent-start -Value $sb -Force | Out-Null
+    if (-not (Test-Path Function:\Start-SSHAgent)) {
+        New-Item -Path Function:\Start-SSHAgent -Value $sb -Force | Out-Null
+        Set-Alias -Name ssh-agent-start -Value Start-SSHAgent -ErrorAction SilentlyContinue
     }
 }

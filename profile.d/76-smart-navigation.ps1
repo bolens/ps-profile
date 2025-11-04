@@ -63,9 +63,9 @@ try {
         # Keep only top 1000 directories to prevent memory bloat
         if ($statsDict.Count -gt 1000) {
             $toRemove = $statsDict.GetEnumerator() |
-                Sort-Object { $_.Value.Score } |
-                Select-Object -First ($statsDict.Count - 1000) |
-                ForEach-Object { $_.Key }
+            Sort-Object { $_.Value.Score } |
+            Select-Object -First ($statsDict.Count - 1000) |
+            ForEach-Object { $_.Key }
 
             foreach ($key in $toRemove) {
                 $statsDict.TryRemove($key, [ref]$null)
@@ -131,7 +131,8 @@ try {
     .DESCRIPTION
         Alias for Jump-Directory for quick navigation.
     #>
-    function j { Jump-Directory @args }
+    function Jump-DirectoryQuick { Jump-Directory @args }
+    Set-Alias -Name j -Value Jump-DirectoryQuick -ErrorAction SilentlyContinue
 
     # List frequently used directories
     <#

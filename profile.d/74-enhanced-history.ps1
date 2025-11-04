@@ -110,7 +110,7 @@ try {
     .DESCRIPTION
         Searches command history for the specified pattern.
     #>
-    function fh {
+    function Find-HistoryQuick {
         param([string]$Pattern)
 
         if (-not $Pattern) {
@@ -145,6 +145,7 @@ try {
             Write-Host ("{0,5} {1}" -f $item.Id, $cmd)
         }
     }
+    Set-Alias -Name fh -Value Find-HistoryQuick -ErrorAction SilentlyContinue
 
     # History statistics and insights
     <#

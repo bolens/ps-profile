@@ -255,6 +255,7 @@ try {
     try {
         $promptFrameworkActive = (
             (Get-Variable -Name 'StarshipInitialized' -Scope Global -ErrorAction SilentlyContinue) -or
+            (Get-Variable -Name 'StarshipActive' -Scope Global -ErrorAction SilentlyContinue) -or
             (Get-Variable -Name 'OhMyPoshInitialized' -Scope Global -ErrorAction SilentlyContinue)
         )
     }
