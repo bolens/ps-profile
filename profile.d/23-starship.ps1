@@ -42,20 +42,66 @@ try {
                     Initialize-SmartPrompt
                     return
                 }
-                $initScript = & $starCmd.Source init powershell --print-full-init 2>$null
-                if ($initScript) {
-                    # Write the initialization script to a temp file and dot-source it to avoid Invoke-Expression.
-                    $temp = [System.IO.Path]::GetTempFileName() + '.ps1'
+                # Use a simpler approach: define the prompt function directly
+                function global:prompt {
+                    $origDollarQuestion = $global:?
+                    $origLastExitCode = $global:LASTEXITCODE
+
+                    # @ makes sure the result is an array even if single or no values are returned
+                    $jobs = @(Get-Job | Where-Object { $_.State -eq 'Running' }).Count
+
+                    $cwd = Get-Location
+                    $arguments = @(
+                        "prompt"
+                        "--path=$($cwd.Path)",
+                        "--logical-path=$($cwd.Path)",
+                        "--terminal-width=$($Host.UI.RawUI.WindowSize.Width)",
+                        "--jobs=$($jobs)"
+                    )
+
+                    # We start from the premise that the command executed correctly, which covers also the fresh console.
+                    $lastExitCodeForPrompt = 0
+                    if ($lastCmd = Get-History -Count 1) {
+                        # In case we have a False on the Dollar hook, we know there's an error.
+                        if (-not $origDollarQuestion) {
+                            $lastExitCodeForPrompt = $origLastExitCode
+                        }
+                        $duration = [math]::Round(($lastCmd.EndExecutionTime - $lastCmd.StartExecutionTime).TotalMilliseconds)
+                        $arguments += "--cmd-duration=$($duration)"
+                    }
+
+                    $arguments += "--status=$($lastExitCodeForPrompt)"
+
+                    # Invoke Starship
                     try {
-                        $null = $initScript | Out-File -FilePath $temp -Encoding UTF8
-                        if (Test-Path $temp) { .$temp }
+                        $promptText = & $starCmd.Source @arguments 2>$null
+                        if ($promptText) {
+                            $promptText
+                        }
+                        else {
+                            "❯ "
+                        }
                     }
-                    finally {
-                        if (Test-Path $temp) { Remove-Item $temp -Force -ErrorAction SilentlyContinue }
+                    catch {
+                        "❯ "
                     }
-                    Set-Variable -Name 'StarshipInitialized' -Value $true -Scope Global -Force
-                    if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship initialized via $($starCmd.Source)" }
+
+                    # Propagate the original $LASTEXITCODE
+                    $global:LASTEXITCODE = $origLastExitCode
+
+                    # Propagate the original $?
+                    if ($global:? -ne $origDollarQuestion) {
+                        if ($origDollarQuestion) {
+                            1 + 1
+                        }
+                        else {
+                            Write-Error '' -ErrorAction 'Ignore'
+                        }
+                    }
                 }
+
+                Set-Variable -Name 'StarshipInitialized' -Value $true -Scope Global -Force
+                if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship initialized via $($starCmd.Source)" }
                 else {
                     # Fallback to smart prompt if starship init fails
                     Initialize-SmartPrompt
