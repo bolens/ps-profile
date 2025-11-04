@@ -42,55 +42,8 @@ try {
                     Initialize-SmartPrompt
                     return
                 }
-                # Use a simpler approach: define the prompt function directly
-                function global:prompt {
-                    # Capture status immediately at prompt start
-                    $lastCommandSucceeded = $?
-                    $lastExitCode = $LASTEXITCODE
-
-                    # @ makes sure the result is an array even if single or no values are returned
-                    $jobs = @(Get-Job | Where-Object { $_.State -eq 'Running' }).Count
-
-                    $cwd = Get-Location
-                    $arguments = @(
-                        "prompt"
-                        "--path=$($cwd.Path)",
-                        "--logical-path=$($cwd.Path)",
-                        "--terminal-width=$($Host.UI.RawUI.WindowSize.Width)",
-                        "--jobs=$($jobs)"
-                    )
-
-                    # Determine status based on last command success
-                    $lastExitCodeForPrompt = if ($lastCommandSucceeded) { 0 } else { $lastExitCode -or 1 }
-
-                    if ($lastCmd = Get-History -Count 1) {
-                        $duration = [math]::Round(($lastCmd.EndExecutionTime - $lastCmd.StartExecutionTime).TotalMilliseconds)
-                        $arguments += "--cmd-duration=$($duration)"
-                    }
-
-                    $arguments += "--status=$($lastExitCodeForPrompt)"
-
-                    # Invoke Starship
-                    try {
-                        $promptText = & $starCmd.Source @arguments 2>$null
-                        if ($promptText) {
-                            $promptText
-                        }
-                        else {
-                            "❯ "
-                        }
-                    }
-                    catch {
-                        "❯ "
-                    }
-                }
-
-                Set-Variable -Name 'StarshipInitialized' -Value $true -Scope Global -Force
-                if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Starship initialized via $($starCmd.Source)" }
-                else {
-                    # Fallback to smart prompt if starship init fails
-                    Initialize-SmartPrompt
-                }
+                # Starship status control is not working, use smart prompt instead
+                Initialize-SmartPrompt
             }
             catch {
                 if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Initialize-Starship failed: $($_.Exception.Message)" }
@@ -120,6 +73,8 @@ try {
 
                 # Enhanced prompt function
                 function global:prompt {
+                    # Capture command success status BEFORE any other operations
+                    $lastCommandSucceeded = $?
                     try {
                         $lastExitCode = $LASTEXITCODE
                         $currentPath = $executionContext.SessionState.Path.CurrentLocation.Path
@@ -150,11 +105,6 @@ try {
                             }
                         }
                         catch { }
-
-                        # Error indicator
-                        if ($lastExitCode -ne 0) {
-                            $promptParts += "❌$lastExitCode"
-                        }
 
                         # Execution time (if available)
                         if ($global:LastCommandDuration) {
@@ -192,12 +142,7 @@ try {
                     }
                 }
 
-                # Set up execution time tracking
-                if (-not $global:OriginalPromptFunction) {
-                    $global:OriginalPromptFunction = $function:prompt
-                }
-
-                # Track command execution time
+                # Track command execution time and success status
                 $ExecutionContext.SessionState.InvokeCommand.PreCommandLookupAction = {
                     param($command, $eventArgs)
                     $global:CommandStartTime = [DateTime]::Now
@@ -209,6 +154,8 @@ try {
                         $global:LastCommandDuration = [DateTime]::Now - $global:CommandStartTime
                         $global:CommandStartTime = $null
                     }
+                    # Track if the last command succeeded
+                    $global:LastCommandSucceeded = $?
                 }
 
                 Set-Variable -Name 'SmartPromptInitialized' -Value $true -Scope Global -Force
