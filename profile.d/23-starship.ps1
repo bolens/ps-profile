@@ -44,8 +44,9 @@ try {
                 }
                 # Use a simpler approach: define the prompt function directly
                 function global:prompt {
-                    $origDollarQuestion = $global:?
-                    $origLastExitCode = $global:LASTEXITCODE
+                    # Capture status immediately at prompt start
+                    $lastCommandSucceeded = $?
+                    $lastExitCode = $LASTEXITCODE
 
                     # @ makes sure the result is an array even if single or no values are returned
                     $jobs = @(Get-Job | Where-Object { $_.State -eq 'Running' }).Count
@@ -59,13 +60,10 @@ try {
                         "--jobs=$($jobs)"
                     )
 
-                    # We start from the premise that the command executed correctly, which covers also the fresh console.
-                    $lastExitCodeForPrompt = 0
+                    # Determine status based on last command success
+                    $lastExitCodeForPrompt = if ($lastCommandSucceeded) { 0 } else { $lastExitCode -or 1 }
+
                     if ($lastCmd = Get-History -Count 1) {
-                        # In case we have a False on the Dollar hook, we know there's an error.
-                        if (-not $origDollarQuestion) {
-                            $lastExitCodeForPrompt = $origLastExitCode
-                        }
                         $duration = [math]::Round(($lastCmd.EndExecutionTime - $lastCmd.StartExecutionTime).TotalMilliseconds)
                         $arguments += "--cmd-duration=$($duration)"
                     }
@@ -84,19 +82,6 @@ try {
                     }
                     catch {
                         "❯ "
-                    }
-
-                    # Propagate the original $LASTEXITCODE
-                    $global:LASTEXITCODE = $origLastExitCode
-
-                    # Propagate the original $?
-                    if ($global:? -ne $origDollarQuestion) {
-                        if ($origDollarQuestion) {
-                            1 + 1
-                        }
-                        else {
-                            Write-Error '' -ErrorAction 'Ignore'
-                        }
                     }
                 }
 
