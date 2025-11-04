@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/bolens/ps-profile/compare/v1.1.2...v1.2.0) (2025-11-04)
+
+
+### Features
+
+* Implement additional quick wins for PowerShell profile ([80e75bd](https://github.com/bolens/ps-profile/commit/80e75bdff2457a22f42e70f0d038debe6830bd0a))
+* Implement Enhanced Error Handling and Smart Prompt ([5c41e9f](https://github.com/bolens/ps-profile/commit/5c41e9f3e7b0c30cb34a0781ec358a04c71206ff))
+* Implement Quick Wins and standardize code style ([e1a73dd](https://github.com/bolens/ps-profile/commit/e1a73dd45cc6b2bad7e3499ed2859885007078b0))
+
 ## [1.1.2](https://github.com/bolens/ps-profile/compare/v1.1.1...v1.1.2) (2025-10-31)
 
 
