@@ -42,7 +42,7 @@ try {
                     Initialize-SmartPrompt
                     return
                 }
-                $initScript = & $starCmd.Source init powershell 2>$null
+                $initScript = & $starCmd.Source init powershell --print-full-init 2>$null
                 if ($initScript) {
                     # Write the initialization script to a temp file and dot-source it to avoid Invoke-Expression.
                     $temp = [System.IO.Path]::GetTempFileName() + '.ps1'
