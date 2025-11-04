@@ -229,28 +229,60 @@ try {
         Write-Host "🧹 Performance data cleared."
     }
 
-    # Auto-track commands (integrate with prompt)
-    if (-not $global:PSProfileOriginalPrompt) {
-        $global:PSProfileOriginalPrompt = $function:prompt
+    # Auto-track commands (integrate with prompt or InvokeCommand events)
+    # Set up command tracking regardless of prompt framework
+    if (-not $global:PSProfileCommandTrackingSetup) {
+        # Use InvokeCommand events for reliable tracking
+        $ExecutionContext.SessionState.InvokeCommand.PreCommandLookupAction = {
+            param($command, $eventArgs)
+            if (-not $global:PSProfileCommandTimer) {
+                Start-CommandTimer -CommandName $command
+            }
+        }
+
+        $ExecutionContext.SessionState.InvokeCommand.PostCommandLookupAction = {
+            param($command, $eventArgs)
+            if ($global:PSProfileCommandTimer -and $global:PSProfileCommandTimer.Name -eq $command) {
+                Stop-CommandTimer
+            }
+        }
+
+        $global:PSProfileCommandTrackingSetup = $true
     }
 
-    # Enhanced prompt with timing
-    function global:prompt {
-        # Stop any running timer
-        if ($global:PSProfileCommandTimer) {
-            Stop-CommandTimer
+    # Only set up prompt integration if no prompt framework is active
+    $promptFrameworkActive = $false
+    try {
+        $promptFrameworkActive = (
+            (Get-Variable -Name 'StarshipInitialized' -Scope Global -ErrorAction SilentlyContinue) -or
+            (Get-Variable -Name 'OhMyPoshInitialized' -Scope Global -ErrorAction SilentlyContinue)
+        )
+    }
+    catch { }
+
+    if (-not $promptFrameworkActive) {
+        if (-not $global:PSProfileOriginalPrompt) {
+            $global:PSProfileOriginalPrompt = $function:prompt
         }
 
-        # Call original prompt
-        if ($global:PSProfileOriginalPrompt) {
-            & $global:PSProfileOriginalPrompt
-        }
-        else {
-            "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
-        }
+        # Enhanced prompt with timing
+        function global:prompt {
+            # Stop any running timer
+            if ($global:PSProfileCommandTimer) {
+                Stop-CommandTimer
+            }
 
-        # Start timing for next command
-        Start-CommandTimer -CommandName "prompt"
+            # Call original prompt
+            if ($global:PSProfileOriginalPrompt) {
+                & $global:PSProfileOriginalPrompt
+            }
+            else {
+                "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
+            }
+
+            # Start timing for next command
+            Start-CommandTimer -CommandName "prompt"
+        }
     }
 
     Set-Variable -Name 'PerformanceInsightsLoaded' -Value $true -Scope Global -Force
