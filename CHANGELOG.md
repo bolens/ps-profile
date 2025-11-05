@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/bolens/ps-profile/compare/v1.2.0...v1.2.1) (2025-11-05)
+
+
+### Bug Fixes
+
+* remove invalid Suppressions key and update lint report location ([2fe6133](https://github.com/bolens/ps-profile/commit/2fe613352829aaadddd14c4a97c33a41c3865b60))
+
 # [1.2.0](https://github.com/bolens/ps-profile/compare/v1.1.2...v1.2.0) (2025-11-04)
 
 ## Features
