@@ -1,3 +1,21 @@
+<#
+scripts/checks/check-idempotency.ps1
+
+.SYNOPSIS
+    Checks that profile.d fragments can be dot-sourced multiple times without errors.
+
+.DESCRIPTION
+    Idempotency checker for profile.d fragments. Creates a temporary script that
+    dot-sources all profile.d fragments twice in sequence to verify they can be
+    loaded multiple times without errors. This ensures fragments are idempotent
+    and safe to reload.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\checks\check-idempotency.ps1
+
+    Checks that all profile.d fragments can be loaded twice without errors.
+#>
+
 # Idempotency checker for profile.d fragments
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)

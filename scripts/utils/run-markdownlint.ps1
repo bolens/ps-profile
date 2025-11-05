@@ -2,15 +2,21 @@
 #Requires -Version 7.0
 
 <#
+scripts/utils/run-markdownlint.ps1
+
 .SYNOPSIS
     Runs markdownlint on all markdown files.
 
 .DESCRIPTION
     Checks if markdownlint-cli is installed and runs it on all markdown files,
-    excluding node_modules.
+    excluding node_modules and Modules directories. If markdownlint-cli is not
+    found, attempts to install it globally via npm. Exits with error code 1 if
+    any linting errors are found.
 
 .EXAMPLE
-    .\scripts\utils\run-markdownlint.ps1
+    pwsh -NoProfile -File scripts\utils\run-markdownlint.ps1
+
+    Runs markdownlint on all markdown files in the repository.
 #>
 
 $ErrorActionPreference = 'Stop'

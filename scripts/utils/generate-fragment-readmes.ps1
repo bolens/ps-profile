@@ -1,4 +1,6 @@
 <#
+scripts/utils/generate-fragment-readmes.ps1
+
 .SYNOPSIS
     Generates minimal README files for each profile.d/*.ps1 fragment.
 

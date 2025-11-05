@@ -1,5 +1,19 @@
-# Cross-platform helper invoked by .git/hooks/pre-commit
-# It runs formatting, adds formatted files, then runs validation.
+<#
+scripts/git/pre-commit.ps1
+
+.SYNOPSIS
+    Cross-platform pre-commit hook that runs formatting and validation.
+
+.DESCRIPTION
+    Cross-platform helper invoked by .git/hooks/pre-commit. It runs code formatting
+    first, adds any formatted files to the commit, then runs validation checks.
+    Ensures code quality before commits are finalized.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\git\pre-commit.ps1
+
+    Runs formatting and validation checks as part of the git pre-commit hook.
+#>
 
 # Run formatting first
 $formatScript = Join-Path $PSScriptRoot '..\utils\run-format.ps1'

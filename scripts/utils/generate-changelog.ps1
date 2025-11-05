@@ -1,4 +1,6 @@
 <#
+scripts/utils/generate-changelog.ps1
+
 .SYNOPSIS
     Generates changelog using git-cliff from conventional commits.
 

@@ -107,8 +107,6 @@ Use numeric prefixes to control load order:
 
 - Function/alias documentation is auto-generated from comment-based help
 - Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/generate-docs.ps1` to regenerate
-- Use `task add-missing-help` to add missing `.SYNOPSIS` and `.DESCRIPTION` sections
-- Fix markdown formatting with `task fix-markdown-blank-lines` and `task fix-markdown-readme`
 - See [PROFILE_README.md](PROFILE_README.md) for detailed technical information
 
 ## Questions

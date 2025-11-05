@@ -1,34 +1,38 @@
 <#
+scripts/utils/init_wrangler_config.ps1
+
 .SYNOPSIS
-Creates a minimal Cloudflare Wrangler config file at the XDG-style location shown in the debug log.
+    Creates a minimal Cloudflare Wrangler config file at the XDG-style location.
 
 .DESCRIPTION
-Some tools (including MCP/Cloudflare helpers) look for a global Wrangler config file at
-a path derived from XDG config or APPDATA. On Windows the path in the log looked like:
-
-  C:\Users\<you>\AppData\Roaming\xdg.config\.wrangler\config\default.toml
-
-This script will create the directory and write a minimal `default.toml` containing an
-`api_token` and optional `account_id`. It does NOT try to obtain credentials for you—
-you should create an API token in the Cloudflare dashboard and pass it here, or use
-`wrangler login` which will create the file for you.
+    Some tools (including MCP/Cloudflare helpers) look for a global Wrangler config file at
+    a path derived from XDG config or APPDATA. On Windows the path is typically:
+    
+    C:\Users\<you>\AppData\Roaming\xdg.config\.wrangler\config\default.toml
+    
+    This script will create the directory and write a minimal `default.toml` containing an
+    `api_token` and optional `account_id`. It does NOT try to obtain credentials for you—
+    you should create an API token in the Cloudflare dashboard and pass it here, or use
+    `wrangler login` which will create the file for you.
 
 .PARAMETER ApiToken
-The Cloudflare API token. If omitted the script will prompt interactively.
+    The Cloudflare API token. If omitted the script will prompt interactively.
 
 .PARAMETER AccountId
-Optional Cloudflare Account ID to include in the file.
+    Optional Cloudflare Account ID to include in the file.
 
 .PARAMETER Force
-Overwrite an existing file without prompting.
+    Overwrite an existing file without prompting.
 
-USAGE
-  # interactively prompt for token
-  .\scripts\init_wrangler_config.ps1
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\init_wrangler_config.ps1
 
-  # pass token and account id non-interactively
-  .\scripts\init_wrangler_config.ps1 -ApiToken 'xxxxxxxx' -AccountId 'abcd-1234' -Force
+    Interactively prompts for the API token and creates the config file.
 
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\init_wrangler_config.ps1 -ApiToken 'xxxxxxxx' -AccountId 'abcd-1234' -Force
+
+    Creates the config file non-interactively with the provided token and account ID.
 #>
 
 param(

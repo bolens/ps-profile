@@ -1,18 +1,30 @@
 <#
-scripts/hooks/commit-msg.ps1
+scripts/git/hooks/commit-msg.ps1
 
-Conventional Commits validator. Accepts messages matching the pattern:
-  type(scope?): subject
+.SYNOPSIS
+    Validates commit messages against Conventional Commits format.
 
-Examples:
-  feat: add new widget
-  fix(cli): handle empty input
+.DESCRIPTION
+    Conventional Commits validator. Accepts messages matching the pattern:
+    type(scope?): subject
+    
+    Examples:
+      feat: add new widget
+      fix(cli): handle empty input
+    
+    This script also allows:
+     - Merge commits (messages that start with "Merge ")
+     - Revert commits (messages that start with "Revert ")
+     - Auto-merge commits (messages that start with "Auto-merge")
 
-This script also allows:
- - Merge commits (messages that start with "Merge ")
- - Revert commits (messages that start with "Revert ")
+.PARAMETER CommitMsgFile
+    The path to the commit message file. This is automatically provided by git
+    when the hook is invoked.
 
-Usage: git will invoke this with the path to the commit message file.
+.EXAMPLE
+    git commit -m "feat: add new feature"
+    
+    This hook is automatically invoked by git when committing.
 #>
 
 param(

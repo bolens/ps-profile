@@ -1,3 +1,28 @@
+<#
+scripts/git/install-pre-commit-hook.ps1
+
+.SYNOPSIS
+    Installs the pre-commit git hook.
+
+.DESCRIPTION
+    Installs a pre-commit git hook that runs validation checks before commits.
+    Backs up any existing hook with a timestamp. The hook runs validate-profile.ps1
+    to ensure code quality before commits are finalized.
+
+.PARAMETER RepoRoot
+    The root directory of the git repository. Defaults to the current directory.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\git\install-pre-commit-hook.ps1
+
+    Installs the pre-commit hook in the current repository.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\git\install-pre-commit-hook.ps1 -RepoRoot C:\MyRepo
+
+    Installs the pre-commit hook in the specified repository.
+#>
+
 param(
     [string]$RepoRoot = (Get-Location).Path
 )

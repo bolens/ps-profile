@@ -1,11 +1,27 @@
 <#
 scripts/checks/check-comment-help.ps1
 
-Check that all functions in profile.d/*.ps1 fragments have comment-based help.
-This ensures the automated documentation generator can create complete docs.
+.SYNOPSIS
+    Checks that all functions in profile.d fragments have comment-based help.
 
-Usage:
-  pwsh -NoProfile -File scripts\checks\check-comment-help.ps1
+.DESCRIPTION
+    Checks that all functions in profile.d/*.ps1 fragments have comment-based help.
+    This ensures the automated documentation generator can create complete docs.
+    Scans all PowerShell files in the profile.d directory and reports any functions
+    that are missing comment-based help blocks.
+
+.PARAMETER Verbose
+    If specified, outputs detailed information about each function checked.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\checks\check-comment-help.ps1
+
+    Checks all functions in profile.d for comment-based help.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\checks\check-comment-help.ps1 -Verbose
+
+    Checks all functions with verbose output.
 #>
 
 param(

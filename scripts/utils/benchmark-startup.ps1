@@ -16,20 +16,14 @@ scripts/utils/benchmark-startup.ps1
     pwsh -NoProfile -File scripts\utils\benchmark-startup.ps1 -WorkspaceRoot C:\Users\username\Documents\PowerShell\profile
     pwsh -NoProfile -File scripts\utils\benchmark-startup.ps1 -Iterations 5 -UpdateBaseline -RegressionThreshold 1.2 -WorkspaceRoot C:\Users\username\Documents\PowerShell\profile
 
-    .PARAMETER Iterations
-        The number of times to run the benchmark.
-    .PARAMETER WorkspaceRoot
-        The root directory of the workspace.
-    .PARAMETER UpdateBaseline
-        Update the performance baseline.
-    .PARAMETER RegressionThreshold
-        The threshold for performance regression.
-    .PARAMETER WorkspaceRoot
-        The root directory of the workspace.
-    .PARAMETER UpdateBaseline
-        Update the performance baseline.
-    .PARAMETER RegressionThreshold
-        The threshold for performance regression.
+.PARAMETER Iterations
+    The number of times to run the benchmark.
+.PARAMETER WorkspaceRoot
+    The root directory of the workspace.
+.PARAMETER UpdateBaseline
+    Update the performance baseline.
+.PARAMETER RegressionThreshold
+    The threshold for performance regression.
 #>
 
 param(

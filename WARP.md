@@ -15,7 +15,6 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - `quality-check` - Full quality check (format + security + lint + spellcheck + markdownlint + help + tests)
 - `validate` - Validation (format + security + lint + spellcheck + help + idempotency)
 - `format-and-lint` - Format and lint code (common pre-commit workflow)
-- `fix-all-markdown` - Fix all markdown formatting issues
 - `all-docs` - Generate all documentation (API docs + fragment READMEs)
 - `test` - Run Pester tests
 - `test-coverage` - Run tests with coverage
@@ -26,9 +25,6 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - `lint` - Lint code
 - `spellcheck` - Run spellcheck
 - `markdownlint` - Run markdownlint
-- `add-missing-help` - Add missing comment-based help
-- `fix-markdown-blank-lines` - Fix markdown blank lines
-- `fix-markdown-readme` - Fix markdown README formatting
 - `pre-commit-checks` - Run pre-commit checks manually
 - `check-module-updates` - Check for module updates
 - `install-module-updates` - Install module updates

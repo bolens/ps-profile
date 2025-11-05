@@ -1,3 +1,20 @@
+<#
+scripts/checks/validate-profile.ps1
+
+.SYNOPSIS
+    Runs comprehensive validation checks on the PowerShell profile.
+
+.DESCRIPTION
+    Runs format, security scan, lint, spellcheck, comment-based help check, and
+    idempotency checks. Fails if any step fails. This is the main validation script
+    used in CI/CD pipelines and git hooks.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\checks\validate-profile.ps1
+
+    Runs all validation checks on the PowerShell profile.
+#>
+
 # Run format, security scan, lint then idempotency checks; fail if any step fails
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 

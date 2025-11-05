@@ -103,21 +103,6 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline
 
-  add-missing-help:
-    desc: Add Missing Help
-    cmds:
-      - pwsh -NoProfile -File scripts/utils/add-missing-help.ps1
-
-  fix-markdown-blank-lines:
-    desc: Fix Markdown Blank Lines
-    cmds:
-      - pwsh -NoProfile -File scripts/utils/fix-markdown-blank-lines.ps1
-
-  fix-markdown-readme:
-    desc: Fix Markdown README Formatting
-    cmds:
-      - pwsh -NoProfile -File scripts/utils/fix-markdown-readme-formatting.ps1
-
   quality-check:
     desc: Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests)
     deps: [format, security-scan, lint, spellcheck, markdownlint, check-comment-help, test]
@@ -133,12 +118,6 @@ tasks:
     desc: Check Idempotency
     cmds:
       - pwsh -NoProfile -File scripts/checks/check-idempotency.ps1
-
-  fix-all-markdown:
-    desc: Fix All Markdown (blank lines + README formatting)
-    deps: [fix-markdown-blank-lines, fix-markdown-readme]
-    cmds:
-      - echo "All markdown fixes completed"
 
   format-and-lint:
     desc: Format and Lint Code

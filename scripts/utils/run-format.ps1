@@ -1,9 +1,26 @@
 <#
 scripts/utils/run-format.ps1
 
-Format PowerShell code using PowerShell-Beautifier for consistent styling.
+.SYNOPSIS
+    Formats PowerShell code using PSScriptAnalyzer for consistent styling.
 
-Usage: pwsh -NoProfile -File scripts/utils/run-format.ps1
+.DESCRIPTION
+    Formats PowerShell code using PSScriptAnalyzer's Invoke-Formatter for consistent styling.
+    By default, formats all PowerShell files in the profile.d directory. Preserves original
+    line endings (CRLF or LF) in the formatted output.
+
+.PARAMETER Path
+    The path to format. Defaults to profile.d directory relative to repository root.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run-format.ps1
+
+    Formats all PowerShell files in the profile.d directory.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run-format.ps1 -Path scripts
+
+    Formats all PowerShell files in the scripts directory.
 #>
 
 param(

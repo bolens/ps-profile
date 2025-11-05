@@ -1,10 +1,27 @@
 <#
 scripts/utils/check-module-updates.ps1
 
-Checks for available updates to PowerShell modules in the Modules directory
-and other commonly used modules.
+.SYNOPSIS
+    Checks for available updates to PowerShell modules.
 
-Usage: pwsh -NoProfile -File scripts/utils/check-module-updates.ps1
+.DESCRIPTION
+    Checks for available updates to PowerShell modules in the Modules directory and other
+    commonly used modules like PSScriptAnalyzer, Pester, and PowerShell-Beautifier. Compares
+    installed versions with latest versions available in the PowerShell Gallery.
+
+.PARAMETER Update
+    If specified, automatically updates all modules that have available updates. Otherwise,
+    only reports available updates without installing them.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\check-module-updates.ps1
+
+    Checks for available module updates and displays them.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\check-module-updates.ps1 -Update
+
+    Checks for updates and automatically installs them.
 #>
 
 param(

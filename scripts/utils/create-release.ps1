@@ -1,9 +1,27 @@
 <#
 scripts/utils/create-release.ps1
 
-Creates a release based on conventional commits since the last tag.
+.SYNOPSIS
+    Creates a release based on conventional commits since the last tag.
 
-Usage: pwsh -NoProfile -File scripts/utils/create-release.ps1 [-DryRun]
+.DESCRIPTION
+    Analyzes commits since the last git tag and creates a new release version based on
+    conventional commit patterns. Determines version bump (major/minor/patch) from commit
+    types, generates a changelog, creates a git tag, and pushes it to the remote repository.
+
+.PARAMETER DryRun
+    If specified, performs a dry run without creating tags or pushing changes. Shows what
+    would be done without making any changes.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\create-release.ps1
+
+    Creates a release by analyzing commits and creating a new git tag.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\create-release.ps1 -DryRun
+
+    Shows what release would be created without actually creating it.
 #>
 
 param(

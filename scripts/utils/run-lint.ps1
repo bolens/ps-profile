@@ -1,5 +1,20 @@
-# Install PSScriptAnalyzer if not present, then run it against profile.d and scripts
-# This matches the CI lint task behavior exactly
+<#
+scripts/utils/run-lint.ps1
+
+.SYNOPSIS
+    Runs PSScriptAnalyzer against profile.d and scripts directories.
+
+.DESCRIPTION
+    Installs PSScriptAnalyzer if not present, then runs it against profile.d and scripts
+    directories. This matches the CI lint task behavior exactly. Reports are saved to
+    psscriptanalyzer-report.json. Exits with error code 1 if any Error-level findings
+    are detected.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run-lint.ps1
+
+    Runs PSScriptAnalyzer on all PowerShell files in profile.d and scripts directories.
+#>
 
 # Cache path calculations once
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition

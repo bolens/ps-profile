@@ -1,9 +1,28 @@
 <#
 scripts/utils/generate-docs.ps1
 
-Generates API documentation from comment-based help in PowerShell functions.
+.SYNOPSIS
+    Generates API documentation from comment-based help in PowerShell functions.
 
-Usage: pwsh -NoProfile -File scripts/utils/generate-docs.ps1
+.DESCRIPTION
+    Scans all PowerShell script files in the profile.d directory and generates markdown
+    documentation files from comment-based help. Extracts functions, aliases, parameters,
+    examples, and other help content. Creates individual markdown files for each function
+    and alias, plus an index file.
+
+.PARAMETER OutputPath
+    The output directory for generated documentation. Can be absolute or relative to the
+    repository root. Defaults to "docs".
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\generate-docs.ps1
+
+    Generates documentation in the default docs directory.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\generate-docs.ps1 -OutputPath ".\documentation"
+
+    Generates documentation in a custom directory.
 #>
 
 param(

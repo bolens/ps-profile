@@ -1,4 +1,36 @@
-# Ensure Pester is available and run the test suite in this repo
+<#
+scripts/utils/run_pester.ps1
+
+.SYNOPSIS
+    Runs Pester tests for the PowerShell profile.
+
+.DESCRIPTION
+    Ensures Pester is available and runs the test suite in this repository. Can run all tests
+    or a specific test file. Optionally includes code coverage reporting.
+
+.PARAMETER TestFile
+    Optional path to a specific test file to run. If not specified, runs all tests in the
+    tests directory.
+
+.PARAMETER Coverage
+    If specified, enables code coverage reporting for profile.d directory.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run_pester.ps1
+
+    Runs all Pester tests in the tests directory.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run_pester.ps1 -TestFile tests\profile.tests.ps1
+
+    Runs only the profile.tests.ps1 test file.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Coverage
+
+    Runs all tests with code coverage reporting enabled.
+#>
+
 param(
     [string]$TestFile = "",
     [switch]$Coverage

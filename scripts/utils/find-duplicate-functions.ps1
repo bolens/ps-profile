@@ -1,3 +1,20 @@
+<#
+scripts/utils/find-duplicate-functions.ps1
+
+.SYNOPSIS
+    Finds duplicate function definitions in profile.d directory.
+
+.DESCRIPTION
+    Scans all PowerShell script files in the profile.d directory and identifies
+    functions that are defined in multiple files. This helps detect potential conflicts
+    or duplicate function definitions that could cause issues.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\find-duplicate-functions.ps1
+
+    Scans profile.d directory and reports any duplicate function definitions.
+#>
+
 # Scans profile.d for functions and prints ones defined in multiple files
 $root = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 $profileDir = Join-Path $root 'profile.d'

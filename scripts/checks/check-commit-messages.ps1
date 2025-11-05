@@ -1,12 +1,27 @@
 <#
-scripts/check-commit-messages.ps1
+scripts/checks/check-commit-messages.ps1
 
-Validate commit subjects in the current branch against Conventional Commits.
-By default compares commits on HEAD against origin/main. Exits 0 when all
-commit subjects pass, non-zero when any fail.
+.SYNOPSIS
+    Validates commit messages against Conventional Commits format.
 
-Usage:
-  pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1
+.DESCRIPTION
+    Validates commit subjects in the current branch against Conventional Commits format.
+    By default compares commits on HEAD against origin/main. Exits 0 when all commit
+    subjects pass, non-zero when any fail. Allows merge commits, revert commits, and
+    auto-merge commits.
+
+.PARAMETER Base
+    The base branch or commit to compare against. Defaults to 'origin/main'.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\checks\check-commit-messages.ps1
+
+    Validates commits against origin/main.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\checks\check-commit-messages.ps1 -Base 'origin/develop'
+
+    Validates commits against origin/develop.
 #>
 
 param(

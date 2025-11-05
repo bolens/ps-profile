@@ -38,7 +38,6 @@ This project includes VS Code tasks and Taskfile commands for common development
 - `validate` - Full validation (format + security + lint + spellcheck + help + idempotency)
 - `quality-check` - Comprehensive quality check (format + security + lint + spellcheck + markdownlint + help + tests)
 - `format-and-lint` - Format and lint code (common pre-commit workflow)
-- `fix-all-markdown` - Fix all markdown formatting issues
 - `all-docs` - Generate all documentation (API docs + fragment READMEs)
 - `test` - Run Pester tests
 - `test-coverage` - Run tests with coverage
