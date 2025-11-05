@@ -47,7 +47,8 @@ $modulesToCheck = @(
     'PowerShell-Beautifier'
 ) | Select-Object -Unique
 
-$updatesAvailable = @()
+# Use List for better performance than array concatenation
+$updatesAvailable = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 foreach ($moduleName in $modulesToCheck) {
     try {
@@ -62,12 +63,12 @@ foreach ($moduleName in $modulesToCheck) {
             $galleryInfo = Find-Module -Name $moduleName -ErrorAction SilentlyContinue
 
             if ($galleryInfo -and [version]$galleryInfo.Version -gt [version]$installed.Version) {
-                $updatesAvailable += [PSCustomObject]@{
-                    Name           = $moduleName
-                    CurrentVersion = $installed.Version.ToString()
-                    LatestVersion  = $galleryInfo.Version
-                    Source         = if ($localModules | Where-Object { $_.Name -eq $moduleName }) { "Local" } else { "System" }
-                }
+                $updatesAvailable.Add([PSCustomObject]@{
+                        Name           = $moduleName
+                        CurrentVersion = $installed.Version.ToString()
+                        LatestVersion  = $galleryInfo.Version
+                        Source         = if ($localModules | Where-Object { $_.Name -eq $moduleName }) { "Local" } else { "System" }
+                    })
             }
         }
         else {

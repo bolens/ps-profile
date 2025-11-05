@@ -33,8 +33,13 @@ if (-not $subject) {
     exit 1
 }
 
+# Compile regex patterns once for better performance
+$mergeRegex = [regex]::new('^Merge\s', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$revertRegex = [regex]::new('^Revert\s', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$autoMergeRegex = [regex]::new('^Auto-merge', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 # Allow merge/revert commits and automated PR title formats
-if ($subject -match '^Merge\s' -or $subject -match '^Revert\s' -or $subject -match '^Auto-merge') {
+if ($mergeRegex.IsMatch($subject) -or $revertRegex.IsMatch($subject) -or $autoMergeRegex.IsMatch($subject)) {
     Write-Output "commit-msg: merge/revert/auto-merge message allowed"
     exit 0
 }
@@ -43,8 +48,9 @@ if ($subject -match '^Merge\s' -or $subject -match '^Revert\s' -or $subject -mat
 # type: feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert|wip
 $typeRegex = 'feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert|wip|ci'
 $convRegex = "^(?:($typeRegex))(?:\([a-z0-9_\-]+\))?:\s.+$"
+$convRegexCompiled = [regex]::new($convRegex, [System.Text.RegularExpressions.RegexOptions]::Compiled)
 
-if ($subject -notmatch $convRegex) {
+if (-not $convRegexCompiled.IsMatch($subject)) {
     Write-Error "commit-msg: commit subject does not match Conventional Commits pattern (type(scope?): subject). Example: 'feat(cli): add foo'"
     exit 1
 }

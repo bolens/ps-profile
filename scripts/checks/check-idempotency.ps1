@@ -9,15 +9,16 @@ if ($files.Count -eq 0) { Write-Error "No fragments found in $profileD"; exit 2 
 
 $temp = [IO.Path]::Combine($env:TEMP, [IO.Path]::GetRandomFileName() + '.ps1')
 
-$content = @()
-$content += "# Auto-generated idempotency runner"
-$content += "`$ErrorActionPreference = 'Stop'"
-$content += "Write-Output 'Idempotency runner starting: dot-sourcing all fragments in order (pass 1)...'"
-foreach ($f in $files) { $content += ". '$f'" }
-$content += "Write-Output 'Pass 1 complete'"
-$content += "Write-Output 'Pass 2 starting: dot-sourcing all fragments in order (pass 2)...'"
-foreach ($f in $files) { $content += ". '$f'" }
-$content += "Write-Output 'Pass 2 complete'"
+# Use List for better performance than array concatenation
+$content = [System.Collections.Generic.List[string]]::new()
+$content.Add("# Auto-generated idempotency runner")
+$content.Add("`$ErrorActionPreference = 'Stop'")
+$content.Add("Write-Output 'Idempotency runner starting: dot-sourcing all fragments in order (pass 1)...'")
+foreach ($f in $files) { $content.Add(". '$f'") }
+$content.Add("Write-Output 'Pass 1 complete'")
+$content.Add("Write-Output 'Pass 2 starting: dot-sourcing all fragments in order (pass 2)...'")
+foreach ($f in $files) { $content.Add(". '$f'") }
+$content.Add("Write-Output 'Pass 2 complete'")
 
 [System.IO.File]::WriteAllLines($temp, $content)
 

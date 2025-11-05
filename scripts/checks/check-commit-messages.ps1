@@ -18,7 +18,8 @@ Write-Output "Checking commits against base: $Base"
 try {
     # Ensure we have the base ref locally
     & git fetch origin +refs/heads/main:refs/remotes/origin/main 2>$null
-} catch {
+}
+catch {
     # ignore
 }
 
@@ -29,20 +30,27 @@ if (-not $commits) {
     exit 0
 }
 
-$errors = @()
+# Use List for better performance than array concatenation
+$errors = [System.Collections.Generic.List[PSCustomObject]]::new()
 $typeRegex = 'feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert|wip|ci'
 $convRegex = "^(?:($typeRegex))(?:\([a-z0-9_\-]+\))?:\s.+$"
+
+# Compile regex patterns once for better performance
+$mergeRegex = [regex]::new('^Merge\s', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$revertRegex = [regex]::new('^Revert\s', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$autoMergeRegex = [regex]::new('^Auto-merge', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$convRegexCompiled = [regex]::new($convRegex, [System.Text.RegularExpressions.RegexOptions]::Compiled)
 
 foreach ($c in $commits) {
     $subject = (& git log -1 --pretty=format:%s $c).Trim()
     if (-not $subject) { continue }
 
-    if ($subject -match '^Merge\s' -or $subject -match '^Revert\s' -or $subject -match '^Auto-merge') {
+    if ($mergeRegex.IsMatch($subject) -or $revertRegex.IsMatch($subject) -or $autoMergeRegex.IsMatch($subject)) {
         continue
     }
 
-    if ($subject -notmatch $convRegex) {
-        $errors += [PSCustomObject]@{ Commit = $c; Subject = $subject }
+    if (-not $convRegexCompiled.IsMatch($subject)) {
+        $errors.Add([PSCustomObject]@{ Commit = $c; Subject = $subject })
     }
 }
 

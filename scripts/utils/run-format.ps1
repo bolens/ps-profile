@@ -46,8 +46,12 @@ catch {
     exit 2
 }
 
+# Compile regex pattern once for CRLF detection
+$crlfRegex = [regex]::new("`r`n", [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 $filesFormatted = 0
-$errors = @()
+# Use List for better performance than array concatenation
+$errors = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
     $file = $_.FullName
@@ -56,7 +60,7 @@ Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
     try {
         # Read the original content to detect line endings
         $originalContent = Get-Content -Path $file -Raw -ErrorAction Stop
-        $hasCRLF = $originalContent -match "`r`n"
+        $hasCRLF = $crlfRegex.IsMatch($originalContent)
 
         # Use Invoke-Formatter from PSScriptAnalyzer to format the file
         $formattedContent = Invoke-Formatter -ScriptDefinition $originalContent -ErrorAction Stop
@@ -75,10 +79,10 @@ Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
         $filesFormatted++
     }
     catch {
-        $errors += [PSCustomObject]@{
-            File  = $file
-            Error = $_.Exception.Message
-        }
+        $errors.Add([PSCustomObject]@{
+                File  = $file
+                Error = $_.Exception.Message
+            })
         Write-Warning "Failed to format $file`: $($_.Exception.Message)"
     }
 }

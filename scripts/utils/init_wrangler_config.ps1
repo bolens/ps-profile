@@ -32,10 +32,10 @@ USAGE
 #>
 
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$ApiToken,
 
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$AccountId,
 
     [switch]$Force
@@ -73,17 +73,18 @@ if (-not (Test-Path -Path $dir)) {
 
 if (Test-Path -Path $file -and -not $Force) {
     $ok = Read-Host "File already exists at $file. Overwrite? (y/N)"
-    if ($ok -notin @('y','Y','yes','YES')) {
+    if ($ok -notin @('y', 'Y', 'yes', 'YES')) {
         Write-Host 'Aborting; existing file retained.'
         return
     }
 }
 
-$content = @()
-$content += "# Wrangler global config created by init_wrangler_config.ps1"
-$content += "# Replace the token or use `wrangler login` for a more secure setup"
-$content += "api_token = \"$ApiToken\""
-if ($AccountId) { $content += "account_id = \"$AccountId\"" }
+# Use List for better performance than array concatenation
+$content = [System.Collections.Generic.List[string]]::new()
+$content.Add('# Wrangler global config created by init_wrangler_config.ps1')
+$content.Add('# Replace the token or use `wrangler login` for a more secure setup')
+$content.Add("api_token = `"$ApiToken`"")
+if ($AccountId) { $content.Add("account_id = `"$AccountId`"") }
 
 Set-Content -Path $file -Value ($content -join "`n") -Encoding UTF8
 
