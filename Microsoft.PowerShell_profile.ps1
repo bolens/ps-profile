@@ -92,13 +92,41 @@ function Measure-FragmentLoadTime {
 # ===============================================
 # The previous loader dot-sourced all `profile.d/*.ps1` files. To improve
 # robustness we load files in sorted order and wrap each load in try/catch.
+# Fragments can be disabled using Disable-ProfileFragment command.
 $profileDir = Split-Path -Parent $PSCommandPath
 $profileD = Join-Path $profileDir 'profile.d'
+
+# Load fragment configuration (read directly to avoid dependency on bootstrap)
+$fragmentConfigPath = Join-Path $profileDir '.profile-fragments.json'
+$disabledFragments = @()
+if (Test-Path $fragmentConfigPath) {
+    try {
+        $configContent = Get-Content -Path $fragmentConfigPath -Raw -ErrorAction Stop
+        $configObj = $configContent | ConvertFrom-Json
+        if ($configObj.disabled) {
+            $disabledFragments = @($configObj.disabled)
+        }
+    }
+    catch {
+        if ($env:PS_PROFILE_DEBUG) {
+            Write-Host "Warning: Failed to load fragment config: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
+}
+
 if (Test-Path $profileD) {
     # Load files in lexical order. Each file should be idempotent and
     # safe to be dot-sourced multiple times.
     Get-ChildItem -Path $profileD -File -Filter '*.ps1' | Sort-Object Name | ForEach-Object {
         $fragmentName = $_.Name
+        $fragmentBaseName = $_.BaseName
+        
+        # Check if fragment is disabled (skip 00-bootstrap.ps1 check as it's always needed)
+        if ($fragmentBaseName -ne '00-bootstrap' -and $fragmentBaseName -in $disabledFragments) {
+            if ($env:PS_PROFILE_DEBUG) { Write-Host "Skipping disabled profile fragment: $fragmentName" -ForegroundColor DarkGray }
+            return
+        }
+        
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan }
         try {
             # Dot-source the file so it can define functions/aliases in this scope.

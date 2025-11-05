@@ -25,3 +25,6 @@ obj/
 
 # Ignore generated data files
 scripts/**/*.csv
+
+# Ignore user-specific fragment configuration
+.profile-fragments.json

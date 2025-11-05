@@ -1,68 +1,97 @@
-# profile.d/ — PowerShell modular profile fragments
+# profile.d/ — Modular Profile Fragments
 
-This directory contains small, focused PowerShell scripts that are dot-sourced
-from `Microsoft.PowerShell_profile.ps1` during interactive session startup.
+This directory contains small, focused PowerShell scripts that are dot-sourced from `Microsoft.PowerShell_profile.ps1` during interactive session startup.
 
-Guidelines:
+## Loading Order
 
-- Keep fragments idempotent: avoid re-defining existing functions/aliases unless
-  necessary. Use `Get-Command -ErrorAction SilentlyContinue` to guard.
-- Prefer `Set-Item -Path "Function:<name>" -Value <scriptblock> -Option AllScope`
-  for programmatic function registration when you need to avoid collisions.
-- Keep each file focused (e.g., `git` helpers, `wsl` helpers, `system-info`).
-- Keep external tool dependencies behind `Get-Command` checks to avoid noisy
-  errors when a tool is not installed.
-- If adding long-running or heavy work, guard it with `if ($Host.UI.RawUI)` or
-  make it opt-in via a small variable
+Files are loaded in **lexical order** (sorted by filename). Use numeric prefixes to control load order:
 
-Loading order:
-Files are loaded in lexical order (sorted by filename). To control load order,
-prefix names with numeric or alphabetic prefixes (e.g., `00-init.ps1`, `10-git.ps1`).
+- **00-09**: Core bootstrap, environment, and registration helpers
+- **10-19**: Terminal configuration (PSReadLine, prompts, Git)
+- **20-29**: Container engines and cloud tools
+- **30-39**: Development tools and aliases
+- **40-69**: Language-specific tools (Go, PHP, Node.js, Python, Rust)
+- **70-79**: Advanced features (performance insights, enhanced history, system monitoring)
 
-Examples/Helpers:
+## Fragment Guidelines
 
-- Use `reload` to reload your profile: `reload` (already provided in `utilities.ps1`).
-- Use `backup-profile` to create a timestamped backup of the main profile.
+### Idempotency
 
-Keep this README updated whenever you add new fragments.
+Fragments must be safe to dot-source multiple times:
 
-## Common quick examples
+```powershell
+# Use bootstrap helpers (recommended)
+Set-AgentModeFunction -Name 'MyFunc' -Body { ... }
+Set-AgentModeAlias -Name 'gs' -Target 'git status'
 
-- Convert JSON to YAML (03-files provides helpers):
-  - Get-Content data.json | ConvertFrom-Json | ConvertTo-Yaml
-- Base64 encode a file:
-  - Get-Content file.bin -AsByteStream | [System.Convert]::ToBase64String($_)
-- Use `ssh-add-if` to load your private key only when not already loaded:
-  - ssh-add-if $env:USERPROFILE\\.ssh\\id_rsa
-- Copy output to clipboard:
-  - Get-Process | Out-String | cb
+# Or guard with provider checks
+if (-not (Test-Path Function:\MyFunc)) {
+    function MyFunc { ... }
+}
+```
 
-## Where to add fragments
+### External Tool Dependencies
 
-Add short, focused files in this directory and prefix them with numbers to
-control load order. Keep each fragment idempotent and guard calls to external
-tools with `Get-Command` checks to avoid noisy errors.
+Always check availability before invoking:
 
-## Spellcheck
+```powershell
+if (Test-CachedCommand 'docker') {
+    # configure docker helpers
+}
+```
 
-- This repository includes a GitHub Actions workflow that runs `cspell` on
-  pushes and PRs (`.github/workflows/spellcheck.yml`). Locally you can run
-  `scripts\spellcheck.ps1`. To opt into a local pre-commit hook, create the
-  file `.hooks/enable` — a tracked shim lives at `.hooks/pre-commit` which will
-  invoke the script (non-blocking by default).
+### Performance
 
-## Performance & lazy helpers
+- **Defer expensive work**: Use `Enable-*` functions for lazy loading
+- **Provider-first checks**: Use `Test-Path Function:\Name` over `Get-Command`
+- **No side effects**: Avoid module imports, file I/O, network calls during dot-sourcing
 
-To keep interactive startup time low, many fragments avoid doing expensive
-discovery or imports at dot-source. Instead, heavy work is deferred behind
-small Enable-* helpers. Examples:
+### Focus
 
-- `Enable-PSReadLine` — imports/configures PSReadLine on-demand.
-- `Enable-Aliases` — registers aliases and small helper functions when first
-  requested.
-- `Enable-ScoopCompletion` — loads scoop completion only when needed.
+Keep each fragment focused on a single concern (e.g., `11-git.ps1` for Git helpers, `22-containers.ps1` for container utilities).
 
-Use the included benchmark harness `scripts/utils/benchmark-startup.ps1` to measure
-full startup and per-fragment dot-source timings. The harness writes
-`scripts/data/startup-benchmark.csv` and prints a table to stdout. This helps
-prioritize micro-optimizations without changing user-visible behavior.
+## Bootstrap Helpers
+
+Available from `00-bootstrap.ps1`:
+
+- `Set-AgentModeFunction` — Creates collision-safe functions
+- `Set-AgentModeAlias` — Creates collision-safe aliases
+- `Test-CachedCommand` — Fast command existence check with caching
+
+See [PROFILE_README.md](../PROFILE_README.md) for detailed usage examples.
+
+## Quick Examples
+
+```powershell
+# Reload profile
+reload
+
+# Convert JSON to YAML
+Get-Content data.json | ConvertFrom-Json | ConvertTo-Yaml
+
+# Base64 encode a file
+Get-Content file.bin -AsByteStream | [System.Convert]::ToBase64String($_)
+
+# Load SSH key if not already loaded
+ssh-add-if $env:USERPROFILE\.ssh\id_rsa
+
+# Copy output to clipboard
+Get-Process | Out-String | cb
+```
+
+## Performance Benchmarking
+
+Measure startup and per-fragment timings:
+
+```powershell
+pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
+```
+
+Outputs `scripts/data/startup-benchmark.csv` with detailed metrics.
+
+## Documentation
+
+- Fragment-level README files are optional but recommended
+- Function/alias documentation is auto-generated from comment-based help
+- See [PROFILE_README.md](../PROFILE_README.md) for detailed technical information
+- See [CONTRIBUTING.md](../CONTRIBUTING.md) for development guidelines

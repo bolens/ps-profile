@@ -1,74 +1,90 @@
-Contributing
-============
+# Contributing
 
-Thanks for contributing to this PowerShell profile workspace. A few quick notes to
-make contributions smooth:
+Thank you for contributing to this PowerShell profile project.
 
-## Local validation
+## Prerequisites
 
-Run these locally before opening a PR:
+All validation scripts automatically install required modules (PSScriptAnalyzer, PowerShell-Beautifier, Pester) to `CurrentUser` scope if missing.
+
+## Local Validation
+
+Run these checks before opening a PR:
 
 ```powershell
-# Format code (installs PowerShell-Beautifier to CurrentUser if needed)
-pwsh -NoProfile -File scripts/utils/run-format.ps1
-
-# Security scan (installs PSScriptAnalyzer to CurrentUser if needed)
-pwsh -NoProfile -File scripts/utils/run-security-scan.ps1
-
-# Lint (installs PSScriptAnalyzer to CurrentUser if needed)
-pwsh -NoProfile -File scripts/utils/run-lint.ps1
-
-# Idempotency smoke-test (dot-sources every fragment twice)
-pwsh -NoProfile -File scripts/checks/check-idempotency.ps1
-
-# Run tests (installs Pester to CurrentUser if needed)
-pwsh -NoProfile -File scripts/utils/run_pester.ps1
-
-# Run tests with code coverage
-pwsh -NoProfile -File scripts/utils/run_pester.ps1 -Coverage
-
-# Check for module updates
-pwsh -NoProfile -File scripts/utils/check-module-updates.ps1
-
-# Combined validation
+# Full validation (format + security + lint + idempotency)
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1
+
+# Individual checks
+pwsh -NoProfile -File scripts/utils/run-format.ps1          # Format code
+pwsh -NoProfile -File scripts/utils/run-security-scan.ps1   # Security scan
+pwsh -NoProfile -File scripts/utils/run-lint.ps1            # Lint (PSScriptAnalyzer)
+pwsh -NoProfile -File scripts/checks/check-idempotency.ps1  # Idempotency test
+pwsh -NoProfile -File scripts/utils/run_pester.ps1         # Run tests
+pwsh -NoProfile -File scripts/utils/spellcheck.ps1          # Spellcheck
 ```
 
-## Commit messages and hooks
+## Git Hooks
 
-We use Conventional Commits for commit messages. A valid subject looks like:
+Install pre-commit, pre-push, and commit-msg hooks:
+
+```powershell
+pwsh -NoProfile -File scripts/git/install-githooks.ps1
+
+# On Unix-like systems, make hooks executable:
+chmod +x .git/hooks/*
+```
+
+## Commit Messages
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) format:
 
 ```text
 feat(cli): add new command
 fix: correct edge-case handling
 docs: update README
+refactor: simplify bootstrap logic
 ```
 
 Merge and revert commits are allowed (messages starting with "Merge " or "Revert ").
 
-To install the local git hook wrappers that run the repository's versioned
-PowerShell hooks (pre-commit, pre-push, commit-msg):
+## Code Style
 
-```powershell
-pwsh -NoProfile -File scripts/git/install-githooks.ps1
-```
+### Fragment Guidelines
 
-The install script writes small wrapper files to `.git/` that forward to the
-hook scripts in `scripts/hooks/`. On Unix-like systems you may need to make
-the generated hooks executable:
+- **Idempotency**: Fragments must be safe to dot-source multiple times
+  - Use `Set-AgentModeFunction` / `Set-AgentModeAlias` from `00-bootstrap.ps1`
+  - Guard with `Get-Command -ErrorAction SilentlyContinue` or `Test-Path Function:\Name`
+- **No Side Effects**: Avoid expensive operations during dot-sourcing
+  - Defer heavy work behind `Enable-*` functions (lazy loading pattern)
+  - Keep early fragments (00-09) lightweight
+- **External Tools**: Always check availability before invoking
+  ```powershell
+  if (Test-CachedCommand 'docker') { # configure docker helpers }
+  ```
 
-```powershell
-chmod +x .git/*
-```
+### Fragment Naming
 
-## Style notes
+Use numeric prefixes to control load order:
 
-- Keep fragments idempotent. Use `Set-AgentModeFunction` / `Set-AgentModeAlias`
-  and `Get-Command -ErrorAction SilentlyContinue` guards.
-- Keep side-effecting code out of early fragments (e.g., `00-bootstrap.ps1`).
-- Use clear comments and add fragment-level README files.
+- `00-09`: Core bootstrap and helpers
+- `10-19`: Terminal and Git configuration
+- `20-29`: Container engines and cloud tools
+- `30-69`: Development tools and language-specific utilities
+
+## Adding New Fragments
+
+1. Create a new `.ps1` file in `profile.d/` with appropriate numeric prefix
+2. Keep it focused on a single concern (e.g., `45-nextjs.ps1` for Next.js helpers)
+3. Add a `README.md` in `profile.d/` documenting the fragment (optional but recommended)
+4. Ensure idempotency and guard external tool calls
+5. Run validation before committing
+
+## Documentation
+
+- Function/alias documentation is auto-generated from comment-based help
+- Run `pwsh -NoProfile -File scripts/utils/generate-docs.ps1` to regenerate
+- See [PROFILE_README.md](PROFILE_README.md) for detailed technical information
 
 ## Questions
 
-If you're unsure about a change, open an issue or a draft PR and tag someone
-who maintains the profile.
+Open an issue or draft PR if you need guidance. Tag maintainers for review.

@@ -3,73 +3,64 @@
 [![Validate PowerShell Profile](https://github.com/bolens/ps-profile/actions/workflows/validate-profile.yml/badge.svg)](https://github.com/bolens/ps-profile/actions/workflows/validate-profile.yml)
 [![Commit message check](https://github.com/bolens/ps-profile/actions/workflows/commit-message-check.yml/badge.svg)](https://github.com/bolens/ps-profile/actions/workflows/commit-message-check.yml)
 
-A modular, performance-optimized PowerShell profile for interactive shells. Features lazy loading, container helpers, prompt frameworks (oh-my-posh/Starship), and comprehensive validation tooling.
+A modular, performance-optimized PowerShell profile with lazy loading, container helpers, prompt frameworks, and comprehensive validation.
 
 ## Quick Start
 
-1. Clone this repository to your PowerShell profile location:
+```powershell
+# Clone to PowerShell profile location
+git clone https://github.com/bolens/ps-profile.git $HOME\Documents\PowerShell
 
-   ```powershell
-   git clone https://github.com/bolens/ps-profile.git $HOME\Documents\PowerShell
-   ```
-
-2. Reload your profile:
-
-   ```powershell
-   . $PROFILE
-   ```
+# Reload profile
+. $PROFILE
+```
 
 ## Features
 
-- **Modular Design**: Profile functionality split into small, maintainable fragments in `profile.d/`
-- **Performance Optimized**: Lazy loading and deferred initialization keep startup fast
-- **Container Support**: Docker/Podman helpers with auto-detection
-- **Prompt Frameworks**: Support for oh-my-posh and Starship with lazy initialization
-- **Comprehensive Validation**: Linting, security scanning, idempotency testing, and benchmarking
-- **Git Integration**: Pre-commit hooks and CI workflows
+- **Modular Design**: Small, maintainable fragments in `profile.d/` loaded in lexical order
+- **Performance Optimized**: Lazy loading and deferred initialization for fast startup
+- **Container Support**: Docker/Podman helpers with auto-detection (`dcu`, `dcd`, `dcl`, etc.)
+- **Prompt Frameworks**: oh-my-posh and Starship with lazy initialization
+- **Comprehensive Tooling**: 228 functions, 255 aliases, validation scripts, benchmarks
 
-## Structure
+## Quick Reference
 
-- `Microsoft.PowerShell_profile.ps1` — Main profile loader
-- `profile.d/` — Modular fragments loaded in lexical order
-  - `00-bootstrap.ps1` — Helper functions for safe registration
-  - `06-oh-my-posh.ps1` / `20-starship.ps1` — Prompt initialization
-  - `10-git.ps1` — Git helpers
-  - `20-containers.ps1` — Container management utilities
-- `scripts/` — Utility scripts for validation, formatting, and maintenance
-
-## Validation & Testing
-
-Run comprehensive checks before committing:
+### Validation
 
 ```powershell
-# Full validation (lint + security + idempotency)
-pwsh -NoProfile -File scripts/checks/validate-profile.ps1
-
-# Individual checks
-pwsh -NoProfile -File scripts/utils/run-lint.ps1          # PSScriptAnalyzer
-pwsh -NoProfile -File scripts/utils/run-security-scan.ps1 # Security analysis
-pwsh -NoProfile -File scripts/checks/check-idempotency.ps1 # Idempotency test
+pwsh -NoProfile -File scripts/checks/validate-profile.ps1  # Full validation
+pwsh -NoProfile -File scripts/utils/run-lint.ps1          # Lint only
+pwsh -NoProfile -File scripts/utils/run-security-scan.ps1  # Security scan
 ```
 
-## Performance Benchmarking
-
-Measure startup performance:
+### Performance
 
 ```powershell
 pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
 ```
 
-## Contributing
+### Documentation
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, validation scripts, and contribution guidelines.
+- [PROFILE_README.md](PROFILE_README.md) — Comprehensive technical guide
+- [CONTRIBUTING.md](CONTRIBUTING.md) — Development and contribution guidelines
+- [PROFILE_DEBUG.md](PROFILE_DEBUG.md) — Debugging and instrumentation
+- [docs/README.md](docs/README.md) — API documentation (auto-generated)
 
-## Documentation
+## Project Structure
 
-- [Detailed Profile Documentation](PROFILE_README.md) — Comprehensive guide
-- [Debug Guide](PROFILE_DEBUG.md) — Debugging and instrumentation
-- [PowerShell Config](powershell.config.README.md) — Configuration details
+```
+├── Microsoft.PowerShell_profile.ps1  # Main profile loader
+├── profile.d/                         # Modular fragments (00-99)
+│   ├── 00-bootstrap.ps1               # Registration helpers
+│   ├── 06-oh-my-posh.ps1              # Prompt framework
+│   ├── 11-git.ps1                     # Git helpers
+│   └── 22-containers.ps1              # Container utilities
+├── scripts/                           # Validation & utilities
+│   ├── checks/                        # Validation scripts
+│   └── utils/                         # Helper scripts
+└── docs/                              # Auto-generated API docs
+```
 
 ## License
 
-This project is open source. See individual files for licensing information.
+Open source. See individual files for licensing information.

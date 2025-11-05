@@ -148,8 +148,8 @@ try {
             }
 
             $stats = $global:PSProfileCommandUsage.GetEnumerator() |
-            Sort-Object -Property Value -Descending |
-            Select-Object -First 20
+                Sort-Object -Property Value -Descending |
+                Select-Object -First 20
 
             if ($stats.Count -eq 0) {
                 Write-Host "No command usage data available."

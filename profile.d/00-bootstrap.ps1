@@ -172,11 +172,231 @@ if (-not (Test-Path "Function:\\global:Test-CachedCommand")) {
 function Test-HasCommand {
     param([Parameter(Mandatory)] [string]$Name)
     # Fast provider checks avoid triggering module autoload/discovery
-    if (Test-Path "Function:\\global:$Name" -or Test-Path "Function:\\$Name" -or Test-Path "Alias:\\$Name") { return $true }
+    if ((Test-Path "Function:\\global:$Name") -or (Test-Path "Function:\\$Name") -or (Test-Path "Alias:\\$Name")) { return $true }
     # If we have the cached helper, prefer it to avoid repeated Get-Command calls
     if (Test-Path "Function:\\global:Test-CachedCommand") {
         try { return [bool](Test-CachedCommand -Name $Name) } catch { Write-Verbose "Test-CachedCommand failed: $($_.Exception.Message)" }
     }
     # Last resort: Get-Command (may autoload modules)
     return $null -ne (Get-Command -Name $Name -ErrorAction SilentlyContinue)
+}
+
+# ===============================================
+# FRAGMENT MANAGEMENT HELPERS
+# ===============================================
+# Helper function to get the fragment config file path
+if (-not (Test-Path "Function:\\global:Get-FragmentConfigPath")) {
+    function Get-FragmentConfigPath {
+        $profileDir = Split-Path -Parent $PROFILE
+        return Join-Path $profileDir '.profile-fragments.json'
+    }
+}
+
+# Helper function to load fragment configuration
+if (-not (Test-Path "Function:\\global:Get-FragmentConfig")) {
+    function Get-FragmentConfig {
+        $configPath = Get-FragmentConfigPath
+        if (-not (Test-Path $configPath)) {
+            return @{ disabled = @() }
+        }
+        try {
+            $content = Get-Content -Path $configPath -Raw -ErrorAction Stop
+            $configObj = $content | ConvertFrom-Json
+            # Convert to hashtable for easier manipulation
+            $config = @{ disabled = @() }
+            if ($configObj.disabled) {
+                $config.disabled = @($configObj.disabled)
+            }
+            return $config
+        }
+        catch {
+            Write-Warning "Failed to load fragment config: $($_.Exception.Message). Using defaults."
+            return @{ disabled = @() }
+        }
+    }
+}
+
+# Helper function to save fragment configuration
+if (-not (Test-Path "Function:\\global:Save-FragmentConfig")) {
+    function Save-FragmentConfig {
+        param([Parameter(Mandatory)] [hashtable]$Config)
+        $configPath = Get-FragmentConfigPath
+        try {
+            $json = $Config | ConvertTo-Json -Depth 10 -Compress
+            Set-Content -Path $configPath -Value $json -ErrorAction Stop
+            return $true
+        }
+        catch {
+            Write-Error "Failed to save fragment config: $($_.Exception.Message)"
+            return $false
+        }
+    }
+}
+
+# Helper function to check if a fragment is enabled
+if (-not (Test-Path "Function:\\global:Test-ProfileFragmentEnabled")) {
+    <#
+    .SYNOPSIS
+        Tests if a profile fragment is enabled.
+    .DESCRIPTION
+        Checks the fragment configuration to determine if a fragment is enabled.
+        Fragments are enabled by default unless explicitly disabled.
+    .PARAMETER FragmentName
+        The name of the fragment to check (e.g., '11-git.ps1' or '11-git').
+    #>
+    function Test-ProfileFragmentEnabled {
+        param([Parameter(Mandatory)] [string]$FragmentName)
+        
+        # Normalize fragment name (remove .ps1 extension if present)
+        if ($FragmentName -like '*.ps1') {
+            $FragmentName = $FragmentName -replace '\.ps1$', ''
+        }
+        
+        $config = Get-FragmentConfig
+        return $FragmentName -notin $config.disabled
+    }
+}
+
+# Enable a profile fragment
+if (-not (Test-Path "Function:\\global:Enable-ProfileFragment")) {
+    <#
+    .SYNOPSIS
+        Enables a profile fragment.
+    .DESCRIPTION
+        Removes a fragment from the disabled list, allowing it to be loaded on next profile reload.
+    .PARAMETER FragmentName
+        The name of the fragment to enable (e.g., '11-git.ps1' or '11-git').
+    .EXAMPLE
+        Enable-ProfileFragment -FragmentName '11-git'
+    #>
+    function Enable-ProfileFragment {
+        [CmdletBinding(SupportsShouldProcess)]
+        param(
+            [Parameter(Mandatory, ValueFromPipeline)] [string]$FragmentName
+        )
+        
+        # Normalize fragment name
+        if ($FragmentName -like '*.ps1') {
+            $FragmentName = $FragmentName -replace '\.ps1$', ''
+        }
+        
+        $config = Get-FragmentConfig
+        if ($FragmentName -in $config.disabled) {
+            if ($PSCmdlet.ShouldProcess("Fragment '$FragmentName'", "Enable")) {
+                $config.disabled = $config.disabled | Where-Object { $_ -ne $FragmentName }
+                if (Save-FragmentConfig -Config $config) {
+                    Write-Host "Fragment '$FragmentName' enabled. Reload your profile with '. `$PROFILE' to apply changes." -ForegroundColor Green
+                    return $true
+                }
+            }
+        }
+        else {
+            Write-Host "Fragment '$FragmentName' is already enabled." -ForegroundColor Yellow
+            return $false
+        }
+    }
+}
+
+# Disable a profile fragment
+if (-not (Test-Path "Function:\\global:Disable-ProfileFragment")) {
+    <#
+    .SYNOPSIS
+        Disables a profile fragment.
+    .DESCRIPTION
+        Adds a fragment to the disabled list, preventing it from being loaded on next profile reload.
+    .PARAMETER FragmentName
+        The name of the fragment to disable (e.g., '11-git.ps1' or '11-git').
+    .EXAMPLE
+        Disable-ProfileFragment -FragmentName '11-git'
+    #>
+    function Disable-ProfileFragment {
+        [CmdletBinding(SupportsShouldProcess)]
+        param(
+            [Parameter(Mandatory, ValueFromPipeline)] [string]$FragmentName
+        )
+        
+        # Normalize fragment name
+        if ($FragmentName -like '*.ps1') {
+            $FragmentName = $FragmentName -replace '\.ps1$', ''
+        }
+        
+        $config = Get-FragmentConfig
+        if ($FragmentName -notin $config.disabled) {
+            if ($PSCmdlet.ShouldProcess("Fragment '$FragmentName'", "Disable")) {
+                $existingDisabled = if ($config.disabled) { @($config.disabled) } else { @() }
+                $config.disabled = $existingDisabled + $FragmentName
+                if (Save-FragmentConfig -Config $config) {
+                    Write-Host "Fragment '$FragmentName' disabled. Reload your profile with '. `$PROFILE' to apply changes." -ForegroundColor Yellow
+                    return $true
+                }
+            }
+        }
+        else {
+            Write-Host "Fragment '$FragmentName' is already disabled." -ForegroundColor Yellow
+            return $false
+        }
+    }
+}
+
+# Get profile fragment status
+if (-not (Test-Path "Function:\\global:Get-ProfileFragment")) {
+    <#
+    .SYNOPSIS
+        Gets the status of profile fragments.
+    .DESCRIPTION
+        Lists all profile fragments and their enabled/disabled status.
+    .PARAMETER FragmentName
+        Optional. Filter by specific fragment name.
+    .PARAMETER DisabledOnly
+        Show only disabled fragments.
+    .PARAMETER EnabledOnly
+        Show only enabled fragments.
+    .EXAMPLE
+        Get-ProfileFragment
+    .EXAMPLE
+        Get-ProfileFragment -DisabledOnly
+    #>
+    function Get-ProfileFragment {
+        [CmdletBinding()]
+        param(
+            [string]$FragmentName,
+            [switch]$DisabledOnly,
+            [switch]$EnabledOnly
+        )
+        
+        $profileDir = Split-Path -Parent $PROFILE
+        $profileD = Join-Path $profileDir 'profile.d'
+        
+        if (-not (Test-Path $profileD)) {
+            Write-Warning "Profile.d directory not found: $profileD"
+            return
+        }
+        
+        $config = Get-FragmentConfig
+        $fragments = Get-ChildItem -Path $profileD -File -Filter '*.ps1' | Sort-Object Name
+        
+        $results = foreach ($fragment in $fragments) {
+            $name = $fragment.BaseName
+            $isEnabled = Test-ProfileFragmentEnabled -FragmentName $name
+            
+            if ($FragmentName -and $name -notlike "*$FragmentName*") {
+                continue
+            }
+            if ($DisabledOnly -and $isEnabled) {
+                continue
+            }
+            if ($EnabledOnly -and -not $isEnabled) {
+                continue
+            }
+            
+            [PSCustomObject]@{
+                Name     = $name
+                FileName = $fragment.Name
+                Enabled  = $isEnabled
+                Path     = $fragment.FullName
+            }
+        }
+        
+        return $results
+    }
 }
