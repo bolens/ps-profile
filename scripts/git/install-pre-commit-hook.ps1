@@ -5,9 +5,9 @@ scripts/git/install-pre-commit-hook.ps1
     Installs the pre-commit git hook.
 
 .DESCRIPTION
-    Installs a pre-commit git hook that runs validation checks before commits.
-    Backs up any existing hook with a timestamp. The hook runs validate-profile.ps1
-    to ensure code quality before commits are finalized.
+    Installs a pre-commit git hook that runs formatting and validation checks before commits.
+    Backs up any existing hook with a timestamp. The hook runs scripts/git/pre-commit.ps1
+    which formats code first, then runs validate-profile.ps1 to ensure code quality.
 
 .PARAMETER RepoRoot
     The root directory of the git repository. Defaults to the current directory.
@@ -41,9 +41,9 @@ if (Test-Path $hookPath) {
 
 $script = @'
 #!/usr/bin/env pwsh
-# pre-commit hook to validate PowerShell profile
-pwsh -NoProfile -File "scripts/checks/validate-profile.ps1"
-if ($LASTEXITCODE -ne 0) { Write-Host 'Pre-commit: validation failed' ; exit 1 }
+# pre-commit hook to format and validate PowerShell profile
+pwsh -NoProfile -File "scripts/git/pre-commit.ps1"
+if ($LASTEXITCODE -ne 0) { Write-Host 'Pre-commit: checks failed' ; exit 1 }
 exit 0
 '@
 
