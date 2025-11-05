@@ -98,6 +98,60 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1
 
+  update-baseline:
+    desc: Update Performance Baseline
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline
+
+  add-missing-help:
+    desc: Add Missing Help
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/add-missing-help.ps1
+
+  fix-markdown-blank-lines:
+    desc: Fix Markdown Blank Lines
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/fix-markdown-blank-lines.ps1
+
+  fix-markdown-readme:
+    desc: Fix Markdown README Formatting
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/fix-markdown-readme-formatting.ps1
+
+  quality-check:
+    desc: Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests)
+    deps: [format, security-scan, lint, spellcheck, markdownlint, check-comment-help, test]
+    cmds:
+      - echo "All quality checks passed"
+
+  pre-commit-checks:
+    desc: Run Pre-commit Checks
+    cmds:
+      - pwsh -NoProfile -File scripts/git/pre-commit.ps1
+
+  check-idempotency:
+    desc: Check Idempotency
+    cmds:
+      - pwsh -NoProfile -File scripts/checks/check-idempotency.ps1
+
+  fix-all-markdown:
+    desc: Fix All Markdown (blank lines + README formatting)
+    deps: [fix-markdown-blank-lines, fix-markdown-readme]
+    cmds:
+      - echo "All markdown fixes completed"
+
+  format-and-lint:
+    desc: Format and Lint Code
+    deps: [format, lint]
+    cmds:
+      - echo "Format and lint completed"
+
+  all-docs:
+    desc: Generate All Documentation (API docs + fragment READMEs)
+    deps: [generate-docs, generate-fragment-readmes]
+    cmds:
+      - echo "All documentation generated"
+
   default:
     desc: Run default task
     cmds:

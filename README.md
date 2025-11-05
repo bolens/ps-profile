@@ -25,6 +25,31 @@ git clone https://github.com/bolens/ps-profile.git $HOME\Documents\PowerShell
 
 ## Quick Reference
 
+### Development Tasks
+
+This project includes VS Code tasks and Taskfile commands for common development workflows.
+
+**VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
+
+**Taskfile**: Run `task <task-name>` (e.g., `task lint`, `task validate`)
+
+**Common Tasks**:
+
+- `validate` - Full validation (format + security + lint + spellcheck + help + idempotency)
+- `quality-check` - Comprehensive quality check (format + security + lint + spellcheck + markdownlint + help + tests)
+- `format-and-lint` - Format and lint code (common pre-commit workflow)
+- `fix-all-markdown` - Fix all markdown formatting issues
+- `all-docs` - Generate all documentation (API docs + fragment READMEs)
+- `test` - Run Pester tests
+- `test-coverage` - Run tests with coverage
+- `benchmark` - Performance benchmark
+- `check-idempotency` - Check fragment idempotency
+- `format` - Format code
+- `lint` - Lint code
+- `pre-commit-checks` - Run pre-commit checks manually
+
+See `.vscode/tasks.json` or `Taskfile.yml` for all available tasks.
+
 ### Validation
 
 ```powershell
@@ -37,6 +62,7 @@ pwsh -NoProfile -File scripts/utils/run-security-scan.ps1  # Security scan
 
 ```powershell
 pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
+pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline  # Update baseline
 ```
 
 ### Documentation

@@ -1,497 +1,499 @@
 {
-  "FullStartupMean": 1717.16,
-  "Timestamp": "2025-10-31T17:48:22.8928838-06:00",
+  "FullStartupMean": 1809.21,
   "Fragments": [
     {
-      "MedianMs": 26.98,
       "Fragment": "00-bootstrap.ps1",
-      "Raw": "26.975,26.6945,26.8768",
-      "MeanMs": 26.85
-    },
-    {
-      "MedianMs": 56.63,
-      "Fragment": "01-env.ps1",
-      "Raw": "56.6317,52.8736,51.397",
-      "MeanMs": 53.63
-    },
-    {
-      "MedianMs": 29.04,
-      "Fragment": "02-files-conversion.ps1",
-      "Raw": "28.9893,29.0431,27.9259",
-      "MeanMs": 28.65
-    },
-    {
-      "MedianMs": 26.37,
-      "Fragment": "02-files-listing.ps1",
-      "Raw": "25.9816,26.369,25.1153",
-      "MeanMs": 25.82
-    },
-    {
-      "MedianMs": 29.58,
-      "Fragment": "02-files-navigation.ps1",
-      "Raw": "26.3396,27.092,29.5842",
-      "MeanMs": 27.67
-    },
-    {
-      "MedianMs": 26.53,
-      "Fragment": "02-files-utilities.ps1",
-      "Raw": "26.1738,26.5341,25.8208",
-      "MeanMs": 26.18
-    },
-    {
-      "MedianMs": 8.5,
-      "Fragment": "02-files.ps1",
-      "Raw": "7.1408,8.5046,7.308",
-      "MeanMs": 7.65
-    },
-    {
-      "MedianMs": 26.56,
-      "Fragment": "03-agent-mode.ps1",
-      "Raw": "26.5642,25.5785,25.9029",
-      "MeanMs": 26.02
-    },
-    {
-      "MedianMs": 53.24,
-      "Fragment": "04-scoop-completion.ps1",
-      "Raw": "53.0592,52.9648,53.2375",
-      "MeanMs": 53.09
-    },
-    {
-      "MedianMs": 12.38,
-      "Fragment": "05-utilities.ps1",
-      "Raw": "12.382,11.5235,11.5628",
-      "MeanMs": 11.82
-    },
-    {
-      "MedianMs": 29.05,
-      "Fragment": "06-oh-my-posh.ps1",
-      "Raw": "28.8523,29.0462,28.6315",
-      "MeanMs": 28.84
-    },
-    {
-      "MedianMs": 8.62,
-      "Fragment": "07-system.ps1",
-      "Raw": "7.9795,7.8957,8.6223",
-      "MeanMs": 8.17
-    },
-    {
-      "MedianMs": 7.89,
-      "Fragment": "08-system-info.ps1",
-      "Raw": "7.8943,7.828,7.7737",
-      "MeanMs": 7.83
-    },
-    {
-      "MedianMs": 41.19,
-      "Fragment": "09-package-managers.ps1",
-      "Raw": "38.9099,41.1916,38.4667",
-      "MeanMs": 39.52
-    },
-    {
-      "MedianMs": 7.67,
-      "Fragment": "10-wsl.ps1",
-      "Raw": "7.3475,7.614,7.6694",
-      "MeanMs": 7.54
-    },
-    {
-      "MedianMs": 32.71,
-      "Fragment": "11-git.ps1",
-      "Raw": "32.7112,31.2572,32.0362",
-      "MeanMs": 32.0
-    },
-    {
-      "MedianMs": 52.49,
-      "Fragment": "12-psreadline.ps1",
-      "Raw": "50.9161,52.4853,52.2754",
-      "MeanMs": 51.89
-    },
-    {
-      "MedianMs": 7.99,
-      "Fragment": "13-ansible.ps1",
-      "Raw": "7.987,7.6515,7.5961",
-      "MeanMs": 7.74
-    },
-    {
-      "MedianMs": 27.97,
-      "Fragment": "14-ssh.ps1",
-      "Raw": "27.7407,27.9664,27.9235",
-      "MeanMs": 27.88
-    },
-    {
-      "MedianMs": 27.51,
-      "Fragment": "15-shortcuts.ps1",
-      "Raw": "25.6223,25.812,27.513",
-      "MeanMs": 26.32
-    },
-    {
-      "MedianMs": 26.4,
-      "Fragment": "16-clipboard.ps1",
-      "Raw": "26.0248,26.4013,25.9899",
-      "MeanMs": 26.14
-    },
-    {
-      "MedianMs": 29.8,
-      "Fragment": "17-kubectl.ps1",
-      "Raw": "29.7977,27.6612,28.569",
-      "MeanMs": 28.68
-    },
-    {
-      "MedianMs": 30.33,
-      "Fragment": "18-terraform.ps1",
-      "Raw": "30.3295,28.1064,28.5933",
-      "MeanMs": 29.01
-    },
-    {
-      "MedianMs": 28.86,
-      "Fragment": "19-fzf.ps1",
-      "Raw": "28.8622,27.4787,27.4629",
-      "MeanMs": 27.93
-    },
-    {
-      "MedianMs": 29.77,
-      "Fragment": "20-gh.ps1",
-      "Raw": "26.2713,25.3929,29.7744",
-      "MeanMs": 27.15
-    },
-    {
-      "MedianMs": 27.29,
-      "Fragment": "21-kube.ps1",
-      "Raw": "27.0179,26.6891,27.2942",
-      "MeanMs": 27.0
-    },
-    {
-      "MedianMs": 29.26,
-      "Fragment": "22-containers.ps1",
-      "Raw": "26.652,29.2553,25.9426",
-      "MeanMs": 27.28
-    },
-    {
-      "MedianMs": 30.67,
-      "Fragment": "23-starship.ps1",
-      "Raw": "28.8103,30.6735,27.9669",
-      "MeanMs": 29.15
-    },
-    {
-      "MedianMs": 8.42,
-      "Fragment": "24-container-utils.ps1",
-      "Raw": "8.1825,8.222,8.4155",
-      "MeanMs": 8.27
-    },
-    {
-      "MedianMs": 26.62,
-      "Fragment": "25-lazydocker.ps1",
-      "Raw": "26.6199,25.3181,25.2446",
-      "MeanMs": 25.73
-    },
-    {
-      "MedianMs": 26.87,
-      "Fragment": "26-rclone.ps1",
-      "Raw": "26.1191,26.8736,25.9439",
-      "MeanMs": 26.31
-    },
-    {
-      "MedianMs": 32.26,
-      "Fragment": "27-minio.ps1",
-      "Raw": "28.0284,32.2573,27.6527",
-      "MeanMs": 29.31
-    },
-    {
-      "MedianMs": 29.08,
-      "Fragment": "28-jq-yq.ps1",
-      "Raw": "29.0786,27.6167,28.158",
-      "MeanMs": 28.28
-    },
-    {
-      "MedianMs": 27.16,
-      "Fragment": "29-rg.ps1",
-      "Raw": "26.2084,27.1631,27.1577",
-      "MeanMs": 26.84
-    },
-    {
-      "MedianMs": 25.96,
-      "Fragment": "30-open.ps1",
-      "Raw": "25.9621,24.8165,25.279",
-      "MeanMs": 25.35
-    },
-    {
-      "MedianMs": 29.92,
-      "Fragment": "31-aws.ps1",
-      "Raw": "29.9173,27.4172,27.9859",
-      "MeanMs": 28.44
-    },
-    {
-      "MedianMs": 28.45,
-      "Fragment": "32-bun.ps1",
-      "Raw": "27.6714,27.0241,28.4478",
-      "MeanMs": 27.71
-    },
-    {
-      "MedianMs": 9.49,
-      "Fragment": "33-aliases.ps1",
-      "Raw": "9.49,9.1285,8.9303",
-      "MeanMs": 9.18
-    },
-    {
-      "MedianMs": 33.67,
-      "Fragment": "34-dev.ps1",
-      "Raw": "32.8535,33.6712,32.5462",
-      "MeanMs": 33.02
-    },
-    {
-      "MedianMs": 29.04,
-      "Fragment": "35-ollama.ps1",
-      "Raw": "28.7766,29.0397,28.5404",
-      "MeanMs": 28.79
-    },
-    {
-      "MedianMs": 29.81,
-      "Fragment": "36-ngrok.ps1",
-      "Raw": "29.8095,27.7385,28.4594",
-      "MeanMs": 28.67
-    },
-    {
-      "MedianMs": 29.06,
-      "Fragment": "37-deno.ps1",
-      "Raw": "27.8272,29.0594,27.7152",
-      "MeanMs": 28.2
-    },
-    {
-      "MedianMs": 28.41,
-      "Fragment": "38-firebase.ps1",
-      "Raw": "28.2487,28.4093,27.682",
-      "MeanMs": 28.11
-    },
-    {
-      "MedianMs": 29.02,
-      "Fragment": "39-rustup.ps1",
-      "Raw": "28.6819,29.0196,28.6618",
-      "MeanMs": 28.79
-    },
-    {
-      "MedianMs": 28.18,
-      "Fragment": "40-tailscale.ps1",
-      "Raw": "27.8045,27.614,28.1796",
-      "MeanMs": 27.87
-    },
-    {
-      "MedianMs": 28.36,
-      "Fragment": "41-yarn.ps1",
-      "Raw": "28.224,28.361,27.7952",
-      "MeanMs": 28.13
-    },
-    {
-      "MedianMs": 29.1,
-      "Fragment": "42-php.ps1",
-      "Raw": "29.0985,28.0412,27.9558",
-      "MeanMs": 28.37
-    },
-    {
-      "MedianMs": 29.23,
-      "Fragment": "43-laravel.ps1",
-      "Raw": "29.2251,28.2106,27.489",
-      "MeanMs": 28.31
-    },
-    {
-      "MedianMs": 51.17,
-      "Fragment": "44-git.ps1",
-      "Raw": "50.5408,50.0129,51.1692",
-      "MeanMs": 50.57
-    },
-    {
-      "MedianMs": 30.59,
-      "Fragment": "45-nextjs.ps1",
-      "Raw": "28.3088,30.5928,28.8493",
-      "MeanMs": 29.25
-    },
-    {
-      "MedianMs": 29.2,
-      "Fragment": "46-vite.ps1",
-      "Raw": "28.904,29.2043,28.5986",
-      "MeanMs": 28.9
-    },
-    {
-      "MedianMs": 30.76,
-      "Fragment": "47-angular.ps1",
-      "Raw": "27.4883,27.4051,30.7635",
-      "MeanMs": 28.55
-    },
-    {
-      "MedianMs": 28.89,
-      "Fragment": "48-vue.ps1",
-      "Raw": "28.8855,28.6409,28.0145",
-      "MeanMs": 28.51
-    },
-    {
-      "MedianMs": 30.03,
-      "Fragment": "49-nuxt.ps1",
-      "Raw": "28.297,28.7118,30.0282",
-      "MeanMs": 29.01
-    },
-    {
-      "MedianMs": 30.6,
-      "Fragment": "50-azure.ps1",
-      "Raw": "30.604,28.3764,28.6989",
-      "MeanMs": 29.23
-    },
-    {
-      "MedianMs": 29.49,
-      "Fragment": "51-gcloud.ps1",
-      "Raw": "27.7219,29.4872,27.8294",
+      "Raw": "28.1656,29.637,27.6682,28.1728,28.1089",
+      "MedianMs": 28.17,
       "MeanMs": 28.35
     },
     {
-      "MedianMs": 29.63,
-      "Fragment": "52-helm.ps1",
-      "Raw": "29.3605,29.6335,28.9",
-      "MeanMs": 29.3
+      "Fragment": "01-env.ps1",
+      "Raw": "52.0827,50.6854,54.519,55.7114,55.6777",
+      "MedianMs": 54.52,
+      "MeanMs": 53.74
     },
     {
-      "MedianMs": 29.29,
-      "Fragment": "53-go.ps1",
-      "Raw": "29.2856,28.6896,28.3598",
-      "MeanMs": 28.78
+      "Fragment": "02-files-conversion.ps1",
+      "Raw": "50.7225,55.6,62.9022,51.4725,61.093",
+      "MedianMs": 55.6,
+      "MeanMs": 56.36
     },
     {
-      "MedianMs": 30.11,
-      "Fragment": "54-modern-cli.ps1",
-      "Raw": "30.1099,27.3378,27.9718",
+      "Fragment": "02-files-listing.ps1",
+      "Raw": "44.8504,51.7689,51.4806,45.8345,50.2922",
+      "MedianMs": 50.29,
+      "MeanMs": 48.85
+    },
+    {
+      "Fragment": "02-files-navigation.ps1",
+      "Raw": "50.6137,48.6732,49.0295,67.0578,54.3921",
+      "MedianMs": 50.61,
+      "MeanMs": 53.95
+    },
+    {
+      "Fragment": "02-files-utilities.ps1",
+      "Raw": "47.9229,48.5231,51.3103,52.7422,45.8533",
+      "MedianMs": 48.52,
+      "MeanMs": 49.27
+    },
+    {
+      "Fragment": "02-files.ps1",
+      "Raw": "7.8456,7.5621,7.8183,8.1428,8.2166",
+      "MedianMs": 7.85,
+      "MeanMs": 7.92
+    },
+    {
+      "Fragment": "03-agent-mode.ps1",
+      "Raw": "27.6169,27.9278,26.419,25.4595,30.1812",
+      "MedianMs": 27.62,
+      "MeanMs": 27.52
+    },
+    {
+      "Fragment": "04-scoop-completion.ps1",
+      "Raw": "62.2693,59.8043,55.1317,54.561,55.1651",
+      "MedianMs": 55.17,
+      "MeanMs": 57.39
+    },
+    {
+      "Fragment": "05-utilities.ps1",
+      "Raw": "33.061,34.4087,34.2093,35.8124,34.0065",
+      "MedianMs": 34.21,
+      "MeanMs": 34.3
+    },
+    {
+      "Fragment": "06-oh-my-posh.ps1",
+      "Raw": "32.1868,33.9518,30.9079,30.7947,32.6547",
+      "MedianMs": 32.19,
+      "MeanMs": 32.1
+    },
+    {
+      "Fragment": "07-system.ps1",
+      "Raw": "31.1552,40.165,32.3377,32.2735,33.2989",
+      "MedianMs": 32.34,
+      "MeanMs": 33.85
+    },
+    {
+      "Fragment": "08-system-info.ps1",
+      "Raw": "33.2286,28.8956,31.3045,30.0666,37.9681",
+      "MedianMs": 31.3,
+      "MeanMs": 32.29
+    },
+    {
+      "Fragment": "09-package-managers.ps1",
+      "Raw": "189.2004,152.6761,164.7487,149.2217,151.8181",
+      "MedianMs": 152.68,
+      "MeanMs": 161.53
+    },
+    {
+      "Fragment": "10-wsl.ps1",
+      "Raw": "28.3602,27.8005,28.8645,27.9194,32.7664",
+      "MedianMs": 28.36,
+      "MeanMs": 29.14
+    },
+    {
+      "Fragment": "11-git.ps1",
+      "Raw": "53.9165,54.1081,59.5561,52.2718,50.6675",
+      "MedianMs": 53.92,
+      "MeanMs": 54.1
+    },
+    {
+      "Fragment": "12-psreadline.ps1",
+      "Raw": "52.5822,51.6881,50.9621,51.7301,52.2476",
+      "MedianMs": 51.73,
+      "MeanMs": 51.84
+    },
+    {
+      "Fragment": "13-ansible.ps1",
+      "Raw": "29.6335,28.2655,28.0088,27.6024,28.7476",
+      "MedianMs": 28.27,
+      "MeanMs": 28.45
+    },
+    {
+      "Fragment": "14-ssh.ps1",
+      "Raw": "69.4123,46.9143,48.9703,46.9935,48.9007",
+      "MedianMs": 48.9,
+      "MeanMs": 52.24
+    },
+    {
+      "Fragment": "15-shortcuts.ps1",
+      "Raw": "45.1018,48.4379,46.7488,47.416,46.2117",
+      "MedianMs": 46.75,
+      "MeanMs": 46.78
+    },
+    {
+      "Fragment": "16-clipboard.ps1",
+      "Raw": "44.4481,49.6785,44.8147,48.7781,46.3188",
+      "MedianMs": 46.32,
+      "MeanMs": 46.81
+    },
+    {
+      "Fragment": "17-kubectl.ps1",
+      "Raw": "28.2778,28.4151,28.9739,27.8402,27.5282",
+      "MedianMs": 28.28,
+      "MeanMs": 28.21
+    },
+    {
+      "Fragment": "18-terraform.ps1",
+      "Raw": "30.7892,29.1427,31.4542,37.9354,32.6624",
+      "MedianMs": 31.45,
+      "MeanMs": 32.4
+    },
+    {
+      "Fragment": "19-fzf.ps1",
+      "Raw": "48.5545,47.833,48.1971,48.1852,48.202",
+      "MedianMs": 48.2,
+      "MeanMs": 48.19
+    },
+    {
+      "Fragment": "20-gh.ps1",
+      "Raw": "28.3023,27.5467,32.3092,29.1417,29.9949",
+      "MedianMs": 29.14,
+      "MeanMs": 29.46
+    },
+    {
+      "Fragment": "21-kube.ps1",
+      "Raw": "34.7359,28.2954,28.4866,28.1856,27.6876",
+      "MedianMs": 28.3,
+      "MeanMs": 29.48
+    },
+    {
+      "Fragment": "22-containers.ps1",
+      "Raw": "48.2305,51.6555,55.3257,48.3354,45.2793",
+      "MedianMs": 48.34,
+      "MeanMs": 49.77
+    },
+    {
+      "Fragment": "23-starship.ps1",
+      "Raw": "79.0103,71.7819,72.8302,73.0124,76.2495",
+      "MedianMs": 73.01,
+      "MeanMs": 74.58
+    },
+    {
+      "Fragment": "24-container-utils.ps1",
+      "Raw": "9.5682,8.833,8.8435,8.1293,8.9881",
+      "MedianMs": 8.84,
+      "MeanMs": 8.87
+    },
+    {
+      "Fragment": "25-lazydocker.ps1",
+      "Raw": "28.3593,27.3296,26.411,28.2567,28.7793",
+      "MedianMs": 28.26,
+      "MeanMs": 27.83
+    },
+    {
+      "Fragment": "26-rclone.ps1",
+      "Raw": "31.9541,28.4056,31.3789,34.6698,27.6665",
+      "MedianMs": 31.38,
+      "MeanMs": 30.81
+    },
+    {
+      "Fragment": "27-minio.ps1",
+      "Raw": "38.8843,27.1455,29.6728,28.8664,28.7514",
+      "MedianMs": 28.87,
+      "MeanMs": 30.66
+    },
+    {
+      "Fragment": "28-jq-yq.ps1",
+      "Raw": "27.6831,27.6867,28.0588,29.5752,30.3085",
+      "MedianMs": 28.06,
+      "MeanMs": 28.66
+    },
+    {
+      "Fragment": "29-rg.ps1",
+      "Raw": "28.1539,26.0737,26.4898,28.266,28.722",
+      "MedianMs": 28.15,
+      "MeanMs": 27.54
+    },
+    {
+      "Fragment": "30-open.ps1",
+      "Raw": "46.4047,45.8188,45.8488,45.0746,44.2171",
+      "MedianMs": 45.82,
+      "MeanMs": 45.47
+    },
+    {
+      "Fragment": "31-aws.ps1",
+      "Raw": "27.5722,31.0706,27.7372,27.0849,27.5347",
+      "MedianMs": 27.57,
+      "MeanMs": 28.2
+    },
+    {
+      "Fragment": "32-bun.ps1",
+      "Raw": "27.8014,27.0718,29.1519,27.9691,26.7082",
+      "MedianMs": 27.8,
+      "MeanMs": 27.74
+    },
+    {
+      "Fragment": "33-aliases.ps1",
+      "Raw": "9.482,9.6721,10.3166,9.3389,9.2174",
+      "MedianMs": 9.48,
+      "MeanMs": 9.61
+    },
+    {
+      "Fragment": "34-dev.ps1",
+      "Raw": "35.1856,35.9133,37.0096,35.7674,34.4026",
+      "MedianMs": 35.77,
+      "MeanMs": 35.66
+    },
+    {
+      "Fragment": "35-ollama.ps1",
+      "Raw": "28.8085,29.132,28.5878,28.1125,27.7275",
+      "MedianMs": 28.59,
       "MeanMs": 28.47
     },
     {
-      "MedianMs": 52.07,
-      "Fragment": "55-modules.ps1",
-      "Raw": "51.0628,52.074,51.7261",
-      "MeanMs": 51.62
-    },
-    {
-      "MedianMs": 30.48,
-      "Fragment": "56-database.ps1",
-      "Raw": "28.548,27.2458,30.4772",
-      "MeanMs": 28.76
-    },
-    {
-      "MedianMs": 29.41,
-      "Fragment": "57-testing.ps1",
-      "Raw": "28.3304,29.4117,28.6158",
+      "Fragment": "36-ngrok.ps1",
+      "Raw": "27.0562,27.4991,31.6284,30.1818,27.6045",
+      "MedianMs": 27.6,
       "MeanMs": 28.79
     },
     {
-      "MedianMs": 31.79,
-      "Fragment": "58-build-tools.ps1",
-      "Raw": "28.3325,28.6325,31.7901",
-      "MeanMs": 29.59
+      "Fragment": "37-deno.ps1",
+      "Raw": "27.9312,28.7692,28.6959,26.9573,27.731",
+      "MedianMs": 27.93,
+      "MeanMs": 28.02
     },
     {
-      "MedianMs": 35.46,
-      "Fragment": "59-diagnostics.ps1",
-      "Raw": "32.282,35.4601,34.1074",
-      "MeanMs": 33.95
+      "Fragment": "38-firebase.ps1",
+      "Raw": "28.1898,27.9258,29.2075,36.0165,30.167",
+      "MedianMs": 29.21,
+      "MeanMs": 30.3
     },
     {
-      "MedianMs": 29.27,
-      "Fragment": "60-local-overrides.ps1",
-      "Raw": "29.2685,28.405,28.1003",
-      "MeanMs": 28.59
+      "Fragment": "39-rustup.ps1",
+      "Raw": "29.5155,30.2627,28.5454,29.0143,27.9204",
+      "MedianMs": 29.01,
+      "MeanMs": 29.05
     },
     {
-      "MedianMs": 22.44,
-      "Fragment": "61-eza.ps1",
-      "Raw": "22.4407,21.6318,21.1064",
-      "MeanMs": 21.73
+      "Fragment": "40-tailscale.ps1",
+      "Raw": "31.5493,27.5009,29.6608,28.224,27.8926",
+      "MedianMs": 28.22,
+      "MeanMs": 28.97
     },
     {
-      "MedianMs": 38.76,
-      "Fragment": "62-navi.ps1",
-      "Raw": "38.7574,37.7911,37.2642",
-      "MeanMs": 37.94
+      "Fragment": "41-yarn.ps1",
+      "Raw": "28.2488,27.2576,30.1478,34.5418,28.2166",
+      "MedianMs": 28.25,
+      "MeanMs": 29.68
     },
     {
+      "Fragment": "42-php.ps1",
+      "Raw": "31.7265,30.7191,28.7104,28.6386,26.9018",
+      "MedianMs": 28.71,
+      "MeanMs": 29.34
+    },
+    {
+      "Fragment": "43-laravel.ps1",
+      "Raw": "28.2228,29.9537,28.8408,30.8207,29.8299",
+      "MedianMs": 29.83,
+      "MeanMs": 29.53
+    },
+    {
+      "Fragment": "44-git.ps1",
+      "Raw": "54.3952,63.4947,53.1781,53.4913,66.9826",
+      "MedianMs": 54.4,
+      "MeanMs": 58.31
+    },
+    {
+      "Fragment": "45-nextjs.ps1",
+      "Raw": "37.6155,27.5075,28.7375,27.8627,29.5935",
       "MedianMs": 28.74,
-      "Fragment": "63-gum.ps1",
-      "Raw": "28.5496,28.7394,28.4773",
-      "MeanMs": 28.59
+      "MeanMs": 30.26
     },
     {
-      "MedianMs": 41.27,
+      "Fragment": "46-vite.ps1",
+      "Raw": "27.8135,30.4482,30.6973,30.3428,29.5456",
+      "MedianMs": 30.34,
+      "MeanMs": 29.77
+    },
+    {
+      "Fragment": "47-angular.ps1",
+      "Raw": "29.0999,28.3527,28.2339,30.0861,28.4235",
+      "MedianMs": 28.42,
+      "MeanMs": 28.84
+    },
+    {
+      "Fragment": "48-vue.ps1",
+      "Raw": "33.9618,27.874,27.9522,27.8879,28.0062",
+      "MedianMs": 27.95,
+      "MeanMs": 29.14
+    },
+    {
+      "Fragment": "49-nuxt.ps1",
+      "Raw": "29.3821,27.3484,28.019,27.7447,27.8021",
+      "MedianMs": 27.8,
+      "MeanMs": 28.06
+    },
+    {
+      "Fragment": "50-azure.ps1",
+      "Raw": "27.9051,27.878,33.7783,30.8912,29.5839",
+      "MedianMs": 29.58,
+      "MeanMs": 30.01
+    },
+    {
+      "Fragment": "51-gcloud.ps1",
+      "Raw": "28.9693,27.974,33.0039,28.1699,30.8886",
+      "MedianMs": 28.97,
+      "MeanMs": 29.8
+    },
+    {
+      "Fragment": "52-helm.ps1",
+      "Raw": "29.7568,28.7521,28.5169,30.2489,28.3592",
+      "MedianMs": 28.75,
+      "MeanMs": 29.13
+    },
+    {
+      "Fragment": "53-go.ps1",
+      "Raw": "28.5702,27.6107,28.4735,27.5008,26.8123",
+      "MedianMs": 27.61,
+      "MeanMs": 27.79
+    },
+    {
+      "Fragment": "54-modern-cli.ps1",
+      "Raw": "28.7066,30.3883,30.0621,29.7899,30.5567",
+      "MedianMs": 30.06,
+      "MeanMs": 29.9
+    },
+    {
+      "Fragment": "55-modules.ps1",
+      "Raw": "55.0378,51.8495,51.0651,52.1233,54.6756",
+      "MedianMs": 52.12,
+      "MeanMs": 52.95
+    },
+    {
+      "Fragment": "56-database.ps1",
+      "Raw": "31.3873,28.759,28.7001,28.2312,33.3551",
+      "MedianMs": 28.76,
+      "MeanMs": 30.09
+    },
+    {
+      "Fragment": "57-testing.ps1",
+      "Raw": "29.5112,27.5056,28.9169,27.8724,28.2753",
+      "MedianMs": 28.28,
+      "MeanMs": 28.42
+    },
+    {
+      "Fragment": "58-build-tools.ps1",
+      "Raw": "29.0637,29.547,30.2132,29.9588,28.0567",
+      "MedianMs": 29.55,
+      "MeanMs": 29.37
+    },
+    {
+      "Fragment": "59-diagnostics.ps1",
+      "Raw": "34.797,34.0133,33.2828,34.2563,40.5095",
+      "MedianMs": 34.26,
+      "MeanMs": 35.37
+    },
+    {
+      "Fragment": "60-local-overrides.ps1",
+      "Raw": "31.414,27.2212,28.6777,30.4024,26.0351",
+      "MedianMs": 28.68,
+      "MeanMs": 28.75
+    },
+    {
+      "Fragment": "61-eza.ps1",
+      "Raw": "57.8355,69.8229,57.1837,57.1257,89.7513",
+      "MedianMs": 57.84,
+      "MeanMs": 66.34
+    },
+    {
+      "Fragment": "62-navi.ps1",
+      "Raw": "86.9648,82.7766,105.6418,63.5903,61.9886",
+      "MedianMs": 82.78,
+      "MeanMs": 80.19
+    },
+    {
+      "Fragment": "63-gum.ps1",
+      "Raw": "26.9728,33.1739,30.9656,31.2211,31.4425",
+      "MedianMs": 31.22,
+      "MeanMs": 30.76
+    },
+    {
       "Fragment": "64-bottom.ps1",
-      "Raw": "40.8912,40.4654,41.2719",
+      "Raw": "94.3793,95.1263,105.8067,79.0951,81.7696",
+      "MedianMs": 94.38,
+      "MeanMs": 91.24
+    },
+    {
+      "Fragment": "65-procs.ps1",
+      "Raw": "82.2037,86.5565,90.4795,91.815,79.1633",
+      "MedianMs": 86.56,
+      "MeanMs": 86.04
+    },
+    {
+      "Fragment": "66-dust.ps1",
+      "Raw": "69.8383,81.8218,87.2435,69.1312,78.9106",
+      "MedianMs": 78.91,
+      "MeanMs": 77.39
+    },
+    {
+      "Fragment": "67-uv.ps1",
+      "Raw": "82.3075,57.5999,67.4328,80.6927,93.0789",
+      "MedianMs": 80.69,
+      "MeanMs": 76.22
+    },
+    {
+      "Fragment": "68-pixi.ps1",
+      "Raw": "60.2742,80.82,71.9452,85.718,81.5358",
+      "MedianMs": 80.82,
+      "MeanMs": 76.06
+    },
+    {
+      "Fragment": "69-pnpm.ps1",
+      "Raw": "73.8413,83.133,74.4344,76.0578,60.7716",
+      "MedianMs": 74.43,
+      "MeanMs": 73.65
+    },
+    {
+      "Fragment": "70-profile-updates.ps1",
+      "Raw": "42.3088,41.5067,40.1756,42.945,45.246",
+      "MedianMs": 42.31,
+      "MeanMs": 42.44
+    },
+    {
+      "Fragment": "71-network-utils.ps1",
+      "Raw": "33.2415,39.8066,36.0601,43.4982,35.0782",
+      "MedianMs": 36.06,
+      "MeanMs": 37.54
+    },
+    {
+      "Fragment": "72-error-handling.ps1",
+      "Raw": "44.3872,46.7005,47.7298,37.711,37.6914",
+      "MedianMs": 44.39,
+      "MeanMs": 42.84
+    },
+    {
+      "Fragment": "73-performance-insights.ps1",
+      "Raw": "56.2885,56.3643,57.5897,59.4959,59.5966",
+      "MedianMs": 57.59,
+      "MeanMs": 57.87
+    },
+    {
+      "Fragment": "74-enhanced-history.ps1",
+      "Raw": "35.0152,34.8994,36.3636,34.0685,34.7154",
+      "MedianMs": 34.9,
+      "MeanMs": 35.01
+    },
+    {
+      "Fragment": "75-system-monitor.ps1",
+      "Raw": "42.1952,37.2475,45.4797,37.2332,42.2651",
+      "MedianMs": 42.2,
       "MeanMs": 40.88
     },
     {
-      "MedianMs": 39.47,
-      "Fragment": "65-procs.ps1",
-      "Raw": "37.4569,37.2892,39.4686",
-      "MeanMs": 38.07
-    },
-    {
-      "MedianMs": 45.22,
-      "Fragment": "66-dust.ps1",
-      "Raw": "41.7106,45.2162,41.8558",
-      "MeanMs": 42.93
-    },
-    {
-      "MedianMs": 42.92,
-      "Fragment": "67-uv.ps1",
-      "Raw": "41.7338,42.917,41.0033",
-      "MeanMs": 41.88
-    },
-    {
-      "MedianMs": 47.6,
-      "Fragment": "68-pixi.ps1",
-      "Raw": "41.3396,41.6929,47.6034",
-      "MeanMs": 43.55
-    },
-    {
-      "MedianMs": 44.96,
-      "Fragment": "69-pnpm.ps1",
-      "Raw": "44.9624,36.2941,35.8142",
-      "MeanMs": 39.02
-    },
-    {
-      "MedianMs": 48.87,
-      "Fragment": "70-profile-updates.ps1",
-      "Raw": "48.871,45.6725,44.0888",
-      "MeanMs": 46.21
-    },
-    {
-      "MedianMs": 37.73,
-      "Fragment": "71-network-utils.ps1",
-      "Raw": "37.7322,33.0519,34.6156",
-      "MeanMs": 35.13
-    },
-    {
-      "MedianMs": 40.75,
-      "Fragment": "72-error-handling.ps1",
-      "Raw": "37.4304,38.2768,40.7522",
-      "MeanMs": 38.82
-    },
-    {
-      "MedianMs": 36.92,
-      "Fragment": "73-performance-insights.ps1",
-      "Raw": "36.9229,34.579,35.2235",
-      "MeanMs": 35.58
-    },
-    {
-      "MedianMs": 36.12,
-      "Fragment": "74-enhanced-history.ps1",
-      "Raw": "34.9569,36.1224,34.9828",
-      "MeanMs": 35.35
-    },
-    {
-      "MedianMs": 39.5,
-      "Fragment": "75-system-monitor.ps1",
-      "Raw": "39.5035,37.3113,36.2168",
-      "MeanMs": 37.68
-    },
-    {
-      "MedianMs": 50.21,
       "Fragment": "76-smart-navigation.ps1",
-      "Raw": "41.6952,50.2096,43.4645",
-      "MeanMs": 45.12
+      "Raw": "54.287,50.8692,52.9305,54.3023,48.433",
+      "MedianMs": 52.93,
+      "MeanMs": 52.16
     }
   ],
+  "Timestamp": "2025-11-05T15:32:26.4754403-07:00",
   "FullStartupRaw": [
-    1691.564,
-    1734.0589,
-    1725.8457
+    1770.2772,
+    1939.1199,
+    1753.9369,
+    1742.2396,
+    1840.481
   ]
 }

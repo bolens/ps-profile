@@ -10,6 +10,28 @@ All validation scripts automatically install required modules (PSScriptAnalyzer,
 
 Run these checks before opening a PR:
 
+### Using Tasks (Recommended)
+
+**VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task  
+**Taskfile**: Run `task <task-name>`
+
+```powershell
+# Full quality check (recommended before PR)
+task quality-check
+
+# Or individual tasks
+task validate          # Full validation (format + security + lint + spellcheck + help + idempotency)
+task format            # Format code
+task lint              # Lint code
+task test              # Run tests
+task test-coverage     # Run tests with coverage
+task spellcheck        # Spellcheck
+task markdownlint      # Markdownlint
+task pre-commit-checks # Run pre-commit checks manually
+```
+
+### Direct Script Execution
+
 ```powershell
 # Full validation (format + security + lint + idempotency)
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1
@@ -84,7 +106,9 @@ Use numeric prefixes to control load order:
 ## Documentation
 
 - Function/alias documentation is auto-generated from comment-based help
-- Run `pwsh -NoProfile -File scripts/utils/generate-docs.ps1` to regenerate
+- Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/generate-docs.ps1` to regenerate
+- Use `task add-missing-help` to add missing `.SYNOPSIS` and `.DESCRIPTION` sections
+- Fix markdown formatting with `task fix-markdown-blank-lines` and `task fix-markdown-readme`
 - See [PROFILE_README.md](PROFILE_README.md) for detailed technical information
 
 ## Questions

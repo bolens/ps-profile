@@ -236,6 +236,119 @@
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
       "problemMatcher": []
+    },
+    {
+      "label": "Update Performance Baseline",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\benchmark-startup.ps1",
+        "-UpdateBaseline"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Add Missing Help",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\add-missing-help.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Fix Markdown Blank Lines",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\fix-markdown-blank-lines.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Fix Markdown README Formatting",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\fix-markdown-readme-formatting.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Full Quality Check",
+      "dependsOn": [
+        "Format Code",
+        "Run Security Scan",
+        "Lint profile.d",
+        "Run Spellcheck",
+        "Run Markdownlint",
+        "Check comment-based help",
+        "Run Pester Tests"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Pre-commit Checks",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\git\\pre-commit.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check Idempotency",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\checks\\check-idempotency.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Fix All Markdown",
+      "dependsOn": [
+        "Fix Markdown Blank Lines",
+        "Fix Markdown README Formatting"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Format and Lint",
+      "dependsOn": ["Format Code", "Lint profile.d"],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate All Documentation",
+      "dependsOn": ["Generate API Documentation", "Generate Fragment READMEs"],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
     }
   ]
 }

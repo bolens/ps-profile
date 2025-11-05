@@ -27,10 +27,16 @@ jobs:
         run: |
           $paths = @("./profile.d", "./scripts") | Where-Object { Test-Path $_ }
           if (-not $paths) { Write-Output "No paths found to analyze"; exit 0 }
+          $settingsFile = "./PSScriptAnalyzerSettings.psd1"
+          $settingsParam = @{}
+          if (Test-Path $settingsFile) {
+              Write-Output "Using settings file: $settingsFile"
+              $settingsParam['Settings'] = $settingsFile
+          }
           $results = @()
           foreach ($p in $paths) {
               Write-Output "Analyzing $p"
-              $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error','Warning','Information') -Verbose
+              $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error','Warning','Information') -Verbose @settingsParam
               $results += $r
           }
           $json = $results | Select-Object @{n='FilePath';e={$_.ScriptName}},RuleName,Severity,Message,Line,Column | ConvertTo-Json -Depth 5

@@ -4,7 +4,39 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Development Commands
 
-### Validation & Testing
+### Using Tasks (Recommended)
+
+**VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
+
+**Taskfile**: Run `task <task-name>` (e.g., `task lint`, `task validate`)
+
+**Common Tasks**:
+
+- `quality-check` - Full quality check (format + security + lint + spellcheck + markdownlint + help + tests)
+- `validate` - Validation (format + security + lint + spellcheck + help + idempotency)
+- `format-and-lint` - Format and lint code (common pre-commit workflow)
+- `fix-all-markdown` - Fix all markdown formatting issues
+- `all-docs` - Generate all documentation (API docs + fragment READMEs)
+- `test` - Run Pester tests
+- `test-coverage` - Run tests with coverage
+- `benchmark` - Performance benchmark
+- `update-baseline` - Update performance baseline
+- `check-idempotency` - Check fragment idempotency
+- `format` - Format code
+- `lint` - Lint code
+- `spellcheck` - Run spellcheck
+- `markdownlint` - Run markdownlint
+- `add-missing-help` - Add missing comment-based help
+- `fix-markdown-blank-lines` - Fix markdown blank lines
+- `fix-markdown-readme` - Fix markdown README formatting
+- `pre-commit-checks` - Run pre-commit checks manually
+- `check-module-updates` - Check for module updates
+- `install-module-updates` - Install module updates
+- `generate-docs` - Generate API documentation
+- `generate-changelog` - Generate changelog
+- `find-duplicates` - Find duplicate functions
+
+### Direct Script Execution
 
 ```powershell
 # Full validation (format + security + lint + idempotency)
@@ -42,6 +74,10 @@ chmod +x .git/hooks/*
 # Measure startup performance (30 iterations recommended)
 pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
 # Outputs: scripts/data/startup-benchmark.csv
+
+# Update performance baseline after optimizations
+pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline
+# Or use task: task update-baseline
 ```
 
 ### Documentation Generation

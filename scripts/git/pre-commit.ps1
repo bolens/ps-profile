@@ -1,9 +1,6 @@
 # Cross-platform helper invoked by .git/hooks/pre-commit
 # It runs formatting, adds formatted files, then runs validation.
 
-# Get the repository root
-$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-
 # Run formatting first
 $formatScript = Join-Path $PSScriptRoot '..\utils\run-format.ps1'
 if (Test-Path $formatScript) {

@@ -20,7 +20,7 @@ $markdownlint = Get-Command markdownlint -ErrorAction SilentlyContinue
 $npx = Get-Command npx -ErrorAction SilentlyContinue
 
 if (-not $markdownlint -and -not $npx) {
-    Write-Host "markdownlint-cli not found. Installing..." -ForegroundColor Yellow
+    Write-Information "markdownlint-cli not found. Installing..." -InformationAction Continue
     npm install -g markdownlint-cli@0.35.0
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Failed to install markdownlint-cli"
@@ -29,7 +29,7 @@ if (-not $markdownlint -and -not $npx) {
     $markdownlint = Get-Command markdownlint -ErrorAction SilentlyContinue
 }
 
-Write-Host "Running markdownlint..." -ForegroundColor Cyan
+Write-Information "Running markdownlint..." -InformationAction Continue
 if ($markdownlint) {
     markdownlint '**/*.md' --ignore node_modules --ignore '**/Modules/**'
 }
@@ -42,5 +42,5 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host "markdownlint passed!" -ForegroundColor Green
+Write-Information "markdownlint passed!" -InformationAction Continue
 

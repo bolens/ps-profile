@@ -85,6 +85,14 @@ Measure startup and per-fragment timings:
 
 ```powershell
 pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
+# Or use task: task benchmark
+```
+
+Update performance baseline after optimizations:
+
+```powershell
+pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline
+# Or use task: task update-baseline
 ```
 
 Outputs `scripts/data/startup-benchmark.csv` with detailed metrics.
