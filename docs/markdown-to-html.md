@@ -8,18 +8,11 @@ Converts Markdown file to HTML.
 
 Uses pandoc to convert a Markdown file to HTML format.
 
-## Signature
+## Alias Information
 
-```powershell
-markdown-to-html
-```
+**Alias for:** `ConvertTo-HtmlFromMarkdown`
 
-## Parameters
-
-### -InputPath
-
-The path to the Markdown file.
-
+This is an alias that points to the `ConvertTo-HtmlFromMarkdown` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

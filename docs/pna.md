@@ -8,15 +8,11 @@ Adds packages using PNPM.
 
 Adds packages as dependencies to the project.
 
-## Signature
+## Alias Information
 
-```powershell
-pna
-```
+**Alias for:** `Add-PnpmPackage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Add-PnpmPackage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

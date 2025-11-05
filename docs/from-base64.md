@@ -8,15 +8,11 @@ Decodes base64 input to text.
 
 Converts base64 encoded string back to readable text.
 
-## Signature
+## Alias Information
 
-```powershell
-from-base64
-```
+**Alias for:** `ConvertFrom-Base64`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertFrom-Base64` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,18 +8,11 @@ Converts audio file formats.
 
 Uses ffmpeg to convert an audio file from one format to another.
 
-## Signature
+## Alias Information
 
-```powershell
-audio-convert
-```
+**Alias for:** `Convert-Audio`
 
-## Parameters
-
-### -InputPath
-
-The path to the input audio file.
-
+This is an alias that points to the `Convert-Audio` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

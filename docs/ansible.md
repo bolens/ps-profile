@@ -8,15 +8,11 @@ Runs Ansible commands via WSL with UTF-8 locale.
 
 Executes ansible commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 
-## Signature
+## Alias Information
 
-```powershell
-ansible
-```
+**Alias for:** `Invoke-Ansible`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-Ansible` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

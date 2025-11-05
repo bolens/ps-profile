@@ -8,15 +8,11 @@ Tests network connectivity.
 
 Tests connectivity to specified hosts using ping.
 
-## Signature
+## Alias Information
 
-```powershell
-ptest
-```
+**Alias for:** `Test-NetworkConnection`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Test-NetworkConnection` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

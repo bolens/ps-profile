@@ -6,18 +6,13 @@ Prunes unused container system resources (Docker-first).
 
 ## Description
 
-Runs 'system prune -f' using the available container engine, preferring Docker over Podman.
-        Removes unused containers, networks, images, and build cache.
+Runs 'system prune -f' using the available container engine, preferring Docker over Podman. Removes unused containers, networks, images, and build cache.
 
-## Signature
+## Alias Information
 
-```powershell
-dprune
-```
+**Alias for:** `Clear-ContainerSystem`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Clear-ContainerSystem` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -16,7 +16,10 @@ Show-RecentCommands
 
 ## Parameters
 
-No parameters.
+### -Count
+
+Number of recent commands to show (default: 10).
+
 
 ## Examples
 

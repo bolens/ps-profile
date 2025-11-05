@@ -8,15 +8,11 @@ Shows current date and time.
 
 Displays the current date and time in a standard format.
 
-## Signature
+## Alias Information
 
-```powershell
-now
-```
+**Alias for:** `Get-DateTime`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-DateTime` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

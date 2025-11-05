@@ -11,8 +11,8 @@ See the fragment source: `36-ngrok.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `ngrok` — Ngrok execute - run ngrok with arguments
-- `ngrok-http` — Ngrok HTTP tunnel - expose local HTTP server
+- `ngrok` — Register Ngrok helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `ngrok-http` — Register Ngrok helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `ngrok-tcp` — Ngrok TCP tunnel - expose local TCP service
 
 Dependencies

@@ -8,15 +8,11 @@ Lists directory contents in long format with git status using eza.
 
 Shows detailed listing with git status indicators.
 
-## Signature
+## Alias Information
 
-```powershell
-llg
-```
+**Alias for:** `Get-ChildItemEzaLongGit`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaLongGit` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -2,21 +2,17 @@
 
 ## Synopsis
 
-Shows memory information.
+Shows detailed memory usage information.
 
 ## Description
 
-Displays total physical memory capacity in GB.
 
-## Signature
 
-```powershell
-meminfo
-```
+## Alias Information
 
-## Parameters
+**Alias for:** `Show-MemoryInfo`
 
-No parameters.
+This is an alias that points to the `Show-MemoryInfo` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 
@@ -24,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: profile.d\08-system-info.ps1
+Defined in: profile.d\75-system-monitor.ps1

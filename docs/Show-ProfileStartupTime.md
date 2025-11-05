@@ -6,8 +6,7 @@ Shows profile startup time information.
 
 ## Description
 
-Displays how long the profile took to load and which fragments were slowest.
-            Only available when PS_PROFILE_DEBUG environment variable is set.
+Displays how long the profile took to load and which fragments were slowest. Only available when PS_PROFILE_DEBUG environment variable is set.
 
 ## Signature
 

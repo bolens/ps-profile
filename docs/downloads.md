@@ -8,15 +8,11 @@ Changes to the Downloads directory.
 
 Navigates to the user's Downloads folder.
 
-## Signature
+## Alias Information
 
-```powershell
-downloads
-```
+**Alias for:** `Set-LocationDownloads`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Set-LocationDownloads` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

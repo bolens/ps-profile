@@ -6,18 +6,13 @@ Pastes content from the clipboard.
 
 ## Description
 
-Retrieves content from the clipboard. Uses Get-Clipboard if available,
-        otherwise falls back to the 'paste' command.
+Retrieves content from the clipboard. Uses Get-Clipboard if available, otherwise falls back to the 'paste' command.
 
-## Signature
+## Alias Information
 
-```powershell
-pb
-```
+**Alias for:** `Get-FromClipboard`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-FromClipboard` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

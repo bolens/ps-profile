@@ -8,26 +8,11 @@ Resizes an image.
 
 Uses ImageMagick to resize an image to specified dimensions.
 
-## Signature
+## Alias Information
 
-```powershell
-image-resize
-```
+**Alias for:** `Resize-Image`
 
-## Parameters
-
-### -InputPath
-
-The path to the input image file.
-
-### -OutputPath
-
-The path for the output image file.
-
-### -Width
-
-The desired width.
-
+This is an alias that points to the `Resize-Image` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

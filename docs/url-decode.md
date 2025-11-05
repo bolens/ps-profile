@@ -8,15 +8,11 @@ URL-decodes a string.
 
 Decodes a URL-encoded string.
 
-## Signature
+## Alias Information
 
-```powershell
-url-decode
-```
+**Alias for:** `ConvertFrom-UrlEncoded`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertFrom-UrlEncoded` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

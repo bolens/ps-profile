@@ -8,15 +8,11 @@ Runs Python commands with UV.
 
 Executes Python commands in temporary virtual environments.
 
-## Signature
+## Alias Information
 
-```powershell
-uvr
-```
+**Alias for:** `Invoke-UVRun`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-UVRun` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

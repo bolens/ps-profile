@@ -8,15 +8,11 @@ Runs Ansible inventory commands via WSL with UTF-8 locale.
 
 Executes ansible-inventory commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 
-## Signature
+## Alias Information
 
-```powershell
-ansible-inventory
-```
+**Alias for:** `Get-AnsibleInventory`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-AnsibleInventory` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

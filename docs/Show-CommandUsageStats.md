@@ -6,9 +6,7 @@ Shows command usage statistics for optimization insights.
 
 ## Description
 
-Displays which profile functions are used most frequently to help
-            identify optimization opportunities. Only available when PS_PROFILE_DEBUG
-            environment variable is set.
+Displays which profile functions are used most frequently to help identify optimization opportunities. Only available when PS_PROFILE_DEBUG environment variable is set.
 
 ## Signature
 

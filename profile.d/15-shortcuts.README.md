@@ -11,8 +11,15 @@ See the fragment source: `15-shortcuts.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `vsc` — >
-- `project-root` — >
+- `Open-VSCode` — Opens current directory in VS Code.
+- `Open-Editor` — Opens file in editor quickly.
+- `Get-ProjectRoot` — Changes to project root directory.
+
+Aliases
+-------
+- `vsc` — Opens current directory in VS Code. (alias for `Open-VSCode`)
+- `e` — Opens file in editor quickly. (alias for `Open-Editor`)
+- `project-root` — Changes to project root directory. (alias for `Get-ProjectRoot`)
 
 Dependencies
 ------------

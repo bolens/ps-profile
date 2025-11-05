@@ -6,8 +6,7 @@ Tracks directory navigation for smart jumping.
 
 ## Description
 
-Automatically tracks directory changes and maintains statistics
-        for smart directory navigation features.
+Automatically tracks directory changes and maintains statistics for smart directory navigation features.
 
 ## Signature
 

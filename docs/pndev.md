@@ -2,21 +2,17 @@
 
 ## Synopsis
 
-Runs development server using PNPM.
+Installs development packages using pnpm.
 
 ## Description
 
-Runs the dev script defined in package.json.
+Adds packages as dev dependencies to the project using pnpm.
 
-## Signature
+## Alias Information
 
-```powershell
-pndev
-```
+**Alias for:** `Invoke-PnpmDevInstall`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-PnpmDevInstall` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 
@@ -24,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: profile.d\09-package-managers.ps1
+Defined in: profile.d\69-pnpm.ps1

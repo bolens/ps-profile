@@ -11,8 +11,8 @@ See the fragment source: `38-firebase.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `fb` — Firebase alias - run firebase with arguments
-- `fb-deploy` — Firebase deploy - deploy to Firebase hosting
+- `fb` — Register Firebase helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `fb-deploy` — Register Firebase helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `fb-serve` — Firebase serve - start local development server
 
 Dependencies

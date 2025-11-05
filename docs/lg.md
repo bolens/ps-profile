@@ -8,15 +8,11 @@ Lists directory contents with git status using eza.
 
 Shows files with git status indicators.
 
-## Signature
+## Alias Information
 
-```powershell
-lg
-```
+**Alias for:** `Get-ChildItemEzaGit`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaGit` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

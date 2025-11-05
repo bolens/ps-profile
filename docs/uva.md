@@ -8,15 +8,11 @@ Adds dependencies to UV project.
 
 Adds packages as dependencies to the current UV project.
 
-## Signature
+## Alias Information
 
-```powershell
-uva
-```
+**Alias for:** `Add-UVDependency`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Add-UVDependency` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

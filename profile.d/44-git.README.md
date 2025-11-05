@@ -11,9 +11,15 @@ See the fragment source: `44-git.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Git-CurrentBranch` — Git current branch - get current branch name
-- `Git-StatusShort` — Git status short - show concise status
-- `Prompt-GitSegment` — Git prompt segment - show current branch in prompt
+- `Get-GitCurrentBranch` — Register Git helpers as lightweight stubs. They will call `git` at runtime
+- `Get-GitStatusShort` — Git status short - show concise status
+- `Format-PromptGitSegment` — Git prompt segment - show current branch in prompt
+
+Aliases
+-------
+- `Git-CurrentBranch` — Register Git helpers as lightweight stubs. They will call `git` at runtime (alias for `Get-GitCurrentBranch`)
+- `Git-StatusShort` — Git status short - show concise status (alias for `Get-GitStatusShort`)
+- `Prompt-GitSegment` — Git prompt segment - show current branch in prompt (alias for `Format-PromptGitSegment`)
 
 Dependencies
 ------------

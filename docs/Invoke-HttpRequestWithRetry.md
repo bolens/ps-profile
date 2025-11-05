@@ -6,8 +6,7 @@ Makes HTTP requests with retry logic and timeout handling.
 
 ## Description
 
-Enhanced HTTP client with automatic retry for transient network failures
-    and configurable timeouts.
+Enhanced HTTP client with automatic retry for transient network failures and configurable timeouts.
 
 ## Signature
 
@@ -28,6 +27,10 @@ HTTP method. Default is GET.
 ### -TimeoutSeconds
 
 Request timeout in seconds. Default is 30.
+
+### -MaxRetries
+
+Maximum retry attempts. Default is 3.
 
 
 ## Examples

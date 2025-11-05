@@ -8,15 +8,11 @@ Lists directory contents in long format using eza.
 
 Shows detailed directory listing with permissions, sizes, and dates.
 
-## Signature
+## Alias Information
 
-```powershell
-ll
-```
+**Alias for:** `Get-ChildItemEzaLong`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaLong` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -16,7 +16,10 @@ Get-DirectoryBookmark
 
 ## Parameters
 
-No parameters.
+### -Name
+
+Name of the bookmark to jump to.
+
 
 ## Examples
 

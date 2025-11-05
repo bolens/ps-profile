@@ -8,15 +8,11 @@ Builds the project using PNPM.
 
 Runs the build script defined in package.json.
 
-## Signature
+## Alias Information
 
-```powershell
-pnb
-```
+**Alias for:** `Build-PnpmProject`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Build-PnpmProject` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

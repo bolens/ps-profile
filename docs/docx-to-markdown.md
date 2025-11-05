@@ -8,18 +8,11 @@ Converts DOCX file to Markdown.
 
 Uses pandoc to convert a DOCX file to Markdown format.
 
-## Signature
+## Alias Information
 
-```powershell
-docx-to-markdown
-```
+**Alias for:** `ConvertFrom-DocxToMarkdown`
 
-## Parameters
-
-### -InputPath
-
-The path to the DOCX file.
-
+This is an alias that points to the `ConvertFrom-DocxToMarkdown` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

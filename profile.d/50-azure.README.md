@@ -11,9 +11,9 @@ See the fragment source: `50-azure.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `az` — Azure execute - run az with arguments
-- `azd` — Azure Developer CLI - Azure development tools
-- `az-login` — Azure login - authenticate with Azure CLI
+- `az` — Register Azure CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `azd` — Register Azure CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `az-login` — Register Azure CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `azd-up` — Azure Developer CLI up - provision and deploy
 
 Dependencies

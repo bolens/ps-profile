@@ -1,0 +1,99 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  lint:
+    desc: Lint profile.d
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/run-lint.ps1
+
+  validate:
+    desc: Validate profile (lint + idempotency)
+    cmds:
+      - pwsh -NoProfile -File scripts/checks/validate-profile.ps1
+
+  check-comment-help:
+    desc: Check comment-based help
+    cmds:
+      - pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
+
+  test:
+    desc: Run Pester Tests
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/run_pester.ps1
+
+  test-coverage:
+    desc: Run Pester Tests with Coverage
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/run_pester.ps1 -Coverage
+
+  benchmark:
+    desc: Run Performance Benchmark
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1
+
+  security-scan:
+    desc: Run Security Scan
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/run-security-scan.ps1
+
+  check-module-updates:
+    desc: Check Module Updates
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/check-module-updates.ps1
+
+  install-module-updates:
+    desc: Install Module Updates
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/check-module-updates.ps1 -Update
+
+  generate-changelog:
+    desc: Generate Changelog
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/generate-changelog.ps1
+
+  create-release:
+    desc: Create Release (Dry Run)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/create-release.ps1 -DryRun
+
+  generate-docs:
+    desc: Generate API Documentation
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/generate-docs.ps1
+
+  spellcheck:
+    desc: Run Spellcheck
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/spellcheck.ps1
+
+  install-githooks:
+    desc: Install Git hooks
+    cmds:
+      - pwsh -NoProfile -File scripts/git/install-githooks.ps1
+
+  format:
+    desc: Format Code
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/run-format.ps1
+
+  find-duplicates:
+    desc: Find Duplicate Functions
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/find-duplicate-functions.ps1
+
+  generate-fragment-readmes:
+    desc: Generate Fragment READMEs
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/generate-fragment-readmes.ps1
+
+  check-commit-messages:
+    desc: Check Commit Messages
+    cmds:
+      - pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1
+
+  default:
+    desc: Run default task
+    cmds:
+      - task --list-all

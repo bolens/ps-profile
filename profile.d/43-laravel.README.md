@@ -11,9 +11,9 @@ See the fragment source: `43-laravel.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `artisan` — Laravel artisan command - run artisan commands
-- `art` — Laravel artisan alias - run artisan commands
-- `laravel-new` — Laravel new project - create new Laravel application
+- `artisan` — Register Laravel helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `art` — Register Laravel helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `laravel-new` — Register Laravel helpers lazily. Avoid expensive Get-Command probes at dot-source.
 
 Dependencies
 ------------

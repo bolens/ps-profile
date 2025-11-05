@@ -8,15 +8,11 @@ Gets current Unix timestamp.
 
 Returns the current date and time as a Unix timestamp (seconds since epoch).
 
-## Signature
+## Alias Information
 
-```powershell
-epoch
-```
+**Alias for:** `Get-Epoch`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-Epoch` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

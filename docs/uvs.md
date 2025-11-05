@@ -8,15 +8,11 @@ Syncs UV project dependencies.
 
 Installs and synchronizes all project dependencies.
 
-## Signature
+## Alias Information
 
-```powershell
-uvs
-```
+**Alias for:** `Sync-UVDependencies`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Sync-UVDependencies` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

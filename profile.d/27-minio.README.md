@@ -11,7 +11,7 @@ See the fragment source: `27-minio.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `mc-ls` — MinIO list - list files in MinIO
+- `mc-ls` — 27-minio.ps1
 - `mc-cp` — MinIO copy - copy files to/from MinIO
 
 Dependencies

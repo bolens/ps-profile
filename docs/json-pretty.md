@@ -8,15 +8,11 @@ Pretty-prints JSON data.
 
 Formats JSON data with proper indentation and structure.
 
-## Signature
+## Alias Information
 
-```powershell
-json-pretty
-```
+**Alias for:** `Format-Json`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Format-Json` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -6,8 +6,7 @@ Tests for command availability with caching.
 
 ## Description
 
-Lightweight cached command testing used by profile fragments to avoid
-        repeated Get-Command calls. Results are cached in script scope for performance.
+Lightweight cached command testing used by profile fragments to avoid repeated Get-Command calls. Results are cached in script scope for performance.
 
 ## Signature
 
@@ -17,7 +16,10 @@ Test-CachedCommand
 
 ## Parameters
 
-No parameters.
+### -Name
+
+The name of the command to test.
+
 
 ## Examples
 

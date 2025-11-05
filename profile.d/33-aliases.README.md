@@ -11,10 +11,15 @@ See the fragment source: `33-aliases.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Enable-Aliases` — >
-- `ll` — List directory contents - enhanced ls
-- `la` — List all directory contents - enhanced ls -a
+- `Enable-Aliases` — Enables user-defined aliases and helper functions for enhanced shell experience.
+- `Get-ChildItemEnhanced` — List directory contents - enhanced ls
+- `Get-ChildItemEnhancedAll` — List all directory contents - enhanced ls -a
 - `Show-Path` — Show PATH entries as an array
+
+Aliases
+-------
+- `ll` — List directory contents - enhanced ls (alias for `Get-ChildItemEnhanced`)
+- `la` — List all directory contents - enhanced ls -a (alias for `Get-ChildItemEnhancedAll`)
 
 Enable helpers
 --------------

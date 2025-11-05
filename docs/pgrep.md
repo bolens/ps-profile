@@ -8,15 +8,11 @@ Searches for patterns in files.
 
 Searches for text patterns in files using Select-String.
 
-## Signature
+## Alias Information
 
-```powershell
-pgrep
-```
+**Alias for:** `Find-String`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Find-String` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

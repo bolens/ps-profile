@@ -6,8 +6,7 @@ Shows performance insights for command execution.
 
 ## Description
 
-Analyzes command execution times and provides optimization suggestions.
-        Shows slowest commands, trends, and potential improvements.
+Analyzes command execution times and provides optimization suggestions. Shows slowest commands, trends, and potential improvements.
 
 ## Signature
 

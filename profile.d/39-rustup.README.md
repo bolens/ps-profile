@@ -11,8 +11,8 @@ See the fragment source: `39-rustup.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `rustup` — Rustup execute - run rustup with arguments
-- `rustup-update` — Rustup update - update Rust toolchain
+- `rustup` — Register Rustup helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `rustup-update` — Register Rustup helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `rustup-install` — Rustup install - install Rust toolchains
 
 Dependencies

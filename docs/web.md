@@ -8,15 +8,11 @@ Makes HTTP web requests.
 
 Downloads content from web URLs or sends HTTP requests.
 
-## Signature
+## Alias Information
 
-```powershell
-web
-```
+**Alias for:** `Invoke-WebRequestCustom`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-WebRequestCustom` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

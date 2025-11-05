@@ -11,8 +11,8 @@ See the fragment source: `24-container-utils.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Test-ContainerEngine` — >
-- `Set-ContainerEnginePreference` — >
+- `Test-ContainerEngine` — Tests for available container engines and compose tools.
+- `Set-ContainerEnginePreference` — Sets the preferred container engine for the session.
 
 Dependencies
 ------------

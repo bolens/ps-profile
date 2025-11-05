@@ -11,7 +11,7 @@ See the fragment source: `45-nextjs.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `next-dev` — Next.js dev server - start development server
+- `next-dev` — Register Next.js helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `next-build` — Next.js build - create production build
 - `next-start` — Next.js start - start production server
 - `create-next-app` — Create Next.js app - bootstrap a new Next.js application

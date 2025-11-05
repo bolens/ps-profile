@@ -6,9 +6,7 @@ Creates collision-safe functions for profile fragments.
 
 ## Description
 
-Defines a helper function that creates small convenience functions or wrappers
-        without overwriting existing user or module commands. Used by profile fragments
-        to safely register functions.
+Defines a helper function that creates small convenience functions or wrappers without overwriting existing user or module commands. Used by profile fragments to safely register functions.
 
 ## Signature
 
@@ -25,6 +23,10 @@ The name of the function to create.
 ### -Body
 
 The script block containing the function body.
+
+### -ReturnScriptBlock
+
+If specified, returns the created script block instead of a boolean.
 
 
 ## Examples

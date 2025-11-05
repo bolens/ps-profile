@@ -8,15 +8,11 @@ Lists directory contents using eza (short alias).
 
 Short alias for eza directory listing.
 
-## Signature
+## Alias Information
 
-```powershell
-l
-```
+**Alias for:** `Get-ChildItemEzaShort`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaShort` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

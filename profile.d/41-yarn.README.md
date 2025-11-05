@@ -11,8 +11,8 @@ See the fragment source: `41-yarn.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `yarn` — Yarn execute - run yarn with arguments
-- `yarn-add` — Yarn add - add packages to dependencies
+- `yarn` — Register Yarn helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `yarn-add` — Register Yarn helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `yarn-install` — Yarn install - install project dependencies
 
 Dependencies

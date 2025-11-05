@@ -11,45 +11,45 @@ See the fragment source: `34-dev.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `d` — d: docker wrapper
-- `dc` — dc: docker-compose wrapper
-- `dps` — dps: docker ps wrapper
-- `di` — di: docker images wrapper
-- `drm` — drm: docker rm wrapper
-- `drmi` — drmi: docker rmi wrapper
-- `dexec` — dexec: docker exec -it wrapper
-- `dlogs` — dlogs: docker logs wrapper
-- `pd` — pd: podman wrapper
-- `pps` — pps: podman ps wrapper
-- `pi` — pi: podman images wrapper
-- `prmi` — prmi: podman rmi wrapper
-- `pdexec` — pdexec: podman exec -it wrapper
-- `pdlogs` — pdlogs: podman logs wrapper
-- `n` — n: npm wrapper
-- `ni` — ni: npm install wrapper
-- `nr` — nr: npm run wrapper
-- `ns` — ns: npm start wrapper
-- `nt` — nt: npm test wrapper
-- `np` — np: npm publish wrapper
-- `nb` — nb: npm run build wrapper
-- `nrd` — nrd: npm run dev wrapper
-- `py` — py: python wrapper
-- `venv` — venv: python virtual environment wrapper
-- `activate` — activate: activate virtual environment
-- `req` — req: generate requirements.txt
-- `pipi` — pipi: pip install wrapper
-- `pipu` — pipu: pip install --upgrade wrapper
-- `cr` — cr: cargo run wrapper
-- `cb` — cb: cargo build wrapper
-- `ct` — ct: cargo test wrapper
-- `cc` — cc: cargo check wrapper
-- `cu` — cu: cargo update wrapper
-- `ca` — ca: cargo add wrapper
-- `cw` — cw: cargo watch -x run wrapper
-- `cd` — cd: cargo doc --open wrapper
-- `cl` — cl: cargo clippy wrapper
-- `cf` — cf: cargo fmt wrapper
-- `ci` — ci: cargo install wrapper
+- `d` — 34-dev.ps1
+- `dc` — 34-dev.ps1
+- `dps` — 34-dev.ps1
+- `di` — 34-dev.ps1
+- `drm` — 34-dev.ps1
+- `drmi` — 34-dev.ps1
+- `dexec` — 34-dev.ps1
+- `dlogs` — 34-dev.ps1
+- `pd` — 34-dev.ps1
+- `pps` — 34-dev.ps1
+- `pi` — 34-dev.ps1
+- `prmi` — 34-dev.ps1
+- `pdexec` — Docker shortcuts
+- `pdlogs` — Docker shortcuts
+- `n` — dps: docker ps wrapper
+- `ni` — di: docker images wrapper
+- `nr` — drm: docker rm wrapper
+- `ns` — drmi: docker rmi wrapper
+- `nt` — dexec: docker exec -it wrapper
+- `np` — dlogs: docker logs wrapper
+- `nb` — Podman shortcuts
+- `nrd` — Podman shortcuts
+- `py` — pi: podman images wrapper
+- `venv` — prmi: podman rmi wrapper
+- `activate` — pdexec: podman exec -it wrapper
+- `req` — pdlogs: podman logs wrapper
+- `pipi` — Node.js shortcuts
+- `pipu` — Node.js shortcuts
+- `cr` — nr: npm run wrapper
+- `cb` — ns: npm start wrapper
+- `ct` — nt: npm test wrapper
+- `cc` — np: npm publish wrapper
+- `cu` — nb: npm run build wrapper
+- `ca` — nrd: npm run dev wrapper
+- `cw` — Python shortcuts
+- `cd` — Python shortcuts
+- `cl` — venv: python virtual environment wrapper
+- `cf` — activate: activate virtual environment
+- `ci` — req: generate requirements.txt
 
 Dependencies
 ------------

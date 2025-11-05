@@ -8,15 +8,11 @@ Converts JSON file to CSV format.
 
 Parses a JSON file containing an array of objects and converts it to CSV.
 
-## Signature
+## Alias Information
 
-```powershell
-json-to-csv
-```
+**Alias for:** `ConvertTo-CsvFromJson`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertTo-CsvFromJson` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

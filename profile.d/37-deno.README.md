@@ -11,8 +11,8 @@ See the fragment source: `37-deno.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `deno` — Deno execute - run deno with arguments
-- `deno-run` — Deno run - execute Deno scripts
+- `deno` — Register Deno helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `deno-run` — Register Deno helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `deno-task` — Deno task - run defined tasks from deno.json
 
 Dependencies

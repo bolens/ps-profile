@@ -8,15 +8,11 @@ Shows human-readable file size.
 
 Displays file size in appropriate units (bytes, KB, MB, GB, TB).
 
-## Signature
+## Alias Information
 
-```powershell
-filesize
-```
+**Alias for:** `Get-FileSize`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-FileSize` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

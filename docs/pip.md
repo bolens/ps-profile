@@ -8,15 +8,11 @@ Python package manager using uv instead of pip.
 
 Replacement for pip that uses uv for faster Python package management.
 
-## Signature
+## Alias Information
 
-```powershell
-pip
-```
+**Alias for:** `Invoke-Pip`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-Pip` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

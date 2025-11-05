@@ -8,15 +8,11 @@ Extracts ZIP archives.
 
 Extracts files from ZIP archives to specified destinations.
 
-## Signature
+## Alias Information
 
-```powershell
-unzip
-```
+**Alias for:** `Expand-ArchiveCustom`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Expand-ArchiveCustom` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

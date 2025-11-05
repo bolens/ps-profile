@@ -11,7 +11,7 @@ See the fragment source: `25-lazydocker.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `ld` — lazydocker wrapper helpers
+- `ld` — 25-lazydocker.ps1
 
 Dependencies
 ------------

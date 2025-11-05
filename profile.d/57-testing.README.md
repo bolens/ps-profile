@@ -11,7 +11,7 @@ See the fragment source: `57-testing.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `jest` — Jest - JavaScript testing framework
+- `jest` — Register testing framework helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `vitest` — Vitest - next generation testing framework
 - `playwright` — Playwright - end-to-end testing framework
 - `cypress` — Cypress - JavaScript end-to-end testing framework

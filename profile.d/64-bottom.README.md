@@ -9,6 +9,12 @@ Usage
 -----
 See the fragment source: `64-bottom.ps1` for examples and usage notes.
 
+Aliases
+-------
+- `top` — Main bottom command (alias for `btm`)
+- `htop` — alias for `btm`
+- `monitor` — alias for `btm`
+
 Dependencies
 ------------
 None explicit; see the fragment for runtime checks and optional tooling dependencies.

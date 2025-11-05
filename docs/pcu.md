@@ -6,18 +6,13 @@ Starts container services using compose (Podman-first).
 
 ## Description
 
-Runs 'compose up -d' using the available container engine, preferring Podman over Docker.
-        Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+Runs 'compose up -d' using the available container engine, preferring Podman over Docker. Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
 
-## Signature
+## Alias Information
 
-```powershell
-pcu
-```
+**Alias for:** `Start-ContainerComposePodman`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Start-ContainerComposePodman` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

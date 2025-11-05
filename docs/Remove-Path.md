@@ -20,6 +20,10 @@ Remove-Path
 
 The directory path to remove from PATH.
 
+### -Global
+
+If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
+
 
 ## Examples
 

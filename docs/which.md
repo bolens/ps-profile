@@ -8,15 +8,11 @@ Shows information about commands.
 
 Displays information about PowerShell commands and their locations.
 
-## Signature
+## Alias Information
 
-```powershell
-which
-```
+**Alias for:** `Get-CommandInfo`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-CommandInfo` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

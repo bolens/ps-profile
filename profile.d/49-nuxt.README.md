@@ -11,8 +11,8 @@ See the fragment source: `49-nuxt.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `nuxi` — Nuxt execute - run nuxi with arguments
-- `nuxt-dev` — Nuxt dev server - start development server
+- `nuxi` — Register Nuxt helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `nuxt-dev` — Register Nuxt helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `nuxt-build` — Nuxt build - create production build
 - `create-nuxt-app` — Create Nuxt app - scaffold new Nuxt.js project
 

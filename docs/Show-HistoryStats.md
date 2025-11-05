@@ -6,8 +6,7 @@ Shows statistics about command history usage.
 
 ## Description
 
-Analyzes command history and shows usage patterns, frequently used commands,
-        and time-based statistics.
+Analyzes command history and shows usage patterns, frequently used commands, and time-based statistics.
 
 ## Signature
 

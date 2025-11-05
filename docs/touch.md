@@ -8,15 +8,11 @@ Creates empty files.
 
 Creates new empty files at the specified paths.
 
-## Signature
+## Alias Information
 
-```powershell
-touch
-```
+**Alias for:** `New-EmptyFile`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `New-EmptyFile` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

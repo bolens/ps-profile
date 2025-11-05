@@ -8,15 +8,11 @@ Shows battery information.
 
 Displays battery status including charge remaining, battery status, and estimated runtime.
 
-## Signature
+## Alias Information
 
-```powershell
-battery
-```
+**Alias for:** `Get-BatteryInfo`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-BatteryInfo` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

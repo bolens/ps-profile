@@ -11,8 +11,13 @@ See the fragment source: `16-clipboard.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `cb` — >
-- `pb` — >
+- `Copy-ToClipboard` — Copies input to the clipboard.
+- `Get-FromClipboard` — Pastes content from the clipboard.
+
+Aliases
+-------
+- `cb` — Copies input to the clipboard. (alias for `Copy-ToClipboard`)
+- `pb` — Pastes content from the clipboard. (alias for `Get-FromClipboard`)
 
 Dependencies
 ------------

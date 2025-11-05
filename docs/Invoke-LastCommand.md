@@ -16,7 +16,10 @@ Invoke-LastCommand
 
 ## Parameters
 
-No parameters.
+### -Pattern
+
+Pattern to match against command history.
+
 
 ## Examples
 

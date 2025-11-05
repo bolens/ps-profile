@@ -8,15 +8,11 @@ Runs internet speed test.
 
 Executes speedtest-cli to measure internet connection speed.
 
-## Signature
+## Alias Information
 
-```powershell
-speedtest
-```
+**Alias for:** `Start-SpeedTest`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Start-SpeedTest` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

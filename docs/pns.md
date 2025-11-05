@@ -8,15 +8,11 @@ Starts the project using PNPM.
 
 Runs the start script defined in package.json.
 
-## Signature
+## Alias Information
 
-```powershell
-pns
-```
+**Alias for:** `Start-PnpmProject`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Start-PnpmProject` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

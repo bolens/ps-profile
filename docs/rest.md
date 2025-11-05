@@ -8,15 +8,11 @@ Makes REST API calls.
 
 Sends HTTP requests to REST APIs and returns the response.
 
-## Signature
+## Alias Information
 
-```powershell
-rest
-```
+**Alias for:** `Invoke-RestApi`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-RestApi` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

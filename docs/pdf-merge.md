@@ -8,18 +8,11 @@ Merges multiple PDF files.
 
 Uses pdftk to combine multiple PDF files into one.
 
-## Signature
+## Alias Information
 
-```powershell
-pdf-merge
-```
+**Alias for:** `Merge-Pdf`
 
-## Parameters
-
-### -InputPaths
-
-Array of paths to PDF files to merge.
-
+This is an alias that points to the `Merge-Pdf` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

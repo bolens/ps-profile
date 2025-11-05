@@ -11,7 +11,7 @@ See the fragment source: `26-rclone.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `rcopy` — rclone copy - copy files to/from remote
+- `rcopy` — 26-rclone.ps1
 - `rls` — rclone list - list remote files
 
 Dependencies

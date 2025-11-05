@@ -6,18 +6,13 @@ Copies input to the clipboard.
 
 ## Description
 
-Copies text or objects to the clipboard. Uses Set-Clipboard if available,
-        otherwise falls back to the 'clip' command.
+Copies text or objects to the clipboard. Uses Set-Clipboard if available, otherwise falls back to the 'clip' command.
 
-## Signature
+## Alias Information
 
-```powershell
-cb
-```
+**Alias for:** `Copy-ToClipboard`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Copy-ToClipboard` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

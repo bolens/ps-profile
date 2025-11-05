@@ -11,7 +11,7 @@ See the fragment source: `48-vue.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `vue` — Vue execute - run vue with arguments
+- `vue` — Register Vue helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `vue-create` — Vue create project - create new Vue.js project
 - `vue-serve` — Vue serve - start development server
 

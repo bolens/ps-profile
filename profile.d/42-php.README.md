@@ -11,8 +11,8 @@ See the fragment source: `42-php.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `php` — PHP execute - run php with arguments
-- `php-server` — PHP built-in server - start development server
+- `php` — Register PHP helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `php-server` — Register PHP helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `composer` — Composer - PHP dependency manager
 
 Dependencies

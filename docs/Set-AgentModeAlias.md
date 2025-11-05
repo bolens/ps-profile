@@ -6,9 +6,7 @@ Creates collision-safe aliases for profile fragments.
 
 ## Description
 
-Defines a helper function that creates aliases or function wrappers
-        without overwriting existing user or module commands. Used by profile fragments
-        to safely register aliases.
+Defines a helper function that creates aliases or function wrappers without overwriting existing user or module commands. Used by profile fragments to safely register aliases.
 
 ## Signature
 
@@ -25,6 +23,10 @@ The name of the alias to create.
 ### -Target
 
 The target command for the alias.
+
+### -ReturnDefinition
+
+If specified, returns the alias definition instead of a boolean.
 
 
 ## Examples

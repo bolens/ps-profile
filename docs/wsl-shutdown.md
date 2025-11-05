@@ -8,15 +8,11 @@ Shuts down all WSL distributions.
 
 Terminates all running WSL distributions and shuts down the WSL subsystem.
 
-## Signature
+## Alias Information
 
-```powershell
-wsl-shutdown
-```
+**Alias for:** `Stop-WSL`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Stop-WSL` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

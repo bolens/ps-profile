@@ -22,6 +22,13 @@ No parameters.
 
 No examples provided.
 
+## Aliases
+
+This function has the following aliases:
+
+- `navip` - Prints commands from navi cheatsheets without executing them.
+
+
 ## Source
 
 Defined in: profile.d\62-navi.ps1

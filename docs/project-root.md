@@ -8,15 +8,11 @@ Changes to project root directory.
 
 Changes the current directory to the root of the git repository if inside a git repo.
 
-## Signature
+## Alias Information
 
-```powershell
-project-root
-```
+**Alias for:** `Get-ProjectRoot`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ProjectRoot` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

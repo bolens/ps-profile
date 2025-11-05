@@ -11,8 +11,8 @@ See the fragment source: `46-vite.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `vite` — Vite execute - run vite with arguments
-- `create-vite` — Create Vite project - scaffold new Vite project
+- `vite` — Register Vite helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `create-vite` — Register Vite helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `vite-dev` — Vite dev server - start development server
 - `vite-build` — Vite build - create production build
 

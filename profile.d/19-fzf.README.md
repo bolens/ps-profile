@@ -11,8 +11,13 @@ See the fragment source: `19-fzf.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `ff` — ff: fuzzy-find files by name
-- `fcmd` — fcmd: fuzzy-find a command
+- `Find-FileFuzzy` — 17-fzf.ps1
+- `Find-CommandFuzzy` — fcmd: fuzzy-find a command
+
+Aliases
+-------
+- `ff` — 17-fzf.ps1 (alias for `Find-FileFuzzy`)
+- `fcmd` — fcmd: fuzzy-find a command (alias for `Find-CommandFuzzy`)
 
 Dependencies
 ------------

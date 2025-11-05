@@ -8,15 +8,11 @@ Generates a random password.
 
 Creates a 16-character random password using alphanumeric characters.
 
-## Signature
+## Alias Information
 
-```powershell
-pwgen
-```
+**Alias for:** `New-RandomPassword`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `New-RandomPassword` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,15 +8,11 @@ URL-encodes a string.
 
 Encodes a string for use in URLs.
 
-## Signature
+## Alias Information
 
-```powershell
-url-encode
-```
+**Alias for:** `ConvertTo-UrlEncoded`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertTo-UrlEncoded` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

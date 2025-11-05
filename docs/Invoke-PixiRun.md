@@ -22,6 +22,13 @@ No parameters.
 
 No examples provided.
 
+## Aliases
+
+This function has the following aliases:
+
+- `pxrun` - Runs commands in the pixi environment.
+
+
 ## Source
 
 Defined in: profile.d\68-pixi.ps1

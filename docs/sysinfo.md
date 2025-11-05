@@ -2,21 +2,17 @@
 
 ## Synopsis
 
-Shows system information.
+Shows a comprehensive system status dashboard.
 
 ## Description
 
-Displays basic computer system information including name, manufacturer, model, and total memory.
 
-## Signature
 
-```powershell
-sysinfo
-```
+## Alias Information
 
-## Parameters
+**Alias for:** `Show-SystemDashboard`
 
-No parameters.
+This is an alias that points to the `Show-SystemDashboard` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 
@@ -24,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: profile.d\08-system-info.ps1
+Defined in: profile.d\75-system-monitor.ps1

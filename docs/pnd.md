@@ -8,15 +8,11 @@ Adds dev dependencies using PNPM.
 
 Adds packages as development dependencies to the project.
 
-## Signature
+## Alias Information
 
-```powershell
-pnd
-```
+**Alias for:** `Add-PnpmDevPackage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Add-PnpmDevPackage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

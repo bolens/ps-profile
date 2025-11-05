@@ -20,6 +20,10 @@ Get-EnvVar
 
 The name of the environment variable.
 
+### -Global
+
+If specified, gets the variable from the system-wide registry; otherwise, from user registry.
+
 
 ## Examples
 

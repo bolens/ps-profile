@@ -8,18 +8,11 @@ Converts video to GIF.
 
 Uses ffmpeg to convert a video file to animated GIF.
 
-## Signature
+## Alias Information
 
-```powershell
-video-to-gif
-```
+**Alias for:** `ConvertFrom-VideoToGif`
 
-## Parameters
-
-### -InputPath
-
-The path to the video file.
-
+This is an alias that points to the `ConvertFrom-VideoToGif` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

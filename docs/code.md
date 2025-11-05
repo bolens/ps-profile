@@ -8,15 +8,11 @@ Opens files in Visual Studio Code.
 
 Launches Visual Studio Code with the specified files or directories.
 
-## Signature
+## Alias Information
 
-```powershell
-code
-```
+**Alias for:** `Open-VSCode`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Open-VSCode` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

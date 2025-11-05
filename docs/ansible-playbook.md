@@ -8,15 +8,11 @@ Runs Ansible playbook commands via WSL with UTF-8 locale.
 
 Executes ansible-playbook commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
 
-## Signature
+## Alias Information
 
-```powershell
-ansible-playbook
-```
+**Alias for:** `Invoke-AnsiblePlaybook`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-AnsiblePlaybook` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

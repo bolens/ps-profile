@@ -8,15 +8,11 @@ Resolves DNS names.
 
 Performs DNS lookups for hostnames or IP addresses.
 
-## Signature
+## Alias Information
 
-```powershell
-dns
-```
+**Alias for:** `Resolve-DnsNameCustom`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Resolve-DnsNameCustom` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

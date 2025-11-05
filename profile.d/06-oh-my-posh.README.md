@@ -11,8 +11,8 @@ See the fragment source: `06-oh-my-posh.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Initialize-OhMyPosh` — >
-- `prompt` — >
+- `Initialize-OhMyPosh` — Initializes oh-my-posh prompt framework lazily.
+- `prompt` — PowerShell prompt function with lazy oh-my-posh initialization.
 
 Dependencies
 ------------

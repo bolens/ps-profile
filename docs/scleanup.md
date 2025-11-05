@@ -8,15 +8,11 @@ Cleans up Scoop cache and old versions.
 
 Removes old package versions and cleans the download cache.
 
-## Signature
+## Alias Information
 
-```powershell
-scleanup
-```
+**Alias for:** `Clear-ScoopCache`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Clear-ScoopCache` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

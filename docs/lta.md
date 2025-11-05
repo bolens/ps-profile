@@ -8,15 +8,11 @@ Lists all directory contents in tree format using eza.
 
 Shows all files including hidden ones in tree format.
 
-## Signature
+## Alias Information
 
-```powershell
-lta
-```
+**Alias for:** `Get-ChildItemEzaTreeAll`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaTreeAll` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

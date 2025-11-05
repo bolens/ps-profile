@@ -8,15 +8,11 @@ Runs tools installed with UV.
 
 Executes tools that were installed using uv tool install.
 
-## Signature
+## Alias Information
 
-```powershell
-uvx
-```
+**Alias for:** `Invoke-UVTool`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-UVTool` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

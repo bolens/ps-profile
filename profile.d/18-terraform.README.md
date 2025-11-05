@@ -11,8 +11,8 @@ See the fragment source: `18-terraform.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `tf` — Terraform alias - run terraform with arguments
-- `tfi` — Terraform init - initialize working directory
+- `tf` — Register terraform helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `tfi` — Register terraform helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `tfp` — Terraform plan - show execution plan
 - `tfa` — Terraform apply - apply changes
 - `tfd` — Terraform destroy - destroy infrastructure

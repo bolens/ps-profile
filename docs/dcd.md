@@ -6,18 +6,13 @@ Stops container services using compose (Docker-first).
 
 ## Description
 
-Runs 'compose down' using the available container engine, preferring Docker over Podman.
-        Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
+Runs 'compose down' using the available container engine, preferring Docker over Podman. Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
 
-## Signature
+## Alias Information
 
-```powershell
-dcd
-```
+**Alias for:** `Stop-ContainerCompose`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Stop-ContainerCompose` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -11,8 +11,8 @@ See the fragment source: `52-helm.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `helm` — Helm execute - run helm with arguments
-- `helm-install` — Helm install - install Helm charts
+- `helm` — Register Helm helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `helm-install` — Register Helm helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `helm-upgrade` — Helm upgrade - upgrade Helm releases
 - `helm-list` — Helm list - list Helm releases
 

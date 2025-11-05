@@ -53,6 +53,13 @@ try {
         # A Prompt function already exists; let the existing configuration win.
         return
     }
+    
+    # If starship is available, don't create a proxy prompt - let starship handle it
+    # Starship will be initialized later by 23-starship.ps1
+    if (Get-Command starship -ErrorAction SilentlyContinue) {
+        if ($env:PS_PROFILE_DEBUG) { Write-Host "Starship detected, skipping oh-my-posh proxy prompt" -ForegroundColor Cyan }
+        return
+    }
 
     # Proxy prompt: on first invocation initialize oh-my-posh, then invoke the
     # real prompt function that oh-my-posh registers. Comparison uses the

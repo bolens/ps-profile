@@ -6,18 +6,13 @@ Prunes unused container system resources (Podman-first).
 
 ## Description
 
-Runs 'system prune -f' using the available container engine, preferring Podman over Docker.
-        Removes unused containers, networks, images, and build cache.
+Runs 'system prune -f' using the available container engine, preferring Podman over Docker. Removes unused containers, networks, images, and build cache.
 
-## Signature
+## Alias Information
 
-```powershell
-pprune
-```
+**Alias for:** `Clear-ContainerSystemPodman`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Clear-ContainerSystemPodman` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -11,7 +11,7 @@ See the fragment source: `12-psreadline.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `global` — Simplified lazy loading - create function directly without complex scriptblock
+- `global` — Register a lazy enabler that imports and configures PSReadLine on demand.
 
 Dependencies
 ------------

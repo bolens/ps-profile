@@ -6,8 +6,7 @@ Shows a comprehensive system status dashboard.
 
 ## Description
 
-Displays CPU usage, memory usage, disk space, network status,
-        and other system metrics in a clean, organized format.
+Displays CPU usage, memory usage, disk space, network status, and other system metrics in a clean, organized format.
 
 ## Signature
 
@@ -22,6 +21,13 @@ No parameters.
 ## Examples
 
 No examples provided.
+
+## Aliases
+
+This function has the following aliases:
+
+- `sysinfo` - Shows a comprehensive system status dashboard.
+
 
 ## Source
 

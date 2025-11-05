@@ -6,17 +6,13 @@ Quick search in command history.
 
 ## Description
 
-Searches command history for the specified pattern.
 
-## Signature
 
-```powershell
-fh
-```
+## Alias Information
 
-## Parameters
+**Alias for:** `Find-HistoryQuick`
 
-No parameters.
+This is an alias that points to the `Find-HistoryQuick` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 
