@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/bolens/ps-profile/compare/v1.2.1...v1.2.2) (2025-11-05)
+
+
+### Bug Fixes
+
+* update pre-commit hook installation to use pre-commit.ps1 ([868e013](https://github.com/bolens/ps-profile/commit/868e013c2fd9494354ea29f9a4a49dcf17170d50))
+
 ## [1.2.1](https://github.com/bolens/ps-profile/compare/v1.2.0...v1.2.1) (2025-11-05)
 
 
