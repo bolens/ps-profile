@@ -6,18 +6,13 @@ Shows container logs using compose (Podman-first).
 
 ## Description
 
-Runs 'compose logs -f' using the available container engine, preferring Podman over Docker.
-        Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+Runs 'compose logs -f' using the available container engine, preferring Podman over Docker. Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
 
-## Signature
+## Alias Information
 
-```powershell
-pcl
-```
+**Alias for:** `Get-ContainerComposeLogsPodman`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ContainerComposeLogsPodman` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

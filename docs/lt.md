@@ -8,15 +8,11 @@ Lists directory contents in tree format using eza.
 
 Shows directory structure as a tree view.
 
-## Signature
+## Alias Information
 
-```powershell
-lt
-```
+**Alias for:** `Get-ChildItemEzaTree`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaTree` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

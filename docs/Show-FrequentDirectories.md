@@ -20,6 +20,10 @@ Show-FrequentDirectories
 
 Number of directories to show (default: 10).
 
+### -Pattern
+
+Filter directories by pattern.
+
 
 ## Examples
 

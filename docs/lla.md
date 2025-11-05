@@ -8,15 +8,11 @@ Lists all directory contents in long format using eza.
 
 Shows all files including hidden ones in detailed long format.
 
-## Signature
+## Alias Information
 
-```powershell
-lla
-```
+**Alias for:** `Get-ChildItemEzaAllLong`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaAllLong` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

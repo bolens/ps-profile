@@ -2,21 +2,17 @@
 
 ## Synopsis
 
-Shows CPU information.
+Shows detailed CPU information and usage.
 
 ## Description
 
-Displays processor information including name, number of cores, logical processors, and max clock speed.
 
-## Signature
 
-```powershell
-cpuinfo
-```
+## Alias Information
 
-## Parameters
+**Alias for:** `Show-CPUInfo`
 
-No parameters.
+This is an alias that points to the `Show-CPUInfo` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 
@@ -24,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: profile.d\08-system-info.ps1
+Defined in: profile.d\75-system-monitor.ps1

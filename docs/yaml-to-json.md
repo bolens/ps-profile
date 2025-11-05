@@ -8,15 +8,11 @@ Converts YAML to JSON format.
 
 Transforms YAML input to JSON output using yq.
 
-## Signature
+## Alias Information
 
-```powershell
-yaml-to-json
-```
+**Alias for:** `ConvertFrom-Yaml`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertFrom-Yaml` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

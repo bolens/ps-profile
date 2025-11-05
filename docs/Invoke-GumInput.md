@@ -22,6 +22,13 @@ No parameters.
 
 No examples provided.
 
+## Aliases
+
+This function has the following aliases:
+
+- `input` - Shows an input prompt using gum.
+
+
 ## Source
 
 Defined in: profile.d\63-gum.ps1

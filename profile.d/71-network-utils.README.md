@@ -11,10 +11,10 @@ See the fragment source: `71-network-utils.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Invoke-WithRetry` — >
-- `Test-NetworkConnectivity` — >
-- `Invoke-HttpRequestWithRetry` — >
-- `Resolve-HostWithRetry` — >
+- `Invoke-WithRetry` — Executes a network operation with retry logic and timeout handling.
+- `Test-NetworkConnectivity` — Tests network connectivity with retry logic.
+- `Invoke-HttpRequestWithRetry` — Makes HTTP requests with retry logic and timeout handling.
+- `Resolve-HostWithRetry` — Resolves hostnames with retry logic.
 
 Dependencies
 ------------

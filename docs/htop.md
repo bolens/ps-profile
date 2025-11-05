@@ -2,21 +2,17 @@
 
 ## Synopsis
 
-Shows top CPU-consuming processes.
+Launches bottom system monitor.
 
 ## Description
 
-Displays the top 10 processes sorted by CPU usage.
+Opens bottom, a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
 
-## Signature
+## Alias Information
 
-```powershell
-htop
-```
+**Alias for:** `bottom`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `bottom` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 
@@ -24,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: profile.d\07-system.ps1
+Defined in: profile.d\64-bottom.ps1

@@ -11,7 +11,7 @@ See the fragment source: `47-angular.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `ng` — Angular execute - run angular with arguments
+- `ng` — Register Angular helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `ng-new` — Angular new project - create new Angular application
 - `ng-serve` — Angular serve - start development server
 

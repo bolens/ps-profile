@@ -8,15 +8,11 @@ Shows weather information.
 
 Retrieves and displays weather information for a specified location using wttr.in.
 
-## Signature
+## Alias Information
 
-```powershell
-weather
-```
+**Alias for:** `Get-Weather`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-Weather` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

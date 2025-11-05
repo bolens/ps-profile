@@ -22,6 +22,13 @@ No parameters.
 
 No examples provided.
 
+## Aliases
+
+This function has the following aliases:
+
+- `navis` - Searches navi cheatsheets interactively.
+
+
 ## Source
 
 Defined in: profile.d\62-navi.ps1

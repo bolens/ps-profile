@@ -8,15 +8,11 @@ Creates a backup of the profile.
 
 Creates a timestamped backup copy of the current PowerShell profile.
 
-## Signature
+## Alias Information
 
-```powershell
-backup-profile
-```
+**Alias for:** `Backup-Profile`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Backup-Profile` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

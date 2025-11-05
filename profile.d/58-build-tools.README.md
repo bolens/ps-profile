@@ -11,7 +11,7 @@ See the fragment source: `58-build-tools.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `turbo` — turbo - monorepo build system and task runner
+- `turbo` — Register build tools and development server helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `esbuild` — esbuild - extremely fast JavaScript bundler
 - `rollup` — rollup - JavaScript module bundler
 - `serve` — serve - static file serving and directory listing

@@ -8,15 +8,11 @@ Changes to the Documents directory.
 
 Navigates to the user's Documents folder.
 
-## Signature
+## Alias Information
 
-```powershell
-docs
-```
+**Alias for:** `Set-LocationDocuments`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Set-LocationDocuments` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

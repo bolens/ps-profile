@@ -8,15 +8,11 @@ Runs tests using PNPM.
 
 Runs the test script defined in package.json.
 
-## Signature
+## Alias Information
 
-```powershell
-pnt
-```
+**Alias for:** `Test-PnpmProject`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Test-PnpmProject` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

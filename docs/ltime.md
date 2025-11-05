@@ -8,15 +8,11 @@ Lists directory contents sorted by modification time using eza.
 
 Shows files sorted by modification time, newest first.
 
-## Signature
+## Alias Information
 
-```powershell
-ltime
-```
+**Alias for:** `Get-ChildItemEzaByTime`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaByTime` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,18 +8,11 @@ Extracts audio from video file.
 
 Uses ffmpeg to extract audio track from a video file as MP3.
 
-## Signature
+## Alias Information
 
-```powershell
-video-to-audio
-```
+**Alias for:** `ConvertFrom-VideoToAudio`
 
-## Parameters
-
-### -InputPath
-
-The path to the video file.
-
+This is an alias that points to the `ConvertFrom-VideoToAudio` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

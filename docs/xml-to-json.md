@@ -8,15 +8,11 @@ Converts XML file to JSON format.
 
 Parses an XML file and converts it to JSON representation.
 
-## Signature
+## Alias Information
 
-```powershell
-xml-to-json
-```
+**Alias for:** `ConvertFrom-XmlToJson`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertFrom-XmlToJson` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

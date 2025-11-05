@@ -8,15 +8,11 @@ Lists directory contents excluding hidden files.
 
 Shows files and directories but excludes hidden ones. Uses eza if available.
 
-## Signature
+## Alias Information
 
-```powershell
-lx
-```
+**Alias for:** `Get-ChildItemVisible`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemVisible` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

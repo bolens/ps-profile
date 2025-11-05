@@ -132,6 +132,14 @@ try {
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship function found, calling it..." -ForegroundColor Green }
         Initialize-Starship
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship completed" -ForegroundColor Green }
+        
+        # Final verification: verify prompt function exists (Initialize-Starship handles making it global)
+        if (Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue) {
+            if ($env:PS_PROFILE_DEBUG) { Write-Host "Prompt function verified and active" -ForegroundColor Green }
+        }
+        else {
+            if ($env:PS_PROFILE_DEBUG) { Write-Host "WARNING: Prompt function not found after initialization!" -ForegroundColor Red }
+        }
     }
     else {
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship function not found" -ForegroundColor Red }

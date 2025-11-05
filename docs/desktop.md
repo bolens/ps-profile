@@ -8,15 +8,11 @@ Changes to the Desktop directory.
 
 Navigates to the user's Desktop folder.
 
-## Signature
+## Alias Information
 
-```powershell
-desktop
-```
+**Alias for:** `Set-LocationDesktop`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Set-LocationDesktop` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

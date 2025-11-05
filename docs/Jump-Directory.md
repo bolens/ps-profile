@@ -6,8 +6,7 @@ Jumps to frequently used directories.
 
 ## Description
 
-Changes to the most frequently used directory matching the pattern.
-        Uses fuzzy matching and scoring based on visit frequency and recency.
+Changes to the most frequently used directory matching the pattern. Uses fuzzy matching and scoring based on visit frequency and recency.
 
 ## Signature
 
@@ -17,7 +16,10 @@ Jump-Directory
 
 ## Parameters
 
-No parameters.
+### -Pattern
+
+Pattern to match against directory paths.
+
 
 ## Examples
 

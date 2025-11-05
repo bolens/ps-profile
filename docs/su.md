@@ -8,15 +8,11 @@ Updates packages using Scoop.
 
 Updates specified packages or all packages if no arguments provided.
 
-## Signature
+## Alias Information
 
-```powershell
-su
-```
+**Alias for:** `Update-ScoopPackage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Update-ScoopPackage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -253,11 +253,23 @@ try {
     # Only set up prompt integration if no prompt framework is active
     $promptFrameworkActive = $false
     try {
+        # Check for prompt framework variables (set after initialization)
         $promptFrameworkActive = (
             (Get-Variable -Name 'StarshipInitialized' -Scope Global -ErrorAction SilentlyContinue) -or
             (Get-Variable -Name 'StarshipActive' -Scope Global -ErrorAction SilentlyContinue) -or
             (Get-Variable -Name 'OhMyPoshInitialized' -Scope Global -ErrorAction SilentlyContinue)
         )
+        
+        # Also check if starship module is loaded (even if variables not set yet)
+        if (-not $promptFrameworkActive) {
+            $starshipModule = Get-Module starship -ErrorAction SilentlyContinue
+            if ($starshipModule) {
+                $promptFunc = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
+                if ($promptFunc -and $promptFunc.ModuleName -eq 'starship') {
+                    $promptFrameworkActive = $true
+                }
+            }
+        }
     }
     catch { }
 

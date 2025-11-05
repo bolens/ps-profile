@@ -8,15 +8,11 @@ Runs scripts using PNPM.
 
 Executes scripts defined in package.json.
 
-## Signature
+## Alias Information
 
-```powershell
-pnr
-```
+**Alias for:** `Invoke-PnpmScript`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Invoke-PnpmScript` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

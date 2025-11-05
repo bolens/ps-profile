@@ -8,18 +8,11 @@ Converts EPUB file to Markdown.
 
 Uses pandoc to convert an EPUB file to Markdown format.
 
-## Signature
+## Alias Information
 
-```powershell
-epub-to-markdown
-```
+**Alias for:** `ConvertFrom-EpubToMarkdown`
 
-## Parameters
-
-### -InputPath
-
-The path to the EPUB file.
-
+This is an alias that points to the `ConvertFrom-EpubToMarkdown` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,15 +8,11 @@ Installs Python tools using UV.
 
 Installs Python applications as standalone executables.
 
-## Signature
+## Alias Information
 
-```powershell
-uvi
-```
+**Alias for:** `Install-UVTool`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Install-UVTool` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,15 +8,11 @@ Opens files in Neovim.
 
 Launches Neovim text editor with the specified files.
 
-## Signature
+## Alias Information
 
-```powershell
-vim
-```
+**Alias for:** `Open-Neovim`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Open-Neovim` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

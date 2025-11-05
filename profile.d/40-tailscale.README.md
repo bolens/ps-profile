@@ -11,8 +11,8 @@ See the fragment source: `40-tailscale.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `tailscale` — Tailscale execute - run tailscale with arguments
-- `ts-up` — Tailscale up - connect to Tailscale network
+- `tailscale` — Register Tailscale helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `ts-up` — Register Tailscale helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `ts-down` — Tailscale down - disconnect from Tailscale network
 - `ts-status` — Tailscale status - show connection status
 

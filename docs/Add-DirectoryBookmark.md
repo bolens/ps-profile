@@ -20,6 +20,10 @@ Add-DirectoryBookmark
 
 Name for the bookmark.
 
+### -Path
+
+Directory path to bookmark (defaults to current directory).
+
 
 ## Examples
 

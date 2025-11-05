@@ -8,15 +8,11 @@ Shows information about Scoop packages.
 
 Displays detailed information about specified packages.
 
-## Signature
+## Alias Information
 
-```powershell
-sh
-```
+**Alias for:** `Get-ScoopPackageInfo`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ScoopPackageInfo` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

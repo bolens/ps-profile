@@ -6,8 +6,7 @@ Performs fuzzy search on command history.
 
 ## Description
 
-Searches through PowerShell command history using fuzzy matching.
-        Supports partial matches and shows results with context.
+Searches through PowerShell command history using fuzzy matching. Supports partial matches and shows results with context.
 
 ## Signature
 
@@ -24,6 +23,10 @@ The search pattern to match against history.
 ### -CaseSensitive
 
 If specified, performs case-sensitive search.
+
+### -MaxResults
+
+Maximum number of results to return (default: 20).
 
 
 ## Examples

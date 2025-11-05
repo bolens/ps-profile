@@ -8,15 +8,11 @@ Searches for files recursively.
 
 Finds files by name in the current directory and subdirectories.
 
-## Signature
+## Alias Information
 
-```powershell
-search
-```
+**Alias for:** `Find-File`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Find-File` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

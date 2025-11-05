@@ -6,8 +6,7 @@ Interactive history search with preview.
 
 ## Description
 
-Provides an interactive way to search through command history
-        with live preview of matching commands.
+Provides an interactive way to search through command history with live preview of matching commands.
 
 ## Signature
 

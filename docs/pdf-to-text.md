@@ -8,18 +8,11 @@ Extracts text from PDF file.
 
 Uses pdftotext to extract plain text from a PDF file.
 
-## Signature
+## Alias Information
 
-```powershell
-pdf-to-text
-```
+**Alias for:** `ConvertFrom-PdfToText`
 
-## Parameters
-
-### -InputPath
-
-The path to the PDF file.
-
+This is an alias that points to the `ConvertFrom-PdfToText` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

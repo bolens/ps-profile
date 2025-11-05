@@ -8,15 +8,11 @@ Searches command history.
 
 Searches through PowerShell command history for the specified pattern.
 
-## Signature
+## Alias Information
 
-```powershell
-hg
-```
+**Alias for:** `Find-History`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Find-History` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

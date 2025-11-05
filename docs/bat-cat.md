@@ -8,15 +8,11 @@ Displays file contents with syntax highlighting.
 
 Shows file contents with syntax highlighting using bat, or falls back to Get-Content.
 
-## Signature
+## Alias Information
 
-```powershell
-bat-cat
-```
+**Alias for:** `Show-FileContent`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Show-FileContent` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

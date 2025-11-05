@@ -11,8 +11,8 @@ See the fragment source: `17-kubectl.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `k` — kubectl alias - run kubectl with arguments
-- `kn` — kubectl context switcher - switch Kubernetes context
+- `k` — 17-kubectl.ps1
+- `kn` — 17-kubectl.ps1
 - `kg` — kubectl get - get Kubernetes resources
 - `kd` — kubectl describe - describe Kubernetes resources
 - `kctx` — kubectl context - show current context

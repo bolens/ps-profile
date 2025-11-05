@@ -11,8 +11,8 @@ See the fragment source: `35-ollama.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `ol` — Ollama alias - run ollama with arguments
-- `ol-list` — Ollama list - list available models
+- `ol` — Register Ollama helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `ol-list` — Register Ollama helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `ol-run` — Ollama run - run an AI model interactively
 - `ol-pull` — Ollama pull - download an AI model
 

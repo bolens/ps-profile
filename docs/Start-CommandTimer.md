@@ -6,8 +6,7 @@ Tracks command execution performance and provides insights.
 
 ## Description
 
-Monitors command execution times and maintains statistics for optimization insights.
-        Automatically tracks commands that take longer than a threshold.
+Monitors command execution times and maintains statistics for optimization insights. Automatically tracks commands that take longer than a threshold.
 
 ## Signature
 

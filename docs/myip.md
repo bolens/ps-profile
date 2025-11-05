@@ -8,15 +8,11 @@ Shows public IP address.
 
 Retrieves and displays the current public IP address.
 
-## Signature
+## Alias Information
 
-```powershell
-myip
-```
+**Alias for:** `Get-MyIP`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-MyIP` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

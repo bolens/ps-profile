@@ -11,7 +11,7 @@ See the fragment source: `54-modern-cli.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `bat` — bat - cat clone with syntax highlighting and Git integration
+- `bat` — Register modern CLI tools helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `fd` — fd - find files and directories
 - `http` — http - command-line HTTP client
 - `zoxide` — zoxide - smarter cd command

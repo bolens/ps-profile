@@ -24,6 +24,10 @@ The name of the environment variable.
 
 The value to set. If null or empty, the variable is removed.
 
+### -Global
+
+If specified, sets the variable in the system-wide registry; otherwise, in user registry.
+
 
 ## Examples
 

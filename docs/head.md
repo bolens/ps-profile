@@ -8,15 +8,11 @@ Shows the first N lines of a file.
 
 Displays the beginning of a file or pipeline input. Defaults to 10 lines.
 
-## Signature
+## Alias Information
 
-```powershell
-head
-```
+**Alias for:** `Get-FileHead`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-FileHead` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

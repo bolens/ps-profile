@@ -11,8 +11,8 @@ See the fragment source: `51-gcloud.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `gcloud` — Google Cloud execute - run gcloud with arguments
-- `gcloud-auth` — Google Cloud auth - manage authentication
+- `gcloud` — Register Google Cloud CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `gcloud-auth` — Register Google Cloud CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `gcloud-config` — Google Cloud config - manage configuration
 - `gcloud-projects` — Google Cloud projects - manage GCP projects
 

@@ -8,15 +8,11 @@ Creates ZIP archives.
 
 Compresses files and directories into ZIP archives.
 
-## Signature
+## Alias Information
 
-```powershell
-zip
-```
+**Alias for:** `Compress-ArchiveCustom`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Compress-ArchiveCustom` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

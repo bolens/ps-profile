@@ -20,6 +20,10 @@ Add-Path
 
 The directory path to add to PATH.
 
+### -Global
+
+If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
+
 
 ## Examples
 

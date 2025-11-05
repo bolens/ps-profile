@@ -8,15 +8,11 @@ Reloads the PowerShell profile.
 
 Dots-sources the current profile file to reload all functions and settings.
 
-## Signature
+## Alias Information
 
-```powershell
-reload
-```
+**Alias for:** `Reload-Profile`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Reload-Profile` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

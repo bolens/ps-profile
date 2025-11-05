@@ -6,18 +6,13 @@ Opens files or URLs using the system's default application.
 
 ## Description
 
-Opens the specified file or URL using the appropriate system command.
-        On Windows, uses Start-Process. On Linux/macOS, uses xdg-open or open.
+Opens the specified file or URL using the appropriate system command. On Windows, uses Start-Process. On Linux/macOS, uses xdg-open or open.
 
-## Signature
+## Alias Information
 
-```powershell
-open
-```
+**Alias for:** `Open-Item`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Open-Item` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

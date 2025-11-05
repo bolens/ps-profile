@@ -8,18 +8,11 @@ Calculates file hash using specified algorithm.
 
 Computes cryptographic hash of a file. Defaults to SHA256.
 
-## Signature
+## Alias Information
 
-```powershell
-file-hash
-```
+**Alias for:** `Get-FileHashValue`
 
-## Parameters
-
-### -Path
-
-The path to the file to hash.
-
+This is an alias that points to the `Get-FileHashValue` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -1,9 +1,55 @@
 <#
-scripts/utils/generate-changelog.ps1
+.SYNOPSIS
+    Generates changelog using git-cliff from conventional commits.
 
-Generates changelog using git-cliff from conventional commits.
+.DESCRIPTION
+    Generates a changelog file from git commit history using git-cliff and
+    conventional commit messages. The script uses the cliff.toml configuration
+    file in the repository root to determine formatting and categorization rules.
 
-Usage: pwsh -NoProfile -File scripts/utils/generate-changelog.ps1
+    If git-cliff is not installed, the script will attempt to install it via
+    cargo (Rust toolchain) if available, or provide instructions for manual
+    installation.
+
+.PARAMETER OutputFile
+    Specifies the output filename for the generated changelog.
+    The path is resolved relative to the repository root.
+    Default value is "CHANGELOG.md".
+
+.PARAMETER Unreleased
+    If specified, generates only the unreleased changes section without
+    including version tags. Useful for previewing changes before a release.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1
+
+    Generates a full changelog in CHANGELOG.md.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1 -Unreleased
+
+    Generates only the unreleased changes section.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1 -OutputFile "RELEASE_NOTES.md"
+
+    Generates changelog with a custom output filename.
+
+.OUTPUTS
+    Creates or updates the changelog file at the specified path.
+
+.NOTES
+    This script requires git-cliff to be installed. Installation options:
+    - Via cargo: cargo install git-cliff
+    - Via scoop: scoop install git-cliff
+    - Via winget: winget install git-cliff
+    - Download from: https://github.com/orhun/git-cliff/releases
+
+    The script uses the cliff.toml configuration file in the repository root
+    to control changelog formatting, commit categorization, and filtering rules.
+
+    Used in CI/CD pipelines and release creation workflows.
+
 #>
 
 param(
@@ -29,7 +75,8 @@ if (-not $gitCliff) {
         if ($cargo) {
             Write-Output "Installing git-cliff via cargo..."
             & cargo install git-cliff
-        } else {
+        }
+        else {
             # Try via other methods
             Write-Output "Please install git-cliff manually:"
             Write-Output "  Via cargo: cargo install git-cliff"
@@ -38,7 +85,8 @@ if (-not $gitCliff) {
             Write-Output "  Download from: https://github.com/orhun/git-cliff/releases"
             exit 1
         }
-    } catch {
+    }
+    catch {
         Write-Error "Failed to install git-cliff: $($_.Exception.Message)"
         exit 1
     }
@@ -59,7 +107,8 @@ Write-Output "Running: git-cliff $($args -join ' ')"
 
 if ($LASTEXITCODE -eq 0) {
     Write-Output "Changelog generated successfully: $changelogPath"
-} else {
+}
+else {
     Write-Error "Failed to generate changelog"
     exit $LASTEXITCODE
 }

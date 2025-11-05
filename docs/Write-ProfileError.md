@@ -6,8 +6,7 @@ Logs errors with enhanced context and formatting.
 
 ## Description
 
-Provides comprehensive error logging with timestamps, context, and suggestions.
-        Logs to both console (when debugging) and file for persistent debugging.
+Provides comprehensive error logging with timestamps, context, and suggestions. Logs to both console (when debugging) and file for persistent debugging.
 
 ## Signature
 
@@ -24,6 +23,10 @@ The error record to log.
 ### -Context
 
 Additional context about where the error occurred.
+
+### -Category
+
+Error category for better organization.
 
 
 ## Examples

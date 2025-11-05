@@ -11,8 +11,8 @@ See the fragment source: `31-aws.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `aws` — AWS execute - run aws with arguments
-- `aws-profile` — AWS profile switcher - set AWS profile
+- `aws` — Register AWS CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `aws-profile` — Register AWS CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `aws-region` — AWS region switcher - set AWS region
 
 Dependencies

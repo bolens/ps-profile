@@ -8,15 +8,11 @@ Lists directory contents sorted by size using eza.
 
 Shows files sorted by file size in descending order.
 
-## Signature
+## Alias Information
 
-```powershell
-lS
-```
+**Alias for:** `Get-ChildItemEzaBySize`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ChildItemEzaBySize` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -6,8 +6,7 @@ Ensures Git helper functions are initialized.
 
 ## Description
 
-Lazily initializes additional Git helper functions when first called.
-        This keeps the initial profile loading fast by deferring heavier Git helpers.
+Lazily initializes additional Git helper functions when first called. This keeps the initial profile loading fast by deferring heavier Git helpers.
 
 ## Signature
 

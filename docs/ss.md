@@ -8,15 +8,11 @@ Searches for packages in Scoop.
 
 Searches for available packages in Scoop repositories.
 
-## Signature
+## Alias Information
 
-```powershell
-ss
-```
+**Alias for:** `Find-ScoopPackage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Find-ScoopPackage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

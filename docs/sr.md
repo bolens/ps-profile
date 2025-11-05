@@ -8,15 +8,11 @@ Uninstalls packages using Scoop.
 
 Removes installed packages from the system.
 
-## Signature
+## Alias Information
 
-```powershell
-sr
-```
+**Alias for:** `Uninstall-ScoopPackage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Uninstall-ScoopPackage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

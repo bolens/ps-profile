@@ -16,7 +16,10 @@ Remove-OldHistory
 
 ## Parameters
 
-No parameters.
+### -Days
+
+Number of days of history to keep (default: 30).
+
 
 ## Examples
 

@@ -22,6 +22,13 @@ No parameters.
 
 No examples provided.
 
+## Aliases
+
+This function has the following aliases:
+
+- `sysstat` - Shows a compact system status overview.
+
+
 ## Source
 
 Defined in: profile.d\75-system-monitor.ps1

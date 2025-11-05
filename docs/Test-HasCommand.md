@@ -6,8 +6,7 @@ Tests if a command is available.
 
 ## Description
 
-Utility function to check if a command exists. Uses fast provider checks first
-    to avoid module autoload, then falls back to cached or direct command testing.
+Utility function to check if a command exists. Uses fast provider checks first to avoid module autoload, then falls back to cached or direct command testing.
 
 ## Signature
 
@@ -17,7 +16,10 @@ Test-HasCommand
 
 ## Parameters
 
-No parameters.
+### -Name
+
+The name of the command to test.
+
 
 ## Examples
 

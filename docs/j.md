@@ -8,15 +8,11 @@ Quick directory jumping alias.
 
 Alias for Jump-Directory for quick navigation.
 
-## Signature
+## Alias Information
 
-```powershell
-j
-```
+**Alias for:** `Jump-DirectoryQuick`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Jump-DirectoryQuick` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

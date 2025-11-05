@@ -11,11 +11,11 @@ See the fragment source: `73-performance-insights.ps1` for examples and usage no
 
 Functions
 ---------
-- `Start-CommandTimer` — >
-- `Stop-CommandTimer` — >
-- `Show-PerformanceInsights` — >
-- `Test-PerformanceHealth` — >
-- `Clear-PerformanceData` — >
+- `Start-CommandTimer` — Tracks command execution performance and provides insights.
+- `Stop-CommandTimer` — Stops command timing and records the duration.
+- `Show-PerformanceInsights` — Shows performance insights for command execution.
+- `Test-PerformanceHealth` — Performs a quick performance check of the current session.
+- `Clear-PerformanceData` — Clears all collected performance data.
 - `global` — Enhanced prompt with timing
 
 Dependencies

@@ -6,8 +6,7 @@ Sets the preferred container engine for the session.
 
 ## Description
 
-Sets the CONTAINER_ENGINE_PREFERENCE environment variable to specify whether to prefer Docker or Podman.
-    This affects which container engine is used by container-related functions in the profile.
+Sets the CONTAINER_ENGINE_PREFERENCE environment variable to specify whether to prefer Docker or Podman. This affects which container engine is used by container-related functions in the profile.
 
 ## Signature
 

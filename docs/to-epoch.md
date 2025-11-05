@@ -8,15 +8,11 @@ Converts DateTime to Unix timestamp.
 
 Converts a DateTime object or string to a Unix timestamp (seconds since epoch).
 
-## Signature
+## Alias Information
 
-```powershell
-to-epoch
-```
+**Alias for:** `ConvertTo-Epoch`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertTo-Epoch` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,15 +8,11 @@ Converts YAML file to CSV format.
 
 Reads a YAML file and outputs its contents as CSV.
 
-## Signature
+## Alias Information
 
-```powershell
-yaml-to-csv
-```
+**Alias for:** `ConvertFrom-YamlToCsv`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertFrom-YamlToCsv` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

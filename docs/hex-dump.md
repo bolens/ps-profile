@@ -8,15 +8,11 @@ Shows hex dump of a file.
 
 Displays the hexadecimal representation of a file's contents.
 
-## Signature
+## Alias Information
 
-```powershell
-hex-dump
-```
+**Alias for:** `Get-HexDump`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-HexDump` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

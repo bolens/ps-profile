@@ -11,9 +11,16 @@ See the fragment source: `62-navi.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Invoke-NaviSearch` — >
-- `Invoke-NaviBest` — >
-- `Invoke-NaviPrint` — >
+- `Invoke-NaviSearch` — Searches navi cheatsheets interactively.
+- `Invoke-NaviBest` — Finds the best matching command from navi cheatsheets.
+- `Invoke-NaviPrint` — Prints commands from navi cheatsheets without executing them.
+
+Aliases
+-------
+- `cheats` — Main navi command (alias for `navi`)
+- `navis` — Searches navi cheatsheets interactively. (alias for `Invoke-NaviSearch`)
+- `navib` — Finds the best matching command from navi cheatsheets. (alias for `Invoke-NaviBest`)
+- `navip` — Prints commands from navi cheatsheets without executing them. (alias for `Invoke-NaviPrint`)
 
 Dependencies
 ------------

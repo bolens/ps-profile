@@ -3,7 +3,7 @@ profile.d/23-starship.ps1
 
 Purpose
 -------
-Idempotent, quiet initialization of the Starship prompt for PowerShell with smart fallback.
+Simple initialization of the Starship prompt for PowerShell.
 
 Usage
 -----
@@ -11,8 +11,9 @@ See the fragment source: `23-starship.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Initialize-Starship` — >
-- `Initialize-SmartPrompt` — >
+- `Initialize-Starship` — Initializes the Starship prompt for PowerShell.
+- `global` — Fallback: manually create prompt function if init script fails
+- `Initialize-SmartPrompt` — Initializes a smart fallback prompt when Starship is not available.
 - `global` — Enhanced prompt function
 
 Dependencies

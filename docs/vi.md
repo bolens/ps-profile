@@ -8,15 +8,11 @@ Opens files in Neovim (vi mode).
 
 Launches Neovim in vi compatibility mode with the specified files.
 
-## Signature
+## Alias Information
 
-```powershell
-vi
-```
+**Alias for:** `Open-NeovimVi`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Open-NeovimVi` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

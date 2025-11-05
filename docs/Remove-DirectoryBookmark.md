@@ -16,7 +16,10 @@ Remove-DirectoryBookmark
 
 ## Parameters
 
-No parameters.
+### -Name
+
+Name of the bookmark to remove.
+
 
 ## Examples
 

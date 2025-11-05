@@ -6,8 +6,7 @@ Tests network connectivity with retry logic.
 
 ## Description
 
-Enhanced version of network connectivity testing with automatic retry
-    for transient network issues.
+Enhanced version of network connectivity testing with automatic retry for transient network issues.
 
 ## Signature
 
@@ -24,6 +23,10 @@ The target host or IP to test connectivity to.
 ### -Port
 
 The port to test. Default is 80.
+
+### -TimeoutSeconds
+
+Timeout for each connectivity test. Default is 5.
 
 
 ## Examples

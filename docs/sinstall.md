@@ -8,15 +8,11 @@ Installs packages using Scoop.
 
 Installs one or more packages using the Scoop package manager.
 
-## Signature
+## Alias Information
 
-```powershell
-sinstall
-```
+**Alias for:** `Install-ScoopPackage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Install-ScoopPackage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

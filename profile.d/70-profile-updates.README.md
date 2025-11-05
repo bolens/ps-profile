@@ -11,7 +11,7 @@ See the fragment source: `70-profile-updates.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Test-ProfileUpdates` — >
+- `Test-ProfileUpdates` — Checks for profile updates and displays changelog.
 
 Dependencies
 ------------

@@ -8,15 +8,11 @@ Encodes input to base64 format.
 
 Converts file contents or string input to base64 encoded string.
 
-## Signature
+## Alias Information
 
-```powershell
-to-base64
-```
+**Alias for:** `ConvertTo-Base64`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertTo-Base64` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,15 +8,11 @@ Opens the profile in VS Code.
 
 Launches VS Code to edit the current PowerShell profile file.
 
-## Signature
+## Alias Information
 
-```powershell
-edit-profile
-```
+**Alias for:** `Edit-Profile`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Edit-Profile` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

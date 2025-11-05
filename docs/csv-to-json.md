@@ -8,15 +8,11 @@ Converts CSV file to JSON format.
 
 Reads a CSV file and outputs its contents as JSON.
 
-## Signature
+## Alias Information
 
-```powershell
-csv-to-json
-```
+**Alias for:** `ConvertFrom-CsvToJson`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `ConvertFrom-CsvToJson` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

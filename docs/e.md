@@ -8,15 +8,11 @@ Opens file in editor quickly.
 
 Opens the specified file in VS Code if available.
 
-## Signature
+## Alias Information
 
-```powershell
-e
-```
+**Alias for:** `Open-Editor`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Open-Editor` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,15 +8,11 @@ Opens current directory in VS Code.
 
 Launches VS Code in the current directory if VS Code is available.
 
-## Signature
+## Alias Information
 
-```powershell
-vsc
-```
+**Alias for:** `Open-VSCode`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Open-VSCode` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

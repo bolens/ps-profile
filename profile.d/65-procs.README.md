@@ -9,6 +9,11 @@ Usage
 -----
 See the fragment source: `65-procs.ps1` for examples and usage notes.
 
+Aliases
+-------
+- `ps` — Main procs command (alias for `procs`)
+- `psgrep` — alias for `procs`
+
 Dependencies
 ------------
 None explicit; see the fragment for runtime checks and optional tooling dependencies.

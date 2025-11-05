@@ -11,7 +11,7 @@ See the fragment source: `28-jq-yq.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `jq2json` — jq to JSON converter - convert JSON to compact JSON
+- `jq2json` — Register jq/yq helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `yq2json` — yq to JSON converter - convert YAML to JSON
 
 Dependencies

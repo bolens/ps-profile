@@ -63,9 +63,9 @@ try {
         # Keep only top 1000 directories to prevent memory bloat
         if ($statsDict.Count -gt 1000) {
             $toRemove = $statsDict.GetEnumerator() |
-            Sort-Object { $_.Value.Score } |
-            Select-Object -First ($statsDict.Count - 1000) |
-            ForEach-Object { $_.Key }
+                Sort-Object { $_.Value.Score } |
+                Select-Object -First ($statsDict.Count - 1000) |
+                ForEach-Object { $_.Key }
 
             foreach ($key in $toRemove) {
                 $statsDict.TryRemove($key, [ref]$null)

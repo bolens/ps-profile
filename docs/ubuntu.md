@@ -8,15 +8,11 @@ Launches or switches to Ubuntu WSL distribution.
 
 Starts the Ubuntu WSL distribution or switches to it if already running. Passes through any additional arguments.
 
-## Signature
+## Alias Information
 
-```powershell
-ubuntu
-```
+**Alias for:** `Start-UbuntuWSL`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Start-UbuntuWSL` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

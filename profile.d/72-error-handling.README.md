@@ -11,9 +11,9 @@ See the fragment source: `72-error-handling.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Write-ProfileError` — >
-- `Invoke-ProfileErrorHandler` — >
-- `Invoke-SafeFragmentLoad` — >
+- `Write-ProfileError` — Logs errors with enhanced context and formatting.
+- `Invoke-ProfileErrorHandler` — Enhanced global error handler with recovery suggestions.
+- `Invoke-SafeFragmentLoad` — Loads profile fragments with enhanced error handling and retry logic.
 
 Dependencies
 ------------

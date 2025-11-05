@@ -6,8 +6,7 @@ Checks for profile updates and displays changelog.
 
 ## Description
 
-Checks if the profile repository has new commits and displays a summary
-    of recent changes. Only shows updates once per day to avoid spam.
+Checks if the profile repository has new commits and displays a summary of recent changes. Only shows updates once per day to avoid spam.
 
 ## Signature
 

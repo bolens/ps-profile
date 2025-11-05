@@ -8,15 +8,11 @@ Shows network port information.
 
 Displays active network connections and listening ports.
 
-## Signature
+## Alias Information
 
-```powershell
-ports
-```
+**Alias for:** `Get-NetworkPorts`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-NetworkPorts` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

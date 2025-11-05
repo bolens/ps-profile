@@ -20,6 +20,10 @@ Resolve-HostWithRetry
 
 The hostname to resolve.
 
+### -TimeoutSeconds
+
+Timeout for DNS resolution. Default is 10.
+
 
 ## Examples
 

@@ -6,8 +6,7 @@ Enhanced global error handler with recovery suggestions.
 
 ## Description
 
-Provides intelligent error handling with suggestions for common issues.
-        Attempts recovery where possible and provides helpful guidance.
+Provides intelligent error handling with suggestions for common issues. Attempts recovery where possible and provides helpful guidance.
 
 ## Signature
 
@@ -17,7 +16,10 @@ Invoke-ProfileErrorHandler
 
 ## Parameters
 
-No parameters.
+### -ErrorRecord
+
+The error record to handle.
+
 
 ## Examples
 

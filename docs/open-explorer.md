@@ -8,15 +8,11 @@ Opens current directory in File Explorer.
 
 Launches Windows File Explorer in the current directory.
 
-## Signature
+## Alias Information
 
-```powershell
-open-explorer
-```
+**Alias for:** `Open-Explorer`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Open-Explorer` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

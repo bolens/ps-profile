@@ -11,7 +11,11 @@ See the fragment source: `30-open.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `open` — >
+- `Open-Item` — Opens files or URLs using the system's default application.
+
+Aliases
+-------
+- `open` — Opens files or URLs using the system's default application. (alias for `Open-Item`)
 
 Dependencies
 ------------

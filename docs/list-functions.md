@@ -8,15 +8,11 @@ Lists user-defined functions.
 
 Displays all user-defined functions in the current PowerShell session.
 
-## Signature
+## Alias Information
 
-```powershell
-list-functions
-```
+**Alias for:** `Get-Functions`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-Functions` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -8,15 +8,11 @@ Updates all installed Scoop packages.
 
 Updates all installed packages and Scoop itself.
 
-## Signature
+## Alias Information
 
-```powershell
-suu
-```
+**Alias for:** `Update-ScoopAll`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Update-ScoopAll` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

@@ -1,14 +1,51 @@
-# scripts/generate-fragment-readmes.ps1
-
 <#
-Generate minimal README files for each profile.d/*.ps1 fragment. The script
-extracts a short purpose line from the top-of-file comment block, detects
-top-level functions and short comments above them, and mentions any
-Enable-* helpers. Existing README files are preserved unless -Force is used.
+.SYNOPSIS
+    Generates minimal README files for each profile.d/*.ps1 fragment.
 
-Usage:
-    pwsh -NoProfile -File scripts\generate-fragment-readmes.ps1 [-Force]
-#>
+.DESCRIPTION
+    Scans all PowerShell script files in the profile.d directory and generates
+    corresponding README.md files for each fragment. The script extracts:
+    - A short purpose line from the top-of-file comment block
+    - Top-level function declarations and their associated comments
+    - Dynamically-created functions (Set-AgentModeFunction, Set-Item Function:, etc.)
+    - Enable-* helper functions
+
+    Existing README files are preserved unless -Force is used to overwrite them.
+
+.PARAMETER Force
+    If specified, overwrites existing README.md files. Otherwise, existing
+    files are skipped and preserved.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1
+
+    Generates README files for all fragments that don't already have one.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1 -Force
+
+    Regenerates all README files, overwriting existing ones.
+
+.OUTPUTS
+    Creates or updates .README.md files in the profile.d directory, one per
+    .ps1 fragment file. Each README includes:
+    - Purpose section extracted from file header comments
+    - Usage section referencing the source file
+    - Functions section listing all detected functions with descriptions
+    - Enable helpers section listing lazy-loading helper functions
+    - Dependencies and Notes sections
+
+.NOTES
+    The script uses pattern matching to detect:
+    - Standard function declarations: function FunctionName { ... }
+    - Dynamic function creation: Set-AgentModeFunction, Set-Item Function:, etc.
+    - Comments above functions (up to 10 lines back)
+    - Multiline comment blocks with structured help (.SYNOPSIS, .DESCRIPTION)
+
+Function descriptions are extracted from single-line comments (#) or
+    content within multiline comment blocks immediately preceding the function.
+
+    #>
 
 param(
     [switch]$Force

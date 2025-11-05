@@ -8,15 +8,11 @@ Lists all WSL distributions with their status.
 
 Displays a verbose list of all installed WSL distributions including their state and version.
 
-## Signature
+## Alias Information
 
-```powershell
-wsl-list
-```
+**Alias for:** `Get-WSLDistribution`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-WSLDistribution` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

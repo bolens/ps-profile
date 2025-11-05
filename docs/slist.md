@@ -8,15 +8,11 @@ Lists installed Scoop packages.
 
 Shows all packages currently installed via Scoop.
 
-## Signature
+## Alias Information
 
-```powershell
-slist
-```
+**Alias for:** `Get-ScoopPackage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-ScoopPackage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

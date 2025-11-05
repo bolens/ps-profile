@@ -8,15 +8,11 @@ Shows disk usage information.
 
 Displays disk space usage for all file system drives.
 
-## Signature
+## Alias Information
 
-```powershell
-df
-```
+**Alias for:** `Get-DiskUsage`
 
-## Parameters
-
-No parameters.
+This is an alias that points to the `Get-DiskUsage` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

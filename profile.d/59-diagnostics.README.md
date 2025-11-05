@@ -11,10 +11,10 @@ See the fragment source: `59-diagnostics.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `Show-ProfileDiagnostic` — >
-- `Show-ProfileStartupTime` — >
-- `Test-ProfileHealth` — >
-- `Show-CommandUsageStats` — >
+- `Show-ProfileDiagnostic` — Shows profile diagnostic information.
+- `Show-ProfileStartupTime` — Shows profile startup time information.
+- `Test-ProfileHealth` — Performs basic health checks for critical dependencies.
+- `Show-CommandUsageStats` — Shows command usage statistics for optimization insights.
 
 Dependencies
 ------------

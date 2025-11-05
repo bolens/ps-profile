@@ -8,18 +8,11 @@ Converts image file formats.
 
 Uses ImageMagick to convert an image from one format to another.
 
-## Signature
+## Alias Information
 
-```powershell
-image-convert
-```
+**Alias for:** `Convert-Image`
 
-## Parameters
-
-### -InputPath
-
-The path to the input image file.
-
+This is an alias that points to the `Convert-Image` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 

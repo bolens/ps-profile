@@ -11,10 +11,10 @@ See the fragment source: `56-database.ps1` for examples and usage notes.
 
 Functions
 ---------
-- `psql` — PostgreSQL client - connect to PostgreSQL databases
-- `mysql` — MySQL client - connect to MySQL databases
-- `mongosh` — MongoDB shell - interact with MongoDB databases
-- `redis-cli` — Redis CLI - command-line interface for Redis
+- `psql` — Register database tools helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `mysql` — Register database tools helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `mongosh` — Register database tools helpers lazily. Avoid expensive Get-Command probes at dot-source.
+- `redis-cli` — Register database tools helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `sqlite3` — SQLite CLI - command-line interface for SQLite databases
 
 Dependencies
