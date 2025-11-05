@@ -26,6 +26,7 @@ obj/
 
 # Ignore generated data files
 scripts/**/*.csv
+scripts/data/psscriptanalyzer-report.json
 
 # Ignore user-specific fragment configuration
 .profile-fragments.json

@@ -7,8 +7,8 @@ scripts/utils/run-lint.ps1
 .DESCRIPTION
     Installs PSScriptAnalyzer if not present, then runs it against profile.d and scripts
     directories. This matches the CI lint task behavior exactly. Reports are saved to
-    psscriptanalyzer-report.json. Exits with error code 1 if any Error-level findings
-    are detected.
+    scripts/data/psscriptanalyzer-report.json. Exits with error code 1 if any Error-level
+    findings are detected.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\run-lint.ps1
@@ -66,7 +66,11 @@ foreach ($p in $paths) {
 
 # Save report to JSON (matching CI behavior)
 $json = $results | Select-Object @{n = 'FilePath'; e = { $_.ScriptName } }, RuleName, Severity, Message, Line, Column | ConvertTo-Json -Depth 5
-$out = "psscriptanalyzer-report.json"
+$dataDir = Join-Path $repoRoot 'scripts' 'data'
+if (-not (Test-Path $dataDir)) {
+    New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+}
+$out = Join-Path $dataDir 'psscriptanalyzer-report.json'
 $json | Out-File -FilePath $out -Encoding utf8
 Write-Output "Saved report to $out"
 
