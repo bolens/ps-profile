@@ -58,6 +58,14 @@ $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
 # Compile regex patterns once for better performance
 $regexCommentLine = [regex]::new('^\s*#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 $regexFunction = [regex]::new('^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexDecorativeEquals = [regex]::new('^# =+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexDecorativeDashes = [regex]::new('^# -+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexMultilineCommentStart = [regex]::new('^\s*<#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexMultilineCommentEnd = [regex]::new('^\s*#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexCommentStart = [regex]::new('^\s*#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexEmptyLine = [regex]::new('^\s*$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexIfStatement = [regex]::new('^\s*if\s*\(', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexInlineComment = [regex]::new("# (.+)$", [System.Text.RegularExpressions.RegexOptions]::Compiled)
 
 foreach ($ps in $psFiles) {
     $mdPath = [System.IO.Path]::ChangeExtension($ps.FullName, '.README.md')
@@ -72,15 +80,15 @@ foreach ($ps in $psFiles) {
         foreach ($l in $headerLines) {
             $trim = $l.Trim()
             # Track multiline comment state
-            if ($trim -match '^\s*<#') { $inMultilineComment = $true; continue }
-            if ($trim -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
+            if ($regexMultilineCommentStart.IsMatch($trim)) { $inMultilineComment = $true; continue }
+            if ($regexMultilineCommentEnd.IsMatch($trim) -and $inMultilineComment) { $inMultilineComment = $false; continue }
 
-            # Skip decorative lines
-            if ($trim -match '^# =+$' -or $trim -match '^# -+$' -or $trim -eq '#') { continue }
+            # Skip decorative lines (use compiled regex for better performance)
+            if ($regexDecorativeEquals.IsMatch($trim) -or $regexDecorativeDashes.IsMatch($trim) -or $trim -eq '#') { continue }
 
             # Look for comment lines (both single-line # and inside multiline comments)
             $m = $regexCommentLine.Match($trim)
-            if ($m.Success -or ($inMultilineComment -and $trim -and -not ($trim -match '^\s*<#') -and -not ($trim -match '^\s*#'))) {
+            if ($m.Success -or ($inMultilineComment -and $trim -and -not $regexMultilineCommentStart.IsMatch($trim) -and -not $regexCommentStart.IsMatch($trim))) {
                 $purposeText = if ($m.Success) { $m.Groups[1].Value } else { $trim }
                 # Skip generic or decorative text
                 if ($purposeText -notmatch '^=+$' -and $purposeText -notmatch '^-+$' -and $purposeText -notmatch '^\.+$') {
@@ -108,7 +116,8 @@ foreach ($ps in $psFiles) {
     catch {}
 
     # Extract top-level function declarations and a short comment above them (if present)
-    $functions = @()
+    # Use List for better performance than array concatenation
+    $functions = [System.Collections.Generic.List[PSCustomObject]]::new()
     try {
         $allLines = Get-Content -Path $ps.FullName -ErrorAction SilentlyContinue
         for ($i = 0; $i -lt $allLines.Count; $i++) {
@@ -123,18 +132,18 @@ foreach ($ps in $psFiles) {
                 # First pass: determine if we're starting inside a multiline comment
                 for ($k = $i - 1; $k -ge [Math]::Max(0, $i - 10); $k--) {
                     $checkLine = $allLines[$k].Trim()
-                    if ($checkLine -match '^\s*<#') { $inMultilineComment = $true; break }
-                    if ($checkLine -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; break }
+                    if ($regexMultilineCommentStart.IsMatch($checkLine)) { $inMultilineComment = $true; break }
+                    if ($regexMultilineCommentEnd.IsMatch($checkLine) -and $inMultilineComment) { $inMultilineComment = $false; break }
                     # Only break on actual code lines, not content inside comments
-                    if ($checkLine -and -not ($checkLine -match '^\s*$') -and -not ($checkLine -match '^\s*#') -and -not ($checkLine -match '^\s*if\s*\(') -and -not $inMultilineComment) { break }
+                    if ($checkLine -and -not $regexEmptyLine.IsMatch($checkLine) -and -not $regexCommentStart.IsMatch($checkLine) -and -not $regexIfStatement.IsMatch($checkLine) -and -not $inMultilineComment) { break }
                 }
                 # Second pass: extract comments
                 for ($j = $i - 1; $j -ge [Math]::Max(0, $i - 10); $j--) {
                     $up = $allLines[$j].Trim()
 
                     # Track multiline comment state
-                    if ($up -match '^\s*<#') { $inMultilineComment = $true; continue }
-                    if ($up -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
+                    if ($regexMultilineCommentStart.IsMatch($up)) { $inMultilineComment = $true; continue }
+                    if ($regexMultilineCommentEnd.IsMatch($up) -and $inMultilineComment) { $inMultilineComment = $false; continue }
 
                     # Check for single-line comment lines above
                     $dm = $regexCommentLine.Match($up)
@@ -147,7 +156,7 @@ foreach ($ps in $psFiles) {
                         }
                     }
                     # Check for content inside multiline comments
-                    elseif ($inMultilineComment -and $up -and -not ($up -match '^\s*<#') -and -not ($up -match '^\s*#')) {
+                    elseif ($inMultilineComment -and $up -and -not $regexMultilineCommentStart.IsMatch($up) -and -not $regexCommentStart.IsMatch($up)) {
                         # Extract the first meaningful line from multiline comment
                         $descText = $up.Trim()
                         # Skip function names, titles (word + dashes), decorative lines
@@ -158,11 +167,11 @@ foreach ($ps in $psFiles) {
                     }
 
                     # Stop if we hit a non-comment, non-empty line (but allow if statements)
-                    if ($up -and -not ($up -match '^\s*$') -and -not ($up -match '^\s*#') -and -not ($up -match '^\s*if\s*\(') -and -not $inMultilineComment) {
+                    if ($up -and -not $regexEmptyLine.IsMatch($up) -and -not $regexCommentStart.IsMatch($up) -and -not $regexIfStatement.IsMatch($up) -and -not $inMultilineComment) {
                         break
                     }
                 }
-                $functions += [PSCustomObject]@{ Name = $fname; Short = $desc }
+                $functions.Add([PSCustomObject]@{ Name = $fname; Short = $desc })
             }
         }
     }
@@ -194,18 +203,18 @@ foreach ($ps in $psFiles) {
                 # First pass: determine if we're starting inside a multiline comment
                 for ($k = $i - 1; $k -ge [Math]::Max(0, $i - 10); $k--) {
                     $checkLine = $allLines[$k].Trim()
-                    if ($checkLine -match '^\s*<#') { $inMultilineComment = $true; break }
-                    if ($checkLine -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; break }
+                    if ($regexMultilineCommentStart.IsMatch($checkLine)) { $inMultilineComment = $true; break }
+                    if ($regexMultilineCommentEnd.IsMatch($checkLine) -and $inMultilineComment) { $inMultilineComment = $false; break }
                     # Only break on actual code lines, not content inside comments
-                    if ($checkLine -and -not ($checkLine -match '^\s*$') -and -not ($checkLine -match '^\s*#') -and -not ($checkLine -match '^\s*if\s*\(') -and -not $inMultilineComment) { break }
+                    if ($checkLine -and -not $regexEmptyLine.IsMatch($checkLine) -and -not $regexCommentStart.IsMatch($checkLine) -and -not $regexIfStatement.IsMatch($checkLine) -and -not $inMultilineComment) { break }
                 }
                 # Second pass: extract comments
                 for ($j = $i - 1; $j -ge [Math]::Max(0, $i - 10); $j--) {
                     $up = $allLines[$j].Trim()
 
                     # Track multiline comment state
-                    if ($up -match '^\s*<#') { $inMultilineComment = $true; continue }
-                    if ($up -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
+                    if ($regexMultilineCommentStart.IsMatch($up)) { $inMultilineComment = $true; continue }
+                    if ($regexMultilineCommentEnd.IsMatch($up) -and $inMultilineComment) { $inMultilineComment = $false; continue }
 
                     # Check for single-line comment lines above
                     $dm = $regexCommentLine.Match($up)
@@ -218,7 +227,7 @@ foreach ($ps in $psFiles) {
                         }
                     }
                     # Check for content inside multiline comments
-                    elseif ($inMultilineComment -and $up -and -not ($up -match '^\s*<#') -and -not ($up -match '^\s*#')) {
+                    elseif ($inMultilineComment -and $up -and -not $regexMultilineCommentStart.IsMatch($up) -and -not $regexCommentStart.IsMatch($up)) {
                         # Extract the first meaningful line from multiline comment
                         $descText = $up.Trim()
                         # Skip function names, titles (word + dashes), decorative lines
@@ -229,7 +238,7 @@ foreach ($ps in $psFiles) {
                     }
 
                     # Stop if we hit a non-comment, non-empty line
-                    if ($up -and -not ($up -match '^\s*$') -and -not ($up -match '^\s*#') -and -not ($up -match '^\s*if\s*\(') -and -not $inMultilineComment) {
+                    if ($up -and -not $regexEmptyLine.IsMatch($up) -and -not $regexCommentStart.IsMatch($up) -and -not $regexIfStatement.IsMatch($up) -and -not $inMultilineComment) {
                         break
                     }
                 }
@@ -237,8 +246,10 @@ foreach ($ps in $psFiles) {
                 # If no comment found above, check for inline comment on the function line
                 if (-not $desc) {
                     $functionLine = $allLines[$i].Trim()
-                    if ($functionLine -match "# (.+)$") {
-                        $inlineDesc = $matches[1]
+                    # Use compiled regex pattern for inline comment detection
+                    $inlineMatch = $regexInlineComment.Match($functionLine)
+                    if ($inlineMatch.Success) {
+                        $inlineDesc = $inlineMatch.Groups[1].Value
                         # Skip decorative comments
                         if ($inlineDesc -notmatch '^[-=\s]*$' -and $inlineDesc -notmatch '^[A-Za-z ]+:$') {
                             $desc = $inlineDesc
@@ -249,7 +260,7 @@ foreach ($ps in $psFiles) {
                 # Only add if not already in the list
                 if ($functions.Name -notcontains $fname) {
                     if (-not $desc) { $desc = 'dynamically-created; see fragment source' }
-                    $functions += [PSCustomObject]@{ Name = $fname; Short = $desc }
+                    $functions.Add([PSCustomObject]@{ Name = $fname; Short = $desc })
                 }
             }
         }

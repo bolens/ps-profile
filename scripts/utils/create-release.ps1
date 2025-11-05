@@ -20,6 +20,12 @@ if (-not $latestTag) {
 
 Write-Output "Comparing commits from $latestTag to HEAD..."
 
+# Compile regex patterns once for better performance
+$regexBreaking = [regex]::new('^feat!|^BREAKING|^break!', [System.Text.RegularExpressions.RegexOptions]::Compiled -bor [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+$regexFeat = [regex]::new('^feat', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexFix = [regex]::new('^fix', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexVersion = [regex]::new('v(\d+\.\d+\.\d+)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 # Analyze commits using conventional commit patterns
 $commits = git log --pretty=format:"%s" "$latestTag..HEAD" 2>$null
 
@@ -29,13 +35,16 @@ $fixes = 0
 $other = 0
 
 foreach ($commit in $commits) {
-    if ($commit -match '^feat!|^BREAKING|^break!') {
+    if ($regexBreaking.IsMatch($commit)) {
         $breakingChanges++
-    } elseif ($commit -match '^feat') {
+    }
+    elseif ($regexFeat.IsMatch($commit)) {
         $features++
-    } elseif ($commit -match '^fix') {
+    }
+    elseif ($regexFix.IsMatch($commit)) {
         $fixes++
-    } else {
+    }
+    else {
         $other++
     }
 }
@@ -50,7 +59,8 @@ Write-Output "  Other: $other"
 $versionBump = "patch"
 if ($breakingChanges -gt 0) {
     $versionBump = "major"
-} elseif ($features -gt 0) {
+}
+elseif ($features -gt 0) {
     $versionBump = "minor"
 }
 
@@ -58,8 +68,11 @@ Write-Output "Recommended version bump: $versionBump"
 
 # Get current version from git tags or package file
 $currentVersion = "0.0.0"
-if ($latestTag -and $latestTag -match 'v(\d+\.\d+\.\d+)') {
-    $currentVersion = $matches[1]
+if ($latestTag) {
+    $versionMatch = $regexVersion.Match($latestTag)
+    if ($versionMatch.Success) {
+        $currentVersion = $versionMatch.Groups[1].Value
+    }
 }
 
 $versionParts = $currentVersion -split '\.'

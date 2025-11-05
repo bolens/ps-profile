@@ -3,23 +3,20 @@ param(
     [string]$Path
 )
 
-if (-not $Path) {
-    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-    $repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
-    $Path = Join-Path $repoRoot 'profile.d'
-}
-
+# Cache path calculations once
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
-if (-not [System.IO.Path]::IsPathRooted($Path)) {
+
+if (-not $Path) {
+    $Path = Join-Path $repoRoot 'profile.d'
+}
+elseif (-not [System.IO.Path]::IsPathRooted($Path)) {
     $Path = Join-Path $repoRoot $Path
 }
 
 Write-Output "Running PSScriptAnalyzer on: $Path"
 
 # Locate repo-level settings file if present
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
 $settingsFile = Join-Path $repoRoot 'PSScriptAnalyzerSettings.psd1'
 if (Test-Path $settingsFile) {
     Write-Output "Using settings file: $settingsFile"

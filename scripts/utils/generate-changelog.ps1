@@ -63,16 +63,31 @@ $changelogPath = Join-Path $repoRoot $OutputFile
 
 Write-Output "Generating changelog..."
 
+# Use Test-HasCommand for efficient command checks (if available from profile, otherwise fallback)
+$testHasCommand = (Test-Path Function:Test-HasCommand) -or (Get-Command Test-HasCommand -ErrorAction SilentlyContinue)
+
 # Check if git-cliff is available
-$gitCliff = Get-Command git-cliff -ErrorAction SilentlyContinue
-if (-not $gitCliff) {
+if ($testHasCommand) {
+    $hasGitCliff = Test-HasCommand git-cliff
+}
+else {
+    $hasGitCliff = $null -ne (Get-Command git-cliff -ErrorAction SilentlyContinue)
+}
+
+if (-not $hasGitCliff) {
     Write-Output "git-cliff not found. Installing..."
 
     # Try to install git-cliff
     try {
         # Check if cargo is available (Rust toolchain)
-        $cargo = Get-Command cargo -ErrorAction SilentlyContinue
-        if ($cargo) {
+        if ($testHasCommand) {
+            $hasCargo = Test-HasCommand cargo
+        }
+        else {
+            $hasCargo = $null -ne (Get-Command cargo -ErrorAction SilentlyContinue)
+        }
+        if ($hasCargo) {
+            $cargo = Get-Command cargo -ErrorAction SilentlyContinue
             Write-Output "Installing git-cliff via cargo..."
             & cargo install git-cliff
         }

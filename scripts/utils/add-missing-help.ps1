@@ -17,8 +17,11 @@ $setAliasRegex = [regex]'Set-Alias\s+-Name\s+([A-Za-z0-9_\-]+)\s+-Value\s+([A-Za
 $setAgentModeAliasRegex = [regex]'Set-AgentModeAlias\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)[\x27\x22]\s+-Target\s+[\x27\x22]?([A-Za-z0-9_\-\.\~]+)'
 $setAliasNameRegex = [regex]'Set-Alias\s+-Name\s+([A-Za-z0-9_\-]+)'
 $valueRegex = [regex]'-Value\s+([A-Za-z0-9_\-\.\~]+)'
+$emptyLineRegex = [regex]'^\s*$'
+$codeLineRegex = [regex]'^\s*[A-Za-z]'
 
-$filesToUpdate = @()
+# Use List for better performance than array concatenation
+$filesToUpdate = [System.Collections.Generic.List[PSCustomObject]]::new()
 $fileContents = @{} # Cache file contents to avoid re-reading
 
 Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
@@ -35,7 +38,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         $functionName = $funcAst.Name
         
         # Skip functions with colons (like global:..) as they are internal aliases
-        if ($functionName -match ':') {
+        if ($regexColon.IsMatch($functionName)) {
             continue
         }
         
@@ -60,16 +63,16 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                 # Efficient line number calculation using pre-calculated line offsets
                 $lineNumber = ($content.Substring(0, $start) -split "`r?`n").Count
                 
-                $filesToUpdate += [PSCustomObject]@{
-                    File           = $file
-                    FunctionName   = $functionName
-                    CommentStart   = $commentStart
-                    CommentEnd     = $commentEnd
-                    HelpText       = $helpText
-                    HasSynopsis    = $hasSynopsis
-                    HasDescription = $hasDescription
-                    LineNumber     = $lineNumber
-                }
+                $filesToUpdate.Add([PSCustomObject]@{
+                        File           = $file
+                        FunctionName   = $functionName
+                        CommentStart   = $commentStart
+                        CommentEnd     = $commentEnd
+                        HelpText       = $helpText
+                        HasSynopsis    = $hasSynopsis
+                        HasDescription = $hasDescription
+                        LineNumber     = $lineNumber
+                    })
             }
         }
     }
@@ -103,7 +106,8 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                             $targetCommand = $valueMatch.Groups[1].Value
                             break
                         }
-                        if ($nextLine -match '^\s*$' -or $nextLine -match '^\s*[A-Za-z]') {
+                        # Use compiled regex for better performance
+                        if ($emptyLineRegex.IsMatch($nextLine) -or $codeLineRegex.IsMatch($nextLine)) {
                             break
                         }
                     }
@@ -129,15 +133,15 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                 $hasDescription = $descriptionRegex.IsMatch($helpText)
                 
                 if (-not $hasSynopsis -or -not $hasDescription) {
-                    $filesToUpdate += [PSCustomObject]@{
-                        File           = $file
-                        AliasName      = $aliasName
-                        TargetCommand  = $targetCommand
-                        HelpText       = $helpText
-                        HasSynopsis    = $hasSynopsis
-                        HasDescription = $hasDescription
-                        LineNumber     = $i + 1
-                    }
+                    $filesToUpdate.Add([PSCustomObject]@{
+                            File           = $file
+                            AliasName      = $aliasName
+                            TargetCommand  = $targetCommand
+                            HelpText       = $helpText
+                            HasSynopsis    = $hasSynopsis
+                            HasDescription = $hasDescription
+                            LineNumber     = $i + 1
+                        })
                 }
             }
         }
@@ -215,92 +219,118 @@ foreach ($group in $groupedByFile) {
     }
 }
 
+# Compile regex patterns once for function name parsing (used in helper functions)
+$regexSetLocation = [regex]::new('^Set-Location(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexGet = [regex]::new('^Get-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexSet = [regex]::new('^Set-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexTest = [regex]::new('^Test-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexShow = [regex]::new('^Show-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexEnable = [regex]::new('^Enable-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexDisable = [regex]::new('^Disable-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexAdd = [regex]::new('^Add-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexRemove = [regex]::new('^Remove-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexUpdate = [regex]::new('^Update-(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexCamelCase = [regex]::new('([A-Z])', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexNotes = [regex]::new('(?s)\.NOTES\s*\n\s*(.+?)(?=\n\s*\.|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 function Generate-Synopsis {
     param([string]$FunctionName)
     
     # Generate synopsis based on function name patterns
-    if ($FunctionName -match '^Set-Location(.+)$') {
-        $target = $matches[1]
+    $match = $regexSetLocation.Match($FunctionName)
+    if ($match.Success) {
+        $target = $match.Groups[1].Value
         return "Changes to the $target directory."
     }
-    elseif ($FunctionName -match '^Get-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexGet.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Gets $what."
     }
-    elseif ($FunctionName -match '^Set-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexSet.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Sets $what."
     }
-    elseif ($FunctionName -match '^Test-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexTest.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Tests $what."
     }
-    elseif ($FunctionName -match '^Show-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexShow.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Shows $what."
     }
-    elseif ($FunctionName -match '^Enable-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexEnable.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Enables $what."
     }
-    elseif ($FunctionName -match '^Disable-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexDisable.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Disables $what."
     }
-    elseif ($FunctionName -match '^Add-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexAdd.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Adds $what."
     }
-    elseif ($FunctionName -match '^Remove-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexRemove.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Removes $what."
     }
-    elseif ($FunctionName -match '^Update-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexUpdate.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Updates $what."
     }
-    else {
-        $readable = $FunctionName -replace '([A-Z])', ' $1' -replace '^ ', ''
-        return "Performs $readable operation."
-    }
+    $readable = $regexCamelCase.Replace($FunctionName, ' $1') -replace '^ ', ''
+    return "Performs $readable operation."
 }
 
 function Generate-Description {
     param([string]$FunctionName, [string]$ExistingHelp)
     
     # Try to extract description from existing help if available
-    if ($ExistingHelp -match '(?s)\.NOTES\s*\n\s*(.+?)(?=\n\s*\.|$)') {
-        $notes = $matches[1].Trim()
+    $notesMatch = $regexNotes.Match($ExistingHelp)
+    if ($notesMatch.Success) {
+        $notes = $notesMatch.Groups[1].Value.Trim()
         if ($notes.Length -lt 200) {
             return $notes
         }
     }
     
     # Generate description based on function name
-    if ($FunctionName -match '^Set-Location(.+)$') {
-        $target = $matches[1]
+    $match = $regexSetLocation.Match($FunctionName)
+    if ($match.Success) {
+        $target = $match.Groups[1].Value
         return "Navigates to the user's $target folder."
     }
-    elseif ($FunctionName -match '^Get-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexGet.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Retrieves information about $what."
     }
-    elseif ($FunctionName -match '^Set-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexSet.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Configures or sets $what."
     }
-    elseif ($FunctionName -match '^Test-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexTest.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Checks if $what meets specified conditions."
     }
-    elseif ($FunctionName -match '^Show-(.+)$') {
-        $what = $matches[1] -replace '([A-Z])', ' $1' -replace '^ ', ''
+    $match = $regexShow.Match($FunctionName)
+    if ($match.Success) {
+        $what = $regexCamelCase.Replace($match.Groups[1].Value, ' $1') -replace '^ ', ''
         return "Displays information about $what."
     }
-    else {
-        $readable = $FunctionName -replace '([A-Z])', ' $1' -replace '^ ', ''
-        return "Provides functionality for $readable."
-    }
+    $readable = $regexCamelCase.Replace($FunctionName, ' $1') -replace '^ ', ''
+    return "Provides functionality for $readable."
 }
 
 Write-Output "`nDone processing files."

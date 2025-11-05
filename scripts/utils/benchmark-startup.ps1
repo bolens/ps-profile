@@ -47,12 +47,21 @@ for ($i = 1; $i -le $Iterations; $i++) {
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $proc.Start() | Out-Null
 
+    # Compile regex pattern once for marker detection
+    $markerRegex = [regex]::new([regex]::Escape($marker), [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    
     # Read output until marker or timeout
-    $out = ''
+    # Use StringBuilder for better performance than string concatenation in loop
+    $outBuilder = [System.Text.StringBuilder]::new()
     while (-not $proc.HasExited -and $sw.Elapsed.TotalSeconds -lt 30) {
         Start-Sleep -Milliseconds 50
-        while (-not $proc.StandardOutput.EndOfStream) { $line = $proc.StandardOutput.ReadLine(); $out += "$line`n"; if ($line -eq $marker) { break } }
-        if ($out -match [regex]::Escape($marker)) { break }
+        while (-not $proc.StandardOutput.EndOfStream) { 
+            $line = $proc.StandardOutput.ReadLine()
+            [void]$outBuilder.AppendLine($line)
+            if ($line -eq $marker) { break } 
+        }
+        $out = $outBuilder.ToString()
+        if ($markerRegex.IsMatch($out)) { break }
     }
     $sw.Stop()
     $ms = $sw.Elapsed.TotalMilliseconds
@@ -66,8 +75,12 @@ for ($i = 1; $i -le $Iterations; $i++) {
 }
 
 # 2) Measure per-fragment dot-source time: run a fresh pwsh -NoProfile that dot-sources a single fragment
+# Compile regex pattern once for extracting numeric values (used in loop)
+$numericRegex = [regex]::new('(\d+\.?\d*)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 $fragments = Get-ChildItem -Path (Join-Path $WorkspaceRoot 'profile.d') -Filter '*.ps1' | Sort-Object Name
-$fragmentResults = @()
+# Use List for better performance than array concatenation
+$fragmentResults = [System.Collections.Generic.List[PSCustomObject]]::new()
 foreach ($frag in $fragments) {
     $times = [System.Collections.Generic.List[double]]::new()
     for ($i = 1; $i -le $Iterations; $i++) {
@@ -97,17 +110,18 @@ Write-Output `$sw.Elapsed.TotalMilliseconds
         $out = $proc.StandardOutput.ReadToEnd()
         $proc.WaitForExit(10000) | Out-Null
         [double]$val = 0
-        if ($out -match '(\d+\.?\d*)') { [double]$val = [double]$matches[1] }
+        $match = $numericRegex.Match($out)
+        if ($match.Success) { [double]$val = [double]$match.Groups[1].Value }
         $times.Add($val)
         Remove-Item -Path $tempFrag -Force -ErrorAction SilentlyContinue
     }
-    $fragmentResults += [PSCustomObject]@{
-        Fragment   = $frag.Name
-        Iterations = $Iterations
-        MeanMs     = [Math]::Round(($times | Measure-Object -Average).Average, 2)
-        MedianMs   = [Math]::Round((($times | Sort-Object)[$times.Count / 2]), 2)
-        Raw        = $times -join ','
-    }
+    $fragmentResults.Add([PSCustomObject]@{
+            Fragment   = $frag.Name
+            Iterations = $Iterations
+            MeanMs     = [Math]::Round(($times | Measure-Object -Average).Average, 2)
+            MedianMs   = [Math]::Round((($times | Sort-Object)[$times.Count / 2]), 2)
+            Raw        = $times -join ','
+        })
 }
 
 # Print results

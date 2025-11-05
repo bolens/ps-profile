@@ -39,6 +39,8 @@ $regexCommentBlock = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpression
 $regexParameter = [regex]::new('(?s)\.PARAMETER\s+(\w+)\s*\n\s*(.+?)(?=\n\s*\.(?:PARAMETER|EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 $regexExample = [regex]::new('(?s)\.EXAMPLE\s*\n\s*(.+?)(?=\n\s*\.(?:EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 $regexLink = [regex]::new('(?s)\.LINK\s*\n\s*(.+?)(?=\n\s*\.(?:LINK)|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexEmptyLine = [regex]::new('^\s*$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexCodeLine = [regex]::new('^\s*[A-Za-z]', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 
 # Handle OutputPath - if it's absolute, use it directly, otherwise join with repo root
 if ([System.IO.Path]::IsPathRooted($OutputPath)) {
@@ -58,11 +60,13 @@ if (-not (Test-Path $docsPath)) {
 }
 
 # Track which commands we're documenting (to clean up stale docs later)
-$documentedCommandNames = @()
+# Use List for better performance than array concatenation
+$documentedCommandNames = [System.Collections.Generic.List[string]]::new()
 
 # Find all functions with comment-based help
-$functions = @()
-$aliases = @()
+# Use List for better performance than array concatenation
+$functions = [System.Collections.Generic.List[PSCustomObject]]::new()
+$aliases = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
     $file = $_.FullName
@@ -127,12 +131,13 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         # Parse the help content - extract all sections
         $synopsis = ""
         $description = ""
-        $parameters = @()
-        $examples = @()
+        # Use List for better performance than array concatenation
+        $parameters = [System.Collections.Generic.List[PSCustomObject]]::new()
+        $examples = [System.Collections.Generic.List[string]]::new()
         $outputs = ""
         $notes = ""
         $inputs = ""
-        $links = @()
+        $links = [System.Collections.Generic.List[string]]::new()
 
         # Extract SYNOPSIS (improved regex to work even without DESCRIPTION)
         if ($helpContent -match '(?s)\.SYNOPSIS\s*\n\s*(.+?)(?=\n\s*\.(?:DESCRIPTION|PARAMETER|EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)') {
@@ -199,20 +204,20 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                 }
             }
             
-            $parameters += [PSCustomObject]@{
-                Name        = $paramName
-                Description = $paramDesc
-                Type        = if ($paramDetail) { $paramDetail.Type } else { "" }
-                Mandatory   = if ($paramDetail) { $paramDetail.Mandatory } else { $false }
-                Pipeline    = if ($paramDetail) { $paramDetail.Pipeline } else { $false }
-                Position    = if ($paramDetail) { $paramDetail.Position } else { $null }
-            }
+            $parameters.Add([PSCustomObject]@{
+                    Name        = $paramName
+                    Description = $paramDesc
+                    Type        = if ($paramDetail) { $paramDetail.Type } else { "" }
+                    Mandatory   = if ($paramDetail) { $paramDetail.Mandatory } else { $false }
+                    Pipeline    = if ($paramDetail) { $paramDetail.Pipeline } else { $false }
+                    Position    = if ($paramDetail) { $paramDetail.Position } else { $null }
+                })
         }
 
         # Extract EXAMPLES (improved to capture multi-line examples)
         $exampleMatches = $regexExample.Matches($helpContent)
         foreach ($exampleMatch in $exampleMatches) {
-            $examples += $exampleMatch.Groups[1].Value.Trim()
+            $examples.Add($exampleMatch.Groups[1].Value.Trim())
         }
 
         # Extract OUTPUTS
@@ -236,22 +241,22 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         # Extract LINKS
         $linkMatches = $regexLink.Matches($helpContent)
         foreach ($linkMatch in $linkMatches) {
-            $links += $linkMatch.Groups[1].Value.Trim()
+            $links.Add($linkMatch.Groups[1].Value.Trim())
         }
 
-        $functions += [PSCustomObject]@{
-            Name        = $functionName
-            Signature   = $signature
-            Synopsis    = $synopsis
-            Description = $description
-            Parameters  = $parameters
-            Examples    = $examples
-            Outputs     = $outputs
-            Notes       = $notes
-            Inputs      = $inputs
-            Links       = $links
-            File        = $file
-        }
+        $functions.Add([PSCustomObject]@{
+                Name        = $functionName
+                Signature   = $signature
+                Synopsis    = $synopsis
+                Description = $description
+                Parameters  = $parameters
+                Examples    = $examples
+                Outputs     = $outputs
+                Notes       = $notes
+                Inputs      = $inputs
+                Links       = $links
+                File        = $file
+            })
     }
     
     # Detect aliases (Set-Alias and Set-AgentModeAlias)
@@ -283,8 +288,8 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                         $targetCommand = $matches[1]
                         break
                     }
-                    # Stop if we hit another command or empty line
-                    if ($nextLine -match '^\s*$' -or $nextLine -match '^\s*[A-Za-z]') {
+                    # Stop if we hit another command or empty line (use compiled regex for better performance)
+                    if ($regexEmptyLine.IsMatch($nextLine) -or $regexCodeLine.IsMatch($nextLine)) {
                         break
                     }
                 }
@@ -353,13 +358,13 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                     }
                 }
                 
-                $aliases += [PSCustomObject]@{
-                    Name        = $aliasName
-                    Target      = $targetCommand
-                    Synopsis    = $synopsis
-                    Description = $description
-                    File        = $file
-                }
+                $aliases.Add([PSCustomObject]@{
+                        Name        = $aliasName
+                        Target      = $targetCommand
+                        Synopsis    = $synopsis
+                        Description = $description
+                        File        = $file
+                    })
             }
         }
     }
@@ -375,7 +380,7 @@ Write-Output "Found $($functions.Count) functions and $($aliases.Count) aliases 
 # Generate markdown documentation
 foreach ($function in $functions) {
     $mdFile = Join-Path $docsPath "$($function.Name).md"
-    $documentedCommandNames += $function.Name
+    $documentedCommandNames.Add($function.Name)
 
     $content = "# $($function.Name)`n`n"
     $content += "## Synopsis`n`n"
@@ -399,10 +404,11 @@ foreach ($function in $functions) {
             }
             
             # Add attributes
-            $attrs = @()
-            if ($param.Mandatory) { $attrs += "Mandatory" }
-            if ($param.Pipeline) { $attrs += "Accepts pipeline input" }
-            if ($param.Position -ne $null) { $attrs += "Position: $($param.Position)" }
+            # Use List for better performance than array concatenation
+            $attrs = [System.Collections.Generic.List[string]]::new()
+            if ($param.Mandatory) { $attrs.Add("Mandatory") }
+            if ($param.Pipeline) { $attrs.Add("Accepts pipeline input") }
+            if ($param.Position -ne $null) { $attrs.Add("Position: $($param.Position)") }
             if ($attrs.Count -gt 0) {
                 $content += "**Attributes:** " + ($attrs -join ", ") + "`n`n"
             }

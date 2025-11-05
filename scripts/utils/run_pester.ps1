@@ -42,13 +42,17 @@ if ($Coverage) {
     Write-Host "Code coverage enabled for: $profileDir"
 }
 
+# Compile regex pattern once for error detection
+$nullArgRegex = [regex]::new("null.*empty.*argument", [System.Text.RegularExpressions.RegexOptions]::Compiled -bor [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+$paramFirstRegex = [regex]::new("Cannot validate argument on parameter 'First'", [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 try {
     $result = Invoke-Pester @pesterParams -PassThru
 }
 catch {
     # Work around Pester 3.4.0 bug with null ErrorRecord handling
     # If we get the specific error about null arguments, suppress it and get the result differently
-    if ($_.Exception.Message -match "null.*empty.*argument" -or $_.Exception.Message -match "Cannot validate argument on parameter 'First'") {
+    if ($nullArgRegex.IsMatch($_.Exception.Message) -or $paramFirstRegex.IsMatch($_.Exception.Message)) {
         Write-Host "Pester framework error suppressed (known issue with null ErrorRecord handling)"
         # Try to run without -PassThru to avoid the error
         Invoke-Pester @pesterParams
