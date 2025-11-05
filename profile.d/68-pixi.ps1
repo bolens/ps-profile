@@ -6,7 +6,7 @@
 # Pixi aliases
 # Requires: pixi (https://github.com/prefix-dev/pixi)
 
-if (Get-Command pixi -ErrorAction SilentlyContinue) {
+if (Test-HasCommand pixi) {
     # Common pixi commands
     <#
     .SYNOPSIS

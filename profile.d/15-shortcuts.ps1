@@ -14,13 +14,8 @@ if (-not (Test-Path Function:vsc)) {
     function Open-VSCode {
         [CmdletBinding()] param()
         try {
-            # Runtime check: prefer Test-CachedCommand if available to avoid Get-Command cost
-            if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
-                if (Test-CachedCommand code) { code . } else { Write-Warning 'code (VS Code) not found in PATH' }
-            }
-            else {
-                if (Test-Path Function:code -ErrorAction SilentlyContinue -or (Get-Command -Name code -ErrorAction SilentlyContinue)) { code . } else { Write-Warning 'code (VS Code) not found in PATH' }
-            }
+            # Use Test-HasCommand which handles caching and fallback internally
+            if (Test-HasCommand code) { code . } else { Write-Warning 'code (VS Code) not found in PATH' }
         }
         catch {
             Write-Warning "Failed to open VS Code: $_"
@@ -43,12 +38,8 @@ if (-not (Test-Path Function:Open-Editor)) {
         param($p)
         if (-not $p) { Write-Warning 'Usage: Open-Editor <path>'; return }
         try {
-            if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
-                if (Test-CachedCommand code) { code $p } else { Write-Warning 'code (VS Code) not found in PATH' }
-            }
-            else {
-                code $p
-            }
+            # Use Test-HasCommand which handles caching and fallback internally
+            if (Test-HasCommand code) { code $p } else { Write-Warning 'code (VS Code) not found in PATH' }
         }
         catch {
             Write-Warning "Failed to open file in editor: $_"

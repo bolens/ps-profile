@@ -34,6 +34,12 @@ function Get-RelativePath {
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
+# Compile regex patterns once for better performance
+$regexCommentBlock = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexParameter = [regex]::new('(?s)\.PARAMETER\s+(\w+)\s*\n\s*(.+?)(?=\n\s*\.(?:PARAMETER|EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexExample = [regex]::new('(?s)\.EXAMPLE\s*\n\s*(.+?)(?=\n\s*\.(?:EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexLink = [regex]::new('(?s)\.LINK\s*\n\s*(.+?)(?=\n\s*\.(?:LINK)|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 # Handle OutputPath - if it's absolute, use it directly, otherwise join with repo root
 if ([System.IO.Path]::IsPathRooted($OutputPath)) {
     $docsPath = $OutputPath
@@ -94,7 +100,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         $beforeText = $content.Substring(0, $start)
 
         # Find the last comment block before the function
-        $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+        $commentMatches = $regexCommentBlock.Matches($beforeText)
         if ($commentMatches.Count -gt 0) {
             $helpContent = $commentMatches[-1].Value  # Last comment block
             # Remove the comment markers
@@ -141,7 +147,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         }
 
         # Extract PARAMETERS with improved regex for multi-line descriptions
-        $paramMatches = [regex]::Matches($helpContent, '(?s)\.PARAMETER\s+(\w+)\s*\n\s*(.+?)(?=\n\s*\.(?:PARAMETER|EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)')
+        $paramMatches = $regexParameter.Matches($helpContent)
         foreach ($paramMatch in $paramMatches) {
             $paramName = $paramMatch.Groups[1].Value
             $paramDesc = $paramMatch.Groups[2].Value.Trim()
@@ -204,7 +210,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         }
 
         # Extract EXAMPLES (improved to capture multi-line examples)
-        $exampleMatches = [regex]::Matches($helpContent, '(?s)\.EXAMPLE\s*\n\s*(.+?)(?=\n\s*\.(?:EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)')
+        $exampleMatches = $regexExample.Matches($helpContent)
         foreach ($exampleMatch in $exampleMatches) {
             $examples += $exampleMatch.Groups[1].Value.Trim()
         }
@@ -228,7 +234,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         }
 
         # Extract LINKS
-        $linkMatches = [regex]::Matches($helpContent, '(?s)\.LINK\s*\n\s*(.+?)(?=\n\s*\.(?:LINK)|$)')
+        $linkMatches = $regexLink.Matches($helpContent)
         foreach ($linkMatch in $linkMatches) {
             $links += $linkMatch.Groups[1].Value.Trim()
         }
@@ -294,7 +300,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                 }
                 
                 # Find the last comment block before the alias
-                $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+                $commentMatches = $regexCommentBlock.Matches($beforeText)
                 if ($commentMatches.Count -gt 0) {
                     $helpContent = $commentMatches[-1].Value
                     $helpContent = $helpContent -replace '^<#\s*', '' -replace '\s*#>$', ''

@@ -3,15 +3,24 @@ param(
     [string]$TestFile = "",
     [switch]$Coverage
 )
-if (-not (Get-Command Invoke-Pester -ErrorAction SilentlyContinue)) {
+
+# Cache root directory path calculation
+$rootDir = Split-Path (Split-Path $PSScriptRoot)
+$testsDir = Join-Path $rootDir 'tests'
+$profileDir = Join-Path $rootDir 'profile.d'
+
+# Check for Pester module (cache module check)
+$pesterCmd = Get-Command Invoke-Pester -ErrorAction SilentlyContinue
+if (-not $pesterCmd) {
     Write-Host 'Pester not found; installing to CurrentUser scope...'
     Install-Module -Name Pester -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+    $pesterCmd = Get-Command Invoke-Pester -ErrorAction Stop
 }
 
 $pesterParams = @{}
 if ([string]::IsNullOrWhiteSpace($TestFile)) {
     # Run all tests in the tests/ directory
-    $files = Get-ChildItem -Path (Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'tests') -Filter '*.ps1' -File | Sort-Object Name | Select-Object -ExpandProperty FullName
+    $files = Get-ChildItem -Path $testsDir -Filter '*.ps1' -File | Sort-Object Name | Select-Object -ExpandProperty FullName
     Write-Host "Running Pester tests: $($files -join ', ')"
     $pesterParams.Script = $files
 }
@@ -22,15 +31,15 @@ else {
 
 if ($Coverage) {
     # Add code coverage for profile.d directory
-    $profilePath = Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'profile.d'
-    $pesterParams.CodeCoverage = "$profilePath/*.ps1"
+    $pesterParams.CodeCoverage = "$profileDir/*.ps1"
 
     # CodeCoverageOutputFile parameter is only available in Pester 4.0+
+    # Cache module version check
     $pesterModule = Get-Module -ListAvailable Pester | Sort-Object Version -Descending | Select-Object -First 1
-    if ($pesterModule.Version -ge [version]'4.0.0') {
+    if ($pesterModule -and $pesterModule.Version -ge [version]'4.0.0') {
         $pesterParams.CodeCoverageOutputFile = 'coverage.xml'
     }
-    Write-Host "Code coverage enabled for: $profilePath"
+    Write-Host "Code coverage enabled for: $profileDir"
 }
 
 try {

@@ -15,8 +15,8 @@ if (-not (Test-Path Function:Open-Item -ErrorAction SilentlyContinue)) {
     function Open-Item {
         param($p)
         if ($IsWindows) { Start-Process -FilePath $p } else {
-            if (Test-Path Function:'xdg-open' -ErrorAction SilentlyContinue -or $null -NE (Get-Command xdg-open -ErrorAction SilentlyContinue)) { xdg-open $p }
-            elseif (Test-Path Function:'open' -ErrorAction SilentlyContinue -or $null -NE (Get-Command open -ErrorAction SilentlyContinue)) { open $p }
+            if (Test-HasCommand xdg-open) { xdg-open $p }
+            elseif (Test-HasCommand open) { open $p }
             else { Write-Warning "No opener found for $p" }
         }
     }

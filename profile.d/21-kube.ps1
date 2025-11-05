@@ -14,32 +14,15 @@ Notes:
 #>
 
 # minikube start/stop conveniences: register cheap stubs that only probe
-# for `minikube` when invoked. If `Test-CachedCommand` is available, prefer it.
+# for `minikube` when invoked. Use Test-HasCommand which handles caching internally.
 if (-not (Test-Path Function:\minikube-start)) {
-    # Register a stub that prefers Test-CachedCommand at runtime when available
-    $sbStart = {
-        param($a)
-        if (Test-Path "Function:\Test-CachedCommand" -or Test-Path "Function:\global:Test-CachedCommand") {
-            try { if (Test-CachedCommand minikube) { minikube start @a } else { Write-Warning 'minikube not found' } } catch { Write-Warning 'minikube check failed' }
-        }
-        else {
-            if (Get-Command minikube -ErrorAction SilentlyContinue) { minikube start @a } else { Write-Warning 'minikube not found' }
-        }
-    }
-    Set-Item -Path Function:\minikube-start -Value $sbStart -Force | Out-Null
+    # Use Test-HasCommand which handles caching and fallback internally
+    Set-Item -Path Function:\minikube-start -Value { param($a) if (Test-HasCommand minikube) { minikube start @a } else { Write-Warning 'minikube not found' } } -Force | Out-Null
 }
 
 if (-not (Test-Path Function:\minikube-stop)) {
-    $sbStop = {
-        param($a)
-        if (Test-Path "Function:\Test-CachedCommand" -or Test-Path "Function:\global:Test-CachedCommand") {
-            try { if (Test-CachedCommand minikube) { minikube stop @a } else { Write-Warning 'minikube not found' } } catch { Write-Warning 'minikube check failed' }
-        }
-        else {
-            if (Get-Command minikube -ErrorAction SilentlyContinue) { minikube stop @a } else { Write-Warning 'minikube not found' }
-        }
-    }
-    Set-Item -Path Function:\minikube-stop -Value $sbStop -Force | Out-Null
+    # Use Test-HasCommand which handles caching and fallback internally
+    Set-Item -Path Function:\minikube-stop -Value { param($a) if (Test-HasCommand minikube) { minikube stop @a } else { Write-Warning 'minikube not found' } } -Force | Out-Null
 }
 
 # Do NOT duplicate kctx here; `15-kubectl.ps1` is authoritative for kubectl shorthands.

@@ -6,7 +6,7 @@
 # UV aliases and functions
 # Requires: uv (https://github.com/astral-sh/uv)
 
-if (Get-Command uv -ErrorAction SilentlyContinue) {
+if (Test-HasCommand uv) {
     # UV pip replacement
     <#
     .SYNOPSIS

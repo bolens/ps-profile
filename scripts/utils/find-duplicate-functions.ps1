@@ -4,10 +4,11 @@ $profileDir = Join-Path $root 'profile.d'
 if (-not (Test-Path $profileDir)) { Write-Error "profile.d not found at $profileDir"; exit 2 }
 $files = Get-ChildItem -Path $profileDir -Filter '*.ps1' -File
 $found = @()
-$regex = [regex]"function\s+([A-Za-z0-9_-]+)\s*\{"
+# Compile regex once for better performance
+$functionRegex = [regex]"function\s+([A-Za-z0-9_-]+)\s*\{"
 foreach ($f in $files) {
     $content = Get-Content -Raw -Path $f.FullName
-    foreach ($m in $regex.Matches($content)) {
+    foreach ($m in $functionRegex.Matches($content)) {
         $found += [PSCustomObject]@{ File = $f.FullName; Name = $m.Groups[1].Value }
     }
 }

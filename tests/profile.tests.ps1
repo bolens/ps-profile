@@ -1,8 +1,12 @@
 Describe 'Profile fragments' {
+    BeforeAll {
+        $script:ProfileDir = Join-Path $PSScriptRoot '..\profile.d'
+        $script:BootstrapPath = Join-Path $script:ProfileDir '00-bootstrap.ps1'
+    }
+
     It 'loads fragments twice without error (idempotency)' {
-        $fragDir = Join-Path $PSScriptRoot '..\profile.d'
         # Dot-source each fragment inside a scriptblock that defines $PSScriptRoot so fragments can rely on it.
-        $files = Get-ChildItem -Path $fragDir -Filter *.ps1 -File | Sort-Object Name | Select-Object -ExpandProperty FullName
+        $files = Get-ChildItem -Path $script:ProfileDir -Filter *.ps1 -File | Sort-Object Name | Select-Object -ExpandProperty FullName
         # Dot-source all fragments in the same scope so helpers defined in bootstrap are visible
         & { param($files, $root) $PSScriptRoot = $root; foreach ($f in $files) { . $f } } $files $PSScriptRoot
         & { param($files, $root) $PSScriptRoot = $root; foreach ($f in $files) { . $f } } $files $PSScriptRoot
@@ -11,7 +15,7 @@ Describe 'Profile fragments' {
     }
 
     It 'Set-AgentModeFunction registers a function safely' {
-        . "$PSScriptRoot/..\profile.d\00-bootstrap.ps1"
+        . $script:BootstrapPath
         $sb = Set-AgentModeFunction -Name 'test_agent_fn' -Body { return 'ok' } -ReturnScriptBlock
         # The helper returns the created ScriptBlock on success, or $false when it was a no-op.
         $sb | Should Not Be $false
@@ -38,7 +42,7 @@ Describe 'Profile fragments' {
 
     Context 'Utility functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\05-utilities.ps1"
+            . (Join-Path $script:ProfileDir '05-utilities.ps1')
         }
 
         It 'Get-EnvVar retrieves environment variable from registry' {
@@ -90,60 +94,105 @@ Describe 'Profile fragments' {
             $password | Should Match '^[a-zA-Z0-9]+$'
         }
 
+        It 'pwgen generates unique passwords on consecutive calls' {
+            $pass1 = pwgen
+            $pass2 = pwgen
+            # Passwords should be different (very unlikely to be the same)
+            $pass1 | Should Not Be $pass2
+        }
+
         It 'Remove-Path removes directory from PATH' {
             # Test Remove-Path function
-            $testPath = 'C:\Test\Path'
+            $testPath = Join-Path $TestDrive 'TestPath'
 
             # Add test path to PATH temporarily
             $originalPath = $env:PATH
-            $env:PATH = "$env:PATH;$testPath"
+            try {
+                $env:PATH = "$env:PATH;$testPath"
 
-            # Verify path was added
-            $env:PATH | Should Match ([regex]::Escape($testPath))
+                # Verify path was added
+                $env:PATH | Should Match ([regex]::Escape($testPath))
 
-            # Remove the path
-            Remove-Path -Path $testPath
+                # Remove the path
+                Remove-Path -Path $testPath
 
-            # Verify path was removed
-            $env:PATH | Should Not Match ([regex]::Escape($testPath))
-
-            # Restore original PATH
-            $env:PATH = $originalPath
+                # Verify path was removed
+                $env:PATH | Should Not Match ([regex]::Escape($testPath))
+            }
+            finally {
+                # Restore original PATH
+                $env:PATH = $originalPath
+            }
         }
 
         It 'Add-Path adds directory to PATH' {
             # Test Add-Path function
-            $testPath = 'C:\Test\AddPath'
+            $testPath = Join-Path $TestDrive 'TestAddPath'
 
             # Store original PATH
             $originalPath = $env:PATH
+            try {
+                # Ensure test path is not already in PATH
+                if ($env:PATH -split ';' -contains $testPath) {
+                    Remove-Path -Path $testPath
+                }
 
-            # Ensure test path is not already in PATH
-            if ($env:PATH -split ';' -contains $testPath) {
+                # Add the test path
+                Add-Path -Path $testPath
+
+                # Verify path was added
+                $env:PATH | Should Match ([regex]::Escape($testPath))
+
+                # Clean up - remove the test path
                 Remove-Path -Path $testPath
+
+                # Verify path was removed
+                $env:PATH | Should Not Match ([regex]::Escape($testPath))
             }
+            finally {
+                # Restore original PATH
+                $env:PATH = $originalPath
+            }
+        }
 
-            # Add the test path
-            Add-Path -Path $testPath
+        It 'Get-EnvVar handles non-existent variables gracefully' {
+            $nonExistent = "NON_EXISTENT_VAR_$(Get-Random)"
+            $result = Get-EnvVar -Name $nonExistent
+            # Should return null or empty for non-existent vars
+            ($result -eq $null -or $result -eq '') | Should Be $true
+        }
 
-            # Verify path was added
-            $env:PATH | Should Match ([regex]::Escape($testPath))
+        It 'Set-EnvVar can delete variables by setting to null' {
+            $tempVar = "TEST_DELETE_$(Get-Random)"
+            try {
+                # Set a value
+                Set-EnvVar -Name $tempVar -Value 'test'
+                $before = Get-EnvVar -Name $tempVar
+                $before | Should Be 'test'
+                
+                # Delete by setting to null
+                Set-EnvVar -Name $tempVar -Value $null
+                $after = Get-EnvVar -Name $tempVar
+                ($after -eq $null -or $after -eq '') | Should Be $true
+            }
+            finally {
+                Set-EnvVar -Name $tempVar -Value $null
+            }
+        }
 
-            # Clean up - remove the test path
-            Remove-Path -Path $testPath
-
-            # Verify path was removed
-            $env:PATH | Should Not Match ([regex]::Escape($testPath))
-
-            # Restore original PATH
-            $env:PATH = $originalPath
+        It 'from-epoch handles epoch 0 correctly' {
+            # Test epoch 0 (1970-01-01)
+            $result = from-epoch 0
+            $result.Year | Should Be 1970
+            $result.Month | Should Be 1
+            $result.Day | Should Be 1
         }
     }
 
     Context 'File utility functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\02-files-conversion.ps1"
-            . "$PSScriptRoot/..\profile.d\02-files-utilities.ps1"
+            . (Join-Path $script:ProfileDir '02-files-conversion.ps1')
+            . (Join-Path $script:ProfileDir '02-files-utilities.ps1')
             # Ensure file helper functions are initialized
             Ensure-FileConversion
             Ensure-FileUtilities
@@ -164,40 +213,46 @@ Describe 'Profile fragments' {
         }
 
         It 'file-hash calculates SHA256 correctly' {
-            $tempFile = [IO.Path]::GetTempFileName()
-            try {
-                Set-Content -Path $tempFile -Value 'test content' -NoNewline
-                $hash = file-hash $tempFile
-                $hash.Algorithm | Should Be 'SHA256'
-                $hash.Hash.Length | Should Be 64  # SHA256 is 64 hex chars
-            }
-            finally {
-                Remove-Item $tempFile -Force
-            }
+            $tempFile = Join-Path $TestDrive 'test_hash.txt'
+            Set-Content -Path $tempFile -Value 'test content' -NoNewline
+            $hash = file-hash $tempFile
+            $hash.Algorithm | Should Be 'SHA256'
+            $hash.Hash.Length | Should Be 64  # SHA256 is 64 hex chars
         }
 
         It 'filesize returns human-readable size' {
-            # Ensure filesize function is available
-            if (-not (Get-Command filesize -ErrorAction SilentlyContinue)) {
-                Ensure-FileUtilities
-            }
-            $tempFile = [IO.Path]::GetTempFileName()
-            try {
-                # Create a 1024 byte file
-                $content = 'x' * 1024
-                Set-Content -Path $tempFile -Value $content -NoNewline
-                $result = filesize $tempFile
-                $result | Should Match '1\.00 KB'
-            }
-            finally {
-                Remove-Item $tempFile -Force
-            }
+            $tempFile = Join-Path $TestDrive 'test_size.txt'
+            # Create a 1024 byte file
+            $content = 'x' * 1024
+            Set-Content -Path $tempFile -Value $content -NoNewline
+            $result = filesize $tempFile
+            $result | Should Match '1\.00 KB'
+        }
+
+        It 'to-base64 handles empty strings' {
+            $empty = ''
+            $encoded = $empty | to-base64
+            $decoded = $encoded | from-base64
+            $decoded.TrimEnd("`r", "`n") | Should Be $empty
+        }
+
+        It 'to-base64 handles unicode strings' {
+            $unicode = 'Hello 世界'
+            $encoded = $unicode | to-base64
+            $decoded = $encoded | from-base64
+            $decoded.TrimEnd("`r", "`n") | Should Be $unicode
+        }
+
+        It 'file-hash handles non-existent files gracefully' {
+            $nonExistent = Join-Path $TestDrive 'non_existent.txt'
+            # Should handle error gracefully
+            { file-hash $nonExistent } | Should Not Throw
         }
     }
 
     Context 'System utility functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\07-system.ps1"
+            . (Join-Path $script:ProfileDir '07-system.ps1')
         }
 
         It 'which shows command information' {
@@ -206,47 +261,71 @@ Describe 'Profile fragments' {
             $result.Name | Should Be 'Get-Command'
         }
 
+        It 'which handles non-existent commands gracefully' {
+            $nonExistent = "NonExistentCommand_$(Get-Random)"
+            $result = which $nonExistent
+            # Should return null or handle gracefully
+            ($result -eq $null -or $result.Count -eq 0) | Should Be $true
+        }
+
         It 'pgrep searches for patterns in files' {
-            $tempFile = [IO.Path]::GetTempFileName()
-            try {
-                Set-Content -Path $tempFile -Value 'test content with pattern'
-                $result = pgrep 'pattern' $tempFile
-                $result | Should Not Be $null
-                $result.Line | Should Match 'pattern'
-            }
-            finally {
-                Remove-Item $tempFile -Force
-            }
+            $tempFile = Join-Path $TestDrive 'test_pgrep.txt'
+            Set-Content -Path $tempFile -Value 'test content with pattern'
+            $result = pgrep 'pattern' $tempFile
+            $result | Should Not Be $null
+            $result.Line | Should Match 'pattern'
+        }
+
+        It 'pgrep handles pattern not found gracefully' {
+            $tempFile = Join-Path $TestDrive 'test_no_match.txt'
+            Set-Content -Path $tempFile -Value 'no match here'
+            $result = pgrep 'nonexistentpattern' $tempFile
+            # Should return empty or null
+            ($result -eq $null -or $result.Count -eq 0) | Should Be $true
         }
 
         It 'touch creates empty files' {
-            $tempFile = [IO.Path]::GetTempFileName()
-            Remove-Item $tempFile -Force
+            $tempFile = Join-Path $TestDrive 'test_touch.txt'
+            if (Test-Path $tempFile) {
+                Remove-Item $tempFile -Force
+            }
             touch $tempFile
             Test-Path $tempFile | Should Be $true
-            Remove-Item $tempFile -Force
         }
 
         It 'mkdir creates directories' {
-            $tempDir = [IO.Path]::GetTempPath() + [Guid]::NewGuid().ToString()
+            $tempDir = Join-Path $TestDrive 'test_mkdir'
             mkdir $tempDir
             Test-Path $tempDir | Should Be $true
-            Remove-Item $tempDir -Force
         }
 
         It 'search finds files recursively' {
-            $tempDir = [IO.Path]::GetTempPath() + [Guid]::NewGuid().ToString()
+            $tempDir = Join-Path $TestDrive 'test_search'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             New-Item -ItemType File -Path (Join-Path $tempDir 'test.txt') -Force | Out-Null
 
+            Push-Location $tempDir
             try {
-                Push-Location $tempDir
                 $result = search test.txt
                 $result | Where-Object { $_ -eq 'test.txt' } | Should Not BeNullOrEmpty
             }
             finally {
                 Pop-Location
-                Remove-Item $tempDir -Recurse -Force
+            }
+        }
+
+        It 'search handles empty directories' {
+            $emptyDir = Join-Path $TestDrive 'empty_search'
+            New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
+
+            Push-Location $emptyDir
+            try {
+                $result = search '*.txt'
+                # Should return empty array or null
+                ($result -eq $null -or $result.Count -eq 0) | Should Be $true
+            }
+            finally {
+                Pop-Location
             }
         }
 
@@ -282,25 +361,19 @@ Describe 'Profile fragments' {
         }
 
         It 'zip creates archives' {
-            $tempDir = [IO.Path]::GetTempPath() + [Guid]::NewGuid().ToString()
-            $zipFile = [IO.Path]::GetTempFileName() + '.zip'
+            $tempDir = Join-Path $TestDrive 'test_zip'
+            $zipFile = Join-Path $TestDrive 'test.zip'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             New-Item -ItemType File -Path (Join-Path $tempDir 'test.txt') -Value 'test' -Force | Out-Null
 
-            try {
-                zip -Path $tempDir -DestinationPath $zipFile
-                Test-Path $zipFile | Should Be $true
-            }
-            finally {
-                Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-                Remove-Item $zipFile -Force -ErrorAction SilentlyContinue
-            }
+            zip -Path $tempDir -DestinationPath $zipFile
+            Test-Path $zipFile | Should Be $true
         }
     }
 
     Context 'System info functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\08-system-info.ps1"
+            . (Join-Path $script:ProfileDir '08-system-info.ps1')
         }
 
         It 'uptime returns a TimeSpan object' {
@@ -333,15 +406,15 @@ Describe 'Profile fragments' {
 
     Context 'Git functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\11-git.ps1"
+            . (Join-Path $script:ProfileDir '11-git.ps1')
         }
 
         It 'git shortcuts are available' {
             # Test that basic git shortcuts are defined
-            Get-Command gs -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
-            Get-Command ga -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
-            Get-Command gc -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
-            Get-Command gp -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
+            $expectedCommands = @('gs', 'ga', 'gc', 'gp')
+            foreach ($cmd in $expectedCommands) {
+                Get-Command $cmd -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
+            }
         }
 
         It 'Ensure-GitHelper initializes lazy helpers' {
@@ -349,14 +422,16 @@ Describe 'Profile fragments' {
             { Ensure-GitHelper } | Should Not Throw
 
             # After calling Ensure-GitHelper, lazy functions should be available
-            Get-Command gcl -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
-            Get-Command gsta -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
+            $lazyCommands = @('gcl', 'gsta')
+            foreach ($cmd in $lazyCommands) {
+                Get-Command $cmd -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
+            }
         }
     }
 
     Context 'Clipboard functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\16-clipboard.ps1"
+            . (Join-Path $script:ProfileDir '16-clipboard.ps1')
         }
 
         It 'cb function is available' {
@@ -380,19 +455,14 @@ Describe 'Profile fragments' {
 
     Context 'Shortcut functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\15-shortcuts.ps1"
+            . (Join-Path $script:ProfileDir '15-shortcuts.ps1')
         }
 
-        It 'vsc function is available' {
-            Get-Command vsc -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
-        }
-
-        It 'e function is available' {
-            Get-Command e -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
-        }
-
-        It 'project-root function is available' {
-            Get-Command project-root -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
+        It 'shortcut functions are available' {
+            $expectedCommands = @('vsc', 'e', 'project-root')
+            foreach ($cmd in $expectedCommands) {
+                Get-Command $cmd -CommandType Function -ErrorAction SilentlyContinue | Should Not Be $null
+            }
         }
 
         It 'vsc opens current directory in VS Code' {
@@ -424,8 +494,8 @@ Describe 'Profile fragments' {
 
     Context 'Alias functions' {
         BeforeAll {
-            . "$PSScriptRoot/..\profile.d\00-bootstrap.ps1"
-            . "$PSScriptRoot/..\profile.d\33-aliases.ps1"
+            . $script:BootstrapPath
+            . (Join-Path $script:ProfileDir '33-aliases.ps1')
         }
 
         It 'Enable-Aliases function is available' {
@@ -446,33 +516,23 @@ Describe 'Profile fragments' {
             # Create the ll function directly for testing
             Set-Item -Path Function:ll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) Get-ChildItem @a } -Force
 
-            $tempDir = [IO.Path]::GetTempPath()
-            Push-Location $tempDir
-            try {
-                # Create a test file
-                $testFile = 'test_ll_file.txt'
-                New-Item -ItemType File -Path $testFile -Force | Out-Null
+            $testFile = Join-Path $TestDrive 'test_ll_file.txt'
+            New-Item -ItemType File -Path $testFile -Force | Out-Null
 
-                # Test ll function
-                $result = ll $testFile
-                $result | Should Not Be $null
-                $result.Name | Should Be $testFile
-
-                Remove-Item $testFile -Force
-            }
-            finally {
-                Pop-Location
-            }
+            # Test ll function
+            $result = ll $testFile
+            $result | Should Not Be $null
+            $result.Name | Should Be 'test_ll_file.txt'
         }
 
         It 'la function shows hidden files' {
             # Create the la function directly for testing
             Set-Item -Path Function:la -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) Get-ChildItem -Force @a } -Force
 
-            # Use current directory for testing
-            $originalLocation = Get-Location
+            # Use TestDrive for testing
+            Push-Location $TestDrive
             try {
-                # Create a hidden test file in current directory
+                # Create a hidden test file
                 $testFile = 'test_la_file.txt'
                 New-Item -ItemType File -Path $testFile -Force | Out-Null
                 # Set file as hidden using attrib command
@@ -482,11 +542,9 @@ Describe 'Profile fragments' {
                 $result = la
                 $result | Should Not Be $null
                 ($result | Where-Object { $_.Name -eq $testFile }) | Should Not BeNullOrEmpty
-
-                Remove-Item $testFile -Force
             }
             finally {
-                Set-Location $originalLocation
+                Pop-Location
             }
         }
 

@@ -6,7 +6,7 @@
 # Dust aliases
 # Requires: dust (https://github.com/bootandy/dust)
 
-if (Get-Command dust -ErrorAction SilentlyContinue) {
+if (Test-HasCommand dust) {
     # Main dust command
     <#
     .SYNOPSIS

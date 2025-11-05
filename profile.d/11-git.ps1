@@ -142,7 +142,7 @@ if (-not (Test-Path Function:Ensure-GitHelper)) {
     function Ensure-GitHelper {
         if ($script:__GitHelpersInitialized) { return }
         $script:__GitHelpersInitialized = $true
-        if (-not (Get-Command -Name Set-AgentModeFunction -ErrorAction SilentlyContinue)) { return }
+        if (-not (Test-Path Function:Set-AgentModeFunction)) { return }
         $null = Set-AgentModeFunction -Name 'Invoke-GitClone' -Body { git clone @args } # Git clone - clone a repository
         Set-Alias -Name gcl -Value Invoke-GitClone -ErrorAction SilentlyContinue
         $null = Set-AgentModeFunction -Name 'Save-GitStash' -Body { git stash @args } # Git stash - stash changes
@@ -185,18 +185,11 @@ if (-not (Test-Path Function:Ensure-GitHelper)) {
         Set-Alias -Name gdefault -Value Get-GitDefaultBranch -ErrorAction SilentlyContinue
 
         # GitHub CLI helpers
-        if (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue) {
-            $null = Set-AgentModeFunction -Name 'New-GitHubPullRequest' -Body { if (Test-CachedCommand gh) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
-            Set-Alias -Name prc -Value New-GitHubPullRequest -ErrorAction SilentlyContinue
-            $null = Set-AgentModeFunction -Name 'Show-GitHubPullRequest' -Body { if (Test-CachedCommand gh) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
-            Set-Alias -Name prv -Value Show-GitHubPullRequest -ErrorAction SilentlyContinue
-        }
-        else {
-            $null = Set-AgentModeFunction -Name 'New-GitHubPullRequest' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
-            Set-Alias -Name prc -Value New-GitHubPullRequest -ErrorAction SilentlyContinue
-            $null = Set-AgentModeFunction -Name 'Show-GitHubPullRequest' -Body { if (Get-Command gh -ErrorAction SilentlyContinue) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
-            Set-Alias -Name prv -Value Show-GitHubPullRequest -ErrorAction SilentlyContinue
-        }
+        # Use Test-HasCommand which handles caching and fallback internally
+        $null = Set-AgentModeFunction -Name 'New-GitHubPullRequest' -Body { if (Test-HasCommand gh) { gh pr create @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR create - create a pull request
+        Set-Alias -Name prc -Value New-GitHubPullRequest -ErrorAction SilentlyContinue
+        $null = Set-AgentModeFunction -Name 'Show-GitHubPullRequest' -Body { if (Test-HasCommand gh) { gh pr view --web @args } else { Write-Warning 'GitHub CLI (gh) not found' } } # GitHub PR view - view pull request in browser
+        Set-Alias -Name prv -Value Show-GitHubPullRequest -ErrorAction SilentlyContinue
     }
 }
 

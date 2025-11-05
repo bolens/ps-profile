@@ -4,5 +4,6 @@
 # ===============================================
 
 if (-not (Test-Path Function:ld -ErrorAction SilentlyContinue)) {
-    Set-Item -Path Function:ld -Value { if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) { if (Test-CachedCommand lazydocker) { lazydocker @Args } else { Write-Warning 'lazydocker not found' } } else { if (Get-Command lazydocker -ErrorAction SilentlyContinue) { lazydocker @Args } else { Write-Warning 'lazydocker not found' } } } -Force | Out-Null
+    # Use Test-HasCommand which handles caching and fallback internally
+    Set-Item -Path Function:ld -Value { if (Test-HasCommand lazydocker) { lazydocker @Args } else { Write-Warning 'lazydocker not found' } } -Force | Out-Null
 }

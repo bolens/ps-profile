@@ -174,7 +174,7 @@ function Test-HasCommand {
     # Fast provider checks avoid triggering module autoload/discovery
     if (Test-Path "Function:\\global:$Name" -or Test-Path "Function:\\$Name" -or Test-Path "Alias:\\$Name") { return $true }
     # If we have the cached helper, prefer it to avoid repeated Get-Command calls
-    if (Test-Path "Function:\\global:Test-CachedCommand" -or (Get-Command -Name Test-CachedCommand -ErrorAction SilentlyContinue)) {
+    if (Test-Path "Function:\\global:Test-CachedCommand") {
         try { return [bool](Test-CachedCommand -Name $Name) } catch { Write-Verbose "Test-CachedCommand failed: $($_.Exception.Message)" }
     }
     # Last resort: Get-Command (may autoload modules)

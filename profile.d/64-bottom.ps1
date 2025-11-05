@@ -6,40 +6,22 @@
 # Bottom aliases
 # Requires: bottom (https://github.com/ClementTsang/bottom)
 
-if (Get-Command btm -ErrorAction SilentlyContinue) {
-    # Main bottom command
-    <#
-    .SYNOPSIS
-        Launches bottom system monitor.
-    .DESCRIPTION
-        Opens bottom (btm), a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
-    #>
-    Set-Alias -Name top -Value btm -Option AllScope -Force
-    
-    <#
-    .SYNOPSIS
-        Launches bottom system monitor.
-    .DESCRIPTION
-        Opens bottom (btm), a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
-    #>
-    Set-Alias -Name htop -Value btm -Option AllScope -Force
-    
-    <#
-    .SYNOPSIS
-        Launches bottom system monitor.
-    .DESCRIPTION
-        Opens bottom (btm), a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
-    #>
-    Set-Alias -Name monitor -Value btm -Option AllScope -Force
+$bottomCmd = $null
+if (Test-HasCommand btm) {
+    $bottomCmd = 'btm'
 }
-elseif (Get-Command bottom -ErrorAction SilentlyContinue) {
+elseif (Test-HasCommand bottom) {
+    $bottomCmd = 'bottom'
+}
+
+if ($bottomCmd) {
     <#
     .SYNOPSIS
         Launches bottom system monitor.
     .DESCRIPTION
         Opens bottom, a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
     #>
-    Set-Alias -Name top -Value bottom -Option AllScope -Force
+    Set-Alias -Name top -Value $bottomCmd -Option AllScope -Force
     
     <#
     .SYNOPSIS
@@ -47,7 +29,7 @@ elseif (Get-Command bottom -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Opens bottom, a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
     #>
-    Set-Alias -Name htop -Value bottom -Option AllScope -Force
+    Set-Alias -Name htop -Value $bottomCmd -Option AllScope -Force
     
     <#
     .SYNOPSIS
@@ -55,7 +37,7 @@ elseif (Get-Command bottom -ErrorAction SilentlyContinue) {
     .DESCRIPTION
         Opens bottom, a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
     #>
-    Set-Alias -Name monitor -Value bottom -Option AllScope -Force
+    Set-Alias -Name monitor -Value $bottomCmd -Option AllScope -Force
 }
 else {
     Write-Warning "bottom (btm) not found. Install with: scoop install bottom"

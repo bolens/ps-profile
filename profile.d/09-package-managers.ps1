@@ -4,7 +4,7 @@
 # ===============================================
 
 # Scoop helpers
-if (Get-Command scoop -ErrorAction SilentlyContinue) {
+if (Test-HasCommand scoop) {
     # Scoop install
     <#
     .SYNOPSIS
@@ -90,7 +90,7 @@ else {
 }
 
 # UV helpers
-if (Get-Command uv -ErrorAction SilentlyContinue) {
+if (Test-HasCommand uv) {
     # UV install (tool install)
     <#
     .SYNOPSIS
@@ -146,7 +146,7 @@ else {
 }
 
 # PNPM helpers
-if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+if (Test-HasCommand pnpm) {
     # PNPM install
     <#
     .SYNOPSIS

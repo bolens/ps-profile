@@ -17,12 +17,8 @@ if (-not (Test-Path Function:Copy-ToClipboard -ErrorAction SilentlyContinue)) {
         [CmdletBinding()] param([Parameter(ValueFromPipeline = $true)] $input)
         process {
             try {
-                if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-                    if (Test-CachedCommand Set-Clipboard) { $input | Set-Clipboard } else { $input | Out-String | clip }
-                }
-                else {
-                    if ($null -ne (Get-Command -Name Set-Clipboard -ErrorAction SilentlyContinue)) { $input | Set-Clipboard } else { $input | Out-String | clip }
-                }
+                # Use Test-HasCommand which handles caching and fallback internally
+                if (Test-HasCommand Set-Clipboard) { $input | Set-Clipboard } else { $input | Out-String | clip }
             }
             catch {
                 Write-Warning "Failed to copy to clipboard: $_"
@@ -44,12 +40,8 @@ if (-not (Test-Path Function:Get-FromClipboard -ErrorAction SilentlyContinue)) {
     #>
     function Get-FromClipboard {
         try {
-            if (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) {
-                if (Test-CachedCommand Get-Clipboard) { Get-Clipboard } else { cmd /c paste }
-            }
-            else {
-                if ($null -ne (Get-Command -Name Get-Clipboard -ErrorAction SilentlyContinue)) { Get-Clipboard } else { cmd /c paste }
-            }
+            # Use Test-HasCommand which handles caching and fallback internally
+            if (Test-HasCommand Get-Clipboard) { Get-Clipboard } else { cmd /c paste }
         }
         catch {
             Write-Warning "Failed to paste from clipboard: $_"

@@ -6,7 +6,7 @@
 # Eza aliases for modern directory listing
 # Requires: eza (https://github.com/eza-community/eza)
 
-if (Get-Command eza -ErrorAction SilentlyContinue) {
+if (Test-HasCommand eza) {
     # Basic ls replacements
     <#
     .SYNOPSIS
