@@ -56,7 +56,7 @@ try {
     
     # If starship is available, don't create a proxy prompt - let starship handle it
     # Starship will be initialized later by 23-starship.ps1
-    if (Get-Command starship -ErrorAction SilentlyContinue) {
+    if (Test-HasCommand starship) {
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Starship detected, skipping oh-my-posh proxy prompt" -ForegroundColor Cyan }
         return
     }

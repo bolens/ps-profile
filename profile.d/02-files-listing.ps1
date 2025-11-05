@@ -14,17 +14,17 @@
 if (-not (Test-Path "Function:\\Ensure-FileListing")) {
     function Ensure-FileListing {
         # Listing helpers (prefer eza when available)
-        Set-Item -Path Function:Get-ChildItemDetailed -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-CachedCommand eza) { eza -la --icons --git @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
+        Set-Item -Path Function:Get-ChildItemDetailed -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-HasCommand eza) { eza -la --icons --git @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
         Set-Alias -Name ll -Value Get-ChildItemDetailed -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-ChildItemAll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-CachedCommand eza) { eza -la --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
+        Set-Item -Path Function:Get-ChildItemAll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-HasCommand eza) { eza -la --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
         Set-Alias -Name la -Value Get-ChildItemAll -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-ChildItemVisible -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-CachedCommand eza) { eza --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
+        Set-Item -Path Function:Get-ChildItemVisible -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-HasCommand eza) { eza --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
         Set-Alias -Name lx -Value Get-ChildItemVisible -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-DirectoryTree -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-CachedCommand eza) { eza -T --icons @fileArgs } else { Get-ChildItem -Recurse | Where-Object { $_.PSIsContainer } | Select-Object FullName } } -Force | Out-Null
+        Set-Item -Path Function:Get-DirectoryTree -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-HasCommand eza) { eza -T --icons @fileArgs } else { Get-ChildItem -Recurse | Where-Object { $_.PSIsContainer } | Select-Object FullName } } -Force | Out-Null
         Set-Alias -Name tree -Value Get-DirectoryTree -ErrorAction SilentlyContinue
 
         # bat wrapper
-        Set-Item -Path Function:Show-FileContent -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if ($fileArgs) { if (Test-CachedCommand bat) { bat @fileArgs } else { Get-Content -LiteralPath @fileArgs | Out-Host } } else { if (Test-CachedCommand bat) { bat } else { $input | Out-Host } } } -Force | Out-Null
+        Set-Item -Path Function:Show-FileContent -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if ($fileArgs) { if (Test-HasCommand bat) { bat @fileArgs } else { Get-Content -LiteralPath @fileArgs | Out-Host } } else { if (Test-HasCommand bat) { bat } else { $input | Out-Host } } } -Force | Out-Null
         Set-Alias -Name bat-cat -Value Show-FileContent -ErrorAction SilentlyContinue
     }
 }

@@ -9,11 +9,22 @@ $profilePath = Join-Path $repoRoot 'profile.d'
 
 Write-Output "Scanning for functions and aliases missing Synopsis/Description..."
 
+# Compile regex patterns once for better performance
+$commentBlockRegex = [regex]'<#[\s\S]*?#>'
+$synopsisRegex = [regex]'(?s)\.SYNOPSIS'
+$descriptionRegex = [regex]'(?s)\.DESCRIPTION'
+$setAliasRegex = [regex]'Set-Alias\s+-Name\s+([A-Za-z0-9_\-]+)\s+-Value\s+([A-Za-z0-9_\-\.\~]+)'
+$setAgentModeAliasRegex = [regex]'Set-AgentModeAlias\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)[\x27\x22]\s+-Target\s+[\x27\x22]?([A-Za-z0-9_\-\.\~]+)'
+$setAliasNameRegex = [regex]'Set-Alias\s+-Name\s+([A-Za-z0-9_\-]+)'
+$valueRegex = [regex]'-Value\s+([A-Za-z0-9_\-\.\~]+)'
+
 $filesToUpdate = @()
+$fileContents = @{} # Cache file contents to avoid re-reading
 
 Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
     $file = $_.FullName
     $content = Get-Content $file -Raw
+    $fileContents[$file] = $content # Cache for later use
     $lines = $content -split "`r?`n"
     
     # Parse the file content to find functions using AST
@@ -32,19 +43,22 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         $beforeText = $content.Substring(0, $start)
         
         # Find the last comment block before the function
-        $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+        $commentMatches = $commentBlockRegex.Matches($beforeText)
         if ($commentMatches.Count -gt 0) {
             $helpContent = $commentMatches[-1].Value
             $helpText = $helpContent -replace '^<#\s*', '' -replace '\s*#>$', ''
             $helpText = $helpText.Trim()
             
-            # Check if SYNOPSIS or DESCRIPTION are missing
-            $hasSynopsis = $helpText -match '(?s)\.SYNOPSIS'
-            $hasDescription = $helpText -match '(?s)\.DESCRIPTION'
+            # Check if SYNOPSIS or DESCRIPTION are missing (combine checks)
+            $hasSynopsis = $synopsisRegex.IsMatch($helpText)
+            $hasDescription = $descriptionRegex.IsMatch($helpText)
             
             if (-not $hasSynopsis -or -not $hasDescription) {
                 $commentStart = $commentMatches[-1].Index
                 $commentEnd = $commentStart + $commentMatches[-1].Length
+                
+                # Efficient line number calculation using pre-calculated line offsets
+                $lineNumber = ($content.Substring(0, $start) -split "`r?`n").Count
                 
                 $filesToUpdate += [PSCustomObject]@{
                     File           = $file
@@ -54,7 +68,7 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                     HelpText       = $helpText
                     HasSynopsis    = $hasSynopsis
                     HasDescription = $hasDescription
-                    LineNumber     = ($content.Substring(0, $start) -split "`r?`n").Count
+                    LineNumber     = $lineNumber
                 }
             }
         }
@@ -66,25 +80,33 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
         $aliasName = $null
         $targetCommand = $null
         
-        # Match Set-Alias patterns
-        if ($line -match 'Set-Alias\s+-Name\s+([A-Za-z0-9_\-]+)\s+-Value\s+([A-Za-z0-9_\-\.\~]+)') {
-            $aliasName = $matches[1]
-            $targetCommand = $matches[2]
+        # Match Set-Alias patterns using compiled regex
+        $match = $setAliasRegex.Match($line)
+        if ($match.Success) {
+            $aliasName = $match.Groups[1].Value
+            $targetCommand = $match.Groups[2].Value
         }
-        elseif ($line -match 'Set-AgentModeAlias\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)[\x27\x22]\s+-Target\s+[\x27\x22]?([A-Za-z0-9_\-\.\~]+)') {
-            $aliasName = $matches[1]
-            $targetCommand = $matches[2]
-        }
-        elseif ($line -match 'Set-Alias\s+-Name\s+([A-Za-z0-9_\-]+)') {
-            $aliasName = $matches[1]
-            for ($j = $i + 1; $j -lt [Math]::Min($i + 5, $lines.Count); $j++) {
-                $nextLine = $lines[$j].Trim()
-                if ($nextLine -match '-Value\s+([A-Za-z0-9_\-\.\~]+)') {
-                    $targetCommand = $matches[1]
-                    break
-                }
-                if ($nextLine -match '^\s*$' -or $nextLine -match '^\s*[A-Za-z]') {
-                    break
+        else {
+            $match = $setAgentModeAliasRegex.Match($line)
+            if ($match.Success) {
+                $aliasName = $match.Groups[1].Value
+                $targetCommand = $match.Groups[2].Value
+            }
+            else {
+                $match = $setAliasNameRegex.Match($line)
+                if ($match.Success) {
+                    $aliasName = $match.Groups[1].Value
+                    for ($j = $i + 1; $j -lt [Math]::Min($i + 5, $lines.Count); $j++) {
+                        $nextLine = $lines[$j].Trim()
+                        $valueMatch = $valueRegex.Match($nextLine)
+                        if ($valueMatch.Success) {
+                            $targetCommand = $valueMatch.Groups[1].Value
+                            break
+                        }
+                        if ($nextLine -match '^\s*$' -or $nextLine -match '^\s*[A-Za-z]') {
+                            break
+                        }
+                    }
                 }
             }
         }
@@ -97,14 +119,14 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
                 $beforeText = ($lines[$startIdx..($i - 1)] -join "`n")
             }
             
-            $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+            $commentMatches = $commentBlockRegex.Matches($beforeText)
             if ($commentMatches.Count -gt 0) {
                 $helpContent = $commentMatches[-1].Value
                 $helpText = $helpContent -replace '^<#\s*', '' -replace '\s*#>$', ''
                 $helpText = $helpText.Trim()
                 
-                $hasSynopsis = $helpText -match '(?s)\.SYNOPSIS'
-                $hasDescription = $helpText -match '(?s)\.DESCRIPTION'
+                $hasSynopsis = $synopsisRegex.IsMatch($helpText)
+                $hasDescription = $descriptionRegex.IsMatch($helpText)
                 
                 if (-not $hasSynopsis -or -not $hasDescription) {
                     $filesToUpdate += [PSCustomObject]@{
@@ -136,8 +158,8 @@ foreach ($group in $groupedByFile) {
     $file = $group.Name
     Write-Output "`nProcessing $file..."
     
-    $fileContent = Get-Content $file -Raw
-    $lines = $fileContent -split "`r?`n"
+    # Use cached content instead of re-reading file
+    $fileContent = $fileContents[$file]
     $updated = $false
     
     # Process in reverse order to maintain indices
@@ -172,10 +194,9 @@ foreach ($group in $groupedByFile) {
         }
         
         if ($needsUpdate) {
-            # Find the comment block in the file
+            # Find the comment block in the file using cached regex
             $beforeText = $fileContent.Substring(0, $item.CommentStart)
-            $afterText = $fileContent.Substring($item.CommentEnd)
-            $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+            $commentMatches = $commentBlockRegex.Matches($beforeText)
             
             if ($commentMatches.Count -gt 0) {
                 $oldComment = $commentMatches[-1].Value

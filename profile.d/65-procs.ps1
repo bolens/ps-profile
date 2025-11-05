@@ -6,7 +6,7 @@
 # Procs aliases
 # Requires: procs (https://github.com/dalance/procs)
 
-if (Get-Command procs -ErrorAction SilentlyContinue) {
+if (Test-HasCommand procs) {
     # Main procs command
     <#
     .SYNOPSIS

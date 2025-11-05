@@ -1,6 +1,10 @@
 Describe 'Alias helper' {
+    BeforeAll {
+        $script:BootstrapPath = Join-Path $PSScriptRoot '..\profile.d\00-bootstrap.ps1'
+    }
+
     It 'Set-AgentModeAlias returns definition when requested and alias works' {
-        . "$PSScriptRoot/..\profile.d\00-bootstrap.ps1"
+        . $script:BootstrapPath
         $name = "test_alias_$(Get-Random)"
         $def = Set-AgentModeAlias -Name $name -Target 'Write-Output' -ReturnDefinition
         $def | Should Not Be $false
@@ -12,6 +16,13 @@ Describe 'Alias helper' {
 }
 
 Describe 'Documentation Generation' {
+    BeforeAll {
+        $script:ScriptsUtilsPath = Join-Path $PSScriptRoot '..\scripts\utils'
+        
+        # Cache compiled regex for comment parsing
+        $script:CommentBlockRegex = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    }
+
     Context 'Comment parsing' {
         It 'parses comment-based help correctly' {
             $testFunction = @'
@@ -32,23 +43,15 @@ function Test-Function {
 }
 '@
 
-            $tempFile = [IO.Path]::GetTempFileName() + '.ps1'
-            try {
-                Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
+            $tempFile = Join-Path $TestDrive 'test_function.ps1'
+            Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
 
-                # Import the generate-docs script functions
-                . "$PSScriptRoot/..\scripts/utils/generate-docs.ps1"
+            # Test that the script can parse the function
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
+            $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 
-                # Test that the script can parse the function
-                $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
-                $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
-
-                $functionAsts.Count | Should Be 1
-                $functionAsts[0].Name | Should Be 'Test-Function'
-            }
-            finally {
-                Remove-Item $tempFile -Force
-            }
+            $functionAsts.Count | Should Be 1
+            $functionAsts[0].Name | Should Be 'Test-Function'
         }
 
         It 'handles functions without parameters' {
@@ -64,19 +67,14 @@ function Test-Function {
 function Simple-Function { }
 '@
 
-            $tempFile = [IO.Path]::GetTempFileName() + '.ps1'
-            try {
-                Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
+            $tempFile = Join-Path $TestDrive 'simple_function.ps1'
+            Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
 
-                $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
-                $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
+            $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 
-                $functionAsts.Count | Should Be 1
-                $functionAsts[0].Name | Should Be 'Simple-Function'
-            }
-            finally {
-                Remove-Item $tempFile -Force
-            }
+            $functionAsts.Count | Should Be 1
+            $functionAsts[0].Name | Should Be 'Simple-Function'
         }
 
         It 'extracts synopsis from comment-based help' {
@@ -90,44 +88,38 @@ function Simple-Function { }
 function Test-Synopsis { }
 '@
 
-            $tempFile = [IO.Path]::GetTempFileName() + '.ps1'
-            try {
-                Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
+            $tempFile = Join-Path $TestDrive 'test_synopsis.ps1'
+            Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
 
-                $content = Get-Content $tempFile -Raw
-                $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
-                $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+            $content = Get-Content $tempFile -Raw
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
+            $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 
-                $funcAst = $functionAsts[0]
-                $start = $funcAst.Extent.StartOffset
-                $beforeText = $content.Substring(0, $start)
-                $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+            $funcAst = $functionAsts[0]
+            $start = $funcAst.Extent.StartOffset
+            $beforeText = $content.Substring(0, $start)
+            $commentMatches = $script:CommentBlockRegex.Matches($beforeText)
 
-                $commentMatches.Count | Should Be 1
-                $helpContent = $commentMatches[-1].Value -replace '^<#\s*', '' -replace '\s*#>$', ''
+            $commentMatches.Count | Should Be 1
+            $helpContent = $commentMatches[-1].Value -replace '^<#\s*', '' -replace '\s*#>$', ''
 
-                if ($helpContent -match '(?s)\.SYNOPSIS\s*\n\s*(.+?)\n\s*\.DESCRIPTION') {
-                    $synopsis = $matches[1].Trim()
-                    $synopsis | Should Be 'This is a test synopsis'
-                }
-            }
-            finally {
-                Remove-Item $tempFile -Force
+            if ($helpContent -match '(?s)\.SYNOPSIS\s*\n\s*(.+?)\n\s*\.DESCRIPTION') {
+                $synopsis = $matches[1].Trim()
+                $synopsis | Should Be 'This is a test synopsis'
             }
         }
     }
 
     Context 'File generation' {
         It 'creates markdown files with correct structure' {
-            $tempDir = [IO.Path]::GetTempPath() + [Guid]::NewGuid().ToString()
+            $tempDir = Join-Path $TestDrive 'docs_test'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
-            try {
-                # Create a test profile.d directory with a test function
-                $testProfileDir = Join-Path $tempDir 'profile.d'
-                New-Item -ItemType Directory -Path $testProfileDir -Force | Out-Null
+            # Create a test profile.d directory with a test function
+            $testProfileDir = Join-Path $tempDir 'profile.d'
+            New-Item -ItemType Directory -Path $testProfileDir -Force | Out-Null
 
-                $testFunction = @'
+            $testFunction = @'
 <#
 .SYNOPSIS
     Test function
@@ -143,41 +135,31 @@ function Test-Function {
 }
 '@
 
-                $testFile = Join-Path $testProfileDir 'test.ps1'
-                Set-Content -Path $testFile -Value $testFunction -Encoding UTF8
+            $testFile = Join-Path $testProfileDir 'test.ps1'
+            Set-Content -Path $testFile -Value $testFunction -Encoding UTF8
 
-                # Run the documentation generator with custom profile path
-                # We'll need to temporarily modify the script or use a different approach
-                # For now, let's test that the script runs without error
-                $scriptPath = Join-Path $PSScriptRoot '..\scripts\utils\generate-docs.ps1'
-                $result = & $scriptPath -OutputPath $tempDir 2>&1
+            # Run the documentation generator with custom profile path
+            $scriptPath = Join-Path $script:ScriptsUtilsPath 'generate-docs.ps1'
+            $result = & $scriptPath -OutputPath $tempDir 2>&1
 
-                # The script should run without throwing an exception
-                $true | Should Be $true
-            }
-            finally {
-                Remove-Item $tempDir -Recurse -Force
-            }
+            # The script should run without throwing an exception
+            $true | Should Be $true
         }
 
         It 'generates index with alphabetical function list' {
-            $tempDir = [IO.Path]::GetTempPath() + [Guid]::NewGuid().ToString()
+            $tempDir = Join-Path $TestDrive 'docs_index'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
-            try {
-                $scriptPath = Join-Path $PSScriptRoot '..\scripts\utils\generate-docs.ps1'
-                $result = & $scriptPath -OutputPath $tempDir 2>&1
+            $scriptPath = Join-Path $script:ScriptsUtilsPath 'generate-docs.ps1'
+            $result = & $scriptPath -OutputPath $tempDir 2>&1
 
-                $readmePath = Join-Path $tempDir 'README.md'
-                if (Test-Path $readmePath) {
-                    $content = Get-Content $readmePath -Raw
-                    $content | Should Match '## Functions by Fragment'
-                    $content | Should Match 'Total Functions:'
-                    $content | Should Match 'Generated:'
+            $readmePath = Join-Path $tempDir 'README.md'
+            if (Test-Path $readmePath) {
+                $content = Get-Content $readmePath -Raw
+                $expectedPatterns = @('## Functions by Fragment', 'Total Functions:', 'Generated:')
+                foreach ($pattern in $expectedPatterns) {
+                    $content | Should Match $pattern
                 }
-            }
-            finally {
-                Remove-Item $tempDir -Recurse -Force
             }
         }
     }

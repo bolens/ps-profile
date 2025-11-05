@@ -73,12 +73,12 @@ try {
                 },
                 @{
                     Name    = "Scoop"
-                    Test    = { Test-CachedCommand scoop }
+                    Test    = { Test-HasCommand scoop }
                     Message = "Scoop package manager not found"
                 },
                 @{
                     Name    = "Git"
-                    Test    = { Test-CachedCommand git }
+                    Test    = { Test-HasCommand git }
                     Message = "Git not found - version control features will be limited"
                 },
                 @{
@@ -148,8 +148,8 @@ try {
             }
 
             $stats = $global:PSProfileCommandUsage.GetEnumerator() |
-                Sort-Object -Property Value -Descending |
-                Select-Object -First 20
+            Sort-Object -Property Value -Descending |
+            Select-Object -First 20
 
             if ($stats.Count -eq 0) {
                 Write-Host "No command usage data available."

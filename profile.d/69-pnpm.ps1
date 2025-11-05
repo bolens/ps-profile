@@ -6,7 +6,7 @@
 # PNPM aliases
 # Requires: pnpm (https://pnpm.io/)
 
-if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+if (Test-HasCommand pnpm) {
     # PNPM as npm replacement
     Set-Alias -Name npm -Value pnpm -Option AllScope -Force
     Set-Alias -Name yarn -Value pnpm -Option AllScope -Force

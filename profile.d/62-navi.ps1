@@ -6,7 +6,7 @@
 # Navi aliases and functions
 # Requires: navi (https://github.com/denisidoro/navi)
 
-if (Get-Command navi -ErrorAction SilentlyContinue) {
+if (Test-HasCommand navi) {
     # Main navi command
     Set-Alias -Name cheats -Value navi -Option AllScope -Force
 

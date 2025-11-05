@@ -55,6 +55,10 @@ $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $fragDir = Join-Path $root 'profile.d'
 $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
 
+# Compile regex patterns once for better performance
+$regexCommentLine = [regex]::new('^\s*#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexFunction = [regex]::new('^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 foreach ($ps in $psFiles) {
     $mdPath = [System.IO.Path]::ChangeExtension($ps.FullName, '.README.md')
     if ((Test-Path $mdPath) -and (-not $Force)) { continue }
@@ -75,7 +79,7 @@ foreach ($ps in $psFiles) {
             if ($trim -match '^# =+$' -or $trim -match '^# -+$' -or $trim -eq '#') { continue }
 
             # Look for comment lines (both single-line # and inside multiline comments)
-            $m = [regex]::Match($trim, '^\s*#\s*(.+)$')
+            $m = $regexCommentLine.Match($trim)
             if ($m.Success -or ($inMultilineComment -and $trim -and -not ($trim -match '^\s*<#') -and -not ($trim -match '^\s*#'))) {
                 $purposeText = if ($m.Success) { $m.Groups[1].Value } else { $trim }
                 # Skip generic or decorative text
@@ -110,7 +114,7 @@ foreach ($ps in $psFiles) {
         for ($i = 0; $i -lt $allLines.Count; $i++) {
             $line = $allLines[$i]
             # Match function declarations (not in comments), including those inside conditional blocks
-            $fm = [regex]::Match($line, '^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b')
+            $fm = $regexFunction.Match($line)
             if ($fm.Success) {
                 $fname = $fm.Groups[1].Value
                 $desc = $null
@@ -133,7 +137,7 @@ foreach ($ps in $psFiles) {
                     if ($up -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
 
                     # Check for single-line comment lines above
-                    $dm = [regex]::Match($up, '^\s*#\s*(.+)$')
+                    $dm = $regexCommentLine.Match($up)
                     if ($dm.Success -and -not $inMultilineComment) {
                         $descText = $dm.Groups[1].Value
                         # Skip if this looks like a structured comment (dashes, equals, etc.)
@@ -204,7 +208,7 @@ foreach ($ps in $psFiles) {
                     if ($up -match '^\s*#>' -and $inMultilineComment) { $inMultilineComment = $false; continue }
 
                     # Check for single-line comment lines above
-                    $dm = [regex]::Match($up, '^\s*#\s*(.+)$')
+                    $dm = $regexCommentLine.Match($up)
                     if ($dm.Success -and -not $inMultilineComment) {
                         $descText = $dm.Groups[1].Value
                         # Skip if this looks like a structured comment (dashes, equals, etc.)

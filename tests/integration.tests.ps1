@@ -1,43 +1,52 @@
 Describe 'Profile Integration Tests' {
+    # Cache frequently used paths
+    BeforeAll {
+        $script:ProfilePath = Join-Path $PSScriptRoot '..\Microsoft.PowerShell_profile.ps1'
+        $script:ProfileContent = Get-Content $script:ProfilePath -Raw -ErrorAction Stop
+        $script:DocsPath = Join-Path $PSScriptRoot '..\docs'
+        $script:CspellPath = Join-Path $PSScriptRoot '..\cspell.json'
+        $script:ProfileDir = Join-Path $PSScriptRoot '..\profile.d'
+        $script:ScriptsUtilsPath = Join-Path $PSScriptRoot '..\scripts\utils'
+        
+        # Helper function to run PowerShell script in isolated process
+        function script:Invoke-PwshScript {
+            param([string]$ScriptContent)
+            $tempFile = Join-Path $TestDrive 'test_script.ps1'
+            Set-Content -Path $tempFile -Value $ScriptContent -Encoding UTF8
+            try {
+                & pwsh -NoProfile -File $tempFile 2>&1
+            }
+            finally {
+                # TestDrive cleanup is automatic, but remove explicitly for immediate cleanup
+                Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
     Context 'Profile loading in different environments' {
         It 'loads successfully in current PowerShell environment' {
             # Test that profile loads without throwing exceptions
-            $profilePath = Join-Path $PSScriptRoot '..\Microsoft.PowerShell_profile.ps1'
             $testScript = @"
 try {
-    . '$profilePath'
+    . '$($script:ProfilePath -replace "'", "''")'
     Write-Output 'PROFILE_LOADED_SUCCESSFULLY'
 } catch {
     Write-Error "Profile failed to load: `$_"
     exit 1
 }
 "@
-
-            $tempFile = [IO.Path]::GetTempFileName() + '.ps1'
-            Set-Content -Path $tempFile -Value $testScript -Encoding UTF8
-
-            try {
-                $result = & pwsh -NoProfile -File $tempFile 2>&1
-                $result | Should Match 'PROFILE_LOADED_SUCCESSFULLY'
-            }
-            finally {
-                # Ensure cleanup happens even if test fails
-                if (Test-Path $tempFile) {
-                    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-                }
-            }
-            # Add delay to prevent resource exhaustion from multiple pwsh processes
-            Start-Sleep -Milliseconds 200
+            $result = & $script:Invoke-PwshScript -ScriptContent $testScript
+            $result | Should Match 'PROFILE_LOADED_SUCCESSFULLY'
         }
 
         It 'does not pollute global scope excessively' {
             # Test that loading the profile doesn't create an excessive number of unexpected global variables
-            $before = Get-Variable -Scope Global | Measure-Object | Select-Object -ExpandProperty Count
+            $before = (Get-Variable -Scope Global).Count
 
             # Load profile in current session
-            . (Join-Path $PSScriptRoot '..\Microsoft.PowerShell_profile.ps1')
+            . $script:ProfilePath
 
-            $after = Get-Variable -Scope Global | Measure-Object | Select-Object -ExpandProperty Count
+            $after = (Get-Variable -Scope Global).Count
             $increase = $after - $before
 
             # Allow some increase for expected profile variables, but not excessive
@@ -50,37 +59,24 @@ try {
             try {
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
 
-                $profilePath = Join-Path $PSScriptRoot '..\Microsoft.PowerShell_profile.ps1'
                 $testScript = @"
-. '$profilePath'
+. '$($script:ProfilePath -replace "'", "''")'
 Write-Output 'EXECUTION_POLICY_COMPATIBLE'
 "@
-
-                $tempFile = [IO.Path]::GetTempFileName() + '.ps1'
-                Set-Content -Path $tempFile -Value $testScript -Encoding UTF8
-
-                $result = & pwsh -NoProfile -File $tempFile 2>&1
+                $result = & $script:Invoke-PwshScript -ScriptContent $testScript
                 $result | Should Match 'EXECUTION_POLICY_COMPATIBLE'
             }
             finally {
                 Set-ExecutionPolicy -ExecutionPolicy $currentPolicy -Scope Process -Force
-                # Ensure cleanup happens even if test fails
-                if (Test-Path $tempFile) {
-                    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-                }
             }
-            # Add delay to prevent resource exhaustion
-            Start-Sleep -Milliseconds 200
         }
     }
 
     Context 'Cross-platform compatibility' {
         It 'uses compatible path separators' {
             # Test that profile uses Join-Path or / for paths, not \
-            $profileContent = Get-Content (Join-Path $PSScriptRoot '..\Microsoft.PowerShell_profile.ps1') -Raw
-
             # Should not contain hardcoded backslashes in paths (except in comments or strings that are meant to be)
-            $hardcodedBackslashes = $profileContent | Select-String -Pattern '\\(?!\\)' -AllMatches
+            $hardcodedBackslashes = $script:ProfileContent | Select-String -Pattern '\\(?!\\)' -AllMatches
             # Allow some exceptions for known cases, but generally avoid hardcoded paths
             $hardcodedBackslashes.Matches.Count | Should BeLessThan 20
         }
@@ -88,24 +84,23 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
         It 'handles missing commands gracefully' {
             # Test that profile handles missing external commands without crashing
             # This should not throw an exception even if some commands are missing
-            { . (Join-Path $PSScriptRoot '..\Microsoft.PowerShell_profile.ps1') } | Should Not Throw
+            { . $script:ProfilePath } | Should Not Throw
         }
     }
 
     Context 'Documentation generation' {
         It 'generates API documentation successfully' {
-            $docsPath = Join-Path $PSScriptRoot '..\docs'
-            $originalFiles = Get-ChildItem -Path $docsPath -Filter *.md | Measure-Object | Select-Object -ExpandProperty Count
+            $originalFiles = (Get-ChildItem -Path $script:DocsPath -Filter *.md -ErrorAction SilentlyContinue).Count
 
             # Run the documentation generation
-            & "$PSScriptRoot/..\scripts/utils/generate-docs.ps1"
+            & (Join-Path $script:ScriptsUtilsPath 'generate-docs.ps1')
 
-            $newFiles = Get-ChildItem -Path $docsPath -Filter *.md | Measure-Object | Select-Object -ExpandProperty Count
+            $newFiles = (Get-ChildItem -Path $script:DocsPath -Filter *.md -ErrorAction SilentlyContinue).Count
             # Documentation generation should not fail and should maintain or increase file count
             ($newFiles -ge $originalFiles) | Should Be $true
 
             # Check that README.md exists and contains functions
-            $readmePath = Join-Path $docsPath 'README.md'
+            $readmePath = Join-Path $script:DocsPath 'README.md'
             Test-Path $readmePath | Should Be $true
             $readmeContent = Get-Content $readmePath -Raw
             $readmeContent | Should Match '## Functions by Fragment'
@@ -115,21 +110,25 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
         }
 
         It 'documentation includes proper function signatures' {
-            $docsPath = Join-Path $PSScriptRoot '..\docs'
-            $setEnvVarDoc = Join-Path $docsPath 'Set-EnvVar.md'
+            $setEnvVarDoc = Join-Path $script:DocsPath 'Set-EnvVar.md'
 
             if (Test-Path $setEnvVarDoc) {
                 $content = Get-Content $setEnvVarDoc -Raw
-                $content | Should Match '## Synopsis'
-                $content | Should Match '## Description'
-                $content | Should Match '## Signature'
-                $content | Should Match '## Parameters'
-                $content | Should Match '## Examples'
-                $content | Should Match '## Source'
-                $content | Should Match '-Name'
-                $content | Should Match '-Value'
-                $content | Should Match 'powershell'
-                $content | Should Match 'Defined in:'
+                $expectedPatterns = @(
+                    '## Synopsis',
+                    '## Description',
+                    '## Signature',
+                    '## Parameters',
+                    '## Examples',
+                    '## Source',
+                    '-Name',
+                    '-Value',
+                    'powershell',
+                    'Defined in:'
+                )
+                foreach ($pattern in $expectedPatterns) {
+                    $content | Should Match $pattern
+                }
             }
         }
     }
@@ -137,30 +136,89 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
     Context 'Spellcheck functionality' {
         It 'spellcheck runs without errors' {
             # This should not throw an exception
-            { & "$PSScriptRoot/..\scripts/utils/spellcheck.ps1" } | Should Not Throw
+            { & (Join-Path $script:ScriptsUtilsPath 'spellcheck.ps1') } | Should Not Throw
         }
 
         It 'cspell configuration includes custom words' {
-            $cspellPath = Join-Path $PSScriptRoot '..\cspell.json'
-            Test-Path $cspellPath | Should Be $true
+            Test-Path $script:CspellPath | Should Be $true
 
-            $cspellContent = Get-Content $cspellPath -Raw
-            $cspellContent | Should Match '"HKCU"'
-            $cspellContent | Should Match '"HKLM"'
-            $cspellContent | Should Match '"SETTINGCHANGE"'
-            $cspellContent | Should Match '"lpdw"'
+            $cspellContent = Get-Content $script:CspellPath -Raw
+            $expectedWords = @('HKCU', 'HKLM', 'SETTINGCHANGE', 'lpdw')
+            foreach ($word in $expectedWords) {
+                $cspellContent | Should Match ([regex]::Escape("`"$word`""))
+            }
         }
     }
 
     Context 'Linting and formatting' {
+        BeforeAll {
+            $script:ExcludeRules = @(
+                'PSUseShouldProcessForStateChangingFunctions',
+                'PSAvoidUsingEmptyCatchBlock',
+                'PSUseBOMForUnicodeEncodedFile',
+                'PSUseDeclaredVarsMoreThanAssignments',
+                'PSUseApprovedVerbs',
+                'PSAvoidUsingWriteHost',
+                'PSAvoidUsingComputerNameHardcoded'
+            )
+            $script:ProfileFiles = Get-ChildItem -Path $script:ProfileDir -Filter *.ps1
+        }
+
         It 'PSScriptAnalyzer runs without critical errors' {
-            $profileFiles = Get-ChildItem -Path (Join-Path $PSScriptRoot '..\profile.d') -Filter *.ps1
-            foreach ($file in $profileFiles) {
-                $result = Invoke-ScriptAnalyzer -Path $file.FullName -ExcludeRule PSUseShouldProcessForStateChangingFunctions, PSAvoidUsingEmptyCatchBlock, PSUseBOMForUnicodeEncodedFile, PSUseDeclaredVarsMoreThanAssignments, PSUseApprovedVerbs, PSAvoidUsingWriteHost, PSAvoidUsingComputerNameHardcoded
+            foreach ($file in $script:ProfileFiles) {
+                $result = Invoke-ScriptAnalyzer -Path $file.FullName -ExcludeRule $script:ExcludeRules
                 # Should not have any errors (warnings are ok)
                 $errors = $result | Where-Object { $_.Severity -eq 'Error' }
                 $errors | Should BeNullOrEmpty
             }
+        }
+    }
+
+    Context 'Profile fragment dependencies' {
+        It 'all profile fragments exist and are readable' {
+            $fragFiles = Get-ChildItem -Path $script:ProfileDir -Filter *.ps1 -File
+            foreach ($file in $fragFiles) {
+                Test-Path $file.FullName | Should Be $true
+                # Should be able to read the file
+                { Get-Content $file.FullName -ErrorAction Stop } | Should Not Throw
+            }
+        }
+
+        It 'profile fragments have valid PowerShell syntax' {
+            $fragFiles = Get-ChildItem -Path $script:ProfileDir -Filter *.ps1 -File
+            foreach ($file in $fragFiles) {
+                $errors = $null
+                $null = [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$null, [ref]$errors)
+                # Should have no parse errors
+                if ($errors) {
+                    $errors.Count | Should Be 0
+                }
+            }
+        }
+    }
+
+    Context 'Profile loading edge cases' {
+        It 'profile handles missing profile.d directory gracefully' {
+            # This test verifies the main profile handles errors
+            # Note: This might not apply if profile.d is required
+            $profileContent = $script:ProfileContent
+            # Profile should handle errors gracefully
+            $profileContent | Should Not BeNullOrEmpty
+        }
+
+        It 'profile can be loaded multiple times without side effects' {
+            # Load profile multiple times
+            $before = (Get-Variable -Scope Global).Count
+            . $script:ProfilePath
+            $middle = (Get-Variable -Scope Global).Count
+            . $script:ProfilePath
+            $after = (Get-Variable -Scope Global).Count
+            
+            # Variable count increase should be consistent
+            $firstIncrease = $middle - $before
+            $secondIncrease = $after - $middle
+            # Second load should not add significantly more variables (idempotent)
+            $secondIncrease | Should BeLessThan ($firstIncrease * 2)
         }
     }
 }

@@ -324,7 +324,7 @@ try {
     # Initialize starship immediately if available
     # Always call Initialize-Starship - it will handle checking if already initialized
     # and verify the prompt function is correct
-    if (Get-Command starship -ErrorAction SilentlyContinue) {
+    if (Test-HasCommand starship) {
         try {
             if ($env:PS_PROFILE_DEBUG) { Write-Host "Checking/initializing starship..." -ForegroundColor Yellow }
             Initialize-Starship
@@ -379,7 +379,7 @@ try {
                         # Git branch (if in git repo)
                         $gitBranch = $null
                         try {
-                            if (Test-Path ".git" -or (Get-Command git -ErrorAction SilentlyContinue)) {
+                            if (Test-Path ".git" -or (Test-HasCommand git)) {
                                 $gitBranch = & git rev-parse --abbrev-ref HEAD 2>$null
                                 if ($gitBranch -and $gitBranch -ne "HEAD") {
                                     $promptParts += "git:($gitBranch)"

@@ -25,12 +25,11 @@ function Get-ContainerEngineInfo {
     }
     $pref = ($env:CONTAINER_ENGINE_PREFERENCE) -as [string]
     $info.Preferred = if ($pref) { $pref } else { $null }
-    # Use Test-Path against the Function: provider for cheap existence checks where possible.
-    # Fall back to Get-Command only when necessary (e.g., to detect compose subcommand support).
-    $hasDocker = Test-Path Function:docker -or (Get-Command docker -ErrorAction SilentlyContinue) -NE $null
-    $hasDockerComposeCmd = Test-Path Function:'docker-compose' -or (Get-Command docker-compose -ErrorAction SilentlyContinue) -NE $null
-    $hasPodman = Test-Path Function:podman -or (Get-Command podman -ErrorAction SilentlyContinue) -NE $null
-    $hasPodmanComposeCmd = Test-Path Function:'podman-compose' -or (Get-Command podman-compose -ErrorAction SilentlyContinue) -NE $null
+    # Use Test-HasCommand for efficient command checks that avoid module autoload
+    $hasDocker = Test-HasCommand docker
+    $hasDockerComposeCmd = Test-HasCommand docker-compose
+    $hasPodman = Test-HasCommand podman
+    $hasPodmanComposeCmd = Test-HasCommand podman-compose
     $info.HasDockerComposeCmd = $hasDockerComposeCmd
     $info.HasPodmanComposeCmd = $hasPodmanComposeCmd
     # Test compose subcommand support once (only when docker/podman present)
@@ -119,7 +118,6 @@ if (-not (Test-Path Function:Get-ContainerComposeLogs)) {
     Set-Alias -Name dcl -Value Get-ContainerComposeLogs -ErrorAction SilentlyContinue
 }
 
-# prune system for whichever engine
 # prune system for whichever engine
 if (-not (Test-Path Function:Clear-ContainerSystem)) {
     <#

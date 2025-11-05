@@ -13,11 +13,11 @@
 #>
 function Test-ContainerEngine {
     $pref = ($env:CONTAINER_ENGINE_PREFERENCE) -as [string]
-    # Use Test-Path Function: first to avoid triggering module/autoload discovery.
-    if (Test-Path Function:docker -ErrorAction SilentlyContinue) { $hasDocker = $true } elseif (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) { $hasDocker = Test-CachedCommand docker } else { $hasDocker = $null -ne (Get-Command docker -ErrorAction SilentlyContinue) }
-    if (Test-Path Function:'docker-compose' -ErrorAction SilentlyContinue) { $hasDockerComposeCmd = $true } elseif (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) { $hasDockerComposeCmd = Test-CachedCommand 'docker-compose' } else { $hasDockerComposeCmd = $null -ne (Get-Command 'docker-compose' -ErrorAction SilentlyContinue) }
-    if (Test-Path Function:podman -ErrorAction SilentlyContinue) { $hasPodman = $true } elseif (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) { $hasPodman = Test-CachedCommand podman } else { $hasPodman = $null -ne (Get-Command podman -ErrorAction SilentlyContinue) }
-    if (Test-Path Function:'podman-compose' -ErrorAction SilentlyContinue) { $hasPodmanComposeCmd = $true } elseif (Test-Path Function:Test-CachedCommand -ErrorAction SilentlyContinue) { $hasPodmanComposeCmd = Test-CachedCommand 'podman-compose' } else { $hasPodmanComposeCmd = $null -ne (Get-Command 'podman-compose' -ErrorAction SilentlyContinue) }
+    # Use Test-HasCommand for efficient command checks that avoid module autoload
+    $hasDocker = Test-HasCommand docker
+    $hasDockerComposeCmd = Test-HasCommand docker-compose
+    $hasPodman = Test-HasCommand podman
+    $hasPodmanComposeCmd = Test-HasCommand podman-compose
 
     $engine = $null
     $compose = $null

@@ -16,6 +16,10 @@ $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $fragDir = Join-Path $root 'profile.d'
 $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
 
+# Compile regex patterns once for better performance
+$regexCommentBlock = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$regexCommentBlockMultiline = [regex]::new('^[\s]*<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Multiline -bor [System.Text.RegularExpressions.RegexOptions]::Compiled)
+
 $issueCount = 0
 
 function Get-FunctionsWithoutCommentHelp($path) {
@@ -42,7 +46,7 @@ function Get-FunctionsWithoutCommentHelp($path) {
             # Check for comment-based help before the function
             $start = $funcAst.Extent.StartOffset
             $beforeText = $content.Substring(0, $start)
-            $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+            $commentMatches = $regexCommentBlock.Matches($beforeText)
             if ($commentMatches.Count -gt 0) {
                 $helpContent = $commentMatches[-1].Value  # Last comment block
                 # Check if it contains SYNOPSIS or DESCRIPTION
@@ -58,7 +62,7 @@ function Get-FunctionsWithoutCommentHelp($path) {
                 $bodyText = $content.Substring($bodyStart, $bodyEnd - $bodyStart)
 
                 # Look for comment block at the beginning of the body
-                $bodyCommentMatches = [regex]::Matches($bodyText, '^[\s]*<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Multiline)
+                $bodyCommentMatches = $regexCommentBlockMultiline.Matches($bodyText)
                 if ($bodyCommentMatches.Count -gt 0) {
                     $helpContent = $bodyCommentMatches[0].Value
                     if ($helpContent -match '\.SYNOPSIS|\.DESCRIPTION') {
