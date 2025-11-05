@@ -16,6 +16,7 @@ pwsh -NoProfile -File scripts/utils/run-lint.ps1            # PSScriptAnalyzer
 pwsh -NoProfile -File scripts/utils/run-security-scan.ps1   # Security analysis
 pwsh -NoProfile -File scripts/checks/check-idempotency.ps1  # Idempotency test
 pwsh -NoProfile -File scripts/utils/spellcheck.ps1          # Spellcheck
+pwsh -NoProfile -File scripts/utils/run-markdownlint.ps1    # Markdownlint
 
 # Run tests
 pwsh -NoProfile -File scripts/utils/run_pester.ps1
@@ -111,7 +112,7 @@ All fragments MUST be idempotent (safe to source multiple times). Use:
 
 #### Performance Optimizations
 
-- **Lazy Loading**: Expensive initialization deferred behind Enable-* functions
+- **Lazy Loading**: Expensive initialization deferred behind Enable-\* functions
 - **Provider-First Checks**: Use `Test-Path Function:\Name` to avoid module autoload
 - **Cached Commands**: Use `Test-CachedCommand` to avoid repeated Get-Command calls
 - **No Side Effects at Load**: Keep fragment dot-sourcing fast; defer work to functions

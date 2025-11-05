@@ -21,6 +21,7 @@ pwsh -NoProfile -File scripts/utils/run-lint.ps1            # Lint (PSScriptAnal
 pwsh -NoProfile -File scripts/checks/check-idempotency.ps1  # Idempotency test
 pwsh -NoProfile -File scripts/utils/run_pester.ps1         # Run tests
 pwsh -NoProfile -File scripts/utils/spellcheck.ps1          # Spellcheck
+pwsh -NoProfile -File scripts/utils/run-markdownlint.ps1    # Markdownlint
 ```
 
 ## Git Hooks
