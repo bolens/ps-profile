@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ls` - Lists directory contents using eza.
 
-
 ## Source
 
 Defined in: profile.d\61-eza.ps1

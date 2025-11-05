@@ -24,7 +24,6 @@ The directory path to remove from PATH.
 
 If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
 
-
 ## Examples
 
 No examples provided.

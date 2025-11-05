@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `touch` - Creates empty files.
 
-
 ## Source
 
 Defined in: profile.d\07-system.ps1

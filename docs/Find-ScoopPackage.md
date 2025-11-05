@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ss` - Searches for packages in Scoop.
 
-
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

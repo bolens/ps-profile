@@ -3,14 +3,17 @@ profile.d/09-package-managers.ps1
 
 Purpose
 -------
+
 Package manager helper shorthands (Scoop, uv, pnpm, etc.)
 
 Usage
 -----
+
 See the fragment source: `09-package-managers.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Install-ScoopPackage` — Installs packages using Scoop.
 - `Find-ScoopPackage` — Searches for packages in Scoop.
 - `Update-ScoopPackage` — Updates packages using Scoop.
@@ -35,6 +38,7 @@ Functions
 
 Aliases
 -------
+
 - `sinstall` — Installs packages using Scoop. (alias for `Install-ScoopPackage`)
 - `ss` — Searches for packages in Scoop. (alias for `Find-ScoopPackage`)
 - `su` — Updates packages using Scoop. (alias for `Update-ScoopPackage`)
@@ -59,8 +63,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

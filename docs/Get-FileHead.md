@@ -20,7 +20,6 @@ Get-FileHead
 
 The number of lines to display. Default is 10.
 
-
 ## Examples
 
 No examples provided.
@@ -30,7 +29,6 @@ No examples provided.
 This function has the following aliases:
 
 - `head` - Shows the first N lines of a file.
-
 
 ## Source
 

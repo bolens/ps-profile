@@ -32,7 +32,6 @@ Request timeout in seconds. Default is 30.
 
 Maximum retry attempts. Default is 3.
 
-
 ## Examples
 
 No examples provided.

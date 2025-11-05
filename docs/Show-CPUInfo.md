@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `cpuinfo` - Shows detailed CPU information and usage.
 
-
 ## Source
 
 Defined in: profile.d\75-system-monitor.ps1

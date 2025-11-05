@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ll` - Lists directory contents in long format using eza.
 
-
 ## Source
 
 Defined in: profile.d\61-eza.ps1

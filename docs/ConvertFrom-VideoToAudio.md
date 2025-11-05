@@ -24,7 +24,6 @@ The path to the video file.
 
 The path for the output audio file. If not specified, uses input path with .mp3 extension.
 
-
 ## Examples
 
 No examples provided.
@@ -34,7 +33,6 @@ No examples provided.
 This function has the following aliases:
 
 - `video-to-audio` - Extracts audio from video file.
-
 
 ## Source
 

@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `bat-cat` - Displays file contents with syntax highlighting.
 
-
 ## Source
 
 Defined in: profile.d\02-files-listing.ps1

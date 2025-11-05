@@ -8,7 +8,6 @@ This documentation is automatically generated from comment-based help in the pro
 
 ## Functions by Fragment
 
-
 ### 00-bootstrap (4 functions)
 
 - [Set-AgentModeAlias](Set-AgentModeAlias.md) - Creates collision-safe aliases for profile fragments.
@@ -339,9 +338,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Show-FrequentDirectories](Show-FrequentDirectories.md) - Lists frequently used directories.
 - [Update-DirectoryStats](Update-DirectoryStats.md) - Tracks directory navigation for smart jumping.
 
-
 ## Aliases by Fragment
-
 
 ### 02-files-conversion (42 aliases)
 
@@ -690,7 +687,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [cd](cd.md) - Enhanced change directory with navigation tracking. (alias for `Set-LocationTracked`)
 - [f](f.md) - Goes forward in the navigation history. (alias for `Set-LocationForward`)
 - [j](j.md) - Quick directory jumping alias. (alias for `Jump-DirectoryQuick`)
-
 
 ## Generation
 

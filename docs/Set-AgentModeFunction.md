@@ -28,7 +28,6 @@ The script block containing the function body.
 
 If specified, returns the created script block instead of a boolean.
 
-
 ## Examples
 
 No examples provided.

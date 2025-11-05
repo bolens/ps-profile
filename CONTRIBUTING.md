@@ -58,6 +58,7 @@ Merge and revert commits are allowed (messages starting with "Merge " or "Revert
   - Defer heavy work behind `Enable-*` functions (lazy loading pattern)
   - Keep early fragments (00-09) lightweight
 - **External Tools**: Always check availability before invoking
+
   ```powershell
   if (Test-CachedCommand 'docker') { # configure docker helpers }
   ```

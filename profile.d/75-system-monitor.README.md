@@ -3,14 +3,17 @@ profile.d/75-system-monitor.ps1
 
 Purpose
 -------
+
 System monitoring dashboard for PowerShell profile.
 
 Usage
 -----
+
 See the fragment source: `75-system-monitor.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Show-SystemDashboard` — Shows a comprehensive system status dashboard.
 - `Show-SystemStatus` — Shows a compact system status overview.
 - `Show-CPUInfo` — Shows detailed CPU information and usage.
@@ -20,6 +23,7 @@ Functions
 
 Aliases
 -------
+
 - `sysinfo` — Quick aliases (alias for `Show-SystemDashboard`)
 - `sysstat` — Shows a compact system status overview. (alias for `Show-SystemStatus`)
 - `cpuinfo` — Shows detailed CPU information and usage. (alias for `Show-CPUInfo`)
@@ -29,8 +33,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

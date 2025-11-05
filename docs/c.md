@@ -6,8 +6,6 @@ Enhanced change directory with navigation tracking.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Set-LocationTracked`

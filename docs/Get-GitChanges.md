@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `gpl` - Fetches and merges changes from remote repository.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

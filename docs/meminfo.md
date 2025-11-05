@@ -6,8 +6,6 @@ Shows detailed memory usage information.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Show-MemoryInfo`

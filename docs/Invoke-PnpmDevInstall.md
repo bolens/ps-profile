@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pndev` - Installs development packages using pnpm.
 
-
 ## Source
 
 Defined in: profile.d\69-pnpm.ps1

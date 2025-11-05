@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `gcm` - Commits staged changes with a message.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

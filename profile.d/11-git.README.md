@@ -3,14 +3,17 @@ profile.d/11-git.ps1
 
 Purpose
 -------
+
 Consolidated Git helpers
 
 Usage
 -----
+
 See the fragment source: `11-git.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Invoke-GitStatus` — 11-git.ps1
 - `Add-GitChanges` — Git add - stage changes
 - `Save-GitCommit` — Git commit - commit changes
@@ -41,6 +44,7 @@ Functions
 
 Aliases
 -------
+
 - `gs` — 11-git.ps1 (alias for `Invoke-GitStatus`)
 - `ga` — Git add - stage changes (alias for `Add-GitChanges`)
 - `gc` — Git commit - commit changes (alias for `Save-GitCommit`)
@@ -70,8 +74,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

@@ -6,8 +6,6 @@ Goes back to the previous directory.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Set-LocationBack`

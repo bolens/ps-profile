@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `uvx` - Runs tools installed with UV.
 
-
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

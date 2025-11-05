@@ -68,6 +68,11 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/spellcheck.ps1
 
+  markdownlint:
+    desc: Run Markdownlint
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/run-markdownlint.ps1
+
   install-githooks:
     desc: Install Git hooks
     cmds:

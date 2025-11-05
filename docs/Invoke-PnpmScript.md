@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pnr` - Runs scripts using PNPM.
 
-
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

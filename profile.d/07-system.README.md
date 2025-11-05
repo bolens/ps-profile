@@ -3,14 +3,17 @@ profile.d/07-system.ps1
 
 Purpose
 -------
+
 System utilities (shell-like helpers adapted for PowerShell)
 
 Usage
 -----
+
 See the fragment source: `07-system.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Get-CommandInfo` — Shows information about commands.
 - `Find-String` — Searches for patterns in files.
 - `New-EmptyFile` — Creates empty files.
@@ -34,6 +37,7 @@ Functions
 
 Aliases
 -------
+
 - `which` — Shows information about commands. (alias for `Get-CommandInfo`)
 - `pgrep` — Searches for patterns in files. (alias for `Find-String`)
 - `touch` — Creates empty files. (alias for `New-EmptyFile`)
@@ -53,8 +57,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

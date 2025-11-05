@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pcl` - Shows container logs using compose (Podman-first).
 
-
 ## Source
 
 Defined in: profile.d\22-containers.ps1

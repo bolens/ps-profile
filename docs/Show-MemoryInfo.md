@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `meminfo` - Shows detailed memory usage information.
 
-
 ## Source
 
 Defined in: profile.d\75-system-monitor.ps1

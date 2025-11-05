@@ -48,7 +48,7 @@ pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
 
 ## Project Structure
 
-```
+```text
 ├── Microsoft.PowerShell_profile.ps1  # Main profile loader
 ├── profile.d/                         # Modular fragments (00-99)
 │   ├── 00-bootstrap.ps1               # Registration helpers

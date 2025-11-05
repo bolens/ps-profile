@@ -3,14 +3,17 @@ profile.d/34-dev.ps1
 
 Purpose
 -------
+
 Development shortcuts (docker, podman, k8s, node, python, cargo)
 
 Usage
 -----
+
 See the fragment source: `34-dev.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `d` — 34-dev.ps1
 - `dc` — 34-dev.ps1
 - `dps` — 34-dev.ps1
@@ -53,8 +56,10 @@ Functions
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

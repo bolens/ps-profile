@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `to-epoch` - Converts DateTime to Unix timestamp.
 
-
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

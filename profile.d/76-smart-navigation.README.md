@@ -3,14 +3,17 @@ profile.d/76-smart-navigation.ps1
 
 Purpose
 -------
+
 Smart directory navigation for PowerShell profile.
 
 Usage
 -----
+
 See the fragment source: `76-smart-navigation.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Update-DirectoryStats` — Tracks directory navigation for smart jumping.
 - `Jump-Directory` — Jumps to frequently used directories.
 - `Jump-DirectoryQuick` — Quick directory jumping alias.
@@ -25,6 +28,7 @@ Functions
 
 Aliases
 -------
+
 - `j` — Quick directory jumping alias. (alias for `Jump-DirectoryQuick`)
 - `cd` — Override built-in cd and Set-Location (alias for `Set-LocationTracked`)
 - `c` — Enhanced change directory with navigation tracking. (alias for `Set-LocationTracked`)
@@ -34,8 +38,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

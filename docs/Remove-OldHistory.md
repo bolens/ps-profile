@@ -20,7 +20,6 @@ Remove-OldHistory
 
 Number of days of history to keep (default: 30).
 
-
 ## Examples
 
 No examples provided.

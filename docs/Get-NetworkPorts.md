@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ports` - Shows network port information.
 
-
 ## Source
 
 Defined in: profile.d\07-system.ps1

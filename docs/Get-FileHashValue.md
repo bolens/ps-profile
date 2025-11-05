@@ -24,7 +24,6 @@ The path to the file to hash.
 
 The hash algorithm to use. Valid values are MD5, SHA1, SHA256, SHA384, SHA512. Default is SHA256.
 
-
 ## Examples
 
 No examples provided.
@@ -34,7 +33,6 @@ No examples provided.
 This function has the following aliases:
 
 - `file-hash` - Calculates file hash using specified algorithm.
-
 
 ## Source
 

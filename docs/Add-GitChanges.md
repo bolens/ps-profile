@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ga` - Stages changes for commit.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

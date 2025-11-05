@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `cb` - Copies input to the clipboard.
 
-
 ## Source
 
 Defined in: profile.d\16-clipboard.ps1

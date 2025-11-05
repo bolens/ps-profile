@@ -20,7 +20,6 @@ Open-Editor
 
 The path to the file to open.
 
-
 ## Examples
 
 No examples provided.
@@ -30,7 +29,6 @@ No examples provided.
 This function has the following aliases:
 
 - `e` - Opens file in editor quickly.
-
 
 ## Source
 

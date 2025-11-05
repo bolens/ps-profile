@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `meminfo` - Shows memory information.
 
-
 ## Source
 
 Defined in: profile.d\08-system-info.ps1

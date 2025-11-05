@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pnadd` - Installs packages using pnpm.
 
-
 ## Source
 
 Defined in: profile.d\69-pnpm.ps1

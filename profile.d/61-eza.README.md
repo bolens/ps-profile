@@ -3,14 +3,17 @@ profile.d/61-eza.ps1
 
 Purpose
 -------
+
 Modern ls replacement with eza
 
 Usage
 -----
+
 See the fragment source: `61-eza.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Get-ChildItemEza` — Lists directory contents using eza.
 - `Get-ChildItemEzaShort` — Lists directory contents using eza (short alias).
 - `Get-ChildItemEzaLong` — Lists directory contents in long format using eza.
@@ -25,6 +28,7 @@ Functions
 
 Aliases
 -------
+
 - `ls` — Lists directory contents using eza. (alias for `Get-ChildItemEza`)
 - `l` — Lists directory contents using eza (short alias). (alias for `Get-ChildItemEzaShort`)
 - `ll` — Lists directory contents in long format using eza. (alias for `Get-ChildItemEzaLong`)
@@ -38,8 +42,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

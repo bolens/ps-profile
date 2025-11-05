@@ -11,7 +11,7 @@ Usage:
 #>
 
 param(
-  [string[]]$Paths = @('**/*.md', 'profile.d/**/*.md')
+  [string[]]$Paths = @('**/*')
 )
 
 # Use Test-HasCommand for efficient command check (if available from profile, otherwise fallback)
@@ -24,11 +24,11 @@ else {
 
 if ($hasCSpell) {
   Write-Output "Running cspell on: $($Paths -join ', ')"
-  & cspell @Paths --no-progress
+  & cspell @Paths --no-progress --no-summary
   exit $LASTEXITCODE
 }
 else {
-  Write-Warning "cspell not found on PATH. Install with: npm install -g cspell@6"
+  Write-Warning "cspell not found on PATH. Install with: npm install -g cspell@9"
   Write-Output "Skipping local spellcheck (CI workflow will run cspell on push/PR)."
   exit 0
 }

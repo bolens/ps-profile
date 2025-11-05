@@ -6,8 +6,6 @@ Quick search in command history.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Find-HistoryQuick`

@@ -2,11 +2,7 @@
 
 ## Synopsis
 
-
-
 ## Description
-
-
 
 ## Alias Information
 

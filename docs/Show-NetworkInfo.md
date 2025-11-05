@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `netinfo` - Shows detailed network information.
 
-
 ## Source
 
 Defined in: profile.d\75-system-monitor.ps1

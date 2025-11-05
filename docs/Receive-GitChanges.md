@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `gf` - Downloads objects and refs from remote repository.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

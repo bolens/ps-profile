@@ -24,7 +24,6 @@ The path to the video file.
 
 The path for the output GIF file. If not specified, uses input path with .gif extension.
 
-
 ## Examples
 
 No examples provided.
@@ -34,7 +33,6 @@ No examples provided.
 This function has the following aliases:
 
 - `video-to-gif` - Converts video to GIF.
-
 
 ## Source
 

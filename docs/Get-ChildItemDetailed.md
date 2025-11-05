@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ll` - Lists directory contents with details.
 
-
 ## Source
 
 Defined in: profile.d\02-files-listing.ps1

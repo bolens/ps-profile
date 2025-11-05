@@ -24,7 +24,6 @@ The name of the environment variable.
 
 If specified, gets the variable from the system-wide registry; otherwise, from user registry.
 
-
 ## Examples
 
 No examples provided.

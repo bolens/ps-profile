@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ansible` - Runs Ansible commands via WSL with UTF-8 locale.
 
-
 ## Source
 
 Defined in: profile.d\13-ansible.ps1

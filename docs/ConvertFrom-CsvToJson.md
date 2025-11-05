@@ -20,7 +20,6 @@ ConvertFrom-CsvToJson
 
 The path to the CSV file to convert.
 
-
 ## Examples
 
 No examples provided.
@@ -30,7 +29,6 @@ No examples provided.
 This function has the following aliases:
 
 - `csv-to-json` - Converts CSV file to JSON format.
-
 
 ## Source
 

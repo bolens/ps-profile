@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `gd` - Shows differences between commits, branches, or working tree.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

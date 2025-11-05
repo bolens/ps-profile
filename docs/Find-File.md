@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `search` - Searches for files recursively.
 
-
 ## Source
 
 Defined in: profile.d\07-system.ps1

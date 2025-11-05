@@ -28,7 +28,6 @@ Additional context about where the error occurred.
 
 Error category for better organization.
 
-
 ## Examples
 
 No examples provided.

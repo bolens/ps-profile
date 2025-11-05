@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `spin` - Shows a spinner while executing a script block using gum.
 
-
 ## Source
 
 Defined in: profile.d\63-gum.ps1

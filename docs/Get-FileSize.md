@@ -20,7 +20,6 @@ Get-FileSize
 
 The path to the file to check size.
 
-
 ## Examples
 
 No examples provided.
@@ -30,7 +29,6 @@ No examples provided.
 This function has the following aliases:
 
 - `filesize` - Shows human-readable file size.
-
 
 ## Source
 

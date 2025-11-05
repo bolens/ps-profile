@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `gp` - Pushes commits to remote repository.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

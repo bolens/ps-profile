@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `uvs` - Syncs UV project dependencies.
 
-
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

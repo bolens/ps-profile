@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `b` - Goes back to the previous directory.
 
-
 ## Source
 
 Defined in: profile.d\76-smart-navigation.ps1

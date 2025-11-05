@@ -24,7 +24,6 @@ The path to the DOCX file.
 
 The path for the output Markdown file. If not specified, uses input path with .md extension.
 
-
 ## Examples
 
 No examples provided.
@@ -34,7 +33,6 @@ No examples provided.
 This function has the following aliases:
 
 - `docx-to-markdown` - Converts DOCX file to Markdown.
-
 
 ## Source
 

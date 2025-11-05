@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pni` - Installs dependencies using PNPM.
 
-
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

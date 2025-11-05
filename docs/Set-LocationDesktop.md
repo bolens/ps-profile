@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `desktop` - Changes to the Desktop directory.
 
-
 ## Source
 
 Defined in: profile.d\02-files-navigation.ps1

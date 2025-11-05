@@ -6,7 +6,9 @@ Tests for available container engines and compose tools.
 
 ## Description
 
-Returns information about available container engines (Docker/Podman) and their compose capabilities. Checks for docker, docker-compose, podman, and podman-compose availability and compose subcommand support. Returns a PSCustomObject with Engine, Compose, and Preferred fields.
+Returns information about available container engines (Docker/Podman) and their compose capabilities.
+Checks for docker, docker-compose, podman, and podman-compose availability and compose subcommand support.
+Returns a PSCustomObject with Engine, Compose, and Preferred fields.
 
 ## Signature
 

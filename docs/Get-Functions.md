@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `list-functions` - Lists user-defined functions.
 
-
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

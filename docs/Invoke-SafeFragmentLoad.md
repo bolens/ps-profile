@@ -28,7 +28,6 @@ Name of the fragment for logging.
 
 Maximum number of retry attempts.
 
-
 ## Examples
 
 No examples provided.

@@ -6,8 +6,6 @@ Goes forward in the navigation history.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Set-LocationForward`

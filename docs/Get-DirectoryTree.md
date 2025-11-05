@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `tree` - Displays directory structure as a tree.
 
-
 ## Source
 
 Defined in: profile.d\02-files-listing.ps1

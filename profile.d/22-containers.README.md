@@ -3,14 +3,17 @@ profile.d/22-containers.ps1
 
 Purpose
 -------
+
 Container helpers consolidated (docker / podman / compose)
 
 Usage
 -----
+
 See the fragment source: `22-containers.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Get-ContainerEngineInfo` — Gets information about available container engines and compose tools.
 - `Start-ContainerCompose` — Starts container services using compose (Docker-first).
 - `Stop-ContainerCompose` — Stops container services using compose (Docker-first).
@@ -23,6 +26,7 @@ Functions
 
 Aliases
 -------
+
 - `dcu` — Starts container services using compose (Docker-first). (alias for `Start-ContainerCompose`)
 - `dcd` — Stops container services using compose (Docker-first). (alias for `Stop-ContainerCompose`)
 - `dcl` — Shows container logs using compose (Docker-first). (alias for `Get-ContainerComposeLogs`)
@@ -34,8 +38,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

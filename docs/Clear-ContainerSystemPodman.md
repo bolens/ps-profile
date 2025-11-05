@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pprune` - Prunes unused container system resources (Podman-first).
 
-
 ## Source
 
 Defined in: profile.d\22-containers.ps1

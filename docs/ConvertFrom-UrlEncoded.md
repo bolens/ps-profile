@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `url-decode` - URL-decodes a string.
 
-
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

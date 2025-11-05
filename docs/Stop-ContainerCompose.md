@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `dcd` - Stops container services using compose (Docker-first).
 
-
 ## Source
 
 Defined in: profile.d\22-containers.ps1

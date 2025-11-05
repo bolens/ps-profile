@@ -24,7 +24,6 @@ The path to the input image file.
 
 The path for the output image file with desired format.
 
-
 ## Examples
 
 No examples provided.
@@ -34,7 +33,6 @@ No examples provided.
 This function has the following aliases:
 
 - `image-convert` - Converts image file formats.
-
 
 ## Source
 

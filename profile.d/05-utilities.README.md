@@ -3,14 +3,17 @@ profile.d/05-utilities.ps1
 
 Purpose
 -------
+
 Utility functions migrated from utilities.ps1
 
 Usage
 -----
+
 See the fragment source: `05-utilities.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Reload-Profile` — Reloads the PowerShell profile.
 - `Edit-Profile` — Opens the profile in VS Code.
 - `Get-Weather` — Shows weather information.
@@ -36,6 +39,7 @@ Functions
 
 Aliases
 -------
+
 - `reload` — Reloads the PowerShell profile. (alias for `Reload-Profile`)
 - `edit-profile` — Opens the profile in VS Code. (alias for `Edit-Profile`)
 - `weather` — Shows weather information. (alias for `Get-Weather`)
@@ -55,8 +59,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

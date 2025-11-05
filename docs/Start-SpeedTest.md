@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `speedtest` - Runs internet speed test.
 
-
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

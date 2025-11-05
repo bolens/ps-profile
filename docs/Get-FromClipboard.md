@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pb` - Pastes content from the clipboard.
 
-
 ## Source
 
 Defined in: profile.d\16-clipboard.ps1

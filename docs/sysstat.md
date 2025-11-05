@@ -6,8 +6,6 @@ Shows a compact system status overview.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Show-SystemStatus`

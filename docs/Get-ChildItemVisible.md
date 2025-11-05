@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `lx` - Lists directory contents excluding hidden files.
 
-
 ## Source
 
 Defined in: profile.d\02-files-listing.ps1

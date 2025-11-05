@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pnt` - Runs tests using PNPM.
 
-
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

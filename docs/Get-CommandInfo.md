@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `which` - Shows information about commands.
 
-
 ## Source
 
 Defined in: profile.d\07-system.ps1

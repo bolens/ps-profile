@@ -20,7 +20,6 @@ ConvertFrom-XmlToJson
 
 The path to the XML file to convert.
 
-
 ## Examples
 
 No examples provided.
@@ -30,7 +29,6 @@ No examples provided.
 This function has the following aliases:
 
 - `xml-to-json` - Converts XML file to JSON format.
-
 
 ## Source
 

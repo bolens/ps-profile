@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pwgen` - Generates a random password.
 
-
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

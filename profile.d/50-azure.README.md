@@ -3,14 +3,17 @@ profile.d/50-azure.ps1
 
 Purpose
 -------
+
 Azure CLI helpers (guarded)
 
 Usage
 -----
+
 See the fragment source: `50-azure.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `az` — Register Azure CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `azd` — Register Azure CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `az-login` — Register Azure CLI helpers lazily. Avoid expensive Get-Command probes at dot-source.
@@ -18,8 +21,10 @@ Functions
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

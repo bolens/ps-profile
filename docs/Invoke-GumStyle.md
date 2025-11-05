@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `style` - Styles text output using gum.
 
-
 ## Source
 
 Defined in: profile.d\63-gum.ps1

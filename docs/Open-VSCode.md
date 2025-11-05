@@ -29,7 +29,6 @@ This function has the following aliases:
 - `code` - Opens files in Visual Studio Code.
 - `vsc` - Opens current directory in VS Code.
 
-
 ## Source
 
 Defined in: profile.d\15-shortcuts.ps1

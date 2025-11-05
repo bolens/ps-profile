@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `sysinfo` - Shows a comprehensive system status dashboard.
 
-
 ## Source
 
 Defined in: profile.d\75-system-monitor.ps1

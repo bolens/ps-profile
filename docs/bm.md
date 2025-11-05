@@ -6,8 +6,6 @@ Lists all directory bookmarks.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Show-DirectoryBookmarks`

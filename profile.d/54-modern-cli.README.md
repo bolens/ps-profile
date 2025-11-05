@@ -3,14 +3,17 @@ profile.d/54-modern-cli.ps1
 
 Purpose
 -------
+
 Modern CLI tools helpers (guarded)
 
 Usage
 -----
+
 See the fragment source: `54-modern-cli.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `bat` — Register modern CLI tools helpers lazily. Avoid expensive Get-Command probes at dot-source.
 - `fd` — fd - find files and directories
 - `http` — http - command-line HTTP client
@@ -22,8 +25,10 @@ Functions
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

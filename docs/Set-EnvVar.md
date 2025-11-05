@@ -28,7 +28,6 @@ The value to set. If null or empty, the variable is removed.
 
 If specified, sets the variable in the system-wide registry; otherwise, in user registry.
 
-
 ## Examples
 
 No examples provided.

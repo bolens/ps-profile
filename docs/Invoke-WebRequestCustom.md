@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `web` - Makes HTTP web requests.
 
-
 ## Source
 
 Defined in: profile.d\07-system.ps1

@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `ltime` - Lists directory contents sorted by modification time using eza.
 
-
 ## Source
 
 Defined in: profile.d\61-eza.ps1

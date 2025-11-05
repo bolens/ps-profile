@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `yaml-to-json` - Converts YAML to JSON format.
 
-
 ## Source
 
 Defined in: profile.d\02-files-conversion.ps1

@@ -20,7 +20,6 @@ ConvertTo-Base64
 
 The file path or string to encode.
 
-
 ## Examples
 
 No examples provided.
@@ -30,7 +29,6 @@ No examples provided.
 This function has the following aliases:
 
 - `to-base64` - Encodes input to base64 format.
-
 
 ## Source
 

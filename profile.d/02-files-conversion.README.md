@@ -3,14 +3,17 @@ profile.d/02-files-conversion.ps1
 
 Purpose
 -------
+
 File conversion utilities
 
 Usage
 -----
+
 See the fragment source: `02-files-conversion.ps1` for examples and usage notes.
 
 Functions
 ---------
+
 - `Ensure-FileConversion` — Initializes file conversion utility functions on first use.
 - `Format-Json` — Pretty-prints JSON data.
 - `ConvertFrom-Yaml` — Converts YAML to JSON format.
@@ -36,6 +39,7 @@ Functions
 
 Aliases
 -------
+
 - `json-pretty` — Pretty-prints JSON data. (alias for `Format-Json`)
 - `yaml-to-json` — YAML to JSON (alias for `ConvertFrom-Yaml`)
 - `json-to-yaml` — JSON to YAML (alias for `ConvertTo-Yaml`)
@@ -60,8 +64,10 @@ Aliases
 
 Dependencies
 ------------
+
 None explicit; see the fragment for runtime checks and optional tooling dependencies.
 
 Notes
 -----
+
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.

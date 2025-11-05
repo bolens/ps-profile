@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `gs` - Shows Git repository status.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

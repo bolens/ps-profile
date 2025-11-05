@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `open` - Opens files or URLs using the system's default application.
 
-
 ## Source
 
 Defined in: profile.d\30-open.ps1

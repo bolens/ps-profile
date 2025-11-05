@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `project-root` - Changes to project root directory.
 
-
 ## Source
 
 Defined in: profile.d\15-shortcuts.ps1

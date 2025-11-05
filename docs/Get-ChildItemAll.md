@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `la` - Lists all directory contents including hidden files.
 
-
 ## Source
 
 Defined in: profile.d\02-files-listing.ps1

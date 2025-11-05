@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `zip` - Creates ZIP archives.
 
-
 ## Source
 
 Defined in: profile.d\07-system.ps1

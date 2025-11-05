@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `myip` - Shows public IP address.
 
-
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

@@ -6,8 +6,6 @@ Shows detailed disk usage information.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Show-DiskInfo`

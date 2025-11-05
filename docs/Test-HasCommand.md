@@ -20,7 +20,6 @@ Test-HasCommand
 
 The name of the command to test.
 
-
 ## Examples
 
 No examples provided.

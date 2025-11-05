@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `pcu` - Starts container services using compose (Podman-first).
 
-
 ## Source
 
 Defined in: profile.d\22-containers.ps1

@@ -6,8 +6,6 @@ Shows a comprehensive system status dashboard.
 
 ## Description
 
-
-
 ## Alias Information
 
 **Alias for:** `Show-SystemDashboard`

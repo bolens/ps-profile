@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `gc` - Commits staged changes.
 
-
 ## Source
 
 Defined in: profile.d\11-git.ps1

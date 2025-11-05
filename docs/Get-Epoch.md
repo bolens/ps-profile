@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `epoch` - Gets current Unix timestamp.
 
-
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

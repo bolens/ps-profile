@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `fh` - Quick search in command history.
 
-
 ## Source
 
 Defined in: profile.d\74-enhanced-history.ps1

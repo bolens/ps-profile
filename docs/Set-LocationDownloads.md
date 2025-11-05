@@ -28,7 +28,6 @@ This function has the following aliases:
 
 - `downloads` - Changes to the Downloads directory.
 
-
 ## Source
 
 Defined in: profile.d\02-files-navigation.ps1

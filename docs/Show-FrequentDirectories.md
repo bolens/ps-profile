@@ -24,7 +24,6 @@ Number of directories to show (default: 10).
 
 Filter directories by pattern.
 
-
 ## Examples
 
 No examples provided.
