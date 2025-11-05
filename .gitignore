@@ -7,6 +7,7 @@ Modules/
 
 # Ignore PowerShell package artifacts
 *.nupkg
+InstalledScriptInfos/
 
 # Ignore temp and backup files
 tmp/
