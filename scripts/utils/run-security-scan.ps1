@@ -24,31 +24,39 @@ scripts/utils/run-security-scan.ps1
 #>
 
 param(
+    [ValidateScript({
+            if ($_ -and -not (Test-Path $_)) {
+                throw "Path does not exist: $_"
+            }
+            $true
+        })]
     [string]$Path = $null
 )
 
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
 # Default to profile.d relative to the repository root
 if (-not $Path) {
-    $scriptDir = Split-Path -Parent $PSScriptRoot
-    $repoRoot = Split-Path -Parent $scriptDir
-    $Path = Join-Path $repoRoot 'profile.d'
-}
-
-Write-Output "Running security scan on: $Path"
-
-# Ensure PSScriptAnalyzer is available
-if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
-    Write-Output "PSScriptAnalyzer not found. Installing to CurrentUser scope..."
     try {
-        Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false -ErrorAction Stop
+        $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+        $Path = Join-Path $repoRoot 'profile.d'
     }
     catch {
-        Write-Error "Failed to install PSScriptAnalyzer: $($_.Exception.Message)"
-        exit 2
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
-Import-Module -Name PSScriptAnalyzer -Force -ErrorAction Stop
+Write-ScriptMessage -Message "Running security scan on: $Path"
+
+# Ensure PSScriptAnalyzer is available
+try {
+    Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
 # Security-focused rules
 $securityRules = @(
@@ -60,33 +68,37 @@ $securityRules = @(
     'PSAvoidUsingPositionalParameters'
 )
 
-$securityIssues = @()
+# Use List for better performance than array concatenation
+$securityIssues = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
     $file = $_.FullName
-    Write-Output "Security scanning $file"
+    Write-ScriptMessage -Message "Security scanning $file"
 
-    $results = Invoke-ScriptAnalyzer -Path $file -IncludeRule $securityRules -Severity Error, Warning
-    if ($results) {
-        $securityIssues += $results | ForEach-Object {
-            [PSCustomObject]@{
-                File     = (Resolve-Path -Relative $_.ScriptPath)
-                Rule     = $_.RuleName
-                Severity = $_.Severity
-                Line     = $_.Line
-                Message  = $_.Message
+    try {
+        $results = Invoke-ScriptAnalyzer -Path $file -IncludeRule $securityRules -Severity Error, Warning -ErrorAction Stop
+        if ($results) {
+            foreach ($result in $results) {
+                $securityIssues.Add([PSCustomObject]@{
+                        File     = (Resolve-Path -Relative $result.ScriptPath)
+                        Rule     = $result.RuleName
+                        Severity = $result.Severity
+                        Line     = $result.Line
+                        Message  = $result.Message
+                    })
             }
         }
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to scan $file`: $($_.Exception.Message)" -ErrorRecord $_
     }
 }
 
 if ($securityIssues.Count -gt 0) {
-    Write-Output "`nSecurity Issues Found:"
+    Write-ScriptMessage -Message "`nSecurity Issues Found:"
     $securityIssues | Format-Table -AutoSize
-    Write-Error "Found $($securityIssues.Count) security-related issues"
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($securityIssues.Count) security-related issues"
 }
 else {
-    Write-Output "Security scan completed: no issues found"
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Security scan completed: no issues found"
 }

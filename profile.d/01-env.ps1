@@ -14,9 +14,23 @@ try {
     if (-not $env:VISUAL) { $env:VISUAL = 'code' }
 
     # Example: append user-local bin to PATH if present (non-destructive)
-    $userBin = Join-Path $env:USERPROFILE '.local\bin'
-    if ((Test-Path $userBin) -and ($env:Path -notlike "*${userBin}*")) {
-        $env:Path = "$userBin;$env:Path"
+    # Use cross-platform home directory helper
+    $userHome = if (Test-Path Function:\Get-UserHome) {
+        Get-UserHome
+    }
+    elseif ($env:HOME) {
+        $env:HOME
+    }
+    else {
+        $env:USERPROFILE
+    }
+    
+    if ($userHome) {
+        $pathSeparator = [System.IO.Path]::PathSeparator
+        $userBin = Join-Path $userHome '.local' 'bin'
+        if ((Test-Path $userBin) -and ($env:Path -notlike "*$([regex]::Escape($userBin))*")) {
+            $env:Path = "$userBin$pathSeparator$env:Path"
+        }
     }
 
     Set-Variable -Name 'EnvDefaultsLoaded' -Value $true -Scope Global -Force

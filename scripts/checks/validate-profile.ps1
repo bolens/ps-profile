@@ -15,10 +15,21 @@ scripts/checks/validate-profile.ps1
     Runs all validation checks on the PowerShell profile.
 #>
 
-# Run format, security scan, lint then idempotency checks; fail if any step fails
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+# Import shared utilities
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
 
-$utilsDir = Join-Path (Split-Path -Parent $scriptDir) 'utils'
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+# Build paths to validation scripts
+$utilsDir = Join-Path $repoRoot 'scripts' 'utils'
+$scriptDir = $PSScriptRoot
 $format = Join-Path $utilsDir 'run-format.ps1'
 $security = Join-Path $utilsDir 'run-security-scan.ps1'
 $lint = Join-Path $utilsDir 'run-lint.ps1'
@@ -27,31 +38,24 @@ $idemp = Join-Path $scriptDir 'check-idempotency.ps1'
 $fragReadme = Join-Path $scriptDir 'check-comment-help.ps1'
 
 # Determine which PowerShell executable to use
-$psExe = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
+$psExe = Get-PowerShellExecutable
 
-Write-Output "Running format: $format"
-& $psExe -NoProfile -File $format
-if ($LASTEXITCODE -ne 0) { Write-Error "Format failed"; exit $LASTEXITCODE }
+# Run validation checks in sequence
+$checks = @(
+    @{ Name = 'format'; Path = $format }
+    @{ Name = 'security scan'; Path = $security }
+    @{ Name = 'lint'; Path = $lint }
+    @{ Name = 'spellcheck'; Path = $spellcheck }
+    @{ Name = 'comment-based help check'; Path = $fragReadme }
+    @{ Name = 'idempotency'; Path = $idemp }
+)
 
-Write-Output "Running security scan: $security"
-& $psExe -NoProfile -File $security
-if ($LASTEXITCODE -ne 0) { Write-Error "Security scan failed"; exit $LASTEXITCODE }
+foreach ($check in $checks) {
+    Write-ScriptMessage -Message "Running $($check.Name): $($check.Path)"
+    & $psExe -NoProfile -File $check.Path
+    if ($LASTEXITCODE -ne 0) {
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "$($check.Name) failed with exit code $LASTEXITCODE"
+    }
+}
 
-Write-Output "Running lint: $lint"
-& $psExe -NoProfile -File $lint
-if ($LASTEXITCODE -ne 0) { Write-Error "Lint failed"; exit $LASTEXITCODE }
-
-Write-Output "Running spellcheck: $spellcheck"
-& $psExe -NoProfile -File $spellcheck
-if ($LASTEXITCODE -ne 0) { Write-Error "Spellcheck failed"; exit $LASTEXITCODE }
-
-Write-Output "Running comment-based help check: $fragReadme"
-& $psExe -NoProfile -File $fragReadme
-if ($LASTEXITCODE -ne 0) { Write-Error "Comment-based help check failed"; exit $LASTEXITCODE }
-
-Write-Output "Running idempotency: $idemp"
-& $psExe -NoProfile -File $idemp
-if ($LASTEXITCODE -ne 0) { Write-Error "Idempotency check failed"; exit $LASTEXITCODE }
-
-Write-Output "Validation: format + security + lint + spellcheck + comment help + idempotency passed"
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: format + security + lint + spellcheck + comment help + idempotency passed"

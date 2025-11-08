@@ -19,16 +19,55 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
         function global:... { Set-Location ..\..\ }
         # Up three directories
         function global:.... { Set-Location ..\..\..\ }
-        # Go to user's Home directory
-        Set-Item -Path Function:~ -Value { Set-Location $env:USERPROFILE } -Force | Out-Null
-        # Go to user's Desktop directory
-        Set-Item -Path Function:Set-LocationDesktop -Value { Set-Location "$env:USERPROFILE\Desktop" } -Force | Out-Null
+        # Go to user's Home directory (cross-platform)
+        $userHome = if (Test-Path Function:\Get-UserHome) {
+            Get-UserHome
+        }
+        elseif ($env:HOME) {
+            $env:HOME
+        }
+        else {
+            $env:USERPROFILE
+        }
+        Set-Item -Path Function:~ -Value { Set-Location (Get-UserHome) } -Force | Out-Null
+        
+        # Go to user's Desktop directory (Windows-specific, gracefully handled on other platforms)
+        Set-Item -Path Function:Set-LocationDesktop -Value {
+            $home = Get-UserHome
+            $desktop = Join-Path $home 'Desktop'
+            if (Test-Path $desktop) {
+                Set-Location $desktop
+            }
+            else {
+                Write-Warning "Desktop directory not found. This may not be available on your platform."
+            }
+        } -Force | Out-Null
         Set-Alias -Name desktop -Value Set-LocationDesktop -ErrorAction SilentlyContinue
-        # Go to user's Downloads directory
-        Set-Item -Path Function:Set-LocationDownloads -Value { Set-Location "$env:USERPROFILE\Downloads" } -Force | Out-Null
+        
+        # Go to user's Downloads directory (cross-platform)
+        Set-Item -Path Function:Set-LocationDownloads -Value {
+            $home = Get-UserHome
+            $downloads = Join-Path $home 'Downloads'
+            if (Test-Path $downloads) {
+                Set-Location $downloads
+            }
+            else {
+                Write-Warning "Downloads directory not found. This may not be available on your platform."
+            }
+        } -Force | Out-Null
         Set-Alias -Name downloads -Value Set-LocationDownloads -ErrorAction SilentlyContinue
-        # Go to user's Documents directory
-        Set-Item -Path Function:Set-LocationDocuments -Value { Set-Location "$env:USERPROFILE\Documents" } -Force | Out-Null
+        
+        # Go to user's Documents directory (cross-platform)
+        Set-Item -Path Function:Set-LocationDocuments -Value {
+            $home = Get-UserHome
+            $documents = Join-Path $home 'Documents'
+            if (Test-Path $documents) {
+                Set-Location $documents
+            }
+            else {
+                Write-Warning "Documents directory not found. This may not be available on your platform."
+            }
+        } -Force | Out-Null
         Set-Alias -Name docs -Value Set-LocationDocuments -ErrorAction SilentlyContinue
     }
 }

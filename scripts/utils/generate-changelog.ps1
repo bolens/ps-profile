@@ -55,57 +55,57 @@ scripts/utils/generate-changelog.ps1
 #>
 
 param(
+    [ValidateNotNullOrEmpty()]
     [string]$OutputFile = "CHANGELOG.md",
     [switch]$Unreleased
 )
 
-$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$cliffConfig = Join-Path $repoRoot 'cliff.toml'
-$changelogPath = Join-Path $repoRoot $OutputFile
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
 
-Write-Output "Generating changelog..."
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $cliffConfig = Join-Path $repoRoot 'cliff.toml'
+    $changelogPath = Join-Path $repoRoot $OutputFile
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
-# Use Test-HasCommand for efficient command checks (if available from profile, otherwise fallback)
-$testHasCommand = (Test-Path Function:Test-HasCommand) -or (Get-Command Test-HasCommand -ErrorAction SilentlyContinue)
+Write-ScriptMessage -Message "Generating changelog..."
 
 # Check if git-cliff is available
-if ($testHasCommand) {
-    $hasGitCliff = Test-HasCommand git-cliff
-}
-else {
-    $hasGitCliff = $null -ne (Get-Command git-cliff -ErrorAction SilentlyContinue)
-}
+$hasGitCliff = Test-CommandAvailable -CommandName 'git-cliff'
 
 if (-not $hasGitCliff) {
-    Write-Output "git-cliff not found. Installing..."
+    Write-ScriptMessage -Message "git-cliff not found. Installing..."
 
     # Try to install git-cliff
     try {
         # Check if cargo is available (Rust toolchain)
-        if ($testHasCommand) {
-            $hasCargo = Test-HasCommand cargo
-        }
-        else {
-            $hasCargo = $null -ne (Get-Command cargo -ErrorAction SilentlyContinue)
-        }
+        $hasCargo = Test-CommandAvailable -CommandName 'cargo'
         if ($hasCargo) {
             $cargo = Get-Command cargo -ErrorAction SilentlyContinue
-            Write-Output "Installing git-cliff via cargo..."
+            Write-ScriptMessage -Message "Installing git-cliff via cargo..."
             & cargo install git-cliff
+            if ($LASTEXITCODE -ne 0) {
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to install git-cliff via cargo"
+            }
         }
         else {
             # Try via other methods
-            Write-Output "Please install git-cliff manually:"
-            Write-Output "  Via cargo: cargo install git-cliff"
-            Write-Output "  Via scoop: scoop install git-cliff"
-            Write-Output "  Via winget: winget install git-cliff"
-            Write-Output "  Download from: https://github.com/orhun/git-cliff/releases"
-            exit 1
+            Write-ScriptMessage -Message "Please install git-cliff manually:"
+            Write-ScriptMessage -Message "  Via cargo: cargo install git-cliff"
+            Write-ScriptMessage -Message "  Via scoop: scoop install git-cliff"
+            Write-ScriptMessage -Message "  Via winget: winget install git-cliff"
+            Write-ScriptMessage -Message "  Download from: https://github.com/orhun/git-cliff/releases"
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "git-cliff is required but not installed"
         }
     }
     catch {
-        Write-Error "Failed to install git-cliff: $($_.Exception.Message)"
-        exit 1
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
@@ -119,13 +119,17 @@ if ($Unreleased) {
     $args += '--unreleased'
 }
 
-Write-Output "Running: git-cliff $($args -join ' ')"
-& git-cliff @args
+Write-ScriptMessage -Message "Running: git-cliff $($args -join ' ')"
+try {
+    & git-cliff @args
 
-if ($LASTEXITCODE -eq 0) {
-    Write-Output "Changelog generated successfully: $changelogPath"
+    if ($LASTEXITCODE -eq 0) {
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Changelog generated successfully: $changelogPath"
+    }
+    else {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog (exit code: $LASTEXITCODE)"
+    }
 }
-else {
-    Write-Error "Failed to generate changelog"
-    exit $LASTEXITCODE
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }

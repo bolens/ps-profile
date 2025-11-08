@@ -3,6 +3,50 @@
 # Utility functions migrated from utilities.ps1
 # ===============================================
 
+# Security helper for path validation
+<#
+.SYNOPSIS
+    Validates that a path is safe and within a base directory.
+.DESCRIPTION
+    Checks if a resolved path is within a specified base directory to prevent
+    path traversal attacks. Useful for validating user input before file operations.
+.PARAMETER Path
+    The path to validate.
+.PARAMETER BasePath
+    The base directory that the path must be within.
+.OUTPUTS
+    System.Boolean. Returns $true if path is safe, $false otherwise.
+.EXAMPLE
+    if (Test-SafePath -Path $userPath -BasePath $homeDir) {
+        # Safe to use the path
+    }
+#>
+function Test-SafePath {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+        
+        [Parameter(Mandatory)]
+        [string]$BasePath
+    )
+    
+    try {
+        $resolvedPath = [System.IO.Path]::GetFullPath($Path)
+        $resolvedBase = [System.IO.Path]::GetFullPath($BasePath)
+        
+        # Ensure base path ends with directory separator for proper comparison
+        if (-not $resolvedBase.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+            $resolvedBase += [System.IO.Path]::DirectorySeparatorChar
+        }
+        
+        return $resolvedPath.StartsWith($resolvedBase, [System.StringComparison]::OrdinalIgnoreCase)
+    }
+    catch {
+        # If path resolution fails, consider it unsafe
+        return $false
+    }
+}
+
 # Reload profile in current session
 <#
 .SYNOPSIS
@@ -189,6 +233,13 @@ function Get-EnvVar {
         [switch]$Global
     )
 
+    # Registry operations only work on Windows
+    if (-not (Test-IsWindows)) {
+        Write-Warning "Get-EnvVar requires Windows. Use `$env:$Name on other platforms."
+        # Return current session value as fallback
+        return (Get-Item -Path "env:$Name" -ErrorAction SilentlyContinue).Value
+    }
+
     $registerKey = if ($Global) {
         Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager'
     }
@@ -218,6 +269,14 @@ function Set-EnvVar {
         [string]$Value,
         [switch]$Global
     )
+
+    # Registry operations only work on Windows
+    if (-not (Test-IsWindows)) {
+        Write-Warning "Set-EnvVar requires Windows. Use `$env:$Name = '$Value' on other platforms."
+        # Set session value as fallback
+        Set-Item -Path "env:$Name" -Value $Value -ErrorAction SilentlyContinue
+        return
+    }
 
     $registerKey = if ($Global) {
         Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager'
@@ -253,6 +312,12 @@ function Set-EnvVar {
     Sends a WM_SETTINGCHANGE message to notify all windows of environment variable changes.
 #>
 function Publish-EnvVar {
+    # Windows-only function for broadcasting environment variable changes
+    if (-not (Test-IsWindows)) {
+        # On non-Windows platforms, environment variable changes are session-only
+        return
+    }
+
     if (-not ('Win32.NativeMethods' -as [Type])) {
         Add-Type -Namespace Win32 -Name NativeMethods -MemberDefinition @'
 [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -289,14 +354,11 @@ public static extern IntPtr SendMessageTimeout(
 #>
 function Remove-Path {
     param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
         [switch]$Global
     )
-
-    if (-not $Path) {
-        Write-Warning "No path specified to remove"
-        return
-    }
 
     # Get current PATH
     $currentPath = if ($Global) {
@@ -312,10 +374,12 @@ function Remove-Path {
     }
 
     # Split PATH into array and remove the specified path
-    $pathArray = $currentPath -split ';' | Where-Object { $_ -and $_.Trim() -ne $Path.Trim() }
+    # Use platform-appropriate path separator
+    $pathSeparator = [System.IO.Path]::PathSeparator
+    $pathArray = $currentPath -split [regex]::Escape($pathSeparator) | Where-Object { $_ -and $_.Trim() -ne $Path.Trim() }
 
     # Join back into PATH string
-    $newPath = $pathArray -join ';'
+    $newPath = $pathArray -join $pathSeparator
 
     # Update PATH
     if ($Global) {
@@ -338,14 +402,17 @@ function Remove-Path {
 #>
 function Add-Path {
     param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({
+                if (-not (Test-Path $_ -PathType Container -ErrorAction SilentlyContinue)) {
+                    throw "Path does not exist or is not a directory: $_"
+                }
+                $true
+            })]
         [string]$Path,
         [switch]$Global
     )
-
-    if (-not $Path) {
-        Write-Warning "No path specified to add"
-        return
-    }
 
     # Get current PATH
     $currentPath = if ($Global) {
@@ -360,8 +427,9 @@ function Add-Path {
         $newPath = $Path
     }
     else {
-        # Split PATH into array
-        $pathArray = $currentPath -split ';' | Where-Object { $_ -and $_.Trim() }
+        # Split PATH into array using platform-appropriate separator
+        $pathSeparator = [System.IO.Path]::PathSeparator
+        $pathArray = $currentPath -split [regex]::Escape($pathSeparator) | Where-Object { $_ -and $_.Trim() }
 
         # Check if path already exists
         $normalizedPath = $Path.Trim()
@@ -372,7 +440,7 @@ function Add-Path {
 
         # Add the new path
         $pathArray = @($normalizedPath) + $pathArray
-        $newPath = $pathArray -join ';'
+        $newPath = $pathArray -join $pathSeparator
     }
 
     # Update PATH

@@ -8,13 +8,16 @@ This document provides detailed technical information about the profile architec
 
 `Microsoft.PowerShell_profile.ps1` is the main entrypoint that:
 
-- Loads fragments from `profile.d/` in lexical order (sorted by filename)
+- Loads fragments from `profile.d/` with dependency-aware ordering
 - Includes robust error handling that reports which fragment failed to load
+- Supports batch-optimized loading for better performance
 - Keeps itself minimal—all functionality lives in fragments
 
 ### Fragment Loading Order
 
-Fragments use numeric prefixes to control load order:
+Fragments use numeric prefixes to control load order, but can also declare explicit dependencies:
+
+**Numeric Prefixes:**
 
 - **00-09**: Core bootstrap, environment, and registration helpers
 - **10-19**: Terminal configuration (PSReadLine, prompts, Git)
@@ -22,6 +25,83 @@ Fragments use numeric prefixes to control load order:
 - **30-39**: Development tools and aliases
 - **40-69**: Language-specific tools (Go, PHP, Node.js, Python, Rust)
 - **70-79**: Advanced features (performance insights, enhanced history, system monitoring)
+
+**Dependency Declarations:**
+Fragments can declare dependencies in their header:
+
+```powershell
+#Requires -Fragment '00-bootstrap'
+#Requires -Fragment '01-env'
+# Or: # Dependencies: 00-bootstrap, 01-env
+```
+
+The loader automatically resolves dependencies and loads fragments in the correct order.
+
+## Fragment Configuration
+
+### Basic Configuration
+
+Fragments can be enabled/disabled via `.profile-fragments.json`:
+
+```json
+{
+  "disabled": ["11-git"]
+}
+```
+
+Or using commands:
+
+```powershell
+Disable-ProfileFragment -FragmentName '11-git'
+Enable-ProfileFragment -FragmentName '11-git'
+Get-ProfileFragment  # List all fragments
+```
+
+### Enhanced Configuration
+
+The `.profile-fragments.json` file supports advanced options:
+
+```json
+{
+  "disabled": ["11-git"],
+  "loadOrder": ["00-bootstrap", "01-env", "05-utilities"],
+  "environments": {
+    "minimal": ["00-bootstrap", "01-env"],
+    "development": ["00-bootstrap", "01-env", "11-git", "30-dev-tools"]
+  },
+  "featureFlags": {
+    "enableAdvancedFeatures": true
+  },
+  "performance": {
+    "batchLoad": true,
+    "maxFragmentTime": 500
+  }
+}
+```
+
+**Environment-Specific Loading:**
+
+```powershell
+$env:PS_PROFILE_ENVIRONMENT = 'minimal'
+. $PROFILE
+```
+
+**Batch-Optimized Loading:**
+
+```powershell
+$env:PS_PROFILE_BATCH_LOAD = '1'
+. $PROFILE
+```
+
+Or configure in `.profile-fragments.json`:
+
+```json
+{
+  "performance": {
+    "batchLoad": true
+  }
+}
+```
 
 ## Bootstrap Helpers
 

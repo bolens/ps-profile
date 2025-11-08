@@ -28,7 +28,11 @@ param(
     [string]$Base = 'origin/main'
 )
 
-Write-Output "Checking commits against base: $Base"
+# Import shared utilities
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+Write-ScriptMessage -Message "Checking commits against base: $Base"
 
 try {
     # Ensure we have the base ref locally
@@ -41,8 +45,7 @@ catch {
 # Get commit list between base and HEAD (exclude merges)
 $commits = & git rev-list --no-merges --reverse $Base..HEAD 2>$null
 if (-not $commits) {
-    Write-Output "No commits to check against $Base"
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No commits to check against $Base"
 }
 
 # Use List for better performance than array concatenation
@@ -70,10 +73,9 @@ foreach ($c in $commits) {
 }
 
 if ($errors.Count -gt 0) {
-    Write-Error "Found $($errors.Count) commit(s) with invalid commit subjects:"
-    $errors | ForEach-Object { Write-Output ("Commit: {0} - {1}" -f $_.Commit, $_.Subject) }
-    exit 1
+    $errorDetails = $errors | ForEach-Object { "Commit: {0} - {1}" -f $_.Commit, $_.Subject }
+    $errorMessage = "Found $($errors.Count) commit(s) with invalid commit subjects:`n$($errorDetails -join "`n")"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message $errorMessage
 }
 
-Write-Output "All commit subjects conform to Conventional Commits"
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All commit subjects conform to Conventional Commits"

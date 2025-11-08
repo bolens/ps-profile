@@ -29,6 +29,10 @@ param(
     [string]$OutputPath = "docs"
 )
 
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
 # Helper function for GetRelativePath compatibility with older .NET versions
 function Get-RelativePath {
     param([string]$From, [string]$To)
@@ -51,7 +55,13 @@ function Get-RelativePath {
     return $relativePath
 }
 
-$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
 # Compile regex patterns once for better performance
 $regexCommentBlock = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
@@ -71,12 +81,10 @@ else {
 
 $profilePath = Join-Path $repoRoot 'profile.d'
 
-Write-Output "Generating API documentation..."
+Write-ScriptMessage -Message "Generating API documentation..."
 
 # Create docs directory if it doesn't exist
-if (-not (Test-Path $docsPath)) {
-    New-Item -ItemType Directory -Path $docsPath -Force | Out-Null
-}
+Ensure-DirectoryExists -Path $docsPath
 
 # Track which commands we're documenting (to clean up stale docs later)
 # Use List for better performance than array concatenation
@@ -390,11 +398,10 @@ Get-ChildItem -Path $profilePath -Filter '*.ps1' | ForEach-Object {
 }
 
 if ($functions.Count -eq 0 -and $aliases.Count -eq 0) {
-    Write-Output "No functions or aliases with documentation found."
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No functions or aliases with documentation found."
 }
 
-Write-Output "Found $($functions.Count) functions and $($aliases.Count) aliases with documentation."
+Write-ScriptMessage -Message "Found $($functions.Count) functions and $($aliases.Count) aliases with documentation."
 
 # Generate markdown documentation
 foreach ($function in $functions) {
@@ -514,7 +521,7 @@ foreach ($function in $functions) {
     $content += "`n`n## Source`n`nDefined in: $(Get-RelativePath $docsPath $function.File)"
 
     $content | Out-File -FilePath $mdFile -Encoding UTF8 -NoNewline:$false
-    Write-Output "Generated documentation: $mdFile"
+    Write-ScriptMessage -Message "Generated documentation: $mdFile"
 }
 
 # Generate markdown documentation for aliases
@@ -536,7 +543,7 @@ foreach ($alias in $aliases) {
     $content += "Defined in: $(Get-RelativePath $docsPath $alias.File)"
     
     $content | Out-File -FilePath $mdFile -Encoding UTF8 -NoNewline:$false
-    Write-Output "Generated alias documentation: $mdFile"
+    Write-ScriptMessage -Message "Generated alias documentation: $mdFile"
 }
 
 # Generate index file
@@ -576,20 +583,20 @@ $indexContent += "This documentation was generated from the comment-based help i
 $indexContent | Out-File -FilePath (Join-Path $docsPath 'README.md') -Encoding UTF8 -NoNewline:$false
 
 # Clean up stale documentation files
-Write-Output "`nCleaning up stale documentation..."
+Write-ScriptMessage -Message "`nCleaning up stale documentation..."
 $allDocFiles = Get-ChildItem -Path $docsPath -Filter '*.md' -Exclude 'README.md' -ErrorAction SilentlyContinue
 $staleDocs = $allDocFiles | Where-Object { $_.BaseName -notin $documentedCommandNames }
 
 if ($staleDocs.Count -gt 0) {
-    Write-Output "Removing $($staleDocs.Count) stale documentation file(s):"
+    Write-ScriptMessage -Message "Removing $($staleDocs.Count) stale documentation file(s):"
     foreach ($staleDoc in $staleDocs) {
-        Write-Output "  - Removing $($staleDoc.Name)"
+        Write-ScriptMessage -Message "  - Removing $($staleDoc.Name)"
         Remove-Item -Path $staleDoc.FullName -Force
     }
 }
 else {
-    Write-Output "No stale documentation files found."
+    Write-ScriptMessage -Message "No stale documentation files found."
 }
 
-Write-Output "`nAPI documentation generated in: $docsPath"
-Write-Output "Generated documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+Write-ScriptMessage -Message "`nAPI documentation generated in: $docsPath"
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Generated documentation for $($functions.Count) functions and $($aliases.Count) aliases."

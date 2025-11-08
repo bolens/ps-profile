@@ -45,6 +45,10 @@ param(
     [switch]$Force
 )
 
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
 function Get-TargetPath {
     # Use the exact path style from your log. If you prefer XDG env var, set XDG_CONFIG_HOME
     $appdata = $env:APPDATA
@@ -64,22 +68,35 @@ Write-Host "Target config directory: $dir"
 Write-Host "Target config file: $file"
 
 if (-not $ApiToken) {
+    Write-Warning @"
+SECURITY NOTICE: This script will store your API token in plaintext in a config file.
+Consider using one of these more secure alternatives:
+  1. Set CF_API_TOKEN environment variable: `setx CF_API_TOKEN '<token>'` (Windows) or `export CF_API_TOKEN='<token>'` (Unix)
+  2. Use `wrangler login` which handles authentication securely
+  3. Use Windows Credential Manager or keychain for token storage
+
+Press Ctrl+C to cancel, or Enter to continue with file-based storage.
+"@
     $ApiToken = Read-Host -AsSecureString 'Enter Cloudflare API token (will be converted to plaintext in config file)'
     $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ApiToken)
     $ApiToken = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
     [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) | Out-Null
 }
 
-if (-not (Test-Path -Path $dir)) {
-    Write-Host "Creating directory: $dir"
-    New-Item -ItemType Directory -Path $dir -Force | Out-Null
+# Ensure directory exists using Common module helper
+try {
+    Ensure-DirectoryExists -Path $dir
+    Write-Host "Directory ready: $dir"
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to create directory: $($_.Exception.Message)" -ErrorRecord $_
 }
 
 if (Test-Path -Path $file -and -not $Force) {
     $ok = Read-Host "File already exists at $file. Overwrite? (y/N)"
     if ($ok -notin @('y', 'Y', 'yes', 'YES')) {
         Write-Host 'Aborting; existing file retained.'
-        return
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Operation cancelled by user"
     }
 }
 
@@ -92,7 +109,14 @@ if ($AccountId) { $content.Add("account_id = `"$AccountId`"") }
 
 Set-Content -Path $file -Value ($content -join "`n") -Encoding UTF8
 
-Write-Host "Wrote config to: $file"
-Write-Host "Notes:`n - Consider creating a more restrictive API token in the Cloudflare dashboard (least privilege).`n - Alternatively you can set the CF_API_TOKEN env var for CI or local runs: `setx CF_API_TOKEN '<token>'` (powershell)"
-
-Write-Host "Now re-run your MCP server (for example: npx @cloudflare/mcp-server-cloudflare) in a new shell so the env is picked up if you used setx."
+Write-Host "Wrote config to: $file" -ForegroundColor Green
+Write-Host ""
+Write-Host "Security Recommendations:" -ForegroundColor Yellow
+Write-Host "  - Consider creating a more restrictive API token in the Cloudflare dashboard (least privilege)"
+Write-Host "  - For better security, use environment variables instead of config files:"
+Write-Host "    Windows: `setx CF_API_TOKEN '<token>'`"
+Write-Host "    Unix:    `export CF_API_TOKEN='<token>'`"
+Write-Host "  - Use `wrangler login` for interactive sessions (handles authentication securely)"
+Write-Host "  - Consider using credential stores (Windows Credential Manager, macOS Keychain) for production"
+Write-Host ""
+Write-Host "Note: If you used setx, re-run your MCP server in a new shell so the env is picked up."

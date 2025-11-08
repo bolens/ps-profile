@@ -32,32 +32,47 @@ scripts/utils/run_pester.ps1
 #>
 
 param(
+    [ValidateScript({
+            if ($_ -and -not (Test-Path $_)) {
+                throw "Test file does not exist: $_"
+            }
+            $true
+        })]
     [string]$TestFile = "",
     [switch]$Coverage
 )
 
-# Cache root directory path calculation
-$rootDir = Split-Path (Split-Path $PSScriptRoot)
-$testsDir = Join-Path $rootDir 'tests'
-$profileDir = Join-Path $rootDir 'profile.d'
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
 
-# Check for Pester module (cache module check)
-$pesterCmd = Get-Command Invoke-Pester -ErrorAction SilentlyContinue
-if (-not $pesterCmd) {
-    Write-Host 'Pester not found; installing to CurrentUser scope...'
-    Install-Module -Name Pester -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
-    $pesterCmd = Get-Command Invoke-Pester -ErrorAction Stop
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $testsDir = Join-Path $repoRoot 'tests'
+    $profileDir = Join-Path $repoRoot 'profile.d'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+# Ensure Pester is available
+try {
+    Ensure-ModuleAvailable -ModuleName 'Pester'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 $pesterParams = @{}
 if ([string]::IsNullOrWhiteSpace($TestFile)) {
     # Run all tests in the tests/ directory
     $files = Get-ChildItem -Path $testsDir -Filter '*.ps1' -File | Sort-Object Name | Select-Object -ExpandProperty FullName
-    Write-Host "Running Pester tests: $($files -join ', ')"
+    Write-ScriptMessage -Message "Running Pester tests: $($files -join ', ')"
     $pesterParams.Script = $files
 }
 else {
-    Write-Host "Running Pester tests: $TestFile"
+    Write-ScriptMessage -Message "Running Pester tests: $TestFile"
     $pesterParams.Script = $TestFile
 }
 
@@ -71,7 +86,7 @@ if ($Coverage) {
     if ($pesterModule -and $pesterModule.Version -ge [version]'4.0.0') {
         $pesterParams.CodeCoverageOutputFile = 'coverage.xml'
     }
-    Write-Host "Code coverage enabled for: $profileDir"
+    Write-ScriptMessage -Message "Code coverage enabled for: $profileDir"
 }
 
 # Compile regex pattern once for error detection
@@ -85,7 +100,7 @@ catch {
     # Work around Pester 3.4.0 bug with null ErrorRecord handling
     # If we get the specific error about null arguments, suppress it and get the result differently
     if ($nullArgRegex.IsMatch($_.Exception.Message) -or $paramFirstRegex.IsMatch($_.Exception.Message)) {
-        Write-Host "Pester framework error suppressed (known issue with null ErrorRecord handling)"
+        Write-ScriptMessage -Message "Pester framework error suppressed (known issue with null ErrorRecord handling)"
         # Try to run without -PassThru to avoid the error
         Invoke-Pester @pesterParams
         # Create a basic result object

@@ -27,11 +27,46 @@ scripts/utils/benchmark-startup.ps1
 #>
 
 param(
+    [ValidateScript({
+            if ($_ -le 0) {
+                throw "Iterations must be a positive integer. Value provided: $_"
+            }
+            $true
+        })]
     [int]$Iterations = 5,
-    [string]$WorkspaceRoot = (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
+
+    [ValidateScript({
+            if ($_ -and -not (Test-Path $_ -PathType Container)) {
+                throw "WorkspaceRoot must be a valid directory path. Path provided: $_"
+            }
+            $true
+        })]
+    [string]$WorkspaceRoot = $null,
+
     [switch]$UpdateBaseline,
+
+    [ValidateScript({
+            if ($_ -le 0) {
+                throw "RegressionThreshold must be a positive number. Value provided: $_"
+            }
+            $true
+        })]
     [double]$RegressionThreshold = 1.5  # Allow 50% degradation before failing
 )
+
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Get repository root if not specified
+if (-not $WorkspaceRoot) {
+    try {
+        $WorkspaceRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
+}
 
 function Time-Command {
     param([scriptblock]$Script)
@@ -52,7 +87,7 @@ for ($i = 1; $i -le $Iterations; $i++) {
     $profilePath = Join-Path $WorkspaceRoot 'Microsoft.PowerShell_profile.ps1'
 
     $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $startInfo.FileName = 'pwsh'
+    $startInfo.FileName = Get-PowerShellExecutable
     $startInfo.Arguments = "-NoProfile -Command `"$env:PS_PROFILE_AUTOENABLE_PSREADLINE = '1'; Import-Module PSReadLine -ErrorAction SilentlyContinue; . '$($profilePath)'; Write-Output '$($marker)'`""
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
@@ -115,7 +150,7 @@ Write-Output `$sw.Elapsed.TotalMilliseconds
         Set-Content -Path $tempFrag -Value $child -Encoding UTF8
 
         $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-        $startInfo.FileName = 'pwsh'
+        $startInfo.FileName = Get-PowerShellExecutable
         $startInfo.Arguments = "-NoProfile -File `"$tempFrag`""
         $startInfo.RedirectStandardOutput = $true
         $startInfo.RedirectStandardError = $true
@@ -143,13 +178,13 @@ Write-Output `$sw.Elapsed.TotalMilliseconds
 }
 
 # Print results
-Write-Output "Startup benchmark (ms) - iterations: $Iterations"
+Write-ScriptMessage -Message "Startup benchmark (ms) - iterations: $Iterations"
 $fullResultsArray = $fullResults.ToArray()
 $currentMean = [Math]::Round(($fullResultsArray | Measure-Object -Average).Average, 2)
-Write-Output "Full startup times (ms): $($fullResultsArray -join ',')"
-Write-Output "Full startup mean (ms): $currentMean"
+Write-ScriptMessage -Message "Full startup times (ms): $($fullResultsArray -join ',')"
+Write-ScriptMessage -Message "Full startup mean (ms): $currentMean"
 
-Write-Output "Per-fragment dot-source timings (ms):"
+Write-ScriptMessage -Message "Per-fragment dot-source timings (ms):"
 $fragmentResults | Sort-Object -Property MeanMs -Descending | Format-Table -AutoSize
 
 # Performance regression detection
@@ -157,17 +192,17 @@ $baselineFile = Join-Path $WorkspaceRoot 'scripts' 'data' 'performance-baseline.
 $regressionDetected = $false
 
 if (Test-Path $baselineFile) {
-    Write-Output "`nPerformance Regression Check:"
+    Write-ScriptMessage -Message "`nPerformance Regression Check:"
     try {
         $baseline = Get-Content $baselineFile -Raw | ConvertFrom-Json
 
         # Check full startup time regression
         $baselineMean = $baseline.FullStartupMean
         $ratio = $currentMean / $baselineMean
-        Write-Output "Full startup: Current=$currentMean ms, Baseline=$baselineMean ms, Ratio=$([Math]::Round($ratio,2))x"
+        Write-ScriptMessage -Message "Full startup: Current=$currentMean ms, Baseline=$baselineMean ms, Ratio=$([Math]::Round($ratio,2))x"
 
         if ($ratio -gt $RegressionThreshold) {
-            Write-Warning "PERFORMANCE REGRESSION: Full startup time increased by $([Math]::Round(($ratio-1)*100,1))% (threshold: $([Math]::Round(($RegressionThreshold-1)*100,1))%)"
+            Write-ScriptMessage -Message "PERFORMANCE REGRESSION: Full startup time increased by $([Math]::Round(($ratio-1)*100,1))% (threshold: $([Math]::Round(($RegressionThreshold-1)*100,1))%)" -IsWarning
             $regressionDetected = $true
         }
 
@@ -177,22 +212,22 @@ if (Test-Path $baselineFile) {
             if ($baselineFrag) {
                 $fragRatio = $frag.MeanMs / $baselineFrag.MeanMs
                 if ($fragRatio -gt $RegressionThreshold) {
-                    Write-Warning "PERFORMANCE REGRESSION: $($frag.Fragment) increased by $([Math]::Round(($fragRatio-1)*100,1))% (current: $($frag.MeanMs)ms, baseline: $($baselineFrag.MeanMs)ms)"
+                    Write-ScriptMessage -Message "PERFORMANCE REGRESSION: $($frag.Fragment) increased by $([Math]::Round(($fragRatio-1)*100,1))% (current: $($frag.MeanMs)ms, baseline: $($baselineFrag.MeanMs)ms)" -IsWarning
                     $regressionDetected = $true
                 }
             }
         }
 
         if (-not $regressionDetected) {
-            Write-Output "✓ No performance regressions detected"
+            Write-ScriptMessage -Message "✓ No performance regressions detected"
         }
     }
     catch {
-        Write-Warning "Failed to load or parse baseline file: $($_.Exception.Message)"
+        Write-ScriptMessage -Message "Failed to load or parse baseline file: $($_.Exception.Message)" -IsWarning
     }
 }
 else {
-    Write-Output "`nNo baseline performance data found. Run with -UpdateBaseline to create baseline."
+    Write-ScriptMessage -Message "`nNo baseline performance data found. Run with -UpdateBaseline to create baseline."
 }
 
 # Save new baseline if requested
@@ -212,19 +247,27 @@ if ($UpdateBaseline) {
     }
 
     $baselineData | ConvertTo-Json -Depth 10 | Set-Content $baselineFile -Encoding UTF8
-    Write-Output "`nUpdated performance baseline: $baselineFile"
+    Write-ScriptMessage -Message "`nUpdated performance baseline: $baselineFile"
 }
 
-# Save CSV
-$csvOut = Join-Path $WorkspaceRoot 'scripts' 'data' 'startup-benchmark.csv'
+# Save CSV - ensure data directory exists
+$dataDir = Join-Path $WorkspaceRoot 'scripts' 'data'
+try {
+    Ensure-DirectoryExists -Path $dataDir
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+$csvOut = Join-Path $dataDir 'startup-benchmark.csv'
 $fragmentResults | Export-Csv -Path $csvOut -NoTypeInformation -Force
-Write-Output "`nSaved per-fragment results to: $csvOut"
+Write-ScriptMessage -Message "`nSaved per-fragment results to: $csvOut"
 
 # Exit with error if regression detected (unless updating baseline)
 if ($regressionDetected -and -not $UpdateBaseline) {
-    Write-Error "Performance regression detected. Use -UpdateBaseline to accept new performance baseline."
     Pop-Location
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Performance regression detected. Use -UpdateBaseline to accept new performance baseline."
 }
 
 Pop-Location
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Benchmark completed successfully"

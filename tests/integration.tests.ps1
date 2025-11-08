@@ -39,6 +39,20 @@ try {
             $result | Should Match 'PROFILE_LOADED_SUCCESSFULLY'
         }
 
+        It 'loads with cross-platform compatibility helpers' {
+            # Test that platform helpers are available after profile load
+            $testScript = @"
+. '$($script:ProfilePath -replace "'", "''")'
+if (Get-Command Test-IsWindows -ErrorAction SilentlyContinue) {
+    Write-Output 'PLATFORM_HELPERS_AVAILABLE'
+} else {
+    Write-Output 'PLATFORM_HELPERS_MISSING'
+}
+"@
+            $result = & $script:Invoke-PwshScript -ScriptContent $testScript
+            $result | Should Match 'PLATFORM_HELPERS_AVAILABLE'
+        }
+
         It 'does not pollute global scope excessively' {
             # Test that loading the profile doesn't create an excessive number of unexpected global variables
             $before = (Get-Variable -Scope Global).Count
@@ -219,6 +233,69 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
             $secondIncrease = $after - $middle
             # Second load should not add significantly more variables (idempotent)
             $secondIncrease | Should BeLessThan ($firstIncrease * 2)
+        }
+    }
+
+    Context 'Cross-platform PATH manipulation' {
+        It 'Add-Path uses platform-appropriate separator' {
+            . (Join-Path $script:ProfileDir '05-utilities.ps1')
+            
+            $testPath = Join-Path $TestDrive 'test-path'
+            New-Item -ItemType Directory -Path $testPath -Force | Out-Null
+            
+            $originalPath = $env:PATH
+            try {
+                Add-Path -Path $testPath
+                $pathSeparator = [System.IO.Path]::PathSeparator
+                $env:PATH | Should Match ([regex]::Escape($testPath))
+            }
+            finally {
+                $env:PATH = $originalPath
+            }
+        }
+
+        It 'Remove-Path uses platform-appropriate separator' {
+            . (Join-Path $script:ProfileDir '05-utilities.ps1')
+            
+            $testPath = Join-Path $TestDrive 'test-remove-path'
+            New-Item -ItemType Directory -Path $testPath -Force | Out-Null
+            
+            $originalPath = $env:PATH
+            try {
+                $pathSeparator = [System.IO.Path]::PathSeparator
+                $env:PATH = "$testPath$pathSeparator$env:PATH"
+                
+                Remove-Path -Path $testPath
+                $env:PATH | Should Not Match ([regex]::Escape($testPath))
+            }
+            finally {
+                $env:PATH = $originalPath
+            }
+        }
+    }
+
+    Context 'Scoop detection' {
+        It 'handles missing Scoop gracefully' {
+            $testScript = @"
+`$env:SCOOP = `$null
+. '$($script:ProfilePath -replace "'", "''")'
+Write-Output 'SCOOP_HANDLED'
+"@
+            $result = & $script:Invoke-PwshScript -ScriptContent $testScript
+            $result | Should Match 'SCOOP_HANDLED'
+        }
+    }
+
+    Context 'Fragment disable/enable functionality' {
+        It 'Get-ProfileFragment lists fragments' {
+            . $script:ProfilePath
+            
+            if (Get-Command Get-ProfileFragment -ErrorAction SilentlyContinue) {
+                $fragments = Get-ProfileFragment
+                $fragments | Should Not BeNullOrEmpty
+                $fragments[0] | Should HaveMember 'Name'
+                $fragments[0] | Should HaveMember 'Enabled'
+            }
         }
     }
 }

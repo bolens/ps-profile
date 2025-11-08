@@ -15,15 +15,22 @@ scripts/git/hooks/pre-push.ps1
     This hook is automatically invoked by git before pushing.
 #>
 
-Push-Location -LiteralPath (Split-Path -Parent $MyInvocation.MyCommand.Definition)
-$repoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Definition)
-Pop-Location
+# Import shared utilities
+# Note: Git hooks may be called from .git/hooks/, so we need to resolve the path carefully
+$hookScriptPath = $MyInvocation.MyCommand.Definition
+$hookDir = Split-Path -Parent $hookScriptPath
+# From .git/hooks/, go up two levels to get repo root
+$repoRoot = Split-Path -Parent (Split-Path -Parent $hookDir)
+$commonModulePath = Join-Path $repoRoot 'scripts' 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
 
-$validate = Join-Path $repoRoot 'scripts\checks\validate-profile.ps1'
+$validate = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 
-Write-Output "pre-push: running validate-profile (format + security + lint + spellcheck + comment help + idempotency)"
-& pwsh -NoProfile -File $validate
-if ($LASTEXITCODE -ne 0) { Write-Error "pre-push: validate-profile failed"; exit $LASTEXITCODE }
+Write-ScriptMessage -Message "pre-push: running validate-profile (format + security + lint + spellcheck + comment help + idempotency)"
+$psExe = Get-PowerShellExecutable
+& $psExe -NoProfile -File $validate
+if ($LASTEXITCODE -ne 0) {
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "pre-push: validate-profile failed"
+}
 
-Write-Output "pre-push: all checks passed"
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "pre-push: all checks passed"

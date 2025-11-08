@@ -12,18 +12,36 @@ try {
     if ($null -ne (Get-Variable -Name 'ScoopCompletionLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
 
     $scoopCompletion = $null
-    # Prefer the environment-provided path without enumerating other locations
+    $scoopRoot = $null
+    
+    # Prefer the environment-provided path
     if ($env:SCOOP) {
-        $candidate = Join-Path $env:SCOOP 'apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
-        if (Test-Path $candidate) { $scoopCompletion = $candidate }
+        $scoopRoot = $env:SCOOP
     }
-    # If not found via env, check the legacy path (cheap single Test-Path).
-    # Avoid enumerating all drives; only test the legacy root quickly.
-    if (-not $scoopCompletion) {
+    # Check default user location (cross-platform compatible)
+    elseif ($env:USERPROFILE -or $env:HOME) {
+        $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
+        $defaultScoop = Join-Path $userHome 'scoop'
+        if (Test-Path $defaultScoop -PathType Container -ErrorAction SilentlyContinue) {
+            $scoopRoot = $defaultScoop
+        }
+    }
+    # Fallback to legacy path (for backward compatibility)
+    if (-not $scoopRoot) {
         $legacyRoot = 'A:\'
         if (Test-Path $legacyRoot -PathType Container -ErrorAction SilentlyContinue) {
-            $legacy = 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
-            if (Test-Path $legacy -PathType Leaf -ErrorAction SilentlyContinue) { $scoopCompletion = $legacy }
+            $legacyScoop = Join-Path $legacyRoot 'scoop'
+            if (Test-Path $legacyScoop -PathType Container -ErrorAction SilentlyContinue) {
+                $scoopRoot = $legacyScoop
+            }
+        }
+    }
+    
+    # Build completion module path if Scoop root found
+    if ($scoopRoot) {
+        $candidate = Join-Path $scoopRoot 'apps' 'scoop' 'current' 'supporting' 'completion' 'Scoop-Completion.psd1'
+        if (Test-Path $candidate -PathType Leaf -ErrorAction SilentlyContinue) {
+            $scoopCompletion = $candidate
         }
     }
 

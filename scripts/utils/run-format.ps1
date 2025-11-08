@@ -24,43 +24,38 @@ scripts/utils/run-format.ps1
 #>
 
 param(
+    [ValidateScript({
+            if ($_ -and -not (Test-Path $_)) {
+                throw "Path does not exist: $_"
+            }
+            $true
+        })]
     [string]$Path = $null
 )
 
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
 # Default to profile.d relative to the repository root
 if (-not $Path) {
-    $scriptDir = Split-Path -Parent $PSScriptRoot
-    $repoRoot = Split-Path -Parent $scriptDir
-    $Path = Join-Path $repoRoot 'profile.d'
-}
-
-Write-Output "Running PSScriptAnalyzer formatter on: $Path"
-
-# Ensure PSScriptAnalyzer is available (includes formatting capabilities)
-if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
-    Write-Output "PSScriptAnalyzer not found. Installing to CurrentUser scope..."
     try {
-        # Register PSGallery if not already registered
-        if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
-            Register-PSRepository -Default
-        }
-        # Set PSGallery as trusted
-        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false -ErrorAction Stop
+        $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+        $Path = Join-Path $repoRoot 'profile.d'
     }
     catch {
-        Write-Error "Failed to install PSScriptAnalyzer: $($_.Exception.Message)"
-        exit 2
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
-# Import the module
+Write-ScriptMessage -Message "Running PSScriptAnalyzer formatter on: $Path"
+
+# Ensure PSScriptAnalyzer is available (includes formatting capabilities)
 try {
-    Import-Module -Name PSScriptAnalyzer -Force -ErrorAction Stop
+    Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 }
 catch {
-    Write-Error "Failed to import PSScriptAnalyzer: $($_.Exception.Message)"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Compile regex pattern once for CRLF detection
@@ -72,7 +67,7 @@ $errors = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
     $file = $_.FullName
-    Write-Output "Formatting $file"
+    Write-ScriptMessage -Message "Formatting $file"
 
     try {
         # Read the original content to detect line endings
@@ -100,17 +95,16 @@ Get-ChildItem -Path $Path -Filter '*.ps1' | ForEach-Object {
                 File  = $file
                 Error = $_.Exception.Message
             })
-        Write-Warning "Failed to format $file`: $($_.Exception.Message)"
+        Write-ScriptMessage -Message "Failed to format $file`: $($_.Exception.Message)" -IsWarning
     }
 }
 
-Write-Output "Formatted $filesFormatted file(s)"
+Write-ScriptMessage -Message "Formatted $filesFormatted file(s)"
 
 if ($errors.Count -gt 0) {
-    Write-Error "Failed to format $($errors.Count) file(s):"
-    $errors | ForEach-Object { Write-Output "  $($_.File): $($_.Error)" }
-    exit 1
+    $errorDetails = $errors | ForEach-Object { "  $($_.File): $($_.Error)" }
+    $errorMessage = "Failed to format $($errors.Count) file(s):`n$($errorDetails -join "`n")"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message $errorMessage
 }
 
-Write-Output "PSScriptAnalyzer: all files formatted successfully"
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: all files formatted successfully"

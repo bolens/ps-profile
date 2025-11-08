@@ -13,55 +13,63 @@ try {
         $global:PSProfileCommandTimings = [System.Collections.Concurrent.ConcurrentDictionary[string, System.Collections.Generic.List[double]]]::new()
     }
 
-    # Command timing tracker
-    <#
-    .SYNOPSIS
-        Tracks command execution performance and provides insights.
-    .DESCRIPTION
-        Monitors command execution times and maintains statistics for optimization insights.
-        Automatically tracks commands that take longer than a threshold.
-    #>
-    function Start-CommandTimer {
-        param([string]$CommandName)
+    # Command timing tracker - ensure global scope for hook access
+    if (-not (Test-Path "Function:\\global:Start-CommandTimer")) {
+        <#
+        .SYNOPSIS
+            Tracks command execution performance and provides insights.
+        .DESCRIPTION
+            Monitors command execution times and maintains statistics for optimization insights.
+            Automatically tracks commands that take longer than a threshold.
+        #>
+        $sbStart = {
+            param([string]$CommandName)
 
-        $timer = [System.Diagnostics.Stopwatch]::StartNew()
-        $global:PSProfileCommandTimer = @{
-            Name  = $CommandName
-            Timer = $timer
+            $timer = [System.Diagnostics.Stopwatch]::StartNew()
+            $global:PSProfileCommandTimer = @{
+                Name  = $CommandName
+                Timer = $timer
+            }
         }
+        # Create function in global scope explicitly
+        Set-Item -Path "Function:\global:Start-CommandTimer" -Value $sbStart -Force | Out-Null
     }
 
-    <#
-    .SYNOPSIS
-        Stops command timing and records the duration.
-    .DESCRIPTION
-        Stops the command timer and records the execution duration for analysis.
-    #>
-    function Stop-CommandTimer {
-        if ($global:PSProfileCommandTimer) {
-            $global:PSProfileCommandTimer.Timer.Stop()
-            $duration = $global:PSProfileCommandTimer.Timer.Elapsed.TotalMilliseconds
-            $commandName = $global:PSProfileCommandTimer.Name
+    if (-not (Test-Path "Function:\\global:Stop-CommandTimer")) {
+        <#
+        .SYNOPSIS
+            Stops command timing and records the duration.
+        .DESCRIPTION
+            Stops the command timer and records the execution duration for analysis.
+        #>
+        $sbStop = {
+            if ($global:PSProfileCommandTimer) {
+                $global:PSProfileCommandTimer.Timer.Stop()
+                $duration = $global:PSProfileCommandTimer.Timer.Elapsed.TotalMilliseconds
+                $commandName = $global:PSProfileCommandTimer.Name
 
-            # Record timing for analysis
-            if (-not $global:PSProfileCommandTimings.ContainsKey($commandName)) {
-                $global:PSProfileCommandTimings[$commandName] = [System.Collections.Generic.List[double]]::new()
+                # Record timing for analysis
+                if (-not $global:PSProfileCommandTimings.ContainsKey($commandName)) {
+                    $global:PSProfileCommandTimings[$commandName] = [System.Collections.Generic.List[double]]::new()
+                }
+                $global:PSProfileCommandTimings[$commandName].Add($duration)
+
+                # Keep only last 100 timings per command to avoid memory bloat
+                if ($global:PSProfileCommandTimings[$commandName].Count -gt 100) {
+                    $global:PSProfileCommandTimings[$commandName].RemoveAt(0)
+                }
+
+                # Show timing for slow commands
+                if ($duration -gt 1000) {
+                    # Commands taking more than 1 second
+                    Write-Host ("🐌 Slow command: {0} took {1:N2}s" -f $commandName, ($duration / 1000)) -ForegroundColor Yellow
+                }
+
+                $global:PSProfileCommandTimer = $null
             }
-            $global:PSProfileCommandTimings[$commandName].Add($duration)
-
-            # Keep only last 100 timings per command to avoid memory bloat
-            if ($global:PSProfileCommandTimings[$commandName].Count -gt 100) {
-                $global:PSProfileCommandTimings[$commandName].RemoveAt(0)
-            }
-
-            # Show timing for slow commands
-            if ($duration -gt 1000) {
-                # Commands taking more than 1 second
-                Write-Host ("🐌 Slow command: {0} took {1:N2}s" -f $commandName, ($duration / 1000)) -ForegroundColor Yellow
-            }
-
-            $global:PSProfileCommandTimer = $null
         }
+        # Create function in global scope explicitly
+        Set-Item -Path "Function:\global:Stop-CommandTimer" -Value $sbStop -Force | Out-Null
     }
 
     # Performance insights and analysis
@@ -109,50 +117,50 @@ try {
         # Show slowest commands
         Write-Host "`n🐌 Slowest Commands (by average execution time):" -ForegroundColor Yellow
         $commandStats |
-            Where-Object { $_.AvgTime -gt 100 } |  # Only show commands that take > 100ms on average
-            Sort-Object -Property AvgTime -Descending |
-            Select-Object -First 10 |
-            Format-Table -Property @{
-                Name       = "Command"
-                Expression = { $_.Command }
-                Width      = 25
-            }, @{
-                Name       = "Avg Time"
-                Expression = { "{0:N0}ms" -f $_.AvgTime }
-                Width      = 10
-                Alignment  = "Right"
-            }, @{
-                Name       = "Max Time"
-                Expression = { "{0:N0}ms" -f $_.MaxTime }
-                Width      = 10
-                Alignment  = "Right"
-            }, @{
-                Name       = "Executions"
-                Expression = { $_.Executions }
-                Width      = 10
-                Alignment  = "Right"
-            } -AutoSize
+        Where-Object { $_.AvgTime -gt 100 } |  # Only show commands that take > 100ms on average
+        Sort-Object -Property AvgTime -Descending |
+        Select-Object -First 10 |
+        Format-Table -Property @{
+            Name       = "Command"
+            Expression = { $_.Command }
+            Width      = 25
+        }, @{
+            Name       = "Avg Time"
+            Expression = { "{0:N0}ms" -f $_.AvgTime }
+            Width      = 10
+            Alignment  = "Right"
+        }, @{
+            Name       = "Max Time"
+            Expression = { "{0:N0}ms" -f $_.MaxTime }
+            Width      = 10
+            Alignment  = "Right"
+        }, @{
+            Name       = "Executions"
+            Expression = { $_.Executions }
+            Width      = 10
+            Alignment  = "Right"
+        } -AutoSize
 
         # Show most executed commands
         Write-Host "`n🔄 Most Executed Commands:" -ForegroundColor Green
         $commandStats |
-            Sort-Object -Property Executions -Descending |
-            Select-Object -First 10 |
-            Format-Table -Property @{
-                Name       = "Command"
-                Expression = { $_.Command }
-                Width      = 25
-            }, @{
-                Name       = "Executions"
-                Expression = { $_.Executions }
-                Width      = 10
-                Alignment  = "Right"
-            }, @{
-                Name       = "Avg Time"
-                Expression = { "{0:N0}ms" -f $_.AvgTime }
-                Width      = 10
-                Alignment  = "Right"
-            } -AutoSize
+        Sort-Object -Property Executions -Descending |
+        Select-Object -First 10 |
+        Format-Table -Property @{
+            Name       = "Command"
+            Expression = { $_.Command }
+            Width      = 25
+        }, @{
+            Name       = "Executions"
+            Expression = { $_.Executions }
+            Width      = 10
+            Alignment  = "Right"
+        }, @{
+            Name       = "Avg Time"
+            Expression = { "{0:N0}ms" -f $_.AvgTime }
+            Width      = 10
+            Alignment  = "Right"
+        } -AutoSize
 
         # Show optimization suggestions
         Write-Host "`n💡 Optimization Suggestions:" -ForegroundColor Magenta
@@ -266,6 +274,34 @@ try {
             if ($starshipModule) {
                 $promptFunc = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
                 if ($promptFunc -and $promptFunc.ModuleName -eq 'starship') {
+                    $promptFrameworkActive = $true
+                }
+            }
+        }
+        
+        # Check if Starship command is available (will be initialized later)
+        # Don't override prompt if Starship will be initialized
+        if (-not $promptFrameworkActive) {
+            $hasStarship = $false
+            if (Get-Command Test-HasCommand -ErrorAction SilentlyContinue) {
+                $hasStarship = Test-HasCommand starship
+            }
+            else {
+                $hasStarship = $null -ne (Get-Command starship -ErrorAction SilentlyContinue)
+            }
+            
+            # Also check if Initialize-Starship function exists (will be called later)
+            if ($hasStarship -or (Get-Command Initialize-Starship -ErrorAction SilentlyContinue)) {
+                $promptFrameworkActive = $true
+            }
+        }
+        
+        # Check if current prompt already has starship in it
+        if (-not $promptFrameworkActive) {
+            $promptFunc = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
+            if ($promptFunc) {
+                $promptScript = $promptFunc.ScriptBlock.ToString()
+                if ($promptScript -match 'starship|Invoke-Native|Invoke-Starship') {
                     $promptFrameworkActive = $true
                 }
             }

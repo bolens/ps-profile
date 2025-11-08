@@ -16,6 +16,33 @@
     add functionality in `profile.d/`.
 #>
 
+# ===============================================
+# PROFILE VERSION INFORMATION
+# ===============================================
+# Track profile version for debugging and support
+if (-not $global:PSProfileVersion) {
+    $global:PSProfileVersion = '1.0.0'
+    $profileDir = Split-Path -Parent $PSCommandPath
+    if (Test-Path (Join-Path $profileDir '.git')) {
+        try {
+            Push-Location $profileDir
+            $global:PSProfileGitCommit = git rev-parse --short HEAD 2>$null
+            Pop-Location
+        }
+        catch {
+            $global:PSProfileGitCommit = 'unknown'
+        }
+    }
+    else {
+        $global:PSProfileGitCommit = 'unknown'
+    }
+    
+    # Display version in debug mode
+    if ($env:PS_PROFILE_DEBUG) {
+        Write-Host "PowerShell Profile v$global:PSProfileVersion (commit: $global:PSProfileGitCommit)" -ForegroundColor Cyan
+    }
+}
+
 # --- Only run interactive initialization (skip for non-interactive hosts) ---
 # If $Host or its RawUI is not available, we're not in an interactive session.
 if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
@@ -34,15 +61,47 @@ if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
 # ===============================================
 # ENVIRONMENT VARIABLES (existing)
 # ===============================================
-# Editor variables used by many tools (keep as existing defaults)
-$env:EDITOR = 'code'
-$env:GIT_EDITOR = 'code --wait'
-$env:VISUAL = 'code'
+# Editor variables are set in profile.d/01-env.ps1 to avoid duplication
+# and ensure proper idempotency checks
 
-Import-Module 'A:\scoop\local\apps\scoop\current\supporting\completion\Scoop-Completion.psd1' -ErrorAction SilentlyContinue
+# ===============================================
+# SCOOP INTEGRATION (dynamic detection)
+# ===============================================
+# Detect Scoop installation dynamically for portability
+$scoopRoot = $null
+if ($env:SCOOP) {
+    $scoopRoot = $env:SCOOP
+}
+elseif (Test-Path "$env:USERPROFILE\scoop" -ErrorAction SilentlyContinue) {
+    $scoopRoot = "$env:USERPROFILE\scoop"
+}
+elseif (Test-Path "A:\scoop" -ErrorAction SilentlyContinue) {
+    $scoopRoot = "A:\scoop"  # Fallback for legacy setup
+}
 
-# Add scoop shims to PATH so that installed tools are available
-$env:PATH = "A:\scoop\shims;A:\scoop\bin;$env:PATH"
+if ($scoopRoot) {
+    # Import Scoop completion module if available
+    $scoopCompletion = Join-Path $scoopRoot 'apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
+    if (Test-Path $scoopCompletion -ErrorAction SilentlyContinue) {
+        Import-Module $scoopCompletion -ErrorAction SilentlyContinue
+    }
+    
+    # Add Scoop shims and bin to PATH if they exist
+    $scoopShims = Join-Path $scoopRoot 'shims'
+    $scoopBin = Join-Path $scoopRoot 'bin'
+    $pathSeparator = [System.IO.Path]::PathSeparator
+    
+    if (Test-Path $scoopShims -ErrorAction SilentlyContinue) {
+        if ($env:PATH -notlike "*$([regex]::Escape($scoopShims))*") {
+            $env:PATH = "$scoopShims$pathSeparator$env:PATH"
+        }
+    }
+    if (Test-Path $scoopBin -ErrorAction SilentlyContinue) {
+        if ($env:PATH -notlike "*$([regex]::Escape($scoopBin))*") {
+            $env:PATH = "$scoopBin$pathSeparator$env:PATH"
+        }
+    }
+}
 
 # ===============================================
 # FRAGMENT LOADING HELPERS
@@ -52,13 +111,16 @@ if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
     $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
 }
 
-# Helper function to track fragment load times
+# Helper function to track fragment load times with granular debug levels
 <#
 .SYNOPSIS
     Measures and tracks the execution time of profile fragments.
 .DESCRIPTION
     Wraps the execution of profile fragments to measure their load time.
-    Only tracks timing when PS_PROFILE_DEBUG environment variable is set.
+    Supports granular debug levels:
+    - PS_PROFILE_DEBUG=1: Basic debug (current behavior)
+    - PS_PROFILE_DEBUG=2: Verbose debug (includes timing)
+    - PS_PROFILE_DEBUG=3: Performance profiling (detailed metrics)
     Results are stored in a global list for later analysis.
 .PARAMETER FragmentName
     The name of the fragment being measured.
@@ -68,22 +130,51 @@ if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
 function Measure-FragmentLoadTime {
     param([string]$FragmentName, [scriptblock]$Action)
 
-    if (-not $env:PS_PROFILE_DEBUG) {
+    # Parse debug level (default to 1 if set but not numeric)
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG) {
+        if ([int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Successfully parsed
+        }
+        else {
+            # Non-numeric value means basic debug
+            $debugLevel = 1
+        }
+    }
+
+    if ($debugLevel -eq 0) {
         & $Action
         return
     }
 
-    $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    try {
-        & $Action
-    }
-    finally {
-        $sw.Stop()
-        $global:PSProfileFragmentTimes.Add([PSCustomObject]@{
+    # Level 2+ includes timing
+    if ($debugLevel -ge 2) {
+        $sw = [System.Diagnostics.Stopwatch]::StartNew()
+        try {
+            & $Action
+        }
+        finally {
+            $sw.Stop()
+            $timing = [PSCustomObject]@{
                 Fragment  = $FragmentName
                 Duration  = $sw.Elapsed.TotalMilliseconds
                 Timestamp = [DateTime]::Now
-            })
+            }
+            
+            if (-not $global:PSProfileFragmentTimes) {
+                $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
+            }
+            $global:PSProfileFragmentTimes.Add($timing)
+            
+            # Level 3 shows detailed output
+            if ($debugLevel -ge 3) {
+                Write-Host "Fragment '$FragmentName' loaded in $($timing.Duration)ms" -ForegroundColor Cyan
+            }
+        }
+    }
+    else {
+        # Level 1: basic debug, no timing
+        & $Action
     }
 }
 
@@ -97,14 +188,42 @@ $profileDir = Split-Path -Parent $PSCommandPath
 $profileD = Join-Path $profileDir 'profile.d'
 
 # Load fragment configuration (read directly to avoid dependency on bootstrap)
+# After bootstrap loads, we'll use Get-FragmentConfig for enhanced features
 $fragmentConfigPath = Join-Path $profileDir '.profile-fragments.json'
 $disabledFragments = @()
+$loadOrderOverride = @()
+$environmentSets = @{}
+$featureFlags = @{}
+$performanceConfig = @{ batchLoad = $false; maxFragmentTime = 500 }
+
 if (Test-Path $fragmentConfigPath) {
     try {
         $configContent = Get-Content -Path $fragmentConfigPath -Raw -ErrorAction Stop
         $configObj = $configContent | ConvertFrom-Json
         if ($configObj.disabled) {
             $disabledFragments = @($configObj.disabled)
+        }
+        if ($configObj.loadOrder) {
+            $loadOrderOverride = @($configObj.loadOrder)
+        }
+        if ($configObj.environments) {
+            # Convert PSCustomObject to hashtable
+            $configObj.environments.PSObject.Properties | ForEach-Object {
+                $environmentSets[$_.Name] = @($_.Value)
+            }
+        }
+        if ($configObj.featureFlags) {
+            $configObj.featureFlags.PSObject.Properties | ForEach-Object {
+                $featureFlags[$_.Name] = $_.Value
+            }
+        }
+        if ($configObj.performance) {
+            if ($configObj.performance.batchLoad) {
+                $performanceConfig.batchLoad = $configObj.performance.batchLoad
+            }
+            if ($configObj.performance.maxFragmentTime) {
+                $performanceConfig.maxFragmentTime = $configObj.performance.maxFragmentTime
+            }
         }
     }
     catch {
@@ -114,15 +233,33 @@ if (Test-Path $fragmentConfigPath) {
     }
 }
 
+# Check for environment-specific fragment sets
+$currentEnvironment = $env:PS_PROFILE_ENVIRONMENT
+if ($currentEnvironment -and $environmentSets.ContainsKey($currentEnvironment)) {
+    # Disable all fragments, then enable only those in the environment set
+    $allFragments = Get-ChildItem -Path (Join-Path $profileDir 'profile.d') -Filter '*.ps1' -ErrorAction SilentlyContinue
+    $enabledFragments = $environmentSets[$currentEnvironment]
+    $allFragmentNames = $allFragments | ForEach-Object { $_.BaseName }
+    $disabledFragments = $allFragmentNames | Where-Object { $_ -notin $enabledFragments -and $_ -ne '00-bootstrap' }
+    
+    if ($env:PS_PROFILE_DEBUG) {
+        Write-Host "Environment '$currentEnvironment' active. Enabled fragments: $($enabledFragments -join ', ')" -ForegroundColor Cyan
+    }
+}
+
 if (Test-Path $profileD) {
-    # Load files in lexical order. Each file should be idempotent and
-    # safe to be dot-sourced multiple times.
-    Get-ChildItem -Path $profileD -File -Filter '*.ps1' | Sort-Object Name | ForEach-Object {
-        $fragmentName = $_.Name
-        $fragmentBaseName = $_.BaseName
+    # Helper function to load a single fragment with error handling
+    function script:Load-Fragment {
+        param(
+            [System.IO.FileInfo]$FragmentFile,
+            [string[]]$DisabledFragments
+        )
+        
+        $fragmentName = $FragmentFile.Name
+        $fragmentBaseName = $FragmentFile.BaseName
         
         # Check if fragment is disabled (skip 00-bootstrap.ps1 check as it's always needed)
-        if ($fragmentBaseName -ne '00-bootstrap' -and $fragmentBaseName -in $disabledFragments) {
+        if ($fragmentBaseName -ne '00-bootstrap' -and $fragmentBaseName -in $DisabledFragments) {
             if ($env:PS_PROFILE_DEBUG) { Write-Host "Skipping disabled profile fragment: $fragmentName" -ForegroundColor DarkGray }
             return
         }
@@ -133,7 +270,7 @@ if (Test-Path $profileD) {
             # Assign the result to $null to suppress any returned values (fragments
             # may return ScriptBlocks or other objects during registration). This
             # keeps the profile quiet when opening a new shell.
-            $null = . $_.FullName
+            $null = . $FragmentFile.FullName
         }
         catch {
             # Enhanced error handling with recovery suggestions
@@ -145,6 +282,109 @@ if (Test-Path $profileD) {
                 # Fallback to basic error reporting
                 Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
             }
+        }
+    }
+    
+    # Get all fragments and filter disabled ones
+    $allFragments = Get-ChildItem -Path $profileD -File -Filter '*.ps1'
+    
+    # CRITICAL: Always load 00-bootstrap.ps1 first, before any dependency resolution
+    # This ensures all bootstrap helpers are available for other fragments
+    $bootstrapFragment = $allFragments | Where-Object { $_.BaseName -eq '00-bootstrap' }
+    $otherFragments = $allFragments | Where-Object { $_.BaseName -ne '00-bootstrap' }
+    
+    # Load bootstrap first
+    if ($bootstrapFragment) {
+        Load-Fragment -FragmentFile $bootstrapFragment -DisabledFragments $disabledFragments
+    }
+    
+    # Now process remaining fragments with dependency-aware ordering
+    if ($loadOrderOverride.Count -gt 0) {
+        $orderedFragments = @()
+        $unorderedFragments = @()
+        
+        # Add fragments in specified order
+        foreach ($fragmentName in $loadOrderOverride) {
+            if ($fragmentName -eq '00-bootstrap') { continue }  # Already loaded
+            $fragment = $otherFragments | Where-Object { $_.BaseName -eq $fragmentName }
+            if ($fragment) {
+                $orderedFragments += $fragment
+            }
+        }
+        
+        # Add remaining fragments in lexical order
+        $orderedNames = $orderedFragments | ForEach-Object { $_.BaseName }
+        $unorderedFragments = $otherFragments | Where-Object { $_.BaseName -notin $orderedNames } | Sort-Object Name
+        
+        $allFragments = $orderedFragments + $unorderedFragments
+    }
+    else {
+        # Use dependency-aware ordering if bootstrap helpers are now available
+        if (Get-Command Get-FragmentLoadOrder -ErrorAction SilentlyContinue) {
+            try {
+                $allFragments = Get-FragmentLoadOrder -FragmentFiles $otherFragments -DisabledFragments $disabledFragments
+            }
+            catch {
+                # Fall back to lexical order if dependency resolution fails
+                $allFragments = $otherFragments | Sort-Object Name
+            }
+        }
+        else {
+            # Default to lexical order
+            $allFragments = $otherFragments | Sort-Object Name
+        }
+    }
+    
+    # Check if optimized batch loading is enabled (via config or environment variable)
+    # Note: True parallel loading with runspaces has limitations because fragments need
+    # to modify the current session scope. Batch optimization groups fragments by
+    # dependency tiers for more efficient sequential loading.
+    $enableBatchOptimization = $performanceConfig.batchLoad -or 
+    $env:PS_PROFILE_BATCH_LOAD -eq '1' -or 
+    $env:PS_PROFILE_BATCH_LOAD -eq 'true'
+    
+    if ($enableBatchOptimization) {
+        # Batch-optimized loading: Group fragments by dependency tiers
+        # Note: 00-bootstrap is already loaded above, so we only process remaining fragments
+        # Tier 0: 01-09 (remaining core/bootstrap helpers)
+        # Tier 1: 10-29 (terminal/config - can be batched)
+        # Tier 2: 30-69 (tools/languages - can be batched)
+        # Tier 3: 70-99 (advanced features - can be batched)
+        
+        $tier0 = $allFragments | Where-Object { $_.BaseName -match '^0[1-9]-' }
+        $tier1 = $allFragments | Where-Object { $_.BaseName -match '^(1[0-9]|2[0-9])-' }
+        $tier2 = $allFragments | Where-Object { $_.BaseName -match '^([3-6][0-9])-' }
+        $tier3 = $allFragments | Where-Object { $_.BaseName -match '^([7-9][0-9])-' }
+        
+        # Load tier 0 sequentially (remaining bootstrap helpers)
+        foreach ($fragment in $tier0) {
+            Load-Fragment -FragmentFile $fragment -DisabledFragments $disabledFragments
+        }
+        
+        # Load remaining tiers in batches (sequential within tier, but optimized grouping)
+        $tiers = @($tier1, $tier2, $tier3)
+        foreach ($tier in $tiers) {
+            if ($tier.Count -eq 0) { continue }
+            
+            # Load all fragments in this tier sequentially
+            # The optimization comes from grouping - we know these fragments
+            # are independent within their tier, so we can load them efficiently
+            foreach ($fragment in $tier) {
+                Load-Fragment -FragmentFile $fragment -DisabledFragments $disabledFragments
+            }
+        }
+        
+        if ($env:PS_PROFILE_DEBUG) {
+            Write-Host "Batch-optimized loading completed" -ForegroundColor Green
+        }
+    }
+    else {
+        # Sequential loading (default behavior, most reliable)
+        # Load files in dependency-aware or lexical order. Each file should be idempotent and
+        # safe to be dot-sourced multiple times.
+        # Note: 00-bootstrap is already loaded above
+        foreach ($fragment in $allFragments) {
+            Load-Fragment -FragmentFile $fragment -DisabledFragments $disabledFragments
         }
     }
 }

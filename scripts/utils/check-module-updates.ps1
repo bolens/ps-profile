@@ -28,10 +28,21 @@ param(
     [switch]$Update
 )
 
-Write-Output "Checking for PowerShell module updates..."
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
 
-# Get modules in the local Modules directory
-$localModulesPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'Modules'
+Write-ScriptMessage -Message "Checking for PowerShell module updates..."
+
+# Get repository root and modules directory
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $localModulesPath = Join-Path $repoRoot 'Modules'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
 $localModules = @()
 
 if (Test-Path $localModulesPath) {
@@ -48,7 +59,7 @@ if (Test-Path $localModulesPath) {
                 }
             }
             catch {
-                Write-Warning "Failed to read module info for $($_.Name): $($_.Exception.Message)"
+                Write-ScriptMessage -Message "Failed to read module info for $($_.Name): $($_.Exception.Message)" -IsWarning
             }
         }
     }
@@ -69,7 +80,7 @@ $updatesAvailable = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 foreach ($moduleName in $modulesToCheck) {
     try {
-        Write-Output "Checking $moduleName..."
+        Write-ScriptMessage -Message "Checking $moduleName..."
 
         # Get installed version
         $installed = Get-Module -Name $moduleName -ListAvailable -ErrorAction SilentlyContinue |
@@ -89,23 +100,23 @@ foreach ($moduleName in $modulesToCheck) {
             }
         }
         else {
-            Write-Warning "Module $moduleName is not installed"
+            Write-ScriptMessage -Message "Module $moduleName is not installed" -IsWarning
         }
     }
     catch {
-        Write-Warning "Failed to check updates for $moduleName`: $($_.Exception.Message)"
+        Write-ScriptMessage -Message "Failed to check updates for $moduleName`: $($_.Exception.Message)" -IsWarning
     }
 }
 
 if ($updatesAvailable.Count -gt 0) {
-    Write-Output "`nUpdates available:"
+    Write-ScriptMessage -Message "`nUpdates available:"
     $updatesAvailable | Format-Table -AutoSize
 
     if ($Update) {
-        Write-Output "`nUpdating modules..."
+        Write-ScriptMessage -Message "`nUpdating modules..."
         foreach ($moduleUpdate in $updatesAvailable) {
             try {
-                Write-Output "Updating $($moduleUpdate.Name) from $($moduleUpdate.CurrentVersion) to $($moduleUpdate.LatestVersion)..."
+                Write-ScriptMessage -Message "Updating $($moduleUpdate.Name) from $($moduleUpdate.CurrentVersion) to $($moduleUpdate.LatestVersion)..."
                 if ($moduleUpdate.Source -eq "Local") {
                     # For local modules, update in place
                     Update-Module -Name $moduleUpdate.Name -RequiredVersion $moduleUpdate.LatestVersion -Force -ErrorAction Stop
@@ -114,19 +125,19 @@ if ($updatesAvailable.Count -gt 0) {
                     # For system modules, update normally
                     Install-Module -Name $moduleUpdate.Name -RequiredVersion $moduleUpdate.LatestVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
                 }
-                Write-Output "✓ Updated $($moduleUpdate.Name)"
+                Write-ScriptMessage -Message "✓ Updated $($moduleUpdate.Name)"
             }
             catch {
-                Write-Warning "Failed to update $($moduleUpdate.Name): $($_.Exception.Message)"
+                Write-ScriptMessage -Message "Failed to update $($moduleUpdate.Name): $($_.Exception.Message)" -IsWarning
             }
         }
     }
     else {
-        Write-Output "`nRun with -Update switch to install updates"
+        Write-ScriptMessage -Message "`nRun with -Update switch to install updates"
     }
 }
 else {
-    Write-Output "`nAll modules are up to date"
+    Write-ScriptMessage -Message "`nAll modules are up to date"
 }
 
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

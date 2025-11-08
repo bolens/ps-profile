@@ -6,6 +6,143 @@ Thank you for contributing to this PowerShell profile project.
 
 All validation scripts automatically install required modules (PSScriptAnalyzer, PowerShell-Beautifier, Pester) to `CurrentUser` scope if missing.
 
+## Utility Script Standards
+
+### Shared Utilities
+
+Utility scripts should use the shared `scripts/utils/Common.psm1` module for common functionality:
+
+```powershell
+# Import the common module
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Use shared functions
+$repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
+```
+
+The Common module provides:
+
+- `Get-RepoRoot` - Consistent repository root path resolution
+- `Ensure-ModuleAvailable` - Module installation and import
+- `Test-CommandAvailable` - Check if a command is available on the system
+- `Ensure-DirectoryExists` - Create directory if it doesn't exist
+- `Get-PowerShellExecutable` - Get PowerShell executable name (pwsh/powershell)
+- `Test-PathExists` - Path validation with descriptive errors
+- `Test-RequiredParameters` - Validate required parameters are not null or empty
+- `Write-ScriptMessage` - Consistent output formatting (supports warnings and errors)
+- `Exit-WithCode` - Standardized exit code handling
+
+### Exit Code Standards
+
+All utility scripts must use standardized exit codes for consistency:
+
+- **0** (`EXIT_SUCCESS`) - Script completed successfully
+- **1** (`EXIT_VALIDATION_FAILURE`) - Validation or check failure (expected, e.g., lint errors found)
+- **2** (`EXIT_SETUP_ERROR`) - Setup or configuration error (unexpected, e.g., module installation failed)
+- **3+** (`EXIT_OTHER_ERROR`) - Reserved for specific error types
+
+**Usage:**
+
+```powershell
+# Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All checks passed"
+
+# Validation failure (expected)
+Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Lint errors found"
+
+# Setup error (unexpected)
+try {
+    Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+```
+
+### Path Resolution
+
+Use `$PSScriptRoot` (PowerShell 3.0+) for path resolution, or use `Get-RepoRoot` from the Common module:
+
+```powershell
+# Preferred: Use Common module
+$repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+
+# Alternative: Direct calculation (if not using Common module)
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+```
+
+### Parameter Validation
+
+Add parameter validation for paths and other inputs:
+
+```powershell
+param(
+    [ValidateScript({
+            if ($_ -and -not (Test-Path $_)) {
+                throw "Path does not exist: $_"
+            }
+            $true
+        })]
+    [string]$Path = $null
+)
+```
+
+For more complex validation, use the `Test-PathExists` helper:
+
+```powershell
+try {
+    Test-PathExists -Path $configFile -PathType 'File'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+```
+
+### Common Helper Functions
+
+Use helper functions from the Common module for common operations:
+
+**Command Availability:**
+
+```powershell
+if (Test-CommandAvailable -CommandName 'git') {
+    & git --version
+}
+```
+
+**Directory Creation:**
+
+```powershell
+Ensure-DirectoryExists -Path (Join-Path $repoRoot 'output')
+```
+
+**PowerShell Executable:**
+
+```powershell
+$psExe = Get-PowerShellExecutable
+& $psExe -NoProfile -File $scriptPath
+```
+
+**Warning/Error Messages:**
+
+```powershell
+Write-ScriptMessage -Message "Warning: deprecated feature" -IsWarning
+Write-ScriptMessage -Message "Error: validation failed" -IsError
+```
+
+**Required Parameter Validation:**
+
+```powershell
+try {
+    Test-RequiredParameters -Parameters @{ Path = $Path; Name = $Name }
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+```
+
 ## Local Validation
 
 Run these checks before opening a PR:

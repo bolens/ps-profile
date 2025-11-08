@@ -16,14 +16,24 @@ scripts/checks/check-idempotency.ps1
     Checks that all profile.d fragments can be loaded twice without errors.
 #>
 
-# Idempotency checker for profile.d fragments
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
-$profileD = Join-Path $repoRoot 'profile.d'
+# Import shared utilities
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
 
-Write-Output "Building temporary idempotency runner..."
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $profileD = Join-Path $repoRoot 'profile.d'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+Write-ScriptMessage -Message "Building temporary idempotency runner..."
 $files = Get-ChildItem -Path $profileD -Filter '*.ps1' | Sort-Object Name | ForEach-Object { $_.FullName }
-if ($files.Count -eq 0) { Write-Error "No fragments found in $profileD"; exit 2 }
+if ($files.Count -eq 0) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "No fragments found in $profileD"
+}
 
 $temp = [IO.Path]::Combine($env:TEMP, [IO.Path]::GetRandomFileName() + '.ps1')
 
@@ -41,19 +51,17 @@ $content.Add("Write-Output 'Pass 2 complete'")
 [System.IO.File]::WriteAllLines($temp, $content)
 
 # Determine which PowerShell executable to use
-$psExe = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
+$psExe = Get-PowerShellExecutable
 
-Write-Output "Running idempotency runner: $temp"
+Write-ScriptMessage -Message "Running idempotency runner: $temp"
 $out = & $psExe -NoProfile -File $temp 2>&1
 $code = $LASTEXITCODE
 
 Remove-Item -LiteralPath $temp -ErrorAction SilentlyContinue
 
 if ($code -ne 0) {
-    Write-Output $out
-    Write-Error "Idempotency runner failed (exit code $code)"
-    exit $code
+    Write-ScriptMessage -Message $out
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Idempotency runner failed (exit code $code)"
 }
 
-Write-Output "Idempotency: all profile.d fragments loaded twice without errors"
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Idempotency: all profile.d fragments loaded twice without errors"

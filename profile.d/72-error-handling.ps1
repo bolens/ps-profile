@@ -51,16 +51,34 @@ Message: $errorMessage
 
         # Log to file if debug mode is enabled
         if ($env:PS_PROFILE_DEBUG) {
-            $logDir = Join-Path $env:USERPROFILE '.local\share\powershell'
-            if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
-            $logFile = Join-Path $logDir 'profile-errors.log'
-
-            try {
-                $formattedError | Out-File -FilePath $logFile -Append -Encoding UTF8
+            # Use cross-platform home directory
+            $userHome = if (Test-Path Function:\Get-UserHome) {
+                Get-UserHome
             }
-            catch {
-                # Fallback to console if file logging fails
-                Write-Verbose "Failed to write to error log: $($_.Exception.Message)"
+            elseif ($env:HOME) {
+                $env:HOME
+            }
+            else {
+                $env:USERPROFILE
+            }
+            
+            if ($userHome) {
+                $logDir = Join-Path $userHome '.local' 'share' 'powershell'
+                if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+                $logFile = Join-Path $logDir 'profile-errors.log'
+            }
+            else {
+                $logFile = $null
+            }
+
+            if ($logFile) {
+                try {
+                    $formattedError | Out-File -FilePath $logFile -Append -Encoding UTF8
+                }
+                catch {
+                    # Fallback to console if file logging fails
+                    Write-Verbose "Failed to write to error log: $($_.Exception.Message)"
+                }
             }
         }
 

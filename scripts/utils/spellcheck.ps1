@@ -27,21 +27,28 @@ param(
   [string[]]$Paths = @('**/*')
 )
 
-# Use Test-HasCommand for efficient command check (if available from profile, otherwise fallback)
-if ((Test-Path Function:Test-HasCommand) -or (Get-Command Test-HasCommand -ErrorAction SilentlyContinue)) {
-  $hasCSpell = Test-HasCommand cspell
-}
-else {
-  $hasCSpell = $null -ne (Get-Command cspell -ErrorAction SilentlyContinue)
-}
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Check if cspell is available
+$hasCSpell = Test-CommandAvailable -CommandName 'cspell'
 
 if ($hasCSpell) {
-  Write-Output "Running cspell on: $($Paths -join ', ')"
-  & cspell @Paths --no-progress --no-summary
-  exit $LASTEXITCODE
+  Write-ScriptMessage -Message "Running cspell on: $($Paths -join ', ')"
+  try {
+    & cspell @Paths --no-progress --no-summary
+    if ($LASTEXITCODE -ne 0) {
+      Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "cspell found spelling errors"
+    }
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "cspell passed"
+  }
+  catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+  }
 }
 else {
-  Write-Warning "cspell not found on PATH. Install with: npm install -g cspell@9"
-  Write-Output "Skipping local spellcheck (CI workflow will run cspell on push/PR)."
-  exit 0
+  Write-ScriptMessage -Message "cspell not found on PATH. Install with: npm install -g cspell@9" -IsWarning
+  Write-ScriptMessage -Message "Skipping local spellcheck (CI workflow will run cspell on push/PR)."
+  Exit-WithCode -ExitCode $EXIT_SUCCESS
 }

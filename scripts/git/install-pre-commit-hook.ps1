@@ -24,30 +24,56 @@ scripts/git/install-pre-commit-hook.ps1
 #>
 
 param(
-    [string]$RepoRoot = (Get-Location).Path
+    [string]$RepoRoot = $null
 )
 
-$hookPath = Join-Path $RepoRoot '.git\hooks\pre-commit'
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Get repository root if not specified
+if (-not $RepoRoot) {
+    try {
+        $RepoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
+}
+
+$hookPath = Join-Path $RepoRoot '.git' 'hooks' 'pre-commit'
 if (-not (Test-Path -Path (Join-Path $RepoRoot '.git') -PathType Container -ErrorAction SilentlyContinue)) {
-    Write-Error 'No .git directory found. Run this from the repository root.'
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'No .git directory found. Run this from the repository root.'
 }
 
 if (Test-Path $hookPath) {
     $bak = $hookPath + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak'
-    Write-Output "Backing up existing hook to $bak"
+    Write-ScriptMessage -Message "Backing up existing hook to $bak"
     Copy-Item $hookPath $bak -Force
 }
 
-$script = @'
-#!/usr/bin/env pwsh
+$psExe = Get-PowerShellExecutable
+$preCommitScript = Join-Path $RepoRoot 'scripts' 'git' 'pre-commit.ps1'
+$script = @"
+#!/usr/bin/env $psExe
 # pre-commit hook to format and validate PowerShell profile
-pwsh -NoProfile -File "scripts/git/pre-commit.ps1"
-if ($LASTEXITCODE -ne 0) { Write-Host 'Pre-commit: checks failed' ; exit 1 }
+$psExe -NoProfile -File "$preCommitScript"
+if (`$LASTEXITCODE -ne 0) { Write-Host 'Pre-commit: checks failed' ; exit 1 }
 exit 0
-'@
+"@
 
 Set-Content -LiteralPath $hookPath -Value $script -NoNewline -Force
 # Make executable on supported systems (Git for Windows respects the hook file, Unix needs +x)
-try { icacls $hookPath /grant Everyone:RX *>&1 | Out-Null } catch { }
-Write-Output "Installed pre-commit hook at $hookPath"
+try {
+    if (Test-CommandAvailable -CommandName 'chmod') {
+        & chmod +x $hookPath
+    }
+    else {
+        icacls $hookPath /grant Everyone:RX *>&1 | Out-Null
+    }
+}
+catch {
+    # Non-fatal
+}
+
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Installed pre-commit hook at $hookPath"

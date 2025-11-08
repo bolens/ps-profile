@@ -28,7 +28,11 @@ param(
     [switch]$DryRun
 )
 
-Write-Output "Analyzing commits for release..."
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+Write-ScriptMessage -Message "Analyzing commits for release..."
 
 # Get the latest tag
 $latestTag = git describe --tags --abbrev=0 2>$null
@@ -36,7 +40,7 @@ if (-not $latestTag) {
     $latestTag = "HEAD~1"  # If no tags, compare to initial commit
 }
 
-Write-Output "Comparing commits from $latestTag to HEAD..."
+Write-ScriptMessage -Message "Comparing commits from $latestTag to HEAD..."
 
 # Compile regex patterns once for better performance
 $regexBreaking = [regex]::new('^feat!|^BREAKING|^break!', [System.Text.RegularExpressions.RegexOptions]::Compiled -bor [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
@@ -67,11 +71,11 @@ foreach ($commit in $commits) {
     }
 }
 
-Write-Output "Analysis results:"
-Write-Output "  Breaking changes: $breakingChanges"
-Write-Output "  Features: $features"
-Write-Output "  Fixes: $fixes"
-Write-Output "  Other: $other"
+Write-ScriptMessage -Message "Analysis results:"
+Write-ScriptMessage -Message "  Breaking changes: $breakingChanges"
+Write-ScriptMessage -Message "  Features: $features"
+Write-ScriptMessage -Message "  Fixes: $fixes"
+Write-ScriptMessage -Message "  Other: $other"
 
 # Determine version bump
 $versionBump = "patch"
@@ -82,7 +86,7 @@ elseif ($features -gt 0) {
     $versionBump = "minor"
 }
 
-Write-Output "Recommended version bump: $versionBump"
+Write-ScriptMessage -Message "Recommended version bump: $versionBump"
 
 # Get current version from git tags or package file
 $currentVersion = "0.0.0"
@@ -114,24 +118,46 @@ switch ($versionBump) {
 }
 
 $newVersion = "$major.$minor.$patch"
-Write-Output "New version would be: $newVersion"
+Write-ScriptMessage -Message "New version would be: $newVersion"
 
 if ($DryRun) {
-    Write-Output "`nDRY RUN - No changes made"
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "`nDRY RUN - No changes made"
 }
 
 # Generate changelog
-Write-Output "`nGenerating changelog..."
-& (Join-Path $PSScriptRoot 'generate-changelog.ps1') -Unreleased
+Write-ScriptMessage -Message "`nGenerating changelog..."
+try {
+    & (Join-Path $PSScriptRoot 'generate-changelog.ps1') -Unreleased
+    if ($LASTEXITCODE -ne 0) {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog"
+    }
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
 # Create git tag
-Write-Output "Creating git tag v$newVersion..."
-git tag -a "v$newVersion" -m "Release v$newVersion"
+Write-ScriptMessage -Message "Creating git tag v$newVersion..."
+try {
+    git tag -a "v$newVersion" -m "Release v$newVersion"
+    if ($LASTEXITCODE -ne 0) {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to create git tag"
+    }
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
 # Push tag
-Write-Output "Pushing tag to remote..."
-git push origin "v$newVersion"
+Write-ScriptMessage -Message "Pushing tag to remote..."
+try {
+    git push origin "v$newVersion"
+    if ($LASTEXITCODE -ne 0) {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to push tag to remote"
+    }
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
-Write-Output "`nRelease v$newVersion created successfully!"
-Write-Output "GitHub Actions will automatically create the GitHub release."
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "`nRelease v$newVersion created successfully!`nGitHub Actions will automatically create the GitHub release."

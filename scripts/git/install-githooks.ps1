@@ -27,16 +27,27 @@ param(
     [string]$GitDir = '.git'
 )
 
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$repoRoot = Split-Path -Parent $scriptDir
-$gitHooksDir = Join-Path $repoRoot $GitDir
-if (-not (Test-Path $gitHooksDir)) {
-    Write-Error "Git hooks directory '$gitHooksDir' not found. Run this from the repo root."
-    exit 2
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Get repository root
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-$srcHooks = Join-Path $repoRoot 'scripts\git\hooks'
-if (-not (Test-Path $srcHooks)) { Write-Error "Source hooks directory not found: $srcHooks"; exit 2 }
+$gitHooksDir = Join-Path $repoRoot $GitDir
+if (-not (Test-Path $gitHooksDir)) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Git hooks directory '$gitHooksDir' not found. Run this from the repo root."
+}
+
+$srcHooks = Join-Path $repoRoot 'scripts' 'git' 'hooks'
+if (-not (Test-Path $srcHooks)) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Source hooks directory not found: $srcHooks"
+}
 
 $hookFiles = Get-ChildItem -Path $srcHooks -Filter '*.ps1' -File
 foreach ($hf in $hookFiles) {
@@ -48,14 +59,14 @@ foreach ($hf in $hookFiles) {
     $hookScriptPath = (Join-Path $repoRoot "scripts\git\hooks\$($hf.Name)")
     $wrapperContent = "#!/usr/bin/env pwsh`n`$scriptDir = Split-Path -Parent `$MyInvocation.MyCommand.Definition`n& pwsh -NoProfile -File `"$hookScriptPath`" @args`nexit `$LASTEXITCODE`n"
 
-    Write-Output "Installing hook: $name -> $target"
+    Write-ScriptMessage -Message "Installing hook: $name -> $target"
     Set-Content -LiteralPath $target -Value $wrapperContent -Encoding UTF8
 
     # Try to make the wrapper executable on Unix-like systems if chmod exists
     try {
-        if (Get-Command chmod -ErrorAction SilentlyContinue) {
+        if (Test-CommandAvailable -CommandName 'chmod') {
             & chmod +x $target
-            Write-Output "Set executable bit on $target"
+            Write-ScriptMessage -Message "Set executable bit on $target"
         }
         else {
             # On Windows, try to grant read+execute to the current user (best-effort)
@@ -67,5 +78,4 @@ foreach ($hf in $hookFiles) {
     }
 }
 
-Write-Output "Git hooks installed. Ensure .git/hooks/* are executable if using a Unix-like environment."
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Git hooks installed. Ensure .git/hooks/* are executable if using a Unix-like environment."

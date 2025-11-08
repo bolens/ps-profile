@@ -53,8 +53,19 @@ param(
     [switch]$Force
 )
 
-$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$fragDir = Join-Path $root 'profile.d'
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $fragDir = Join-Path $repoRoot 'profile.d'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
 $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
 
 # Compile regex patterns once for better performance
@@ -307,7 +318,7 @@ foreach ($ps in $psFiles) {
     $md += 'Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.'
 
     ($md -join [Environment]::NewLine) | Out-File -FilePath $mdPath -Encoding utf8 -Force
-    Write-Output ("Created: {0}" -f (Split-Path $mdPath -Leaf))
+    Write-ScriptMessage -Message ("Created: {0}" -f (Split-Path $mdPath -Leaf))
 }
 
-Write-Output 'Done generating fragment README files.'
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Done generating fragment README files.'

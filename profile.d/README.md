@@ -57,6 +57,12 @@ Available from `00-bootstrap.ps1`:
 - `Set-AgentModeFunction` — Creates collision-safe functions
 - `Set-AgentModeAlias` — Creates collision-safe aliases
 - `Test-CachedCommand` — Fast command existence check with caching
+- `Get-FragmentDependencies` — Parses dependencies from fragment headers
+- `Test-FragmentDependencies` — Validates dependency satisfaction
+- `Get-FragmentLoadOrder` — Calculates optimal load order
+- `Get-FragmentConfig` — Gets enhanced fragment configuration
+- `Enable-ProfileFragment` / `Disable-ProfileFragment` — Manage fragment state
+- `Get-ProfileFragment` — List fragments and their status
 
 See [PROFILE_README.md](../PROFILE_README.md) for detailed usage examples.
 

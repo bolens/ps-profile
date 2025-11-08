@@ -21,6 +21,13 @@ try {
     Remove-Item Function:Initialize-Starship -Force -ErrorAction SilentlyContinue
     Remove-Item Function:global:Initialize-Starship -Force -ErrorAction SilentlyContinue
     
+    # Ensure Test-HasCommand is available (from bootstrap)
+    if (-not (Get-Command Test-HasCommand -ErrorAction SilentlyContinue)) {
+        # If bootstrap hasn't loaded yet, wait for it
+        # This should not happen since bootstrap loads first, but just in case
+        Write-Warning "Test-HasCommand not available - Starship fragment may not initialize correctly"
+    }
+    
     # ================================================
     # HELPER FUNCTIONS
     # ================================================
@@ -240,85 +247,95 @@ try {
         Sets up Starship as the PowerShell prompt if the starship command is available.
         Uses the standard starship initialization which automatically reads starship.toml.
     #>
-    function Initialize-Starship {
-        try {
-            # Check if already initialized
-            if (Test-StarshipInitialized) {
-                if ($env:PS_PROFILE_DEBUG) {
-                    Write-Host "Starship already initialized, verifying prompt..." -ForegroundColor Cyan
+    # Create Initialize-Starship function - ensure it's in global scope
+    if (-not (Test-Path "Function:\\global:Initialize-Starship")) {
+        <#
+        .SYNOPSIS
+            Initializes the Starship prompt for PowerShell.
+        .DESCRIPTION
+            Sets up Starship as the PowerShell prompt if the starship command is available.
+            Uses the standard starship initialization which automatically reads starship.toml.
+        #>
+        function global:Initialize-Starship {
+            try {
+                # Check if already initialized
+                if (Test-StarshipInitialized) {
+                    if ($env:PS_PROFILE_DEBUG) {
+                        Write-Host "Starship already initialized, verifying prompt..." -ForegroundColor Cyan
+                    }
+                    
+                    # Ensure module stays loaded
+                    Initialize-StarshipModule
+                    
+                    # Ensure command path is stored
+                    if (-not $global:StarshipCommand) {
+                        $starCmd = Get-Command starship -ErrorAction SilentlyContinue
+                        if ($starCmd) {
+                            $global:StarshipCommand = $starCmd.Source
+                        }
+                    }
+                    
+                    # Check if prompt needs replacement (module-scoped prompts can break)
+                    $currentPrompt = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
+                    if ($currentPrompt -and (Test-PromptNeedsReplacement -PromptCmd $currentPrompt)) {
+                        if ($global:StarshipCommand -and (Test-Path $global:StarshipCommand)) {
+                            New-StarshipPromptFunction -StarshipCommandPath $global:StarshipCommand
+                            if ($env:PS_PROFILE_DEBUG) {
+                                Write-Host "Replaced module prompt with direct starship call" -ForegroundColor Yellow
+                            }
+                        }
+                    }
+                    
+                    if ($env:PS_PROFILE_DEBUG) {
+                        Write-Host "Starship prompt verified and active" -ForegroundColor Green
+                    }
+                    return
                 }
+                
+                # Not initialized - proceed with initialization
+                $starCmd = Get-Command starship -ErrorAction SilentlyContinue
+                if (-not $starCmd) {
+                    if ($env:PS_PROFILE_DEBUG) {
+                        Write-Host "Starship not found, using smart prompt" -ForegroundColor Yellow
+                    }
+                    Initialize-SmartPrompt
+                    return
+                }
+                
+                if ($env:PS_PROFILE_DEBUG) {
+                    Write-Host "Starship found at: $($starCmd.Source)" -ForegroundColor Green
+                }
+                
+                # Store command path globally
+                $global:StarshipCommand = $starCmd.Source
+                
+                # Execute Starship's initialization script
+                $promptFunc = Invoke-StarshipInitScript -StarshipCommandPath $starCmd.Source
                 
                 # Ensure module stays loaded
                 Initialize-StarshipModule
                 
-                # Ensure command path is stored
-                if (-not $global:StarshipCommand) {
-                    $starCmd = Get-Command starship -ErrorAction SilentlyContinue
-                    if ($starCmd) {
-                        $global:StarshipCommand = $starCmd.Source
-                    }
-                }
+                # Replace with direct call for reliability (avoids module scope issues)
+                New-StarshipPromptFunction -StarshipCommandPath $starCmd.Source
                 
-                # Check if prompt needs replacement (module-scoped prompts can break)
-                $currentPrompt = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
-                if ($currentPrompt -and (Test-PromptNeedsReplacement -PromptCmd $currentPrompt)) {
-                    if ($global:StarshipCommand -and (Test-Path $global:StarshipCommand)) {
-                        New-StarshipPromptFunction -StarshipCommandPath $global:StarshipCommand
-                        if ($env:PS_PROFILE_DEBUG) {
-                            Write-Host "Replaced module prompt with direct starship call" -ForegroundColor Yellow
-                        }
-                    }
-                }
+                # Update VS Code if active
+                Update-VSCodePrompt
+                
+                # Mark as initialized
+                Set-Variable -Name "StarshipInitialized" -Value $true -Scope Global -Force
+                Set-Variable -Name "StarshipActive" -Value $true -Scope Global -Force
+                $global:StarshipPromptActive = $true
                 
                 if ($env:PS_PROFILE_DEBUG) {
-                    Write-Host "Starship prompt verified and active" -ForegroundColor Green
+                    Write-Host "Starship prompt initialized successfully" -ForegroundColor Green
                 }
-                return
             }
-            
-            # Not initialized - proceed with initialization
-            $starCmd = Get-Command starship -ErrorAction SilentlyContinue
-            if (-not $starCmd) {
+            catch {
                 if ($env:PS_PROFILE_DEBUG) {
-                    Write-Host "Starship not found, using smart prompt" -ForegroundColor Yellow
+                    Write-Verbose "Initialize-Starship failed: $($_.Exception.Message)"
                 }
                 Initialize-SmartPrompt
-                return
             }
-            
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Host "Starship found at: $($starCmd.Source)" -ForegroundColor Green
-            }
-            
-            # Store command path globally
-            $global:StarshipCommand = $starCmd.Source
-            
-            # Execute Starship's initialization script
-            $promptFunc = Invoke-StarshipInitScript -StarshipCommandPath $starCmd.Source
-            
-            # Ensure module stays loaded
-            Initialize-StarshipModule
-            
-            # Replace with direct call for reliability (avoids module scope issues)
-            New-StarshipPromptFunction -StarshipCommandPath $starCmd.Source
-            
-            # Update VS Code if active
-            Update-VSCodePrompt
-            
-            # Mark as initialized
-            Set-Variable -Name "StarshipInitialized" -Value $true -Scope Global -Force
-            Set-Variable -Name "StarshipActive" -Value $true -Scope Global -Force
-            $global:StarshipPromptActive = $true
-            
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Host "Starship prompt initialized successfully" -ForegroundColor Green
-            }
-        }
-        catch {
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Verbose "Initialize-Starship failed: $($_.Exception.Message)"
-            }
-            Initialize-SmartPrompt
         }
     }
     
@@ -333,7 +350,7 @@ try {
         Sets up an enhanced PowerShell prompt that shows git branch, error status,
         execution time, and other useful information when Starship is not available.
     #>
-    function Initialize-SmartPrompt {
+    function global:Initialize-SmartPrompt {
         try {
             if ($null -ne (Get-Variable -Name "SmartPromptInitialized" -Scope Global -ErrorAction SilentlyContinue)) {
                 return
@@ -436,7 +453,17 @@ try {
     # ================================================
     
     # Initialize starship immediately if available
-    if (Test-HasCommand starship) {
+    # Use Get-Command as fallback if Test-HasCommand isn't available yet
+    $hasStarship = $false
+    if (Get-Command Test-HasCommand -ErrorAction SilentlyContinue) {
+        $hasStarship = Test-HasCommand starship
+    }
+    else {
+        # Fallback to direct check
+        $hasStarship = $null -ne (Get-Command starship -ErrorAction SilentlyContinue)
+    }
+    
+    if ($hasStarship) {
         try {
             if ($env:PS_PROFILE_DEBUG) {
                 Write-Host "Checking/initializing starship..." -ForegroundColor Yellow
@@ -447,6 +474,12 @@ try {
             if ($env:PS_PROFILE_DEBUG) {
                 Write-Host "Failed to initialize starship: $($_.Exception.Message)" -ForegroundColor Red
             }
+            Write-Warning "Starship initialization failed: $($_.Exception.Message)"
+        }
+    }
+    else {
+        if ($env:PS_PROFILE_DEBUG) {
+            Write-Host "Starship command not found - will use fallback prompt" -ForegroundColor Yellow
         }
     }
 }

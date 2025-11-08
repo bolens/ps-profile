@@ -15,37 +15,50 @@ scripts/git/pre-commit.ps1
     Runs formatting and validation checks as part of the git pre-commit hook.
 #>
 
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Get repository root
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
 # Run formatting first
-$formatScript = Join-Path $PSScriptRoot '..\utils\run-format.ps1'
+$formatScript = Join-Path $repoRoot 'scripts' 'utils' 'run-format.ps1'
 if (Test-Path $formatScript) {
-    Write-Output "Running code formatting..."
-    & pwsh -NoProfile -File $formatScript
+    Write-ScriptMessage -Message "Running code formatting..."
+    $psExe = Get-PowerShellExecutable
+    & $psExe -NoProfile -File $formatScript
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Code formatting failed"
-        exit $LASTEXITCODE
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Code formatting failed"
     }
 
     # Add any files that were formatted
     $formattedFiles = & git diff --name-only
     if ($formattedFiles) {
-        Write-Output "Adding formatted files to commit..."
+        Write-ScriptMessage -Message "Adding formatted files to commit..."
         $formattedFiles | ForEach-Object { & git add $_ }
     }
 }
 else {
-    Write-Warning "Format script not found: $formatScript"
+    Write-ScriptMessage -Message "Format script not found: $formatScript" -IsWarning
 }
 
 # Run validation
-$validateScript = Join-Path $PSScriptRoot '..\checks\validate-profile.ps1'
+$validateScript = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 if (-not (Test-Path $validateScript)) {
-    Write-Error "Validation script not found: $validateScript"
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Validation script not found: $validateScript"
 }
 
-Write-Output "Running validation..."
-& pwsh -NoProfile -File $validateScript -ErrorAction SilentlyContinue
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+Write-ScriptMessage -Message "Running validation..."
+$psExe = Get-PowerShellExecutable
+& $psExe -NoProfile -File $validateScript -ErrorAction SilentlyContinue
+if ($LASTEXITCODE -ne 0) {
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Validation checks failed"
+}
 
-Write-Output "Pre-commit checks passed"
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Pre-commit checks passed"

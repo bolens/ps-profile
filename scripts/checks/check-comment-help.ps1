@@ -28,8 +28,19 @@ param(
     [switch]$Verbose
 )
 
-$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$fragDir = Join-Path $root 'profile.d'
+# Import shared utilities
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $fragDir = Join-Path $repoRoot 'profile.d'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
 $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
 
 # Compile regex patterns once for better performance
@@ -93,33 +104,31 @@ function Get-FunctionsWithoutCommentHelp($path) {
         }
     }
     catch {
-        Write-Warning "Failed to parse $($path): $($_.Exception.Message)"
+        Write-ScriptMessage -Message "Failed to parse $($path): $($_.Exception.Message)" -IsWarning
     }
 
     return $undocumented
 }
 
-Write-Output "Checking that all functions have comment-based help in $fragDir"
+Write-ScriptMessage -Message "Checking that all functions have comment-based help in $fragDir"
 
 foreach ($ps in $psFiles) {
     $undocumentedFuncs = Get-FunctionsWithoutCommentHelp $ps.FullName
 
     if ($undocumentedFuncs.Count -gt 0) {
         $issueCount++
-        Write-Output "MISSING HELP: $($ps.Name)"
-        Write-Output "  Functions without comment-based help: $([string]::Join(', ', $undocumentedFuncs))"
-        Write-Output ""
+        Write-ScriptMessage -Message "MISSING HELP: $($ps.Name)"
+        Write-ScriptMessage -Message "  Functions without comment-based help: $([string]::Join(', ', $undocumentedFuncs))"
+        Write-ScriptMessage -Message ""
     }
     elseif ($Verbose) {
-        Write-Output "OK: $($ps.Name)"
+        Write-ScriptMessage -Message "OK: $($ps.Name)"
     }
 }
 
 if ($issueCount -gt 0) {
-    Write-Output "Found $issueCount fragments with functions missing comment-based help."
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $issueCount fragments with functions missing comment-based help."
 }
 else {
-    Write-Output "All functions have comment-based help."
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All functions have comment-based help."
 }

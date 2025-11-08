@@ -16,9 +16,17 @@ scripts/utils/run-lint.ps1
     Runs PSScriptAnalyzer on all PowerShell files in profile.d and scripts directories.
 #>
 
-# Cache path calculations once
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
+# Import shared utilities
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module -Path $commonModulePath -ErrorAction Stop
+
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
 # Analyze both profile.d and scripts directories, matching CI behavior
 $paths = @(
@@ -27,58 +35,65 @@ $paths = @(
 ) | Where-Object { Test-Path $_ }
 
 if (-not $paths) {
-    Write-Output "No paths found to analyze"
-    exit 0
+    Write-ScriptMessage -Message "No paths found to analyze"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
-
-
-# Ensure module is available in current user scope
-if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
-    Write-Output "PSScriptAnalyzer not found. Installing to CurrentUser scope..."
-    try {
-        Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false -ErrorAction Stop
-    }
-    catch {
-        Write-Error "Failed to install PSScriptAnalyzer: $($_.Exception.Message)"
-        exit 2
-    }
+# Ensure PSScriptAnalyzer is available
+try {
+    Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 }
-
-# Import PSScriptAnalyzer module
-Import-Module -Name PSScriptAnalyzer -Force -ErrorAction Stop
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
 # Locate settings file if present
 $settingsFile = Join-Path $repoRoot 'PSScriptAnalyzerSettings.psd1'
 $settingsParam = @{}
 if (Test-Path $settingsFile) {
-    Write-Output "Using settings file: $settingsFile"
+    Write-ScriptMessage -Message "Using settings file: $settingsFile"
     $settingsParam['Settings'] = $settingsFile
 }
 
 # Run analysis matching CI behavior exactly
-$results = @()
+# Use List for better performance than array concatenation
+$results = [System.Collections.Generic.List[object]]::new()
 foreach ($p in $paths) {
-    Write-Output "Analyzing $p"
-    $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error', 'Warning', 'Information') -Verbose @settingsParam
-    $results += $r
+    Write-ScriptMessage -Message "Analyzing $p"
+    try {
+        $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error', 'Warning', 'Information') -Verbose @settingsParam
+        if ($r) {
+            $results.AddRange($r)
+        }
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to analyze $p`: $($_.Exception.Message)" -ErrorRecord $_
+    }
 }
 
 # Save report to JSON (matching CI behavior)
-$json = $results | Select-Object @{n = 'FilePath'; e = { $_.ScriptName } }, RuleName, Severity, Message, Line, Column | ConvertTo-Json -Depth 5
-$dataDir = Join-Path $repoRoot 'scripts' 'data'
-if (-not (Test-Path $dataDir)) {
-    New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+$reportData = $results | ForEach-Object {
+    [PSCustomObject]@{
+        FilePath = $_.ScriptName
+        RuleName = $_.RuleName
+        Severity = $_.Severity
+        Message  = $_.Message
+        Line     = $_.Line
+        Column   = $_.Column
+    }
 }
+$json = $reportData | ConvertTo-Json -Depth 5
+
+$dataDir = Join-Path $repoRoot 'scripts' 'data'
+Ensure-DirectoryExists -Path $dataDir
 $out = Join-Path $dataDir 'psscriptanalyzer-report.json'
 $json | Out-File -FilePath $out -Encoding utf8
-Write-Output "Saved report to $out"
+Write-ScriptMessage -Message "Saved report to $out"
 
 # Fail if any Error-level findings (matching CI behavior)
-if ($results | Where-Object { $_.Severity -eq 'Error' }) {
-    Write-Output "Errors found by PSScriptAnalyzer"
-    exit 1
+$errorFindings = $results | Where-Object { $_.Severity -eq 'Error' }
+if ($errorFindings) {
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Errors found by PSScriptAnalyzer"
 }
 
-Write-Output "PSScriptAnalyzer: no issues found"
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: no issues found"
