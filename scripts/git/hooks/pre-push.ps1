@@ -22,7 +22,7 @@ $hookDir = Split-Path -Parent $hookScriptPath
 # From .git/hooks/, go up two levels to get repo root
 $repoRoot = Split-Path -Parent (Split-Path -Parent $hookDir)
 $commonModulePath = Join-Path $repoRoot 'scripts' 'utils' 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -ErrorAction Stop
 
 $validate = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 

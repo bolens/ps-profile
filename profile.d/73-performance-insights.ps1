@@ -117,50 +117,50 @@ try {
         # Show slowest commands
         Write-Host "`n🐌 Slowest Commands (by average execution time):" -ForegroundColor Yellow
         $commandStats |
-        Where-Object { $_.AvgTime -gt 100 } |  # Only show commands that take > 100ms on average
-        Sort-Object -Property AvgTime -Descending |
-        Select-Object -First 10 |
-        Format-Table -Property @{
-            Name       = "Command"
-            Expression = { $_.Command }
-            Width      = 25
-        }, @{
-            Name       = "Avg Time"
-            Expression = { "{0:N0}ms" -f $_.AvgTime }
-            Width      = 10
-            Alignment  = "Right"
-        }, @{
-            Name       = "Max Time"
-            Expression = { "{0:N0}ms" -f $_.MaxTime }
-            Width      = 10
-            Alignment  = "Right"
-        }, @{
-            Name       = "Executions"
-            Expression = { $_.Executions }
-            Width      = 10
-            Alignment  = "Right"
-        } -AutoSize
+            Where-Object { $_.AvgTime -gt 100 } |  # Only show commands that take > 100ms on average
+            Sort-Object -Property AvgTime -Descending |
+            Select-Object -First 10 |
+            Format-Table -Property @{
+                Name       = "Command"
+                Expression = { $_.Command }
+                Width      = 25
+            }, @{
+                Name       = "Avg Time"
+                Expression = { "{0:N0}ms" -f $_.AvgTime }
+                Width      = 10
+                Alignment  = "Right"
+            }, @{
+                Name       = "Max Time"
+                Expression = { "{0:N0}ms" -f $_.MaxTime }
+                Width      = 10
+                Alignment  = "Right"
+            }, @{
+                Name       = "Executions"
+                Expression = { $_.Executions }
+                Width      = 10
+                Alignment  = "Right"
+            } -AutoSize
 
         # Show most executed commands
         Write-Host "`n🔄 Most Executed Commands:" -ForegroundColor Green
         $commandStats |
-        Sort-Object -Property Executions -Descending |
-        Select-Object -First 10 |
-        Format-Table -Property @{
-            Name       = "Command"
-            Expression = { $_.Command }
-            Width      = 25
-        }, @{
-            Name       = "Executions"
-            Expression = { $_.Executions }
-            Width      = 10
-            Alignment  = "Right"
-        }, @{
-            Name       = "Avg Time"
-            Expression = { "{0:N0}ms" -f $_.AvgTime }
-            Width      = 10
-            Alignment  = "Right"
-        } -AutoSize
+            Sort-Object -Property Executions -Descending |
+            Select-Object -First 10 |
+            Format-Table -Property @{
+                Name       = "Command"
+                Expression = { $_.Command }
+                Width      = 25
+            }, @{
+                Name       = "Executions"
+                Expression = { $_.Executions }
+                Width      = 10
+                Alignment  = "Right"
+            }, @{
+                Name       = "Avg Time"
+                Expression = { "{0:N0}ms" -f $_.AvgTime }
+                Width      = 10
+                Alignment  = "Right"
+            } -AutoSize
 
         # Show optimization suggestions
         Write-Host "`n💡 Optimization Suggestions:" -ForegroundColor Magenta

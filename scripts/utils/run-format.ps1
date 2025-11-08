@@ -35,7 +35,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -ErrorAction Stop
 
 # Default to profile.d relative to the repository root
 if (-not $Path) {

@@ -31,7 +31,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -ErrorAction Stop
 
 # Helper function for GetRelativePath compatibility with older .NET versions
 function Get-RelativePath {

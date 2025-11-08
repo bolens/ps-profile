@@ -28,8 +28,13 @@ param(
 )
 
 # Import shared utilities
-$commonModulePath = Join-Path $PSScriptRoot 'utils' 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+$scriptsDir = Split-Path -Parent $PSScriptRoot
+$commonModulePath = Join-Path $scriptsDir 'utils' 'Common.psm1'
+if (-not (Test-Path $commonModulePath)) {
+    throw "Common module not found at: $commonModulePath. PSScriptRoot: $PSScriptRoot"
+}
+$commonModulePath = (Resolve-Path $commonModulePath).Path
+Import-Module $commonModulePath -ErrorAction Stop
 
 # Get repository root if not specified
 if (-not $RepoRoot) {

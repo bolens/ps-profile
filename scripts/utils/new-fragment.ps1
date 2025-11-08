@@ -47,7 +47,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -ErrorAction Stop
 
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot

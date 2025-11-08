@@ -30,7 +30,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -ErrorAction Stop
 
 Write-ScriptMessage -Message "Checking for PowerShell module updates..."
 

@@ -47,7 +47,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -ErrorAction Stop
 
 function Get-TargetPath {
     # Use the exact path style from your log. If you prefer XDG env var, set XDG_CONFIG_HOME
