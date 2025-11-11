@@ -26,6 +26,8 @@ obj/
 
 # Ignore generated data files
 scripts/**/*.csv
+scripts/data/coverage.xml
+scripts/data/performance-baseline.json
 scripts/data/psscriptanalyzer-report.json
 
 # Ignore user-specific fragment configuration

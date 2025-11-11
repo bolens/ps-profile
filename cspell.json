@@ -190,6 +190,7 @@
     "node_modules",
     ".git",
     "vendor",
-    "**/*.min.*"
+    "**/*.min.*",
+    "**/coverage.xml"
   ]
 }

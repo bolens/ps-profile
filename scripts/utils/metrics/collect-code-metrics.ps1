@@ -67,28 +67,12 @@ else {
 
 Write-ScriptMessage -Message "Collecting code metrics..." -LogLevel Info
 
-# Collect metrics for each path using parallel processing when multiple paths
+# Collect metrics for each path sequentially (jobs can miss module context)
 $allMetrics = [System.Collections.Generic.List[PSCustomObject]]::new()
-if ($pathsToAnalyze.Count -gt 1) {
-    # Process multiple paths in parallel
-    $metricsResults = Invoke-Parallel -Items $pathsToAnalyze -ScriptBlock {
-        param($Path)
-        Get-CodeMetrics -Path $Path -Recurse
-    } -ThrottleLimit 3
-    
-    foreach ($result in $metricsResults) {
-        if ($result) {
-            $allMetrics.Add($result)
-        }
-    }
-}
-else {
-    # Sequential processing for single path
-    foreach ($path in $pathsToAnalyze) {
-        Write-ScriptMessage -Message "Analyzing: $path" -LogLevel Info
-        $metrics = Get-CodeMetrics -Path $path -Recurse
-        $allMetrics.Add($metrics)
-    }
+foreach ($path in $pathsToAnalyze) {
+    Write-ScriptMessage -Message "Analyzing: $path" -LogLevel Info
+    $metrics = Get-CodeMetrics -Path $path -Recurse
+    $allMetrics.Add($metrics)
 }
 
 # Aggregate metrics
@@ -116,7 +100,7 @@ else {
         Join-Path $repoRoot 'coverage.xml'
         Join-Path $repoRoot 'scripts' 'data' 'coverage.xml'
     )
-    
+
     foreach ($coveragePath in $possibleCoveragePaths) {
         if (Test-Path -Path $coveragePath) {
             Write-ScriptMessage -Message "Found coverage file: $coveragePath" -LogLevel Info
@@ -124,6 +108,52 @@ else {
             Write-ScriptMessage -Message "  Coverage: $($testCoverage.CoveragePercent)%" -LogLevel Info
             break
         }
+    }
+}
+
+# Normalize paths to be relative to repo root to avoid personal absolute paths
+$toRelativePath = {
+    param($path)
+
+    if ([string]::IsNullOrEmpty($path)) { return $path }
+
+    try {
+        $resolved = Resolve-Path -LiteralPath $path -ErrorAction Stop
+        $relative = [System.IO.Path]::GetRelativePath($repoRoot, $resolved.ProviderPath)
+        if (-not [string]::IsNullOrWhiteSpace($relative)) {
+            return $relative
+        }
+    }
+    catch {
+        # Fall back to input path if it cannot be resolved (already relative or non-existent).
+    }
+
+    return $path
+}
+
+foreach ($pathMetric in $allMetrics) {
+    if ($pathMetric.PSObject.Properties['Path']) {
+        $pathMetric.Path = & $toRelativePath $pathMetric.Path
+    }
+
+    if ($pathMetric.FileMetrics) {
+        foreach ($fileMetric in $pathMetric.FileMetrics) {
+            $fileMetric.Path = & $toRelativePath $fileMetric.Path
+        }
+    }
+
+    if ($pathMetric.DuplicateFunctionDetails) {
+        foreach ($dup in $pathMetric.DuplicateFunctionDetails) {
+            if ($dup.PSObject.Properties['Path']) {
+                $dup.Path = & $toRelativePath $dup.Path
+            }
+        }
+    }
+}
+
+if ($testCoverage -and $testCoverage.FileCoverage) {
+    foreach ($fileCoverage in $testCoverage.FileCoverage) {
+        $fileCoverage.Path = & $toRelativePath $fileCoverage.Path
     }
 }
 
@@ -157,6 +187,14 @@ if ($IncludeCodeSimilarity) {
         }
     }
     $codeSimilarity = $similarityResults.ToArray()
+    foreach ($similar in $codeSimilarity) {
+        if ($similar.PSObject.Properties['File1']) {
+            $similar.File1 = & $toRelativePath $similar.File1
+        }
+        if ($similar.PSObject.Properties['File2']) {
+            $similar.File2 = & $toRelativePath $similar.File2
+        }
+    }
     Write-ScriptMessage -Message "  Found $($codeSimilarity.Count) similar code blocks" -LogLevel Info
 }
 

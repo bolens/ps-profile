@@ -24,6 +24,18 @@ try {
     }
 
     if ($env:PS_PROFILE_DEBUG) {
+        $requiredNetworkFunctions = @('Test-NetworkConnectivity', 'Invoke-HttpRequestWithRetry')
+        $missingNetworkFunctions = $requiredNetworkFunctions | Where-Object {
+            -not (Get-Command $_ -CommandType Function -ErrorAction SilentlyContinue)
+        }
+
+        if ($missingNetworkFunctions) {
+            $networkUtilsPath = Join-Path $PSScriptRoot '71-network-utils.ps1'
+            if (Test-Path $networkUtilsPath) {
+                . $networkUtilsPath
+            }
+        }
+
         # Track profile startup time
         $global:PSProfileStartTime = [DateTime]::Now
 
@@ -96,7 +108,20 @@ try {
                 },
                 @{
                     Name    = "PSReadLine"
-                    Test    = { Get-Module PSReadLine -ErrorAction SilentlyContinue }
+                    Test    = {
+                        if (Get-Module PSReadLine -ErrorAction SilentlyContinue) { return $true }
+
+                        $available = Get-Module -ListAvailable -Name PSReadLine -ErrorAction SilentlyContinue | Select-Object -First 1
+                        if (-not $available) { return $false }
+
+                        try {
+                            Import-Module $available -ErrorAction Stop | Out-Null
+                            return $true
+                        }
+                        catch {
+                            return $false
+                        }
+                    }
                     Message = "PSReadLine module not available - enhanced command line experience disabled"
                 },
                 @{

@@ -4,9 +4,72 @@
 # =======================================
 
 # Basic git shortcuts — simple stubs that forward all args to git.
-# These are intentionally lightweight; if `git` isn't installed the call will
-# fail at runtime. Suppress the positional parameter analyzer for these
-# forwarding helpers.
+# These helpers guard against common failure scenarios (missing repository,
+# empty history) so profile diagnostics stay quiet in test environments.
+
+function Test-GitRepositoryContext {
+    param([string]$CommandName = 'git command')
+
+    if (-not (Test-HasCommand git)) {
+        Write-Verbose "Skipping ${CommandName}: git command unavailable."
+        return $false
+    }
+
+    $inside = git rev-parse --is-inside-work-tree 2>$null
+    if ($LASTEXITCODE -ne 0 -or $inside -ne 'true') {
+        Write-Verbose "Skipping ${CommandName}: not inside a git repository."
+        $global:LASTEXITCODE = 0
+        return $false
+    }
+
+    $global:LASTEXITCODE = 0
+    return $true
+}
+
+function Test-GitRepositoryHasCommits {
+    param([string]$CommandName = 'git command')
+
+    $null = git show-ref --quiet HEAD 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        $global:LASTEXITCODE = 0
+        return $true
+    }
+
+    Write-Verbose "Skipping ${CommandName}: repository has no commits yet."
+    $global:LASTEXITCODE = 0
+    return $false
+}
+
+function Invoke-GitCommand {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Subcommand,
+
+        [object[]]$Arguments = @(),
+
+        [string]$CommandName,
+
+        [switch]$SkipRepositoryCheck,
+
+        [switch]$RequiresCommit
+    )
+
+    if (-not $CommandName) {
+        $CommandName = "git $Subcommand"
+    }
+
+    if (-not $SkipRepositoryCheck) {
+        if (-not (Test-GitRepositoryContext -CommandName $CommandName)) { return }
+    }
+
+    if ($RequiresCommit) {
+        if (-not (Test-GitRepositoryHasCommits -CommandName $CommandName)) { return }
+    }
+
+    if ($null -eq $Arguments) { $Arguments = @() }
+
+    git $Subcommand @Arguments
+}
 
 # Git status - show status
 if (-not (Test-Path Function:Invoke-GitStatus)) {
@@ -16,7 +79,10 @@ if (-not (Test-Path Function:Invoke-GitStatus)) {
     .DESCRIPTION
         Displays the working tree status, showing which files have changes, are staged, or are untracked. Forwards all arguments to git status.
     #>
-    function Invoke-GitStatus { param([Parameter(ValueFromRemainingArguments = $true)] $a) git status @a }
+    function Invoke-GitStatus {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'status' -Arguments $a -CommandName 'git status'
+    }
     Set-Alias -Name gs -Value Invoke-GitStatus -ErrorAction SilentlyContinue
 }
 # Git add - stage changes
@@ -27,7 +93,10 @@ if (-not (Test-Path Function:Add-GitChanges)) {
     .DESCRIPTION
         Adds file changes to the staging area for the next commit. Forwards all arguments to git add.
     #>
-    function Add-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git add @a }
+    function Add-GitChanges {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'add' -Arguments $a -CommandName 'git add'
+    }
     Set-Alias -Name ga -Value Add-GitChanges -ErrorAction SilentlyContinue
 }
 # Git commit - commit changes
@@ -38,7 +107,10 @@ if (-not (Test-Path Function:Save-GitCommit)) {
     .DESCRIPTION
         Creates a new commit with the currently staged changes. Forwards all arguments to git commit.
     #>
-    function Save-GitCommit { param([Parameter(ValueFromRemainingArguments = $true)] $a) git commit @a }
+    function Save-GitCommit {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'commit' -Arguments $a -CommandName 'git commit'
+    }
     Set-Alias -Name gc -Value Save-GitCommit -ErrorAction SilentlyContinue
 }
 # Git push - push to remote
@@ -49,7 +121,10 @@ if (-not (Test-Path Function:Publish-GitChanges)) {
     .DESCRIPTION
         Uploads local commits to the remote repository. Forwards all arguments to git push.
     #>
-    function Publish-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git push @a }
+    function Publish-GitChanges {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'push' -Arguments $a -CommandName 'git push'
+    }
     Set-Alias -Name gp -Value Publish-GitChanges -ErrorAction SilentlyContinue
 }
 # Git log - show commit log
@@ -60,7 +135,10 @@ if (-not (Test-Path Function:Get-GitLog)) {
     .DESCRIPTION
         Displays the commit log for the repository. Forwards all arguments to git log.
     #>
-    function Get-GitLog { param([Parameter(ValueFromRemainingArguments = $true)] $a) git log @a }
+    function Get-GitLog {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'log' -Arguments $a -CommandName 'git log' -RequiresCommit
+    }
     Set-Alias -Name gl -Value Get-GitLog -ErrorAction SilentlyContinue
 }
 # Git diff - show changes
@@ -71,7 +149,10 @@ if (-not (Test-Path Function:Compare-GitChanges)) {
     .DESCRIPTION
         Displays changes between the working tree and staging area, or between commits. Forwards all arguments to git diff.
     #>
-    function Compare-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git diff @a }
+    function Compare-GitChanges {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'diff' -Arguments $a -CommandName 'git diff'
+    }
     Set-Alias -Name gd -Value Compare-GitChanges -ErrorAction SilentlyContinue
 }
 # Git branch - manage branches
@@ -82,7 +163,10 @@ if (-not (Test-Path Function:Get-GitBranch)) {
     .DESCRIPTION
         Manages Git branches. Lists branches when called without arguments, or creates/deletes branches with arguments. Forwards all arguments to git branch.
     #>
-    function Get-GitBranch { param([Parameter(ValueFromRemainingArguments = $true)] $a) git branch @a }
+    function Get-GitBranch {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'branch' -Arguments $a -CommandName 'git branch'
+    }
     Set-Alias -Name gb -Value Get-GitBranch -ErrorAction SilentlyContinue
 }
 # Git checkout - switch branches
@@ -93,7 +177,10 @@ if (-not (Test-Path Function:Switch-GitBranch)) {
     .DESCRIPTION
         Changes the active branch or restores files from a specific commit or branch. Forwards all arguments to git checkout.
     #>
-    function Switch-GitBranch { param([Parameter(ValueFromRemainingArguments = $true)] $a) git checkout @a }
+    function Switch-GitBranch {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'checkout' -Arguments $a -CommandName 'git checkout'
+    }
     Set-Alias -Name gco -Value Switch-GitBranch -ErrorAction SilentlyContinue
 }
 # Git commit with message - commit changes with message
@@ -104,7 +191,10 @@ if (-not (Test-Path Function:Save-GitCommitWithMessage)) {
     .DESCRIPTION
         Creates a new commit with the currently staged changes and the provided commit message. Forwards all arguments to git commit (typically used with -m flag).
     #>
-    function Save-GitCommitWithMessage { param([Parameter(ValueFromRemainingArguments = $true)] $a) git commit @a }
+    function Save-GitCommitWithMessage {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Save-GitCommit @a
+    }
     Set-Alias -Name gcm -Value Save-GitCommitWithMessage -ErrorAction SilentlyContinue
 }
 # Git pull - pull from remote
@@ -115,7 +205,10 @@ if (-not (Test-Path Function:Get-GitChanges)) {
     .DESCRIPTION
         Downloads changes from the remote repository and merges them into the current branch. Forwards all arguments to git pull.
     #>
-    function Get-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git pull @a }
+    function Get-GitChanges {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'pull' -Arguments $a -CommandName 'git pull'
+    }
     Set-Alias -Name gpl -Value Get-GitChanges -ErrorAction SilentlyContinue
 }
 # Git fetch - fetch from remote
@@ -126,7 +219,10 @@ if (-not (Test-Path Function:Receive-GitChanges)) {
     .DESCRIPTION
         Fetches changes from the remote repository without merging them into the current branch. Forwards all arguments to git fetch.
     #>
-    function Receive-GitChanges { param([Parameter(ValueFromRemainingArguments = $true)] $a) git fetch @a }
+    function Receive-GitChanges {
+        param([Parameter(ValueFromRemainingArguments = $true)] $a)
+        Invoke-GitCommand -Subcommand 'fetch' -Arguments $a -CommandName 'git fetch'
+    }
     Set-Alias -Name gf -Value Receive-GitChanges -ErrorAction SilentlyContinue
 }
 
@@ -143,42 +239,51 @@ if (-not (Test-Path Function:Ensure-GitHelper)) {
         if ($script:__GitHelpersInitialized) { return }
         $script:__GitHelpersInitialized = $true
         if (-not (Test-Path Function:Set-AgentModeFunction)) { return }
-        $null = Set-AgentModeFunction -Name 'Invoke-GitClone' -Body { git clone @args } # Git clone - clone a repository
+        $null = Set-AgentModeFunction -Name 'Invoke-GitClone' -Body { Invoke-GitCommand -Subcommand 'clone' -Arguments $args -CommandName 'git clone' -SkipRepositoryCheck } # Git clone - clone a repository
         Set-Alias -Name gcl -Value Invoke-GitClone -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Save-GitStash' -Body { git stash @args } # Git stash - stash changes
+        $null = Set-AgentModeFunction -Name 'Save-GitStash' -Body { Invoke-GitCommand -Subcommand 'stash' -Arguments $args -CommandName 'git stash' } # Git stash - stash changes
         Set-Alias -Name gsta -Value Save-GitStash -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Restore-GitStash' -Body { git stash pop @args } # Git stash pop - apply stashed changes
+        $null = Set-AgentModeFunction -Name 'Restore-GitStash' -Body { Invoke-GitCommand -Subcommand 'stash' -Arguments @('pop') + $args -CommandName 'git stash pop' } # Git stash pop - apply stashed changes
         Set-Alias -Name gstp -Value Restore-GitStash -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Merge-GitRebase' -Body { git rebase @args } # Git rebase - rebase commits
+        $null = Set-AgentModeFunction -Name 'Merge-GitRebase' -Body { Invoke-GitCommand -Subcommand 'rebase' -Arguments $args -CommandName 'git rebase' } # Git rebase - rebase commits
         Set-Alias -Name gr -Value Merge-GitRebase -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Continue-GitRebase' -Body { git rebase --continue } # Git rebase continue - continue rebase
+        $null = Set-AgentModeFunction -Name 'Continue-GitRebase' -Body { Invoke-GitCommand -Subcommand 'rebase' -Arguments @('--continue') -CommandName 'git rebase --continue' } # Git rebase continue - continue rebase
         Set-Alias -Name grc -Value Continue-GitRebase -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Update-GitSubmodule' -Body { git submodule update --init --recursive @args } # Git submodule update - update submodules
+        $null = Set-AgentModeFunction -Name 'Update-GitSubmodule' -Body { Invoke-GitCommand -Subcommand 'submodule' -Arguments @('update', '--init', '--recursive') + $args -CommandName 'git submodule update' } # Git submodule update - update submodules
         Set-Alias -Name gsub -Value Update-GitSubmodule -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Clear-GitUntracked' -Body { git clean -fdx @args } # Git clean - remove untracked files
+        $null = Set-AgentModeFunction -Name 'Clear-GitUntracked' -Body { Invoke-GitCommand -Subcommand 'clean' -Arguments @('-fdx') + $args -CommandName 'git clean' } # Git clean - remove untracked files
         Set-Alias -Name gclean -Value Clear-GitUntracked -ErrorAction SilentlyContinue
         $null = Set-AgentModeFunction -Name 'Set-LocationGitRoot' -Body { # Git cd to root - change to repository root
             $root = (& git rev-parse --show-toplevel) 2>$null
             if ($LASTEXITCODE -eq 0 -and $root) { Set-Location -LiteralPath $root } else { Write-Warning 'Not inside a git repository' }
         }
         Set-Alias -Name cdg -Value Set-LocationGitRoot -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Switch-GitPreviousBranch' -Body { git checkout - } # Git checkout previous - switch to previous branch
+        $null = Set-AgentModeFunction -Name 'Switch-GitPreviousBranch' -Body { Invoke-GitCommand -Subcommand 'checkout' -Arguments @('-') -CommandName 'git checkout -' } # Git checkout previous - switch to previous branch
         Set-Alias -Name gob -Value Switch-GitPreviousBranch -ErrorAction SilentlyContinue
         $null = Set-AgentModeFunction -Name 'Remove-GitMergedBranches' -Body { # Git prune merged - remove merged branches
+            if (-not (Test-GitRepositoryContext -CommandName 'git prune merged')) { return }
+
             $up = (git rev-parse --abbrev-ref --symbolic-full-name '@{u=}') 2>$null
             if (-not $up) { Write-Warning 'No upstream set for this branch'; return }
-            git fetch --prune
+            Invoke-GitCommand -Subcommand 'fetch' -Arguments @('--prune') -CommandName 'git fetch --prune'
             git branch --merged | ForEach-Object {
                 $b = $_.Trim().TrimStart('*', ' ')
                 if ($b -and $b -notin @('main', 'master', 'develop')) { git branch -D $b 2>$null | Out-Null }
             }
         }
         Set-Alias -Name gprune -Value Remove-GitMergedBranches -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Sync-GitRepository' -Body { git fetch --prune; git rebase '@{u}' } # Git sync - fetch and rebase
+        $null = Set-AgentModeFunction -Name 'Sync-GitRepository' -Body {
+            if (-not (Test-GitRepositoryContext -CommandName 'git sync')) { return }
+
+            Invoke-GitCommand -Subcommand 'fetch' -Arguments @('--prune') -CommandName 'git fetch --prune'
+            Invoke-GitCommand -Subcommand 'rebase' -Arguments @('@{u}') -CommandName "git rebase @{u}"
+        } # Git sync - fetch and rebase
         Set-Alias -Name gsync -Value Sync-GitRepository -ErrorAction SilentlyContinue
-        $null = Set-AgentModeFunction -Name 'Undo-GitCommit' -Body { git reset --soft HEAD~1 } # Git undo - soft reset last commit
+        $null = Set-AgentModeFunction -Name 'Undo-GitCommit' -Body { Invoke-GitCommand -Subcommand 'reset' -Arguments @('--soft', 'HEAD~1') -CommandName 'git reset --soft HEAD~1' } # Git undo - soft reset last commit
         Set-Alias -Name gundo -Value Undo-GitCommit -ErrorAction SilentlyContinue
         $null = Set-AgentModeFunction -Name 'Get-GitDefaultBranch' -Body { # Git default branch - get default branch name
+            if (-not (Test-GitRepositoryContext -CommandName 'git default branch')) { return 'main' }
+
             $b = (git symbolic-ref refs/remotes/origin/HEAD 2>$null) -replace '^refs/remotes/origin/', ''
             if ($b) { $b } else { 'main' }
         }

@@ -57,7 +57,29 @@ if (-not (Test-Path "Function:\\Ensure-FileConversion")) {
         Set-Alias -Name json-to-yaml -Value ConvertTo-Yaml -ErrorAction SilentlyContinue
 
         # Base64 encode
-        Set-Item -Path Function:ConvertTo-Base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { if ($InputObject -is [string] -and (Test-Path -LiteralPath $InputObject)) { [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $InputObject))) } else { $bytes = [Text.Encoding]::UTF8.GetBytes($InputObject); [Convert]::ToBase64String($bytes) } } } -Force | Out-Null
+        Set-Item -Path Function:ConvertTo-Base64 -Value {
+            param([Parameter(ValueFromPipeline = $true)] $InputObject)
+            process {
+                if ($InputObject -is [string] -and $InputObject.IndexOf([char]0) -eq -1) {
+                    try {
+                        $resolved = Resolve-Path -LiteralPath $InputObject -ErrorAction Stop
+                        return [Convert]::ToBase64String([IO.File]::ReadAllBytes($resolved))
+                    }
+                    catch {
+                        # Treat the value as literal text if it cannot be resolved as a path.
+                        Write-Verbose "ConvertTo-Base64 treating input as literal text: $($_.Exception.Message)"
+                    }
+                }
+
+                if ($InputObject -is [byte[]]) {
+                    return [Convert]::ToBase64String($InputObject)
+                }
+
+                $text = if ($null -ne $InputObject) { [string]$InputObject } else { [string]::Empty }
+                $bytes = [Text.Encoding]::UTF8.GetBytes($text)
+                return [Convert]::ToBase64String($bytes)
+            }
+        } -Force | Out-Null
         Set-Alias -Name to-base64 -Value ConvertTo-Base64 -ErrorAction SilentlyContinue
         # Base64 decode
         Set-Item -Path Function:ConvertFrom-Base64 -Value { param([Parameter(ValueFromPipeline = $true)] $InputObject) process { $s = ($InputObject -join "") -replace '\s+', ''; try { $bytes = [Convert]::FromBase64String($s); [Text.Encoding]::UTF8.GetString($bytes) } catch { Write-Error "Invalid base64 input" } } } -Force | Out-Null

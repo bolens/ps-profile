@@ -63,91 +63,36 @@ function Get-CodeMetrics {
 
     $scripts = Get-PowerShellScripts -Path $Path -Recurse:$Recurse
 
-    # Use parallel processing for better performance when analyzing multiple files
-    if ($scripts.Count -gt 5 -and (Get-Command Invoke-Parallel -ErrorAction SilentlyContinue)) {
-        $fileMetricsResults = Invoke-Parallel -Items $scripts -ScriptBlock {
-            param($Script)
+    $fileMetrics = [System.Collections.Generic.List[PSCustomObject]]::new()
+    foreach ($script in $scripts) {
+        try {
+            $content = Get-Content -Path $script.FullName -Raw -ErrorAction Stop
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$null, [ref]$null)
 
-            try {
-                $content = Get-Content -Path $Script.FullName -Raw -ErrorAction Stop
-                $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script.FullName, [ref]$null, [ref]$null)
+            $lineCount = ($content -split "`n").Count
+            $functionCount = ($ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)).Count
 
-                $lineCount = ($content -split "`n").Count
-                $functionCount = ($ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)).Count
+            # Simple complexity metric: count control flow statements
+            $complexity = ($ast.FindAll({
+                        param($node)
+                        $node -is [System.Management.Automation.Language.IfStatementAst] -or
+                        $node -is [System.Management.Automation.Language.WhileStatementAst] -or
+                        $node -is [System.Management.Automation.Language.ForEachStatementAst] -or
+                        $node -is [System.Management.Automation.Language.ForStatementAst] -or
+                        $node -is [System.Management.Automation.Language.SwitchStatementAst] -or
+                        $node -is [System.Management.Automation.Language.TryStatementAst]
+                    }, $true)).Count
 
-                # Simple complexity metric: count control flow statements
-                $complexity = ($ast.FindAll({
-                            param($node)
-                            $node -is [System.Management.Automation.Language.IfStatementAst] -or
-                            $node -is [System.Management.Automation.Language.WhileStatementAst] -or
-                            $node -is [System.Management.Automation.Language.ForEachStatementAst] -or
-                            $node -is [System.Management.Automation.Language.ForStatementAst] -or
-                            $node -is [System.Management.Automation.Language.SwitchStatementAst] -or
-                            $node -is [System.Management.Automation.Language.TryStatementAst]
-                        }, $true)).Count
-
-                return [PSCustomObject]@{
-                    File       = $Script.Name
-                    Path       = $Script.FullName
+            $fileMetrics.Add([PSCustomObject]@{
+                    File       = $script.Name
+                    Path       = $script.FullName
                     Lines      = $lineCount
                     Functions  = $functionCount
                     Complexity = $complexity
-                    Success    = $true
-                }
-            }
-            catch {
-                Write-Warning "Failed to analyze $($Script.FullName): $($_.Exception.Message)"
-                return [PSCustomObject]@{
-                    File       = $Script.Name
-                    Path       = $Script.FullName
-                    Lines      = 0
-                    Functions  = 0
-                    Complexity = 0
-                    Success    = $false
-                }
-            }
-        } -ThrottleLimit 5
-
-        $fileMetrics = [System.Collections.Generic.List[PSCustomObject]]::new()
-        foreach ($result in $fileMetricsResults) {
-            if ($result) {
-                $fileMetrics.Add($result)
-            }
+                })
         }
-    }
-    else {
-        # Sequential processing for small numbers of files (overhead not worth it)
-        $fileMetrics = [System.Collections.Generic.List[PSCustomObject]]::new()
-        foreach ($script in $scripts) {
-            try {
-                $content = Get-Content -Path $script.FullName -Raw -ErrorAction Stop
-                $ast = [System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$null, [ref]$null)
-
-                $lineCount = ($content -split "`n").Count
-                $functionCount = ($ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)).Count
-
-                # Simple complexity metric: count control flow statements
-                $complexity = ($ast.FindAll({
-                            param($node)
-                            $node -is [System.Management.Automation.Language.IfStatementAst] -or
-                            $node -is [System.Management.Automation.Language.WhileStatementAst] -or
-                            $node -is [System.Management.Automation.Language.ForEachStatementAst] -or
-                            $node -is [System.Management.Automation.Language.ForStatementAst] -or
-                            $node -is [System.Management.Automation.Language.SwitchStatementAst] -or
-                            $node -is [System.Management.Automation.Language.TryStatementAst]
-                        }, $true)).Count
-
-                $fileMetrics.Add([PSCustomObject]@{
-                        File       = $script.Name
-                        Path       = $script.FullName
-                        Lines      = $lineCount
-                        Functions  = $functionCount
-                        Complexity = $complexity
-                    })
-            }
-            catch {
-                Write-Warning "Failed to analyze $($script.FullName): $($_.Exception.Message)"
-            }
+        catch {
+            Write-Warning "Failed to analyze $($script.FullName): $($_.Exception.Message)"
         }
     }
 

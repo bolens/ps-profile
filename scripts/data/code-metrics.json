@@ -1,820 +1,881 @@
 {
-  "Timestamp": "2025-11-08T04:43:41.0559153Z",
-  "TotalFiles": 108.0,
-  "TotalLines": 12682.0,
-  "TotalFunctions": 262.0,
-  "TotalComplexity": 1341.0,
-  "AverageLinesPerFile": 117.43,
-  "AverageFunctionsPerFile": 2.43,
-  "AverageComplexityPerFile": 12.42,
+  "Timestamp": "2025-11-11T18:16:27.0121596Z",
+  "TotalFiles": 115.0,
+  "TotalLines": 14759.0,
+  "TotalFunctions": 241.0,
+  "TotalComplexity": 1509.0,
+  "DuplicateFunctions": 5.0,
+  "AverageLinesPerFile": 128.34,
+  "AverageFunctionsPerFile": 2.1,
+  "AverageComplexityPerFile": 13.12,
   "PathMetrics": [
     {
-      "TotalFiles": 27,
-      "TotalLines": 4057,
-      "TotalFunctions": 4,
-      "TotalComplexity": 384,
+      "TotalFiles": 35,
+      "TotalLines": 6884.0,
+      "TotalFunctions": 13.0,
+      "TotalComplexity": 626.0,
       "DuplicateFunctions": 0,
       "DuplicateFunctionDetails": [],
-      "AverageLinesPerFile": 150.26,
-      "AverageFunctionsPerFile": 0.15,
-      "AverageComplexityPerFile": 14.22,
+      "AverageLinesPerFile": 196.69,
+      "AverageFunctionsPerFile": 0.37,
+      "AverageComplexityPerFile": 17.89,
       "FileMetrics": [
         {
           "File": "check-comment-help.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\checks\\check-comment-help.ps1",
+          "Path": "scripts\\checks\\check-comment-help.ps1",
           "Lines": 135,
           "Functions": 1,
           "Complexity": 14
         },
         {
           "File": "check-commit-messages.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\checks\\check-commit-messages.ps1",
+          "Path": "scripts\\checks\\check-commit-messages.ps1",
           "Lines": 82,
           "Functions": 0,
           "Complexity": 7
         },
         {
           "File": "check-idempotency.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\checks\\check-idempotency.ps1",
+          "Path": "scripts\\checks\\check-idempotency.ps1",
           "Lines": 68,
           "Functions": 0,
           "Complexity": 5
         },
         {
           "File": "check-script-standards.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\checks\\check-script-standards.ps1",
+          "Path": "scripts\\checks\\check-script-standards.ps1",
           "Lines": 210,
           "Functions": 0,
           "Complexity": 20
         },
         {
           "File": "validate-profile.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\checks\\validate-profile.ps1",
+          "Path": "scripts\\checks\\validate-profile.ps1",
           "Lines": 62,
           "Functions": 0,
           "Complexity": 3
         },
         {
           "File": "setup.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\dev\\setup.ps1",
+          "Path": "scripts\\dev\\setup.ps1",
           "Lines": 58,
           "Functions": 0,
           "Complexity": 3
         },
         {
           "File": "install-githooks.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\git\\install-githooks.ps1",
-          "Lines": 86,
+          "Path": "scripts\\git\\install-githooks.ps1",
+          "Lines": 98,
           "Functions": 0,
-          "Complexity": 8
+          "Complexity": 10
         },
         {
           "File": "install-pre-commit-hook.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\git\\install-pre-commit-hook.ps1",
-          "Lines": 84,
+          "Path": "scripts\\git\\install-pre-commit-hook.ps1",
+          "Lines": 90,
           "Functions": 0,
-          "Complexity": 7
+          "Complexity": 9
         },
         {
           "File": "pre-commit.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\git\\pre-commit.ps1",
+          "Path": "scripts\\git\\pre-commit.ps1",
           "Lines": 69,
           "Functions": 0,
           "Complexity": 7
         },
         {
           "File": "commit-msg.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\git\\hooks\\commit-msg.ps1",
+          "Path": "scripts\\git\\hooks\\commit-msg.ps1",
           "Lines": 82,
           "Functions": 0,
           "Complexity": 5
         },
         {
           "File": "pre-push.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\git\\hooks\\pre-push.ps1",
+          "Path": "scripts\\git\\hooks\\pre-push.ps1",
           "Lines": 37,
           "Functions": 0,
           "Complexity": 1
         },
         {
-          "File": "benchmark-startup.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\benchmark-startup.ps1",
-          "Lines": 275,
+          "File": "check-script-template.ps1",
+          "Path": "scripts\\templates\\check-script-template.ps1",
+          "Lines": 78,
+          "Functions": 0,
+          "Complexity": 4
+        },
+        {
+          "File": "utility-script-template.ps1",
+          "Path": "scripts\\templates\\utility-script-template.ps1",
+          "Lines": 54,
+          "Functions": 0,
+          "Complexity": 2
+        },
+        {
+          "File": "init_wrangler_config.ps1",
+          "Path": "scripts\\utils\\init_wrangler_config.ps1",
+          "Lines": 161,
           "Functions": 1,
-          "Complexity": 24
+          "Complexity": 8
         },
         {
-          "File": "check-module-updates.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\check-module-updates.ps1",
-          "Lines": 274,
+          "File": "run_pester.ps1",
+          "Path": "scripts\\utils\\code-quality\\run_pester.ps1",
+          "Lines": 133,
           "Functions": 0,
-          "Complexity": 28
+          "Complexity": 10
         },
         {
-          "File": "collect-code-metrics.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\collect-code-metrics.ps1",
-          "Lines": 127,
-          "Functions": 0,
-          "Complexity": 12
-        },
-        {
-          "File": "create-release.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\create-release.ps1",
-          "Lines": 163,
-          "Functions": 0,
-          "Complexity": 14
-        },
-        {
-          "File": "find-duplicate-functions.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\find-duplicate-functions.ps1",
-          "Lines": 86,
+          "File": "run-format.ps1",
+          "Path": "scripts\\utils\\code-quality\\run-format.ps1",
+          "Lines": 115,
           "Functions": 0,
           "Complexity": 7
         },
         {
+          "File": "run-lint.ps1",
+          "Path": "scripts\\utils\\code-quality\\run-lint.ps1",
+          "Lines": 100,
+          "Functions": 0,
+          "Complexity": 8
+        },
+        {
+          "File": "run-markdownlint.ps1",
+          "Path": "scripts\\utils\\code-quality\\run-markdownlint.ps1",
+          "Lines": 92,
+          "Functions": 0,
+          "Complexity": 7
+        },
+        {
+          "File": "spellcheck.ps1",
+          "Path": "scripts\\utils\\code-quality\\spellcheck.ps1",
+          "Lines": 64,
+          "Functions": 0,
+          "Complexity": 3
+        },
+        {
+          "File": "validate-function-naming.ps1",
+          "Path": "scripts\\utils\\code-quality\\validate-function-naming.ps1",
+          "Lines": 444,
+          "Functions": 5,
+          "Complexity": 40
+        },
+        {
+          "File": "check-module-updates.ps1",
+          "Path": "scripts\\utils\\dependencies\\check-module-updates.ps1",
+          "Lines": 749,
+          "Functions": 4,
+          "Complexity": 67
+        },
+        {
+          "File": "validate-dependencies.ps1",
+          "Path": "scripts\\utils\\dependencies\\validate-dependencies.ps1",
+          "Lines": 220,
+          "Functions": 0,
+          "Complexity": 27
+        },
+        {
           "File": "generate-changelog.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\generate-changelog.ps1",
+          "Path": "scripts\\utils\\docs\\generate-changelog.ps1",
           "Lines": 136,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "generate-docs.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\generate-docs.ps1",
-          "Lines": 604,
+          "Path": "scripts\\utils\\docs\\generate-docs.ps1",
+          "Lines": 611,
           "Functions": 1,
           "Complexity": 84
         },
         {
           "File": "generate-fragment-readmes.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\generate-fragment-readmes.ps1",
-          "Lines": 324,
+          "Path": "scripts\\utils\\docs\\generate-fragment-readmes.ps1",
+          "Lines": 328,
           "Functions": 0,
           "Complexity": 55
         },
         {
-          "File": "init_wrangler_config.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\init_wrangler_config.ps1",
-          "Lines": 124,
-          "Functions": 1,
-          "Complexity": 6
-        },
-        {
           "File": "new-fragment.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\new-fragment.ps1",
+          "Path": "scripts\\utils\\fragment\\new-fragment.ps1",
           "Lines": 174,
           "Functions": 0,
           "Complexity": 7
         },
         {
-          "File": "run_pester.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\run_pester.ps1",
-          "Lines": 126,
-          "Functions": 0,
-          "Complexity": 9
+          "File": "benchmark-startup.ps1",
+          "Path": "scripts\\utils\\metrics\\benchmark-startup.ps1",
+          "Lines": 279,
+          "Functions": 1,
+          "Complexity": 24
         },
         {
-          "File": "run-format.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\run-format.ps1",
-          "Lines": 142,
+          "File": "collect-code-metrics.ps1",
+          "Path": "scripts\\utils\\metrics\\collect-code-metrics.ps1",
+          "Lines": 283,
           "Functions": 0,
-          "Complexity": 8
+          "Complexity": 43
         },
         {
-          "File": "run-lint.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\run-lint.ps1",
-          "Lines": 123,
+          "File": "export-metrics.ps1",
+          "Path": "scripts\\utils\\metrics\\export-metrics.ps1",
+          "Lines": 172,
           "Functions": 0,
-          "Complexity": 9
+          "Complexity": 16
         },
         {
-          "File": "run-markdownlint.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\run-markdownlint.ps1",
-          "Lines": 92,
+          "File": "find-duplicate-functions.ps1",
+          "Path": "scripts\\utils\\metrics\\find-duplicate-functions.ps1",
+          "Lines": 86,
           "Functions": 0,
           "Complexity": 7
         },
         {
-          "File": "run-security-scan.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\run-security-scan.ps1",
-          "Lines": 250,
+          "File": "generate-dashboard.ps1",
+          "Path": "scripts\\utils\\metrics\\generate-dashboard.ps1",
+          "Lines": 758,
           "Functions": 0,
-          "Complexity": 23
+          "Complexity": 21
         },
         {
-          "File": "spellcheck.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\scripts\\utils\\spellcheck.ps1",
-          "Lines": 64,
+          "File": "save-metrics-snapshot.ps1",
+          "Path": "scripts\\utils\\metrics\\save-metrics-snapshot.ps1",
+          "Lines": 98,
           "Functions": 0,
-          "Complexity": 3
+          "Complexity": 7
+        },
+        {
+          "File": "track-coverage-trends.ps1",
+          "Path": "scripts\\utils\\metrics\\track-coverage-trends.ps1",
+          "Lines": 207,
+          "Functions": 0,
+          "Complexity": 17
+        },
+        {
+          "File": "create-release.ps1",
+          "Path": "scripts\\utils\\release\\create-release.ps1",
+          "Lines": 163,
+          "Functions": 0,
+          "Complexity": 14
+        },
+        {
+          "File": "run-security-scan.ps1",
+          "Path": "scripts\\utils\\security\\run-security-scan.ps1",
+          "Lines": 388,
+          "Functions": 0,
+          "Complexity": 56
         }
       ]
     },
     {
-      "TotalFiles": 81,
-      "TotalLines": 8625,
-      "TotalFunctions": 258,
-      "TotalComplexity": 957,
+      "TotalFiles": 80,
+      "TotalLines": 7875.0,
+      "TotalFunctions": 228.0,
+      "TotalComplexity": 883.0,
       "DuplicateFunctions": 5,
       "DuplicateFunctionDetails": [
         {
           "FunctionName": "Open-VSCode",
           "File": "15-shortcuts.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\15-shortcuts.ps1"
+          "Path": "profile.d\\15-shortcuts.ps1"
         },
         {
           "FunctionName": "global:prompt",
           "File": "23-starship.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\23-starship.ps1"
+          "Path": "profile.d\\23-starship.ps1"
         },
         {
           "FunctionName": "Invoke-UVRun",
           "File": "67-uv.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\67-uv.ps1"
+          "Path": "profile.d\\67-uv.ps1"
         },
         {
           "FunctionName": "Install-UVTool",
           "File": "67-uv.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\67-uv.ps1"
+          "Path": "profile.d\\67-uv.ps1"
         },
         {
           "FunctionName": "global:prompt",
           "File": "73-performance-insights.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\73-performance-insights.ps1"
+          "Path": "profile.d\\73-performance-insights.ps1"
         }
       ],
-      "AverageLinesPerFile": 106.48,
-      "AverageFunctionsPerFile": 3.19,
-      "AverageComplexityPerFile": 11.81,
+      "AverageLinesPerFile": 98.44,
+      "AverageFunctionsPerFile": 2.85,
+      "AverageComplexityPerFile": 11.04,
       "FileMetrics": [
         {
           "File": "00-bootstrap.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\00-bootstrap.ps1",
-          "Lines": 980,
-          "Functions": 21,
-          "Complexity": 108
+          "Path": "profile.d\\00-bootstrap.ps1",
+          "Lines": 387,
+          "Functions": 7,
+          "Complexity": 34
         },
         {
           "File": "01-env.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\01-env.ps1",
+          "Path": "profile.d\\01-env.ps1",
           "Lines": 41,
           "Functions": 0,
           "Complexity": 9
         },
         {
           "File": "02-files-conversion.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\02-files-conversion.ps1",
-          "Lines": 387,
+          "Path": "profile.d\\02-files-conversion.ps1",
+          "Lines": 423,
           "Functions": 22,
-          "Complexity": 36
+          "Complexity": 42
         },
         {
           "File": "02-files-listing.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\02-files-listing.ps1",
-          "Lines": 81,
-          "Functions": 6,
-          "Complexity": 13
+          "Path": "profile.d\\02-files-listing.ps1",
+          "Lines": 34,
+          "Functions": 1,
+          "Complexity": 8
         },
         {
           "File": "02-files-navigation.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\02-files-navigation.ps1",
-          "Lines": 134,
-          "Functions": 10,
-          "Complexity": 12
+          "Path": "profile.d\\02-files-navigation.ps1",
+          "Lines": 222,
+          "Functions": 7,
+          "Complexity": 23
         },
         {
           "File": "02-files-utilities.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\02-files-utilities.ps1",
-          "Lines": 112,
+          "Path": "profile.d\\02-files-utilities.ps1",
+          "Lines": 125,
           "Functions": 6,
           "Complexity": 11
         },
         {
           "File": "02-files.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\02-files.ps1",
+          "Path": "profile.d\\02-files.ps1",
           "Lines": 11,
           "Functions": 0,
           "Complexity": 0
         },
         {
           "File": "03-agent-mode.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\03-agent-mode.ps1",
+          "Path": "profile.d\\03-agent-mode.ps1",
           "Lines": 19,
           "Functions": 0,
           "Complexity": 2
         },
         {
           "File": "04-scoop-completion.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\04-scoop-completion.ps1",
+          "Path": "profile.d\\04-scoop-completion.ps1",
           "Lines": 71,
           "Functions": 0,
           "Complexity": 14
         },
         {
           "File": "05-utilities.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\05-utilities.ps1",
-          "Lines": 454,
+          "Path": "profile.d\\05-utilities.ps1",
+          "Lines": 468,
           "Functions": 23,
           "Complexity": 19
         },
         {
           "File": "06-oh-my-posh.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\06-oh-my-posh.ps1",
+          "Path": "profile.d\\06-oh-my-posh.ps1",
           "Lines": 110,
           "Functions": 2,
           "Complexity": 20
         },
         {
           "File": "07-system.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\07-system.ps1",
-          "Lines": 217,
+          "Path": "profile.d\\07-system.ps1",
+          "Lines": 255,
           "Functions": 20,
-          "Complexity": 1
+          "Complexity": 8
         },
         {
           "File": "08-system-info.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\08-system-info.ps1",
+          "Path": "profile.d\\08-system-info.ps1",
           "Lines": 60,
           "Functions": 5,
           "Complexity": 0
         },
         {
           "File": "09-package-managers.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\09-package-managers.ps1",
+          "Path": "profile.d\\09-package-managers.ps1",
           "Lines": 233,
           "Functions": 21,
           "Complexity": 3
         },
         {
           "File": "10-wsl.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\10-wsl.ps1",
+          "Path": "profile.d\\10-wsl.ps1",
           "Lines": 32,
           "Functions": 3,
           "Complexity": 0
         },
         {
           "File": "11-git.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\11-git.ps1",
-          "Lines": 255,
-          "Functions": 12,
-          "Complexity": 34
+          "Path": "profile.d\\11-git.ps1",
+          "Lines": 360,
+          "Functions": 15,
+          "Complexity": 46
         },
         {
           "File": "12-psreadline.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\12-psreadline.ps1",
+          "Path": "profile.d\\12-psreadline.ps1",
           "Lines": 58,
           "Functions": 1,
           "Complexity": 13
         },
         {
           "File": "13-ansible.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\13-ansible.ps1",
+          "Path": "profile.d\\13-ansible.ps1",
           "Lines": 65,
           "Functions": 6,
           "Complexity": 0
         },
         {
           "File": "14-ssh.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\14-ssh.ps1",
+          "Path": "profile.d\\14-ssh.ps1",
           "Lines": 53,
           "Functions": 0,
           "Complexity": 9
         },
         {
           "File": "15-shortcuts.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\15-shortcuts.ps1",
+          "Path": "profile.d\\15-shortcuts.ps1",
           "Lines": 70,
           "Functions": 3,
           "Complexity": 10
         },
         {
           "File": "16-clipboard.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\16-clipboard.ps1",
+          "Path": "profile.d\\16-clipboard.ps1",
           "Lines": 53,
           "Functions": 2,
           "Complexity": 6
         },
         {
           "File": "17-kubectl.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\17-kubectl.ps1",
+          "Path": "profile.d\\17-kubectl.ps1",
           "Lines": 39,
           "Functions": 0,
           "Complexity": 10
         },
         {
           "File": "18-terraform.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\18-terraform.ps1",
+          "Path": "profile.d\\18-terraform.ps1",
           "Lines": 39,
           "Functions": 0,
           "Complexity": 10
         },
         {
           "File": "19-fzf.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\19-fzf.ps1",
+          "Path": "profile.d\\19-fzf.ps1",
           "Lines": 25,
           "Functions": 0,
           "Complexity": 4
         },
         {
           "File": "20-gh.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\20-gh.ps1",
+          "Path": "profile.d\\20-gh.ps1",
           "Lines": 15,
           "Functions": 0,
           "Complexity": 3
         },
         {
           "File": "21-kube.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\21-kube.ps1",
+          "Path": "profile.d\\21-kube.ps1",
           "Lines": 29,
           "Functions": 0,
           "Complexity": 4
         },
         {
           "File": "22-containers.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\22-containers.ps1",
+          "Path": "profile.d\\22-containers.ps1",
           "Lines": 224,
           "Functions": 9,
           "Complexity": 23
         },
         {
           "File": "23-starship.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\23-starship.ps1",
+          "Path": "profile.d\\23-starship.ps1",
           "Lines": 491,
           "Functions": 11,
           "Complexity": 63
         },
         {
           "File": "24-container-utils.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\24-container-utils.ps1",
+          "Path": "profile.d\\24-container-utils.ps1",
           "Lines": 65,
           "Functions": 2,
           "Complexity": 10
         },
         {
           "File": "25-lazydocker.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\25-lazydocker.ps1",
+          "Path": "profile.d\\25-lazydocker.ps1",
           "Lines": 10,
           "Functions": 0,
           "Complexity": 2
         },
         {
           "File": "26-rclone.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\26-rclone.ps1",
+          "Path": "profile.d\\26-rclone.ps1",
           "Lines": 17,
           "Functions": 0,
           "Complexity": 4
         },
         {
           "File": "27-minio.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\27-minio.ps1",
+          "Path": "profile.d\\27-minio.ps1",
           "Lines": 17,
           "Functions": 0,
           "Complexity": 4
         },
         {
           "File": "28-jq-yq.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\28-jq-yq.ps1",
+          "Path": "profile.d\\28-jq-yq.ps1",
           "Lines": 21,
           "Functions": 0,
           "Complexity": 4
         },
         {
           "File": "29-rg.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\29-rg.ps1",
+          "Path": "profile.d\\29-rg.ps1",
           "Lines": 10,
           "Functions": 0,
           "Complexity": 2
         },
         {
           "File": "30-open.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\30-open.ps1",
+          "Path": "profile.d\\30-open.ps1",
           "Lines": 25,
           "Functions": 1,
           "Complexity": 3
         },
         {
           "File": "31-aws.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\31-aws.ps1",
+          "Path": "profile.d\\31-aws.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "32-bun.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\32-bun.ps1",
+          "Path": "profile.d\\32-bun.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "33-aliases.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\33-aliases.ps1",
+          "Path": "profile.d\\33-aliases.ps1",
           "Lines": 55,
           "Functions": 1,
           "Complexity": 6
         },
         {
           "File": "34-dev.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\34-dev.ps1",
+          "Path": "profile.d\\34-dev.ps1",
           "Lines": 93,
           "Functions": 0,
           "Complexity": 39
         },
         {
           "File": "35-ollama.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\35-ollama.ps1",
+          "Path": "profile.d\\35-ollama.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "36-ngrok.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\36-ngrok.ps1",
+          "Path": "profile.d\\36-ngrok.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "37-deno.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\37-deno.ps1",
+          "Path": "profile.d\\37-deno.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "38-firebase.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\38-firebase.ps1",
+          "Path": "profile.d\\38-firebase.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "39-rustup.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\39-rustup.ps1",
+          "Path": "profile.d\\39-rustup.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "40-tailscale.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\40-tailscale.ps1",
+          "Path": "profile.d\\40-tailscale.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "41-yarn.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\41-yarn.ps1",
+          "Path": "profile.d\\41-yarn.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "42-php.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\42-php.ps1",
+          "Path": "profile.d\\42-php.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "43-laravel.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\43-laravel.ps1",
+          "Path": "profile.d\\43-laravel.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "44-git.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\44-git.ps1",
+          "Path": "profile.d\\44-git.ps1",
           "Lines": 34,
           "Functions": 0,
           "Complexity": 7
         },
         {
           "File": "45-nextjs.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\45-nextjs.ps1",
+          "Path": "profile.d\\45-nextjs.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "46-vite.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\46-vite.ps1",
+          "Path": "profile.d\\46-vite.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "47-angular.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\47-angular.ps1",
+          "Path": "profile.d\\47-angular.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "48-vue.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\48-vue.ps1",
+          "Path": "profile.d\\48-vue.ps1",
           "Lines": 27,
           "Functions": 0,
           "Complexity": 6
         },
         {
           "File": "49-nuxt.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\49-nuxt.ps1",
+          "Path": "profile.d\\49-nuxt.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "50-azure.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\50-azure.ps1",
+          "Path": "profile.d\\50-azure.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "51-gcloud.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\51-gcloud.ps1",
+          "Path": "profile.d\\51-gcloud.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "52-helm.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\52-helm.ps1",
+          "Path": "profile.d\\52-helm.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "53-go.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\53-go.ps1",
+          "Path": "profile.d\\53-go.ps1",
           "Lines": 33,
           "Functions": 0,
           "Complexity": 8
         },
         {
           "File": "54-modern-cli.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\54-modern-cli.ps1",
+          "Path": "profile.d\\54-modern-cli.ps1",
           "Lines": 57,
           "Functions": 0,
           "Complexity": 16
         },
         {
           "File": "55-modules.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\55-modules.ps1",
+          "Path": "profile.d\\55-modules.ps1",
           "Lines": 39,
           "Functions": 0,
           "Complexity": 5
         },
         {
           "File": "56-database.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\56-database.ps1",
+          "Path": "profile.d\\56-database.ps1",
           "Lines": 39,
           "Functions": 0,
           "Complexity": 10
         },
         {
           "File": "57-testing.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\57-testing.ps1",
+          "Path": "profile.d\\57-testing.ps1",
           "Lines": 39,
           "Functions": 0,
           "Complexity": 10
         },
         {
           "File": "58-build-tools.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\58-build-tools.ps1",
+          "Path": "profile.d\\58-build-tools.ps1",
           "Lines": 39,
           "Functions": 0,
           "Complexity": 10
         },
         {
           "File": "59-diagnostics.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\59-diagnostics.ps1",
-          "Lines": 190,
+          "Path": "profile.d\\59-diagnostics.ps1",
+          "Lines": 228,
           "Functions": 4,
-          "Complexity": 12
+          "Complexity": 18
         },
         {
           "File": "60-local-overrides.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\60-local-overrides.ps1",
+          "Path": "profile.d\\60-local-overrides.ps1",
           "Lines": 20,
           "Functions": 0,
           "Complexity": 3
         },
         {
           "File": "61-eza.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\61-eza.ps1",
+          "Path": "profile.d\\61-eza.ps1",
           "Lines": 118,
           "Functions": 11,
           "Complexity": 1
         },
         {
           "File": "62-navi.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\62-navi.ps1",
+          "Path": "profile.d\\62-navi.ps1",
           "Lines": 70,
           "Functions": 3,
           "Complexity": 4
         },
         {
           "File": "63-gum.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\63-gum.ps1",
+          "Path": "profile.d\\63-gum.ps1",
           "Lines": 81,
           "Functions": 5,
           "Complexity": 4
         },
         {
           "File": "64-bottom.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\64-bottom.ps1",
+          "Path": "profile.d\\64-bottom.ps1",
           "Lines": 45,
           "Functions": 0,
           "Complexity": 2
         },
         {
           "File": "65-procs.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\65-procs.ps1",
+          "Path": "profile.d\\65-procs.ps1",
           "Lines": 30,
           "Functions": 0,
           "Complexity": 1
         },
         {
           "File": "66-dust.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\66-dust.ps1",
+          "Path": "profile.d\\66-dust.ps1",
           "Lines": 30,
           "Functions": 0,
           "Complexity": 1
         },
         {
           "File": "67-uv.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\67-uv.ps1",
+          "Path": "profile.d\\67-uv.ps1",
           "Lines": 62,
           "Functions": 4,
           "Complexity": 1
         },
         {
           "File": "68-pixi.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\68-pixi.ps1",
+          "Path": "profile.d\\68-pixi.ps1",
           "Lines": 49,
           "Functions": 3,
           "Complexity": 1
         },
         {
           "File": "69-pnpm.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\69-pnpm.ps1",
+          "Path": "profile.d\\69-pnpm.ps1",
           "Lines": 54,
           "Functions": 3,
           "Complexity": 1
         },
         {
           "File": "70-profile-updates.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\70-profile-updates.ps1",
+          "Path": "profile.d\\70-profile-updates.ps1",
           "Lines": 171,
           "Functions": 1,
           "Complexity": 17
         },
         {
           "File": "71-network-utils.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\71-network-utils.ps1",
-          "Lines": 270,
+          "Path": "profile.d\\71-network-utils.ps1",
+          "Lines": 289,
           "Functions": 4,
-          "Complexity": 19
+          "Complexity": 21
         },
         {
           "File": "72-error-handling.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\72-error-handling.ps1",
+          "Path": "profile.d\\72-error-handling.ps1",
           "Lines": 219,
           "Functions": 3,
           "Complexity": 19
         },
         {
           "File": "73-performance-insights.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\73-performance-insights.ps1",
+          "Path": "profile.d\\73-performance-insights.ps1",
           "Lines": 342,
           "Functions": 4,
           "Complexity": 36
         },
         {
           "File": "74-enhanced-history.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\74-enhanced-history.ps1",
+          "Path": "profile.d\\74-enhanced-history.ps1",
           "Lines": 456,
           "Functions": 9,
           "Complexity": 40
         },
         {
           "File": "75-system-monitor.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\75-system-monitor.ps1",
-          "Lines": 444,
+          "Path": "profile.d\\75-system-monitor.ps1",
+          "Lines": 445,
           "Functions": 6,
           "Complexity": 49
-        },
-        {
-          "File": "76-smart-navigation.ps1",
-          "Path": "C:\\Users\\bolen\\Documents\\PowerShell\\profile.d\\76-smart-navigation.ps1",
-          "Lines": 462,
-          "Functions": 11,
-          "Complexity": 39
         }
       ]
     }
-  ]
+  ],
+  "TestCoverage": {
+    "CoveragePercent": 0,
+    "TotalLines": 0,
+    "CoveredLines": 0,
+    "UncoveredLines": 0,
+    "FileCount": 0,
+    "FileCoverage": [],
+    "Timestamp": "2025-11-11T18:16:26.9548613Z"
+  },
+  "QualityScore": null,
+  "CodeSimilarity": null
 }

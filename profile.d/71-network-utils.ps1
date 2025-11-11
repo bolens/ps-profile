@@ -17,6 +17,8 @@ if ($null -ne (Get-Variable -Name 'NetworkUtilsLoaded' -Scope Global -ErrorActio
     and configurable timeouts to improve reliability.
 .PARAMETER ScriptBlock
     The operation to execute.
+.PARAMETER ArgumentList
+    Arguments to pass to the script block when it runs.
 .PARAMETER MaxRetries
     Maximum number of retry attempts. Default is 3.
 .PARAMETER TimeoutSeconds
@@ -28,6 +30,8 @@ function Invoke-WithRetry {
     param(
         [Parameter(Mandatory)]
         [scriptblock]$ScriptBlock,
+
+        [object[]]$ArgumentList = @(),
 
         [int]$MaxRetries = 3,
 
@@ -42,9 +46,11 @@ function Invoke-WithRetry {
     while ($attempt -lt $MaxRetries) {
         $attempt++
 
+        $job = $null
+
         try {
             # Create a job to run the operation with timeout
-            $job = Start-Job -ScriptBlock $ScriptBlock -ErrorAction Stop
+            $job = Start-Job -ScriptBlock $ScriptBlock -ArgumentList $ArgumentList -ErrorAction Stop
 
             # Wait for completion or timeout
             $completed = Wait-Job $job -Timeout $TimeoutSeconds
@@ -59,12 +65,19 @@ function Invoke-WithRetry {
             # Get the result
             $result = Receive-Job $job -ErrorAction Stop
             Remove-Job $job -ErrorAction SilentlyContinue
+            $job = $null
 
             return $result
 
         }
         catch {
             $lastError = $_
+
+            if ($job) {
+                Stop-Job $job -ErrorAction SilentlyContinue
+                Remove-Job $job -ErrorAction SilentlyContinue
+                $job = $null
+            }
 
             # Check if this is a retryable error
             $retryableErrors = @(
@@ -96,6 +109,12 @@ function Invoke-WithRetry {
             }
 
             Start-Sleep -Seconds $RetryDelaySeconds
+        }
+        finally {
+            if ($job) {
+                Remove-Job $job -ErrorAction SilentlyContinue
+                $job = $null
+            }
         }
     }
 

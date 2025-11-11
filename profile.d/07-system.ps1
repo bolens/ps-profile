@@ -51,7 +51,32 @@ Set-Alias -Name pgrep -Value Find-String -ErrorAction SilentlyContinue
 .DESCRIPTION
     Creates new empty files at the specified paths.
 #>
-function New-EmptyFile { New-Item -ItemType File $args }
+function New-EmptyFile {
+    param([Parameter(ValueFromRemainingArguments = $true)] $paths)
+
+    foreach ($path in $paths) {
+        if (Test-Path -LiteralPath $path) {
+            $existing = Get-Item -LiteralPath $path
+
+            if ($existing -is [System.IO.FileInfo]) {
+                # Update last write time when touching an existing file.
+                $existing.LastWriteTime = Get-Date
+                continue
+            }
+
+            throw "Path '$path' exists and is not a file"
+        }
+
+        try {
+            New-Item -ItemType File -LiteralPath $path -Force | Out-Null
+        }
+        catch [System.IO.IOException] {
+            if ($_.Exception.Message -notmatch 'already exists') {
+                throw
+            }
+        }
+    }
+}
 Set-Alias -Name touch -Value New-EmptyFile -ErrorAction SilentlyContinue
 
 # mkdir equivalent - Note: mkdir is already a built-in alias for New-Item

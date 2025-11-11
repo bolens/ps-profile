@@ -85,7 +85,14 @@ if ($Coverage) {
     # Cache module version check
     $pesterModule = Get-Module -ListAvailable Pester | Sort-Object Version -Descending | Select-Object -First 1
     if ($pesterModule -and $pesterModule.Version -ge [version]'4.0.0') {
-        $pesterParams.CodeCoverageOutputFile = 'coverage.xml'
+        $coverageDir = Join-Path $repoRoot 'scripts' 'data'
+        if (-not (Test-Path -LiteralPath $coverageDir)) {
+            New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
+        }
+
+        $coverageFile = Join-Path $coverageDir 'coverage.xml'
+        $pesterParams.CodeCoverageOutputFile = $coverageFile
+        Write-ScriptMessage -Message "Coverage report: $coverageFile"
     }
     Write-ScriptMessage -Message "Code coverage enabled for: $profileDir"
 }
