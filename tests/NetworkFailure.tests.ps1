@@ -21,7 +21,7 @@ Describe 'Network Failure Scenarios' {
             # Test that the script handles network failures gracefully
             # Since we can't easily mock PowerShellGet across process boundaries,
             # we test with a non-existent module that will trigger network calls
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'check-module-updates.ps1'
+            $scriptPath = Join-Path (Join-Path $script:ScriptsUtilsPath 'dependencies') 'check-module-updates.ps1'
             if (Test-Path $scriptPath) {
                 # Run with DryRun and a module filter to avoid long execution
                 # Use a module name that likely doesn't exist to trigger error handling
@@ -36,7 +36,7 @@ Describe 'Network Failure Scenarios' {
 
         It 'Handles timeout errors when checking module versions' {
             # Verify script has error handling for timeouts
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'check-module-updates.ps1'
+            $scriptPath = Join-Path (Join-Path $script:ScriptsUtilsPath 'dependencies') 'check-module-updates.ps1'
             if (Test-Path $scriptPath) {
                 $content = Get-Content -Path $scriptPath -Raw
                 # Verify script has try-catch blocks for error handling
@@ -51,7 +51,7 @@ Describe 'Network Failure Scenarios' {
 
         It 'Handles network unavailable errors' {
             # Test that script continues processing even when network is unavailable
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'check-module-updates.ps1'
+            $scriptPath = Join-Path (Join-Path $script:ScriptsUtilsPath 'dependencies') 'check-module-updates.ps1'
             if (Test-Path $scriptPath) {
                 # Run with DryRun - script should handle network errors gracefully
                 $result = pwsh -NoProfile -File $scriptPath -DryRun -ModuleFilter @('Pester') 2>&1
@@ -67,7 +67,7 @@ Describe 'Network Failure Scenarios' {
     Context 'Dependency Validation with Network Failures' {
         It 'Handles module installation failures due to network issues' {
             # Verify script has error handling for installation failures
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'validate-dependencies.ps1'
+            $scriptPath = Join-Path (Join-Path $script:ScriptsUtilsPath 'dependencies') 'validate-dependencies.ps1'
             if (Test-Path $scriptPath) {
                 $content = Get-Content -Path $scriptPath -Raw
                 # Verify script has try-catch blocks for error handling
@@ -82,7 +82,7 @@ Describe 'Network Failure Scenarios' {
 
         It 'Handles Find-Module failures when checking module availability' {
             # Verify script handles Find-Module failures gracefully
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'validate-dependencies.ps1'
+            $scriptPath = Join-Path (Join-Path $script:ScriptsUtilsPath 'dependencies') 'validate-dependencies.ps1'
             if (Test-Path $scriptPath) {
                 $content = Get-Content -Path $scriptPath -Raw
                 # Verify script has error handling
@@ -99,7 +99,7 @@ Describe 'Network Failure Scenarios' {
     Context 'Retry Logic for Network Operations' {
         It 'check-module-updates.ps1 retries failed network operations with exponential backoff' {
             # Verify that check-module-updates.ps1 has retry logic
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'check-module-updates.ps1'
+            $scriptPath = Join-Path (Join-Path $script:ScriptsUtilsPath 'dependencies') 'check-module-updates.ps1'
             if (Test-Path $scriptPath) {
                 $content = Get-Content -Path $scriptPath -Raw
                 # Verify retry logic exists in the script
@@ -114,7 +114,7 @@ Describe 'Network Failure Scenarios' {
         It 'Handles all retry attempts failing gracefully' {
             # This test verifies that after all retries fail, the script continues
             # rather than crashing
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'check-module-updates.ps1'
+            $scriptPath = Join-Path (Join-Path $script:ScriptsUtilsPath 'dependencies') 'check-module-updates.ps1'
             if (Test-Path $scriptPath) {
                 # Run with DryRun and a non-existent module to trigger retry logic
                 $result = pwsh -NoProfile -File $scriptPath -DryRun -ModuleFilter @('NonExistentModule12345') 2>&1

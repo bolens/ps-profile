@@ -6,7 +6,7 @@ Integration tests for utility scripts in scripts/utils/.
 
 BeforeAll {
     # Import the Common module
-    $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'utils' 'Common.psm1'
+    $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'lib' 'Common.psm1'
     Import-Module $commonModulePath -ErrorAction Stop
 
     # Get repository root
