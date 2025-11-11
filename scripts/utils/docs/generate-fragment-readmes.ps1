@@ -59,7 +59,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get profile directory using shared function
 try {
@@ -325,3 +325,4 @@ foreach ($ps in $psFiles) {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Done generating fragment README files.'
+

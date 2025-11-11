@@ -105,7 +105,7 @@ Use the appropriate import pattern based on script location:
 
 ```powershell
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 ```
 
 **Scripts in `scripts/checks/` or `scripts/git/`:**
@@ -222,7 +222,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get repository root
 try {
@@ -378,3 +378,4 @@ If `Get-RepoRoot` fails:
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
 - [CODEBASE_IMPROVEMENTS.md](../CODEBASE_IMPROVEMENTS.md) - Planned improvements
 - [requirements.psd1](../requirements.psd1) - Dependency requirements
+

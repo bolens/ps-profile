@@ -35,7 +35,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Default to profile.d relative to the repository root
 try {
@@ -112,3 +112,4 @@ if ($errors.Count -gt 0) {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: all files formatted successfully"
+

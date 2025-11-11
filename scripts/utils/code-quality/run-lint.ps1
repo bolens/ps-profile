@@ -18,7 +18,7 @@ scripts/utils/run-lint.ps1
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get repository root using shared function
 try {
@@ -97,3 +97,4 @@ if ($errorFindings) {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: no issues found"
+

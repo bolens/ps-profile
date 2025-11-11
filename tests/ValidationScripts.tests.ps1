@@ -7,7 +7,7 @@ Tests for validation scripts themselves.
 BeforeAll {
     # Import the Common module
     $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'lib' 'Common.psm1'
-    Import-Module $commonModulePath -ErrorAction Stop
+    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
     
     # Get repository root
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -33,7 +33,7 @@ Describe 'check-script-standards.ps1' {
             $testScript = @'
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
@@ -63,7 +63,7 @@ Exit-WithCode -ExitCode 0 -Message "Success"
             $testScript = @'
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 exit 1
 '@
@@ -88,7 +88,7 @@ exit 1
             $testScript = @'
 # Wrong import pattern for utils/ scripts
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 '@
             $testScriptPath = Join-Path $script:TestTempDir 'test-import.ps1'
             $testScript | Set-Content -Path $testScriptPath
@@ -244,4 +244,5 @@ Describe 'check-commit-messages.ps1' {
         }
     }
 }
+
 

@@ -20,6 +20,10 @@ Invoke-WithRetry
 
 The operation to execute.
 
+### -ArgumentList
+
+Arguments to pass to the script block when it runs.
+
 ### -MaxRetries
 
 Maximum number of retry attempts. Default is 3.

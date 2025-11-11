@@ -27,14 +27,14 @@ All scripts import the shared Common.psm1 module. The import pattern depends on 
 
 ```powershell
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 ```
 
 **For scripts in scripts/checks/:**
 
 ```powershell
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 ```
 
 **For scripts in scripts/git/:**
@@ -42,7 +42,7 @@ Import-Module $commonModulePath -ErrorAction Stop
 ```powershell
 $scriptsDir = Split-Path -Parent $PSScriptRoot
 $commonModulePath = Join-Path $scriptsDir 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 ```
 
 ### Getting Repository Root
@@ -173,3 +173,4 @@ pwsh -NoProfile -File scripts/git/install-pre-commit-hook.ps1
 ```powershell
 pwsh -NoProfile -File scripts/dev/setup.ps1
 ```
+

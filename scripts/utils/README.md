@@ -93,7 +93,7 @@ Scripts in subdirectories should import Common.psm1 using:
 
 ```powershell
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 ```
 
 This pattern works for scripts in any subdirectory of `scripts/utils/`.
@@ -121,3 +121,4 @@ pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1
 ```
 
 See `scripts/examples/README.md` for more detailed usage examples.
+

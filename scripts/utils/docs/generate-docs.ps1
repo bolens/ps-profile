@@ -31,7 +31,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Helper function for GetRelativePath compatibility with older .NET versions
 function Get-RelativePath {
@@ -608,3 +608,4 @@ else {
 
 Write-ScriptMessage -Message "`nAPI documentation generated in: $docsPath"
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Generated documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+

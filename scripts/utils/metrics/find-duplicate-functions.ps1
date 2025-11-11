@@ -17,7 +17,7 @@ scripts/utils/find-duplicate-functions.ps1
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get profile directory using shared function
 try {
@@ -83,3 +83,4 @@ foreach ($g in $groups) {
 
 # Exit with validation failure if duplicates found (non-zero exit indicates issue)
 Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($groups.Count) duplicate function definition(s)"
+

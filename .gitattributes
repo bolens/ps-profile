@@ -1,0 +1,15 @@
+# Normalize text files to use LF in the repository and working tree.
+* text=auto eol=lf
+
+# Explicitly enforce LF for common text-based assets.
+*.md text eol=lf
+*.ps1 text eol=lf
+*.psm1 text eol=lf
+*.psd1 text eol=lf
+*.ps1xml text eol=lf
+*.pssc text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.psrc text eol=lf

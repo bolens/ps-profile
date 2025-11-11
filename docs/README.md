@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 212
+**Total Functions:** 215
 **Total Aliases:** 233
-**Generated:** 2025-11-11 10:24:09
+**Generated:** 2025-11-11 13:05:17
 
 ## Functions by Fragment
 
@@ -149,7 +149,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Start-UbuntuWSL](Start-UbuntuWSL.md) - Launches or switches to Ubuntu WSL distribution.
 - [Stop-WSL](Stop-WSL.md) - Shuts down all WSL distributions.
 
-### 11-git (12 functions)
+### 11-git (15 functions)
 
 - [Add-GitChanges](Add-GitChanges.md) - Stages changes for commit.
 - [Compare-GitChanges](Compare-GitChanges.md) - Shows differences between commits, branches, or working tree.
@@ -157,12 +157,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [Get-GitBranch](Get-GitBranch.md) - Lists, creates, or deletes branches.
 - [Get-GitChanges](Get-GitChanges.md) - Fetches and merges changes from remote repository.
 - [Get-GitLog](Get-GitLog.md) - Shows commit history.
+- [Invoke-GitCommand](Invoke-GitCommand.md) - Invokes a Git subcommand with repository safety guards.
 - [Invoke-GitStatus](Invoke-GitStatus.md) - Shows Git repository status.
 - [Publish-GitChanges](Publish-GitChanges.md) - Pushes commits to remote repository.
 - [Receive-GitChanges](Receive-GitChanges.md) - Downloads objects and refs from remote repository.
 - [Save-GitCommit](Save-GitCommit.md) - Commits staged changes.
 - [Save-GitCommitWithMessage](Save-GitCommitWithMessage.md) - Commits staged changes with a message.
 - [Switch-GitBranch](Switch-GitBranch.md) - Switches branches or restores working tree files.
+- [Test-GitRepositoryContext](Test-GitRepositoryContext.md) - Tests whether the current directory is a Git working tree.
+- [Test-GitRepositoryHasCommits](Test-GitRepositoryHasCommits.md) - Checks whether the current Git repository has at least one commit.
 
 ### 13-ansible (6 functions)
 

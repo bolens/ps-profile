@@ -7,33 +7,24 @@ Unit tests for Common.psm1 module functions.
 BeforeAll {
     # Import the Common module
     $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'lib' 'Common.psm1'
-    Import-Module $commonModulePath -ErrorAction Stop
+    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 }
 
 Describe 'Get-RepoRoot' {
     It 'Returns repository root for scripts/utils/ location' {
-        # Use an actual script path that exists - resolve it first
-        $relativePath = Join-Path $PSScriptRoot '..' 'scripts' 'utils' 'run-lint.ps1'
-        $actualScriptPath = if (Test-Path $relativePath) {
-            (Resolve-Path $relativePath).Path
-        }
-        else {
-            # Try constructing absolute path
-            $scriptsUtilsDir = (Resolve-Path (Join-Path $PSScriptRoot '..' 'scripts' 'utils')).Path
-            Join-Path $scriptsUtilsDir 'run-lint.ps1'
-        }
-        
-        if (Test-Path $actualScriptPath) {
-            $repoRoot = Get-RepoRoot -ScriptPath $actualScriptPath
-            $repoRoot | Should -Exist
-            # Verify it's actually the repo root by checking for common files/directories
-            (Test-Path (Join-Path $repoRoot 'profile.d')) | Should -Be $true
-            (Test-Path (Join-Path $repoRoot 'scripts')) | Should -Be $true
-            (Test-Path (Join-Path $repoRoot 'README.md')) | Should -Be $true
-        }
-        else {
-            Set-ItResult -Skipped -Because "Test script not found at $actualScriptPath"
-        }
+        # Find an existing utility script dynamically to keep the test resilient
+        $searchRoot = Join-Path $PSScriptRoot '..' 'scripts'
+        $candidate = Get-ChildItem -Path $searchRoot -Filter 'run-lint.ps1' -Recurse -File -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+
+        $candidate | Should -Not -BeNullOrEmpty -Because 'run-lint.ps1 should exist within scripts/utilities'
+
+        $repoRoot = Get-RepoRoot -ScriptPath $candidate.FullName
+        $repoRoot | Should -Exist
+        # Verify it's actually the repo root by checking for common files/directories
+        (Test-Path (Join-Path $repoRoot 'profile.d')) | Should -Be $true
+        (Test-Path (Join-Path $repoRoot 'scripts')) | Should -Be $true
+        (Test-Path (Join-Path $repoRoot 'README.md')) | Should -Be $true
     }
 
     It 'Returns repository root for scripts/checks/ location' {
@@ -47,7 +38,7 @@ Describe 'Get-RepoRoot' {
             $scriptsChecksDir = (Resolve-Path (Join-Path $PSScriptRoot '..' 'scripts' 'checks')).Path
             Join-Path $scriptsChecksDir 'check-script-standards.ps1'
         }
-        
+
         if (Test-Path $actualScriptPath) {
             $repoRoot = Get-RepoRoot -ScriptPath $actualScriptPath
             $repoRoot | Should -Exist
@@ -182,4 +173,5 @@ Describe 'Exit Code Constants' {
         $EXIT_OTHER_ERROR | Should -Be 3
     }
 }
+
 

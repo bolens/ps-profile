@@ -33,7 +33,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get repository root using shared function
 try {
@@ -74,4 +74,5 @@ catch {
     Write-ScriptMessage -Message "Validation script failed: $_" -LogLevel Error
     Exit-WithCode -ExitCode $EXIT_OTHER_ERROR
 }
+
 

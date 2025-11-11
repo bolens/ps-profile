@@ -6,7 +6,7 @@ Creates empty files.
 
 ## Description
 
-Creates new empty files at the specified paths.
+
 
 ## Alias Information
 

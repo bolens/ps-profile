@@ -17,7 +17,7 @@ scripts/checks/validate-profile.ps1
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get repository root using shared function
 try {
@@ -59,3 +59,4 @@ foreach ($check in $checks) {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: format + security + lint + spellcheck + comment help + idempotency passed"
+

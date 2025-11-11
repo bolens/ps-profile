@@ -17,7 +17,7 @@
       "",
       "# Import shared utilities",
       "$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'",
-      "Import-Module $commonModulePath -ErrorAction Stop",
+      "Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop",
       "",
       "# Get repository root using shared function",
       "try {",
@@ -449,4 +449,5 @@
     "description": "Pester skipped test pattern"
   }
 }
+
 

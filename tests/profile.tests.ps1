@@ -314,6 +314,87 @@ Describe 'Profile fragments' {
             Test-Path $tempFile | Should -Be $true
         }
 
+        It 'touch updates timestamp when file exists' {
+            $tempFile = Join-Path $TestDrive 'touch_timestamp.txt'
+            Set-Content -Path $tempFile -Value 'initial content'
+            $original = (Get-Item $tempFile).LastWriteTime
+
+            Start-Sleep -Milliseconds 50
+            touch $tempFile
+
+            $updated = (Get-Item $tempFile).LastWriteTime
+            $updated | Should -BeGreaterThan $original
+        }
+
+        It 'touch supports LiteralPath parameter' {
+            $tempFile = Join-Path $TestDrive 'folder with spaces' 'literal touch.txt'
+            $directory = Split-Path -Parent $tempFile
+            if (-not (Test-Path $directory)) {
+                New-Item -ItemType Directory -Path $directory -Force | Out-Null
+            }
+
+            if (Test-Path $tempFile) {
+                Remove-Item $tempFile -Force
+            }
+
+            touch -LiteralPath $tempFile
+            Test-Path -LiteralPath $tempFile | Should -Be $true
+        }
+
+        It 'touch throws when parent directory is missing' {
+            $tempFile = Join-Path $TestDrive 'missing' 'nope.txt'
+            if (Test-Path (Split-Path -Parent $tempFile)) {
+                Remove-Item (Split-Path -Parent $tempFile) -Recurse -Force
+            }
+
+            { touch $tempFile } | Should -Throw -Because 'touch should surface missing parent directory errors'
+        }
+
+        It 'New-Directory creates directories via wrapper' {
+            $tempDir = Join-Path $TestDrive 'wrapper_mkdir'
+            if (Test-Path $tempDir) {
+                Remove-Item $tempDir -Force -Recurse
+            }
+
+            New-Directory -Path $tempDir | Out-Null
+            Test-Path $tempDir | Should -Be $true
+        }
+
+        It 'Copy-ItemCustom copies files via wrapper' {
+            $sourceDir = Join-Path $TestDrive 'copy_source'
+            $destDir = Join-Path $TestDrive 'copy_dest'
+            New-Directory -Path $sourceDir | Out-Null
+            New-Directory -Path $destDir | Out-Null
+
+            $sourceFile = Join-Path $sourceDir 'source.txt'
+            Set-Content -Path $sourceFile -Value 'wrapper copy test'
+
+            Copy-ItemCustom -Path $sourceFile -Destination $destDir
+            Test-Path (Join-Path $destDir 'source.txt') | Should -Be $true
+        }
+
+        It 'Move-ItemCustom moves files via wrapper' {
+            $sourceDir = Join-Path $TestDrive 'move_source'
+            $destDir = Join-Path $TestDrive 'move_dest'
+            New-Directory -Path $sourceDir | Out-Null
+            New-Directory -Path $destDir | Out-Null
+
+            $sourceFile = Join-Path $sourceDir 'move.txt'
+            Set-Content -Path $sourceFile -Value 'wrapper move test'
+
+            Move-ItemCustom -Path $sourceFile -Destination $destDir
+            Test-Path $sourceFile | Should -Be $false
+            Test-Path (Join-Path $destDir 'move.txt') | Should -Be $true
+        }
+
+        It 'Remove-ItemCustom deletes files via wrapper' {
+            $tempFile = Join-Path $TestDrive 'remove.txt'
+            Set-Content -Path $tempFile -Value 'wrapper remove test'
+
+            Remove-ItemCustom -Path $tempFile -Force
+            Test-Path $tempFile | Should -Be $false
+        }
+
         It 'mkdir creates directories' {
             $tempDir = Join-Path $TestDrive 'test_mkdir'
             mkdir $tempDir

@@ -22,7 +22,7 @@ $hookDir = Split-Path -Parent $hookScriptPath
 # From .git/hooks/, go up two levels to get repo root
 $repoRoot = Split-Path -Parent (Split-Path -Parent $hookDir)
 $commonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 $validate = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 
@@ -34,3 +34,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "pre-push: all checks passed"
+

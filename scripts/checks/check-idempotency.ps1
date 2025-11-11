@@ -18,7 +18,7 @@ scripts/checks/check-idempotency.ps1
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get repository root using shared function
 try {
@@ -65,3 +65,4 @@ if ($code -ne 0) {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Idempotency: all profile.d fragments loaded twice without errors"
+

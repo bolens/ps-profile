@@ -51,7 +51,7 @@ param(
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'Common.psm1'
 if (Test-Path $commonModulePath) {
-    Import-Module $commonModulePath -ErrorAction Stop
+    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 }
 
 # Get repository root
@@ -440,4 +440,5 @@ if ($results.Issues.Count -gt 0) {
 else {
     exit 0
 }
+
 

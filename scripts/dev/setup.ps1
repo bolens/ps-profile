@@ -18,7 +18,7 @@ scripts/dev/setup.ps1
 
 # Import shared utilities
 $commonModulePath = Join-Path $PSScriptRoot '..' 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 Write-ScriptMessage -Message "Setting up development environment..." -LogLevel Info
 
@@ -54,4 +54,5 @@ if ($failedModules.Count -gt 0) {
 
 Write-ScriptMessage -Message "`nDevelopment environment setup complete!" -LogLevel Info
 Exit-WithCode -ExitCode $EXIT_SUCCESS
+
 

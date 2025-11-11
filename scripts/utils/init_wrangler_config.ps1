@@ -47,7 +47,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 function Get-TargetPath {
     [CmdletBinding()]
@@ -158,3 +158,4 @@ Write-Host "  - Use `wrangler login` for interactive sessions (handles authentic
 Write-Host "  - Consider using credential stores (Windows Credential Manager, macOS Keychain) for production"
 Write-Host ""
 Write-Host "Note: If you used setx, re-run your MCP server in a new shell so the env is picked up."
+

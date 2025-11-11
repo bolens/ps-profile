@@ -17,11 +17,11 @@ Utility scripts should use the shared `scripts/lib/Common.psm1` module for commo
 ```powershell
 # Scripts in scripts/utils/ subdirectories (e.g., code-quality/, metrics/)
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Scripts in scripts/checks/ - Common.psm1 is in scripts/lib/
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Scripts in scripts/git/ - Common.psm1 is in scripts/lib/
 $scriptsDir = Split-Path -Parent $PSScriptRoot
@@ -33,7 +33,7 @@ Import-Module (Resolve-Path $commonModulePath).Path -ErrorAction Stop
 
 # Scripts in scripts/lib/ - Common.psm1 is in the same directory
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Use shared functions
 $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
@@ -324,3 +324,4 @@ Use numeric prefixes to control load order:
 ## Questions
 
 Open an issue or draft PR if you need guidance. Tag maintainers for review.
+

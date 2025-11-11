@@ -7,7 +7,7 @@ Tests for network failure scenarios and error handling.
 BeforeAll {
     # Import the Common module
     $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'lib' 'Common.psm1'
-    Import-Module $commonModulePath -ErrorAction Stop
+    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
     # Get repository root
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -269,4 +269,5 @@ Describe 'External Dependency Mocking' {
         }
     }
 }
+
 

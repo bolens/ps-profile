@@ -7,7 +7,7 @@ Tests for library module functions that are not yet covered by other test files.
 BeforeAll {
     # Import the Common module
     $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'lib' 'Common.psm1'
-    Import-Module $commonModulePath -ErrorAction Stop
+    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
     # Get repository root
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -390,4 +390,5 @@ Describe 'FileSystem Module - Test-PathParameter' {
         }
     }
 }
+
 

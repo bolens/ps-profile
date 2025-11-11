@@ -52,7 +52,27 @@ Set-Alias -Name pgrep -Value Find-String -ErrorAction SilentlyContinue
     Creates new empty files at the specified paths.
 #>
 function New-EmptyFile {
-    param([Parameter(ValueFromRemainingArguments = $true)] $paths)
+    param(
+        [Parameter(ValueFromRemainingArguments = $true, Position = 0)]
+        [string[]]$Path,
+
+        [Alias('LiteralPath')]
+        [string[]]$AdditionalPaths
+    )
+
+    $paths = @()
+
+    if ($Path) {
+        $paths += $Path
+    }
+
+    if ($AdditionalPaths) {
+        $paths += $AdditionalPaths
+    }
+
+    if (-not $paths) {
+        return
+    }
 
     foreach ($path in $paths) {
         if (Test-Path -LiteralPath $path) {
@@ -68,7 +88,13 @@ function New-EmptyFile {
         }
 
         try {
-            New-Item -ItemType File -LiteralPath $path -Force | Out-Null
+            $directory = [System.IO.Path]::GetDirectoryName($path)
+            if ($directory -and -not (Test-Path -LiteralPath $directory)) {
+                throw "Directory '$directory' does not exist"
+            }
+
+            $fileStream = [System.IO.File]::Open($path, [System.IO.FileMode]::OpenOrCreate, [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::ReadWrite)
+            $fileStream.Dispose()
         }
         catch [System.IO.IOException] {
             if ($_.Exception.Message -notmatch 'already exists') {
@@ -87,7 +113,7 @@ Set-Alias -Name touch -Value New-EmptyFile -ErrorAction SilentlyContinue
 .DESCRIPTION
     Creates new directories at the specified paths.
 #>
-function New-Directory { New-Item -ItemType Directory $args }
+function New-Directory { New-Item -ItemType Directory @args }
 # Note: mkdir is already a built-in alias, so we don't create a conflicting alias
 
 # rm equivalent - Note: rm is already a built-in alias for Remove-Item
@@ -98,7 +124,7 @@ function New-Directory { New-Item -ItemType Directory $args }
 .DESCRIPTION
     Deletes files and directories recursively if needed.
 #>
-function Remove-ItemCustom { Remove-Item $args }
+function Remove-ItemCustom { Remove-Item @args }
 # Note: rm is already a built-in alias, so we don't create a conflicting alias
 
 # cp equivalent - Note: cp is already a built-in alias for Copy-Item
@@ -109,7 +135,7 @@ function Remove-ItemCustom { Remove-Item $args }
 .DESCRIPTION
     Copies files and directories to specified destinations.
 #>
-function Copy-ItemCustom { Copy-Item $args }
+function Copy-ItemCustom { Copy-Item @args }
 # Note: cp is already a built-in alias, so we don't create a conflicting alias
 
 # mv equivalent - Note: mv is already a built-in alias for Move-Item
@@ -120,7 +146,7 @@ function Copy-ItemCustom { Copy-Item $args }
 .DESCRIPTION
     Moves or renames files and directories.
 #>
-function Move-ItemCustom { Move-Item $args }
+function Move-ItemCustom { Move-Item @args }
 # Note: mv is already a built-in alias, so we don't create a conflicting alias
 
 # search equivalent
@@ -160,7 +186,7 @@ Set-Alias -Name htop -Value Get-TopProcesses -ErrorAction SilentlyContinue
 .DESCRIPTION
     Displays active network connections and listening ports.
 #>
-function Get-NetworkPorts { netstat -an $args }
+function Get-NetworkPorts { netstat -an @args }
 Set-Alias -Name ports -Value Get-NetworkPorts -ErrorAction SilentlyContinue
 
 # ptest equivalent
@@ -170,7 +196,7 @@ Set-Alias -Name ports -Value Get-NetworkPorts -ErrorAction SilentlyContinue
 .DESCRIPTION
     Tests connectivity to specified hosts using ping.
 #>
-function Test-NetworkConnection { Test-Connection $args }
+function Test-NetworkConnection { Test-Connection @args }
 Set-Alias -Name ptest -Value Test-NetworkConnection -ErrorAction SilentlyContinue
 
 # dns equivalent
@@ -190,7 +216,7 @@ Set-Alias -Name dns -Value Resolve-DnsNameCustom -ErrorAction SilentlyContinue
 .DESCRIPTION
     Sends HTTP requests to REST APIs and returns the response.
 #>
-function Invoke-RestApi { Invoke-RestMethod $args }
+function Invoke-RestApi { Invoke-RestMethod @args }
 Set-Alias -Name rest -Value Invoke-RestApi -ErrorAction SilentlyContinue
 
 # web equivalent
@@ -200,7 +226,7 @@ Set-Alias -Name rest -Value Invoke-RestApi -ErrorAction SilentlyContinue
 .DESCRIPTION
     Downloads content from web URLs or sends HTTP requests.
 #>
-function Invoke-WebRequestCustom { Invoke-WebRequest $args }
+function Invoke-WebRequestCustom { Invoke-WebRequest @args }
 Set-Alias -Name web -Value Invoke-WebRequestCustom -ErrorAction SilentlyContinue
 
 # unzip equivalent
@@ -210,7 +236,7 @@ Set-Alias -Name web -Value Invoke-WebRequestCustom -ErrorAction SilentlyContinue
 .DESCRIPTION
     Extracts files from ZIP archives to specified destinations.
 #>
-function Expand-ArchiveCustom { Expand-Archive $args }
+function Expand-ArchiveCustom { Expand-Archive @args }
 Set-Alias -Name unzip -Value Expand-ArchiveCustom -ErrorAction SilentlyContinue
 
 # zip equivalent

@@ -7,7 +7,7 @@ Edge case and error handling tests for utility scripts.
 BeforeAll {
     # Import the Common module
     $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'lib' 'Common.psm1'
-    Import-Module $commonModulePath -ErrorAction Stop
+    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
     # Get repository root
     $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -29,7 +29,7 @@ Describe 'Utility Script Error Handling' {
 # Simulate missing Common.psm1
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
 try {
-    Import-Module $commonModulePath -ErrorAction Stop
+    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 }
 catch {
     Write-Error "Failed to import Common module: $($_.Exception.Message)"
@@ -250,4 +250,5 @@ Describe 'Error Handling Edge Cases' {
         }
     }
 }
+
 

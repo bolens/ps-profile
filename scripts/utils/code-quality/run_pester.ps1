@@ -44,7 +44,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get repository root using shared function
 try {
@@ -56,7 +56,9 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-# Ensure Pester is available
+# Ensure Pester 5+ is available and imported
+$requiredPesterVersion = [version]'5.0.0'
+
 try {
     Ensure-ModuleAvailable -ModuleName 'Pester'
 }
@@ -64,69 +66,70 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-$pesterParams = @{}
+$installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
+if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
+    try {
+        Write-ScriptMessage -Message "Installing Pester $requiredPesterVersion or newer"
+        Install-RequiredModule -ModuleName 'Pester' -Scope 'CurrentUser' -Force
+        $installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
+}
+
+if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
+    $message = "Pester $requiredPesterVersion or newer is required but could not be installed."
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message $message
+}
+
+try {
+    Import-Module -Name 'Pester' -MinimumVersion $requiredPesterVersion -Force -ErrorAction Stop
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+Write-ScriptMessage -Message "Using Pester v$($installedPester.Version)"
+
+$config = New-PesterConfiguration
+$config.Run.PassThru = $true
+$config.Run.Exit = $false
+$config.Output.Verbosity = 'Detailed'
+
 if ([string]::IsNullOrWhiteSpace($TestFile)) {
     # Run all tests in the tests/ directory
     $testScripts = Get-PowerShellScripts -Path $testsDir -SortByName
     $files = $testScripts | Select-Object -ExpandProperty FullName
     Write-ScriptMessage -Message "Running Pester tests: $($files -join ', ')"
-    $pesterParams.Script = $files
+    $config.Run.Path = $files
 }
 else {
     Write-ScriptMessage -Message "Running Pester tests: $TestFile"
-    $pesterParams.Script = $TestFile
+    $config.Run.Path = @($TestFile)
 }
 
 if ($Coverage) {
-    # Add code coverage for profile.d directory
-    $pesterParams.CodeCoverage = "$profileDir/*.ps1"
-
-    # CodeCoverageOutputFile parameter is only available in Pester 4.0+
-    # Cache module version check
-    $pesterModule = Get-Module -ListAvailable Pester | Sort-Object Version -Descending | Select-Object -First 1
-    if ($pesterModule -and $pesterModule.Version -ge [version]'4.0.0') {
-        $coverageDir = Join-Path $repoRoot 'scripts' 'data'
-        if (-not (Test-Path -LiteralPath $coverageDir)) {
-            New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
-        }
-
-        $coverageFile = Join-Path $coverageDir 'coverage.xml'
-        $pesterParams.CodeCoverageOutputFile = $coverageFile
-        Write-ScriptMessage -Message "Coverage report: $coverageFile"
+    $coverageDir = Join-Path $repoRoot 'scripts' 'data'
+    if (-not (Test-Path -LiteralPath $coverageDir)) {
+        New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
     }
+
+    $coverageFile = Join-Path $coverageDir 'coverage.xml'
+
+    $config.CodeCoverage.Enabled = $true
+    $config.CodeCoverage.OutputPath = $coverageFile
+    $config.CodeCoverage.Path = @($profileDir)
+    $config.CodeCoverage.Recurse = $true
+
     Write-ScriptMessage -Message "Code coverage enabled for: $profileDir"
+    Write-ScriptMessage -Message "Coverage report: $coverageFile"
+}
+else {
+    $config.CodeCoverage.Enabled = $false
 }
 
-# Compile regex pattern once for error detection
-$nullArgRegex = [regex]::new("null.*empty.*argument", [System.Text.RegularExpressions.RegexOptions]::Compiled -bor [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
-$paramFirstRegex = [regex]::new("Cannot validate argument on parameter 'First'", [System.Text.RegularExpressions.RegexOptions]::Compiled)
-
-try {
-    $result = Invoke-Pester @pesterParams -PassThru
-}
-catch {
-    # Work around Pester 3.4.0 bug with null ErrorRecord handling
-    # If we get the specific error about null arguments, suppress it and get the result differently
-    if ($nullArgRegex.IsMatch($_.Exception.Message) -or $paramFirstRegex.IsMatch($_.Exception.Message)) {
-        Write-ScriptMessage -Message "Pester framework error suppressed (known issue with null ErrorRecord handling)"
-        # Try to run without -PassThru to avoid the error
-        Invoke-Pester @pesterParams
-        # Create a basic result object
-        $result = [PSCustomObject]@{
-            PassedCount = 0
-            FailedCount = 0
-            TotalCount  = 0
-        }
-    }
-    else {
-        throw
-    }
-}
-
-# Work around Pester 3.4.0 bug with null ErrorRecord handling
-# Filter out test results with null ErrorRecord to prevent framework errors
-if ($result.TestResult) {
-    $result.TestResult = $result.TestResult | Where-Object { $_.ErrorRecord -ne $null }
-}
+$result = Invoke-Pester -Configuration $config
 
 $result
+

@@ -30,7 +30,7 @@ param(
 
 # Import shared utilities
 $commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
 # Get repository root using shared function
 try {
@@ -132,3 +132,4 @@ if ($issueCount -gt 0) {
 else {
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All functions have comment-based help."
 }
+
