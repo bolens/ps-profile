@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `gco` - Switches branches or restores working tree files.
 
+
 ## Source
 
 Defined in: profile.d\11-git.ps1

@@ -2,18 +2,12 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 228
-**Total Aliases:** 255
-**Generated:** 2025-11-05 13:05:10
+**Total Functions:** 212
+**Total Aliases:** 233
+**Generated:** 2025-11-11 09:23:23
 
 ## Functions by Fragment
 
-### 00-bootstrap (4 functions)
-
-- [Set-AgentModeAlias](Set-AgentModeAlias.md) - Creates collision-safe aliases for profile fragments.
-- [Set-AgentModeFunction](Set-AgentModeFunction.md) - Creates collision-safe functions for profile fragments.
-- [Test-CachedCommand](Test-CachedCommand.md) - Tests for command availability with caching.
-- [Test-HasCommand](Test-HasCommand.md) - Tests if a command is available.
 
 ### 02-files-conversion (22 functions)
 
@@ -40,14 +34,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [Merge-Pdf](Merge-Pdf.md) - Merges multiple PDF files.
 - [Resize-Image](Resize-Image.md) - Resizes an image.
 
-### 02-files-listing (6 functions)
+### 02-files-listing (1 functions)
 
 - [Ensure-FileListing](Ensure-FileListing.md) - Initializes file listing utility functions on first use.
-- [Get-ChildItemAll](Get-ChildItemAll.md) - Lists all directory contents including hidden files.
-- [Get-ChildItemDetailed](Get-ChildItemDetailed.md) - Lists directory contents with details.
-- [Get-ChildItemVisible](Get-ChildItemVisible.md) - Lists directory contents excluding hidden files.
-- [Get-DirectoryTree](Get-DirectoryTree.md) - Displays directory structure as a tree.
-- [Show-FileContent](Show-FileContent.md) - Displays file contents with syntax highlighting.
 
 ### 02-files-navigation (7 functions)
 
@@ -68,7 +57,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Get-FileTail](Get-FileTail.md) - Shows the last N lines of a file.
 - [Get-HexDump](Get-HexDump.md) - Shows hex dump of a file.
 
-### 05-utilities (22 functions)
+### 05-utilities (23 functions)
 
 - [Add-Path](Add-Path.md) - Adds a directory to the PATH environment variable.
 - [Backup-Profile](Backup-Profile.md) - Creates a backup of the profile.
@@ -92,6 +81,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-Path](Remove-Path.md) - Removes a directory from the PATH environment variable.
 - [Set-EnvVar](Set-EnvVar.md) - Sets an environment variable value in the registry.
 - [Start-SpeedTest](Start-SpeedTest.md) - Runs internet speed test.
+- [Test-SafePath](Test-SafePath.md) - Validates that a path is safe and within a base directory.
 
 ### 06-oh-my-posh (2 functions)
 
@@ -206,10 +196,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [Stop-ContainerCompose](Stop-ContainerCompose.md) - Stops container services using compose (Docker-first).
 - [Stop-ContainerComposePodman](Stop-ContainerComposePodman.md) - Stops container services using compose (Podman-first).
 
-### 23-starship (2 functions)
+### 23-starship (7 functions)
 
-- [Initialize-SmartPrompt](Initialize-SmartPrompt.md) - Initializes a smart fallback prompt when Starship is not available.
-- [Initialize-Starship](Initialize-Starship.md) - Initializes the Starship prompt for PowerShell.
+- [Get-StarshipPromptArguments](Get-StarshipPromptArguments.md) - Builds arguments array for starship prompt command.
+- [Initialize-StarshipModule](Initialize-StarshipModule.md) - Ensures Starship module stays loaded to prevent prompt from breaking.
+- [Invoke-StarshipInitScript](Invoke-StarshipInitScript.md) - Executes Starship's initialization script and verifies it worked.
+- [New-StarshipPromptFunction](New-StarshipPromptFunction.md) - Creates a global prompt function that directly calls starship executable.
+- [Test-PromptNeedsReplacement](Test-PromptNeedsReplacement.md) - Checks if a prompt function needs replacement (module-scoped prompts can break).
+- [Test-StarshipInitialized](Test-StarshipInitialized.md) - Tests if Starship is already initialized.
+- [Update-VSCodePrompt](Update-VSCodePrompt.md) - Updates VS Code's prompt state if VS Code is active.
 
 ### 24-container-utils (2 functions)
 
@@ -295,12 +290,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-SafeFragmentLoad](Invoke-SafeFragmentLoad.md) - Loads profile fragments with enhanced error handling and retry logic.
 - [Write-ProfileError](Write-ProfileError.md) - Logs errors with enhanced context and formatting.
 
-### 73-performance-insights (5 functions)
+### 73-performance-insights (3 functions)
 
 - [Clear-PerformanceData](Clear-PerformanceData.md) - Clears all collected performance data.
 - [Show-PerformanceInsights](Show-PerformanceInsights.md) - Shows performance insights for command execution.
-- [Start-CommandTimer](Start-CommandTimer.md) - Tracks command execution performance and provides insights.
-- [Stop-CommandTimer](Stop-CommandTimer.md) - Stops command timing and records the duration.
 - [Test-PerformanceHealth](Test-PerformanceHealth.md) - Performs a quick performance check of the current session.
 
 ### 74-enhanced-history (9 functions)
@@ -324,21 +317,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [Show-SystemDashboard](Show-SystemDashboard.md) - Shows a comprehensive system status dashboard.
 - [Show-SystemStatus](Show-SystemStatus.md) - Shows a compact system status overview.
 
-### 76-smart-navigation (11 functions)
-
-- [Add-DirectoryBookmark](Add-DirectoryBookmark.md) - Creates a directory bookmark.
-- [Get-DirectoryBookmark](Get-DirectoryBookmark.md) - Jumps to a bookmarked directory.
-- [Jump-Directory](Jump-Directory.md) - Jumps to frequently used directories.
-- [Jump-DirectoryQuick](Jump-DirectoryQuick.md) - Quick directory jumping alias.
-- [Remove-DirectoryBookmark](Remove-DirectoryBookmark.md) - Removes a directory bookmark.
-- [Set-LocationBack](Set-LocationBack.md) - Goes back to the previous directory.
-- [Set-LocationForward](Set-LocationForward.md) - Goes forward in the navigation history.
-- [Set-LocationTracked](Set-LocationTracked.md) - Enhanced change directory with navigation tracking.
-- [Show-DirectoryBookmarks](Show-DirectoryBookmarks.md) - Lists all directory bookmarks.
-- [Show-FrequentDirectories](Show-FrequentDirectories.md) - Lists frequently used directories.
-- [Update-DirectoryStats](Update-DirectoryStats.md) - Tracks directory navigation for smart jumping.
 
 ## Aliases by Fragment
+
 
 ### 02-files-conversion (42 aliases)
 
@@ -361,7 +342,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [image-resize](image-resize.md) - Resizes an image. (alias for `Resize-Image`)
 - [image-resize](image-resize.md) - Resizes an image. (alias for `Resize-Image`)
 - [json-pretty](json-pretty.md) - Pretty-prints JSON data. (alias for `Format-Json`)
-- [json-pretty](json-pretty.md) - Initializes file conversion utility functions on first use. (alias for `Format-Json`)
+- [json-pretty](json-pretty.md) - Pretty-prints JSON data. (alias for `Format-Json`)
 - [json-to-csv](json-to-csv.md) - Converts JSON file to CSV format. (alias for `ConvertTo-CsvFromJson`)
 - [json-to-csv](json-to-csv.md) - Converts JSON file to CSV format. (alias for `ConvertTo-CsvFromJson`)
 - [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format. (alias for `ConvertTo-Yaml`)
@@ -385,26 +366,18 @@ This documentation is automatically generated from comment-based help in the pro
 - [yaml-to-json](yaml-to-json.md) - Converts YAML to JSON format. (alias for `ConvertFrom-Yaml`)
 - [yaml-to-json](yaml-to-json.md) - Converts YAML to JSON format. (alias for `ConvertFrom-Yaml`)
 
-### 02-files-listing (10 aliases)
+### 02-files-listing (5 aliases)
 
 - [bat-cat](bat-cat.md) - Initializes file listing utility functions on first use. (alias for `Show-FileContent`)
-- [bat-cat](bat-cat.md) - Displays file contents with syntax highlighting. (alias for `Show-FileContent`)
 - [la](la.md) - Initializes file listing utility functions on first use. (alias for `Get-ChildItemAll`)
-- [la](la.md) - Lists all directory contents including hidden files. (alias for `Get-ChildItemAll`)
 - [ll](ll.md) - Initializes file listing utility functions on first use. (alias for `Get-ChildItemDetailed`)
-- [ll](ll.md) - Lists directory contents with details. (alias for `Get-ChildItemDetailed`)
 - [lx](lx.md) - Initializes file listing utility functions on first use. (alias for `Get-ChildItemVisible`)
-- [lx](lx.md) - Lists directory contents excluding hidden files. (alias for `Get-ChildItemVisible`)
 - [tree](tree.md) - Initializes file listing utility functions on first use. (alias for `Get-DirectoryTree`)
-- [tree](tree.md) - Displays directory structure as a tree. (alias for `Get-DirectoryTree`)
 
-### 02-files-navigation (6 aliases)
+### 02-files-navigation (3 aliases)
 
-- [desktop](desktop.md) - Initializes file navigation utility functions on first use. (alias for `Set-LocationDesktop`)
 - [desktop](desktop.md) - Changes to the Desktop directory. (alias for `Set-LocationDesktop`)
-- [docs](docs.md) - Initializes file navigation utility functions on first use. (alias for `Set-LocationDocuments`)
 - [docs](docs.md) - Changes to the Documents directory. (alias for `Set-LocationDocuments`)
-- [downloads](downloads.md) - Initializes file navigation utility functions on first use. (alias for `Set-LocationDownloads`)
 - [downloads](downloads.md) - Changes to the Downloads directory. (alias for `Set-LocationDownloads`)
 
 ### 02-files-utilities (10 aliases)
@@ -496,10 +469,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [wsl-list](wsl-list.md) - Lists all WSL distributions with their status. (alias for `Get-WSLDistribution`)
 - [wsl-shutdown](wsl-shutdown.md) - Shuts down all WSL distributions. (alias for `Stop-WSL`)
 
-### 11-git (41 aliases)
+### 11-git (39 aliases)
 
-- [cdg](cdg.md) - Ensures Git helper functions are initialized. (alias for `Set-LocationGitRoot`)
 - [cdg](cdg.md) - Alias for `Set-LocationGitRoot` (alias for `Set-LocationGitRoot`)
+- [cdg](cdg.md) - Ensures Git helper functions are initialized. (alias for `Set-LocationGitRoot`)
 - [ga](ga.md) - Stages changes for commit. (alias for `Add-GitChanges`)
 - [gb](gb.md) - Lists, creates, or deletes branches. (alias for `Get-GitBranch`)
 - [gc](gc.md) - Commits staged changes. (alias for `Save-GitCommit`)
@@ -520,15 +493,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [gpl](gpl.md) - Fetches and merges changes from remote repository. (alias for `Get-GitChanges`)
 - [gprune](gprune.md) - Alias for `Remove-GitMergedBranches` (alias for `Remove-GitMergedBranches`)
 - [gprune](gprune.md) - Alias for `Remove-GitMergedBranches` (alias for `Remove-GitMergedBranches`)
-- [gr](gr.md) - Alias for `Merge-GitRebase` (alias for `Merge-GitRebase`)
 - [gr](gr.md) - Ensures Git helper functions are initialized. (alias for `Merge-GitRebase`)
+- [gr](gr.md) - Alias for `Merge-GitRebase` (alias for `Merge-GitRebase`)
 - [grc](grc.md) - Ensures Git helper functions are initialized. (alias for `Continue-GitRebase`)
 - [grc](grc.md) - Alias for `Continue-GitRebase` (alias for `Continue-GitRebase`)
 - [gs](gs.md) - Shows Git repository status. (alias for `Invoke-GitStatus`)
 - [gsta](gsta.md) - Alias for `Save-GitStash` (alias for `Save-GitStash`)
 - [gsta](gsta.md) - Ensures Git helper functions are initialized. (alias for `Save-GitStash`)
-- [gstp](gstp.md) - Alias for `Restore-GitStash` (alias for `Restore-GitStash`)
 - [gstp](gstp.md) - Ensures Git helper functions are initialized. (alias for `Restore-GitStash`)
+- [gstp](gstp.md) - Alias for `Restore-GitStash` (alias for `Restore-GitStash`)
 - [gsub](gsub.md) - Ensures Git helper functions are initialized. (alias for `Update-GitSubmodule`)
 - [gsub](gsub.md) - Alias for `Update-GitSubmodule` (alias for `Update-GitSubmodule`)
 - [gsync](gsync.md) - Alias for `Sync-GitRepository` (alias for `Sync-GitRepository`)
@@ -536,8 +509,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [gundo](gundo.md) - Alias for `Undo-GitCommit` (alias for `Undo-GitCommit`)
 - [gundo](gundo.md) - Alias for `Undo-GitCommit` (alias for `Undo-GitCommit`)
 - [prc](prc.md) - Alias for `New-GitHubPullRequest` (alias for `New-GitHubPullRequest`)
-- [prc](prc.md) - Alias for `New-GitHubPullRequest` (alias for `New-GitHubPullRequest`)
-- [prv](prv.md) - Alias for `Show-GitHubPullRequest` (alias for `Show-GitHubPullRequest`)
 - [prv](prv.md) - Alias for `Show-GitHubPullRequest` (alias for `Show-GitHubPullRequest`)
 
 ### 13-ansible (6 aliases)
@@ -626,15 +597,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [spin](spin.md) - Shows a spinner while executing a script block using gum. (alias for `Invoke-GumSpin`)
 - [style](style.md) - Styles text output using gum. (alias for `Invoke-GumStyle`)
 
-### 64-bottom (6 aliases)
-
-- [htop](htop.md) - Launches bottom system monitor. (alias for `btm`)
-- [htop](htop.md) - Launches bottom system monitor. (alias for `bottom`)
-- [monitor](monitor.md) - Launches bottom system monitor. (alias for `btm`)
-- [monitor](monitor.md) - Launches bottom system monitor. (alias for `bottom`)
-- [top](top.md) - Launches bottom system monitor. (alias for `btm`)
-- [top](top.md) - Launches bottom system monitor. (alias for `bottom`)
-
 ### 65-procs (2 aliases)
 
 - [ps](ps.md) - Lists processes with procs. (alias for `procs`)
@@ -679,14 +641,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [sysinfo](sysinfo.md) - Shows a comprehensive system status dashboard. (alias for `Show-SystemDashboard`)
 - [sysstat](sysstat.md) - Shows a compact system status overview. (alias for `Show-SystemStatus`)
 
-### 76-smart-navigation (6 aliases)
-
-- [b](b.md) - Goes back to the previous directory. (alias for `Set-LocationBack`)
-- [bm](bm.md) - Lists all directory bookmarks. (alias for `Show-DirectoryBookmarks`)
-- [c](c.md) - Enhanced change directory with navigation tracking. (alias for `Set-LocationTracked`)
-- [cd](cd.md) - Enhanced change directory with navigation tracking. (alias for `Set-LocationTracked`)
-- [f](f.md) - Goes forward in the navigation history. (alias for `Set-LocationForward`)
-- [j](j.md) - Quick directory jumping alias. (alias for `Jump-DirectoryQuick`)
 
 ## Generation
 

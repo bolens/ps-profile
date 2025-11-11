@@ -20,6 +20,7 @@ Invoke-LastCommand
 
 Pattern to match against command history.
 
+
 ## Examples
 
 No examples provided.

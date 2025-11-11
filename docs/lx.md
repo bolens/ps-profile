@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Lists directory contents excluding hidden files.
+Initializes file listing utility functions on first use.
 
 ## Description
 
-Shows files and directories but excludes hidden ones. Uses eza if available.
+Sets up all file listing utility functions when any of them is called for the first time. This lazy loading approach improves profile startup performance.
 
 ## Alias Information
 

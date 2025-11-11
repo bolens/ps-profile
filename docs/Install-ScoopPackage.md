@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `sinstall` - Installs packages using Scoop.
 
+
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

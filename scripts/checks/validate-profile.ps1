@@ -16,7 +16,7 @@ scripts/checks/validate-profile.ps1
 #>
 
 # Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
 Import-Module $commonModulePath -ErrorAction Stop
 
 # Get repository root using shared function
@@ -30,10 +30,10 @@ catch {
 # Build paths to validation scripts
 $utilsDir = Join-Path $repoRoot 'scripts' 'utils'
 $scriptDir = $PSScriptRoot
-$format = Join-Path $utilsDir 'run-format.ps1'
-$security = Join-Path $utilsDir 'run-security-scan.ps1'
-$lint = Join-Path $utilsDir 'run-lint.ps1'
-$spellcheck = Join-Path $utilsDir 'spellcheck.ps1'
+$format = Join-Path $utilsDir 'code-quality' 'run-format.ps1'
+$security = Join-Path $utilsDir 'security' 'run-security-scan.ps1'
+$lint = Join-Path $utilsDir 'code-quality' 'run-lint.ps1'
+$spellcheck = Join-Path $utilsDir 'code-quality' 'spellcheck.ps1'
 $idemp = Join-Path $scriptDir 'check-idempotency.ps1'
 $fragReadme = Join-Path $scriptDir 'check-comment-help.ps1'
 

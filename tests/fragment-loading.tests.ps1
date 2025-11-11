@@ -40,7 +40,7 @@ function Test-BadFunction {
             New-TestFragment -Name $fragmentName -Content $badContent
             
             # Profile should still load despite syntax error in one fragment
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName
@@ -55,7 +55,7 @@ throw "Test exception from fragment"
             New-TestFragment -Name $fragmentName -Content $badContent
             
             # Profile should handle exception and continue loading
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName
@@ -71,7 +71,7 @@ $result = NonExistent-Function -Parameter 'test'
             New-TestFragment -Name $fragmentName -Content $badContent
             
             # Profile should handle missing dependency error
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName
@@ -95,10 +95,10 @@ $global:TestFragmentLoaded = $true
             $global:TestFragmentLoaded = $false
             
             # Profile should continue loading despite first fragment failure
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Second fragment should have loaded
-            $global:TestFragmentLoaded | Should Be $true
+            $global:TestFragmentLoaded | Should -Be $true
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName1
@@ -131,7 +131,7 @@ $global:FragmentLoadCount++
             
             # Fragment should be idempotent (or at least handle multiple loads)
             # Exact behavior depends on fragment design, but shouldn't crash
-            $secondLoad | Should BeGreaterThan $firstLoad
+            $secondLoad | Should -BeGreaterThan $firstLoad
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName
@@ -156,8 +156,8 @@ function Test-IdempotentFunction {
             $secondExists = Get-Command Test-IdempotentFunction -ErrorAction SilentlyContinue
             
             # Function should exist after both loads (idempotent)
-            $firstExists | Should Not BeNullOrEmpty
-            $secondExists | Should Not BeNullOrEmpty
+            $firstExists | Should -Not -BeNullOrEmpty
+            $secondExists | Should -Not -BeNullOrEmpty
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName
@@ -175,10 +175,10 @@ throw "Recovery test error"
             New-TestFragment -Name $fragmentName -Content $badContent
             
             # First load with error
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Second load should also work (recovery)
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName
@@ -190,7 +190,7 @@ throw "Recovery test error"
             $profileContent = Get-Content $script:ProfilePath -Raw
             
             # Profile should check for directory existence
-            $profileContent | Should Match 'Test-Path.*profile\.d'
+            $profileContent | Should -Match 'Test-Path.*profile\.d'
         }
         
         It 'handles corrupted fragment configuration file' {
@@ -206,7 +206,7 @@ throw "Recovery test error"
                 Set-Content -Path $configPath -Value '{ invalid json }' -Encoding UTF8
                 
                 # Profile should handle corrupted config gracefully
-                { . $script:ProfilePath } | Should Not Throw
+                { . $script:ProfilePath } | Should -Not -Throw
             }
             finally {
                 # Restore original config
@@ -231,7 +231,7 @@ $result = Get-NonExistentCommand -ErrorAction SilentlyContinue
             New-TestFragment -Name $fragmentName -Content $content
             
             # Profile should handle missing command gracefully
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName
@@ -246,7 +246,7 @@ Import-Module NonExistentModule -ErrorAction SilentlyContinue
             New-TestFragment -Name $fragmentName -Content $content
             
             # Profile should handle missing module gracefully
-            { . $script:ProfilePath } | Should Not Throw
+            { . $script:ProfilePath } | Should -Not -Throw
             
             # Cleanup
             Remove-TestFragment -Name $fragmentName

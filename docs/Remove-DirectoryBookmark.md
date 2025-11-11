@@ -20,6 +20,7 @@ Remove-DirectoryBookmark
 
 Name of the bookmark to remove.
 
+
 ## Examples
 
 No examples provided.

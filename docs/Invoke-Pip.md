@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `pip` - Python package manager using uv instead of pip.
 
+
 ## Source
 
 Defined in: profile.d\67-uv.ps1

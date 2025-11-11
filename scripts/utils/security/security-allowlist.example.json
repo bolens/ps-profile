@@ -1,0 +1,26 @@
+{
+  "ExternalCommands": [
+    "git",
+    "pwsh",
+    "powershell",
+    "npm",
+    "npx",
+    "cargo",
+    "cspell",
+    "markdownlint",
+    "git-cliff"
+  ],
+  "SecretPatterns": [
+    "password\\s*=\\s*[\"']?example",
+    "password\\s*=\\s*[\"']?test",
+    "password\\s*=\\s*[\"']?placeholder",
+    "api_key\\s*=\\s*[\"']?your.*key",
+    "token\\s*=\\s*[\"']?your.*token"
+  ],
+  "FilePatterns": [
+    "\\.tests\\.ps1$",
+    "\\.test\\.ps1$",
+    "test-.*\\.ps1$"
+  ]
+}
+

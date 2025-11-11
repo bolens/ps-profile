@@ -25,13 +25,13 @@ function Enable-Aliases {
     try {
         if (-not (Get-Variable -Name 'AliasesLoaded' -Scope Global -ErrorAction SilentlyContinue)) {
             # List directory contents - enhanced ls
-            Set-Item -Path Function:Get-ChildItemEnhanced -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) Get-ChildItem @a } -Force | Out-Null
-            Set-Alias -Name ll -Value Get-ChildItemEnhanced -ErrorAction SilentlyContinue
+            Set-Item -Path Function:\global:Get-ChildItemEnhanced -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) Get-ChildItem @a } -Force | Out-Null
+            Set-Alias -Name ll -Value Get-ChildItemEnhanced -Scope Global -ErrorAction SilentlyContinue
             # List all directory contents - enhanced ls -a
-            Set-Item -Path Function:Get-ChildItemEnhancedAll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) Get-ChildItem -Force @a } -Force | Out-Null
-            Set-Alias -Name la -Value Get-ChildItemEnhancedAll -ErrorAction SilentlyContinue
+            Set-Item -Path Function:\global:Get-ChildItemEnhancedAll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) Get-ChildItem -Force @a } -Force | Out-Null
+            Set-Alias -Name la -Value Get-ChildItemEnhancedAll -Scope Global -ErrorAction SilentlyContinue
             # Show PATH entries as an array
-            Set-Item -Path Function:Show-Path -Value { $env:Path -split ';' | Where-Object { $_ } } -Force | Out-Null
+            Set-Item -Path Function:\global:Show-Path -Value { $env:Path -split ';' | Where-Object { $_ } } -Force | Out-Null
             Set-Variable -Name 'AliasesLoaded' -Value $true -Scope Global -Force
         }
     }

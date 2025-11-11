@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `lg` - Lists directory contents with git status using eza.
 
+
 ## Source
 
 Defined in: profile.d\61-eza.ps1

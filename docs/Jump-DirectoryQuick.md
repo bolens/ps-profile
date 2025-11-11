@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `j` - Quick directory jumping alias.
 
+
 ## Source
 
 Defined in: profile.d\76-smart-navigation.ps1

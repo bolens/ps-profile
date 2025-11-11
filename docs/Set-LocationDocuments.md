@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `docs` - Changes to the Documents directory.
 
+
 ## Source
 
 Defined in: profile.d\02-files-navigation.ps1

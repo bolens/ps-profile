@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `vim` - Opens files in Neovim.
 
+
 ## Source
 
 Defined in: profile.d\07-system.ps1

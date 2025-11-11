@@ -28,6 +28,7 @@ The target command for the alias.
 
 If specified, returns the alias definition instead of a boolean.
 
+
 ## Examples
 
 No examples provided.

@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `ubuntu` - Launches or switches to Ubuntu WSL distribution.
 
+
 ## Source
 
 Defined in: profile.d\10-wsl.ps1

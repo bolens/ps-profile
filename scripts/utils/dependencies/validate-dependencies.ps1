@@ -1,0 +1,219 @@
+<#
+scripts/utils/validate-dependencies.ps1
+
+.SYNOPSIS
+    Validates that all required dependencies are installed and available.
+
+.DESCRIPTION
+    Checks PowerShell version, required modules, and optional external tools
+    against the requirements.psd1 file. Reports missing dependencies and
+    provides installation instructions.
+
+.PARAMETER InstallMissing
+    If specified, attempts to install missing PowerShell modules automatically.
+
+.PARAMETER RequirementsFile
+    Path to requirements file. Defaults to requirements.psd1 in repository root.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1
+
+    Validates all dependencies and reports status.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1 -InstallMissing
+
+    Validates dependencies and installs missing PowerShell modules.
+
+.NOTES
+    Exit Codes:
+    - 0 (EXIT_SUCCESS): All required dependencies are available
+    - 1 (EXIT_VALIDATION_FAILURE): Required dependencies are missing
+    - 2 (EXIT_SETUP_ERROR): Error reading requirements file or installing modules
+#>
+
+param(
+    [switch]$InstallMissing,
+
+    [string]$RequirementsFile = $null
+)
+
+# Import shared utilities
+$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
+Import-Module $commonModulePath -ErrorAction Stop
+
+# Get repository root
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+# Load requirements file
+if (-not $RequirementsFile) {
+    $RequirementsFile = Join-Path $repoRoot 'requirements.psd1'
+}
+
+if (-not (Test-Path -Path $RequirementsFile)) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Requirements file not found: $RequirementsFile"
+}
+
+try {
+    $requirements = Import-CachedPowerShellDataFile -Path $RequirementsFile -ErrorAction Stop
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
+}
+
+Write-ScriptMessage -Message "Validating dependencies..." -LogLevel Info
+
+$allValid = $true
+$missingRequired = [System.Collections.Generic.List[string]]::new()
+$missingOptional = [System.Collections.Generic.List[string]]::new()
+$versionMismatches = [System.Collections.Generic.List[string]]::new()
+
+# Check PowerShell version
+if ($requirements.PowerShellVersion) {
+    $requiredVersion = [Version]$requirements.PowerShellVersion
+    $currentVersion = $PSVersionTable.PSVersion
+    
+    Write-ScriptMessage -Message "Checking PowerShell version..." -LogLevel Info
+    Write-ScriptMessage -Message "  Required: $requiredVersion" -LogLevel Info
+    Write-ScriptMessage -Message "  Current: $currentVersion" -LogLevel Info
+    
+    if ($currentVersion -lt $requiredVersion) {
+        $allValid = $false
+        $versionMismatches.Add("PowerShell version $currentVersion is below required $requiredVersion")
+        Write-ScriptMessage -Message "  ✗ PowerShell version mismatch" -IsWarning
+    }
+    else {
+        Write-ScriptMessage -Message "  ✓ PowerShell version OK" -LogLevel Info
+    }
+}
+
+# Check required modules
+if ($requirements.Modules) {
+    Write-ScriptMessage -Message "`nChecking PowerShell modules..." -LogLevel Info
+    
+    foreach ($moduleName in $requirements.Modules.Keys) {
+        $moduleReq = $requirements.Modules[$moduleName]
+        $required = $moduleReq.Required
+        $requiredVersion = if ($moduleReq.Version) { [Version]$moduleReq.Version } else { $null }
+        
+        # Check cache first (cache for 5 minutes)
+        $cacheKey = "ModuleAvailable_$moduleName"
+        $cachedModule = Get-CachedValue -Key $cacheKey
+        if ($null -ne $cachedModule) {
+            $installedModule = $cachedModule
+        }
+        else {
+            $installedModule = Get-Module -ListAvailable -Name $moduleName -ErrorAction SilentlyContinue
+            # Cache the result (even if null)
+            Set-CachedValue -Key $cacheKey -Value $installedModule -ExpirationSeconds 300
+        }
+        
+        if (-not $installedModule) {
+            if ($required) {
+                $allValid = $false
+                $missingRequired.Add($moduleName)
+                Write-ScriptMessage -Message "  ✗ $moduleName (REQUIRED) - Missing" -IsError
+                
+                if ($InstallMissing) {
+                    try {
+                        Write-ScriptMessage -Message "    Installing $moduleName..." -LogLevel Info
+                        Ensure-ModuleAvailable -ModuleName $moduleName
+                        Write-ScriptMessage -Message "    ✓ $moduleName installed" -LogLevel Info
+                        $missingRequired.Remove($moduleName) | Out-Null
+                    }
+                    catch {
+                        Write-ScriptMessage -Message "    ✗ Failed to install $moduleName`: $($_.Exception.Message)" -IsError
+                    }
+                }
+            }
+            else {
+                $missingOptional.Add($moduleName)
+                Write-ScriptMessage -Message "  ⚠ $moduleName (OPTIONAL) - Missing" -IsWarning
+            }
+        }
+        else {
+            $installedVersion = $installedModule.Version
+            if ($requiredVersion -and $installedVersion -lt $requiredVersion) {
+                $allValid = $false
+                $versionMismatches.Add("$moduleName version $installedVersion is below required $requiredVersion")
+                Write-ScriptMessage -Message "  ⚠ $moduleName - Version mismatch (installed: $installedVersion, required: $requiredVersion)" -IsWarning
+            }
+            else {
+                Write-ScriptMessage -Message "  ✓ $moduleName - Installed (version $installedVersion)" -LogLevel Info
+            }
+        }
+    }
+}
+
+# Check external tools
+if ($requirements.ExternalTools) {
+    Write-ScriptMessage -Message "`nChecking external tools..." -LogLevel Info
+    
+    foreach ($toolName in $requirements.ExternalTools.Keys) {
+        $toolReq = $requirements.ExternalTools[$toolName]
+        $required = $toolReq.Required
+        
+        $isAvailable = Test-CommandAvailable -CommandName $toolName
+        
+        if (-not $isAvailable) {
+            if ($required) {
+                $allValid = $false
+                $missingRequired.Add($toolName)
+                Write-ScriptMessage -Message "  ✗ $toolName (REQUIRED) - Missing" -IsError
+                
+                if ($toolReq.InstallCommand) {
+                    Write-ScriptMessage -Message "    Install with: $($toolReq.InstallCommand)" -LogLevel Info
+                }
+            }
+            else {
+                $missingOptional.Add($toolName)
+                Write-ScriptMessage -Message "  ⚠ $toolName (OPTIONAL) - Missing" -IsWarning
+                
+                if ($toolReq.InstallCommand) {
+                    Write-ScriptMessage -Message "    Install with: $($toolReq.InstallCommand)" -LogLevel Info
+                }
+            }
+        }
+        else {
+            Write-ScriptMessage -Message "  ✓ $toolName - Available" -LogLevel Info
+        }
+    }
+}
+
+# Summary
+Write-ScriptMessage -Message "`nValidation Summary:" -LogLevel Info
+
+if ($missingRequired.Count -eq 0 -and $versionMismatches.Count -eq 0) {
+    Write-ScriptMessage -Message "  ✓ All required dependencies are available" -LogLevel Info
+    
+    if ($missingOptional.Count -gt 0) {
+        Write-ScriptMessage -Message "  ⚠ $($missingOptional.Count) optional dependency(ies) missing" -IsWarning
+    }
+    
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Dependency validation passed"
+}
+else {
+    Write-ScriptMessage -Message "  ✗ Missing or invalid dependencies found:" -IsError
+    
+    if ($missingRequired.Count -gt 0) {
+        Write-ScriptMessage -Message "    Required: $($missingRequired -join ', ')" -IsError
+    }
+    
+    if ($versionMismatches.Count -gt 0) {
+        foreach ($mismatch in $versionMismatches) {
+            Write-ScriptMessage -Message "    Version: $mismatch" -IsError
+        }
+    }
+    
+    if (-not $InstallMissing) {
+        Write-ScriptMessage -Message "`nRun with -InstallMissing to automatically install missing PowerShell modules." -LogLevel Info
+    }
+    
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Dependency validation failed"
+}
+

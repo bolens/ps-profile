@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `weather` - Shows weather information.
 
+
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

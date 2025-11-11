@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `url-encode` - URL-encodes a string.
 
+
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `rest` - Makes REST API calls.
 
+
 ## Source
 
 Defined in: profile.d\07-system.ps1

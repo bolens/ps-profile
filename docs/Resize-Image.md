@@ -32,6 +32,7 @@ The desired width.
 
 The desired height.
 
+
 ## Examples
 
 No examples provided.
@@ -41,6 +42,7 @@ No examples provided.
 This function has the following aliases:
 
 - `image-resize` - Resizes an image.
+
 
 ## Source
 

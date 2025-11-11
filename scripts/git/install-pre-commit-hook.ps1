@@ -18,7 +18,7 @@ scripts/git/install-pre-commit-hook.ps1
     Installs the pre-commit hook in the current repository.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\git\install-pre-commit-hook.ps1 -RepoRoot C:\MyRepo
+    pwsh -NoProfile -File scripts/git/install-pre-commit-hook.ps1 -RepoRoot /path/to/repo
 
     Installs the pre-commit hook in the specified repository.
 #>
@@ -29,12 +29,11 @@ param(
 
 # Import shared utilities
 $scriptsDir = Split-Path -Parent $PSScriptRoot
-$commonModulePath = Join-Path $scriptsDir 'utils' 'Common.psm1'
+$commonModulePath = Join-Path $scriptsDir 'lib' 'Common.psm1'
 if (-not (Test-Path $commonModulePath)) {
     throw "Common module not found at: $commonModulePath. PSScriptRoot: $PSScriptRoot"
 }
-$commonModulePath = (Resolve-Path $commonModulePath).Path
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module (Resolve-Path $commonModulePath).Path -ErrorAction Stop
 
 # Get repository root if not specified
 if (-not $RepoRoot) {
@@ -70,15 +69,21 @@ exit 0
 Set-Content -LiteralPath $hookPath -Value $script -NoNewline -Force
 # Make executable on supported systems (Git for Windows respects the hook file, Unix needs +x)
 try {
-    if (Test-CommandAvailable -CommandName 'chmod') {
-        & chmod +x $hookPath
+    if (Test-IsWindows) {
+        # On Windows, try to grant read+execute permissions using icacls (best-effort)
+        if (Test-CommandAvailable -CommandName 'icacls') {
+            icacls $hookPath /grant Everyone:RX *>&1 | Out-Null
+        }
     }
     else {
-        icacls $hookPath /grant Everyone:RX *>&1 | Out-Null
+        # On Unix-like systems, use chmod to set executable bit
+        if (Test-CommandAvailable -CommandName 'chmod') {
+            & chmod +x $hookPath
+        }
     }
 }
 catch {
-    # Non-fatal
+    # Non-fatal - permissions may not be critical on all systems
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Installed pre-commit hook at $hookPath"

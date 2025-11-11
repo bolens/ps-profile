@@ -1,0 +1,452 @@
+{
+  "PowerShell Profile Script Template": {
+    "prefix": "psprofile",
+    "body": [
+      "<#",
+      "${1:script-name}",
+      "",
+      ".SYNOPSIS",
+      "    ${2:Description of what the script does}",
+      "",
+      ".DESCRIPTION",
+      "    ${3:Detailed description}",
+      "",
+      ".EXAMPLE",
+      "    ${4:Example usage}",
+      "#>",
+      "",
+      "# Import shared utilities",
+      "$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'",
+      "Import-Module $commonModulePath -ErrorAction Stop",
+      "",
+      "# Get repository root using shared function",
+      "try {",
+      "    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot",
+      "}",
+      "catch {",
+      "    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_",
+      "}",
+      "",
+      "${5:# Script logic here}",
+      "",
+      "Exit-WithCode -ExitCode $EXIT_SUCCESS"
+    ],
+    "description": "Template for PowerShell profile utility scripts"
+  },
+  "PowerShell Function with Comment-Based Help": {
+    "prefix": "psfunc",
+    "body": [
+      "<#",
+      ".SYNOPSIS",
+      "    ${1:Function description}",
+      "",
+      ".DESCRIPTION",
+      "    ${2:Detailed description}",
+      "",
+      ".PARAMETER ${3:ParameterName}",
+      "    ${4:Parameter description}",
+      "",
+      ".EXAMPLE",
+      "    ${5:Example usage}",
+      "",
+      ".OUTPUTS",
+      "    ${6:Output type}",
+      "#>",
+      "function ${7:Function-Name} {",
+      "    [CmdletBinding()]",
+      "    [OutputType([${8:type}])]",
+      "    param(",
+      "        [Parameter(${9:Mandatory})]",
+      "        [${10:string}]",
+      "        `$${3:ParameterName}",
+      "    )",
+      "",
+      "    ${11:# Function body}",
+      "}"
+    ],
+    "description": "PowerShell function with comment-based help"
+  },
+  "PowerShell Try-Catch Block": {
+    "prefix": "pstry",
+    "body": [
+      "try {",
+      "    ${1:# Code that might throw}",
+      "}",
+      "catch {",
+      "    ${2:Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_}",
+      "}"
+    ],
+    "description": "PowerShell try-catch block with error handling"
+  },
+  "PowerShell Test Case": {
+    "prefix": "pstest",
+    "body": [
+      "Describe '${1:Test Description}' {",
+      "    It '${2:should do something}' {",
+      "        ${3:# Arrange}",
+      "        ${4:# Act}",
+      "        ${5:# Assert}",
+      "        ${6:result} | Should -Be ${7:expected}",
+      "    }",
+      "}"
+    ],
+    "description": "Pester test case template"
+  },
+  "PowerShell Test Context": {
+    "prefix": "pstestctx",
+    "body": [
+      "Describe '${1:Test Suite}' {",
+      "    Context '${2:Test Context}' {",
+      "        BeforeAll {",
+      "            ${3:# Setup}",
+      "        }",
+      "",
+      "        AfterAll {",
+      "            ${4:# Cleanup}",
+      "        }",
+      "",
+      "        It '${5:should do something}' {",
+      "            ${6:# Test implementation}",
+      "        }",
+      "    }",
+      "}"
+    ],
+    "description": "Pester test context with BeforeAll/AfterAll"
+  },
+  "PowerShell Parameter Validation": {
+    "prefix": "psparam",
+    "body": [
+      "[Parameter(${1:Mandatory})]",
+      "[${2:string}]",
+      "`$${3:ParameterName}${4:,}"
+    ],
+    "description": "PowerShell parameter declaration"
+  },
+  "PowerShell ValidateScript Parameter": {
+    "prefix": "psvalidatescript",
+    "body": [
+      "[Parameter(Mandatory)]",
+      "[ValidateScript({",
+      "    if (${1:condition}) {",
+      "        throw \"${2:Error message}\"",
+      "    }",
+      "    `$true",
+      "})]",
+      "[${3:string}]",
+      "`$${4:ParameterName}"
+    ],
+    "description": "PowerShell parameter with ValidateScript"
+  },
+  "PowerShell Measure-Operation": {
+    "prefix": "psmeasure",
+    "body": [
+      "`$metrics = Measure-Operation -ScriptBlock {",
+      "    ${1:# Operation to measure}",
+      "} -OperationName '${2:OperationName}'",
+      "",
+      "Write-Output \"Operation took `$(`$metrics.DurationMs)ms\""
+    ],
+    "description": "Measure operation execution time"
+  },
+  "PowerShell Parallel Processing": {
+    "prefix": "psparallel",
+    "body": [
+      "`$results = Invoke-Parallel -Items `${${1:items}} -ScriptBlock {",
+      "    param(`$Item)",
+      "    ${2:# Process item}",
+      "    return `$result",
+      "} -ThrottleLimit ${3:5}"
+    ],
+    "description": "Process items in parallel"
+  },
+  "PowerShell Caching": {
+    "prefix": "pscache",
+    "body": [
+      "# Check cache first",
+      "`$cachedValue = Get-CachedValue -Key '${1:CacheKey}'",
+      "if (`$null -ne `$cachedValue) {",
+      "    return `$cachedValue",
+      "}",
+      "",
+      "# Compute value",
+      "`$value = ${2:# Compute value}",
+      "",
+      "# Cache result",
+      "Set-CachedValue -Key '${1:CacheKey}' -Value `$value -ExpirationSeconds ${3:300}",
+      "return `$value"
+    ],
+    "description": "Cache pattern with Get-CachedValue/Set-CachedValue"
+  },
+  "PowerShell OutputType Attribute": {
+    "prefix": "psoutputtype",
+    "body": [
+      "[OutputType([${1:type}])]"
+    ],
+    "description": "OutputType attribute for function return type"
+  },
+  "PowerShell Type Constraint Parameter": {
+    "prefix": "pstypeparam",
+    "body": [
+      "[Parameter(${1:Mandatory})]",
+      "[${2:string}]",
+      "`$${3:ParameterName}${4:,}"
+    ],
+    "description": "Parameter with type constraint"
+  },
+  "PowerShell ValidateSet Parameter": {
+    "prefix": "psvalidateset",
+    "body": [
+      "[Parameter(${1:Mandatory})]",
+      "[ValidateSet('${2:value1}', '${3:value2}', '${4:value3}')]",
+      "[${5:string}]",
+      "`$${6:ParameterName}"
+    ],
+    "description": "Parameter with ValidateSet constraint"
+  },
+  "PowerShell Path Validation Parameter": {
+    "prefix": "pspathparam",
+    "body": [
+      "[Parameter(${1:Mandatory})]",
+      "[ValidateScript({",
+      "    if (`$_ -and -not (Test-Path `$_)) {",
+      "        throw \"Path does not exist: `$_\"",
+      "    }",
+      "    `$true",
+      "})]",
+      "[${2:string}]",
+      "`$${3:Path}${4:,}"
+    ],
+    "description": "Path parameter with validation"
+  },
+  "PowerShell Suppression Attribute": {
+    "prefix": "pssuppress",
+    "body": [
+      "[Diagnostics.CodeAnalysis.SuppressMessageAttribute('${1:RuleName}', '', Justification = '${2:Reason for suppression}')]"
+    ],
+    "description": "PSScriptAnalyzer suppression attribute"
+  },
+  "PowerShell Function with Full Type Safety": {
+    "prefix": "psfunctype",
+    "body": [
+      "<#",
+      ".SYNOPSIS",
+      "    ${1:Function description}",
+      "",
+      ".DESCRIPTION",
+      "    ${2:Detailed description}",
+      "",
+      ".PARAMETER ${3:ParameterName}",
+      "    ${4:Parameter description}",
+      "",
+      ".EXAMPLE",
+      "    ${5:Example usage}",
+      "",
+      ".OUTPUTS",
+      "    ${6:Output type description}",
+      "#>",
+      "function ${7:Function-Name} {",
+      "    [CmdletBinding()]",
+      "    [OutputType([${8:type}])]",
+      "    param(",
+      "        [Parameter(${9:Mandatory})]",
+      "        [${10:string}]",
+      "        `$${3:ParameterName}",
+      "    )",
+      "",
+      "    ${11:# Function body with type-safe operations}",
+      "}"
+    ],
+    "description": "Function template with full type safety (OutputType, type constraints)"
+  },
+  "PowerShell Error Handling with Exit-WithCode": {
+    "prefix": "psexitcode",
+    "body": [
+      "try {",
+      "    ${1:# Operation that might fail}",
+      "}",
+      "catch {",
+      "    Exit-WithCode -ExitCode `$EXIT_${2:SETUP_ERROR} -ErrorRecord `$_",
+      "}"
+    ],
+    "description": "Error handling pattern with Exit-WithCode"
+  },
+  "PowerShell List Collection": {
+    "prefix": "pslist",
+    "body": [
+      "`$${1:list} = [System.Collections.Generic.List[${2:PSCustomObject}]]::new()",
+      "`$${1:list}.Add(${3:item})"
+    ],
+    "description": "Generic List collection initialization"
+  },
+  "Profile Fragment: Set-AgentModeFunction": {
+    "prefix": "psfragmentfunc",
+    "body": [
+      "Set-AgentModeFunction -Name '${1:Function-Name}' -Body {",
+      "    ${2:# Function body}",
+      "}${3: # ${4:Description}}"
+    ],
+    "description": "Create collision-safe function in profile fragment"
+  },
+  "Profile Fragment: Set-AgentModeAlias": {
+    "prefix": "psfragmentalias",
+    "body": [
+      "Set-AgentModeAlias -Name '${1:alias}' -Target '${2:command}'${3: # ${4:Description}}"
+    ],
+    "description": "Create collision-safe alias in profile fragment"
+  },
+  "Profile Fragment: Command Check": {
+    "prefix": "psfragmentcheck",
+    "body": [
+      "if (Test-CachedCommand '${1:command}') {",
+      "    ${2:# Configure ${1:command} helpers}",
+      "}"
+    ],
+    "description": "Check if external command is available before configuring"
+  },
+  "Profile Fragment: Lazy Function Registration": {
+    "prefix": "psfragmentlazy",
+    "body": [
+      "Register-LazyFunction -Name '${1:Function-Name}' -Initializer {",
+      "    ${2:# Initialization code}",
+      "} -Alias '${3:alias}'"
+    ],
+    "description": "Register lazy-loading function stub"
+  },
+  "Profile Fragment: Enable Function Pattern": {
+    "prefix": "psfragmentenable",
+    "body": [
+      "function Enable-${1:Feature} {",
+      "    [CmdletBinding()]",
+      "    param()",
+      "    ",
+      "    ${2:# Lazy initialization code}",
+      "}"
+    ],
+    "description": "Enable function pattern for lazy loading"
+  },
+  "Profile Fragment: Idempotency Check": {
+    "prefix": "psfragmentidempotent",
+    "body": [
+      "if (-not (Test-Path Function:\\${1:FunctionName})) {",
+      "    function ${1:FunctionName} {",
+      "        ${2:# Function body}",
+      "    }",
+      "}"
+    ],
+    "description": "Idempotent function definition check"
+  },
+  "Profile Fragment: Fragment Header": {
+    "prefix": "psfragmentheader",
+    "body": [
+      "# ===============================================",
+      "# ${1:NN-fragment-name}.ps1",
+      "# ${2:Fragment description}",
+      "#",
+      "# Purpose: ${3:Purpose of this fragment}",
+      "# Dependencies: ${4:none|command1,command2}",
+      "# ==============================================="
+    ],
+    "description": "Standard profile fragment header"
+  },
+  "Pester: Describe Block": {
+    "prefix": "pstestdescribe",
+    "body": [
+      "Describe '${1:Test Description}' {",
+      "    ${2:# Test cases}",
+      "}"
+    ],
+    "description": "Pester Describe block"
+  },
+  "Pester: Context Block": {
+    "prefix": "pstestcontext",
+    "body": [
+      "Context '${1:Test Context}' {",
+      "    ${2:# Test cases}",
+      "}"
+    ],
+    "description": "Pester Context block"
+  },
+  "Pester: It Test Case": {
+    "prefix": "pstestit",
+    "body": [
+      "It '${1:should do something}' {",
+      "    ${2:# Arrange}",
+      "    ${3:# Act}",
+      "    ${4:# Assert}",
+      "    ${5:result} | Should -Be ${6:expected}",
+      "}"
+    ],
+    "description": "Pester It test case"
+  },
+  "Pester: BeforeAll Block": {
+    "prefix": "pstestbeforeall",
+    "body": [
+      "BeforeAll {",
+      "    ${1:# Setup code}",
+      "}"
+    ],
+    "description": "Pester BeforeAll setup block"
+  },
+  "Pester: AfterAll Block": {
+    "prefix": "pstestafterall",
+    "body": [
+      "AfterAll {",
+      "    ${1:# Cleanup code}",
+      "}"
+    ],
+    "description": "Pester AfterAll cleanup block"
+  },
+  "Pester: Should Assertion": {
+    "prefix": "pstestshould",
+    "body": [
+      "${1:result} | Should -Be ${2:expected}${3: -Because \"${4:reason}\"}"
+    ],
+    "description": "Pester Should assertion"
+  },
+  "Pester: Mock Pattern": {
+    "prefix": "pstestmock",
+    "body": [
+      "Mock -CommandName ${1:Command-Name} -MockWith {",
+      "    ${2:# Mock implementation}",
+      "    return ${3:value}",
+      "}"
+    ],
+    "description": "Pester Mock pattern"
+  },
+  "Pester: Complete Test Suite": {
+    "prefix": "pstestsuite",
+    "body": [
+      "<#",
+      "tests/${1:test-file}.tests.ps1",
+      "",
+      "${2:Description of test suite}",
+      "#>",
+      "",
+      "BeforeAll {",
+      "    ${3:# Import modules and setup}",
+      "}",
+      "",
+      "AfterAll {",
+      "    ${4:# Cleanup}",
+      "}",
+      "",
+      "Describe '${5:Test Suite}' {",
+      "    Context '${6:Test Context}' {",
+      "        It '${7:should do something}' {",
+      "            ${8:# Test implementation}",
+      "            ${9:result} | Should -Be ${10:expected}",
+      "        }",
+      "    }",
+      "}"
+    ],
+    "description": "Complete Pester test suite template"
+  },
+  "Pester: Skipped Test": {
+    "prefix": "pstestskipped",
+    "body": [
+      "Set-ItResult -Skipped -Because \"${1:Reason for skipping}\""
+    ],
+    "description": "Pester skipped test pattern"
+  }
+}
+

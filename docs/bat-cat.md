@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Displays file contents with syntax highlighting.
+Initializes file listing utility functions on first use.
 
 ## Description
 
-Shows file contents with syntax highlighting using bat, or falls back to Get-Content.
+Sets up all file listing utility functions when any of them is called for the first time. This lazy loading approach improves profile startup performance.
 
 ## Alias Information
 

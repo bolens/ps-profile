@@ -1,0 +1,99 @@
+<#
+scripts/utils/run-lint.ps1
+
+.SYNOPSIS
+    Runs PSScriptAnalyzer against profile.d and scripts directories.
+
+.DESCRIPTION
+    Installs PSScriptAnalyzer if not present, then runs it against profile.d and scripts
+    directories. This matches the CI lint task behavior exactly. Reports are saved to
+    scripts/data/psscriptanalyzer-report.json. Exits with error code 1 if any Error-level
+    findings are detected.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run-lint.ps1
+
+    Runs PSScriptAnalyzer on all PowerShell files in profile.d and scripts directories.
+#>
+
+# Import shared utilities
+$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
+Import-Module $commonModulePath -ErrorAction Stop
+
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+# Analyze both profile.d and scripts directories, matching CI behavior
+$paths = @(
+    Join-Path $repoRoot 'profile.d'
+    Join-Path $repoRoot 'scripts'
+) | Where-Object { Test-Path $_ }
+
+if (-not $paths) {
+    Write-ScriptMessage -Message "No paths found to analyze"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
+}
+
+# Ensure PSScriptAnalyzer is available
+try {
+    Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+# Locate settings file if present
+$settingsFile = Join-Path $repoRoot 'PSScriptAnalyzerSettings.psd1'
+$settingsParam = @{}
+if (Test-Path $settingsFile) {
+    Write-ScriptMessage -Message "Using settings file: $settingsFile"
+    $settingsParam['Settings'] = $settingsFile
+}
+
+# Run analysis matching CI behavior exactly
+# Use List for better performance than array concatenation
+$results = [System.Collections.Generic.List[object]]::new()
+foreach ($p in $paths) {
+    Write-ScriptMessage -Message "Analyzing $p"
+    try {
+        $r = Invoke-ScriptAnalyzer -Path $p -Recurse -Severity @('Error', 'Warning', 'Information') -Verbose @settingsParam
+        if ($r) {
+            $results.AddRange($r)
+        }
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to analyze $p`: $($_.Exception.Message)" -ErrorRecord $_
+    }
+}
+
+# Save report to JSON (matching CI behavior)
+$reportData = $results | ForEach-Object {
+    [PSCustomObject]@{
+        FilePath = $_.ScriptName
+        RuleName = $_.RuleName
+        Severity = $_.Severity
+        Message  = $_.Message
+        Line     = $_.Line
+        Column   = $_.Column
+    }
+}
+$json = $reportData | ConvertTo-Json -Depth 5
+
+$dataDir = Join-Path $repoRoot 'scripts' 'data'
+Ensure-DirectoryExists -Path $dataDir
+$out = Join-Path $dataDir 'psscriptanalyzer-report.json'
+$json | Out-File -FilePath $out -Encoding utf8
+Write-ScriptMessage -Message "Saved report to $out"
+
+# Fail if any Error-level findings (matching CI behavior)
+$errorFindings = $results | Where-Object { $_.Severity -eq 'Error' }
+if ($errorFindings) {
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Errors found by PSScriptAnalyzer"
+}
+
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: no issues found"

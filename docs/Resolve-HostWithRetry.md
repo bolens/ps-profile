@@ -24,6 +24,7 @@ The hostname to resolve.
 
 Timeout for DNS resolution. Default is 10.
 
+
 ## Examples
 
 No examples provided.

@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `slist` - Lists installed Scoop packages.
 
+
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

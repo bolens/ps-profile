@@ -12,7 +12,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 **Common Tasks**:
 
-- `quality-check` - Full quality check (format + security + lint + spellcheck + markdownlint + help + tests)
+- `quality-check` - Full quality check (format + security + lint + spellcheck + markdownlint + help + tests + function naming)
 - `validate` - Validation (format + security + lint + spellcheck + help + idempotency)
 - `format-and-lint` - Format and lint code (common pre-commit workflow)
 - `all-docs` - Generate all documentation (API docs + fragment READMEs)
@@ -21,6 +21,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 - `benchmark` - Performance benchmark
 - `update-baseline` - Update performance baseline
 - `check-idempotency` - Check fragment idempotency
+- `validate-function-naming` - Validate function naming conventions
 - `format` - Format code
 - `lint` - Lint code
 - `spellcheck` - Run spellcheck
@@ -39,12 +40,13 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1
 
 # Individual checks
-pwsh -NoProfile -File scripts/utils/run-format.ps1          # PowerShell-Beautifier
-pwsh -NoProfile -File scripts/utils/run-lint.ps1            # PSScriptAnalyzer
-pwsh -NoProfile -File scripts/utils/run-security-scan.ps1   # Security analysis
-pwsh -NoProfile -File scripts/checks/check-idempotency.ps1  # Idempotency test
-pwsh -NoProfile -File scripts/utils/spellcheck.ps1          # Spellcheck
-pwsh -NoProfile -File scripts/utils/run-markdownlint.ps1    # Markdownlint
+pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1                    # PowerShell-Beautifier
+pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1                     # PSScriptAnalyzer
+pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1                 # Security analysis
+pwsh -NoProfile -File scripts/checks/check-idempotency.ps1                        # Idempotency test
+pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1                    # Spellcheck
+pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1             # Markdownlint
+pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1     # Validate function naming
 
 # Run tests
 pwsh -NoProfile -File scripts/utils/run_pester.ps1

@@ -97,7 +97,8 @@ try {
             # Internet connectivity check
             Write-Host "`n🌍 Internet Connectivity:" -ForegroundColor Cyan
             try {
-                $ping = Test-Connection -ComputerName 8.8.8.8 -Count 1 -TimeoutSeconds 2 -ErrorAction Stop
+                $pingTarget = '8.8.8.8'
+                $ping = Test-Connection -ComputerName $pingTarget -Count 1 -TimeoutSeconds 2 -ErrorAction Stop
                 Write-Host ("  Ping to Google DNS: {0}ms" -f $ping.ResponseTime) -ForegroundColor Green
             }
             catch {
@@ -365,13 +366,13 @@ try {
                 $startTime = Get-Date
                 $tcpClient = $null
                 $connectAsync = $null
-                
+
                 try {
                     # Use direct TCP connection with timeout for faster and more reliable testing
                     $tcpClient = New-Object System.Net.Sockets.TcpClient
                     $connectAsync = $tcpClient.BeginConnect($testHost.Name, $testHost.Port, $null, $null)
                     $waitResult = $connectAsync.AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds(5), $false)
-                    
+
                     if ($waitResult) {
                         try {
                             $tcpClient.EndConnect($connectAsync)
@@ -405,7 +406,7 @@ try {
                         $connectAsync.AsyncWaitHandle.Close()
                     }
                 }
-                
+
                 # Fallback to ping for IP addresses if TCP fails
                 if (-not $connected -and $testHost.Name -match '^\d+\.\d+\.\d+\.\d+$') {
                     try {
@@ -417,7 +418,7 @@ try {
                         # Ignore ping failures for IP addresses, already tried TCP
                     }
                 }
-                
+
                 if (-not $connected) {
                     Write-Host ("  {0}: ✗ (unreachable)" -f $testHost.Name) -ForegroundColor Red
                 }

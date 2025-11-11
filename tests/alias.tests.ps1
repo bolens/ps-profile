@@ -1,24 +1,30 @@
 Describe 'Alias helper' {
     BeforeAll {
-        $script:BootstrapPath = Join-Path $PSScriptRoot '..\profile.d\00-bootstrap.ps1'
+        $bootstrapRelative = Join-Path $PSScriptRoot '..\profile.d\00-bootstrap.ps1'
+        try {
+            $script:BootstrapPath = (Resolve-Path -LiteralPath $bootstrapRelative -ErrorAction Stop).ProviderPath
+        }
+        catch {
+            throw "Bootstrap script not found at $bootstrapRelative"
+        }
     }
 
     It 'Set-AgentModeAlias returns definition when requested and alias works' {
         . $script:BootstrapPath
         $name = "test_alias_$(Get-Random)"
         $def = Set-AgentModeAlias -Name $name -Target 'Write-Output' -ReturnDefinition
-        $def | Should Not Be $false
-        $def.GetType().Name | Should Be 'String'
+        $def | Should -Not -Be $false
+        $def.GetType().Name | Should -Be 'String'
         # The alias should also be callable and emit the given argument
         $out = & $name 'hello'
-        $out | Should Be 'hello'
+        $out | Should -Be 'hello'
     }
 }
 
 Describe 'Documentation Generation' {
     BeforeAll {
-        $script:ScriptsUtilsPath = Join-Path $PSScriptRoot '..\scripts\utils'
-        
+        $script:ScriptsUtilsDocsPath = Join-Path $PSScriptRoot '..\scripts\utils\docs'
+
         # Cache compiled regex for comment parsing
         $script:CommentBlockRegex = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
     }
@@ -50,8 +56,8 @@ function Test-Function {
             $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
             $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 
-            $functionAsts.Count | Should Be 1
-            $functionAsts[0].Name | Should Be 'Test-Function'
+            $functionAsts.Count | Should -Be 1
+            $functionAsts[0].Name | Should -Be 'Test-Function'
         }
 
         It 'handles functions without parameters' {
@@ -73,8 +79,8 @@ function Simple-Function { }
             $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
             $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 
-            $functionAsts.Count | Should Be 1
-            $functionAsts[0].Name | Should Be 'Simple-Function'
+            $functionAsts.Count | Should -Be 1
+            $functionAsts[0].Name | Should -Be 'Simple-Function'
         }
 
         It 'extracts synopsis from comment-based help' {
@@ -100,12 +106,12 @@ function Test-Synopsis { }
             $beforeText = $content.Substring(0, $start)
             $commentMatches = $script:CommentBlockRegex.Matches($beforeText)
 
-            $commentMatches.Count | Should Be 1
+            $commentMatches.Count | Should -Be 1
             $helpContent = $commentMatches[-1].Value -replace '^<#\s*', '' -replace '\s*#>$', ''
 
             if ($helpContent -match '(?s)\.SYNOPSIS\s*\n\s*(.+?)\n\s*\.DESCRIPTION') {
                 $synopsis = $matches[1].Trim()
-                $synopsis | Should Be 'This is a test synopsis'
+                $synopsis | Should -Be 'This is a test synopsis'
             }
         }
     }
@@ -139,18 +145,18 @@ function Test-Function {
             Set-Content -Path $testFile -Value $testFunction -Encoding UTF8
 
             # Run the documentation generator with custom profile path
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'generate-docs.ps1'
+            $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
             $result = & $scriptPath -OutputPath $tempDir 2>&1
 
             # The script should run without throwing an exception
-            $true | Should Be $true
+            $true | Should -Be $true
         }
 
         It 'generates index with alphabetical function list' {
             $tempDir = Join-Path $TestDrive 'docs_index'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
-            $scriptPath = Join-Path $script:ScriptsUtilsPath 'generate-docs.ps1'
+            $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
             $result = & $scriptPath -OutputPath $tempDir 2>&1
 
             $readmePath = Join-Path $tempDir 'README.md'
@@ -158,7 +164,7 @@ function Test-Function {
                 $content = Get-Content $readmePath -Raw
                 $expectedPatterns = @('## Functions by Fragment', 'Total Functions:', 'Generated:')
                 foreach ($pattern in $expectedPatterns) {
-                    $content | Should Match $pattern
+                    $content | Should -Match $pattern
                 }
             }
         }

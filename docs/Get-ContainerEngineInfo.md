@@ -6,8 +6,7 @@ Gets information about available container engines and compose tools.
 
 ## Description
 
-Returns cached information about available container engines (Docker/Podman) and their compose capabilities.
-Checks for docker, docker-compose, podman, and podman-compose availability and compose subcommand support.
+Returns cached information about available container engines (Docker/Podman) and their compose capabilities. Checks for docker, docker-compose, podman, and podman-compose availability and compose subcommand support.
 
 ## Signature
 

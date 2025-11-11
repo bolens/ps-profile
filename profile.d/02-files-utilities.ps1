@@ -36,7 +36,20 @@ if (-not (Test-Path "Function:\\Ensure-FileUtilities")) {
         Set-Alias -Name tail -Value Get-FileTail -ErrorAction SilentlyContinue
 
         # File hash
-        Set-Item -Path Function:Get-FileHashValue -Value { param([string]$Path, [ValidateSet('MD5', 'SHA1', 'SHA256', 'SHA384', 'SHA512')] [string]$Algorithm = 'SHA256') if (-not (Test-Path -LiteralPath $Path)) { Write-Error "File not found: $Path"; return } Microsoft.PowerShell.Utility\Get-FileHash -Algorithm $Algorithm -Path $Path } -Force | Out-Null
+        Set-Item -Path Function:Get-FileHashValue -Value {
+            param(
+                [string]$Path,
+                [ValidateSet('MD5', 'SHA1', 'SHA256', 'SHA384', 'SHA512')]
+                [string]$Algorithm = 'SHA256'
+            )
+
+            if (-not (Test-Path -LiteralPath $Path)) {
+                Write-Warning "File not found: $Path"
+                return $null
+            }
+
+            Microsoft.PowerShell.Utility\Get-FileHash -Algorithm $Algorithm -Path $Path
+        } -Force | Out-Null
         Set-Alias -Name file-hash -Value Get-FileHashValue -ErrorAction SilentlyContinue
         # File size
         Set-Item -Path Function:Get-FileSize -Value { param([string]$Path) if (-not (Test-Path -LiteralPath $Path)) { Write-Error "File not found: $Path"; return } $len = (Get-Item -LiteralPath $Path).Length; switch ($len) { { $_ -ge 1TB } { "{0:N2} TB" -f ($len / 1TB); break } { $_ -ge 1GB } { "{0:N2} GB" -f ($len / 1GB); break } { $_ -ge 1MB } { "{0:N2} MB" -f ($len / 1MB); break } { $_ -ge 1KB } { "{0:N2} KB" -f ($len / 1KB); break } default { "{0} bytes" -f $len } } } -Force | Out-Null

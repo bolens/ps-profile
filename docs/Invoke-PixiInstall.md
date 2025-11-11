@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `pxadd` - Installs packages using pixi.
 
+
 ## Source
 
 Defined in: profile.d\68-pixi.ps1

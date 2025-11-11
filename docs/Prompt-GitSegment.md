@@ -6,6 +6,8 @@ profile.d/44-git.ps1
 
 ## Description
 
+
+
 ## Alias Information
 
 **Alias for:** `Format-PromptGitSegment`

@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `l` - Lists directory contents using eza (short alias).
 
+
 ## Source
 
 Defined in: profile.d\61-eza.ps1

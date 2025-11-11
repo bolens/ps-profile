@@ -20,6 +20,7 @@ Get-HexDump
 
 The path to the file to dump.
 
+
 ## Examples
 
 No examples provided.
@@ -29,6 +30,7 @@ No examples provided.
 This function has the following aliases:
 
 - `hex-dump` - Shows hex dump of a file.
+
 
 ## Source
 

@@ -24,6 +24,7 @@ The path to the HTML file.
 
 The path for the output Markdown file. If not specified, uses input path with .md extension.
 
+
 ## Examples
 
 No examples provided.
@@ -33,6 +34,7 @@ No examples provided.
 This function has the following aliases:
 
 - `html-to-markdown` - Converts HTML file to Markdown.
+
 
 ## Source
 

@@ -20,6 +20,7 @@ Jump-Directory
 
 Pattern to match against directory paths.
 
+
 ## Examples
 
 No examples provided.

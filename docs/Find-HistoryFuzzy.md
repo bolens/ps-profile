@@ -28,6 +28,7 @@ If specified, performs case-sensitive search.
 
 Maximum number of results to return (default: 20).
 
+
 ## Examples
 
 No examples provided.

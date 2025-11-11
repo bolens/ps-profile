@@ -20,6 +20,7 @@ Get-FileTail
 
 The number of lines to display. Default is 10.
 
+
 ## Examples
 
 No examples provided.
@@ -29,6 +30,7 @@ No examples provided.
 This function has the following aliases:
 
 - `tail` - Shows the last N lines of a file.
+
 
 ## Source
 

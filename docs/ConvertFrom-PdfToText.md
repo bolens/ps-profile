@@ -24,6 +24,7 @@ The path to the PDF file.
 
 The path for the output text file. If not specified, uses input path with .txt extension.
 
+
 ## Examples
 
 No examples provided.
@@ -33,6 +34,7 @@ No examples provided.
 This function has the following aliases:
 
 - `pdf-to-text` - Extracts text from PDF file.
+
 
 ## Source
 

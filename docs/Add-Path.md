@@ -24,6 +24,7 @@ The directory path to add to PATH.
 
 If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
 
+
 ## Examples
 
 No examples provided.

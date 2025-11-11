@@ -20,6 +20,7 @@ r
 
 Either a number (for recent commands) or a pattern to search for.
 
+
 ## Examples
 
 No examples provided.

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Displays directory structure as a tree.
+Initializes file listing utility functions on first use.
 
 ## Description
 
-Shows hierarchical directory structure. Uses eza if available.
+Sets up all file listing utility functions when any of them is called for the first time. This lazy loading approach improves profile startup performance.
 
 ## Alias Information
 

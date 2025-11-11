@@ -6,7 +6,7 @@ tasks:
   lint:
     desc: Lint profile.d
     cmds:
-      - pwsh -NoProfile -File scripts/utils/run-lint.ps1
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1
 
   validate:
     desc: Validate profile (lint + idempotency)
@@ -21,57 +21,57 @@ tasks:
   test:
     desc: Run Pester Tests
     cmds:
-      - pwsh -NoProfile -File scripts/utils/run_pester.ps1
+      - pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1
 
   test-coverage:
     desc: Run Pester Tests with Coverage
     cmds:
-      - pwsh -NoProfile -File scripts/utils/run_pester.ps1 -Coverage
+      - pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Coverage
 
   benchmark:
     desc: Run Performance Benchmark
     cmds:
-      - pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1
+      - pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
 
   security-scan:
     desc: Run Security Scan
     cmds:
-      - pwsh -NoProfile -File scripts/utils/run-security-scan.ps1
+      - pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1
 
   check-module-updates:
     desc: Check Module Updates
     cmds:
-      - pwsh -NoProfile -File scripts/utils/check-module-updates.ps1
+      - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1
 
   install-module-updates:
     desc: Install Module Updates
     cmds:
-      - pwsh -NoProfile -File scripts/utils/check-module-updates.ps1 -Update
+      - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update
 
   generate-changelog:
     desc: Generate Changelog
     cmds:
-      - pwsh -NoProfile -File scripts/utils/generate-changelog.ps1
+      - pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1
 
   create-release:
     desc: Create Release (Dry Run)
     cmds:
-      - pwsh -NoProfile -File scripts/utils/create-release.ps1 -DryRun
+      - pwsh -NoProfile -File scripts/utils/release/create-release.ps1 -DryRun
 
   generate-docs:
     desc: Generate API Documentation
     cmds:
-      - pwsh -NoProfile -File scripts/utils/generate-docs.ps1
+      - pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1
 
   spellcheck:
     desc: Run Spellcheck
     cmds:
-      - pwsh -NoProfile -File scripts/utils/spellcheck.ps1
+      - pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1
 
   markdownlint:
     desc: Run Markdownlint
     cmds:
-      - pwsh -NoProfile -File scripts/utils/run-markdownlint.ps1
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1
 
   install-githooks:
     desc: Install Git hooks
@@ -81,17 +81,17 @@ tasks:
   format:
     desc: Format Code
     cmds:
-      - pwsh -NoProfile -File scripts/utils/run-format.ps1
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1
 
   find-duplicates:
     desc: Find Duplicate Functions
     cmds:
-      - pwsh -NoProfile -File scripts/utils/find-duplicate-functions.ps1
+      - pwsh -NoProfile -File scripts/utils/metrics/find-duplicate-functions.ps1
 
   generate-fragment-readmes:
     desc: Generate Fragment READMEs
     cmds:
-      - pwsh -NoProfile -File scripts/utils/generate-fragment-readmes.ps1
+      - pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1
 
   check-commit-messages:
     desc: Check Commit Messages
@@ -101,11 +101,11 @@ tasks:
   update-baseline:
     desc: Update Performance Baseline
     cmds:
-      - pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline
+      - pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline
 
   quality-check:
-    desc: Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests)
-    deps: [format, security-scan, lint, spellcheck, markdownlint, check-comment-help, test]
+    desc: Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests + function naming)
+    deps: [format, security-scan, lint, spellcheck, markdownlint, check-comment-help, test, validate-function-naming]
     cmds:
       - echo "All quality checks passed"
 
@@ -118,6 +118,21 @@ tasks:
     desc: Check Idempotency
     cmds:
       - pwsh -NoProfile -File scripts/checks/check-idempotency.ps1
+
+  validate-function-naming:
+    desc: Validate Function Naming Conventions
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1
+
+  validate-dependencies:
+    desc: Validate Dependencies
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/dependencies/validate-dependencies.ps1
+
+  check-vulnerabilities:
+    desc: Check Dependency Updates (Vulnerability scanning can be added)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1
 
   format-and-lint:
     desc: Format and Lint Code

@@ -2,17 +2,17 @@
 
 ## Synopsis
 
-Launches bottom system monitor.
+Shows top CPU-consuming processes.
 
 ## Description
 
-Opens bottom, a cross-platform graphical process/system monitor. Provides an interactive, real-time view of system resources including CPU, memory, disk, and network usage.
+Displays the top 10 processes sorted by CPU usage.
 
 ## Alias Information
 
-**Alias for:** `bottom`
+**Alias for:** `Get-TopProcesses`
 
-This is an alias that points to the `bottom` command. Use this alias as a shorthand for the full command name.
+This is an alias that points to the `Get-TopProcesses` command. Use this alias as a shorthand for the full command name.
 
 ## Examples
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: profile.d\64-bottom.ps1
+Defined in: profile.d\07-system.ps1

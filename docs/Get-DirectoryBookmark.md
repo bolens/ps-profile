@@ -20,6 +20,7 @@ Get-DirectoryBookmark
 
 Name of the bookmark to jump to.
 
+
 ## Examples
 
 No examples provided.

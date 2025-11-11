@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `pxshell` - Activates the pixi shell environment.
 
+
 ## Source
 
 Defined in: profile.d\68-pixi.ps1

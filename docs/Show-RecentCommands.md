@@ -20,6 +20,7 @@ Show-RecentCommands
 
 Number of recent commands to show (default: 10).
 
+
 ## Examples
 
 No examples provided.

@@ -29,6 +29,7 @@ This function has the following aliases:
 - `c` - Enhanced change directory with navigation tracking.
 - `cd` - Enhanced change directory with navigation tracking.
 
+
 ## Source
 
 Defined in: profile.d\76-smart-navigation.ps1

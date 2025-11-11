@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `scleanup` - Cleans up Scoop cache and old versions.
 
+
 ## Source
 
 Defined in: profile.d\09-package-managers.ps1

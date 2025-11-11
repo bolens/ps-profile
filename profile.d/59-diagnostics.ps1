@@ -8,7 +8,20 @@ interactive startup.
 
 # Register diagnostics helpers
 try {
-    if ($null -ne (Get-Variable -Name 'DiagnosticsLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
+    $diagnosticsLoaded = Get-Variable -Name 'PSProfileDiagnosticsLoaded' -Scope Global -ErrorAction SilentlyContinue
+
+    if ($diagnosticsLoaded) {
+        $missingCommands = @(
+            'Show-ProfileDiagnostic'
+            'Show-ProfileStartupTime'
+            'Test-ProfileHealth'
+            'Show-CommandUsageStats'
+        ) | Where-Object {
+            -not (Get-Command $_ -CommandType Function -ErrorAction SilentlyContinue)
+        }
+
+        if (-not $missingCommands) { return }
+    }
 
     if ($env:PS_PROFILE_DEBUG) {
         # Track profile startup time
@@ -181,7 +194,7 @@ try {
             Write-Host ("`nEstimated tracking overhead: ~{0} bytes" -f $estimatedMemory)
         }
 
-        Set-Variable -Name 'DiagnosticsLoaded' -Value $true -Scope Global -Force
+        Set-Variable -Name 'PSProfileDiagnosticsLoaded' -Value $true -Scope Global -Force
     }
 }
 catch {

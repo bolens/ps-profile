@@ -39,13 +39,123 @@ jobs:
         run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/check-comment-help.ps1
 
       - name: Generate API Documentation
-        run: ${{ matrix.powershell }} -NoProfile -File scripts/utils/generate-docs.ps1
+        id: generate-docs
+        run: ${{ matrix.powershell }} -NoProfile -File scripts/utils/docs/generate-docs.ps1
+        continue-on-error: true
+
+      - name: Comment PR with Documentation Summary
+        if: github.event_name == 'pull_request' && matrix.os == 'windows-latest' && steps.generate-docs.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+              // Check if documentation was generated
+              const docsPath = 'docs/';
+              if (fs.existsSync(docsPath)) {
+                const files = fs.readdirSync(docsPath);
+                const docFiles = files.filter(f => f.endsWith('.md') && f !== 'README.md');
+                const indexFile = files.find(f => f === 'README.md');
+                
+                if (docFiles.length > 0) {
+                  // Read the index file to get summary statistics
+                  let totalFunctions = 0;
+                  let totalAliases = 0;
+                  let generatedDate = '';
+                  
+                  if (indexFile) {
+                    try {
+                      const indexContent = fs.readFileSync(path.join(docsPath, indexFile), 'utf8');
+                      const functionMatch = indexContent.match(/\*\*Total Functions:\*\* (\d+)/);
+                      const aliasMatch = indexContent.match(/\*\*Total Aliases:\*\* (\d+)/);
+                      const dateMatch = indexContent.match(/\*\*Generated:\*\* ([^\n]+)/);
+                      
+                      if (functionMatch) totalFunctions = parseInt(functionMatch[1]);
+                      if (aliasMatch) totalAliases = parseInt(aliasMatch[1]);
+                      if (dateMatch) generatedDate = dateMatch[1].trim();
+                    } catch (e) {
+                      console.log('Could not parse index file:', e.message);
+                    }
+                  }
+                  
+                  // Group files by type (functions vs aliases)
+                  const functionFiles = docFiles.filter(f => !f.includes('alias') && !f.includes('Alias'));
+                  const aliasFiles = docFiles.filter(f => f.includes('alias') || f.includes('Alias'));
+                  
+                  let body = '📚 **API Documentation Generated**\n\n';
+                  
+                  if (totalFunctions > 0 || totalAliases > 0) {
+                    body += `**Summary:**\n`;
+                    if (totalFunctions > 0) {
+                      body += `- ${totalFunctions} function(s) documented\n`;
+                    }
+                    if (totalAliases > 0) {
+                      body += `- ${totalAliases} alias(es) documented\n`;
+                    }
+                    if (generatedDate) {
+                      body += `- Generated: ${generatedDate}\n`;
+                    }
+                    body += '\n';
+                  }
+                  
+                  body += `**Documentation Files:** ${docFiles.length} file(s) generated\n\n`;
+                  
+                  // Show sample of documented functions
+                  if (functionFiles.length > 0) {
+                    body += '**Sample Functions:**\n';
+                    functionFiles.slice(0, 5).forEach(file => {
+                      const name = file.replace('.md', '');
+                      body += `- \`${name}\`\n`;
+                    });
+                    if (functionFiles.length > 5) {
+                      body += `\n*...and ${functionFiles.length - 5} more function(s)*\n`;
+                    }
+                    body += '\n';
+                  }
+                  
+                  // Show sample of documented aliases
+                  if (aliasFiles.length > 0) {
+                    body += '**Sample Aliases:**\n';
+                    aliasFiles.slice(0, 5).forEach(file => {
+                      const name = file.replace('.md', '');
+                      body += `- \`${name}\`\n`;
+                    });
+                    if (aliasFiles.length > 5) {
+                      body += `\n*...and ${aliasFiles.length - 5} more alias(es)*\n`;
+                    }
+                    body += '\n';
+                  }
+                  
+                  body += '📋 **View Documentation:**\n';
+                  body += '- Documentation artifacts are available in the workflow run artifacts\n';
+                  body += '- Download the `api-docs-*` artifact to view the generated markdown files\n';
+                  if (indexFile) {
+                    body += '- The `README.md` file contains an index of all documented functions and aliases\n';
+                  }
+                  body += '\n';
+                  body += '*Documentation is automatically generated from comment-based help in PowerShell functions.*';
+                  
+                  github.rest.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: body
+                  });
+                }
+              }
+            } catch (error) {
+              console.log('Failed to post documentation comment:', error.message);
+            }
 
       - name: Upload documentation
         uses: actions/upload-artifact@v5
+        if: always()
         with:
           name: api-docs-${{ matrix.os }}-${{ matrix.powershell }}
           path: docs/
+          if-no-files-found: ignore
 
       - name: Upload validation artifacts
         uses: actions/upload-artifact@v5

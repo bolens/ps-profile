@@ -17,12 +17,11 @@ scripts/git/pre-commit.ps1
 
 # Import shared utilities
 $scriptsDir = Split-Path -Parent $PSScriptRoot
-$commonModulePath = Join-Path $scriptsDir 'utils' 'Common.psm1'
+$commonModulePath = Join-Path $scriptsDir 'lib' 'Common.psm1'
 if (-not (Test-Path $commonModulePath)) {
     throw "Common module not found at: $commonModulePath. PSScriptRoot: $PSScriptRoot"
 }
-$commonModulePath = (Resolve-Path $commonModulePath).Path
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module (Resolve-Path $commonModulePath).Path -ErrorAction Stop
 
 # Get repository root
 try {
@@ -33,7 +32,7 @@ catch {
 }
 
 # Run formatting first
-$formatScript = Join-Path $repoRoot 'scripts' 'utils' 'run-format.ps1'
+$formatScript = Join-Path $repoRoot 'scripts' 'utils' 'code-quality' 'run-format.ps1'
 if (Test-Path $formatScript) {
     Write-ScriptMessage -Message "Running code formatting..."
     $psExe = Get-PowerShellExecutable

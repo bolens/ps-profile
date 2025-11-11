@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `battery` - Shows battery information.
 
+
 ## Source
 
 Defined in: profile.d\08-system-info.ps1

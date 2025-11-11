@@ -13,62 +13,80 @@
 #>
 if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
     function Ensure-FileNavigation {
-        # Up directory
-        function global:.. { Set-Location .. }
-        # Up two directories
-        function global:... { Set-Location ..\..\ }
-        # Up three directories
-        function global:.... { Set-Location ..\..\..\ }
-        # Go to user's Home directory (cross-platform)
-        $userHome = if (Test-Path Function:\Get-UserHome) {
-            Get-UserHome
-        }
-        elseif ($env:HOME) {
-            $env:HOME
-        }
-        else {
-            $env:USERPROFILE
-        }
-        Set-Item -Path Function:~ -Value { Set-Location (Get-UserHome) } -Force | Out-Null
-        
-        # Go to user's Desktop directory (Windows-specific, gracefully handled on other platforms)
-        Set-Item -Path Function:Set-LocationDesktop -Value {
-            $home = Get-UserHome
-            $desktop = Join-Path $home 'Desktop'
+        Set-Item -Path Function:\global:__FileNavigation_UpOne -Value { Set-Location .. } -Force | Out-Null
+        Set-Item -Path Function:\global:__FileNavigation_UpTwo -Value { Set-Location ..\..\ } -Force | Out-Null
+        Set-Item -Path Function:\global:__FileNavigation_UpThree -Value { Set-Location ..\..\..\ } -Force | Out-Null
+
+        $resolveHome = {
+            if (Test-Path Function:\Get-UserHome) {
+                Get-UserHome
+            }
+            elseif ($env:HOME) {
+                $env:HOME
+            }
+            else {
+                $env:USERPROFILE
+            }
+        }.GetNewClosure()
+
+        $homeScript = {
+            $resolvedHome = & $resolveHome
+            if ($resolvedHome) {
+                Set-Location $resolvedHome
+            }
+            else {
+                throw 'Unable to determine user home directory.'
+            }
+        }.GetNewClosure()
+        Set-Item -Path Function:\global:__FileNavigation_Home -Value $homeScript -Force | Out-Null
+
+        $desktopScript = {
+            $resolvedHome = & $resolveHome
+            if (-not $resolvedHome) {
+                throw 'Unable to determine user home directory.'
+            }
+
+            $desktop = Join-Path $resolvedHome 'Desktop'
             if (Test-Path $desktop) {
                 Set-Location $desktop
             }
             else {
-                Write-Warning "Desktop directory not found. This may not be available on your platform."
+                Write-Warning 'Desktop directory not found. This may not be available on your platform.'
             }
-        } -Force | Out-Null
-        Set-Alias -Name desktop -Value Set-LocationDesktop -ErrorAction SilentlyContinue
-        
-        # Go to user's Downloads directory (cross-platform)
-        Set-Item -Path Function:Set-LocationDownloads -Value {
-            $home = Get-UserHome
-            $downloads = Join-Path $home 'Downloads'
+        }.GetNewClosure()
+        Set-Item -Path Function:\global:__FileNavigation_Desktop -Value $desktopScript -Force | Out-Null
+
+        $downloadsScript = {
+            $resolvedHome = & $resolveHome
+            if (-not $resolvedHome) {
+                throw 'Unable to determine user home directory.'
+            }
+
+            $downloads = Join-Path $resolvedHome 'Downloads'
             if (Test-Path $downloads) {
                 Set-Location $downloads
             }
             else {
-                Write-Warning "Downloads directory not found. This may not be available on your platform."
+                Write-Warning 'Downloads directory not found. This may not be available on your platform.'
             }
-        } -Force | Out-Null
-        Set-Alias -Name downloads -Value Set-LocationDownloads -ErrorAction SilentlyContinue
-        
-        # Go to user's Documents directory (cross-platform)
-        Set-Item -Path Function:Set-LocationDocuments -Value {
-            $home = Get-UserHome
-            $documents = Join-Path $home 'Documents'
+        }.GetNewClosure()
+        Set-Item -Path Function:\global:__FileNavigation_Downloads -Value $downloadsScript -Force | Out-Null
+
+        $documentsScript = {
+            $resolvedHome = & $resolveHome
+            if (-not $resolvedHome) {
+                throw 'Unable to determine user home directory.'
+            }
+
+            $documents = Join-Path $resolvedHome 'Documents'
             if (Test-Path $documents) {
                 Set-Location $documents
             }
             else {
-                Write-Warning "Documents directory not found. This may not be available on your platform."
+                Write-Warning 'Documents directory not found. This may not be available on your platform.'
             }
-        } -Force | Out-Null
-        Set-Alias -Name docs -Value Set-LocationDocuments -ErrorAction SilentlyContinue
+        }.GetNewClosure()
+        Set-Item -Path Function:\global:__FileNavigation_Documents -Value $documentsScript -Force | Out-Null
     }
 }
 
@@ -79,7 +97,17 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
 .DESCRIPTION
     Moves up one directory level in the file system.
 #>
-function .. { if (-not (Test-Path Function:\..)) { Ensure-FileNavigation }; return & (Get-Item Function:\.. -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function .. {
+    if (-not (Test-Path Function:\__FileNavigation_UpOne)) {
+        Ensure-FileNavigation
+    }
+
+    if (-not (Test-Path Function:\__FileNavigation_UpOne)) {
+        throw 'File navigation helper "__FileNavigation_UpOne" failed to initialize.'
+    }
+
+    return & __FileNavigation_UpOne @args
+}
 
 # Up two directories
 <#
@@ -88,7 +116,17 @@ function .. { if (-not (Test-Path Function:\..)) { Ensure-FileNavigation }; retu
 .DESCRIPTION
     Moves up two directory levels in the file system.
 #>
-function ... { if (-not (Test-Path Function:\...)) { Ensure-FileNavigation }; return & (Get-Item Function:\... -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function ... {
+    if (-not (Test-Path Function:\__FileNavigation_UpTwo)) {
+        Ensure-FileNavigation
+    }
+
+    if (-not (Test-Path Function:\__FileNavigation_UpTwo)) {
+        throw 'File navigation helper "__FileNavigation_UpTwo" failed to initialize.'
+    }
+
+    return & __FileNavigation_UpTwo @args
+}
 
 # Up three directories
 <#
@@ -97,10 +135,30 @@ function ... { if (-not (Test-Path Function:\...)) { Ensure-FileNavigation }; re
 .DESCRIPTION
     Moves up three directory levels in the file system.
 #>
-function .... { if (-not (Test-Path Function:\....)) { Ensure-FileNavigation }; return & (Get-Item Function:\.... -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function .... {
+    if (-not (Test-Path Function:\__FileNavigation_UpThree)) {
+        Ensure-FileNavigation
+    }
+
+    if (-not (Test-Path Function:\__FileNavigation_UpThree)) {
+        throw 'File navigation helper "__FileNavigation_UpThree" failed to initialize.'
+    }
+
+    return & __FileNavigation_UpThree @args
+}
 
 # Go to user home directory
-Set-Item -Path Function:\~ -Value { if (-not (Test-Path Function:\~)) { Ensure-FileNavigation }; return & (Get-Item Function:\~ -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) } -Force | Out-Null
+Set-Item -Path Function:\~ -Value {
+    if (-not (Test-Path Function:\__FileNavigation_Home)) {
+        Ensure-FileNavigation
+    }
+
+    if (-not (Test-Path Function:\__FileNavigation_Home)) {
+        throw 'File navigation helper "__FileNavigation_Home" failed to initialize.'
+    }
+
+    return & __FileNavigation_Home @args
+} -Force | Out-Null
 
 # Go to Desktop directory
 <#
@@ -109,7 +167,17 @@ Set-Item -Path Function:\~ -Value { if (-not (Test-Path Function:\~)) { Ensure-F
 .DESCRIPTION
     Navigates to the user's Desktop folder.
 #>
-function Set-LocationDesktop { if (-not (Test-Path Function:\Set-LocationDesktop)) { Ensure-FileNavigation }; return & (Get-Item Function:\Set-LocationDesktop -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Set-LocationDesktop {
+    if (-not (Test-Path Function:\__FileNavigation_Desktop)) {
+        Ensure-FileNavigation
+    }
+
+    if (-not (Test-Path Function:\__FileNavigation_Desktop)) {
+        throw 'File navigation helper "__FileNavigation_Desktop" failed to initialize.'
+    }
+
+    return & __FileNavigation_Desktop @args
+}
 Set-Alias -Name desktop -Value Set-LocationDesktop -ErrorAction SilentlyContinue
 
 # Go to Downloads directory
@@ -119,7 +187,17 @@ Set-Alias -Name desktop -Value Set-LocationDesktop -ErrorAction SilentlyContinue
 .DESCRIPTION
     Navigates to the user's Downloads folder.
 #>
-function Set-LocationDownloads { if (-not (Test-Path Function:\Set-LocationDownloads)) { Ensure-FileNavigation }; return & (Get-Item Function:\Set-LocationDownloads -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Set-LocationDownloads {
+    if (-not (Test-Path Function:\__FileNavigation_Downloads)) {
+        Ensure-FileNavigation
+    }
+
+    if (-not (Test-Path Function:\__FileNavigation_Downloads)) {
+        throw 'File navigation helper "__FileNavigation_Downloads" failed to initialize.'
+    }
+
+    return & __FileNavigation_Downloads @args
+}
 Set-Alias -Name downloads -Value Set-LocationDownloads -ErrorAction SilentlyContinue
 
 # Go to Documents directory
@@ -129,5 +207,15 @@ Set-Alias -Name downloads -Value Set-LocationDownloads -ErrorAction SilentlyCont
 .DESCRIPTION
     Navigates to the user's Documents folder.
 #>
-function Set-LocationDocuments { if (-not (Test-Path Function:\Set-LocationDocuments)) { Ensure-FileNavigation }; return & (Get-Item Function:\Set-LocationDocuments -ErrorAction SilentlyContinue).ScriptBlock.InvokeReturnAsIs($args) }
+function Set-LocationDocuments {
+    if (-not (Test-Path Function:\__FileNavigation_Documents)) {
+        Ensure-FileNavigation
+    }
+
+    if (-not (Test-Path Function:\__FileNavigation_Documents)) {
+        throw 'File navigation helper "__FileNavigation_Documents" failed to initialize.'
+    }
+
+    return & __FileNavigation_Documents @args
+}
 Set-Alias -Name docs -Value Set-LocationDocuments -ErrorAction SilentlyContinue

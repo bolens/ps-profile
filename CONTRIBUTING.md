@@ -10,12 +10,30 @@ All validation scripts automatically install required modules (PSScriptAnalyzer,
 
 ### Shared Utilities
 
-Utility scripts should use the shared `scripts/utils/Common.psm1` module for common functionality:
+Utility scripts should use the shared `scripts/lib/Common.psm1` module for common functionality.
+
+**Import Pattern by Script Location:**
 
 ```powershell
-# Import the common module
+# Scripts in scripts/utils/ subdirectories (e.g., code-quality/, metrics/)
+$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
+Import-Module $commonModulePath -ErrorAction Stop
+
+# Scripts in scripts/checks/ - Common.psm1 is in scripts/lib/
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
+Import-Module $commonModulePath -ErrorAction Stop
+
+# Scripts in scripts/git/ - Common.psm1 is in scripts/lib/
+$scriptsDir = Split-Path -Parent $PSScriptRoot
+$commonModulePath = Join-Path $scriptsDir 'lib' 'Common.psm1'
+if (-not (Test-Path $commonModulePath)) {
+    throw "Common module not found at: $commonModulePath"
+}
+Import-Module (Resolve-Path $commonModulePath).Path -ErrorAction Stop
+
+# Scripts in scripts/lib/ - Common.psm1 is in the same directory
 $commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
-Import-Module -Path $commonModulePath -ErrorAction Stop
+Import-Module $commonModulePath -ErrorAction Stop
 
 # Use shared functions
 $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
@@ -143,6 +161,61 @@ catch {
 }
 ```
 
+**Path Parameter Validation:**
+
+For path parameters, use ValidateScript with Test-Path:
+
+```powershell
+param(
+    [ValidateScript({
+            if ($_ -and -not (Test-Path $_)) {
+                throw "Path does not exist: $_"
+            }
+            $true
+        })]
+    [string]$Path = $null
+)
+```
+
+Or validate after import using Test-PathExists:
+
+```powershell
+try {
+    Test-PathExists -Path $configFile -PathType 'File'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+```
+
+### Error Handling Standards
+
+**Always use try-catch for risky operations:**
+
+```powershell
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+```
+
+**Never use direct `exit` calls - always use `Exit-WithCode`:**
+
+```powershell
+# ❌ Bad
+if ($error) { exit 1 }
+
+# ✅ Good
+if ($error) {
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Validation failed"
+}
+```
+
+**Exception:** Git hook templates that generate shell scripts may use `exit 0` or `exit 1` in here-strings, as these are part of the generated script, not the PowerShell script itself.
+
 ## Local Validation
 
 Run these checks before opening a PR:
@@ -157,14 +230,15 @@ Run these checks before opening a PR:
 task quality-check
 
 # Or individual tasks
-task validate          # Full validation (format + security + lint + spellcheck + help + idempotency)
-task format            # Format code
-task lint              # Lint code
-task test              # Run tests
-task test-coverage     # Run tests with coverage
-task spellcheck        # Spellcheck
-task markdownlint      # Markdownlint
-task pre-commit-checks # Run pre-commit checks manually
+task validate                # Full validation (format + security + lint + spellcheck + help + idempotency)
+task format                  # Format code
+task lint                    # Lint code
+task test                    # Run tests
+task test-coverage           # Run tests with coverage
+task spellcheck              # Spellcheck
+task markdownlint            # Markdownlint
+task validate-function-naming # Validate function naming conventions
+task pre-commit-checks       # Run pre-commit checks manually
 ```
 
 ### Direct Script Execution
@@ -174,13 +248,14 @@ task pre-commit-checks # Run pre-commit checks manually
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1
 
 # Individual checks
-pwsh -NoProfile -File scripts/utils/run-format.ps1          # Format code
-pwsh -NoProfile -File scripts/utils/run-security-scan.ps1   # Security scan
-pwsh -NoProfile -File scripts/utils/run-lint.ps1            # Lint (PSScriptAnalyzer)
-pwsh -NoProfile -File scripts/checks/check-idempotency.ps1  # Idempotency test
-pwsh -NoProfile -File scripts/utils/run_pester.ps1         # Run tests
-pwsh -NoProfile -File scripts/utils/spellcheck.ps1          # Spellcheck
-pwsh -NoProfile -File scripts/utils/run-markdownlint.ps1    # Markdownlint
+pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1          # Format code
+pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1        # Security scan
+pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1                    # Lint (PSScriptAnalyzer)
+pwsh -NoProfile -File scripts/checks/check-idempotency.ps1                       # Idempotency test
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1                  # Run tests
+pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1                  # Spellcheck
+pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1            # Markdownlint
+pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1   # Validate function naming
 ```
 
 ## Git Hooks
@@ -243,7 +318,7 @@ Use numeric prefixes to control load order:
 ## Documentation
 
 - Function/alias documentation is auto-generated from comment-based help
-- Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/generate-docs.ps1` to regenerate
+- Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1` to regenerate
 - See [PROFILE_README.md](PROFILE_README.md) for detailed technical information
 
 ## Questions

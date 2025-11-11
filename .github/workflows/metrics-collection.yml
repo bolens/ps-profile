@@ -1,0 +1,171 @@
+name: Metrics Collection
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+  push:
+    branches:
+      - main
+    paths:
+      # Trigger when metrics-related files change
+      - 'scripts/utils/metrics/**'
+      - 'scripts/lib/Common.psm1'
+      - 'scripts/data/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/**/*.ps1'
+      - 'profile.d/**/*.ps1'
+
+jobs:
+  collect-metrics:
+    name: Collect and Store Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: actions/setup-powershell@v1
+        with:
+          pwsh-version: '7.4'
+
+      - name: Collect Code Metrics
+        id: collect-code-metrics
+        run: |
+          pwsh -NoProfile -File scripts/utils/metrics/collect-code-metrics.ps1
+        continue-on-error: true
+
+      - name: Collect Performance Metrics (if available)
+        id: collect-performance-metrics
+        run: |
+          if [ -f "scripts/utils/metrics/benchmark-startup.ps1" ]; then
+            pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 || true
+          fi
+        continue-on-error: true
+
+      - name: Save Metrics Snapshot
+        id: save-snapshot
+        run: |
+          pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1 -IncludeCodeMetrics -IncludePerformanceMetrics
+        continue-on-error: true
+
+      - name: Generate Metrics Dashboard
+        id: generate-dashboard
+        run: |
+          pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1 -IncludeHistorical || true
+        continue-on-error: true
+
+      - name: Export Metrics
+        id: export-metrics
+        run: |
+          pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1 -IncludeCodeMetrics -IncludePerformance || true
+        continue-on-error: true
+
+      - name: Upload Metrics Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metrics-artifacts
+          path: |
+            scripts/data/code-metrics.json
+            scripts/data/performance-baseline.json
+            scripts/data/metrics-export.json
+            scripts/data/metrics-dashboard.html
+            scripts/data/history/*.json
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Comment PR with Metrics Summary
+        if: github.event_name == 'pull_request' && steps.collect-code-metrics.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+              const metricsPath = 'scripts/data/code-metrics.json';
+              if (fs.existsSync(metricsPath)) {
+                const metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
+                
+                const body = `## 📊 Code Metrics Summary
+                
+                **Total Files:** ${metrics.TotalFiles || 'N/A'}
+                **Total Lines:** ${metrics.TotalLines || 'N/A'}
+                **Total Functions:** ${metrics.TotalFunctions || 'N/A'}
+                **Total Complexity:** ${metrics.TotalComplexity || 'N/A'}
+                **Duplicate Functions:** ${metrics.DuplicateFunctions || 0}
+                
+                *Metrics collected automatically by CI/CD*`;
+                
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: body
+                });
+              }
+            } catch (error) {
+              console.log('Failed to post metrics comment:', error.message);
+            }
+
+  analyze-trends:
+    name: Analyze Metrics Trends
+    runs-on: ubuntu-latest
+    needs: collect-metrics
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: actions/setup-powershell@v1
+        with:
+          pwsh-version: '7.4'
+
+      - name: Download Metrics Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: metrics-artifacts
+          path: scripts/data
+
+      - name: Analyze Trends
+        id: analyze-trends
+        run: |
+          pwsh -NoProfile -Command "
+            Import-Module scripts/lib/Common.psm1 -ErrorAction Stop
+            `$historical = Get-HistoricalMetrics -HistoryPath 'scripts/data/history'
+            if (`$historical.Count -ge 2) {
+              `$filesTrend = Get-MetricsTrend -HistoricalData `$historical -MetricName 'CodeMetrics.TotalFiles'
+              `$linesTrend = Get-MetricsTrend -HistoricalData `$historical -MetricName 'CodeMetrics.TotalLines'
+              `$functionsTrend = Get-MetricsTrend -HistoricalData `$historical -MetricName 'CodeMetrics.TotalFunctions'
+              
+              Write-Host '## Metrics Trends Analysis'
+              Write-Host ''
+              Write-Host '### Total Files'
+              Write-Host \"  Trend: `$(`$filesTrend.TrendDirection)\"
+              Write-Host \"  Growth Rate: `$(`$filesTrend.GrowthRate)%\"
+              Write-Host \"  Change: `$(`$filesTrend.TotalChange) files\"
+              Write-Host ''
+              Write-Host '### Total Lines'
+              Write-Host \"  Trend: `$(`$linesTrend.TrendDirection)\"
+              Write-Host \"  Growth Rate: `$(`$linesTrend.GrowthRate)%\"
+              Write-Host \"  Change: `$(`$linesTrend.TotalChange) lines\"
+              Write-Host ''
+              Write-Host '### Total Functions'
+              Write-Host \"  Trend: `$(`$functionsTrend.TrendDirection)\"
+              Write-Host \"  Growth Rate: `$(`$functionsTrend.GrowthRate)%\"
+              Write-Host \"  Change: `$(`$functionsTrend.TotalChange) functions\"
+            } else {
+              Write-Host 'Insufficient historical data for trend analysis (need at least 2 snapshots)'
+            }
+          "
+        continue-on-error: true
+

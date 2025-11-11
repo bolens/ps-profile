@@ -24,6 +24,7 @@ Name for the bookmark.
 
 Directory path to bookmark (defaults to current directory).
 
+
 ## Examples
 
 No examples provided.

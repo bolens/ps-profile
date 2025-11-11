@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `json-pretty` - Pretty-prints JSON data.
 
+
 ## Source
 
 Defined in: profile.d\02-files-conversion.ps1

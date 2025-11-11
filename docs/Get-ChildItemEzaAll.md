@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `la` - Lists all directory contents including hidden files using eza.
 
+
 ## Source
 
 Defined in: profile.d\61-eza.ps1

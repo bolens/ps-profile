@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `gb` - Lists, creates, or deletes branches.
 
+
 ## Source
 
 Defined in: profile.d\11-git.ps1

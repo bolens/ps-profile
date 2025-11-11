@@ -53,15 +53,15 @@ See `.vscode/tasks.json` or `Taskfile.yml` for all available tasks.
 
 ```powershell
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1  # Full validation
-pwsh -NoProfile -File scripts/utils/run-lint.ps1          # Lint only
-pwsh -NoProfile -File scripts/utils/run-security-scan.ps1  # Security scan
+pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1          # Lint only
+pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1  # Security scan
 ```
 
 ### Performance
 
 ```powershell
-pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
-pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline  # Update baseline
+pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 30
+pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline  # Update baseline
 ```
 
 ### Documentation
@@ -82,7 +82,17 @@ pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline  # Upd
 │   └── 22-containers.ps1              # Container utilities
 ├── scripts/                           # Validation & utilities
 │   ├── checks/                        # Validation scripts
-│   └── utils/                         # Helper scripts
+│   ├── lib/                           # Shared script modules (Common.psm1)
+│   ├── utils/                         # Helper scripts (organized by category)
+│   │   ├── code-quality/              # Linting, formatting, testing
+│   │   ├── metrics/                   # Performance and code metrics
+│   │   ├── docs/                      # Documentation generation
+│   │   ├── dependencies/              # Dependency management
+│   │   ├── security/                  # Security scanning
+│   │   ├── release/                   # Release management
+│   │   └── fragment/                  # Fragment management
+│   ├── templates/                     # Script templates
+│   └── examples/                      # Usage examples
 └── docs/                              # Auto-generated API docs
 ```
 

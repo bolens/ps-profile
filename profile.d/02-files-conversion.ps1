@@ -22,14 +22,28 @@ if (-not (Test-Path "Function:\\Ensure-FileConversion")) {
                 $fileArgs
             )
             process {
-                if ($fileArgs) {
-                    Get-Content -Raw -LiteralPath @fileArgs | ConvertFrom-Json | ConvertTo-Json -Depth 10
+                $rawInput = $null
+                try {
+                    if ($fileArgs) {
+                        $rawInput = Get-Content -Raw -LiteralPath @fileArgs
+                        $rawInput | ConvertFrom-Json -ErrorAction Stop | ConvertTo-Json -Depth 10
+                    }
+                    elseif ($PSBoundParameters.ContainsKey('InputObject') -and $null -ne $InputObject) {
+                        $rawInput = $InputObject
+                        $rawInput | ConvertFrom-Json -ErrorAction Stop | ConvertTo-Json -Depth 10
+                    }
+                    else {
+                        $rawInput = $input | Out-String
+                        if (-not [string]::IsNullOrWhiteSpace($rawInput)) {
+                            $rawInput | ConvertFrom-Json -ErrorAction Stop | ConvertTo-Json -Depth 10
+                        }
+                    }
                 }
-                elseif ($InputObject) {
-                    $InputObject | ConvertFrom-Json | ConvertTo-Json -Depth 10
-                }
-                else {
-                    $input | ConvertFrom-Json | ConvertTo-Json -Depth 10
+                catch {
+                    Write-Warning "Failed to pretty-print JSON: $($_.Exception.Message)"
+                    if ($null -ne $rawInput) {
+                        Write-Output $rawInput
+                    }
                 }
             }
         } -Force | Out-Null

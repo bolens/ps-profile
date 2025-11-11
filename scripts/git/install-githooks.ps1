@@ -29,12 +29,11 @@ param(
 
 # Import shared utilities
 $scriptsDir = Split-Path -Parent $PSScriptRoot
-$commonModulePath = Join-Path $scriptsDir 'utils' 'Common.psm1'
+$commonModulePath = Join-Path $scriptsDir 'lib' 'Common.psm1'
 if (-not (Test-Path $commonModulePath)) {
     throw "Common module not found at: $commonModulePath. PSScriptRoot: $PSScriptRoot"
 }
-$commonModulePath = (Resolve-Path $commonModulePath).Path
-Import-Module $commonModulePath -ErrorAction Stop
+Import-Module (Resolve-Path $commonModulePath).Path -ErrorAction Stop
 
 # Get repository root
 try {
@@ -60,26 +59,38 @@ foreach ($hf in $hookFiles) {
     $target = Join-Path $gitHooksDir $name
 
 
-    # Create a small wrapper script that executes pwsh pointing at the repo script
-    $hookScriptPath = (Join-Path $repoRoot "scripts\git\hooks\$($hf.Name)")
-    $wrapperContent = "#!/usr/bin/env pwsh`n`$scriptDir = Split-Path -Parent `$MyInvocation.MyCommand.Definition`n& pwsh -NoProfile -File `"$hookScriptPath`" @args`nexit `$LASTEXITCODE`n"
+    # Create a small wrapper script that executes PowerShell pointing at the repo script
+    # Use Get-PowerShellExecutable for cross-platform compatibility
+    $psExe = Get-PowerShellExecutable
+    $hookScriptPath = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path 'git' (Join-Path 'hooks' $hf.Name)))
+    $wrapperContent = "#!/usr/bin/env $psExe`n`$scriptDir = Split-Path -Parent `$MyInvocation.MyCommand.Definition`n& $psExe -NoProfile -File `"$hookScriptPath`" @args`nexit `$LASTEXITCODE`n"
 
     Write-ScriptMessage -Message "Installing hook: $name -> $target"
     Set-Content -LiteralPath $target -Value $wrapperContent -Encoding UTF8
 
-    # Try to make the wrapper executable on Unix-like systems if chmod exists
+    # Try to make the wrapper executable on supported systems
     try {
-        if (Test-CommandAvailable -CommandName 'chmod') {
-            & chmod +x $target
-            Write-ScriptMessage -Message "Set executable bit on $target"
+        if (Test-IsWindows) {
+            # On Windows, try to grant read+execute permissions using icacls (best-effort)
+            if (Test-CommandAvailable -CommandName 'icacls') {
+                try { 
+                    icacls $target /grant "$($env:USERNAME):RX" > $null 2>&1 
+                } 
+                catch { 
+                    # Non-fatal - permissions may not be critical
+                }
+            }
         }
         else {
-            # On Windows, try to grant read+execute to the current user (best-effort)
-            try { icacls $target /grant "$($env:USERNAME):RX" > $null 2>&1 } catch { }
+            # On Unix-like systems, use chmod to set executable bit
+            if (Test-CommandAvailable -CommandName 'chmod') {
+                & chmod +x $target
+                Write-ScriptMessage -Message "Set executable bit on $target"
+            }
         }
     }
     catch {
-        # Non-fatal
+        # Non-fatal - permissions may not be critical on all systems
     }
 }
 

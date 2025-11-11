@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `cpuinfo` - Shows CPU information.
 
+
 ## Source
 
 Defined in: profile.d\08-system-info.ps1

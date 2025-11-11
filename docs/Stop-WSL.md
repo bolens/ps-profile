@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `wsl-shutdown` - Shuts down all WSL distributions.
 
+
 ## Source
 
 Defined in: profile.d\10-wsl.ps1

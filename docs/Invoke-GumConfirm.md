@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `confirm` - Shows a confirmation prompt using gum.
 
+
 ## Source
 
 Defined in: profile.d\63-gum.ps1

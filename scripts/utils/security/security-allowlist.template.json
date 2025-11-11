@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Security Scan Allowlist",
+  "description": "Template for configuring false positive filtering in security scans. Copy this file to security-allowlist.json and customize as needed.",
+  "type": "object",
+  "properties": {
+    "ExternalCommands": {
+      "description": "List of external commands that are safe to execute. These commands will not trigger security warnings.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        "git",
+        "pwsh",
+        "powershell",
+        "npm",
+        "npx"
+      ]
+    },
+    "SecretPatterns": {
+      "description": "List of regex patterns that match known-safe secret-like strings (e.g., examples, placeholders, test values). Patterns matching these will not trigger security warnings.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Regular expression pattern"
+      },
+      "examples": [
+        "password\\s*=\\s*[\"']?example",
+        "password\\s*=\\s*[\"']?test",
+        "api_key\\s*=\\s*[\"']?your.*key"
+      ]
+    },
+    "FilePatterns": {
+      "description": "List of regex patterns that match file paths that should be excluded from security scanning (e.g., test files). Files matching these patterns will not trigger security warnings.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Regular expression pattern matching file paths"
+      },
+      "examples": [
+        "\\.tests\\.ps1$",
+        "\\.test\\.ps1$",
+        "test-.*\\.ps1$"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
+

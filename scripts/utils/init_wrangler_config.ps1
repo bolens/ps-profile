@@ -46,16 +46,54 @@ param(
 )
 
 # Import shared utilities
-$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
 Import-Module $commonModulePath -ErrorAction Stop
 
 function Get-TargetPath {
-    # Use the exact path style from your log. If you prefer XDG env var, set XDG_CONFIG_HOME
-    $appdata = $env:APPDATA
-    if (-not $appdata) { throw 'APPDATA is not set in the environment; unable to compute target path.' }
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param()
+    
+    # Cross-platform config directory resolution:
+    # 1. Use XDG_CONFIG_HOME if set (Unix standard)
+    # 2. Use APPDATA on Windows
+    # 3. Fallback to home directory + .config (Unix) or APPDATA equivalent (Windows)
+    
+    $configBase = $null
+    
+    if ($env:XDG_CONFIG_HOME) {
+        # XDG_CONFIG_HOME is set (Unix standard)
+        $configBase = $env:XDG_CONFIG_HOME
+    }
+    elseif ($env:APPDATA) {
+        # Windows: Use APPDATA
+        $configBase = $env:APPDATA
+    }
+    else {
+        # Fallback: Use home directory
+        if ($env:HOME) {
+            $configBase = Join-Path $env:HOME '.config'
+        }
+        elseif ($env:USERPROFILE) {
+            # Windows fallback
+            $configBase = Join-Path $env:USERPROFILE 'AppData' 'Roaming'
+        }
+        else {
+            throw 'Unable to determine config directory. Neither XDG_CONFIG_HOME, APPDATA, HOME, nor USERPROFILE are set.'
+        }
+    }
 
-    # match the path reported by the debug message
-    $dir = Join-Path -Path $appdata -ChildPath 'xdg.config\.wrangler\config'
+    # On Windows with APPDATA, use the xdg.config subdirectory style
+    # On Unix, use standard XDG structure
+    if ($env:APPDATA -and $configBase -eq $env:APPDATA) {
+        # Windows: match the path style from the original implementation
+        $dir = Join-Path -Path $configBase -ChildPath 'xdg.config\.wrangler\config'
+    }
+    else {
+        # Unix: standard XDG config structure
+        $dir = Join-Path -Path $configBase -ChildPath '.wrangler' 'config'
+    }
+    
     $file = Join-Path -Path $dir -ChildPath 'default.toml'
     return @{ Dir = $dir; File = $file }
 }

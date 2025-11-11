@@ -6,7 +6,7 @@ Gets an environment variable value from the registry.
 
 ## Description
 
-Retrieves the value of an environment variable from the Windows registry.
+Retrieves the value of an environment variable from the Windows registry. Works with both user and system-wide environment variables.
 
 ## Signature
 
@@ -18,11 +18,17 @@ Get-EnvVar
 
 ### -Name
 
-The name of the environment variable.
+The name of the environment variable to retrieve. Type: [string]. Should be a valid environment variable name.
 
 ### -Global
 
-If specified, gets the variable from the system-wide registry; otherwise, from user registry.
+If specified, retrieves from system-wide registry; otherwise, from user registry.
+
+
+## Outputs
+
+String. The environment variable value, or null if not found.
+
 
 ## Examples
 

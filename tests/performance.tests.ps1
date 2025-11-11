@@ -23,7 +23,7 @@ Describe 'Profile Performance Regression Tests' {
             $loadTimeMs = $sw.ElapsedMilliseconds
             
             # Profile should load within reasonable time
-            $loadTimeMs | Should BeLessThan $script:MaxLoadTimeMs
+            $loadTimeMs | Should -BeLessThan $script:MaxLoadTimeMs
             
             Write-Verbose "Profile loaded in $loadTimeMs ms" -Verbose
         }
@@ -48,7 +48,7 @@ Describe 'Profile Performance Regression Tests' {
             $deviationPercent = ($maxDeviation / $avgTime) * 100
             
             # Load times should be relatively consistent (within 50% variance)
-            $deviationPercent | Should BeLessThan 50
+            $deviationPercent | Should -BeLessThan 50
             
             Write-Verbose "Average load time: $avgTime ms, Max deviation: $maxDeviation ms ($([Math]::Round($deviationPercent, 2))%)" -Verbose
         }
@@ -78,7 +78,7 @@ Describe 'Profile Performance Regression Tests' {
                 $slowPercent = if ($totalCount -gt 0) { ($slowCount / $totalCount) * 100 } else { 0 }
                 
                 # Less than 20% of fragments should be slow
-                $slowPercent | Should BeLessThan 20
+                $slowPercent | Should -BeLessThan 20
             }
             
             # Cleanup
@@ -104,7 +104,7 @@ Describe 'Profile Performance Regression Tests' {
             $timePerFragment = if ($fragmentCount -gt 0) { $loadTimeMs / $fragmentCount } else { 0 }
             
             # Should average less than 200ms per fragment
-            $timePerFragment | Should BeLessThan 200
+            $timePerFragment | Should -BeLessThan 200
             
             Write-Verbose "Loaded $fragmentCount fragments in $loadTimeMs ms ($([Math]::Round($timePerFragment, 2)) ms per fragment)" -Verbose
         }
@@ -121,7 +121,7 @@ Describe 'Profile Performance Regression Tests' {
             $memoryIncreaseMB = $memoryIncrease / 1MB
             
             # Profile should not use more than 50MB
-            $memoryIncreaseMB | Should BeLessThan 50
+            $memoryIncreaseMB | Should -BeLessThan 50
             
             Write-Verbose "Memory increase: $([Math]::Round($memoryIncreaseMB, 2)) MB" -Verbose
         }
@@ -156,7 +156,7 @@ Describe 'Profile Performance Regression Tests' {
             $timeDifference = [Math]::Abs($batchTime - $sequentialTime)
             $timeDifferencePercent = ($timeDifference / $sequentialTime) * 100
             
-            $timeDifferencePercent | Should BeLessThan 20
+            $timeDifferencePercent | Should -BeLessThan 20
             
             Write-Verbose "Sequential: $sequentialTime ms, Batch: $batchTime ms" -Verbose
             

@@ -29,7 +29,7 @@ param(
 )
 
 # Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
 Import-Module $commonModulePath -ErrorAction Stop
 
 Write-ScriptMessage -Message "Checking commits against base: $Base"

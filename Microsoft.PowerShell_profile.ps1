@@ -36,7 +36,7 @@ if (-not $global:PSProfileVersion) {
     else {
         $global:PSProfileGitCommit = 'unknown'
     }
-    
+
     # Display version in debug mode
     if ($env:PS_PROFILE_DEBUG) {
         Write-Host "PowerShell Profile v$global:PSProfileVersion (commit: $global:PSProfileGitCommit)" -ForegroundColor Cyan
@@ -85,12 +85,12 @@ if ($scoopRoot) {
     if (Test-Path $scoopCompletion -ErrorAction SilentlyContinue) {
         Import-Module $scoopCompletion -ErrorAction SilentlyContinue
     }
-    
+
     # Add Scoop shims and bin to PATH if they exist
     $scoopShims = Join-Path $scoopRoot 'shims'
     $scoopBin = Join-Path $scoopRoot 'bin'
     $pathSeparator = [System.IO.Path]::PathSeparator
-    
+
     if (Test-Path $scoopShims -ErrorAction SilentlyContinue) {
         if ($env:PATH -notlike "*$([regex]::Escape($scoopShims))*") {
             $env:PATH = "$scoopShims$pathSeparator$env:PATH"
@@ -160,12 +160,12 @@ function Measure-FragmentLoadTime {
                 Duration  = $sw.Elapsed.TotalMilliseconds
                 Timestamp = [DateTime]::Now
             }
-            
+
             if (-not $global:PSProfileFragmentTimes) {
                 $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
             }
             $global:PSProfileFragmentTimes.Add($timing)
-            
+
             # Level 3 shows detailed output
             if ($debugLevel -ge 3) {
                 Write-Host "Fragment '$FragmentName' loaded in $($timing.Duration)ms" -ForegroundColor Cyan
@@ -241,151 +241,119 @@ if ($currentEnvironment -and $environmentSets.ContainsKey($currentEnvironment)) 
     $enabledFragments = $environmentSets[$currentEnvironment]
     $allFragmentNames = $allFragments | ForEach-Object { $_.BaseName }
     $disabledFragments = $allFragmentNames | Where-Object { $_ -notin $enabledFragments -and $_ -ne '00-bootstrap' }
-    
+
     if ($env:PS_PROFILE_DEBUG) {
         Write-Host "Environment '$currentEnvironment' active. Enabled fragments: $($enabledFragments -join ', ')" -ForegroundColor Cyan
     }
 }
 
-if (Test-Path $profileD) {
-    # Helper function to load a single fragment with error handling
-    function script:Load-Fragment {
-        param(
-            [System.IO.FileInfo]$FragmentFile,
-            [string[]]$DisabledFragments
-        )
-        
-        $fragmentName = $FragmentFile.Name
-        $fragmentBaseName = $FragmentFile.BaseName
-        
-        # Check if fragment is disabled (skip 00-bootstrap.ps1 check as it's always needed)
-        if ($fragmentBaseName -ne '00-bootstrap' -and $fragmentBaseName -in $DisabledFragments) {
-            if ($env:PS_PROFILE_DEBUG) { Write-Host "Skipping disabled profile fragment: $fragmentName" -ForegroundColor DarkGray }
-            return
-        }
-        
-        if ($env:PS_PROFILE_DEBUG) { Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan }
-        try {
-            # Dot-source the file so it can define functions/aliases in this scope.
-            # Assign the result to $null to suppress any returned values (fragments
-            # may return ScriptBlocks or other objects during registration). This
-            # keeps the profile quiet when opening a new shell.
-            $null = . $FragmentFile.FullName
-        }
-        catch {
-            # Enhanced error handling with recovery suggestions
-            if ($env:PS_PROFILE_DEBUG) { Write-Host "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)" -ForegroundColor Red }
-            if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                Write-ProfileError -ErrorRecord $_ -Context "Profile fragment loading" -Category 'Fragment'
-            }
-            else {
-                # Fallback to basic error reporting
-                Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
-            }
-        }
-    }
-    
-    # Get all fragments and filter disabled ones
+if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
     $allFragments = Get-ChildItem -Path $profileD -File -Filter '*.ps1'
-    
-    # CRITICAL: Always load 00-bootstrap.ps1 first, before any dependency resolution
-    # This ensures all bootstrap helpers are available for other fragments
+
     $bootstrapFragment = $allFragments | Where-Object { $_.BaseName -eq '00-bootstrap' }
     $otherFragments = $allFragments | Where-Object { $_.BaseName -ne '00-bootstrap' }
-    
-    # Load bootstrap first
-    if ($bootstrapFragment) {
-        Load-Fragment -FragmentFile $bootstrapFragment -DisabledFragments $disabledFragments
-    }
-    
-    # Now process remaining fragments with dependency-aware ordering
+
     if ($loadOrderOverride.Count -gt 0) {
         $orderedFragments = @()
         $unorderedFragments = @()
-        
-        # Add fragments in specified order
+
         foreach ($fragmentName in $loadOrderOverride) {
-            if ($fragmentName -eq '00-bootstrap') { continue }  # Already loaded
+            if ($fragmentName -eq '00-bootstrap') { continue }
             $fragment = $otherFragments | Where-Object { $_.BaseName -eq $fragmentName }
             if ($fragment) {
                 $orderedFragments += $fragment
             }
         }
-        
-        # Add remaining fragments in lexical order
+
         $orderedNames = $orderedFragments | ForEach-Object { $_.BaseName }
         $unorderedFragments = $otherFragments | Where-Object { $_.BaseName -notin $orderedNames } | Sort-Object Name
-        
-        $allFragments = $orderedFragments + $unorderedFragments
+
+        $nonBootstrapFragments = $orderedFragments + $unorderedFragments
     }
     else {
-        # Use dependency-aware ordering if bootstrap helpers are now available
         if (Get-Command Get-FragmentLoadOrder -ErrorAction SilentlyContinue) {
             try {
-                $allFragments = Get-FragmentLoadOrder -FragmentFiles $otherFragments -DisabledFragments $disabledFragments
+                $nonBootstrapFragments = Get-FragmentLoadOrder -FragmentFiles $otherFragments -DisabledFragments $disabledFragments
             }
             catch {
-                # Fall back to lexical order if dependency resolution fails
-                $allFragments = $otherFragments | Sort-Object Name
+                $nonBootstrapFragments = $otherFragments | Sort-Object Name
             }
         }
         else {
-            # Default to lexical order
-            $allFragments = $otherFragments | Sort-Object Name
+            $nonBootstrapFragments = $otherFragments | Sort-Object Name
         }
     }
-    
-    # Check if optimized batch loading is enabled (via config or environment variable)
-    # Note: True parallel loading with runspaces has limitations because fragments need
-    # to modify the current session scope. Batch optimization groups fragments by
-    # dependency tiers for more efficient sequential loading.
-    $enableBatchOptimization = $performanceConfig.batchLoad -or 
-    $env:PS_PROFILE_BATCH_LOAD -eq '1' -or 
+
+    $disabledSet = $null
+    if ($disabledFragments) {
+        $disabledSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+        foreach ($name in $disabledFragments) {
+            if ([string]::IsNullOrWhiteSpace($name)) { continue }
+            [void]$disabledSet.Add($name)
+        }
+    }
+
+    $enableBatchOptimization = $performanceConfig.batchLoad -or
+    $env:PS_PROFILE_BATCH_LOAD -eq '1' -or
     $env:PS_PROFILE_BATCH_LOAD -eq 'true'
-    
+
+    $fragmentsToLoad = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+
+    if ($bootstrapFragment) {
+        foreach ($fragment in $bootstrapFragment) {
+            $fragmentsToLoad.Add($fragment)
+        }
+    }
+
     if ($enableBatchOptimization) {
-        # Batch-optimized loading: Group fragments by dependency tiers
-        # Note: 00-bootstrap is already loaded above, so we only process remaining fragments
-        # Tier 0: 01-09 (remaining core/bootstrap helpers)
-        # Tier 1: 10-29 (terminal/config - can be batched)
-        # Tier 2: 30-69 (tools/languages - can be batched)
-        # Tier 3: 70-99 (advanced features - can be batched)
-        
-        $tier0 = $allFragments | Where-Object { $_.BaseName -match '^0[1-9]-' }
-        $tier1 = $allFragments | Where-Object { $_.BaseName -match '^(1[0-9]|2[0-9])-' }
-        $tier2 = $allFragments | Where-Object { $_.BaseName -match '^([3-6][0-9])-' }
-        $tier3 = $allFragments | Where-Object { $_.BaseName -match '^([7-9][0-9])-' }
-        
-        # Load tier 0 sequentially (remaining bootstrap helpers)
-        foreach ($fragment in $tier0) {
-            Load-Fragment -FragmentFile $fragment -DisabledFragments $disabledFragments
-        }
-        
-        # Load remaining tiers in batches (sequential within tier, but optimized grouping)
-        $tiers = @($tier1, $tier2, $tier3)
-        foreach ($tier in $tiers) {
-            if ($tier.Count -eq 0) { continue }
-            
-            # Load all fragments in this tier sequentially
-            # The optimization comes from grouping - we know these fragments
-            # are independent within their tier, so we can load them efficiently
-            foreach ($fragment in $tier) {
-                Load-Fragment -FragmentFile $fragment -DisabledFragments $disabledFragments
-            }
-        }
-        
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "Batch-optimized loading completed" -ForegroundColor Green
-        }
+        $tier0 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^0[1-9]-' }
+        $tier1 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^(1[0-9]|2[0-9])-' }
+        $tier2 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([3-6][0-9])-' }
+        $tier3 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([7-9][0-9])-' }
+
+        foreach ($fragment in $tier0) { $fragmentsToLoad.Add($fragment) }
+        foreach ($fragment in $tier1) { $fragmentsToLoad.Add($fragment) }
+        foreach ($fragment in $tier2) { $fragmentsToLoad.Add($fragment) }
+        foreach ($fragment in $tier3) { $fragmentsToLoad.Add($fragment) }
     }
     else {
-        # Sequential loading (default behavior, most reliable)
-        # Load files in dependency-aware or lexical order. Each file should be idempotent and
-        # safe to be dot-sourced multiple times.
-        # Note: 00-bootstrap is already loaded above
-        foreach ($fragment in $allFragments) {
-            Load-Fragment -FragmentFile $fragment -DisabledFragments $disabledFragments
+        foreach ($fragment in $nonBootstrapFragments) {
+            $fragmentsToLoad.Add($fragment)
         }
+    }
+
+    foreach ($fragment in $fragmentsToLoad) {
+        $fragmentName = $fragment.Name
+        $fragmentBaseName = $fragment.BaseName
+
+        if ($fragmentBaseName -ne '00-bootstrap' -and $disabledSet -and $disabledSet.Contains($fragmentBaseName)) {
+            if ($env:PS_PROFILE_DEBUG) { Write-Host "Skipping disabled profile fragment: $fragmentName" -ForegroundColor DarkGray }
+            continue
+        }
+
+        if ($env:PS_PROFILE_DEBUG) { Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan }
+
+        try {
+            $null = . $fragment.FullName
+        }
+        catch {
+            if ($env:PS_PROFILE_DEBUG) { Write-Host "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)" -ForegroundColor Red }
+            if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                Write-ProfileError -ErrorRecord $_ -Context "Profile fragment loading" -Category 'Fragment'
+            }
+            else {
+                Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
+            }
+        }
+    }
+
+    if ($enableBatchOptimization -and $env:PS_PROFILE_DEBUG) {
+        Write-Host "Batch-optimized loading completed" -ForegroundColor Green
+    }
+}
+else {
+    if ($env:PS_PROFILE_DEBUG) {
+        Write-Host "Profile fragments directory not found: $profileD" -ForegroundColor Yellow
     }
 }
 
@@ -400,7 +368,7 @@ try {
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship function found, calling it..." -ForegroundColor Green }
         Initialize-Starship
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship completed" -ForegroundColor Green }
-        
+
         # Final verification: verify prompt function exists (Initialize-Starship handles making it global)
         if (Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue) {
             if ($env:PS_PROFILE_DEBUG) { Write-Host "Prompt function verified and active" -ForegroundColor Green }

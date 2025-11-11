@@ -11,6 +11,9 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
+    labels:
+      - "dependencies"
+      - "powershell"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -23,3 +26,25 @@ updates:
     commit-message:
       prefix: "ci"
       include: "scope"
+    labels:
+      - "dependencies"
+      - "ci/cd"
+
+  # NPM dependencies (for tools like cspell, markdownlint-cli)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    assignees:
+      - "bolens"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "npm"
+    ignore:
+      # Ignore dev dependencies that are installed globally
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

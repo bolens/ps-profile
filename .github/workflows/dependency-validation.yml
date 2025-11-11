@@ -1,0 +1,52 @@
+name: Dependencies - Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate-dependencies:
+    name: Validate Dependencies
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PowerShell
+        uses: actions/setup-powershell@v1
+        with:
+          pwsh-version: '7.4'
+
+      - name: Validate Dependencies
+        id: validate-deps
+        run: |
+          pwsh -NoProfile -File scripts/utils/dependencies/validate-dependencies.ps1
+        continue-on-error: false
+
+      - name: Comment PR with Dependency Status
+        if: github.event_name == 'pull_request' && steps.validate-deps.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ **Dependency Validation Passed**\n\nAll required dependencies are available and meet version requirements.'
+            })
+
+      - name: Comment PR with Dependency Issues
+        if: github.event_name == 'pull_request' && steps.validate-deps.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ **Dependency Validation Failed**\n\nPlease check the workflow logs for details on missing or invalid dependencies.'
+            })
+

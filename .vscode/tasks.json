@@ -8,7 +8,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\run-lint.ps1"
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-lint.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -44,7 +44,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\run_pester.ps1"
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -56,7 +56,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\run_pester.ps1",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
         "-Coverage"
       ],
       "presentation": { "reveal": "always" },
@@ -69,7 +69,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\benchmark-startup.ps1"
+        "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -81,7 +81,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\run-security-scan.ps1"
+        "${workspaceFolder}\\scripts\\utils\\security\\run-security-scan.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -93,7 +93,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\check-module-updates.ps1"
+        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -105,7 +105,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\check-module-updates.ps1",
+        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1",
         "-Update"
       ],
       "presentation": { "reveal": "always" },
@@ -118,7 +118,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\generate-changelog.ps1"
+        "${workspaceFolder}\\scripts\\utils\\docs\\generate-changelog.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -130,7 +130,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\create-release.ps1",
+        "${workspaceFolder}\\scripts\\utils\\release\\create-release.ps1",
         "-DryRun"
       ],
       "presentation": { "reveal": "always" },
@@ -143,7 +143,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\generate-docs.ps1"
+        "${workspaceFolder}\\scripts\\utils\\docs\\generate-docs.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -155,7 +155,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\spellcheck.ps1"
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\spellcheck.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -167,7 +167,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\run-markdownlint.ps1"
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-markdownlint.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -192,7 +192,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\run-format.ps1"
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-format.ps1"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
@@ -205,7 +205,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\find-duplicate-functions.ps1"
+        "${workspaceFolder}\\scripts\\utils\\metrics\\find-duplicate-functions.ps1"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
@@ -218,7 +218,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\generate-fragment-readmes.ps1"
+        "${workspaceFolder}\\scripts\\utils\\docs\\generate-fragment-readmes.ps1"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
@@ -244,7 +244,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\benchmark-startup.ps1",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1",
         "-UpdateBaseline"
       ],
       "presentation": { "reveal": "always" },
@@ -298,7 +298,8 @@
         "Run Spellcheck",
         "Run Markdownlint",
         "Check comment-based help",
-        "Run Pester Tests"
+        "Run Pester Tests",
+        "Validate Function Naming"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -324,6 +325,19 @@
         "-NoProfile",
         "-File",
         "${workspaceFolder}\\scripts\\checks\\check-idempotency.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate Function Naming",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\validate-function-naming.ps1"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },

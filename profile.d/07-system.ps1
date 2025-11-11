@@ -10,7 +10,20 @@
 .DESCRIPTION
     Displays information about PowerShell commands and their locations.
 #>
-function Get-CommandInfo { Get-Command $args }
+function Get-CommandInfo {
+    param([Parameter(ValueFromRemainingArguments = $true)] $CommandArgs)
+
+    if (-not $CommandArgs) {
+        return $null
+    }
+
+    try {
+        return Get-Command @CommandArgs -ErrorAction SilentlyContinue
+    }
+    catch {
+        return $null
+    }
+}
 Set-Alias -Name which -Value Get-CommandInfo -ErrorAction SilentlyContinue
 
 # pgrep equivalent

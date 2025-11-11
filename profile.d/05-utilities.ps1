@@ -222,13 +222,20 @@ Set-Alias -Name backup-profile -Value Backup-Profile -ErrorAction SilentlyContin
     Gets an environment variable value from the registry.
 .DESCRIPTION
     Retrieves the value of an environment variable from the Windows registry.
+    Works with both user and system-wide environment variables.
 .PARAMETER Name
-    The name of the environment variable.
+    The name of the environment variable to retrieve.
+    Type: [string]. Should be a valid environment variable name.
 .PARAMETER Global
-    If specified, gets the variable from the system-wide registry; otherwise, from user registry.
+    If specified, retrieves from system-wide registry; otherwise, from user registry.
+.OUTPUTS
+    String. The environment variable value, or null if not found.
 #>
 function Get-EnvVar {
+    [CmdletBinding()]
+    [OutputType([string])]
     param(
+        [Parameter(Mandatory)]
         [string]$Name,
         [switch]$Global
     )
@@ -258,13 +265,20 @@ function Get-EnvVar {
     Sets the value of an environment variable in the Windows registry and broadcasts the change.
 .PARAMETER Name
     The name of the environment variable.
+    Type: [string]. Should be a valid environment variable name.
 .PARAMETER Value
     The value to set. If null or empty, the variable is removed.
+    Type: [string]. Can be null or empty to remove the variable.
 .PARAMETER Global
     If specified, sets the variable in the system-wide registry; otherwise, in user registry.
+.OUTPUTS
+    None. This function does not return a value.
 #>
 function Set-EnvVar {
+    [CmdletBinding()]
+    [OutputType([void])]
     param(
+        [Parameter(Mandatory)]
         [string]$Name,
         [string]$Value,
         [switch]$Global

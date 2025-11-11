@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `reload` - Reloads the PowerShell profile.
 
+
 ## Source
 
 Defined in: profile.d\05-utilities.ps1

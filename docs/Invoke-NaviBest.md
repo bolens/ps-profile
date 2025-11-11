@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `navib` - Finds the best matching command from navi cheatsheets.
 
+
 ## Source
 
 Defined in: profile.d\62-navi.ps1

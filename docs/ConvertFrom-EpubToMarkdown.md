@@ -24,6 +24,7 @@ The path to the EPUB file.
 
 The path for the output Markdown file. If not specified, uses input path with .md extension.
 
+
 ## Examples
 
 No examples provided.
@@ -33,6 +34,7 @@ No examples provided.
 This function has the following aliases:
 
 - `epub-to-markdown` - Converts EPUB file to Markdown.
+
 
 ## Source
 

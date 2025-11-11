@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `uptime` - Shows system uptime.
 
+
 ## Source
 
 Defined in: profile.d\08-system-info.ps1

@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `gl` - Shows commit history.
 
+
 ## Source
 
 Defined in: profile.d\11-git.ps1

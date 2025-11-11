@@ -24,6 +24,7 @@ Array of paths to PDF files to merge.
 
 The path for the output merged PDF file.
 
+
 ## Examples
 
 No examples provided.
@@ -33,6 +34,7 @@ No examples provided.
 This function has the following aliases:
 
 - `pdf-merge` - Merges multiple PDF files.
+
 
 ## Source
 

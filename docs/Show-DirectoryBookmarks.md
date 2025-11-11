@@ -28,6 +28,7 @@ This function has the following aliases:
 
 - `bm` - Lists all directory bookmarks.
 
+
 ## Source
 
 Defined in: profile.d\76-smart-navigation.ps1

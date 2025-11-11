@@ -6,6 +6,8 @@ Shows detailed CPU information and usage.
 
 ## Description
 
+
+
 ## Alias Information
 
 **Alias for:** `Show-CPUInfo`
