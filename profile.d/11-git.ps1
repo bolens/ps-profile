@@ -7,6 +7,17 @@
 # These helpers guard against common failure scenarios (missing repository,
 # empty history) so profile diagnostics stay quiet in test environments.
 
+<#
+.SYNOPSIS
+    Tests whether the current directory is a Git working tree.
+.DESCRIPTION
+    Confirms that the git executable is available and the current directory is inside a Git repository.
+    Resets $LASTEXITCODE so callers do not inherit git errors.
+.PARAMETER CommandName
+    Friendly name for the caller, used in verbose skip messaging.
+.OUTPUTS
+    System.Boolean. Returns $true when the repository context is valid.
+#>
 function Test-GitRepositoryContext {
     param([string]$CommandName = 'git command')
 
@@ -26,6 +37,16 @@ function Test-GitRepositoryContext {
     return $true
 }
 
+<#
+.SYNOPSIS
+    Checks whether the current Git repository has at least one commit.
+.DESCRIPTION
+    Calls `git show-ref --quiet HEAD` and resets $LASTEXITCODE so higher-level helpers stay quiet on empty repos.
+.PARAMETER CommandName
+    Friendly name for the caller, used in verbose skip messaging.
+.OUTPUTS
+    System.Boolean. Returns $true when the repository contains commits.
+#>
 function Test-GitRepositoryHasCommits {
     param([string]$CommandName = 'git command')
 
@@ -40,6 +61,27 @@ function Test-GitRepositoryHasCommits {
     return $false
 }
 
+<#
+.SYNOPSIS
+    Invokes a Git subcommand with repository safety guards.
+.DESCRIPTION
+    Provides a central wrapper that optionally validates repository context and commit availability before
+    forwarding execution to `git`. Prevents noisy failures when the profile runs outside a repo or against
+    a freshly initialized repository.
+.PARAMETER Subcommand
+    The git subcommand to execute (for example, 'status' or 'pull').
+.PARAMETER Arguments
+    Additional arguments to pass to git. Defaults to an empty array.
+.PARAMETER CommandName
+    Friendly label for verbose/log messages. Defaults to "git <Subcommand>".
+.PARAMETER SkipRepositoryCheck
+    Skips the repository existence check when specified.
+.PARAMETER RequiresCommit
+    Requires that the repository contains commits before executing.
+.EXAMPLE
+    Invoke-GitCommand -Subcommand 'status' -Arguments @('--short')
+    Runs `git status --short` if the current directory is a Git repository.
+#>
 function Invoke-GitCommand {
     param(
         [Parameter(Mandatory)]
