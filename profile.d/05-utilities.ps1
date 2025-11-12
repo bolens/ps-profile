@@ -25,20 +25,20 @@ function Test-SafePath {
     param(
         [Parameter(Mandatory)]
         [string]$Path,
-        
+
         [Parameter(Mandatory)]
         [string]$BasePath
     )
-    
+
     try {
         $resolvedPath = [System.IO.Path]::GetFullPath($Path)
         $resolvedBase = [System.IO.Path]::GetFullPath($BasePath)
-        
+
         # Ensure base path ends with directory separator for proper comparison
         if (-not $resolvedBase.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
             $resolvedBase += [System.IO.Path]::DirectorySeparatorChar
         }
-        
+
         return $resolvedPath.StartsWith($resolvedBase, [System.StringComparison]::OrdinalIgnoreCase)
     }
     catch {
@@ -94,7 +94,7 @@ Set-Alias -Name myip -Value Get-MyIP -ErrorAction SilentlyContinue
 .DESCRIPTION
     Executes speedtest-cli to measure internet connection speed.
 #>
-function Start-SpeedTest { speedtest-cli }
+function Start-SpeedTest { & (Get-Command speedtest.exe).Source --accept-license }
 Set-Alias -Name speedtest -Value Start-SpeedTest -ErrorAction SilentlyContinue
 
 # History helpers
@@ -203,7 +203,7 @@ Set-Alias -Name open-explorer -Value Open-Explorer -ErrorAction SilentlyContinue
 .DESCRIPTION
     Displays all user-defined functions in the current PowerShell session.
 #>
-function Get-Functions { Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name, Definition | Format-Table -AutoSize }
+function Get-Functions { @(Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name, Definition) }
 Set-Alias -Name list-functions -Value Get-Functions -ErrorAction SilentlyContinue
 
 # Backup current profile to timestamped .bak file

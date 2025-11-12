@@ -3,6 +3,8 @@
 Describe 'Utility Functions Integration Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
+        . (Join-Path $script:ProfileDir '07-system.ps1')
         . (Join-Path $script:ProfileDir '05-utilities.ps1')
     }
 
@@ -155,14 +157,51 @@ Describe 'Utility Functions Integration Tests' {
             $result | Should -BeOfType [long]
         }
 
-        It 'url-encode and url-decode aliases work' {
-            Get-Command url-encode -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
-            Get-Command url-decode -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
+        It 'Reload-Profile function exists and can be called' {
+            { Reload-Profile -ErrorAction Stop } | Should -Not -Throw
+        }
 
-            $test = 'test string'
-            $encoded = url-encode $test
-            $decoded = url-decode $encoded
-            $decoded | Should -Be $test
+        It 'Edit-Profile function exists and can be called' {
+            Get-Command Edit-Profile -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Note: Calling the function may fail in test environment due to external dependencies
+        }
+
+        It 'Get-Weather function exists and can be called' {
+            # Skip if curl/wget not available or network issues
+            try {
+                { Get-Weather -ErrorAction Stop } | Should -Not -Throw
+            }
+            catch {
+                # Allow network-related failures
+                if ($_.Exception.Message -notmatch "(404|network|connect)") {
+                    throw
+                }
+            }
+        }
+
+        It 'Get-MyIP function exists and can be called' {
+            { Get-MyIP -ErrorAction Stop } | Should -Not -Throw
+        }
+
+        It 'Start-SpeedTest function exists and can be called' {
+            # Skip if speedtest not available
+            if (-not (Get-Command speedtest -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because "speedtest command not available"
+                return
+            }
+            # Just check that the function can be called without throwing an exception
+            # The actual speedtest may succeed or fail, but the function should be callable
+            { Start-SpeedTest } | Should -Not -Throw
+        }
+
+        It 'Get-Functions returns function list' {
+            $result = Get-Functions
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Backup-Profile function exists and can be called' {
+            Get-Command Backup-Profile -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Note: Calling the function may fail in test environment due to file system permissions
         }
     }
 

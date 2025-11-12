@@ -52,12 +52,23 @@ This project includes VS Code tasks and Taskfile commands for common development
 
 See `.vscode/tasks.json` or `Taskfile.yml` for all available tasks.
 
-### Validation
+### Testing
 
 ```powershell
-pwsh -NoProfile -File scripts/checks/validate-profile.ps1  # Full validation
-pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1          # Lint only
-pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1  # Security scan
+# Run all tests
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1
+
+# Run specific test suites
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Unit
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Integration
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Performance
+
+# Run specific tests by name (supports wildcards and "or" syntax)
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -TestName "*Edit-Profile*"
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Integration -TestName "*Backup-Profile* or *Convert-*"
+
+# Run tests with coverage
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Coverage
 ```
 
 ### Performance

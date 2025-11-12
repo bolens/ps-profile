@@ -333,7 +333,12 @@ function global:Get-AssumedCommands {
         return @()
     }
 
-    return [string[]]$global:AssumedAvailableCommands.Keys
+    $result = New-Object 'System.Collections.Generic.List[string]'
+    foreach ($key in $global:AssumedAvailableCommands.Keys) {
+        $result.Add($key)
+    }
+    $array = $result.ToArray()
+    return , $array
 }
 
 <#

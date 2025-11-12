@@ -3,8 +3,8 @@
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
 **Total Functions:** 216
-**Total Aliases:** 233
-**Generated:** 2025-11-11 19:59:33
+**Total Aliases:** 207
+**Generated:** 2025-11-12 15:21:07
 
 ## Functions by Fragment
 
@@ -54,12 +54,13 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### 02-files-utilities (6 functions)
 
-- [Ensure-FileUtilities](Ensure-FileUtilities.md) - Initializes file utility functions on first use.
-- [Get-FileHashValue](Get-FileHashValue.md) - Calculates file hash using specified algorithm.
-- [Get-FileHead](Get-FileHead.md) - Shows the first N lines of a file.
+- [Ensure-FileUtilities](Ensure-FileUtilities.md) - Sets up all file utility functions when any of them is called for the first time.
+    This lazy loading approach improves profile startup performance.
+- [Get-FileHashValue](Get-FileHashValue.md) - Calculates cryptographic hash of a file.
+- [Get-FileHead](Get-FileHead.md) - Shows the first N lines of a file or pipeline input.
 - [Get-FileSize](Get-FileSize.md) - Shows human-readable file size.
-- [Get-FileTail](Get-FileTail.md) - Shows the last N lines of a file.
-- [Get-HexDump](Get-HexDump.md) - Shows hex dump of a file.
+- [Get-FileTail](Get-FileTail.md) - Shows the last N lines of a file or pipeline input.
+- [Get-HexDump](Get-HexDump.md) - Shows hexadecimal dump of a file's contents.
 
 ### 05-utilities (23 functions)
 
@@ -328,49 +329,28 @@ This documentation is automatically generated from comment-based help in the pro
 ## Aliases by Fragment
 
 
-### 02-files-conversion (42 aliases)
+### 02-files-conversion (21 aliases)
 
 - [audio-convert](audio-convert.md) - Converts audio file formats. (alias for `Convert-Audio`)
-- [audio-convert](audio-convert.md) - Converts audio file formats. (alias for `Convert-Audio`)
-- [csv-to-json](csv-to-json.md) - Converts CSV file to JSON format. (alias for `ConvertFrom-CsvToJson`)
 - [csv-to-json](csv-to-json.md) - Converts CSV file to JSON format. (alias for `ConvertFrom-CsvToJson`)
 - [csv-to-yaml](csv-to-yaml.md) - Converts CSV file to YAML format. (alias for `ConvertFrom-CsvToYaml`)
-- [csv-to-yaml](csv-to-yaml.md) - Converts CSV file to YAML format. (alias for `ConvertFrom-CsvToYaml`)
-- [docx-to-markdown](docx-to-markdown.md) - Converts DOCX file to Markdown. (alias for `ConvertFrom-DocxToMarkdown`)
 - [docx-to-markdown](docx-to-markdown.md) - Converts DOCX file to Markdown. (alias for `ConvertFrom-DocxToMarkdown`)
 - [epub-to-markdown](epub-to-markdown.md) - Converts EPUB file to Markdown. (alias for `ConvertFrom-EpubToMarkdown`)
-- [epub-to-markdown](epub-to-markdown.md) - Converts EPUB file to Markdown. (alias for `ConvertFrom-EpubToMarkdown`)
-- [from-base64](from-base64.md) - Decodes base64 input to text. (alias for `ConvertFrom-Base64`)
 - [from-base64](from-base64.md) - Decodes base64 input to text. (alias for `ConvertFrom-Base64`)
 - [html-to-markdown](html-to-markdown.md) - Converts HTML file to Markdown. (alias for `ConvertFrom-HtmlToMarkdown`)
-- [html-to-markdown](html-to-markdown.md) - Converts HTML file to Markdown. (alias for `ConvertFrom-HtmlToMarkdown`)
-- [image-convert](image-convert.md) - Converts image file formats. (alias for `Convert-Image`)
 - [image-convert](image-convert.md) - Converts image file formats. (alias for `Convert-Image`)
 - [image-resize](image-resize.md) - Resizes an image. (alias for `Resize-Image`)
-- [image-resize](image-resize.md) - Resizes an image. (alias for `Resize-Image`)
-- [json-pretty](json-pretty.md) - Pretty-prints JSON data. (alias for `Format-Json`)
 - [json-pretty](json-pretty.md) - Pretty-prints JSON data. (alias for `Format-Json`)
 - [json-to-csv](json-to-csv.md) - Converts JSON file to CSV format. (alias for `ConvertTo-CsvFromJson`)
-- [json-to-csv](json-to-csv.md) - Converts JSON file to CSV format. (alias for `ConvertTo-CsvFromJson`)
-- [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format. (alias for `ConvertTo-Yaml`)
 - [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format. (alias for `ConvertTo-Yaml`)
 - [markdown-to-html](markdown-to-html.md) - Converts Markdown file to HTML. (alias for `ConvertTo-HtmlFromMarkdown`)
-- [markdown-to-html](markdown-to-html.md) - Converts Markdown file to HTML. (alias for `ConvertTo-HtmlFromMarkdown`)
-- [pdf-merge](pdf-merge.md) - Merges multiple PDF files. (alias for `Merge-Pdf`)
 - [pdf-merge](pdf-merge.md) - Merges multiple PDF files. (alias for `Merge-Pdf`)
 - [pdf-to-text](pdf-to-text.md) - Extracts text from PDF file. (alias for `ConvertFrom-PdfToText`)
-- [pdf-to-text](pdf-to-text.md) - Extracts text from PDF file. (alias for `ConvertFrom-PdfToText`)
-- [to-base64](to-base64.md) - Encodes input to base64 format. (alias for `ConvertTo-Base64`)
 - [to-base64](to-base64.md) - Encodes input to base64 format. (alias for `ConvertTo-Base64`)
 - [video-to-audio](video-to-audio.md) - Extracts audio from video file. (alias for `ConvertFrom-VideoToAudio`)
-- [video-to-audio](video-to-audio.md) - Extracts audio from video file. (alias for `ConvertFrom-VideoToAudio`)
-- [video-to-gif](video-to-gif.md) - Converts video to GIF. (alias for `ConvertFrom-VideoToGif`)
 - [video-to-gif](video-to-gif.md) - Converts video to GIF. (alias for `ConvertFrom-VideoToGif`)
 - [xml-to-json](xml-to-json.md) - Converts XML file to JSON format. (alias for `ConvertFrom-XmlToJson`)
-- [xml-to-json](xml-to-json.md) - Converts XML file to JSON format. (alias for `ConvertFrom-XmlToJson`)
 - [yaml-to-csv](yaml-to-csv.md) - Converts YAML file to CSV format. (alias for `ConvertFrom-YamlToCsv`)
-- [yaml-to-csv](yaml-to-csv.md) - Converts YAML file to CSV format. (alias for `ConvertFrom-YamlToCsv`)
-- [yaml-to-json](yaml-to-json.md) - Converts YAML to JSON format. (alias for `ConvertFrom-Yaml`)
 - [yaml-to-json](yaml-to-json.md) - Converts YAML to JSON format. (alias for `ConvertFrom-Yaml`)
 
 ### 02-files-listing (5 aliases)
@@ -387,18 +367,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [docs](docs.md) - Changes to the Documents directory. (alias for `Set-LocationDocuments`)
 - [downloads](downloads.md) - Changes to the Downloads directory. (alias for `Set-LocationDownloads`)
 
-### 02-files-utilities (10 aliases)
+### 02-files-utilities (5 aliases)
 
-- [file-hash](file-hash.md) - Calculates file hash using specified algorithm. (alias for `Get-FileHashValue`)
-- [file-hash](file-hash.md) - Calculates file hash using specified algorithm. (alias for `Get-FileHashValue`)
+- [file-hash](file-hash.md) - Calculates cryptographic hash of a file. (alias for `Get-FileHashValue`)
 - [filesize](filesize.md) - Shows human-readable file size. (alias for `Get-FileSize`)
-- [filesize](filesize.md) - Shows human-readable file size. (alias for `Get-FileSize`)
-- [head](head.md) - Initializes file utility functions on first use. (alias for `Get-FileHead`)
-- [head](head.md) - Shows the first N lines of a file. (alias for `Get-FileHead`)
-- [hex-dump](hex-dump.md) - Shows hex dump of a file. (alias for `Get-HexDump`)
-- [hex-dump](hex-dump.md) - Shows hex dump of a file. (alias for `Get-HexDump`)
-- [tail](tail.md) - Initializes file utility functions on first use. (alias for `Get-FileTail`)
-- [tail](tail.md) - Shows the last N lines of a file. (alias for `Get-FileTail`)
+- [head](head.md) - Shows the first N lines of a file or pipeline input. (alias for `Get-FileHead`)
+- [hex-dump](hex-dump.md) - Shows hexadecimal dump of a file's contents. (alias for `Get-HexDump`)
+- [tail](tail.md) - Shows the last N lines of a file or pipeline input. (alias for `Get-FileTail`)
 
 ### 05-utilities (16 aliases)
 

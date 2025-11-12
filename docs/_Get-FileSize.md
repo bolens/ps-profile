@@ -1,4 +1,4 @@
-# Ensure-FileUtilities
+# _Get-FileSize
 
 ## Synopsis
 
@@ -12,7 +12,7 @@ Sets up all file utility functions when any of them is called for the first time
 ## Signature
 
 ```powershell
-Ensure-FileUtilities
+_Get-FileSize
 ```
 
 ## Parameters

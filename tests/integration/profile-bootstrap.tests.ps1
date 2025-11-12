@@ -71,17 +71,52 @@ Describe 'Profile Bootstrap Integration Tests' {
             $result | Should -Be $false
         }
 
-        It 'Test-HasCommand respects assumed command overrides' {
-            $assumedName = "AssumedCommand_{0}" -f (Get-Random)
+        It 'Clear-TestCachedCommandCache clears all cached entries' {
+            $commandName1 = "TestClearCache1_$(Get-Random)"
+            $commandName2 = "TestClearCache2_$(Get-Random)"
+
+            # Add some cached entries
+            Add-AssumedCommand -Name $commandName1 | Out-Null
+            Add-AssumedCommand -Name $commandName2 | Out-Null
+
+            # Verify they are cached
+            Test-CachedCommand -Name $commandName1 | Should -Be $true
+            Test-CachedCommand -Name $commandName2 | Should -Be $true
+
+            # Clear cache
+            Clear-TestCachedCommandCache
+
+            # Verify cache is cleared (should still be assumed but not cached)
+            Test-HasCommand -Name $commandName1 | Should -Be $true
+            Test-HasCommand -Name $commandName2 | Should -Be $true
+
+            # Clean up
+            Remove-AssumedCommand -Name $commandName1 | Out-Null
+            Remove-AssumedCommand -Name $commandName2 | Out-Null
+        }
+
+        It 'Get-AssumedCommands returns list of assumed commands' {
+            $assumedName1 = "AssumedTest1_$(Get-Random)"
+            $assumedName2 = "AssumedTest2_$(Get-Random)"
 
             try {
-                Add-AssumedCommand -Name $assumedName | Should -BeTrue
-                Test-HasCommand -Name $assumedName | Should -Be $true
-                Test-CachedCommand -Name $assumedName | Should -Be $true
+                # Initially should be empty or not contain our test commands
+                $initialAssumed = Get-AssumedCommands
+                $initialAssumed | Should -Not -Be $null
+                $initialAssumed.GetType().FullName | Should -Be 'System.String[]'
+
+                # Add assumed commands
+                Add-AssumedCommand -Name $assumedName1 | Should -Be $true
+                Add-AssumedCommand -Name $assumedName2 | Should -Be $true
+
+                # Get assumed commands
+                $assumedCommands = Get-AssumedCommands
+                $assumedCommands | Should -Contain $assumedName1
+                $assumedCommands | Should -Contain $assumedName2
             }
             finally {
-                Remove-AssumedCommand -Name $assumedName | Out-Null
-                Remove-TestCachedCommandCacheEntry -Name $assumedName | Out-Null
+                Remove-AssumedCommand -Name $assumedName1 | Out-Null
+                Remove-AssumedCommand -Name $assumedName2 | Out-Null
             }
         }
 

@@ -230,15 +230,15 @@ Run these checks before opening a PR:
 task quality-check
 
 # Or individual tasks
-task validate                # Full validation (format + security + lint + spellcheck + help + idempotency)
-task format                  # Format code
-task lint                    # Lint code
-task test                    # Run tests
-task test-coverage           # Run tests with coverage
-task spellcheck              # Spellcheck
-task markdownlint            # Markdownlint
+task validate                 # Full validation (format + security + lint + spellcheck + help + idempotency)
+task format                   # Format code
+task lint                     # Lint code
+task test                     # Run tests
+task test-coverage            # Run tests with coverage
+task spellcheck               # Spellcheck
+task markdownlint             # Markdownlint
 task validate-function-naming # Validate function naming conventions
-task pre-commit-checks       # Run pre-commit checks manually
+task pre-commit-checks        # Run pre-commit checks manually
 ```
 
 ### Direct Script Execution
@@ -248,14 +248,18 @@ task pre-commit-checks       # Run pre-commit checks manually
 pwsh -NoProfile -File scripts/checks/validate-profile.ps1
 
 # Individual checks
-pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1          # Format code
-pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1        # Security scan
+pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1                  # Format code
+pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1               # Security scan
 pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1                    # Lint (PSScriptAnalyzer)
 pwsh -NoProfile -File scripts/checks/check-idempotency.ps1                       # Idempotency test
 pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1                  # Run tests
 pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1                  # Spellcheck
 pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1            # Markdownlint
-pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1   # Validate function naming
+pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1    # Validate function naming
+
+# Run specific tests by name (supports wildcards and "or" syntax)
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -TestName "*Edit-Profile*"
+pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Integration -TestName "*Backup-Profile* or *Convert-*"
 ```
 
 ## Git Hooks

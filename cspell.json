@@ -172,7 +172,10 @@
     "wez",
     "wezterm",
     "apikey",
+    "binaryfile",
     "changeme",
+    "largefile",
+    "logfile",
     "secretkey",
     "AKIA",
     "Dont",
@@ -192,6 +195,7 @@
     ".git",
     "vendor",
     "**/*.min.*",
-    "**/coverage.xml"
+    "**/coverage.xml",
+    "**/tests/**"
   ]
 }

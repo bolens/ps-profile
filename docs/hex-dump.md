@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows hex dump of a file.
+Shows hexadecimal dump of a file's contents.
 
 ## Description
 
-Displays the hexadecimal representation of a file's contents.
+
 
 ## Alias Information
 

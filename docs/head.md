@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows the first N lines of a file.
+Shows the first N lines of a file or pipeline input.
 
 ## Description
 
-Displays the beginning of a file or pipeline input. Defaults to 10 lines.
+
 
 ## Alias Information
 

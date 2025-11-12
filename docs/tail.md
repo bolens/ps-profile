@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows the last N lines of a file.
+Shows the last N lines of a file or pipeline input.
 
 ## Description
 
-Displays the end of a file or pipeline input. Defaults to 10 lines.
+
 
 ## Alias Information
 

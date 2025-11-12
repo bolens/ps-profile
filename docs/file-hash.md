@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Calculates file hash using specified algorithm.
+Calculates cryptographic hash of a file.
 
 ## Description
 
-Computes cryptographic hash of a file. Defaults to SHA256.
+
 
 ## Alias Information
 

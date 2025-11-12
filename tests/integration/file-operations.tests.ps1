@@ -9,6 +9,7 @@ Describe 'File Operations Integration Tests' {
 
     Context 'File listing functions' {
         BeforeAll {
+            . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
             . (Join-Path $script:ProfileDir '02-files-listing.ps1')
         }
 
@@ -78,6 +79,7 @@ Describe 'File Operations Integration Tests' {
 
     Context 'File navigation functions' {
         BeforeAll {
+            . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
             . (Join-Path $script:ProfileDir '02-files-navigation.ps1')
         }
 
@@ -183,6 +185,83 @@ Describe 'File Operations Integration Tests' {
                     Set-Location $originalLocation
                 }
             }
+        }
+    }
+
+    Context 'File utility functions' {
+        BeforeAll {
+            . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
+            . (Join-Path $script:ProfileDir '02-files-utilities.ps1')
+        }
+
+        It 'Get-FileHead (head) function is available' {
+            Get-Command head -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
+            Get-Command Get-FileHead -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Get-FileTail (tail) function is available' {
+            Get-Command tail -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
+            Get-Command Get-FileTail -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'head function shows first 10 lines of file' {
+            $testFile = Join-Path $TestDrive 'test_head.txt'
+            $content = 1..20 | ForEach-Object { "Line $_" }
+            Set-Content -Path $testFile -Value $content
+
+            $result = head $testFile
+            $result.Count | Should -Be 10
+            $result[0] | Should -Be 'Line 1'
+            $result[9] | Should -Be 'Line 10'
+        }
+
+        It 'head function shows custom number of lines' {
+            $testFile = Join-Path $TestDrive 'test_head_custom.txt'
+            $content = 1..20 | ForEach-Object { "Line $_" }
+            Set-Content -Path $testFile -Value $content
+
+            $result = head $testFile -Lines 5
+            $result.Count | Should -Be 5
+            $result[0] | Should -Be 'Line 1'
+            $result[4] | Should -Be 'Line 5'
+        }
+
+        It 'head function works with pipeline input' {
+            $inputData = 1..15 | ForEach-Object { "Item $_" }
+            $result = $inputData | head
+            $result.Count | Should -Be 10
+            $result[0] | Should -Be 'Item 1'
+            $result[9] | Should -Be 'Item 10'
+        }
+
+        It 'tail function shows last 10 lines of file' {
+            $testFile = Join-Path $TestDrive 'test_tail.txt'
+            $content = 1..20 | ForEach-Object { "Line $_" }
+            Set-Content -Path $testFile -Value $content
+
+            $result = tail $testFile
+            $result.Count | Should -Be 10
+            $result[0] | Should -Be 'Line 11'
+            $result[9] | Should -Be 'Line 20'
+        }
+
+        It 'tail function shows custom number of lines' {
+            $testFile = Join-Path $TestDrive 'test_tail_custom.txt'
+            $content = 1..20 | ForEach-Object { "Line $_" }
+            Set-Content -Path $testFile -Value $content
+
+            $result = tail $testFile -Lines 5
+            $result.Count | Should -Be 5
+            $result[0] | Should -Be 'Line 16'
+            $result[4] | Should -Be 'Line 20'
+        }
+
+        It 'tail function works with pipeline input' {
+            $inputData = 1..15 | ForEach-Object { "Item $_" }
+            $result = $inputData | tail
+            $result.Count | Should -Be 10
+            $result[0] | Should -Be 'Item 6'
+            $result[9] | Should -Be 'Item 15'
         }
     }
 

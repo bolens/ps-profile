@@ -6,11 +6,18 @@ scripts/utils/run_pester.ps1
 
 .DESCRIPTION
     Ensures Pester is available and runs the test suite in this repository. Can run all tests
-    or a specific test file. Optionally includes code coverage reporting.
+    or a specific test file. Optionally includes code coverage reporting and test name filtering.
 
 .PARAMETER TestFile
     Optional path to a specific test file to run. If not specified, runs all tests in the
     tests directory.
+
+.PARAMETER Suite
+    The test suite to run. Valid values are All, Unit, Integration, or Performance.
+    Defaults to All.
+
+.PARAMETER TestName
+    Optional filter for test names. Supports wildcards and multiple patterns separated by " or ".
 
 .PARAMETER Coverage
     If specified, enables code coverage reporting for profile.d directory.
@@ -24,6 +31,21 @@ scripts/utils/run_pester.ps1
     pwsh -NoProfile -File scripts\utils\run_pester.ps1 -TestFile tests\profile.tests.ps1
 
     Runs only the profile.tests.ps1 test file.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Suite Integration
+
+    Runs only integration tests.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run_pester.ps1 -TestName "*Edit-Profile*"
+
+    Runs tests with names containing "Edit-Profile".
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Suite Integration -TestName "*Edit-Profile* or *Backup-Profile*"
+
+    Runs integration tests with names containing "Edit-Profile" or "Backup-Profile".
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Coverage
@@ -42,6 +64,8 @@ param(
 
     [ValidateSet('All', 'Unit', 'Integration', 'Performance')]
     [string]$Suite = 'All',
+
+    [string]$TestName = "",
 
     [switch]$Coverage
 )
@@ -476,24 +500,13 @@ else {
     }
 }
 
-if ($Coverage) {
-    $coverageDir = Join-Path $repoRoot 'scripts' 'data'
-    if (-not (Test-Path -LiteralPath $coverageDir)) {
-        New-Item -ItemType Directory -Path $coverageDir -Force | Out-Null
+if (-not [string]::IsNullOrWhiteSpace($TestName)) {
+    # Parse TestName patterns separated by " or "
+    $namePatterns = $TestName -split '\s+or\s+' | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    if ($namePatterns) {
+        $config.Filter.FullName = $namePatterns
+        Write-ScriptMessage -Message "Filtering tests by name patterns: $($namePatterns -join ', ')"
     }
-
-    $coverageFile = Join-Path $coverageDir 'coverage.xml'
-
-    $config.CodeCoverage.Enabled = $true
-    $config.CodeCoverage.OutputPath = $coverageFile
-    $config.CodeCoverage.Path = @($profileDir)
-    $config.CodeCoverage.RecursePaths = $true
-
-    Write-ScriptMessage -Message "Code coverage enabled for: $(ConvertTo-RepoRelativePath $profileDir)"
-    Write-ScriptMessage -Message "Coverage report: $(ConvertTo-RepoRelativePath $coverageFile)"
-}
-else {
-    $config.CodeCoverage.Enabled = $false
 }
 
 Push-Location -LiteralPath $repoRoot

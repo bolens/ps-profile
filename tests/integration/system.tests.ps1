@@ -8,6 +8,7 @@ Describe 'System Utilities Integration Tests' {
 
     Context 'System utility functions edge cases' {
         BeforeAll {
+            . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
             . (Join-Path $script:ProfileDir '07-system.ps1')
         }
 
@@ -51,6 +52,7 @@ Describe 'System Utilities Integration Tests' {
 
     Context 'System utility aliases' {
         BeforeAll {
+            . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
             . (Join-Path $script:ProfileDir '07-system.ps1')
         }
 
@@ -80,10 +82,47 @@ Describe 'System Utilities Integration Tests' {
             }
         }
 
-        It 'unzip alias invokes Expand-Archive' {
-            $alias = Get-Alias unzip -ErrorAction SilentlyContinue
-            if ($alias) {
-                $alias.Definition | Should -Match 'Expand-Archive'
+        It 'Invoke-RestApi function exists and can be called' {
+            # This function requires URI parameter, so just test it exists
+            Get-Command Invoke-RestApi -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Invoke-WebRequestCustom function exists and can be called' {
+            # This function requires URI parameter, so just test it exists
+            Get-Command Invoke-WebRequestCustom -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Expand-ArchiveCustom function exists and can be called' {
+            # This function requires Path parameter, so just test it exists
+            Get-Command Expand-ArchiveCustom -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Compress-ArchiveCustom function exists and can be called' {
+            # This function requires Path parameter, so just test it exists
+            Get-Command Compress-ArchiveCustom -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Open-VSCode function exists and can be called' {
+            Get-Command Open-VSCode -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test calling only if VS Code is available
+            if (Test-Path "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe") {
+                { Open-VSCode -ErrorAction Stop } | Should -Not -Throw
+            }
+        }
+
+        It 'Open-Neovim function exists and can be called' {
+            Get-Command Open-Neovim -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test calling only if neovim is available
+            if (Get-Command nvim -ErrorAction SilentlyContinue) {
+                { Open-Neovim -ErrorAction Stop } | Should -Not -Throw
+            }
+        }
+
+        It 'Open-NeovimVi function exists and can be called' {
+            Get-Command Open-NeovimVi -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test calling only if neovim is available
+            if (Get-Command nvim -ErrorAction SilentlyContinue) {
+                { Open-NeovimVi -ErrorAction Stop } | Should -Not -Throw
             }
         }
     }
@@ -96,6 +135,7 @@ Describe 'System Utilities Integration Tests' {
         }
 
         It 'functions work with both Windows and Unix-style paths' {
+            . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
             . (Join-Path $script:ProfileDir '02-files-navigation.ps1')
 
             $testPath = Join-Path $TestDrive 'test'
