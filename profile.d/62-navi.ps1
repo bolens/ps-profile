@@ -65,5 +65,5 @@ if (Test-HasCommand navi) {
     Set-Alias -Name navip -Value Invoke-NaviPrint -Option AllScope -Force
 }
 else {
-    Write-Warning "navi not found. Install with: scoop install navi"
+    Write-MissingToolWarning -Tool 'navi' -InstallHint 'Install with: scoop install navi'
 }

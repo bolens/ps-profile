@@ -1,0 +1,111 @@
+#
+# Utility script integration tests focusing on script discovery and validation.
+#
+
+. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+
+BeforeAll {
+    Import-TestCommonModule | Out-Null
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
+}
+
+Describe 'Utility Script Integration Tests' {
+    Context 'Script File Existence' {
+        It 'All utility scripts exist' {
+            $expectedScripts = @(
+                'run-lint.ps1',
+                'run-format.ps1',
+                'run-security-scan.ps1',
+                'run-markdownlint.ps1',
+                'find-duplicate-functions.ps1',
+                'check-module-updates.ps1',
+                'spellcheck.ps1'
+            )
+
+            foreach ($scriptName in $expectedScripts) {
+                $scriptMatch = Get-ChildItem -Path $script:ScriptsUtilsPath -Filter $scriptName -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+                $scriptMatch | Should -Not -BeNullOrEmpty -Because "$scriptName should exist"
+            }
+        }
+    }
+
+    Context 'Script Syntax Validation' {
+        It 'All utility scripts have valid PowerShell syntax' {
+            $scripts = Get-PowerShellScripts -Path $script:ScriptsUtilsPath
+            foreach ($script in $scripts) {
+                $errors = $null
+                $null = [System.Management.Automation.PSParser]::Tokenize(
+                    (Get-Content -Path $script.FullName -Raw),
+                    [ref]$errors
+                )
+                $errors | Should -BeNullOrEmpty -Because "$($script.Name) should have valid syntax"
+            }
+        }
+    }
+
+    Context 'Common.psm1 Import Pattern' {
+        It 'Scripts import Common.psm1 correctly' {
+            $scripts = Get-PowerShellScripts -Path $script:ScriptsUtilsPath
+            foreach ($script in $scripts) {
+                if ($script.Name -eq 'Common.psm1') { continue }
+
+                $content = Get-Content -Path $script.FullName -Raw
+                $content | Should -Match 'Import-Module.*Common' -Because "$($script.Name) should import Common.psm1"
+            }
+        }
+    }
+
+    Context 'Exit Code Usage' {
+        It 'Scripts use Exit-WithCode instead of direct exit' {
+            $scripts = Get-PowerShellScripts -Path $script:ScriptsUtilsPath
+            foreach ($script in $scripts) {
+                if ($script.Name -eq 'Common.psm1') { continue }
+
+                $content = Get-Content -Path $script.FullName -Raw
+                $exitPattern = [regex]::new('\bexit\s+\d+\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+                $matches = $exitPattern.Matches($content)
+
+                foreach ($match in $matches) {
+                    $beforeMatch = $content.Substring(0, $match.Index)
+                    $lineStart = $beforeMatch.LastIndexOf("`n")
+                    $line = if ($lineStart -ge 0) { $content.Substring($lineStart + 1, $match.Index - $lineStart - 1) } else { $content.Substring(0, $match.Index) }
+
+                    if ($line -match '^\s*#' -or $line -match '@"|@"|@''|@''') {
+                        continue
+                    }
+
+                    $match.Value | Should -BeNullOrEmpty -Because "$($script.Name) should use Exit-WithCode instead of direct exit"
+                }
+            }
+        }
+    }
+
+    Context 'Error Handling' {
+        It 'Scripts wrap risky operations in try-catch' {
+            $scripts = Get-PowerShellScripts -Path $script:ScriptsUtilsPath
+            $riskyOperations = @('Get-RepoRoot', 'Ensure-ModuleAvailable', 'Get-Content', 'Set-Content', 'Invoke-ScriptAnalyzer')
+
+            foreach ($script in $scripts) {
+                if ($script.Name -eq 'Common.psm1') { continue }
+
+                $content = Get-Content -Path $script.FullName -Raw
+
+                foreach ($operation in $riskyOperations) {
+                    if ($content -match "\b$operation\b") {
+                        $operationIndex = $content.IndexOf($operation)
+                        if ($operationIndex -gt 0) {
+                            $beforeOperation = $content.Substring(0, $operationIndex)
+                            $tryCount = ([regex]::Matches($beforeOperation, '\btry\s*\{')).Count
+                            $catchCount = ([regex]::Matches($beforeOperation, '\bcatch\s*\{')).Count
+
+                            if ($tryCount -eq 0) {
+                                Write-Warning "$($script.Name) uses $operation but may not have try-catch protection"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,18 +1,20 @@
 <#
-tests/NetworkFailure.tests.ps1
+tests/network-failure.tests.ps1
 
 Tests for network failure scenarios and error handling.
 #>
 
+. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+
 BeforeAll {
     # Import the Common module
-    $commonModulePath = Join-Path $PSScriptRoot '..' 'scripts' 'lib' 'Common.psm1'
+    $commonModulePath = Get-TestPath -RelativePath 'scripts\lib\Common.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
 
     # Get repository root
-    $script:RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-    $script:ScriptsUtilsPath = Join-Path $script:RepoRoot 'scripts' 'utils'
-    $script:ScriptsChecksPath = Join-Path $script:RepoRoot 'scripts' 'checks'
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
+    $script:ScriptsChecksPath = Get-TestPath -RelativePath 'scripts\checks' -StartPath $PSScriptRoot -EnsureExists
 }
 
 Describe 'Network Failure Scenarios' {

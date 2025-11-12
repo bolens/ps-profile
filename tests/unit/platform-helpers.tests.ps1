@@ -1,23 +1,22 @@
+. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+
+<#
+.SYNOPSIS
+    Resolves bootstrap resources for platform helper tests.
+.DESCRIPTION
+    Locates the repository profile directory and bootstrap fragment so tests can dot-source
+    the same helpers used by the interactive profile. The resolved paths are stored in
+    script-scoped variables for reuse within the current test file.
+.PARAMETER BasePath
+    Optional start path for repository discovery. Defaults to the current test directory.
+#>
 function script:Set-TestBootstrapContext {
     param(
         [string]$BasePath = $PSScriptRoot
     )
 
-    $profileRelative = Join-Path $BasePath '..\profile.d'
-    try {
-        $script:ProfileDir = (Resolve-Path -LiteralPath $profileRelative -ErrorAction Stop).ProviderPath
-    }
-    catch {
-        throw "Profile directory not found at $profileRelative"
-    }
-
-    $bootstrapRelative = Join-Path $script:ProfileDir '00-bootstrap.ps1'
-    try {
-        $script:BootstrapPath = (Resolve-Path -LiteralPath $bootstrapRelative -ErrorAction Stop).ProviderPath
-    }
-    catch {
-        throw "Bootstrap script not found at $bootstrapRelative"
-    }
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $BasePath -EnsureExists
+    $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $BasePath -EnsureExists
 }
 
 Describe 'Platform Detection Helpers' {
@@ -217,8 +216,8 @@ Describe 'Test-CachedCommand with TTL' {
 
 Describe 'Test-SafePath Security Helper' {
     BeforeAll {
-        $script:ProfileDir = Join-Path $PSScriptRoot '..\profile.d'
-        $script:UtilitiesPath = Join-Path $script:ProfileDir '05-utilities.ps1'
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        $script:UtilitiesPath = Get-TestPath -RelativePath 'profile.d\05-utilities.ps1' -StartPath $PSScriptRoot -EnsureExists
     }
 
     BeforeEach {

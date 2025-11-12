@@ -40,6 +40,9 @@ This project includes VS Code tasks and Taskfile commands for common development
 - `format-and-lint` - Format and lint code (common pre-commit workflow)
 - `all-docs` - Generate all documentation (API docs + fragment READMEs)
 - `test` - Run Pester tests
+- `test-unit` - Run the unit test suite only
+- `test-integration` - Run the integration test suite only
+- `test-performance` - Run the performance test suite only
 - `test-coverage` - Run tests with coverage
 - `benchmark` - Performance benchmark
 - `check-idempotency` - Check fragment idempotency
@@ -63,6 +66,10 @@ pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1  # Security s
 pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 30
 pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline  # Update baseline
 ```
+
+Performance test thresholds can be tuned with environment variables:
+- `PS_PROFILE_MAX_LOAD_MS` (default 6000)
+- `PS_PROFILE_MAX_FRAGMENT_MS` (default 500)
 
 ### Documentation
 

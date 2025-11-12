@@ -15,7 +15,7 @@ if (Test-HasCommand procs) {
         Launches procs, a modern replacement for ps that provides a faster, more user-friendly process viewer. Displays running processes with colorized output and improved formatting.
     #>
     Set-Alias -Name ps -Value procs -Option AllScope -Force
-    
+
     <#
     .SYNOPSIS
         Searches processes with procs.
@@ -25,5 +25,5 @@ if (Test-HasCommand procs) {
     Set-Alias -Name psgrep -Value procs -Option AllScope -Force
 }
 else {
-    Write-Warning "procs not found. Install with: scoop install procs"
+    Write-MissingToolWarning -Tool 'procs' -InstallHint 'Install with: scoop install procs'
 }

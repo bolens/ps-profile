@@ -86,7 +86,7 @@ if (Test-HasCommand scoop) {
     Set-Alias -Name scleanup -Value Clear-ScoopCache -ErrorAction SilentlyContinue
 }
 else {
-    Write-Warning "Scoop not found. Install from: https://scoop.sh/"
+    Write-MissingToolWarning -Tool 'Scoop' -InstallHint 'Install from: https://scoop.sh/'
 }
 
 # UV helpers
@@ -142,7 +142,7 @@ if (Test-HasCommand uv) {
     Set-Alias -Name uvs -Value Sync-UVDependencies -ErrorAction SilentlyContinue
 }
 else {
-    Write-Warning "UV not found. Install with: pip install uv"
+    Write-MissingToolWarning -Tool 'uv' -InstallHint 'Install with: pip install uv'
 }
 
 # PNPM helpers
@@ -228,5 +228,5 @@ if (Test-HasCommand pnpm) {
     Set-Alias -Name pndev -Value Start-PnpmDev -ErrorAction SilentlyContinue
 }
 else {
-    Write-Warning "PNPM not found. Install with: npm install -g pnpm"
+    Write-MissingToolWarning -Tool 'pnpm' -InstallHint 'Install with: npm install -g pnpm'
 }

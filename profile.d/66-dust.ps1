@@ -25,5 +25,5 @@ if (Test-HasCommand dust) {
     Set-Alias -Name diskusage -Value dust -Option AllScope -Force
 }
 else {
-    Write-Warning "dust not found. Install with: scoop install dust"
+    Write-MissingToolWarning -Tool 'dust' -InstallHint 'Install with: scoop install dust'
 }

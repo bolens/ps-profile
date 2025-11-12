@@ -61,7 +61,7 @@ Message: $errorMessage
             else {
                 $env:USERPROFILE
             }
-            
+
             if ($userHome) {
                 $logDir = Join-Path $userHome '.local' 'share' 'powershell'
                 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
@@ -83,11 +83,26 @@ Message: $errorMessage
         }
 
         # Console output based on debug level
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Host $formattedError -ForegroundColor Red
+        $suppressConsole = $false
+        if ($Category -eq 'Fragment') {
+            $fragmentSource = $ErrorRecord.InvocationInfo.ScriptName
+            if (Get-Command -Name 'Test-FragmentWarningSuppressed' -ErrorAction SilentlyContinue) {
+                try {
+                    $suppressConsole = Test-FragmentWarningSuppressed -FragmentName $fragmentSource
+                }
+                catch {
+                    $suppressConsole = $false
+                }
+            }
         }
-        else {
-            Write-Warning "$Category Error: $errorMessage"
+
+        if (-not $suppressConsole) {
+            if ($env:PS_PROFILE_DEBUG) {
+                Write-Host $formattedError -ForegroundColor Red
+            }
+            else {
+                Write-Warning "$Category Error: $errorMessage"
+            }
         }
     }
 

@@ -4,15 +4,27 @@
 # ===============================================
 
 if (Get-Variable -Name 'PSProfileBootstrapInitialized' -Scope Global -ErrorAction SilentlyContinue) {
-    if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Script -ErrorAction SilentlyContinue)) {
-        $script:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
     }
 
-    if (-not (Get-Variable -Name 'AgentModeReplaceAllowed' -Scope Script -ErrorAction SilentlyContinue)) {
-        $script:AgentModeReplaceAllowed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    if (-not (Get-Variable -Name 'AgentModeReplaceAllowed' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:AgentModeReplaceAllowed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     }
 
-    return
+    if (-not (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    }
+
+    if (-not (Get-Variable -Name 'MissingToolWarnings' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:MissingToolWarnings = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    }
+
+    $reinitCommand = Get-Command -Name 'Initialize-FragmentWarningSuppression' -ErrorAction SilentlyContinue
+    if ($reinitCommand) {
+        Initialize-FragmentWarningSuppression
+    }
+    # Continue to define functions even if already initialized
 }
 
 Set-Variable -Name 'PSProfileBootstrapInitialized' -Scope Global -Value $true -Force
@@ -35,12 +47,28 @@ else {
     Write-Warning "Common module not found at $script:CommonModulePath"
 }
 
-if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Script -ErrorAction SilentlyContinue)) {
-    $script:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
+if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue)) {
+    $global:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
 }
 
-if (-not (Get-Variable -Name 'AgentModeReplaceAllowed' -Scope Script -ErrorAction SilentlyContinue)) {
-    $script:AgentModeReplaceAllowed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+if (-not (Get-Variable -Name 'AgentModeReplaceAllowed' -Scope Global -ErrorAction SilentlyContinue)) {
+    $global:AgentModeReplaceAllowed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+}
+
+if (-not (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue)) {
+    $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+}
+
+if (-not (Get-Variable -Name 'MissingToolWarnings' -Scope Global -ErrorAction SilentlyContinue)) {
+    $global:MissingToolWarnings = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+}
+
+if (-not (Get-Variable -Name 'FragmentWarningPatternSet' -Scope Global -ErrorAction SilentlyContinue)) {
+    $global:FragmentWarningPatternSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+}
+
+if (-not (Get-Variable -Name 'SuppressAllFragmentWarnings' -Scope Global -ErrorAction SilentlyContinue)) {
+    $global:SuppressAllFragmentWarnings = $false
 }
 
 <#
@@ -66,13 +94,44 @@ function global:Test-HasCommand {
         return $false
     }
 
-    $functionPath = "Function:\$Name"
-    if (Test-Path -LiteralPath $functionPath) { return $true }
+    $normalizedName = $Name.Trim()
 
-    $aliasPath = "Alias:\$Name"
-    if (Test-Path -LiteralPath $aliasPath) { return $true }
+    if ($global:AssumedAvailableCommands -and $global:AssumedAvailableCommands.ContainsKey($normalizedName)) {
+        return $true
+    }
 
-    $command = Get-Command -Name $Name -ErrorAction SilentlyContinue
+    # Look through both local and global scopes without triggering module autoload.
+    $functionPaths = @(
+        "Function:\$normalizedName",
+        "Function:\global:$normalizedName"
+    )
+
+    foreach ($path in $functionPaths) {
+        try {
+            if ($path -and (Test-Path -LiteralPath $path)) {
+                return $true
+            }
+        }
+        catch {
+        }
+    }
+
+    $aliasPaths = @(
+        "Alias:\$normalizedName",
+        "Alias:\global:$normalizedName"
+    )
+
+    foreach ($path in $aliasPaths) {
+        try {
+            if ($path -and (Test-Path -LiteralPath $path)) {
+                return $true
+            }
+        }
+        catch {
+        }
+    }
+
+    $command = Get-Command -Name $normalizedName -ErrorAction SilentlyContinue
     return $null -ne $command
 }
 
@@ -105,24 +164,374 @@ function global:Test-CachedCommand {
         return $false
     }
 
-    $cacheKey = $Name.ToLowerInvariant()
+    $normalizedName = $Name.Trim()
+
+    if ($global:AssumedAvailableCommands -and $global:AssumedAvailableCommands.ContainsKey($normalizedName)) {
+        return $true
+    }
+
+    $cacheKey = $normalizedName.ToLowerInvariant()
     $now = Get-Date
 
-    if ($script:TestCachedCommandCache.ContainsKey($cacheKey)) {
-        $entry = [pscustomobject]$script:TestCachedCommandCache[$cacheKey]
+    if ($global:TestCachedCommandCache.ContainsKey($cacheKey)) {
+        $entry = [pscustomobject]$global:TestCachedCommandCache[$cacheKey]
         if ($entry -and $entry.Expires -gt $now) {
             return [bool]$entry.Result
         }
     }
 
-    $result = Test-HasCommand -Name $Name
+    $result = Test-HasCommand -Name $normalizedName
     $expires = $now.AddMinutes([double]$CacheTTLMinutes)
-    $script:TestCachedCommandCache[$cacheKey] = [pscustomobject]@{
+    $global:TestCachedCommandCache[$cacheKey] = [pscustomobject]@{
         Result  = $result
         Expires = $expires
     }
     return $result
 }
+
+<#
+.SYNOPSIS
+    Clears the cached results used by Test-CachedCommand.
+.DESCRIPTION
+    Empties the in-memory cache so that subsequent Test-CachedCommand invocations
+    recalculate command availability.
+.OUTPUTS
+    System.Boolean
+#>
+function global:Clear-TestCachedCommandCache {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param()
+
+    if (-not $global:TestCachedCommandCache) {
+        return $false
+    }
+
+    $global:TestCachedCommandCache.Clear()
+    return $true
+}
+
+<#
+.SYNOPSIS
+    Removes a single entry from the Test-CachedCommand cache.
+.DESCRIPTION
+    Deletes the cached availability result for the specified command name,
+    forcing the next lookup to probe providers again.
+.PARAMETER Name
+    The command name whose cached result should be removed.
+.OUTPUTS
+    System.Boolean
+#>
+function global:Remove-TestCachedCommandCacheEntry {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    if (-not $global:TestCachedCommandCache -or [string]::IsNullOrWhiteSpace($Name)) {
+        return $false
+    }
+
+    $cacheKey = $Name.ToLowerInvariant()
+    $removedEntry = $null
+    return $global:TestCachedCommandCache.TryRemove($cacheKey, [ref]$removedEntry)
+}
+
+<#
+.SYNOPSIS
+    Adds command names that should always be treated as available.
+.DESCRIPTION
+    Registers command names, typically optional tools, that the profile should
+    treat as present even when they are not discoverable on the current PATH.
+.PARAMETER Name
+    One or more command names to mark as assumed available.
+.OUTPUTS
+    System.Boolean
+#>
+function global:Add-AssumedCommand {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [string[]]$Name
+    )
+
+    if (-not $global:AssumedAvailableCommands) {
+        return $false
+    }
+
+    $added = $false
+
+    foreach ($entry in $Name) {
+        if ([string]::IsNullOrWhiteSpace($entry)) {
+            continue
+        }
+
+        $normalized = $entry.Trim()
+        if ($global:AssumedAvailableCommands.TryAdd($normalized, $true) -or $global:AssumedAvailableCommands.ContainsKey($normalized)) {
+            $added = $true
+        }
+    }
+
+    return $added
+}
+
+<#
+.SYNOPSIS
+    Removes command names from the assumed available command list.
+.DESCRIPTION
+    Clears previously added assumed commands so future detection reverts to
+    standard provider checks.
+.PARAMETER Name
+    One or more command names to remove from the assumed command list.
+.OUTPUTS
+    System.Boolean
+#>
+function global:Remove-AssumedCommand {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [string[]]$Name
+    )
+
+    if (-not $global:AssumedAvailableCommands) {
+        return $false
+    }
+
+    $removed = $false
+
+    foreach ($entry in $Name) {
+        if ([string]::IsNullOrWhiteSpace($entry)) {
+            continue
+        }
+
+        $normalized = $entry.Trim()
+        $removedEntry = $null
+        if ($global:AssumedAvailableCommands.TryRemove($normalized, [ref]$removedEntry)) {
+            $removed = $true
+        }
+    }
+
+    return $removed
+}
+
+<#
+.SYNOPSIS
+    Retrieves the list of assumed available commands.
+.OUTPUTS
+    System.String[]
+#>
+function global:Get-AssumedCommands {
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param()
+
+    if (-not $global:AssumedAvailableCommands) {
+        return @()
+    }
+
+    return [string[]]$global:AssumedAvailableCommands.Keys
+}
+
+<#
+.SYNOPSIS
+    Writes a tool detection warning only once per session.
+.DESCRIPTION
+    Emits a warning about a missing optional tool unless warnings are globally
+    suppressed or the message has already been shown in the current session.
+.PARAMETER Tool
+    Unique identifier for the tool (used for de-duplication).
+.PARAMETER InstallHint
+    Optional installation hint appended to the default warning text.
+.PARAMETER Message
+    Full warning message to emit instead of the default format.
+.PARAMETER Force
+    When specified, emits the warning even when it has already been shown.
+#>
+function global:Write-MissingToolWarning {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Tool,
+
+        [string]$InstallHint,
+
+        [string]$Message,
+
+        [switch]$Force
+    )
+
+    if ($env:PS_PROFILE_SUPPRESS_TOOL_WARNINGS -eq '1') {
+        return
+    }
+
+    if (-not $global:MissingToolWarnings) {
+        return
+    }
+
+    $displayName = if ([string]::IsNullOrWhiteSpace($Tool)) { 'Tool' } else { $Tool.Trim() }
+    $normalized = if ([string]::IsNullOrWhiteSpace($Tool)) { 'unknown-tool' } else { $Tool.Trim() }
+
+    if (-not $Force -and $global:MissingToolWarnings.ContainsKey($normalized)) {
+        return
+    }
+
+    $global:MissingToolWarnings[$normalized] = $true
+
+    $warningText = if ($Message) {
+        $Message
+    }
+    elseif ($InstallHint) {
+        "$displayName not found. $InstallHint"
+    }
+    else {
+        "$displayName not found."
+    }
+
+    Write-Warning $warningText
+}
+
+<#
+.SYNOPSIS
+    Clears cached missing tool warnings.
+.DESCRIPTION
+    Removes warning suppression entries so subsequent calls may emit warnings
+    again. When no Tool parameter is provided, all cached warnings are cleared.
+.PARAMETER Tool
+    Optional set of tool names whose warning entries should be cleared.
+.OUTPUTS
+    System.Boolean
+#>
+function global:Clear-MissingToolWarnings {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [string[]]$Tool
+    )
+
+    if (-not $global:MissingToolWarnings) {
+        return $false
+    }
+
+    if (-not $Tool -or $Tool.Count -eq 0) {
+        $global:MissingToolWarnings.Clear()
+        return $true
+    }
+
+    $cleared = $false
+
+    foreach ($entry in $Tool) {
+        if ([string]::IsNullOrWhiteSpace($entry)) {
+            continue
+        }
+
+        $normalized = $entry.Trim()
+        $removed = $null
+        if ($global:MissingToolWarnings.TryRemove($normalized, [ref]$removed)) {
+            $cleared = $true
+        }
+    }
+
+    return $cleared
+}
+
+function Initialize-FragmentWarningSuppression {
+    if (-not (Get-Variable -Name 'FragmentWarningPatternSet' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:FragmentWarningPatternSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    }
+    else {
+        $global:FragmentWarningPatternSet.Clear()
+    }
+
+    $global:SuppressAllFragmentWarnings = $false
+
+    $rawValue = $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS
+    if ([string]::IsNullOrWhiteSpace($rawValue)) {
+        return
+    }
+
+    $tokens = $rawValue -split '[,;\s]+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+
+    foreach ($token in $tokens) {
+        $normalized = $token.Trim()
+        if ([string]::IsNullOrWhiteSpace($normalized)) {
+            continue
+        }
+
+        switch -Regex ($normalized.ToLowerInvariant()) {
+            '^(1|true|all|\*)$' {
+                $global:SuppressAllFragmentWarnings = $true
+                continue
+            }
+            default {
+                [void]$global:FragmentWarningPatternSet.Add($normalized)
+            }
+        }
+    }
+}
+
+function global:Test-FragmentWarningSuppressed {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [string]$FragmentName
+    )
+
+    if ($global:SuppressAllFragmentWarnings) {
+        return $true
+    }
+
+    if (-not $global:FragmentWarningPatternSet -or $global:FragmentWarningPatternSet.Count -eq 0) {
+        return $false
+    }
+
+    if ([string]::IsNullOrWhiteSpace($FragmentName)) {
+        return $false
+    }
+
+    $candidateFull = $FragmentName.Trim()
+    $candidateName = [System.IO.Path]::GetFileName($candidateFull)
+    $candidateBase = [System.IO.Path]::GetFileNameWithoutExtension($candidateFull)
+
+    foreach ($pattern in $global:FragmentWarningPatternSet) {
+        if ([string]::IsNullOrWhiteSpace($pattern)) {
+            continue
+        }
+
+        $normalizedPattern = $pattern.Trim()
+        $patternName = [System.IO.Path]::GetFileName($normalizedPattern)
+        $patternBase = [System.IO.Path]::GetFileNameWithoutExtension($normalizedPattern)
+
+        $candidates = @($candidateFull, $candidateName, $candidateBase)
+        $patterns = @($normalizedPattern, $patternName, $patternBase)
+
+        foreach ($candidate in $candidates) {
+            foreach ($patternVariant in $patterns) {
+                if ([string]::IsNullOrWhiteSpace($candidate) -or [string]::IsNullOrWhiteSpace($patternVariant)) {
+                    continue
+                }
+
+                if ($candidate -like $patternVariant) {
+                    return $true
+                }
+            }
+        }
+    }
+
+    return $false
+}
+
+if ($env:PS_PROFILE_ASSUME_COMMANDS) {
+    $tokens = $env:PS_PROFILE_ASSUME_COMMANDS -split '[,;\s]+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    if ($tokens) {
+        Add-AssumedCommand -Name $tokens | Out-Null
+    }
+}
+
+Initialize-FragmentWarningSuppression
 
 <#
 .SYNOPSIS
@@ -193,7 +602,7 @@ function global:Set-AgentModeFunction {
     }
 
     $existing = Get-Command -Name $Name -ErrorAction SilentlyContinue
-    $allowReplace = $script:AgentModeReplaceAllowed.Contains($Name)
+    $allowReplace = $global:AgentModeReplaceAllowed.Contains($Name)
 
     if ($existing -and -not $allowReplace) {
         return $false
@@ -203,7 +612,7 @@ function global:Set-AgentModeFunction {
     Set-Item -Path ("Function:\global:" + $Name) -Value $scriptBlock -Force | Out-Null
 
     if ($allowReplace) {
-        [void]$script:AgentModeReplaceAllowed.Remove($Name)
+        [void]$global:AgentModeReplaceAllowed.Remove($Name)
     }
 
     if ($ReturnScriptBlock) {
@@ -299,7 +708,7 @@ function global:Register-LazyFunction {
         return $false
     }
 
-    [void]$script:AgentModeReplaceAllowed.Add($Name)
+    [void]$global:AgentModeReplaceAllowed.Add($Name)
     $initBlock = $Initializer
 
     $stub = {

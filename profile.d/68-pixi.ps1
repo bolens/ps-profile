@@ -44,5 +44,5 @@ if (Test-HasCommand pixi) {
     Set-Alias -Name pxshell -Value Invoke-PixiShell -Option AllScope -Force
 }
 else {
-    Write-Warning "pixi not found. Install with: scoop install pixi"
+    Write-MissingToolWarning -Tool 'pixi' -InstallHint 'Install with: scoop install pixi'
 }

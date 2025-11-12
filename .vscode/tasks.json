@@ -50,6 +50,48 @@
       "problemMatcher": []
     },
     {
+      "label": "Run Pester Unit Tests",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
+        "-Suite",
+        "Unit"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Pester Integration Tests",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
+        "-Suite",
+        "Integration"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Pester Performance Tests",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
+        "-Suite",
+        "Performance"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Run Pester Tests with Coverage",
       "type": "shell",
       "command": "pwsh",

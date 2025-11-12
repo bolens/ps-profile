@@ -57,6 +57,24 @@ Run all tests:
 pwsh -NoProfile -File scripts\utils\run_pester.ps1
 ```
 
+Run only the unit suite:
+
+```powershell
+pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Suite Unit
+```
+
+Run only the integration suite:
+
+```powershell
+pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Suite Integration
+```
+
+Run only the performance suite:
+
+```powershell
+pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Suite Performance
+```
+
 Run a specific test file:
 
 ```powershell
@@ -67,6 +85,14 @@ Run tests with code coverage:
 
 ```powershell
 pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Coverage
+```
+
+Or use Taskfile shortcuts:
+
+```powershell
+task test-unit         # Unit suite only
+task test-integration  # Integration suite only
+task test-performance  # Performance suite only
 ```
 
 ### Code Quality Checks
@@ -278,6 +304,11 @@ Update performance baseline:
 ```powershell
 pwsh -NoProfile -File scripts\utils\benchmark-startup.ps1 -Iterations 5 -UpdateBaseline
 ```
+
+Performance regression tests respect optional thresholds:
+
+- `PS_PROFILE_MAX_LOAD_MS` (default 6000)
+- `PS_PROFILE_MAX_FRAGMENT_MS` (default 500)
 
 ## Documentation Generation
 

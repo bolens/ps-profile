@@ -49,5 +49,5 @@ if (Test-HasCommand pnpm) {
     Set-Alias -Name pnrun -Value Invoke-PnpmRun -Option AllScope -Force
 }
 else {
-    Write-Warning "pnpm not found. Install with: scoop install pnpm"
+    Write-MissingToolWarning -Tool 'pnpm' -InstallHint 'Install with: scoop install pnpm'
 }

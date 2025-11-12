@@ -32,6 +32,17 @@ Notes
 - This debug mode is opt-in.
 - Messages within CI are printed to stdout so they appear in logs; locally, `Write-Verbose` is used to avoid polluting normal output unless the developer opts-in.
 
+### Suppressing expected fragment warnings
+
+During automated testing you can silence warnings from intentionally broken test fragments by setting `PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS`. The value accepts comma-separated fragment names or wildcard patterns. For example:
+
+```powershell
+$env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = '99-test-*'
+. $HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
+```
+
+Set the variable to `1`, `true`, or `*` to hide all fragment warnings for the current session. The test harness automatically enables suppression for fragments named `99-test-*` so integration tests stay quiet while still logging details to the debug file when needed.
+
 Timings / micro-instrumentation
 --------------------------------
 

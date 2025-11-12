@@ -2,12 +2,16 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 215
+**Total Functions:** 216
 **Total Aliases:** 233
-**Generated:** 2025-11-11 13:05:17
+**Generated:** 2025-11-11 19:59:33
 
 ## Functions by Fragment
 
+
+### 00-bootstrap (1 functions)
+
+- [Initialize-FragmentWarningSuppression](Initialize-FragmentWarningSuppression.md) - Clears cached missing tool warnings.
 
 ### 02-files-conversion (22 functions)
 

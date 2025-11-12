@@ -337,11 +337,21 @@ if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
             $null = . $fragment.FullName
         }
         catch {
+            $suppressFragmentWarning = $false
+            if (Get-Command -Name 'Test-FragmentWarningSuppressed' -ErrorAction SilentlyContinue) {
+                try {
+                    $suppressFragmentWarning = Test-FragmentWarningSuppressed -FragmentName $fragmentName
+                }
+                catch {
+                    $suppressFragmentWarning = $false
+                }
+            }
+
             if ($env:PS_PROFILE_DEBUG) { Write-Host "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)" -ForegroundColor Red }
             if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
                 Write-ProfileError -ErrorRecord $_ -Context "Profile fragment loading" -Category 'Fragment'
             }
-            else {
+            elseif (-not $suppressFragmentWarning) {
                 Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
             }
         }

@@ -23,6 +23,21 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1
 
+  test-unit:
+    desc: Run Unit Test Suite
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Unit
+
+  test-integration:
+    desc: Run Integration Test Suite
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Integration
+
+  test-performance:
+    desc: Run Performance Test Suite
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/run_pester.ps1 -Suite Performance
+
   test-coverage:
     desc: Run Pester Tests with Coverage
     cmds:

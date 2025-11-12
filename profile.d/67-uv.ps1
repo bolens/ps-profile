@@ -57,5 +57,5 @@ if (Test-HasCommand uv) {
     Set-Alias -Name uvvenv -Value New-UVVenv -Option AllScope -Force
 }
 else {
-    Write-Warning "uv not found. Install with: scoop install uv"
+    Write-MissingToolWarning -Tool 'uv' -InstallHint 'Install with: scoop install uv'
 }

@@ -113,5 +113,5 @@ if (Test-HasCommand eza) {
     Set-Alias -Name ltime -Value Get-ChildItemEzaByTime -ErrorAction SilentlyContinue
 }
 else {
-    Write-Warning "eza not found. Install with: scoop install eza"
+    Write-MissingToolWarning -Tool 'eza' -InstallHint 'Install with: scoop install eza'
 }
