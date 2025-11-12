@@ -208,5 +208,140 @@ Describe 'File Conversion Integration Tests' {
             $parsed = $result | ConvertFrom-Json
             $parsed.root.item.'#text' | Should -Be 'test'
         }
+
+        It 'ConvertTo-HtmlFromMarkdown handles markdown input' {
+            Get-Command ConvertTo-HtmlFromMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $markdown = '# Test Header'
+            $tempFile = Join-Path $TestDrive 'test.md'
+            Set-Content -Path $tempFile -Value $markdown
+            # Test that function doesn't throw when called (pandoc may not be available)
+            { ConvertTo-HtmlFromMarkdown -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-HtmlToMarkdown handles HTML input' {
+            Get-Command ConvertFrom-HtmlToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $html = '<h1>Test Header</h1>'
+            $tempFile = Join-Path $TestDrive 'test.html'
+            Set-Content -Path $tempFile -Value $html
+            # Test that function doesn't throw when called (pandoc may not be available)
+            { ConvertFrom-HtmlToMarkdown -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'Convert-Image handles image conversion' {
+            Get-Command Convert-Image -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.jpg'
+            $tempOutput = Join-Path $TestDrive 'test.png'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy image content'
+            # Test that function doesn't throw when called (ImageMagick may not be available)
+            { Convert-Image -InputPath $tempInput -OutputPath $tempOutput } | Should -Not -Throw
+        }
+
+        It 'Convert-Audio handles audio conversion' {
+            Get-Command Convert-Audio -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.mp3'
+            $tempOutput = Join-Path $TestDrive 'test.wav'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy audio content'
+            # Test that function doesn't throw when called (ffmpeg may not be available)
+            { Convert-Audio -InputPath $tempInput -OutputPath $tempOutput } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-PdfToText handles PDF input' {
+            Get-Command ConvertFrom-PdfToText -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.pdf'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy pdf content'
+            # Test that function doesn't throw when called (pdftotext may not be available)
+            { ConvertFrom-PdfToText -InputPath $tempInput } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-VideoToAudio handles video input' {
+            Get-Command ConvertFrom-VideoToAudio -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.mp4'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy video content'
+            # Test that function doesn't throw when called (ffmpeg may not be available)
+            { ConvertFrom-VideoToAudio -InputPath $tempInput } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-VideoToGif handles video input' {
+            Get-Command ConvertFrom-VideoToGif -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.mp4'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy video content'
+            # Test that function doesn't throw when called (ffmpeg may not be available)
+            { ConvertFrom-VideoToGif -InputPath $tempInput } | Should -Not -Throw
+        }
+
+        It 'Resize-Image handles image resizing' {
+            Get-Command Resize-Image -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.jpg'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy image content'
+            # Test that function doesn't throw when called (ImageMagick may not be available)
+            { Resize-Image -InputPath $tempInput -Width 100 -Height 100 } | Should -Not -Throw
+        }
+
+        It 'Merge-Pdf handles PDF merging' {
+            Get-Command Merge-Pdf -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput1 = Join-Path $TestDrive 'test1.pdf'
+            $tempInput2 = Join-Path $TestDrive 'test2.pdf'
+            $tempOutput = Join-Path $TestDrive 'merged.pdf'
+            # Create dummy files to test parameter handling
+            Set-Content -Path $tempInput1 -Value 'dummy pdf content 1'
+            Set-Content -Path $tempInput2 -Value 'dummy pdf content 2'
+            # Test that function doesn't throw when called (pdftk may not be available)
+            { Merge-Pdf -InputPaths @($tempInput1, $tempInput2) -OutputPath $tempOutput } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-EpubToMarkdown handles EPUB input' {
+            Get-Command ConvertFrom-EpubToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.epub'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy epub content'
+            # Test that function doesn't throw when called (pandoc may not be available)
+            { ConvertFrom-EpubToMarkdown -InputPath $tempInput } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-DocxToMarkdown handles DOCX input' {
+            Get-Command ConvertFrom-DocxToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $tempInput = Join-Path $TestDrive 'test.docx'
+            # Create a dummy file to test parameter handling
+            Set-Content -Path $tempInput -Value 'dummy docx content'
+            # Test that function doesn't throw when called (pandoc may not be available)
+            { ConvertFrom-DocxToMarkdown -InputPath $tempInput } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-CsvToYaml handles CSV input' {
+            Get-Command ConvertFrom-CsvToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $csv = "name,value`ntest,123"
+            $tempFile = Join-Path $TestDrive 'test.csv'
+            Set-Content -Path $tempFile -Value $csv
+            # Test that function doesn't throw when called (yq may not be available)
+            { ConvertFrom-CsvToYaml -Path $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertFrom-YamlToCsv handles YAML input' {
+            Get-Command ConvertFrom-YamlToCsv -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $yaml = "name: test`nvalue: 123"
+            $tempFile = Join-Path $TestDrive 'test.yaml'
+            Set-Content -Path $tempFile -Value $yaml
+            # Test that function doesn't throw when called (yq may not be available)
+            { ConvertFrom-YamlToCsv -Path $tempFile } | Should -Not -Throw
+        }
     }
 }

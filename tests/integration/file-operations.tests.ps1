@@ -263,6 +263,85 @@ Describe 'File Operations Integration Tests' {
             $result[0] | Should -Be 'Item 6'
             $result[9] | Should -Be 'Item 15'
         }
+
+        It 'Get-FileHashValue (file-hash) function is available' {
+            Get-Command file-hash -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
+            Get-Command Get-FileHashValue -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Get-FileHashValue calculates SHA256 hash' {
+            $testFile = Join-Path $TestDrive 'test_hash.txt'
+            Set-Content -Path $testFile -Value 'test content for hashing'
+
+            $result = Get-FileHashValue -Path $testFile
+            $result | Should -Not -BeNullOrEmpty
+            $result.Algorithm | Should -Be 'SHA256'
+            $result.Hash | Should -Match '^[A-F0-9]{64}$'
+            $result.Path | Should -Be $testFile
+        }
+
+        It 'Get-FileHashValue supports different algorithms' {
+            $testFile = Join-Path $TestDrive 'test_hash_algo.txt'
+            Set-Content -Path $testFile -Value 'test content'
+
+            $md5Result = Get-FileHashValue -Path $testFile -Algorithm MD5
+            $md5Result.Algorithm | Should -Be 'MD5'
+            $md5Result.Hash | Should -Match '^[A-F0-9]{32}$'
+
+            $sha1Result = Get-FileHashValue -Path $testFile -Algorithm SHA1
+            $sha1Result.Algorithm | Should -Be 'SHA1'
+            $sha1Result.Hash | Should -Match '^[A-F0-9]{40}$'
+        }
+
+        It 'Get-FileHashValue handles non-existent files' {
+            $nonExistent = Join-Path $TestDrive 'non_existent_hash.txt'
+            $result = Get-FileHashValue -Path $nonExistent
+            $result | Should -Be $null
+        }
+
+        It 'Get-FileSize (filesize) function is available' {
+            Get-Command filesize -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
+            Get-Command Get-FileSize -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Get-FileSize returns human-readable sizes' {
+            $smallFile = Join-Path $TestDrive 'small_size.txt'
+            Set-Content -Path $smallFile -Value 'x' -NoNewline
+
+            $result = Get-FileSize -Path $smallFile
+            $result | Should -Match '\d+ bytes'
+        }
+
+        It 'Get-FileSize handles different file sizes' {
+            $mediumFile = Join-Path $TestDrive 'medium_size.txt'
+            $content = 'x' * 2048  # 2KB
+            Set-Content -Path $mediumFile -Value $content -NoNewline
+
+            $result = Get-FileSize -Path $mediumFile
+            $result | Should -Match '\d+\.\d+ KB'
+        }
+
+        It 'Get-FileSize handles non-existent files' {
+            $nonExistent = Join-Path $TestDrive 'non_existent_size.txt'
+            $result = Get-FileSize -Path $nonExistent 2>$null
+            $result | Should -Be $null
+        }
+
+        It 'Get-HexDump (hex-dump) function is available' {
+            Get-Command hex-dump -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
+            Get-Command Get-HexDump -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Get-HexDump displays hex representation' {
+            $testFile = Join-Path $TestDrive 'test_hex.txt'
+            Set-Content -Path $testFile -Value 'AB' -NoNewline
+
+            $result = Get-HexDump -Path $testFile
+            $result | Should -Not -BeNullOrEmpty
+            # Should contain hex values
+            $resultString = $result | Out-String
+            $resultString | Should -Match '[0-9A-F]{2}'
+        }
     }
 
     Context 'Lazy loading patterns' {
