@@ -131,7 +131,7 @@ jobs:
           pwsh-version: '7.4'
 
       - name: Download Metrics Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: metrics-artifacts
           path: scripts/data
