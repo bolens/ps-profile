@@ -119,7 +119,6 @@ foreach ($ps in $psFiles) {
         $issueCount++
         Write-ScriptMessage -Message "MISSING HELP: $($ps.Name)"
         Write-ScriptMessage -Message "  Functions without comment-based help: $([string]::Join(', ', $undocumentedFuncs))"
-        Write-ScriptMessage -Message ""
     }
     elseif ($Verbose) {
         Write-ScriptMessage -Message "OK: $($ps.Name)"

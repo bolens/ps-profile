@@ -1,0 +1,12 @@
+<root>
+  <item>
+    <name>John</name>
+    <age>25</age>
+    <city>New York</city>
+  </item>
+  <item>
+    <name>Jane</name>
+    <age>30</age>
+    <city>London</city>
+  </item>
+</root>

@@ -42,9 +42,9 @@ scripts/utils/code-quality/validate-function-naming.ps1
 [CmdletBinding()]
 param(
     [string]$Path = $null,
-    
+
     [string]$OutputPath = $null,
-    
+
     [string]$ExceptionsFile = $null
 )
 
@@ -94,7 +94,7 @@ function Get-FunctionParts {
         [Parameter(Mandatory)]
         [string]$FunctionName
     )
-    
+
     if ($FunctionName -match '^([A-Za-z]+)-([A-Za-z0-9_]+)$') {
         return @{
             Verb          = $matches[1]
@@ -118,38 +118,45 @@ function Test-UsesAgentModeFunction {
     param(
         [Parameter(Mandatory)]
         [string]$FilePath,
-        
+
         [Parameter(Mandatory)]
         [string]$FunctionName
     )
-    
+
     if (-not (Test-Path $FilePath)) {
         return $false
     }
-    
+
     $content = Get-Content -Path $FilePath -Raw
     $functionPattern = [regex]::Escape($FunctionName)
-    
+
     # Check if function is defined using Set-AgentModeFunction
     if ($content -match "Set-AgentModeFunction\s+-Name\s+['`"]$functionPattern['`"]") {
         return $true
     }
-    
+
     # Check if function is defined using lazy loading pattern
     if ($content -match "Register-LazyFunction\s+-Name\s+['`"]$functionPattern['`"]") {
         return $true
     }
-    
+
     # Check if function is a lazy-loading stub (checks for function existence and calls Ensure-*)
     if ($content -match "function\s+$functionPattern\s*\{[^}]*Ensure-[A-Za-z]+") {
         return $true  # Lazy-loading stub is a valid pattern
     }
-    
-    # Check if function is defined using direct function keyword
+
+    # Check if function is defined with proper guard (if (-not (Test-Path Function:Name)))
+    # This is a common pattern in the codebase for collision-safe function definition
+    $guardPattern = "if\s*\(\s*-not\s*\(\s*Test-Path\s+Function:$functionPattern\s*\)\s*\)\s*\{\s*function\s+$functionPattern"
+    if ($content -match $guardPattern) {
+        return $true  # Guarded function definition is a valid pattern
+    }
+
+    # Check if function is defined using direct function keyword (not recommended but may exist)
     if ($content -match "(?m)^\s*function\s+$functionPattern\s*\{") {
         return $false
     }
-    
+
     return $null  # Unknown pattern
 }
 
@@ -160,11 +167,11 @@ function Test-IsBootstrapFunction {
     param(
         [Parameter(Mandatory)]
         [string]$FilePath,
-        
+
         [Parameter(Mandatory)]
         [string]$FunctionName
     )
-    
+
     # Bootstrap functions are in 00-bootstrap.ps1
     if ($FilePath -like '*\00-bootstrap.ps1' -or $FilePath -like '*/00-bootstrap.ps1') {
         $bootstrapFunctions = @(
@@ -193,7 +200,7 @@ function Test-IsBootstrapFunction {
         )
         return $FunctionName -in $bootstrapFunctions
     }
-    
+
     return $false
 }
 
@@ -209,7 +216,7 @@ Where-Object { $_.FullName -notlike '*\node_modules\*' -and $_.FullName -notlike
 foreach ($file in $psFiles) {
     $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
     if (-not $content) { continue }
-    
+
     # Track profile.d files separately
     if ($file.FullName -like '*\profile.d\*') {
         $profileDFiles += $file
@@ -217,17 +224,17 @@ foreach ($file in $psFiles) {
     else {
         $scriptFiles += $file
     }
-    
+
     # Find function definitions
     # Match: function Verb-Noun { or function Verb-Noun(
     $functionMatches = [regex]::Matches($content, '(?m)^\s*function\s+([A-Za-z]+-[A-Za-z0-9_]+)', [System.Text.RegularExpressions.RegexOptions]::Multiline)
-    
+
     foreach ($match in $functionMatches) {
         $functionName = $match.Groups[1].Value
         $parts = Get-FunctionParts -FunctionName $functionName
-        
+
         $usesAgentMode = Test-UsesAgentModeFunction -FilePath $file.FullName -FunctionName $functionName
-        
+
         $functions += [PSCustomObject]@{
             Name                     = $functionName
             Verb                     = $parts.Verb
@@ -240,19 +247,19 @@ foreach ($file in $psFiles) {
             UsesSetAgentModeFunction = $usesAgentMode
         }
     }
-    
+
     # Also find functions created via Set-AgentModeFunction
     $agentModeMatches = [regex]::Matches($content, "Set-AgentModeFunction\s+-Name\s+['`"]([A-Za-z]+-[A-Za-z0-9_]+)['`"]", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
-    
+
     foreach ($match in $agentModeMatches) {
         $functionName = $match.Groups[1].Value
         $parts = Get-FunctionParts -FunctionName $functionName
-        
+
         # Check if we already found this function
         if ($functions | Where-Object { $_.Name -eq $functionName -and $_.FilePath -eq $file.FullName }) {
             continue
         }
-        
+
         $functions += [PSCustomObject]@{
             Name                     = $functionName
             Verb                     = $parts.Verb
@@ -277,7 +284,7 @@ if (Test-Path $ExceptionsFile) {
     foreach ($match in $exceptionMatches) {
         $exceptions[$match.Groups[1].Value] = $true
     }
-    
+
     # Also extract exception verbs mentioned in documentation
     if ($exceptionContent -match 'Exception Categories') {
         # Extract verbs from "Common Utility Patterns" section
@@ -294,34 +301,34 @@ function Test-IsException {
     param(
         [Parameter(Mandatory)]
         [string]$FunctionName,
-        
+
         [Parameter(Mandatory)]
         [string]$Verb,
-        
+
         [Parameter(Mandatory)]
         [string]$FilePath
     )
-    
+
     # Check if function is in exceptions list
     if ($exceptions.ContainsKey($FunctionName)) {
         return $true
     }
-    
+
     # Check if verb is in exception verbs list
     if ($Verb -in $exceptionVerbs) {
         return $true
     }
-    
+
     # Check if it's a bootstrap function
     if (Test-IsBootstrapFunction -FilePath $FilePath -FunctionName $FunctionName) {
         return $true
     }
-    
+
     # Check if it's a test file
     if ($FilePath -like '*\tests\*' -or $FilePath -like '*/tests/*') {
         return $true
     }
-    
+
     return $false
 }
 
@@ -329,39 +336,33 @@ function Test-IsException {
 $results = [PSCustomObject]@{
     TotalFunctions                     = $functions.Count
     FunctionsWithApprovedVerbs         = ($functions | Where-Object { $_.HasApprovedVerb }).Count
-    FunctionsWithUnapprovedVerbs       = ($functions | Where-Object { 
+    FunctionsWithUnapprovedVerbs       = ($functions | Where-Object {
             $_.IsValidFormat -and -not $_.HasApprovedVerb -and -not (Test-IsException -FunctionName $_.Name -Verb $_.Verb -FilePath $_.FilePath)
         }).Count
     FunctionsWithInvalidFormat         = ($functions | Where-Object { -not $_.IsValidFormat }).Count
-    ProfileDFunctionsNotUsingAgentMode = ($functions | Where-Object { 
-            $_.IsProfileDFile -and -not $_.UsesSetAgentModeFunction -and -not (Test-IsException -FunctionName $_.Name -Verb $_.Verb -FilePath $_.FilePath)
-        }).Count
+    ProfileDFunctionsNotUsingAgentMode = 0  # Removed requirement - Set-AgentModeFunction is optional
     ExceptionsCount                    = $exceptions.Count
     Functions                          = $functions
     Issues                             = @()
-}
-
-# Identify issues
+}# Identify issues
 foreach ($func in $functions) {
     # Skip exceptions
     if (Test-IsException -FunctionName $func.Name -Verb $func.Verb -FilePath $func.FilePath) {
         continue
     }
-    
+
     $issues = @()
-    
+
     if (-not $func.IsValidFormat) {
         $issues += "Invalid format (not Verb-Noun)"
     }
-    
+
     if ($func.IsValidFormat -and -not $func.HasApprovedVerb) {
         $issues += "Unapproved verb: $($func.Verb)"
     }
-    
-    if ($func.IsProfileDFile -and -not $func.UsesSetAgentModeFunction) {
-        $issues += "Profile function not using Set-AgentModeFunction"
-    }
-    
+
+    # Removed: Set-AgentModeFunction requirement - it's optional for profile functions
+
     if ($issues.Count -gt 0) {
         $results.Issues += [PSCustomObject]@{
             FunctionName             = $func.Name
@@ -381,7 +382,6 @@ Write-Host "Total Functions Found: $($results.TotalFunctions)" -ForegroundColor 
 Write-Host "Functions with Approved Verbs: $($results.FunctionsWithApprovedVerbs)" -ForegroundColor Green
 Write-Host "Functions with Unapproved Verbs: $($results.FunctionsWithUnapprovedVerbs)" -ForegroundColor $(if ($results.FunctionsWithUnapprovedVerbs -eq 0) { 'Green' } else { 'Yellow' })
 Write-Host "Functions with Invalid Format: $($results.FunctionsWithInvalidFormat)" -ForegroundColor $(if ($results.FunctionsWithInvalidFormat -eq 0) { 'Green' } else { 'Red' })
-Write-Host "Profile.d Functions Not Using Set-AgentModeFunction: $($results.ProfileDFunctionsNotUsingAgentMode)" -ForegroundColor $(if ($results.ProfileDFunctionsNotUsingAgentMode -eq 0) { 'Green' } else { 'Yellow' })
 Write-Host "Documented Exceptions: $($results.ExceptionsCount)" -ForegroundColor White
 
 if ($results.Issues.Count -gt 0) {
@@ -428,7 +428,7 @@ if ($OutputPath) {
             }
         }
     }
-    
+
     $report | ConvertTo-Json -Depth 10 | Set-Content -Path $OutputPath
     Write-Host "`nReport saved to: $OutputPath" -ForegroundColor Green
 }

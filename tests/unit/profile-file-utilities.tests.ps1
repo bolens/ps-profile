@@ -153,6 +153,94 @@ Describe 'Profile file utility functions' {
             # Should contain hex representation
             $result.ToString() | Should -Match '41 42'
         }
+
+        It 'ConvertTo-HtmlFromRst function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.rst'
+            Set-Content -Path $tempFile -Value 'Test RST content' -NoNewline
+            # Function should exist
+            Get-Command ConvertTo-HtmlFromRst | Should -Not -BeNullOrEmpty
+            # Should not throw when called (even if pandoc fails)
+            { ConvertTo-HtmlFromRst -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-PdfFromRst function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.rst'
+            Set-Content -Path $tempFile -Value 'Test RST content' -NoNewline
+            Get-Command ConvertTo-PdfFromRst | Should -Not -BeNullOrEmpty
+            { ConvertTo-PdfFromRst -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-DocxFromRst function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.rst'
+            Set-Content -Path $tempFile -Value 'Test RST content' -NoNewline
+            Get-Command ConvertTo-DocxFromRst | Should -Not -BeNullOrEmpty
+            { ConvertTo-DocxFromRst -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-LaTeXFromRst function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.rst'
+            Set-Content -Path $tempFile -Value 'Test RST content' -NoNewline
+            Get-Command ConvertTo-LaTeXFromRst | Should -Not -BeNullOrEmpty
+            { ConvertTo-LaTeXFromRst -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-HtmlFromLaTeX function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.tex'
+            Set-Content -Path $tempFile -Value '\documentclass{article}\begin{document}Test\end{document}' -NoNewline
+            Get-Command ConvertTo-HtmlFromLaTeX | Should -Not -BeNullOrEmpty
+            { ConvertTo-HtmlFromLaTeX -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-PdfFromLaTeX function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.tex'
+            Set-Content -Path $tempFile -Value '\documentclass{article}\begin{document}Test\end{document}' -NoNewline
+            Get-Command ConvertTo-PdfFromLaTeX | Should -Not -BeNullOrEmpty
+            { ConvertTo-PdfFromLaTeX -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-DocxFromLaTeX function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.tex'
+            Set-Content -Path $tempFile -Value '\documentclass{article}\begin{document}Test\end{document}' -NoNewline
+            Get-Command ConvertTo-DocxFromLaTeX | Should -Not -BeNullOrEmpty
+            { ConvertTo-DocxFromLaTeX -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-RstFromLaTeX function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.tex'
+            Set-Content -Path $tempFile -Value '\documentclass{article}\begin{document}Test\end{document}' -NoNewline
+            Get-Command ConvertTo-RstFromLaTeX | Should -Not -BeNullOrEmpty
+            { ConvertTo-RstFromLaTeX -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-RstFromMarkdown function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.md'
+            Set-Content -Path $tempFile -Value '# Test Markdown' -NoNewline
+            Get-Command ConvertTo-RstFromMarkdown | Should -Not -BeNullOrEmpty
+            { ConvertTo-RstFromMarkdown -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-LaTeXFromHtml function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.html'
+            Set-Content -Path $tempFile -Value '<html><body>Test</body></html>' -NoNewline
+            Get-Command ConvertTo-LaTeXFromHtml | Should -Not -BeNullOrEmpty
+            { ConvertTo-LaTeXFromHtml -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-LaTeXFromDocx function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.docx'
+            # Create a dummy file since we can't easily create a real DOCX
+            Set-Content -Path $tempFile -Value 'dummy docx content' -NoNewline
+            Get-Command ConvertTo-LaTeXFromDocx | Should -Not -BeNullOrEmpty
+            { ConvertTo-LaTeXFromDocx -InputPath $tempFile } | Should -Not -Throw
+        }
+
+        It 'ConvertTo-LaTeXFromEpub function exists and can be called' {
+            $tempFile = Join-Path $TestDrive 'test.epub'
+            # Create a dummy file since we can't easily create a real EPUB
+            Set-Content -Path $tempFile -Value 'dummy epub content' -NoNewline
+            Get-Command ConvertTo-LaTeXFromEpub | Should -Not -BeNullOrEmpty
+            { ConvertTo-LaTeXFromEpub -InputPath $tempFile } | Should -Not -Throw
+        }
     }
 
     Context 'File metadata helpers' {

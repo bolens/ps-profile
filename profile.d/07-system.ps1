@@ -186,7 +186,7 @@ Set-Alias -Name htop -Value Get-TopProcesses -ErrorAction SilentlyContinue
 .DESCRIPTION
     Displays active network connections and listening ports.
 #>
-function Get-NetworkPorts { netstat -an @args }
+function Get-NetworkPorts { & netstat -an }
 Set-Alias -Name ports -Value Get-NetworkPorts -ErrorAction SilentlyContinue
 
 # ptest equivalent

@@ -181,7 +181,7 @@ if (-not (Test-Path Function:Get-GitLog)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'log' -Arguments $a -CommandName 'git log' -RequiresCommit
     }
-    Set-Alias -Name gl -Value Get-GitLog -ErrorAction SilentlyContinue
+    Set-Alias -Name gl -Value Get-GitLog -Force
 }
 # Git diff - show changes
 if (-not (Test-Path Function:Compare-GitChanges)) {

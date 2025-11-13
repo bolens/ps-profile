@@ -31,8 +31,25 @@ function Test-SafePath {
     )
 
     try {
-        $resolvedPath = [System.IO.Path]::GetFullPath($Path)
-        $resolvedBase = [System.IO.Path]::GetFullPath($BasePath)
+        # Try to resolve the path if it exists
+        try {
+            $resolvedPath = Resolve-Path -Path $Path -ErrorAction Stop | Select-Object -ExpandProperty Path
+        }
+        catch {
+            # If path doesn't exist, get the unresolved provider path and normalize it
+            $resolvedPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path)
+            $resolvedPath = [System.IO.Path]::GetFullPath($resolvedPath)
+        }
+
+        # Try to resolve the base path if it exists
+        try {
+            $resolvedBase = Resolve-Path -Path $BasePath -ErrorAction Stop | Select-Object -ExpandProperty Path
+        }
+        catch {
+            # If base path doesn't exist, get the unresolved provider path and normalize it
+            $resolvedBase = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($BasePath)
+            $resolvedBase = [System.IO.Path]::GetFullPath($resolvedBase)
+        }
 
         # Ensure base path ends with directory separator for proper comparison
         if (-not $resolvedBase.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {

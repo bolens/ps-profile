@@ -18,6 +18,15 @@ function Ensure-FileUtilities {
 
         begin {
             $collectedInput = @()
+            # Handle case where first positional argument is a number (lines count)
+            if ($Path -and $Path -match '^-?\d+$') {
+                $numLines = [math]::Abs([int]$Path)
+                if ($numLines -gt 0) {
+                    $Lines = $numLines
+                    $Path = $null
+                }
+                # If zero, treat as invalid and keep as path (will fail later)
+            }
         }
 
         process {
@@ -51,6 +60,15 @@ function Ensure-FileUtilities {
 
         begin {
             $collectedInput = @()
+            # Handle case where first positional argument is a number (lines count)
+            if ($Path -and $Path -match '^-?\d+$') {
+                $numLines = [math]::Abs([int]$Path)
+                if ($numLines -gt 0) {
+                    $Lines = $numLines
+                    $Path = $null
+                }
+                # If zero, treat as invalid and keep as path (will fail later)
+            }
         }
 
         process {
@@ -87,7 +105,10 @@ function Ensure-FileUtilities {
         )
 
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Warning "File not found: $Path"
+            # Only show warning when not running in Pester tests
+            if (-not (Get-Module -Name Pester -ErrorAction SilentlyContinue)) {
+                Write-Warning "File not found: $Path"
+            }
             return $null
         }
 
@@ -173,6 +194,21 @@ function Ensure-FileUtilities {
     Shows the first 5 numbers from the pipeline.
 
 .EXAMPLE
+    PS C:\> 1..20 | head -10
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+
+    Shows the first 10 numbers from the pipeline using Unix-style syntax.
+
+.EXAMPLE
     PS C:\> head README.md
     # First 10 lines of README.md
 
@@ -198,6 +234,15 @@ function Get-FileHead {
     begin {
         $collectedInput = @()
         if (-not $global:FileUtilitiesInitialized) { Ensure-FileUtilities }
+        # Handle case where first positional argument is a number (lines count)
+        if ($Path -and $Path -match '^-?\d+$') {
+            $numLines = [math]::Abs([int]$Path)
+            if ($numLines -gt 0) {
+                $Lines = $numLines
+                $Path = $null
+            }
+            # If zero, treat as invalid and keep as path (will fail later)
+        }
     }
     process {
         if ($Path) {
@@ -275,6 +320,31 @@ Set-Alias -Name head -Value Get-FileHead -ErrorAction SilentlyContinue
     Shows the last 5 numbers from the pipeline.
 
 .EXAMPLE
+    PS C:\> 1..20 | tail -20
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+    11
+    12
+    13
+    14
+    15
+    16
+    17
+    18
+    19
+    20
+
+    Shows all 20 numbers from the pipeline using Unix-style syntax.
+
+.EXAMPLE
     PS C:\> tail logfile.txt
     # Last 10 lines of logfile.txt
 
@@ -300,6 +370,15 @@ function Get-FileTail {
     begin {
         $collectedInput = @()
         if (-not $global:FileUtilitiesInitialized) { Ensure-FileUtilities }
+        # Handle case where first positional argument is a number (lines count)
+        if ($Path -and $Path -match '^-?\d+$') {
+            $numLines = [math]::Abs([int]$Path)
+            if ($numLines -gt 0) {
+                $Lines = $numLines
+                $Path = $null
+            }
+            # If zero, treat as invalid and keep as path (will fail later)
+        }
     }
     process {
         if ($Path) {

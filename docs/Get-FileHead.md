@@ -31,12 +31,12 @@ File paths to read from when not using pipeline input.
 
 ## Inputs
 
-System.Object Objects from the pipeline or file paths as strings. .OUTPUTS System.String The first N lines of the input. .EXAMPLE PS C:\> 1..20 | head 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -Lines 5 1 2 3 4 5 Shows the first 5 numbers from the pipeline. .EXAMPLE PS C:\> head README.md # First 10 lines of README.md Shows the first 10 lines of the README.md file. .EXAMPLE PS C:\> head README.md -Lines 5 # First 5 lines of README.md Shows the first 5 lines of the README.md file. .NOTES This function buffers all pipeline input before processing, so it may use more memory for large inputs. For very large files, consider using Get-Content with Select-Object directly.
+System.Object Objects from the pipeline or file paths as strings. .OUTPUTS System.String The first N lines of the input. .EXAMPLE PS C:\> 1..20 | head 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -Lines 5 1 2 3 4 5 Shows the first 5 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -10 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline using Unix-style syntax. .EXAMPLE PS C:\> head README.md # First 10 lines of README.md Shows the first 10 lines of the README.md file. .EXAMPLE PS C:\> head README.md -Lines 5 # First 5 lines of README.md Shows the first 5 lines of the README.md file. .NOTES This function buffers all pipeline input before processing, so it may use more memory for large inputs. For very large files, consider using Get-Content with Select-Object directly.
 
 
 ## Outputs
 
-System.String The first N lines of the input. .EXAMPLE PS C:\> 1..20 | head 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -Lines 5 1 2 3 4 5 Shows the first 5 numbers from the pipeline. .EXAMPLE PS C:\> head README.md # First 10 lines of README.md Shows the first 10 lines of the README.md file. .EXAMPLE PS C:\> head README.md -Lines 5 # First 5 lines of README.md Shows the first 5 lines of the README.md file.
+System.String The first N lines of the input. .EXAMPLE PS C:\> 1..20 | head 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -Lines 5 1 2 3 4 5 Shows the first 5 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -10 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline using Unix-style syntax. .EXAMPLE PS C:\> head README.md # First 10 lines of README.md Shows the first 10 lines of the README.md file. .EXAMPLE PS C:\> head README.md -Lines 5 # First 5 lines of README.md Shows the first 5 lines of the README.md file.
 
 
 ## Examples
@@ -75,13 +75,31 @@ PS C:\> 1..20 | head -Lines 5
 ### Example 3
 
 `powershell
+PS C:\> 1..20 | head -10
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+
+    Shows the first 10 numbers from the pipeline using Unix-style syntax.
+``
+
+### Example 4
+
+`powershell
 PS C:\> head README.md
     # First 10 lines of README.md
 
     Shows the first 10 lines of the README.md file.
 ``
 
-### Example 4
+### Example 5
 
 `powershell
 PS C:\> head README.md -Lines 5

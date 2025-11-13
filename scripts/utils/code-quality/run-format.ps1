@@ -73,8 +73,21 @@ foreach ($scriptFile in $scripts) {
     $file = $scriptFile.FullName
 
     try {
+        # Skip if file disappeared since listing
+        if (-not (Test-Path -Path $file)) {
+            Write-ScriptMessage -Message "Skipping missing file: $file"
+            continue
+        }
+
         # Read the original content to detect line endings
         $originalContent = Get-Content -Path $file -Raw -ErrorAction Stop
+
+        # Handle empty files
+        if ([string]::IsNullOrEmpty($originalContent)) {
+            Write-ScriptMessage -Message "Skipping empty file: $file"
+            continue
+        }
+
         $hasCRLF = $crlfRegex.IsMatch($originalContent)
 
         # Use Invoke-Formatter from PSScriptAnalyzer to format the file

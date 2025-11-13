@@ -17,7 +17,7 @@ scripts/utils/run_pester.ps1
     Defaults to All.
 
 .PARAMETER TestName
-    Optional filter for test names. Supports wildcards and multiple patterns separated by " or ".
+    Optional filter for test names. Supports wildcards and multiple patterns separated by " or " or commas.
 
 .PARAMETER Coverage
     If specified, enables code coverage reporting for profile.d directory.
@@ -46,6 +46,11 @@ scripts/utils/run_pester.ps1
     pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Suite Integration -TestName "*Edit-Profile* or *Backup-Profile*"
 
     Runs integration tests with names containing "Edit-Profile" or "Backup-Profile".
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Suite Integration -TestName "*Edit-Profile*, *Backup-Profile*"
+
+    Runs integration tests with names containing "Edit-Profile" or "Backup-Profile" (comma-separated).
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\run_pester.ps1 -Coverage
@@ -501,8 +506,8 @@ else {
 }
 
 if (-not [string]::IsNullOrWhiteSpace($TestName)) {
-    # Parse TestName patterns separated by " or "
-    $namePatterns = $TestName -split '\s+or\s+' | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    # Parse TestName patterns separated by " or " or commas
+    $namePatterns = $TestName -replace ',', ' or ' -split '\s+or\s+' | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
     if ($namePatterns) {
         $config.Filter.FullName = $namePatterns
         Write-ScriptMessage -Message "Filtering tests by name patterns: $($namePatterns -join ', ')"

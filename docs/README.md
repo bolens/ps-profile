@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 216
-**Total Aliases:** 207
-**Generated:** 2025-11-12 15:41:47
+**Total Functions:** 239
+**Total Aliases:** 229
+**Generated:** 2025-11-13 09:46:26
 
 ## Functions by Fragment
 
@@ -13,17 +13,20 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Initialize-FragmentWarningSuppression](Initialize-FragmentWarningSuppression.md) - Clears cached missing tool warnings.
 
-### 02-files-conversion (22 functions)
+### 02-files-conversion (45 functions)
 
 - [Convert-Audio](Convert-Audio.md) - Converts audio file formats.
 - [Convert-Image](Convert-Image.md) - Converts image file formats.
+- [Convert-XmlToJsonObject](Convert-XmlToJsonObject.md) - Converts an XML element to a JSON-compatible PowerShell object.
 - [ConvertFrom-Base64](ConvertFrom-Base64.md) - Decodes base64 input to text.
 - [ConvertFrom-CsvToJson](ConvertFrom-CsvToJson.md) - Converts CSV file to JSON format.
 - [ConvertFrom-CsvToYaml](ConvertFrom-CsvToYaml.md) - Converts CSV file to YAML format.
 - [ConvertFrom-DocxToMarkdown](ConvertFrom-DocxToMarkdown.md) - Converts DOCX file to Markdown.
 - [ConvertFrom-EpubToMarkdown](ConvertFrom-EpubToMarkdown.md) - Converts EPUB file to Markdown.
 - [ConvertFrom-HtmlToMarkdown](ConvertFrom-HtmlToMarkdown.md) - Converts HTML file to Markdown.
+- [ConvertFrom-LaTeXToMarkdown](ConvertFrom-LaTeXToMarkdown.md) - Converts LaTeX file to Markdown.
 - [ConvertFrom-PdfToText](ConvertFrom-PdfToText.md) - Extracts text from PDF file.
+- [ConvertFrom-RstToMarkdown](ConvertFrom-RstToMarkdown.md) - Converts RST file to Markdown.
 - [ConvertFrom-VideoToAudio](ConvertFrom-VideoToAudio.md) - Extracts audio from video file.
 - [ConvertFrom-VideoToGif](ConvertFrom-VideoToGif.md) - Converts video to GIF.
 - [ConvertFrom-XmlToJson](ConvertFrom-XmlToJson.md) - Converts XML file to JSON format.
@@ -31,7 +34,27 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-YamlToCsv](ConvertFrom-YamlToCsv.md) - Converts YAML file to CSV format.
 - [ConvertTo-Base64](ConvertTo-Base64.md) - Encodes input to base64 format.
 - [ConvertTo-CsvFromJson](ConvertTo-CsvFromJson.md) - Converts JSON file to CSV format.
+- [ConvertTo-DocxFromLaTeX](ConvertTo-DocxFromLaTeX.md) - Converts LaTeX file to DOCX.
+- [ConvertTo-DocxFromMarkdown](ConvertTo-DocxFromMarkdown.md) - Converts Markdown file to DOCX.
+- [ConvertTo-DocxFromRst](ConvertTo-DocxFromRst.md) - Converts RST file to DOCX.
+- [ConvertTo-HtmlFromDocx](ConvertTo-HtmlFromDocx.md) - Converts DOCX file to HTML.
+- [ConvertTo-HtmlFromEpub](ConvertTo-HtmlFromEpub.md) - Converts EPUB file to HTML.
+- [ConvertTo-HtmlFromLaTeX](ConvertTo-HtmlFromLaTeX.md) - Converts LaTeX file to HTML.
 - [ConvertTo-HtmlFromMarkdown](ConvertTo-HtmlFromMarkdown.md) - Converts Markdown file to HTML.
+- [ConvertTo-HtmlFromRst](ConvertTo-HtmlFromRst.md) - Converts RST file to HTML.
+- [ConvertTo-LaTeXFromDocx](ConvertTo-LaTeXFromDocx.md) - Converts DOCX file to LaTeX.
+- [ConvertTo-LaTeXFromEpub](ConvertTo-LaTeXFromEpub.md) - Converts EPUB file to LaTeX.
+- [ConvertTo-LaTeXFromHtml](ConvertTo-LaTeXFromHtml.md) - Converts HTML file to LaTeX.
+- [ConvertTo-LaTeXFromMarkdown](ConvertTo-LaTeXFromMarkdown.md) - Converts Markdown file to LaTeX.
+- [ConvertTo-LaTeXFromRst](ConvertTo-LaTeXFromRst.md) - Converts RST file to LaTeX.
+- [ConvertTo-PdfFromDocx](ConvertTo-PdfFromDocx.md) - Converts DOCX file to PDF.
+- [ConvertTo-PdfFromEpub](ConvertTo-PdfFromEpub.md) - Converts EPUB file to PDF.
+- [ConvertTo-PdfFromHtml](ConvertTo-PdfFromHtml.md) - Converts HTML file to PDF.
+- [ConvertTo-PdfFromLaTeX](ConvertTo-PdfFromLaTeX.md) - Converts LaTeX file to PDF.
+- [ConvertTo-PdfFromMarkdown](ConvertTo-PdfFromMarkdown.md) - Converts Markdown file to PDF.
+- [ConvertTo-PdfFromRst](ConvertTo-PdfFromRst.md) - Converts RST file to PDF.
+- [ConvertTo-RstFromLaTeX](ConvertTo-RstFromLaTeX.md) - Converts LaTeX file to RST.
+- [ConvertTo-RstFromMarkdown](ConvertTo-RstFromMarkdown.md) - Converts Markdown file to RST.
 - [ConvertTo-Yaml](ConvertTo-Yaml.md) - Converts JSON to YAML format.
 - [Ensure-FileConversion](Ensure-FileConversion.md) - Initializes file conversion utility functions on first use.
 - [Format-Json](Format-Json.md) - Pretty-prints JSON data.
@@ -329,23 +352,45 @@ This documentation is automatically generated from comment-based help in the pro
 ## Aliases by Fragment
 
 
-### 02-files-conversion (21 aliases)
+### 02-files-conversion (43 aliases)
 
 - [audio-convert](audio-convert.md) - Converts audio file formats. (alias for `Convert-Audio`)
 - [csv-to-json](csv-to-json.md) - Converts CSV file to JSON format. (alias for `ConvertFrom-CsvToJson`)
 - [csv-to-yaml](csv-to-yaml.md) - Converts CSV file to YAML format. (alias for `ConvertFrom-CsvToYaml`)
+- [docx-to-html](docx-to-html.md) - Converts DOCX file to HTML. (alias for `ConvertTo-HtmlFromDocx`)
+- [docx-to-latex](docx-to-latex.md) - Converts DOCX file to LaTeX. (alias for `ConvertTo-LaTeXFromDocx`)
 - [docx-to-markdown](docx-to-markdown.md) - Converts DOCX file to Markdown. (alias for `ConvertFrom-DocxToMarkdown`)
+- [docx-to-pdf](docx-to-pdf.md) - Converts DOCX file to PDF. (alias for `ConvertTo-PdfFromDocx`)
+- [epub-to-html](epub-to-html.md) - Converts EPUB file to HTML. (alias for `ConvertTo-HtmlFromEpub`)
+- [epub-to-latex](epub-to-latex.md) - Converts EPUB file to LaTeX. (alias for `ConvertTo-LaTeXFromEpub`)
 - [epub-to-markdown](epub-to-markdown.md) - Converts EPUB file to Markdown. (alias for `ConvertFrom-EpubToMarkdown`)
+- [epub-to-pdf](epub-to-pdf.md) - Converts EPUB file to PDF. (alias for `ConvertTo-PdfFromEpub`)
 - [from-base64](from-base64.md) - Decodes base64 input to text. (alias for `ConvertFrom-Base64`)
+- [html-to-latex](html-to-latex.md) - Converts HTML file to LaTeX. (alias for `ConvertTo-LaTeXFromHtml`)
 - [html-to-markdown](html-to-markdown.md) - Converts HTML file to Markdown. (alias for `ConvertFrom-HtmlToMarkdown`)
+- [html-to-pdf](html-to-pdf.md) - Converts HTML file to PDF. (alias for `ConvertTo-PdfFromHtml`)
 - [image-convert](image-convert.md) - Converts image file formats. (alias for `Convert-Image`)
 - [image-resize](image-resize.md) - Resizes an image. (alias for `Resize-Image`)
 - [json-pretty](json-pretty.md) - Pretty-prints JSON data. (alias for `Format-Json`)
 - [json-to-csv](json-to-csv.md) - Converts JSON file to CSV format. (alias for `ConvertTo-CsvFromJson`)
 - [json-to-yaml](json-to-yaml.md) - Converts JSON to YAML format. (alias for `ConvertTo-Yaml`)
+- [latex-to-docx](latex-to-docx.md) - Converts LaTeX file to DOCX. (alias for `ConvertTo-DocxFromLaTeX`)
+- [latex-to-html](latex-to-html.md) - Converts LaTeX file to HTML. (alias for `ConvertTo-HtmlFromLaTeX`)
+- [latex-to-markdown](latex-to-markdown.md) - Converts LaTeX file to Markdown. (alias for `ConvertFrom-LaTeXToMarkdown`)
+- [latex-to-pdf](latex-to-pdf.md) - Converts LaTeX file to PDF. (alias for `ConvertTo-PdfFromLaTeX`)
+- [latex-to-rst](latex-to-rst.md) - Converts LaTeX file to RST. (alias for `ConvertTo-RstFromLaTeX`)
+- [markdown-to-docx](markdown-to-docx.md) - Converts Markdown file to DOCX. (alias for `ConvertTo-DocxFromMarkdown`)
 - [markdown-to-html](markdown-to-html.md) - Converts Markdown file to HTML. (alias for `ConvertTo-HtmlFromMarkdown`)
+- [markdown-to-latex](markdown-to-latex.md) - Converts Markdown file to LaTeX. (alias for `ConvertTo-LaTeXFromMarkdown`)
+- [markdown-to-pdf](markdown-to-pdf.md) - Converts Markdown file to PDF. (alias for `ConvertTo-PdfFromMarkdown`)
+- [markdown-to-rst](markdown-to-rst.md) - Converts Markdown file to RST. (alias for `ConvertTo-RstFromMarkdown`)
 - [pdf-merge](pdf-merge.md) - Merges multiple PDF files. (alias for `Merge-Pdf`)
 - [pdf-to-text](pdf-to-text.md) - Extracts text from PDF file. (alias for `ConvertFrom-PdfToText`)
+- [rst-to-docx](rst-to-docx.md) - Converts RST file to DOCX. (alias for `ConvertTo-DocxFromRst`)
+- [rst-to-html](rst-to-html.md) - Converts RST file to HTML. (alias for `ConvertTo-HtmlFromRst`)
+- [rst-to-latex](rst-to-latex.md) - Converts RST file to LaTeX. (alias for `ConvertTo-LaTeXFromRst`)
+- [rst-to-markdown](rst-to-markdown.md) - Converts RST file to Markdown. (alias for `ConvertFrom-RstToMarkdown`)
+- [rst-to-pdf](rst-to-pdf.md) - Converts RST file to PDF. (alias for `ConvertTo-PdfFromRst`)
 - [to-base64](to-base64.md) - Encodes input to base64 format. (alias for `ConvertTo-Base64`)
 - [video-to-audio](video-to-audio.md) - Extracts audio from video file. (alias for `ConvertFrom-VideoToAudio`)
 - [video-to-gif](video-to-gif.md) - Converts video to GIF. (alias for `ConvertFrom-VideoToGif`)

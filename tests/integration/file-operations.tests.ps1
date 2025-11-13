@@ -295,7 +295,7 @@ Describe 'File Operations Integration Tests' {
 
         It 'Get-FileHashValue handles non-existent files' {
             $nonExistent = Join-Path $TestDrive 'non_existent_hash.txt'
-            $result = Get-FileHashValue -Path $nonExistent
+            $result = Get-FileHashValue -Path $nonExistent 3>$null
             $result | Should -Be $null
         }
 
