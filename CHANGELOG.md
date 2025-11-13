@@ -1,3 +1,11 @@
+# [1.3.0](https://github.com/bolens/ps-profile/compare/v1.2.2...v1.3.0) (2025-11-13)
+
+
+### Features
+
+* enhance testing capabilities and fix integration tests ([0e5eec3](https://github.com/bolens/ps-profile/commit/0e5eec3548035a94a8fd6c8d6e54d2e3bbdbb20f))
+* significantly improve test coverage ([8826a31](https://github.com/bolens/ps-profile/commit/8826a31913990ab5c0d548277223df848d08937f))
+
 ## [1.2.2](https://github.com/bolens/ps-profile/compare/v1.2.1...v1.2.2) (2025-11-05)
 
 
