@@ -47,7 +47,7 @@ jobs:
 
     - name: Comment PR with CodeQL Results
       if: github.event_name == 'pull_request' && steps.analyze.outcome == 'success'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           // CodeQL results are automatically uploaded to GitHub Security tab
@@ -76,7 +76,7 @@ jobs:
 
     - name: Comment PR with CodeQL Errors
       if: github.event_name == 'pull_request' && steps.analyze.outcome == 'failure'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           const body = `❌ **CodeQL Analysis Failed** (${{ matrix.language }})
