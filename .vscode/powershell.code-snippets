@@ -447,6 +447,273 @@
       "Set-ItResult -Skipped -Because \"${1:Reason for skipping}\""
     ],
     "description": "Pester skipped test pattern"
+  },
+  "PowerShell If Statement": {
+    "prefix": "psif",
+    "body": [
+      "if (${1:condition}) {",
+      "    ${2:# Code to execute if true}",
+      "}"
+    ],
+    "description": "PowerShell if statement"
+  },
+  "PowerShell If-Else Statement": {
+    "prefix": "psifelse",
+    "body": [
+      "if (${1:condition}) {",
+      "    ${2:# Code to execute if true}",
+      "} else {",
+      "    ${3:# Code to execute if false}",
+      "}"
+    ],
+    "description": "PowerShell if-else statement"
+  },
+  "PowerShell For Loop": {
+    "prefix": "psfor",
+    "body": [
+      "for (${1:$i = 0}; ${2:$i -lt $count}; ${3:$i++}) {",
+      "    ${4:# Loop body}",
+      "}"
+    ],
+    "description": "PowerShell for loop"
+  },
+  "PowerShell Foreach Loop": {
+    "prefix": "psforeach",
+    "body": [
+      "foreach (${1:$item} in ${2:$collection}) {",
+      "    ${3:# Loop body}",
+      "}"
+    ],
+    "description": "PowerShell foreach loop"
+  },
+  "PowerShell While Loop": {
+    "prefix": "pswhile",
+    "body": [
+      "while (${1:condition}) {",
+      "    ${2:# Loop body}",
+      "}"
+    ],
+    "description": "PowerShell while loop"
+  },
+  "PowerShell Do-While Loop": {
+    "prefix": "psdowhile",
+    "body": [
+      "do {",
+      "    ${1:# Loop body}",
+      "} while (${2:condition})"
+    ],
+    "description": "PowerShell do-while loop"
+  },
+  "PowerShell Switch Statement": {
+    "prefix": "psswitch",
+    "body": [
+      "switch (${1:variable}) {",
+      "    ${2:value1} { ${3:# Action for value1} }",
+      "    ${4:value2} { ${5:# Action for value2} }",
+      "    default { ${6:# Default action} }",
+      "}"
+    ],
+    "description": "PowerShell switch statement"
+  },
+  "PowerShell Here-String": {
+    "prefix": "psherestring",
+    "body": [
+      "@\"",
+      "${1:Content}",
+      "\"@"
+    ],
+    "description": "PowerShell here-string"
+  },
+  "PowerShell Splatting": {
+    "prefix": "pssplat",
+    "body": [
+      "$${1:params} = @{",
+      "    ${2:Parameter1} = '${3:value1}'",
+      "    ${4:Parameter2} = ${5:$value2}",
+      "}",
+      "${6:Command-Name} @${1:params}"
+    ],
+    "description": "PowerShell splatting parameters"
+  },
+  "PowerShell Class Definition": {
+    "prefix": "psclass",
+    "body": [
+      "class ${1:ClassName} {",
+      "    ${2:# Properties}",
+      "    ${3:[string]}${4:PropertyName}",
+      "",
+      "    ${5:# Constructor}",
+      "    ${1:ClassName}() {",
+      "        ${6:# Constructor body}",
+      "    }",
+      "",
+      "    ${7:# Methods}",
+      "    [${8:void}] ${9:MethodName}() {",
+      "        ${10:# Method body}",
+      "    }",
+      "}"
+    ],
+    "description": "PowerShell class definition"
+  },
+  "PowerShell Enum": {
+    "prefix": "psenum",
+    "body": [
+      "enum ${1:EnumName} {",
+      "    ${2:Value1}",
+      "    ${3:Value2}",
+      "    ${4:Value3}",
+      "}"
+    ],
+    "description": "PowerShell enum definition"
+  },
+  "PowerShell Using Statement": {
+    "prefix": "psusing",
+    "body": [
+      "using namespace ${1:System.Collections.Generic}",
+      "using module ${2:ModuleName}"
+    ],
+    "description": "PowerShell using statements"
+  },
+  "PowerShell ValidateRange Parameter": {
+    "prefix": "psvalidaterange",
+    "body": [
+      "[Parameter(Mandatory)]",
+      "[ValidateRange(${1:1}, ${2:100})]",
+      "[${3:int}]",
+      "$${4:ParameterName}"
+    ],
+    "description": "Parameter with ValidateRange"
+  },
+  "PowerShell ValidateLength Parameter": {
+    "prefix": "psvalidatelength",
+    "body": [
+      "[Parameter(Mandatory)]",
+      "[ValidateLength(${1:1}, ${2:50})]",
+      "[${3:string}]",
+      "$${4:ParameterName}"
+    ],
+    "description": "Parameter with ValidateLength"
+  },
+  "PowerShell SupportsShouldProcess": {
+    "prefix": "psshouldprocess",
+    "body": [
+      "[CmdletBinding(SupportsShouldProcess)]",
+      "param()",
+      "",
+      "if ($$PSCmdlet.ShouldProcess('${1:Target}', '${2:Operation}')) {",
+      "    ${3:# Operation code}",
+      "}"
+    ],
+    "description": "CmdletBinding with SupportsShouldProcess"
+  },
+  "PowerShell ConfirmImpact": {
+    "prefix": "psconfirmimpact",
+    "body": [
+      "[CmdletBinding(ConfirmImpact = '${1:High}')]",
+      "param()",
+      "",
+      "${2:# Function body}"
+    ],
+    "description": "CmdletBinding with ConfirmImpact"
+  },
+  "PowerShell Dynamic Parameter": {
+    "prefix": "psdynamicparam",
+    "body": [
+      "function ${1:Function-Name} {",
+      "    [CmdletBinding()]",
+      "    param(",
+      "        [Parameter(Mandatory)]",
+      "        [string]$$StaticParam",
+      "    )",
+      "",
+      "    dynamicparam {",
+      "        $${2:dynamicParamDictionary} = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary",
+      "",
+      "        $${3:paramAttributes} = New-Object System.Collections.ObjectModel.Collection[System.Attribute]",
+      "        $${3:paramAttributes}.Add((New-Object System.Management.Automation.ParameterAttribute))",
+      "",
+      "        $${4:param} = New-Object System.Management.Automation.RuntimeDefinedParameter('${5:DynamicParam}', [${6:string}], $${3:paramAttributes})",
+      "        $${2:dynamicParamDictionary}.Add('${5:DynamicParam}', $${4:param})",
+      "",
+      "        return $${2:dynamicParamDictionary}",
+      "    }",
+      "",
+      "    begin {",
+      "        $${7:dynamicParamValue} = $$PSBoundParameters['${5:DynamicParam}']",
+      "    }",
+      "",
+      "    process {",
+      "        ${8:# Function body}",
+      "    }",
+      "}"
+    ],
+    "description": "Function with dynamic parameters"
+  },
+  "PowerShell Pipeline Function": {
+    "prefix": "pspipeline",
+    "body": [
+      "function ${1:Function-Name} {",
+      "    [CmdletBinding()]",
+      "    param(",
+      "        [Parameter(ValueFromPipeline)]",
+      "        [${2:object}]",
+      "        $${3:InputObject}",
+      "    )",
+      "",
+      "    process {",
+      "        ${4:# Process each pipeline input}",
+      "        return $${3:InputObject}",
+      "    }",
+      "}"
+    ],
+    "description": "Function that accepts pipeline input"
+  },
+  "PowerShell Begin/Process/End": {
+    "prefix": "psbeginprocessend",
+    "body": [
+      "function ${1:Function-Name} {",
+      "    [CmdletBinding()]",
+      "    param()",
+      "",
+      "    begin {",
+      "        ${2:# Initialization code}",
+      "    }",
+      "",
+      "    process {",
+      "        ${3:# Processing code for each input}",
+      "    }",
+      "",
+      "    end {",
+      "        ${4:# Cleanup code}",
+      "    }",
+      "}"
+    ],
+    "description": "Function with begin/process/end blocks"
+  },
+  "PowerShell Try-Catch-Finally": {
+    "prefix": "pstryfinally",
+    "body": [
+      "try {",
+      "    ${1:# Code that might throw}",
+      "}",
+      "catch {",
+      "    ${2:# Exception handling}",
+      "}",
+      "finally {",
+      "    ${3:# Cleanup code}",
+      "}"
+    ],
+    "description": "PowerShell try-catch-finally block"
+  },
+  "PowerShell Script Block": {
+    "prefix": "psscriptblock",
+    "body": [
+      "$${1:scriptBlock} = {",
+      "    param(${2:$param})",
+      "    ${3:# Script block body}",
+      "}"
+    ],
+    "description": "PowerShell script block"
   }
 }
 

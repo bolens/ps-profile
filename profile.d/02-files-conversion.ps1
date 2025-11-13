@@ -47,7 +47,8 @@ function Convert-XmlToJsonObject {
         return [PSCustomObject]$obj
     }
     else {
-        return $obj['#text']
+        # Always return an object, even for text-only elements
+        return [PSCustomObject]$obj
     }
 }
 

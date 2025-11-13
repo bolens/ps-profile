@@ -4,7 +4,7 @@ This documentation is automatically generated from comment-based help in the pro
 
 **Total Functions:** 239
 **Total Aliases:** 229
-**Generated:** 2025-11-13 09:46:26
+**Generated:** 2025-11-13 11:31:20
 
 ## Functions by Fragment
 

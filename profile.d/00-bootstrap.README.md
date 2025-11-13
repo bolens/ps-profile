@@ -1,30 +1,30 @@
 profile.d/00-bootstrap.ps1
-==========================
+=========================
 
 Purpose
 -------
 
-Bootstrap helpers for profile fragments
+Core bootstrap helpers for profile fragments. Provides essential functions and global state initialization for the PowerShell profile system.
 
 Usage
 -----
 
-See the fragment source: `00-bootstrap.ps1` for examples and usage notes.
+This fragment initializes global variables and defines core functions used throughout the profile:
 
-Functions
----------
+- Command availability testing with caching
+- Agent mode function and alias registration
+- Lazy loading and deprecation helpers
+- Fragment warning suppression
+- Assumed command management
 
-- `Set-AgentModeFunction` — Creates collision-safe functions for profile fragments.
-- `Set-AgentModeAlias` — Creates collision-safe aliases for profile fragments.
-- `Test-CachedCommand` — Tests for command availability with caching.
-- `Test-HasCommand` — Tests if a command is available.
+See the fragment source: `00-bootstrap.ps1` for detailed function documentation.
 
 Dependencies
 ------------
 
-None explicit; see the fragment for runtime checks and optional tooling dependencies.
+None explicit; imports the Common.psm1 module if available.
 
 Notes
 -----
 
-Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.
+This is the foundational fragment loaded first (00-). Keep it lightweight and focused on core utilities. All other fragments depend on these helpers.
