@@ -15,7 +15,7 @@ jobs:
         pwsh: [7.2, 7.4]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install PSScriptAnalyzer
         run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force"
       - name: Validate profile (lint + idempotency)

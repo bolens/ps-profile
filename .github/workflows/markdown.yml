@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install tools
         run: |
           npm install -g markdownlint-cli@0.35.0 markdown-link-check
