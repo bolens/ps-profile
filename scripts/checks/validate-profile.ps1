@@ -15,15 +15,25 @@ scripts/checks/validate-profile.ps1
     Runs all validation checks on the PowerShell profile.
 #>
 
-# Import ModuleImport first (bootstrap)
-$moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+# Import PathResolution first (required for ModuleImport to work)
+$scriptsDir = Split-Path -Parent $PSScriptRoot
+$pathResolutionPath = Join-Path $scriptsDir 'lib' 'PathResolution.psm1'
+if (-not (Test-Path $pathResolutionPath)) {
+    throw "PathResolution module not found at: $pathResolutionPath. PSScriptRoot: $PSScriptRoot"
+}
+Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction Stop
+
+# Import ModuleImport (bootstrap)
+$moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $moduleImportPath)) {
+    throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
+}
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root using shared function
 try {
@@ -63,8 +73,6 @@ foreach ($check in $checks) {
         Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "$($check.Name) failed with exit code $LASTEXITCODE"
     }
 }
-
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: format + security + lint + spellcheck + comment help + idempotency passed"
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: format + security + lint + spellcheck + comment help + idempotency passed"
 
