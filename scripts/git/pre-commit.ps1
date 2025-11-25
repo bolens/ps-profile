@@ -15,8 +15,15 @@ scripts/git/pre-commit.ps1
     Runs formatting and validation checks as part of the git pre-commit hook.
 #>
 
-# Import ModuleImport first (bootstrap)
+# Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
+$pathResolutionPath = Join-Path $scriptsDir 'lib' 'PathResolution.psm1'
+if (-not (Test-Path $pathResolutionPath)) {
+    throw "PathResolution module not found at: $pathResolutionPath. PSScriptRoot: $PSScriptRoot"
+}
+Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction Stop
+
+# Import ModuleImport (bootstrap)
 $moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
 if (-not (Test-Path $moduleImportPath)) {
     throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
@@ -26,7 +33,6 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root
