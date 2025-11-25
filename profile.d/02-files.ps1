@@ -3,11 +3,38 @@
 # File utilities, conversions, listing, and navigation
 # ===============================================
 
-# Helper function for consistent error handling when loading sub-modules
-# Uses Write-ProfileError if available, otherwise falls back to Write-Warning
+<#
+.SYNOPSIS
+    Provides consistent error handling when loading sub-modules.
+
+.DESCRIPTION
+    Helper function for consistent error handling when loading sub-modules.
+    Uses Write-ProfileError if available, otherwise falls back to Write-Warning.
+    Only outputs errors when PS_PROFILE_DEBUG environment variable is set.
+
+.PARAMETER ErrorRecord
+    The error record to report.
+
+.PARAMETER ModuleName
+    The name of the module that failed to load.
+
+.EXAMPLE
+    try {
+        . (Join-Path $dir 'module.ps1')
+    }
+    catch {
+        Write-SubModuleError -ErrorRecord $_ -ModuleName 'module.ps1'
+    }
+
+    Reports an error when loading a sub-module fails.
+#>
 function Write-SubModuleError {
+    [CmdletBinding()]
     param(
+        [Parameter(Mandatory)]
         [System.Management.Automation.ErrorRecord]$ErrorRecord,
+        
+        [Parameter(Mandatory)]
         [string]$ModuleName
     )
     if ($env:PS_PROFILE_DEBUG) {

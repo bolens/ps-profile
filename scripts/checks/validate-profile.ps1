@@ -57,8 +57,8 @@ $fragReadme = Join-Path $scriptDir 'check-comment-help.ps1'
 $psExe = Get-PowerShellExecutable
 
 # Run validation checks in sequence
+# Note: format is run separately in pre-commit hook before validation
 $checks = @(
-    @{ Name = 'format'; Path = $format }
     @{ Name = 'security scan'; Path = $security }
     @{ Name = 'lint'; Path = $lint }
     @{ Name = 'spellcheck'; Path = $spellcheck }
@@ -74,5 +74,5 @@ foreach ($check in $checks) {
     }
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: format + security + lint + spellcheck + comment help + idempotency passed"
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: security + lint + spellcheck + comment help + idempotency passed"
 

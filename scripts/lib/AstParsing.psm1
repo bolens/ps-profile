@@ -44,8 +44,29 @@ function Get-PowerShellAst {
         throw "File not found: $Path"
     }
 
+    # Read file content first to handle encoding and line endings properly
+    # Try to use FileContent module if available, otherwise fallback to Get-Content
+    $content = $null
+    if (Get-Command Read-FileContent -ErrorAction SilentlyContinue) {
+        try {
+            $content = Read-FileContent -Path $Path
+        }
+        catch {
+            # Fallback to Get-Content if Read-FileContent fails
+            $content = Get-Content -Path $Path -Raw -Encoding UTF8 -ErrorAction Stop
+        }
+    }
+    else {
+        $content = Get-Content -Path $Path -Raw -Encoding UTF8 -ErrorAction Stop
+    }
+
+    if ([string]::IsNullOrEmpty($content)) {
+        throw "File is empty: $Path"
+    }
+
+    # Parse from content string instead of file path for better encoding/line ending handling
     $errors = $null
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$errors, [ref]$null)
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput($content, [ref]$null, [ref]$errors)
 
     if ($errors -and $errors.Count -gt 0) {
         $errorMessages = $errors | ForEach-Object { 

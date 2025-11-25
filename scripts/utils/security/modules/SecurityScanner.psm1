@@ -86,13 +86,15 @@ function Invoke-SecurityScan {
         $results = Invoke-ScriptAnalyzer -Path $FilePath -IncludeRule $SecurityRules -Severity Error, Warning -ErrorAction Stop
         if ($results) {
             foreach ($result in $results) {
-                $fileIssues.Add([PSCustomObject]@{
-                        File     = $result.ScriptPath
-                        Rule     = $result.RuleName
-                        Severity = $result.Severity
-                        Line     = $result.Line
-                        Message  = $result.Message
-                    })
+                if ($null -ne $result) {
+                    $fileIssues.Add([PSCustomObject]@{
+                            File     = if ($null -ne $result.ScriptPath) { $result.ScriptPath } else { $FilePath }
+                            Rule     = if ($null -ne $result.RuleName) { $result.RuleName } else { 'Unknown' }
+                            Severity = if ($null -ne $result.Severity) { $result.Severity } else { 'Warning' }
+                            Line     = if ($null -ne $result.Line) { $result.Line } else { 0 }
+                            Message  = if ($null -ne $result.Message) { $result.Message } else { 'Security issue detected' }
+                        })
+                }
             }
         }
 
@@ -114,115 +116,140 @@ function Invoke-SecurityScan {
                     continue
                 }
 
-                foreach ($patternName in $ExternalCommandPatterns.Keys) {
-                    $pattern = $ExternalCommandPatterns[$patternName]
-                    if ($null -ne $pattern -and $pattern.IsMatch($line)) {
-                        if ($line.TrimStart() -notmatch '^\s*#') {
-                            $isAllowed = Test-AllowedCommand -Command $line -Allowlist $Allowlist
+                if ($null -ne $ExternalCommandPatterns) {
+                    foreach ($patternName in $ExternalCommandPatterns.Keys) {
+                        if ([string]::IsNullOrEmpty($patternName)) {
+                            continue
+                        }
+                        $pattern = $ExternalCommandPatterns[$patternName]
+                        if ($null -ne $pattern -and $pattern.IsMatch($line)) {
+                            if ($line.TrimStart() -notmatch '^\s*#') {
+                                $isAllowed = Test-AllowedCommand -Command $line -Allowlist $Allowlist
 
-                            if (-not $isAllowed) {
-                                $isAllowed = Test-AllowedFile -FilePath $FilePath -Allowlist $Allowlist
-                            }
+                                if (-not $isAllowed) {
+                                    $isAllowed = Test-AllowedFile -FilePath $FilePath -Allowlist $Allowlist
+                                }
 
-                            if (-not $isAllowed) {
-                                $fileIssues.Add([PSCustomObject]@{
-                                        File     = $FilePath
-                                        Rule     = "ExternalCommand_$patternName"
-                                        Severity = 'Warning'
-                                        Line     = $lineNumber
-                                        Message  = "Potential external command execution detected: $patternName. Review for security implications."
-                                    })
+                                if (-not $isAllowed) {
+                                    $fileIssues.Add([PSCustomObject]@{
+                                            File     = $FilePath
+                                            Rule     = "ExternalCommand_$patternName"
+                                            Severity = 'Warning'
+                                            Line     = $lineNumber
+                                            Message  = "Potential external command execution detected: $patternName. Review for security implications."
+                                        })
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            # Check for secret patterns
-            $lines = $content -split "`n"
-            $lineNumber = 0
-            foreach ($line in $lines) {
-                $lineNumber++
+                # Check for secret patterns
+                $lines = $content -split "`n"
+                $lineNumber = 0
+                foreach ($line in $lines) {
+                    $lineNumber++
 
-                # Skip null or empty lines
-                if ([string]::IsNullOrEmpty($line)) {
-                    continue
-                }
+                    # Skip null or empty lines
+                    if ([string]::IsNullOrEmpty($line)) {
+                        continue
+                    }
 
-                foreach ($patternName in $SecretPatterns.Keys) {
-                    $pattern = $SecretPatterns[$patternName]
-                    if ($null -ne $pattern -and $pattern.IsMatch($line)) {
-                        $trimmedLine = $line.TrimStart()
-                        if ($trimmedLine -match '^\s*#') {
-                            continue
-                        }
-
-                        $codePart = if ($trimmedLine -match '^([^#]+)#') { $matches[1] } else { $trimmedLine }
-
-                        $isAllowed = Test-AllowedSecretPattern -Line $line -Allowlist $Allowlist
-
-                        if (-not $isAllowed) {
-                            $isAllowed = Test-AllowedFile -FilePath $FilePath -Allowlist $Allowlist
-                        }
-
-                        if (-not $isAllowed) {
-                            $lowerLine = $codePart.ToLower()
-
-                            foreach ($fpPattern in $FalsePositivePatterns) {
-                                if ($lowerLine -match $fpPattern) {
-                                    $isAllowed = $true
-                                    break
-                                }
+                    if ($null -ne $SecretPatterns) {
+                        foreach ($patternName in $SecretPatterns.Keys) {
+                            if ([string]::IsNullOrEmpty($patternName)) {
+                                continue
                             }
+                            $pattern = $SecretPatterns[$patternName]
+                            if ($null -ne $pattern -and $pattern.IsMatch($line)) {
+                                $trimmedLine = $line.TrimStart()
+                                if ($trimmedLine -match '^\s*#') {
+                                    continue
+                                }
 
-                            if (-not $isAllowed) {
-                                if ($lineNumber -gt 1) {
-                                    $prevLineObj = $lines[$lineNumber - 2]
-                                    if ($null -ne $prevLineObj) {
-                                        $prevLine = $prevLineObj.ToLower()
-                                        if ($prevLine -match '(?:example|sample|test|placeholder|demo|fake|dummy|mock|temporary|temp)') {
-                                            $isAllowed = $true
+                                $codePart = if ($trimmedLine -match '^([^#]+)#' -and $null -ne $matches -and $matches.Count -gt 1 -and $null -ne $matches[1]) {
+                                    $matches[1]
+                                }
+                                else {
+                                    $trimmedLine
+                                }
+
+                                # Skip if codePart is null or empty
+                                if ([string]::IsNullOrEmpty($codePart)) {
+                                    continue
+                                }
+
+                                $isAllowed = Test-AllowedSecretPattern -Line $line -Allowlist $Allowlist
+
+                                if (-not $isAllowed) {
+                                    $isAllowed = Test-AllowedFile -FilePath $FilePath -Allowlist $Allowlist
+                                }
+
+                                if (-not $isAllowed) {
+                                    $lowerLine = $codePart.ToLower()
+
+                                    if ($null -ne $FalsePositivePatterns) {
+                                        foreach ($fpPattern in $FalsePositivePatterns) {
+                                            if (-not [string]::IsNullOrEmpty($fpPattern) -and $lowerLine -match $fpPattern) {
+                                                $isAllowed = $true
+                                                break
+                                            }
                                         }
                                     }
-                                }
 
-                                if (-not $isAllowed -and $lineNumber -lt $lines.Count) {
-                                    $nextLineObj = $lines[$lineNumber]
-                                    if ($null -ne $nextLineObj) {
-                                        $nextLine = $nextLineObj.ToLower()
-                                        if ($nextLine -match '(?:example|sample|test|placeholder|demo|fake|dummy|mock|temporary|temp)') {
-                                            $isAllowed = $true
+                                    if (-not $isAllowed) {
+                                        if ($lineNumber -gt 1) {
+                                            $prevLineObj = $lines[$lineNumber - 2]
+                                            if ($null -ne $prevLineObj) {
+                                                $prevLine = $prevLineObj.ToLower()
+                                                if ($prevLine -match '(?:example|sample|test|placeholder|demo|fake|dummy|mock|temporary|temp)') {
+                                                    $isAllowed = $true
+                                                }
+                                            }
+                                        }
+
+                                        if (-not $isAllowed -and $lineNumber -lt $lines.Count) {
+                                            $nextLineObj = $lines[$lineNumber]
+                                            if ($null -ne $nextLineObj) {
+                                                $nextLine = $nextLineObj.ToLower()
+                                                if ($nextLine -match '(?:example|sample|test|placeholder|demo|fake|dummy|mock|temporary|temp)') {
+                                                    $isAllowed = $true
+                                                }
+                                            }
+                                        }
+
+                                        if (-not $isAllowed) {
+                                            $match = $pattern.Match($codePart)
+                                            if ($null -ne $match -and $match.Success -and $match.Groups.Count -gt 1) {
+                                                $capturedGroup = $match.Groups[1]
+                                                if ($null -ne $capturedGroup) {
+                                                    $capturedValue = $capturedGroup.Value
+
+                                                    if ($null -ne $capturedValue -and $capturedValue.Length -gt 0) {
+                                                        $isSimpleWord = $capturedValue -match '^[a-z]+$' -and $capturedValue.Length -lt 15
+                                                        $isRepeating = $capturedValue -match '^(.)\1+$'
+                                                        $hasHighEntropy = ($capturedValue -match '[A-Z]') -and ($capturedValue -match '[a-z]') -and ($capturedValue -match '[0-9]')
+
+                                                        if ($isSimpleWord -or $isRepeating) {
+                                                            $isAllowed = $true
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
 
                                 if (-not $isAllowed) {
-                                    $match = $pattern.Match($codePart)
-                                    if ($match.Success -and $match.Groups.Count -gt 1) {
-                                        $capturedValue = $match.Groups[1].Value
-
-                                        if ($null -ne $capturedValue -and $capturedValue.Length -gt 0) {
-                                            $isSimpleWord = $capturedValue -match '^[a-z]+$' -and $capturedValue.Length -lt 15
-                                            $isRepeating = $capturedValue -match '^(.)\1+$'
-                                            $hasHighEntropy = ($capturedValue -match '[A-Z]') -and ($capturedValue -match '[a-z]') -and ($capturedValue -match '[0-9]')
-
-                                            if ($isSimpleWord -or $isRepeating) {
-                                                $isAllowed = $true
-                                            }
-                                        }
-                                    }
+                                    $fileIssues.Add([PSCustomObject]@{
+                                            File     = $FilePath
+                                            Rule     = "HardcodedSecret_$patternName"
+                                            Severity = 'Error'
+                                            Line     = $lineNumber
+                                            Message  = "Potential hardcoded secret detected: $patternName"
+                                        })
                                 }
                             }
-                        }
-
-                        if (-not $isAllowed) {
-                            $fileIssues.Add([PSCustomObject]@{
-                                    File     = $FilePath
-                                    Rule     = "HardcodedSecret_$patternName"
-                                    Severity = 'Error'
-                                    Line     = $lineNumber
-                                    Message  = "Potential hardcoded secret detected: $patternName"
-                                })
                         }
                     }
                 }

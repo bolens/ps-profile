@@ -2,8 +2,8 @@
 *.user
 *.suo
 
-# Ignore local modules that can be installed
-Modules/
+# Ignore local modules that can be installed (root level only)
+/Modules/
 
 # Ignore PowerShell package artifacts
 *.nupkg
