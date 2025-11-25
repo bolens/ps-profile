@@ -10,7 +10,7 @@ scripts/utils/
 │   ├── run-lint.ps1
 │   ├── run-format.ps1
 │   ├── run-markdownlint.ps1
-│   ├── run_pester.ps1
+│   ├── run-pester.ps1
 │   └── spellcheck.ps1
 ├── metrics/           # Metrics and performance scripts
 │   ├── benchmark-startup.ps1
@@ -30,7 +30,7 @@ scripts/utils/
 │   └── create-release.ps1
 ├── fragment/          # Fragment management scripts
 │   └── new-fragment.ps1
-└── init_wrangler_config.ps1  # Miscellaneous utilities
+└── init-wrangler-config.ps1  # Miscellaneous utilities
 ```
 
 ## Script Categories
@@ -42,7 +42,7 @@ Scripts for maintaining code quality:
 - **run-lint.ps1** - Run PSScriptAnalyzer linting
 - **run-format.ps1** - Format PowerShell code
 - **run-markdownlint.ps1** - Lint Markdown files
-- **run_pester.ps1** - Run Pester tests
+- **run-pester.ps1** - Run Pester tests
 - **spellcheck.ps1** - Spell check files
 
 ### Metrics (`metrics/`)
@@ -89,14 +89,32 @@ Scripts for managing profile fragments:
 
 ## Import Pattern
 
-Scripts in subdirectories should import Common.psm1 using:
+Scripts in subdirectories should import library modules using the modular import pattern:
 
 ```powershell
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap) - works from any scripts/ subdirectory
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import specific modules using Import-LibModule (handles path resolution automatically)
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking
 ```
 
-This pattern works for scripts in any subdirectory of `scripts/utils/`.
+This pattern works for scripts in any subdirectory of `scripts/utils/` and automatically handles path resolution.
+
+**Available Library Modules:**
+
+- `ModuleImport.psm1` - Module import helper (import this first)
+- `ExitCodes.psm1` - Exit code constants
+- `PathResolution.psm1` - Path resolution utilities
+- `Logging.psm1` - Logging utilities
+- `Module.psm1` - Module management
+- `Command.psm1` - Command utilities
+- `FileSystem.psm1` - File system operations
+- And many more (see `scripts/lib/` directory)
 
 ## Usage
 
@@ -121,4 +139,3 @@ pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1
 ```
 
 See `scripts/examples/README.md` for more detailed usage examples.
-

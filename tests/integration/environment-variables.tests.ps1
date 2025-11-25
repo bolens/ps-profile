@@ -116,15 +116,32 @@ Describe 'Environment Variables Integration Tests' {
 
         It 'Publish-EnvVar function exists and can be called' {
             Get-Command Publish-EnvVar -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            { Publish-EnvVar -ErrorAction Stop } | Should -Not -Throw
+            # Publish-EnvVar doesn't take parameters - it just broadcasts changes
+            { Publish-EnvVar } | Should -Not -Throw
         }
 
         It 'Publish-EnvVar handles null value' {
-            { Publish-EnvVar -Name 'TEST_NULL' -Value $null -ErrorAction Stop } | Should -Not -Throw
+            # Publish-EnvVar doesn't take parameters, but we can test it after setting a null value
+            $testName = 'TEST_NULL_PUBLISH'
+            try {
+                Set-EnvVar -Name $testName -Value $null
+                { Publish-EnvVar } | Should -Not -Throw
+            }
+            finally {
+                [Environment]::SetEnvironmentVariable($testName, $null, 'User')
+            }
         }
 
         It 'Publish-EnvVar handles empty value' {
-            { Publish-EnvVar -Name 'TEST_EMPTY' -Value '' -ErrorAction Stop } | Should -Not -Throw
+            # Publish-EnvVar doesn't take parameters, but we can test it after setting an empty value
+            $testName = 'TEST_EMPTY_PUBLISH'
+            try {
+                Set-EnvVar -Name $testName -Value ''
+                { Publish-EnvVar } | Should -Not -Throw
+            }
+            finally {
+                [Environment]::SetEnvironmentVariable($testName, $null, 'User')
+            }
         }
     }
 }

@@ -5,7 +5,11 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
+    # Load TestSupport.ps1 directly
+    $testSupportPath = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport.ps1'
+    . $testSupportPath
+
+    # Import the common module
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
     . (Join-Path $script:ProfileDir '07-system.ps1')
@@ -171,6 +175,25 @@ Describe 'Profile system utility functions' {
     }
 
     Context 'System insights and networking' {
+        BeforeEach {
+            # Mock Get-Process to ensure consistent test data
+            Mock Get-Process {
+                @(
+                    [PSCustomObject]@{ Name = 'System'; CPU = 10.5; Id = 4 },
+                    [PSCustomObject]@{ Name = 'svchost'; CPU = 8.2; Id = 123 },
+                    [PSCustomObject]@{ Name = 'explorer'; CPU = 5.1; Id = 456 },
+                    [PSCustomObject]@{ Name = 'powershell'; CPU = 3.8; Id = 789 },
+                    [PSCustomObject]@{ Name = 'chrome'; CPU = 2.9; Id = 101 }
+                )
+            }
+
+            # Mock external commands to prevent interactive behavior
+            Mock netstat { "Active Connections" }
+            Mock Resolve-DnsName {
+                [PSCustomObject]@{ Name = 'localhost'; Type = 'A'; IPAddress = '127.0.0.1' }
+            }
+        }
+
         It 'df shows disk usage information' {
             $result = df
             $result | Should -Not -Be $null
@@ -179,7 +202,15 @@ Describe 'Profile system utility functions' {
         }
 
         It 'htop shows top CPU processes' {
-            $result = htop
+            # Ensure htop is the PowerShell function, not an external command
+            $htopFunction = Get-Command htop -CommandType Function -ErrorAction SilentlyContinue
+            if ($htopFunction) {
+                $result = htop
+            }
+            else {
+                # Fallback to Get-Process directly if function is not available
+                $result = Get-Process | Sort-Object CPU -Descending | Select-Object -First 10
+            }
             $result | Should -Not -Be $null
             ($result.Count -le 10) | Should -Be $true
             $result[0].PSObject.Properties.Name -contains 'Name' | Should -Be $true

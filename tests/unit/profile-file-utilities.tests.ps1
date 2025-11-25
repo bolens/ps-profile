@@ -5,12 +5,12 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-    . (Join-Path $script:ProfileDir '02-files-conversion.ps1')
-    . (Join-Path $script:ProfileDir '02-files-utilities.ps1')
-    Ensure-FileConversion
+    . (Join-Path $script:ProfileDir '02-files.ps1')
+    Ensure-FileConversion-Data
+    Ensure-FileConversion-Documents
+    Ensure-FileConversion-Media
     Ensure-FileUtilities
 }
 

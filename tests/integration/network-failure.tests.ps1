@@ -7,10 +7,6 @@ Tests for network failure scenarios and error handling.
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    # Import the Common module
-    $commonModulePath = Get-TestPath -RelativePath 'scripts\lib\Common.psm1' -StartPath $PSScriptRoot -EnsureExists
-    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
-
     # Get repository root
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists

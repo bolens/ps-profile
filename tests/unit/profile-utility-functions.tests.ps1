@@ -5,7 +5,6 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
     . (Join-Path $script:ProfileDir '05-utilities.ps1')

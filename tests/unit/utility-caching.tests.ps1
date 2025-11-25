@@ -5,7 +5,9 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
+    # Import the Cache module (Common.psm1 no longer exists)
+    $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module (Join-Path $libPath 'Cache.psm1') -DisableNameChecking -ErrorAction Stop -Global
 }
 
 Describe 'Caching Functions' {

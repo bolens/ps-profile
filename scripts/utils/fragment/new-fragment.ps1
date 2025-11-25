@@ -45,9 +45,14 @@ param(
     [string]$Description = "Profile fragment for $Name"
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import shared utilities using ModuleImport pattern
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import required modules using Import-LibModule
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot

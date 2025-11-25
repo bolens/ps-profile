@@ -199,7 +199,7 @@ Set-ContainerEnginePreference docker  # or 'podman'
 Test-ContainerEngine  # Inspect current configuration
 ```
 
-Returns object with `Engine`, `Compose` (subcommand or legacy), and `Preferred` values.
+Returns object with `Engine`, `Compose` (subcommand), and `Preferred` values.
 
 ## Prompt Frameworks
 
@@ -276,6 +276,43 @@ See [PROFILE_DEBUG.md](PROFILE_DEBUG.md) for complete debugging guide.
 4. Guard external tool calls with `Test-CachedCommand` or `Get-Command`
 5. Avoid side effects during dot-sourcing (defer to `Enable-*` functions)
 
+### Modular Fragment Structure
+
+Many fragments use a modular subdirectory structure where the main fragment loads related modules:
+
+**Module Organization:**
+
+- Main fragments (e.g., `02-files.ps1`, `05-utilities.ps1`) act as orchestrators
+- Related functionality is organized in subdirectories (e.g., `conversion-modules/`, `utilities-modules/`)
+- Modules are dot-sourced by the parent fragment during load
+
+**Example Module Loading:**
+
+```powershell
+# In 05-utilities.ps1
+$utilitiesModulesDir = Join-Path $PSScriptRoot 'utilities-modules'
+if (Test-Path $utilitiesModulesDir) {
+    $systemDir = Join-Path $utilitiesModulesDir 'system'
+    . (Join-Path $systemDir 'utilities-profile.ps1')
+    . (Join-Path $systemDir 'utilities-security.ps1')
+    # ... more modules
+}
+```
+
+**When to Use Modules:**
+
+- Large fragments that can be split into logical groups
+- Functionality that's shared across multiple fragments
+- Related utilities that belong together (e.g., all conversion functions)
+- Code that benefits from better organization
+
+**Module Guidelines:**
+
+- Modules should be idempotent (safe to dot-source multiple times)
+- Use `Set-AgentModeFunction` for function registration
+- Include error handling for module loading failures
+- Document all exported functions with comment-based help
+
 ### Best Practices
 
 - **No expensive operations**: Defer module imports, file I/O, network calls
@@ -299,4 +336,6 @@ Outputs to `docs/*.md`. See [docs/README.md](docs/README.md) for the generated i
 - [CONTRIBUTING.md](CONTRIBUTING.md) — Development guidelines
 - [PROFILE_DEBUG.md](PROFILE_DEBUG.md) — Debugging and instrumentation
 - [powershell.config.README.md](powershell.config.README.md) — Configuration details
+- [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) — Developer guide and advanced testing
 - [WARP.md](WARP.md) — WARP development guide
+- [AGENTS.md](AGENTS.md) — AI coding assistant guidance

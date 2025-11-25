@@ -2,8 +2,12 @@
 # 09-package-managers.ps1
 # Package manager helper shorthands (Scoop, uv, pnpm, etc.)
 # ===============================================
+# Provides convenient aliases and wrapper functions for common package manager operations.
+# Each package manager section only loads if the corresponding tool is available on PATH.
 
-# Scoop helpers
+# ===============================================
+# Scoop Package Manager Helpers
+# ===============================================
 if (Test-HasCommand scoop) {
     # Scoop install
     <#
@@ -89,7 +93,9 @@ else {
     Write-MissingToolWarning -Tool 'Scoop' -InstallHint 'Install from: https://scoop.sh/'
 }
 
-# UV helpers
+# ===============================================
+# UV Python Package Manager Helpers
+# ===============================================
 if (Test-HasCommand uv) {
     # UV install (tool install)
     <#
@@ -145,7 +151,9 @@ else {
     Write-MissingToolWarning -Tool 'uv' -InstallHint 'Install with: pip install uv'
 }
 
-# PNPM helpers
+# ===============================================
+# PNPM Node.js Package Manager Helpers
+# ===============================================
 if (Test-HasCommand pnpm) {
     # PNPM install
     <#

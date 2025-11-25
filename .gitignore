@@ -32,3 +32,19 @@ scripts/data/psscriptanalyzer-report.json
 
 # Ignore user-specific fragment configuration
 .profile-fragments.json
+.profile-last-update-check
+
+# Ignore Python virtual environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ignore test data and temporary test files
+**/test-data/**
+# Ignore any single-digit numeric files that might be created by tests
+/[0-9]
+/[0-9][0-9]

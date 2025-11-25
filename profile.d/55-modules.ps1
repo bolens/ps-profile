@@ -11,7 +11,14 @@ try {
     # profile dot-source time. To keep startup fast we create tiny
     # Function: provider wrappers that import the module on first use.
 
-    if ($null -ne (Get-Variable -Name 'ModulesLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
+    # Use FragmentIdempotency module if available (loaded in main profile)
+    if (Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue) {
+        if (Test-FragmentLoaded -FragmentName '55-modules') { return }
+    }
+    else {
+        # Fallback to direct variable check
+        if ($null -ne (Get-Variable -Name 'ModulesLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
+    }
 
     # Expose explicit enable helpers so scripts can opt-in to loading.
     if (-not (Test-Path 'Function:Enable-PoshGit')) {
@@ -31,7 +38,13 @@ try {
         } -Force | Out-Null
     }
 
-    Set-Variable -Name 'ModulesLoaded' -Value $true -Scope Global -Force
+    # Mark as loaded using FragmentIdempotency module if available
+    if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
+        Set-FragmentLoaded -FragmentName '55-modules'
+    }
+    else {
+        Set-Variable -Name 'ModulesLoaded' -Value $true -Scope Global -Force
+    }
 }
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Modules fragment failed: $($_.Exception.Message)" }

@@ -16,9 +16,13 @@ scripts/dev/setup.ps1
     Sets up the development environment.
 #>
 
-# Import shared utilities
-$commonModulePath = Join-Path $PSScriptRoot '..' 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path $PSScriptRoot '..' 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 Write-ScriptMessage -Message "Setting up development environment..." -LogLevel Info
 

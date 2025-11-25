@@ -18,10 +18,15 @@ scripts/utils/generate-fragment-readmes.ps1
     If specified, overwrites existing README.md files. Otherwise, existing
     files are skipped and preserved.
 
+.PARAMETER OutputPath
+    The output directory for fragment documentation. Can be absolute or relative to the
+    repository root. Defaults to "docs/fragments".
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1
 
-    Generates README files for all fragments that don't already have one.
+    Generates README files for all fragments that don't already have one, and copies them
+    to docs/fragments/ with an index.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1 -Force
@@ -30,7 +35,8 @@ scripts/utils/generate-fragment-readmes.ps1
 
 .OUTPUTS
     Creates or updates .README.md files in the profile.d directory, one per
-    .ps1 fragment file. Each README includes:
+    .ps1 fragment file. Also copies them to the output directory and generates
+    an index. Each README includes:
     - Purpose section extracted from file header comments
     - Usage section referencing the source file
     - Functions section listing all detected functions with descriptions
@@ -46,20 +52,53 @@ scripts/utils/generate-fragment-readmes.ps1
 
 Function descriptions are extracted from single-line comments (#) or
     content within multiline comment blocks immediately preceding the function.
-
-    #>
+#>
 
 param(
-    [switch]$Force
+    [switch]$Force,
+    [string]$OutputPath = "docs/fragments"
 )
 
 # Suppress PSAvoidUsingEmptyCatchBlock for this file
 # Empty catch blocks are used intentionally for graceful degradation when parsing files
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '', Justification = 'Empty catch blocks used for graceful degradation when parsing optional file content')]
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import shared utilities directly (no barrel files)
+# Import ModuleImport first (bootstrap)
+# Script is in scripts/utils/docs/, so go up 3 levels to get to repo root, then join with scripts/lib
+$repoRootForLib = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$moduleImportPath = Join-Path $repoRootForLib 'scripts' 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
+# Import fragment README modules
+$modulesRoot = Join-Path $PSScriptRoot 'modules'
+$parserModulePath = Join-Path $modulesRoot 'FragmentReadmeParser.psm1'
+$generatorModulePath = Join-Path $modulesRoot 'FragmentReadmeGenerator.psm1'
+$indexGeneratorModulePath = Join-Path $modulesRoot 'FragmentIndexGenerator.psm1'
+
+if (Test-Path $parserModulePath) {
+    Import-Module $parserModulePath -DisableNameChecking -ErrorAction Stop
+}
+if (Test-Path $generatorModulePath) {
+    Import-Module $generatorModulePath -DisableNameChecking -ErrorAction Stop
+}
+if (Test-Path $indexGeneratorModulePath) {
+    Import-Module $indexGeneratorModulePath -DisableNameChecking -ErrorAction Stop
+}
+
+# Get repository root using shared function
+try {
+    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
 
 # Get profile directory using shared function
 try {
@@ -71,258 +110,94 @@ catch {
 
 $psFiles = Get-PowerShellScripts -Path $fragDir -SortByName
 
-# Compile regex patterns once for better performance
-$regexCommentLine = [regex]::new('^\s*#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexFunction = [regex]::new('^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexDecorativeEquals = [regex]::new('^# =+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexDecorativeDashes = [regex]::new('^# -+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexMultilineCommentStart = [regex]::new('^\s*<#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexMultilineCommentEnd = [regex]::new('^\s*#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexCommentStart = [regex]::new('^\s*#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexEmptyLine = [regex]::new('^\s*$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexIfStatement = [regex]::new('^\s*if\s*\(', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexInlineComment = [regex]::new("# (.+)$", [System.Text.RegularExpressions.RegexOptions]::Compiled)
-
 foreach ($ps in $psFiles) {
     $mdPath = [System.IO.Path]::ChangeExtension($ps.FullName, '.README.md')
-    if ((Test-Path $mdPath) -and (-not $Force)) { continue }
-
-    # Try to read a header comment for a short purpose line
-    $headerLines = Get-Content -Path $ps.FullName -TotalCount 60 -ErrorAction SilentlyContinue
-    $purpose = $null
-    $skipFilename = $true
-    $inMultilineComment = $false
-    if ($headerLines) {
-        foreach ($l in $headerLines) {
-            $trim = $l.Trim()
-            # Track multiline comment state
-            if ($regexMultilineCommentStart.IsMatch($trim)) { $inMultilineComment = $true; continue }
-            if ($regexMultilineCommentEnd.IsMatch($trim) -and $inMultilineComment) { $inMultilineComment = $false; continue }
-
-            # Skip decorative lines (use compiled regex for better performance)
-            if ($regexDecorativeEquals.IsMatch($trim) -or $regexDecorativeDashes.IsMatch($trim) -or $trim -eq '#') { continue }
-
-            # Look for comment lines (both single-line # and inside multiline comments)
-            $m = $regexCommentLine.Match($trim)
-            if ($m.Success -or ($inMultilineComment -and $trim -and -not $regexMultilineCommentStart.IsMatch($trim) -and -not $regexCommentStart.IsMatch($trim))) {
-                $purposeText = if ($m.Success) { $m.Groups[1].Value } else { $trim }
-                # Skip generic or decorative text
-                if ($purposeText -notmatch '^=+$' -and $purposeText -notmatch '^-+$' -and $purposeText -notmatch '^\.+$') {
-                    # Skip filename if it matches the actual filename (with or without path prefix)
-                    if ($skipFilename -and ($purposeText -eq $ps.Name -or $purposeText -eq "profile.d/$($ps.Name)")) {
-                        $skipFilename = $false
-                        continue
-                    }
-                    $purpose = $purposeText
-                    break
-                }
-            }
-        }
+    if ((Test-Path $mdPath) -and (-not $Force)) {
+        continue
     }
 
-    if (-not $purpose) { $purpose = "Small fragment: see file $($ps.Name) for details." }
+    # Extract fragment information
+    $purpose = Get-FragmentPurpose -FilePath $ps.FullName -FileInfo $ps
+    $functions = Get-FragmentFunctions -FilePath $ps.FullName
+    $enableHelpers = Get-FragmentEnableHelpers -FilePath $ps.FullName
 
-    # Detect any Enable-* helpers defined in the fragment so we can mention them
-    $enableHelpers = @()
-    try {
-        $enableMatches = Select-String -Path $ps.FullName -Pattern 'function\s+Enable-[A-Za-z0-9_-]+' -AllMatches -ErrorAction SilentlyContinue
-        foreach ($m in $enableMatches) { foreach ($mm in $m.Matches) { $enableHelpers += $mm.Value.Trim() } }
-        $enableHelpers = $enableHelpers | Sort-Object -Unique
-    }
-    catch {}
+    # Generate markdown content
+    $mdContent = New-FragmentReadmeContent -FileName $ps.Name -Purpose $purpose -Functions $functions -EnableHelpers $enableHelpers
 
-    # Extract top-level function declarations and a short comment above them (if present)
-    # Use List for better performance than array concatenation
-    $functions = [System.Collections.Generic.List[PSCustomObject]]::new()
-    try {
-        $allLines = Get-Content -Path $ps.FullName -ErrorAction SilentlyContinue
-        for ($i = 0; $i -lt $allLines.Count; $i++) {
-            $line = $allLines[$i]
-            # Match function declarations (not in comments), including those inside conditional blocks
-            $fm = $regexFunction.Match($line)
-            if ($fm.Success) {
-                $fname = $fm.Groups[1].Value
-                $desc = $null
-                # Look for comments above the function (up to 10 lines back)
-                $inMultilineComment = $false
-                # First pass: determine if we're starting inside a multiline comment
-                for ($k = $i - 1; $k -ge [Math]::Max(0, $i - 10); $k--) {
-                    $checkLine = $allLines[$k].Trim()
-                    if ($regexMultilineCommentStart.IsMatch($checkLine)) { $inMultilineComment = $true; break }
-                    if ($regexMultilineCommentEnd.IsMatch($checkLine) -and $inMultilineComment) { $inMultilineComment = $false; break }
-                    # Only break on actual code lines, not content inside comments
-                    if ($checkLine -and -not $regexEmptyLine.IsMatch($checkLine) -and -not $regexCommentStart.IsMatch($checkLine) -and -not $regexIfStatement.IsMatch($checkLine) -and -not $inMultilineComment) { break }
-                }
-                # Second pass: extract comments
-                for ($j = $i - 1; $j -ge [Math]::Max(0, $i - 10); $j--) {
-                    $up = $allLines[$j].Trim()
-
-                    # Track multiline comment state
-                    if ($regexMultilineCommentStart.IsMatch($up)) { $inMultilineComment = $true; continue }
-                    if ($regexMultilineCommentEnd.IsMatch($up) -and $inMultilineComment) { $inMultilineComment = $false; continue }
-
-                    # Check for single-line comment lines above
-                    $dm = $regexCommentLine.Match($up)
-                    if ($dm.Success -and -not $inMultilineComment) {
-                        $descText = $dm.Groups[1].Value
-                        # Skip if this looks like a structured comment (dashes, equals, etc.)
-                        if ($descText -notmatch '^[-=\s]*$' -and $descText -notmatch '^[A-Za-z ]+:$' -and $descText.Length -lt 120) {
-                            $desc = $descText
-                            break
-                        }
-                    }
-                    # Check for content inside multiline comments
-                    elseif ($inMultilineComment -and $up -and -not $regexMultilineCommentStart.IsMatch($up) -and -not $regexCommentStart.IsMatch($up)) {
-                        # Extract the first meaningful line from multiline comment
-                        $descText = $up.Trim()
-                        # Skip function names, titles (word + dashes), decorative lines
-                        if ($descText -notmatch '^[-=\s]*$' -and $descText -notmatch '^[A-Za-z ]+:$' -and $descText -notmatch '^[A-Za-z0-9_\-]+$' -and $descText -notmatch '^-+$' -and $descText.Length -lt 120) {
-                            $desc = $descText
-                            break
-                        }
-                    }
-
-                    # Stop if we hit a non-comment, non-empty line (but allow if statements)
-                    if ($up -and -not $regexEmptyLine.IsMatch($up) -and -not $regexCommentStart.IsMatch($up) -and -not $regexIfStatement.IsMatch($up) -and -not $inMultilineComment) {
-                        break
-                    }
-                }
-                $functions.Add([PSCustomObject]@{ Name = $fname; Short = $desc })
-            }
-        }
-    }
-    catch {}
-
-    # Detect dynamically-created functions (Set-Item Function:Name, Function:Name references,
-    # Set-AgentModeFunction/Set-AgentModeAlias, New-Item Function:Name)
-    try {
-        for ($i = 0; $i -lt $allLines.Count; $i++) {
-            $line = $allLines[$i]
-            $ln = $line.Trim()
-            $fname = $null
-            $desc = $null
-
-            # Check for different patterns of function creation
-            if ($ln -match 'Set-AgentModeFunction\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)') {
-                $fname = $matches[1]
-            }
-            elseif ($ln -match 'Set-AgentModeAlias\s+-Name\s+[\x27\x22]([A-Za-z0-9_\-]+)') {
-                $fname = $matches[1]
-            }
-            elseif ($ln -match '(?:Set-Item|New-Item)\s+(?:-Path\s+)?Function:(?:global:)?([A-Za-z0-9_\-\.\~]+)') {
-                $fname = $matches[1]
-            }
-
-            if ($fname) {
-                # Look for comments above the function creation (up to 10 lines back)
-                $inMultilineComment = $false
-                # First pass: determine if we're starting inside a multiline comment
-                for ($k = $i - 1; $k -ge [Math]::Max(0, $i - 10); $k--) {
-                    $checkLine = $allLines[$k].Trim()
-                    if ($regexMultilineCommentStart.IsMatch($checkLine)) { $inMultilineComment = $true; break }
-                    if ($regexMultilineCommentEnd.IsMatch($checkLine) -and $inMultilineComment) { $inMultilineComment = $false; break }
-                    # Only break on actual code lines, not content inside comments
-                    if ($checkLine -and -not $regexEmptyLine.IsMatch($checkLine) -and -not $regexCommentStart.IsMatch($checkLine) -and -not $regexIfStatement.IsMatch($checkLine) -and -not $inMultilineComment) { break }
-                }
-                # Second pass: extract comments
-                for ($j = $i - 1; $j -ge [Math]::Max(0, $i - 10); $j--) {
-                    $up = $allLines[$j].Trim()
-
-                    # Track multiline comment state
-                    if ($regexMultilineCommentStart.IsMatch($up)) { $inMultilineComment = $true; continue }
-                    if ($regexMultilineCommentEnd.IsMatch($up) -and $inMultilineComment) { $inMultilineComment = $false; continue }
-
-                    # Check for single-line comment lines above
-                    $dm = $regexCommentLine.Match($up)
-                    if ($dm.Success -and -not $inMultilineComment) {
-                        $descText = $dm.Groups[1].Value
-                        # Skip if this looks like a structured comment (dashes, equals, etc.)
-                        if ($descText -notmatch '^[-=\s]*$' -and $descText -notmatch '^[A-Za-z ]+:$' -and $descText.Length -lt 120) {
-                            $desc = $descText
-                            break
-                        }
-                    }
-                    # Check for content inside multiline comments
-                    elseif ($inMultilineComment -and $up -and -not $regexMultilineCommentStart.IsMatch($up) -and -not $regexCommentStart.IsMatch($up)) {
-                        # Extract the first meaningful line from multiline comment
-                        $descText = $up.Trim()
-                        # Skip function names, titles (word + dashes), decorative lines
-                        if ($descText -notmatch '^[-=\s]*$' -and $descText -notmatch '^[A-Za-z ]+:$' -and $descText -notmatch '^[A-Za-z0-9_\-]+$' -and $descText -notmatch '^-+$' -and $descText.Length -lt 120) {
-                            $desc = $descText
-                            break
-                        }
-                    }
-
-                    # Stop if we hit a non-comment, non-empty line
-                    if ($up -and -not $regexEmptyLine.IsMatch($up) -and -not $regexCommentStart.IsMatch($up) -and -not $regexIfStatement.IsMatch($up) -and -not $inMultilineComment) {
-                        break
-                    }
-                }
-
-                # If no comment found above, check for inline comment on the function line
-                if (-not $desc) {
-                    $functionLine = $allLines[$i].Trim()
-                    # Use compiled regex pattern for inline comment detection
-                    $inlineMatch = $regexInlineComment.Match($functionLine)
-                    if ($inlineMatch.Success) {
-                        $inlineDesc = $inlineMatch.Groups[1].Value
-                        # Skip decorative comments
-                        if ($inlineDesc -notmatch '^[-=\s]*$' -and $inlineDesc -notmatch '^[A-Za-z ]+:$') {
-                            $desc = $inlineDesc
-                        }
-                    }
-                }
-
-                # Only add if not already in the list
-                if ($functions.Name -notcontains $fname) {
-                    if (-not $desc) { $desc = 'dynamically-created; see fragment source' }
-                    $functions.Add([PSCustomObject]@{ Name = $fname; Short = $desc })
-                }
-            }
-        }
-    }
-    catch {}
-
-    $title = "profile.d/$($ps.Name)"
-    $underline = '=' * $title.Length
-
-    $md = @()
-    $md += $title
-    $md += $underline
-    $md += ''
-    $md += 'Purpose'
-    $md += '-------'
-    $md += $purpose
-    $md += ''
-    $md += 'Usage'
-    $md += '-----'
-    $md += ('See the fragment source: `{0}` for examples and usage notes.' -f $ps.Name)
-    if ($functions.Count -gt 0) {
-        $md += ''
-        $md += 'Functions'
-        $md += '---------'
-        foreach ($f in $functions) {
-            if ($f.Short) { $md += ('- `{0}` — {1}' -f $f.Name, $f.Short) } else { $md += ('- `{0}`' -f $f.Name) }
-        }
-    }
-    if ($enableHelpers.Count -gt 0) {
-        $md += ''
-        $md += 'Enable helpers'
-        $md += '--------------'
-        foreach ($h in $enableHelpers) { $md += ('- {0} (lazy enabler; imports or config when called)' -f $h) }
-    }
-    $md += ''
-    $md += 'Dependencies'
-    $md += '------------'
-    $md += 'None explicit; see the fragment for runtime checks and optional tooling dependencies.'
-    $md += ''
-    $md += 'Notes'
-    $md += '-----'
-    $md += 'Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.'
-
-    ($md -join [Environment]::NewLine) | Out-File -FilePath $mdPath -Encoding utf8 -Force
+    # Write README file
+    $mdContent | Out-File -FilePath $mdPath -Encoding utf8 -Force
     Write-ScriptMessage -Message ("Created: {0}" -f (Split-Path $mdPath -Leaf))
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Done generating fragment README files.'
+# Copy fragment READMEs to output directory and generate index
+Write-ScriptMessage -Message "`nCopying fragment READMEs to output directory..."
 
+# Handle OutputPath - if it's absolute, use it directly, otherwise join with repo root
+if ([System.IO.Path]::IsPathRooted($OutputPath)) {
+    $fragmentsDocsPath = $OutputPath
+}
+else {
+    $fragmentsDocsPath = Join-Path $repoRoot $OutputPath
+}
+
+# Create fragments docs directory if it doesn't exist
+Ensure-DirectoryExists -Path $fragmentsDocsPath
+
+# Track which fragments we're processing
+$processedFragmentNames = [System.Collections.Generic.List[string]]::new()
+
+# Copy all fragment READMEs to the output directory
+foreach ($ps in $psFiles) {
+    $sourceReadme = [System.IO.Path]::ChangeExtension($ps.FullName, '.README.md')
+    if (Test-Path $sourceReadme) {
+        # Use base name without .README extension for cleaner filenames
+        $destReadme = Join-Path $fragmentsDocsPath "$($ps.BaseName).md"
+        Copy-Item -Path $sourceReadme -Destination $destReadme -Force
+        $processedFragmentNames.Add($ps.BaseName)
+        Write-ScriptMessage -Message ("Copied: $($ps.BaseName).md")
+    }
+}
+
+# Clean up all fragment README files from profile.d/ (they're now in docs/fragments/)
+Write-ScriptMessage -Message "`nCleaning up fragment README files from profile.d/ (moved to docs/fragments/)..."
+$allProfileReadmes = Get-ChildItem -Path $fragDir -Filter '*.README.md' -ErrorAction SilentlyContinue
+
+if ($allProfileReadmes.Count -gt 0) {
+    Write-ScriptMessage -Message "Removing $($allProfileReadmes.Count) fragment README file(s) from profile.d/ (now in docs/fragments/):"
+    foreach ($readme in $allProfileReadmes) {
+        Write-ScriptMessage -Message "  - Removing $($readme.Name)"
+        Remove-Item -Path $readme.FullName -Force
+    }
+}
+else {
+    Write-ScriptMessage -Message "No fragment README files found in profile.d/."
+}
+
+# Clean up stale fragment documentation files from docs/fragments/
+Write-ScriptMessage -Message "`nCleaning up stale fragment documentation files from docs/fragments/..."
+if (Test-Path $fragmentsDocsPath) {
+    $allFragmentDocs = Get-ChildItem -Path $fragmentsDocsPath -Filter '*.md' -Exclude 'README.md' -ErrorAction SilentlyContinue
+    $staleFragmentDocs = $allFragmentDocs | Where-Object { 
+        $fragmentBaseName = $_.BaseName
+        $fragmentBaseName -notin $processedFragmentNames
+    }
+
+    if ($staleFragmentDocs.Count -gt 0) {
+        Write-ScriptMessage -Message "Removing $($staleFragmentDocs.Count) stale fragment documentation file(s) from docs/fragments/:"
+        foreach ($staleDoc in $staleFragmentDocs) {
+            Write-ScriptMessage -Message "  - Removing $($staleDoc.Name)"
+            Remove-Item -Path $staleDoc.FullName -Force
+        }
+    }
+    else {
+        Write-ScriptMessage -Message "No stale fragment documentation files found in docs/fragments/."
+    }
+}
+
+# Generate fragment index
+if (Get-Command Write-FragmentIndex -ErrorAction SilentlyContinue) {
+    Write-ScriptMessage -Message "`nGenerating fragment index..."
+    Write-FragmentIndex -FragmentsPath $fragmentsDocsPath -ProfilePath $fragDir
+}
+
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Done generating fragment README files and index.'

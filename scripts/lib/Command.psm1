@@ -16,7 +16,13 @@ scripts/lib/Command.psm1
 # Import Cache module for caching support
 $cacheModulePath = Join-Path $PSScriptRoot 'Cache.psm1'
 if (Test-Path $cacheModulePath) {
-    Import-Module $cacheModulePath -ErrorAction SilentlyContinue
+    try {
+        Import-Module $cacheModulePath -ErrorAction Stop
+    }
+    catch {
+        # Cache module is optional - function will work without it, just without caching
+        Write-Verbose "Failed to import Cache module: $($_.Exception.Message). Caching features will be unavailable."
+    }
 }
 
 <#

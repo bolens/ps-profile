@@ -5,7 +5,6 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
 }
@@ -44,14 +43,18 @@ Describe 'Utility Script Integration Tests' {
         }
     }
 
-    Context 'Common.psm1 Import Pattern' {
-        It 'Scripts import Common.psm1 correctly' {
+    Context 'ModuleImport Pattern' {
+        It 'Scripts use Import-LibModule pattern correctly' {
             $scripts = Get-PowerShellScripts -Path $script:ScriptsUtilsPath
             foreach ($script in $scripts) {
                 if ($script.Name -eq 'Common.psm1') { continue }
+                # Exclude minimal test scripts that don't need module imports
+                if ($script.Name -eq 'test-repo-root.ps1') { continue }
 
                 $content = Get-Content -Path $script.FullName -Raw
-                $content | Should -Match 'Import-Module.*Common' -Because "$($script.Name) should import Common.psm1"
+                # Scripts should use the new ModuleImport pattern
+                $hasNewPattern = $content -match 'Import-LibModule'
+                $hasNewPattern | Should -Be $true -Because "$($script.Name) should use Import-LibModule pattern for module imports"
             }
         }
     }

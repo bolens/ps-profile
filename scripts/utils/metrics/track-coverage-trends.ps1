@@ -42,8 +42,16 @@ param(
 )
 
 # Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root
 try {
@@ -97,7 +105,7 @@ Ensure-DirectoryExists -Path $HistoryPath
 if ($SaveSnapshot) {
     $snapshotFile = Join-Path $HistoryPath "coverage-$(Get-Date -Format 'yyyyMMdd-HHmmss').json"
     try {
-        $currentCoverage | ConvertTo-Json -Depth 10 | Set-Content -Path $snapshotFile -Encoding UTF8
+        Write-JsonFile -Path $snapshotFile -InputObject $currentCoverage -Depth 10 -EnsureDirectory
         Write-ScriptMessage -Message "Coverage snapshot saved: $snapshotFile" -LogLevel Info
     }
     catch {
@@ -120,10 +128,11 @@ if ($historicalFiles.Count -eq 0) {
 Write-ScriptMessage -Message "`nAnalyzing $($historicalFiles.Count) historical snapshots..." -LogLevel Info
 
 # Load and analyze historical data
-$historicalData = [System.Collections.Generic.List[PSCustomObject]]::new()
+$historicalData = New-ObjectList
 foreach ($file in $historicalFiles) {
     try {
-        $data = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
+        $data = Read-JsonFile -Path $file.FullName -ErrorAction SilentlyContinue
+        if ($null -eq $data) { continue }
         $historicalData.Add([PSCustomObject]@{
                 Timestamp       = $data.Timestamp
                 Date            = [DateTime]::Parse($data.Timestamp)
@@ -195,7 +204,7 @@ $trendSummary = [PSCustomObject]@{
 
 $trendFile = Join-Path $repoRoot 'scripts' 'data' 'coverage-trends.json'
 try {
-    $trendSummary | ConvertTo-Json -Depth 10 | Set-Content -Path $trendFile -Encoding UTF8
+    Write-JsonFile -Path $trendFile -InputObject $trendSummary -Depth 10 -EnsureDirectory
     Write-ScriptMessage -Message "`nTrend summary saved: $trendFile" -LogLevel Info
 }
 catch {
@@ -203,5 +212,7 @@ catch {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS
+
+
 
 

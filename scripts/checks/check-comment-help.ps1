@@ -28,9 +28,17 @@ param(
     [switch]$Verbose
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utils' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'AstParsing' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'CommentHelp' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root using shared function
 try {
@@ -43,68 +51,59 @@ catch {
 
 $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
 
-# Compile regex patterns once for better performance
-$regexCommentBlock = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$regexCommentBlockMultiline = [regex]::new('^[\s]*<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Multiline -bor [System.Text.RegularExpressions.RegexOptions]::Compiled)
-
 $issueCount = 0
 
-function Get-FunctionsWithoutCommentHelp($path) {
-    $content = Get-Content -Path $path -Raw -ErrorAction SilentlyContinue
+<#
+.SYNOPSIS
+    Gets a list of functions in a PowerShell file that are missing comment-based help.
+
+.DESCRIPTION
+    Analyzes a PowerShell file using the AST parser to find all function definitions
+    and checks if they have comment-based help blocks (containing .SYNOPSIS or .DESCRIPTION).
+    Checks both before the function definition and at the beginning of the function body.
+
+.PARAMETER Path
+    Path to the PowerShell file to analyze.
+
+.OUTPUTS
+    System.String[]. Array of function names that are missing comment-based help.
+
+.EXAMPLE
+    $undocumented = Get-FunctionsWithoutCommentHelp -Path "profile.d/01-env.ps1"
+    if ($undocumented.Count -gt 0) {
+        Write-Warning "Functions without help: $($undocumented -join ', ')"
+    }
+#>
+function Get-FunctionsWithoutCommentHelp {
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+    
+    # Use FileContent module for consistent file reading
+    $content = Read-FileContent -Path $Path
     if (-not $content) { return @() }
 
     $undocumented = @()
 
-    # Use AST to find all function definitions
+    # Use AST parsing module to find all function definitions
     try {
-        $ast = [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$null, [ref]$null)
-        $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+        $ast = Get-PowerShellAst -Path $Path
+        $functionAsts = Get-FunctionsFromAst -Ast $ast
 
         foreach ($funcAst in $functionAsts) {
-            $functionName = $funcAst.Name
-
-            # Skip functions with colons (like global:..) as they are internal aliases
-            if ($functionName -match ':') {
-                continue
-            }
-
-            $hasHelp = $false
-
-            # Check for comment-based help before the function
-            $start = $funcAst.Extent.StartOffset
-            $beforeText = $content.Substring(0, $start)
-            $commentMatches = $regexCommentBlock.Matches($beforeText)
-            if ($commentMatches.Count -gt 0) {
-                $helpContent = $commentMatches[-1].Value  # Last comment block
-                # Check if it contains SYNOPSIS or DESCRIPTION
-                if ($helpContent -match '\.SYNOPSIS|\.DESCRIPTION') {
-                    $hasHelp = $true
-                }
-            }
-
-            # Also check for comment-based help at the beginning of the function body
-            if (-not $hasHelp -and $funcAst.Body -and $funcAst.Body.Extent) {
-                $bodyStart = $funcAst.Body.Extent.StartOffset
-                $bodyEnd = $funcAst.Body.Extent.EndOffset
-                $bodyText = $content.Substring($bodyStart, $bodyEnd - $bodyStart)
-
-                # Look for comment block at the beginning of the body
-                $bodyCommentMatches = $regexCommentBlockMultiline.Matches($bodyText)
-                if ($bodyCommentMatches.Count -gt 0) {
-                    $helpContent = $bodyCommentMatches[0].Value
-                    if ($helpContent -match '\.SYNOPSIS|\.DESCRIPTION') {
-                        $hasHelp = $true
-                    }
-                }
-            }
+            # Check if function has comment-based help using CommentHelp module
+            $hasHelp = Test-FunctionHasHelp -FuncAst $funcAst -Content $content -CheckBody
 
             if (-not $hasHelp) {
-                $undocumented += $functionName
+                $undocumented += $funcAst.Name
             }
         }
     }
     catch {
-        Write-ScriptMessage -Message "Failed to parse $($path): $($_.Exception.Message)" -IsWarning
+        Write-ScriptMessage -Message "Failed to parse $($Path): $($_.Exception.Message)" -IsWarning
     }
 
     return $undocumented
@@ -113,7 +112,7 @@ function Get-FunctionsWithoutCommentHelp($path) {
 Write-ScriptMessage -Message "Checking that all functions have comment-based help in $fragDir"
 
 foreach ($ps in $psFiles) {
-    $undocumentedFuncs = Get-FunctionsWithoutCommentHelp $ps.FullName
+    $undocumentedFuncs = Get-FunctionsWithoutCommentHelp -Path $ps.FullName
 
     if ($undocumentedFuncs.Count -gt 0) {
         $issueCount++

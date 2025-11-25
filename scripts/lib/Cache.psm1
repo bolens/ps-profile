@@ -62,31 +62,31 @@ function Get-CachedValue {
         [switch]$Clear
     )
 
-    # Initialize cache if it doesn't exist
+    # Initialize module-level cache dictionaries if they don't exist
+    # Uses separate dictionaries for values and expiration times for efficient lookups
     if (-not $script:ValueCache) {
         $script:ValueCache = @{}
         $script:ValueCacheExpiry = @{}
     }
 
-    # Clear cache entry if requested
+    # Clear cache entry if requested (removes both value and expiration entry)
     if ($Clear) {
         $script:ValueCache.Remove($Key) | Out-Null
         $script:ValueCacheExpiry.Remove($Key) | Out-Null
         return $null
     }
 
-    # Check if value exists and hasn't expired
+    # Check if cached value exists and hasn't expired
     if ($script:ValueCache.ContainsKey($Key)) {
         $expiryTime = $script:ValueCacheExpiry[$Key]
         if ($expiryTime -gt [DateTime]::Now) {
             # Return cached value
             return $script:ValueCache[$Key]
         }
-        else {
-            # Expired, remove it
-            $script:ValueCache.Remove($Key) | Out-Null
-            $script:ValueCacheExpiry.Remove($Key) | Out-Null
-        }
+        
+        # Expired, remove it
+        $script:ValueCache.Remove($Key) | Out-Null
+        $script:ValueCacheExpiry.Remove($Key) | Out-Null
     }
 
     # If Value parameter provided, cache it
@@ -100,6 +100,33 @@ function Get-CachedValue {
     return $null
 }
 
+<#
+.SYNOPSIS
+    Sets a cached value with expiration.
+
+.DESCRIPTION
+    Caches a value with an optional expiration time. This is a convenience wrapper
+    around Get-CachedValue that provides a clearer API for setting cache values.
+    Values are cached in memory and expire after the specified time.
+
+.PARAMETER Key
+    The cache key to set.
+
+.PARAMETER Value
+    The value to cache.
+
+.PARAMETER ExpirationSeconds
+    Number of seconds before the cache entry expires. Defaults to 300 (5 minutes).
+
+.OUTPUTS
+    None. This function does not return a value.
+
+.EXAMPLE
+    Set-CachedValue -Key 'ModuleVersion' -Value '1.2.3' -ExpirationSeconds 600
+
+.EXAMPLE
+    Set-CachedValue -Key 'CommandPath' -Value $commandPath
+#>
 function Set-CachedValue {
     [CmdletBinding()]
     [OutputType([void])]
@@ -116,6 +143,26 @@ function Set-CachedValue {
     Get-CachedValue -Key $Key -Value $Value -ExpirationSeconds $ExpirationSeconds | Out-Null
 }
 
+<#
+.SYNOPSIS
+    Clears a cached value.
+
+.DESCRIPTION
+    Removes a cached value from the cache. This is a convenience wrapper around
+    Get-CachedValue that provides a clearer API for clearing cache entries.
+
+.PARAMETER Key
+    The cache key to clear.
+
+.OUTPUTS
+    None. This function does not return a value.
+
+.EXAMPLE
+    Clear-CachedValue -Key 'ModuleVersion'
+
+.EXAMPLE
+    Clear-CachedValue -Key 'CommandPath'
+#>
 function Clear-CachedValue {
     [CmdletBinding()]
     [OutputType([void])]

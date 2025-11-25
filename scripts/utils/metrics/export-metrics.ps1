@@ -47,9 +47,16 @@ param(
     [switch]$IncludeCodeMetrics = $true
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import shared utilities directly (no barrel files)
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root
 try {
@@ -83,8 +90,10 @@ if ($IncludePerformance) {
     
     if (Test-Path -Path $baselineFile) {
         try {
-            $baseline = Get-Content -Path $baselineFile -Raw | ConvertFrom-Json
-            $performanceData.Baseline = $baseline
+            $baseline = Read-JsonFile -Path $baselineFile -ErrorAction SilentlyContinue
+            if ($null -ne $baseline) {
+                $performanceData.Baseline = $baseline
+            }
         }
         catch {
             Write-ScriptMessage -Message "Failed to load performance baseline: $($_.Exception.Message)" -IsWarning
@@ -157,7 +166,7 @@ try {
     }
     else {
         # JSON export
-        $exportData | ConvertTo-Json -Depth 10 | Set-Content -Path $OutputPath -Encoding UTF8
+        Write-JsonFile -Path $OutputPath -InputObject $exportData -Depth 10 -EnsureDirectory
     }
     
     Write-ScriptMessage -Message "Metrics exported to: $OutputPath" -LogLevel Info
@@ -168,5 +177,6 @@ catch {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS
+
 
 

@@ -19,31 +19,31 @@ pwsh -NoProfile -File scripts/utils/script-name.ps1 -Verbose
 
 ## Common Patterns
 
-### Importing Common.psm1
+### Importing Library Modules
 
-All scripts import the shared Common.psm1 module. The import pattern depends on the script's location:
-
-**For scripts in scripts/utils/ subdirectories (e.g., code-quality/, metrics/):**
+All scripts import required modules from `scripts/lib/` using the modular import pattern. This pattern works from any script location:
 
 ```powershell
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap) - works from any scripts/ subdirectory
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import specific modules using Import-LibModule (handles path resolution automatically)
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking
 ```
 
-**For scripts in scripts/checks/:**
-
-```powershell
-$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
-```
-
-**For scripts in scripts/git/:**
-
-```powershell
-$scriptsDir = Split-Path -Parent $PSScriptRoot
-$commonModulePath = Join-Path $scriptsDir 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
-```
+**Available Library Modules:**
+- `ModuleImport.psm1` - Module import helper (import this first)
+- `ExitCodes.psm1` - Exit code constants
+- `PathResolution.psm1` - Path resolution utilities
+- `Logging.psm1` - Logging utilities
+- `Module.psm1` - Module management
+- `Command.psm1` - Command utilities
+- `FileSystem.psm1` - File system operations
+- And many more (see `scripts/lib/` directory)
 
 ### Getting Repository Root
 
@@ -59,7 +59,7 @@ $profileDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot
 
 ### Standardized Exit Codes
 
-Scripts use standardized exit codes defined in Common.psm1:
+Scripts use standardized exit codes defined in `ExitCodes.psm1`:
 
 - `$EXIT_SUCCESS` (0) - Success
 - `$EXIT_VALIDATION_FAILURE` (1) - Validation/check failure (expected)

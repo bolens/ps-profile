@@ -2,7 +2,11 @@
 
 Describe 'Metrics Module Functions' {
     BeforeAll {
-        Import-TestCommonModule | Out-Null
+        # Import the Metrics modules (Common.psm1 no longer exists)
+        $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+        Import-Module (Join-Path $libPath 'MetricsTrendAnalysis.psm1') -DisableNameChecking -ErrorAction Stop
+        Import-Module (Join-Path $libPath 'MetricsHistory.psm1') -DisableNameChecking -ErrorAction Stop
+        Import-Module (Join-Path $libPath 'MetricsSnapshot.psm1') -DisableNameChecking -ErrorAction Stop
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
         $script:TestTempDir = New-TestTempDirectory -Prefix 'MetricsTests'
     }

@@ -5,7 +5,14 @@ Contains Git helper functions and (optionally) completion registration.
 #>
 
 try {
-    if ($null -ne (Get-Variable -Name 'GitHelpersLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
+    # Use FragmentIdempotency module if available (loaded in main profile)
+    if (Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue) {
+        if (Test-FragmentLoaded -FragmentName '44-git') { return }
+    }
+    else {
+        # Fallback to direct variable check
+        if ($null -ne (Get-Variable -Name 'GitHelpersLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
+    }
 
     # Register Git helpers as lightweight stubs. They will call `git` at runtime
     # when invoked, and won't probe for `git` during dot-source.
@@ -26,7 +33,13 @@ try {
         Set-Alias -Name Prompt-GitSegment -Value Format-PromptGitSegment -ErrorAction SilentlyContinue
     }
 
-    Set-Variable -Name 'GitHelpersLoaded' -Value $true -Scope Global -Force
+    # Mark as loaded using FragmentIdempotency module if available
+    if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
+        Set-FragmentLoaded -FragmentName '44-git'
+    }
+    else {
+        Set-Variable -Name 'GitHelpersLoaded' -Value $true -Scope Global -Force
+    }
 }
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Git fragment failed: $($_.Exception.Message)" }

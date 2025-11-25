@@ -27,13 +27,21 @@ param(
     [string]$RepoRoot = $null
 )
 
-# Import shared utilities
+# Import ModuleImport first (bootstrap)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
-$commonModulePath = Join-Path $scriptsDir 'lib' 'Common.psm1'
-if (-not (Test-Path $commonModulePath)) {
-    throw "Common module not found at: $commonModulePath. PSScriptRoot: $PSScriptRoot"
+$moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $moduleImportPath)) {
+    throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
 }
-Import-Module (Resolve-Path $commonModulePath).Path -ErrorAction Stop
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Platform' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root if not specified
 if (-not $RepoRoot) {

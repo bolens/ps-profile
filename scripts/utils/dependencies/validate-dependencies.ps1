@@ -38,9 +38,19 @@ param(
     [string]$RequirementsFile = $null
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import shared utilities directly (no barrel files)
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Cache' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'DataFile' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root
 try {

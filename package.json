@@ -1,0 +1,37 @@
+{
+  "name": "powershell-profile-data-conversions",
+  "version": "1.0.0",
+  "description": "Global npm packages required for PowerShell profile data format conversions",
+  "private": true,
+  "scripts": {
+    "install-all": "pnpm run install-all-global || pnpm run install-all-local",
+    "install-all-global": "pnpm run install-js-global && pnpm run install-python-global",
+    "install-all-local": "pnpm run install-js-local && pnpm run install-python-local",
+    "install-js-global": "pnpm add -g bson @msgpack/msgpack cbor protobufjs avsc flatbuffers thrift superjson json5 parquetjs apache-arrow base32-encode base32-decode qrcode uuid jsonwebtoken",
+    "install-js-local": "pnpm add bson @msgpack/msgpack cbor protobufjs avsc flatbuffers thrift superjson json5 parquetjs apache-arrow base32-encode base32-decode qrcode uuid jsonwebtoken",
+    "install-python-global": "uv pip install --system h5py netCDF4 numpy",
+    "install-python-local": "uv pip install --user h5py netCDF4 numpy"
+  },
+  "dependencies": {
+    "bson": "^6.0.0",
+    "@msgpack/msgpack": "^3.0.0",
+    "cbor": "^9.0.0",
+    "protobufjs": "^7.0.0",
+    "avsc": "^5.7.0",
+    "flatbuffers": "^24.0.0",
+    "thrift": "^0.19.0",
+    "superjson": "^2.0.0",
+    "json5": "^2.2.0",
+    "parquetjs": "^0.11.0",
+    "apache-arrow": "^14.0.0",
+    "base32-encode": "^1.0.0",
+    "base32-decode": "^1.0.0",
+    "qrcode": "^1.5.0",
+    "uuid": "^9.0.0",
+    "jsonwebtoken": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
+

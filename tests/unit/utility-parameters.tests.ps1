@@ -5,7 +5,12 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
+    # Import ExitCodes module for Exit-WithCode
+    $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $exitCodesModulePath = Join-Path $repoRoot 'scripts' 'lib' 'ExitCodes.psm1'
+    if (Test-Path $exitCodesModulePath) {
+        Import-Module $exitCodesModulePath -DisableNameChecking -ErrorAction Stop
+    }
 }
 
 Describe 'Test-RequiredParameters' {

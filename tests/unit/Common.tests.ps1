@@ -1,15 +1,21 @@
 <#
 tests/common.tests.ps1
 
-Unit tests for Common.psm1 module functions.
+Unit tests for functions that were previously in Common.psm1 but are now in separate modules.
+These functions are now distributed across multiple modules for better organization.
 #>
 
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    # Import the Common module
-    $commonModulePath = Get-TestPath -RelativePath 'scripts\lib\Common.psm1' -StartPath $PSScriptRoot -EnsureExists
-    Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+    # Import the modules that contain the functions previously in Common.psm1
+    $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module (Join-Path $libPath 'PathResolution.psm1') -DisableNameChecking -ErrorAction Stop
+    Import-Module (Join-Path $libPath 'FileSystem.psm1') -DisableNameChecking -ErrorAction Stop
+    Import-Module (Join-Path $libPath 'PathValidation.psm1') -DisableNameChecking -ErrorAction Stop
+    Import-Module (Join-Path $libPath 'Command.psm1') -DisableNameChecking -ErrorAction Stop
+    Import-Module (Join-Path $libPath 'PowerShellDetection.psm1') -DisableNameChecking -ErrorAction Stop
+    Import-Module (Join-Path $libPath 'ExitCodes.psm1') -DisableNameChecking -ErrorAction Stop
 }
 
 Describe 'Get-RepoRoot' {

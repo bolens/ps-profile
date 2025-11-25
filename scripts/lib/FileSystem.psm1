@@ -110,7 +110,17 @@ function Get-PowerShellScripts {
         $params['Recurse'] = $true
     }
 
-    $scripts = Get-ChildItem @params
+    try {
+        $scripts = Get-ChildItem @params -ErrorAction Stop
+    }
+    catch [System.UnauthorizedAccessException] {
+        Write-Warning "Access denied to some directories in '$Path'. Results may be incomplete."
+        # Try with ErrorAction SilentlyContinue to get partial results
+        $scripts = Get-ChildItem @params -ErrorAction SilentlyContinue
+    }
+    catch {
+        throw "Failed to get PowerShell scripts from '$Path': $($_.Exception.Message)"
+    }
 
     if ($SortByName) {
         $scripts = $scripts | Sort-Object Name

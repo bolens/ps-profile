@@ -2,11 +2,18 @@
 # Tests for aliases defined across profile fragments.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
-    Import-TestCommonModule | Out-Null
-    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    # Import common module directly
+    $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+    $commonModulePath = Join-Path $repoRoot 'scripts\lib\Common.psm1'
+    if (Test-Path $commonModulePath) {
+        Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+    }
+
+    $script:ProfileDir = Join-Path $repoRoot 'profile.d'
+    if (-not (Test-Path $script:ProfileDir)) {
+        throw "Profile directory not found: $script:ProfileDir"
+    }
     $script:BootstrapPath = Join-Path $script:ProfileDir '00-bootstrap.ps1'
     . $script:BootstrapPath
     . (Join-Path $script:ProfileDir '05-utilities.ps1')

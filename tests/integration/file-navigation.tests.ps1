@@ -10,7 +10,8 @@ Describe 'File Navigation Functions Integration Tests' {
     Context 'File navigation functions' {
         BeforeAll {
             . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-            . (Join-Path $script:ProfileDir '02-files-navigation.ps1')
+            . (Join-Path $script:ProfileDir '02-files.ps1')
+            Ensure-FileNavigation
         }
 
         It '.. function navigates up one directory' {

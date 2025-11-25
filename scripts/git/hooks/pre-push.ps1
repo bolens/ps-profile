@@ -21,8 +21,13 @@ $hookScriptPath = $MyInvocation.MyCommand.Definition
 $hookDir = Split-Path -Parent $hookScriptPath
 # From .git/hooks/, go up two levels to get repo root
 $repoRoot = Split-Path -Parent (Split-Path -Parent $hookDir)
-$commonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+$moduleImportPath = Join-Path $repoRoot 'scripts' 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+# Use the original hook script path for ModuleImport resolution
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking
 
 $validate = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 

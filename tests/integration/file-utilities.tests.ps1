@@ -10,7 +10,8 @@ Describe 'File Utility Functions Integration Tests' {
     Context 'File utility functions' {
         BeforeAll {
             . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-            . (Join-Path $script:ProfileDir '02-files-utilities.ps1')
+            . (Join-Path $script:ProfileDir '02-files.ps1')
+            Ensure-FileUtilities
         }
 
         It 'Get-FileHead (head) function is available' {

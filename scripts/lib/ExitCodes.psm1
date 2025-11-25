@@ -13,12 +13,13 @@ scripts/lib/ExitCodes.psm1
     PowerShell Version: 3.0+
 #>
 
-# Exit code constants
-# These match the standardized exit code conventions documented in CONTRIBUTING.md
-$script:EXIT_SUCCESS = 0              # Success
-$script:EXIT_VALIDATION_FAILURE = 1    # Validation/check failure (expected)
-$script:EXIT_SETUP_ERROR = 2           # Setup/configuration error (unexpected)
-$script:EXIT_OTHER_ERROR = 3          # Other errors
+# Standardized exit code constants
+# These match the conventions documented in CONTRIBUTING.md and ensure consistent
+# error reporting across all utility scripts in the repository.
+$script:EXIT_SUCCESS = 0              # Operation completed successfully
+$script:EXIT_VALIDATION_FAILURE = 1    # Validation/check failure (expected, non-fatal)
+$script:EXIT_SETUP_ERROR = 2           # Setup/configuration error (unexpected, fatal)
+$script:EXIT_OTHER_ERROR = 3          # Other runtime errors (unexpected, fatal)
 
 <#
 .SYNOPSIS

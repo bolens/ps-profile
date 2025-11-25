@@ -1,6 +1,8 @@
 # WARP.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+This file provides guidance to WARP (warp.dev) terminal when working with code in this repository.
+
+> **Note**: For general AI coding assistant guidance (Claude, Cursor, Copilot, etc.), see [AGENTS.md](AGENTS.md).
 
 ## Development Commands
 
@@ -49,11 +51,11 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1           
 pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1     # Validate function naming
 
 # Run tests
-pwsh -NoProfile -File scripts/utils/run_pester.ps1
-pwsh -NoProfile -File scripts/utils/run_pester.ps1 -Coverage
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage
 
 # Check for module updates
-pwsh -NoProfile -File scripts/utils/check-module-updates.ps1
+pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1
 ```
 
 ### Git Hooks
@@ -70,11 +72,11 @@ chmod +x .git/hooks/*
 
 ```powershell
 # Measure startup performance (30 iterations recommended)
-pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 30
+pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 30
 # Outputs: scripts/data/startup-benchmark.csv
 
 # Update performance baseline after optimizations
-pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline
+pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline
 # Or use task: task update-baseline
 ```
 
@@ -82,7 +84,7 @@ pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -UpdateBaseline
 
 ```powershell
 # Generate API documentation from comment-based help
-pwsh -NoProfile -File scripts/utils/generate-docs.ps1
+pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1
 # Outputs: docs/*.md
 ```
 
@@ -218,4 +220,5 @@ Merge and revert commits are allowed.
 - **CONTRIBUTING.md**: Detailed contribution guidelines
 - **PROFILE_README.md**: Comprehensive profile documentation
 - **PROFILE_DEBUG.md**: Debug and instrumentation guide
+- **AGENTS.md**: AI coding assistant guidance (general)
 - **.github/workflows/**: CI workflows

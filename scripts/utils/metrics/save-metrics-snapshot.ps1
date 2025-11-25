@@ -37,9 +37,16 @@ param(
     [string]$OutputPath = $null
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import shared utilities directly (no barrel files)
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root
 try {
@@ -78,8 +85,10 @@ try {
     Write-ScriptMessage -Message "Metrics snapshot saved: $snapshotPath" -LogLevel Info
     
     # Display snapshot info
-    $snapshot = Get-Content -Path $snapshotPath -Raw | ConvertFrom-Json
-    Write-ScriptMessage -Message "Snapshot timestamp: $($snapshot.Timestamp)" -LogLevel Info
+    $snapshot = Read-JsonFile -Path $snapshotPath -ErrorAction SilentlyContinue
+    if ($snapshot) {
+        Write-ScriptMessage -Message "Snapshot timestamp: $($snapshot.Timestamp)" -LogLevel Info
+    }
     
     if ($snapshot.CodeMetrics) {
         Write-ScriptMessage -Message "  Code Metrics: $($snapshot.CodeMetrics.TotalFiles) files, $($snapshot.CodeMetrics.TotalLines) lines" -LogLevel Info

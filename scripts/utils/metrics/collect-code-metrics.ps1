@@ -43,10 +43,16 @@ param(
 )
 
 # Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
-# Get repository root
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
@@ -111,24 +117,34 @@ else {
     }
 }
 
+# Import PathUtilities module for path normalization
+Import-LibModule -ModuleName 'PathUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+
 # Normalize paths to be relative to repo root to avoid personal absolute paths
-$toRelativePath = {
-    param($path)
-
-    if ([string]::IsNullOrEmpty($path)) { return $path }
-
-    try {
-        $resolved = Resolve-Path -LiteralPath $path -ErrorAction Stop
-        $relative = [System.IO.Path]::GetRelativePath($repoRoot, $resolved.ProviderPath)
-        if (-not [string]::IsNullOrWhiteSpace($relative)) {
-            return $relative
+# Use PathUtilities module if available
+if (Get-Command ConvertTo-RepoRelativePath -ErrorAction SilentlyContinue) {
+    $toRelativePath = {
+        param($path)
+        return ConvertTo-RepoRelativePath -Path $path -RepoRoot $repoRoot
+    }
+}
+else {
+    # Fallback to manual calculation
+    $toRelativePath = {
+        param($path)
+        if ([string]::IsNullOrEmpty($path)) { return $path }
+        try {
+            $resolved = Resolve-Path -LiteralPath $path -ErrorAction Stop
+            $relative = [System.IO.Path]::GetRelativePath($repoRoot, $resolved.ProviderPath)
+            if (-not [string]::IsNullOrWhiteSpace($relative)) {
+                return $relative
+            }
         }
+        catch {
+            # Fall back to input path if it cannot be resolved
+        }
+        return $path
     }
-    catch {
-        # Fall back to input path if it cannot be resolved (already relative or non-existent).
-    }
-
-    return $path
 }
 
 foreach ($pathMetric in $allMetrics) {
@@ -271,7 +287,7 @@ if (-not $OutputPath) {
 }
 
 try {
-    $summary | ConvertTo-Json -Depth 10 | Set-Content -Path $OutputPath -Encoding UTF8
+    Write-JsonFile -Path $OutputPath -InputObject $summary -Depth 10 -EnsureDirectory
     Write-ScriptMessage -Message "`nMetrics saved to: $OutputPath" -LogLevel Info
 }
 catch {
@@ -279,5 +295,9 @@ catch {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS
+
+
+
+
 
 

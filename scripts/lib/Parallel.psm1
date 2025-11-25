@@ -93,28 +93,39 @@ function Invoke-Parallel {
 
             while ($activeJobs.Count -lt $ThrottleLimit -and $index -lt $itemList.Count) {
                 $item = $itemList[$index]
-                $job = Start-Job -ScriptBlock {
-                    param($Item, $ScriptBlock)
+                $job = $null
+                
+                try {
+                    $job = Start-Job -ScriptBlock {
+                        param($Item, $ScriptBlock)
 
-                    if ($ScriptBlock -isnot [scriptblock]) {
-                        $ScriptBlock = [scriptblock]::Create([string]$ScriptBlock)
-                    }
+                        if ($ScriptBlock -isnot [scriptblock]) {
+                            $ScriptBlock = [scriptblock]::Create([string]$ScriptBlock)
+                        }
 
-                    # Support both parameterized scriptblocks and $_ style
-                    $PSItem = $Item
-                    $_ = $Item
-                    # Check if scriptblock has parameters
-                    $params = $ScriptBlock.Ast.ParamBlock
-                    if ($params -and $params.Parameters.Count -gt 0) {
-                        $paramName = $params.Parameters[0].Name.VariablePath.UserPath
-                        & $ScriptBlock -$paramName $Item
+                        # Support both parameterized scriptblocks and $_ style
+                        $PSItem = $Item
+                        $_ = $Item
+                        # Check if scriptblock has parameters
+                        $params = $ScriptBlock.Ast.ParamBlock
+                        if ($params -and $params.Parameters.Count -gt 0) {
+                            $paramName = $params.Parameters[0].Name.VariablePath.UserPath
+                            & $ScriptBlock -$paramName $Item
+                        }
+                        else {
+                            & $ScriptBlock
+                        }
+                    } -ArgumentList $item, $ScriptBlock -ErrorAction Stop
+                    
+                    if ($null -ne $job) {
+                        $allJobs.Add($job)
                     }
-                    else {
-                        & $ScriptBlock
-                    }
-                } -ArgumentList $item, $ScriptBlock
-
-                $allJobs.Add($job)
+                }
+                catch {
+                    Write-Warning "Failed to start job for item at index $index : $($_.Exception.Message)"
+                    # Continue with next item
+                }
+                
                 $index++
                 $activeJobs = $allJobs | Where-Object { $_.State -eq 'Running' }
             }

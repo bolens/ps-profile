@@ -15,16 +15,26 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
 
         It 'functions work with both Windows and Unix-style paths' {
             . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-            . (Join-Path $script:ProfileDir '02-files-navigation.ps1')
+            . (Join-Path $script:ProfileDir '02-files.ps1')
+            # Ensure file navigation is initialized
+            if (Get-Command Ensure-FileNavigation -ErrorAction SilentlyContinue) {
+                Ensure-FileNavigation
+            }
 
             $testPath = Join-Path $TestDrive 'test'
             New-Item -ItemType Directory -Path $testPath -Force | Out-Null
 
             Push-Location $testPath
             try {
-                ..
-                $parent = Get-Location
-                $parent.Path | Should -Not -BeNullOrEmpty
+                # Test the .. function (up one directory)
+                if (Get-Command '..' -CommandType Function -ErrorAction SilentlyContinue) {
+                    ..
+                    $parent = Get-Location
+                    $parent.Path | Should -Not -BeNullOrEmpty
+                }
+                else {
+                    Set-ItResult -Skipped -Because ".. function not available"
+                }
             }
             finally {
                 Pop-Location

@@ -9,7 +9,7 @@ This directory contains templates for creating new scripts in the PowerShell pro
 A template for creating utility scripts that perform various tasks. Includes:
 
 - Standard parameter handling
-- Common.psm1 import pattern
+- Modular library import pattern (ModuleImport.psm1 + Import-LibModule)
 - Repository root resolution
 - Error handling with standardized exit codes
 - Consistent logging
@@ -43,16 +43,34 @@ When creating scripts from templates:
 
 1. **Update the synopsis and description** - Clearly describe what the script does
 2. **Add appropriate parameters** - Follow PowerShell parameter naming conventions
-3. **Use shared utilities** - Import Common.psm1 and use its functions
+3. **Use shared utilities** - Import required modules from `scripts/lib/` and use their functions
 4. **Handle errors properly** - Use Exit-WithCode for consistent exit codes
 5. **Add examples** - Include usage examples in the help documentation
 6. **Test thoroughly** - Ensure the script works in different scenarios
 
-## Import Pattern by Script Location
+## Import Pattern
 
-Scripts should import Common.psm1 using the appropriate pattern for their location:
+Scripts should import library modules using the modular import pattern (works from any script location):
 
-- **scripts/utils/ subdirectories** (e.g., code-quality/, metrics/): `Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'`
-- **scripts/checks/**: `Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'`
-- **scripts/git/**: `$scriptsDir = Split-Path -Parent $PSScriptRoot; Join-Path $scriptsDir 'lib' 'Common.psm1'`
-- **scripts/lib/**: `Join-Path $PSScriptRoot 'Common.psm1'` (same directory)
+```powershell
+# Import ModuleImport first (bootstrap) - works from any scripts/ subdirectory
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import specific modules using Import-LibModule (handles path resolution automatically)
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking
+```
+
+**Available Library Modules:**
+
+- `ModuleImport.psm1` - Module import helper (import this first)
+- `ExitCodes.psm1` - Exit code constants (`Exit-WithCode`, `$EXIT_SUCCESS`, etc.)
+- `PathResolution.psm1` - Path resolution (`Get-RepoRoot`)
+- `Logging.psm1` - Logging utilities (`Write-ScriptMessage`)
+- `Module.psm1` - Module management (`Ensure-ModuleAvailable`)
+- `Command.psm1` - Command utilities (`Test-CommandAvailable`)
+- `FileSystem.psm1` - File system operations (`Ensure-DirectoryExists`)
+- And many more (see `scripts/lib/` directory)

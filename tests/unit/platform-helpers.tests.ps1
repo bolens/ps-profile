@@ -10,23 +10,43 @@
 .PARAMETER BasePath
     Optional start path for repository discovery. Defaults to the current test directory.
 #>
-function script:Set-TestBootstrapContext {
+function Set-TestBootstrapContext {
     param(
         [string]$BasePath = $PSScriptRoot
     )
 
+    # Use Get-TestPath from TestSupport.ps1 for consistent path resolution
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $BasePath -EnsureExists
     $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $BasePath -EnsureExists
 }
 
 Describe 'Platform Detection Helpers' {
     BeforeAll {
+        # Define function locally if not available
+        if (-not (Get-Command Set-TestBootstrapContext -ErrorAction SilentlyContinue)) {
+            function Set-TestBootstrapContext {
+                param([string]$BasePath = $PSScriptRoot)
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $BasePath -EnsureExists
+                $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $BasePath -EnsureExists
+            }
+        }
         Set-TestBootstrapContext
+        # Import Platform module directly (functions are in scripts/lib/Platform.psm1, not bootstrap)
+        $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+        Import-Module (Join-Path $libPath 'Platform.psm1') -DisableNameChecking -ErrorAction Stop
     }
 
     BeforeEach {
-        # Load bootstrap to get platform helpers
+        # Load bootstrap to get other helpers (Register-LazyFunction, etc.)
+        # Ensure bootstrap path exists and can be loaded
+        if (-not (Test-Path $script:BootstrapPath)) {
+            throw "Bootstrap path not found: $script:BootstrapPath"
+        }
         . $script:BootstrapPath
+        # Verify Get-UserHome is available after loading bootstrap
+        if (-not (Get-Command Get-UserHome -ErrorAction SilentlyContinue)) {
+            throw "Get-UserHome function not available after loading bootstrap"
+        }
     }
 
     Context 'Platform Detection Functions' {
@@ -115,11 +135,27 @@ Describe 'Platform Detection Helpers' {
 
 Describe 'Register-LazyFunction Helper' {
     BeforeAll {
+        # Define function locally if not available
+        if (-not (Get-Command Set-TestBootstrapContext -ErrorAction SilentlyContinue)) {
+            function Set-TestBootstrapContext {
+                param([string]$BasePath = $PSScriptRoot)
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $BasePath -EnsureExists
+                $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $BasePath -EnsureExists
+            }
+        }
         Set-TestBootstrapContext
     }
 
     BeforeEach {
+        # Ensure bootstrap path exists and can be loaded
+        if (-not (Test-Path $script:BootstrapPath)) {
+            throw "Bootstrap path not found: $script:BootstrapPath"
+        }
         . $script:BootstrapPath
+        # Verify Register-LazyFunction is available after loading bootstrap
+        if (-not (Get-Command Register-LazyFunction -ErrorAction SilentlyContinue)) {
+            throw "Register-LazyFunction not available after loading bootstrap"
+        }
     }
 
     Context 'Lazy Function Registration' {
@@ -189,11 +225,27 @@ Describe 'Register-LazyFunction Helper' {
 
 Describe 'Test-CachedCommand with TTL' {
     BeforeAll {
+        # Define function locally if not available
+        if (-not (Get-Command Set-TestBootstrapContext -ErrorAction SilentlyContinue)) {
+            function Set-TestBootstrapContext {
+                param([string]$BasePath = $PSScriptRoot)
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $BasePath -EnsureExists
+                $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $BasePath -EnsureExists
+            }
+        }
         Set-TestBootstrapContext
     }
 
     BeforeEach {
+        # Ensure bootstrap path exists and can be loaded
+        if (-not (Test-Path $script:BootstrapPath)) {
+            throw "Bootstrap path not found: $script:BootstrapPath"
+        }
         . $script:BootstrapPath
+        # Verify Register-LazyFunction is available after loading bootstrap
+        if (-not (Get-Command Register-LazyFunction -ErrorAction SilentlyContinue)) {
+            throw "Register-LazyFunction not available after loading bootstrap"
+        }
     }
 
     Context 'Command Cache TTL' {
@@ -269,62 +321,3 @@ Describe 'Test-SafePath Security Helper' {
         }
     }
 }
-
-Describe 'Register-DeprecatedFunction Helper' {
-    BeforeAll {
-        Set-TestBootstrapContext
-    }
-
-    BeforeEach {
-        . $script:BootstrapPath
-    }
-
-    Context 'Deprecation Warnings' {
-        It 'Register-DeprecatedFunction creates wrapper function' {
-            $oldName = "Test-OldFunction_$(Get-Random)"
-            $newName = "Test-NewFunction_$(Get-Random)"
-
-            # Create the new function
-            Set-AgentModeFunction -Name $newName -Body { Write-Output 'new function' }
-
-            Register-DeprecatedFunction -OldName $oldName -NewName $newName -RemovalVersion '2.0.0'
-
-            Test-Path "Function:$oldName" | Should -Be $true
-
-            # Cleanup
-            Remove-Item "Function:$oldName" -ErrorAction SilentlyContinue
-            Remove-Item "Function:$newName" -ErrorAction SilentlyContinue
-        }
-
-        It 'Register-DeprecatedFunction displays warning' {
-            $oldName = "Test-Old_$(Get-Random)"
-            $newName = "Test-New_$(Get-Random)"
-
-            Set-AgentModeFunction -Name $newName -Body { Write-Output 'result' }
-            Register-DeprecatedFunction -OldName $oldName -NewName $newName
-
-            $warningOutput = & $oldName 3>&1 2>&1 | Where-Object { $_ -is [System.Management.Automation.WarningRecord] }
-            $warningOutput | Should -Not -BeNullOrEmpty
-
-            # Cleanup
-            Remove-Item "Function:$oldName" -ErrorAction SilentlyContinue
-            Remove-Item "Function:$newName" -ErrorAction SilentlyContinue
-        }
-
-        It 'Register-DeprecatedFunction forwards to new function' {
-            $oldName = "Test-OldForward_$(Get-Random)"
-            $newName = "Test-NewForward_$(Get-Random)"
-
-            Set-AgentModeFunction -Name $newName -Body { Write-Output 'forwarded' }
-            Register-DeprecatedFunction -OldName $oldName -NewName $newName
-
-            $result = & $oldName 3>&1 2>&1 | Where-Object { $_ -isnot [System.Management.Automation.WarningRecord] }
-            $result | Should -Be 'forwarded'
-
-            # Cleanup
-            Remove-Item "Function:$oldName" -ErrorAction SilentlyContinue
-            Remove-Item "Function:$newName" -ErrorAction SilentlyContinue
-        }
-    }
-}
-

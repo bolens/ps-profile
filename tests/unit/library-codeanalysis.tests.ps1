@@ -2,7 +2,18 @@
 
 Describe 'CodeAnalysis Module Functions' {
     BeforeAll {
-        Import-TestCommonModule | Out-Null
+        # Import the modules that contain the functions (Common.psm1 no longer exists)
+        $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+        # Import dependencies first
+        Import-Module (Join-Path $libPath 'FileSystem.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'AstParsing.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'FileContent.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'Collections.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        # Import the modules that contain the functions
+        Import-Module (Join-Path $libPath 'TestCoverage.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'CodeQualityScore.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'StringSimilarity.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'CodeSimilarityDetection.psm1') -DisableNameChecking -ErrorAction Stop -Global
         $script:TestTempDir = New-TestTempDirectory -Prefix 'CodeAnalysisTests'
     }
 
@@ -88,6 +99,12 @@ function Test-Function {
             $result = Get-CodeSimilarity -Path $testDir -MinSimilarity 0.5
             $result | Should -Not -BeNullOrEmpty
             ($result -is [System.Array]) | Should -BeTrue
+            # Result should be an array (even if empty)
+            if ($result.Count -eq 0) {
+                # If no similar patterns found, that's valid - scripts might be too small
+                # Just verify it's an array
+                $result | Should -BeOfType [System.Array]
+            }
         }
     }
 

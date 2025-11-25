@@ -4,8 +4,11 @@ Describe 'File Utility Functions Edge Cases' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-        . (Join-Path $script:ProfileDir '02-files-conversion.ps1')
-        . (Join-Path $script:ProfileDir '02-files-utilities.ps1')
+        . (Join-Path $script:ProfileDir '02-files.ps1')
+        Ensure-FileConversion-Data
+        Ensure-FileConversion-Documents
+        Ensure-FileConversion-Media
+        Ensure-FileUtilities
     }
 
     Context 'Basic file utility edge cases' {

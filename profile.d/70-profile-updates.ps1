@@ -5,11 +5,11 @@ Profile update checker with changelog display. Runs periodically to check for
 updates and show recent changes when available.
 #>
 
-# Only run update checks in interactive sessions
-if (-not $Host.UI -or -not $Host.UI.RawUI) { return }
+# Only run update checks in interactive sessions or test environments
+if ((-not $Host.UI -or -not $Host.UI.RawUI) -and -not $env:PS_PROFILE_TEST_MODE) { return }
 
-# Skip if already loaded
-if ($null -ne (Get-Variable -Name 'ProfileUpdatesLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
+# Skip if already loaded (unless in test mode)
+if ($null -ne (Get-Variable -Name 'ProfileUpdatesLoaded' -Scope Global -ErrorAction SilentlyContinue) -and -not $env:PS_PROFILE_TEST_MODE) { return }
 
 # Profile update checker
 <#

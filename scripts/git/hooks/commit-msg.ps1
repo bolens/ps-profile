@@ -37,8 +37,14 @@ $hookScriptPath = $MyInvocation.MyCommand.Definition
 $hookDir = Split-Path -Parent $hookScriptPath
 # From .git/hooks/, go up two levels to get repo root
 $repoRoot = Split-Path -Parent (Split-Path -Parent $hookDir)
-$commonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+$moduleImportPath = Join-Path $repoRoot 'scripts' 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+# Use the original hook script path for ModuleImport resolution
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking
+Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $hookScriptPath -DisableNameChecking
 
 if (-not $CommitMsgFile -or -not (Test-Path $CommitMsgFile)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "commit-msg: commit message file not provided or not found"
@@ -52,10 +58,10 @@ if (-not $subject) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "commit-msg: empty commit message"
 }
 
-# Compile regex patterns once for better performance
-$mergeRegex = [regex]::new('^Merge\s', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$revertRegex = [regex]::new('^Revert\s', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$autoMergeRegex = [regex]::new('^Auto-merge', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+# Create compiled regex patterns using RegexUtilities module
+$mergeRegex = New-CompiledRegex -Pattern '^Merge\s'
+$revertRegex = New-CompiledRegex -Pattern '^Revert\s'
+$autoMergeRegex = New-CompiledRegex -Pattern '^Auto-merge'
 
 # Allow merge/revert commits and automated PR title formats
 if ($mergeRegex.IsMatch($subject) -or $revertRegex.IsMatch($subject) -or $autoMergeRegex.IsMatch($subject)) {

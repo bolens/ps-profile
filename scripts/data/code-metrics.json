@@ -119,8 +119,8 @@
           "Complexity": 8
         },
         {
-          "File": "run_pester.ps1",
-          "Path": "scripts\\utils\\code-quality\\run_pester.ps1",
+          "File": "run-pester.ps1",
+          "Path": "scripts\\utils\\code-quality\\run-pester.ps1",
           "Lines": 133,
           "Functions": 0,
           "Complexity": 10

@@ -3,7 +3,10 @@
 # Core bootstrap helpers for profile fragments
 # ===============================================
 
+# Idempotency check: if bootstrap was already initialized, ensure global variables
+# are still present (they may have been cleared). This allows safe re-sourcing.
 if (Get-Variable -Name 'PSProfileBootstrapInitialized' -Scope Global -ErrorAction SilentlyContinue) {
+    # Re-initialize global caches if missing (thread-safe collections for concurrent access)
     if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue)) {
         $global:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
     }
@@ -20,49 +23,41 @@ if (Get-Variable -Name 'PSProfileBootstrapInitialized' -Scope Global -ErrorActio
         $global:MissingToolWarnings = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
     }
 
+    # Re-initialize fragment warning suppression from environment variable
     $reinitCommand = Get-Command -Name 'Initialize-FragmentWarningSuppression' -ErrorAction SilentlyContinue
     if ($reinitCommand) {
         Initialize-FragmentWarningSuppression
     }
-    # Continue to define functions even if already initialized
 }
 
 Set-Variable -Name 'PSProfileBootstrapInitialized' -Scope Global -Value $true -Force
 
+# Calculate paths relative to this bootstrap file
 $script:BootstrapRoot = Split-Path -Parent $PSCommandPath
 $script:RepoRoot = Split-Path -Parent $script:BootstrapRoot
 
-$script:CommonModulePath = Join-Path $script:RepoRoot 'scripts\lib\Common.psm1'
-if (Test-Path -LiteralPath $script:CommonModulePath) {
-    if (-not (Get-Module -Name 'Common')) {
-        try {
-            Import-Module -Name $script:CommonModulePath -DisableNameChecking -ErrorAction Stop
-        }
-        catch {
-            Write-Warning "Failed to import Common.psm1: $($_.Exception.Message)"
-        }
-    }
-}
-else {
-    Write-Warning "Common module not found at $script:CommonModulePath"
-}
 
+# Initialize global caches and state variables (thread-safe collections for profile-wide use)
 if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue)) {
     $global:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
 }
 
+# Tracks function names that are allowed to be replaced (used by lazy-loading)
 if (-not (Get-Variable -Name 'AgentModeReplaceAllowed' -Scope Global -ErrorAction SilentlyContinue)) {
     $global:AgentModeReplaceAllowed = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 }
 
+# Commands that should be treated as available even if not found on PATH (for optional tools)
 if (-not (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue)) {
     $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
 }
 
+# Tracks which tool warnings have been shown to avoid duplicate messages
 if (-not (Get-Variable -Name 'MissingToolWarnings' -Scope Global -ErrorAction SilentlyContinue)) {
     $global:MissingToolWarnings = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
 }
 
+# Fragment warning suppression: patterns from PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS environment variable
 if (-not (Get-Variable -Name 'FragmentWarningPatternSet' -Scope Global -ErrorAction SilentlyContinue)) {
     $global:FragmentWarningPatternSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 }
@@ -96,11 +91,13 @@ function global:Test-HasCommand {
 
     $normalizedName = $Name.Trim()
 
+    # Check assumed commands first (bypasses actual command lookup for optional tools)
     if ($global:AssumedAvailableCommands -and $global:AssumedAvailableCommands.ContainsKey($normalizedName)) {
         return $true
     }
 
-    # Look through both local and global scopes without triggering module autoload.
+    # Check function provider first (avoids triggering module autoload which can be slow)
+    # Test both local and global scopes to catch functions defined in either location
     $functionPaths = @(
         "Function:\$normalizedName",
         "Function:\global:$normalizedName"
@@ -173,6 +170,7 @@ function global:Test-CachedCommand {
     $cacheKey = $normalizedName.ToLowerInvariant()
     $now = Get-Date
 
+    # Check cache for existing entry that hasn't expired
     if ($global:TestCachedCommandCache.ContainsKey($cacheKey)) {
         $entry = [pscustomobject]$global:TestCachedCommandCache[$cacheKey]
         if ($entry -and $entry.Expires -gt $now) {
@@ -180,6 +178,7 @@ function global:Test-CachedCommand {
         }
     }
 
+    # Cache miss or expired: perform actual command lookup and cache the result
     $result = Test-HasCommand -Name $normalizedName
     $expires = $now.AddMinutes([double]$CacheTTLMinutes)
     $global:TestCachedCommandCache[$cacheKey] = [pscustomobject]@{
@@ -443,6 +442,8 @@ function global:Clear-MissingToolWarnings {
     return $cleared
 }
 
+# Initializes fragment warning suppression from PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS environment variable.
+# Supports comma/semicolon/space-separated fragment names or 'all'/'*'/'1'/'true' to suppress all warnings.
 function Initialize-FragmentWarningSuppression {
     if (-not (Get-Variable -Name 'FragmentWarningPatternSet' -Scope Global -ErrorAction SilentlyContinue)) {
         $global:FragmentWarningPatternSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
@@ -458,6 +459,7 @@ function Initialize-FragmentWarningSuppression {
         return
     }
 
+    # Parse comma/semicolon/space-separated values
     $tokens = $rawValue -split '[,;\s]+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
     foreach ($token in $tokens) {
@@ -468,10 +470,12 @@ function Initialize-FragmentWarningSuppression {
 
         switch -Regex ($normalized.ToLowerInvariant()) {
             '^(1|true|all|\*)$' {
+                # Special value: suppress all fragment warnings
                 $global:SuppressAllFragmentWarnings = $true
                 continue
             }
             default {
+                # Add fragment name pattern to suppression list
                 [void]$global:FragmentWarningPatternSet.Add($normalized)
             }
         }
@@ -497,6 +501,7 @@ function global:Test-FragmentWarningSuppressed {
         return $false
     }
 
+    # Extract multiple name variants for flexible matching (full path, filename, basename)
     $candidateFull = $FragmentName.Trim()
     $candidateName = [System.IO.Path]::GetFileName($candidateFull)
     $candidateBase = [System.IO.Path]::GetFileNameWithoutExtension($candidateFull)
@@ -506,6 +511,7 @@ function global:Test-FragmentWarningSuppressed {
             continue
         }
 
+        # Extract pattern variants to match against fragment name variants
         $normalizedPattern = $pattern.Trim()
         $patternName = [System.IO.Path]::GetFileName($normalizedPattern)
         $patternBase = [System.IO.Path]::GetFileNameWithoutExtension($normalizedPattern)
@@ -513,6 +519,7 @@ function global:Test-FragmentWarningSuppressed {
         $candidates = @($candidateFull, $candidateName, $candidateBase)
         $patterns = @($normalizedPattern, $patternName, $patternBase)
 
+        # Try all combinations of candidate and pattern variants (supports wildcards via -like)
         foreach ($candidate in $candidates) {
             foreach ($patternVariant in $patterns) {
                 if ([string]::IsNullOrWhiteSpace($candidate) -or [string]::IsNullOrWhiteSpace($patternVariant)) {
@@ -529,6 +536,8 @@ function global:Test-FragmentWarningSuppressed {
     return $false
 }
 
+# Load assumed commands from environment variable (comma/semicolon/space-separated)
+# These commands will be treated as available even if not found on PATH
 if ($env:PS_PROFILE_ASSUME_COMMANDS) {
     $tokens = $env:PS_PROFILE_ASSUME_COMMANDS -split '[,;\s]+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
     if ($tokens) {
@@ -536,6 +545,7 @@ if ($env:PS_PROFILE_ASSUME_COMMANDS) {
     }
 }
 
+# Initialize fragment warning suppression from environment variable
 Initialize-FragmentWarningSuppression
 
 <#
@@ -609,13 +619,16 @@ function global:Set-AgentModeFunction {
     $existing = Get-Command -Name $Name -ErrorAction SilentlyContinue
     $allowReplace = $global:AgentModeReplaceAllowed.Contains($Name)
 
+    # Prevent accidental overwrites unless explicitly allowed (used by lazy-loading)
     if ($existing -and -not $allowReplace) {
         return $false
     }
 
+    # Create closure to capture variables from defining scope
     $scriptBlock = $Body.GetNewClosure()
     Set-Item -Path ("Function:\global:" + $Name) -Value $scriptBlock -Force | Out-Null
 
+    # Clean up allow-list entry after successful replacement
     if ($allowReplace) {
         [void]$global:AgentModeReplaceAllowed.Remove($Name)
     }
@@ -713,9 +726,11 @@ function global:Register-LazyFunction {
         return $false
     }
 
+    # Allow this function to be replaced when the initializer runs
     [void]$global:AgentModeReplaceAllowed.Add($Name)
     $initBlock = $Initializer
 
+    # Create stub function that runs initializer on first call, then delegates to the real function
     $stub = {
         $null = & $initBlock
         $targetName = $MyInvocation.MyCommand.Name
@@ -730,71 +745,6 @@ function global:Register-LazyFunction {
     if ($Alias) {
         Set-AgentModeAlias -Name $Alias -Target $Name | Out-Null
     }
-
-    return $true
-}
-
-<#
-.SYNOPSIS
-    Registers a deprecated function wrapper that forwards to a replacement.
-.DESCRIPTION
-    Creates a function with the deprecated name that writes a warning and then
-    invokes the specified replacement command with the original arguments.
-.PARAMETER OldName
-    The deprecated function or alias name.
-.PARAMETER NewName
-    The replacement command to invoke.
-.PARAMETER RemovalVersion
-    Optional version identifier describing when the deprecated command will be removed.
-.PARAMETER Message
-    Optional custom warning message to display instead of the default text.
-.OUTPUTS
-    System.Boolean
-#>
-function global:Register-DeprecatedFunction {
-    [CmdletBinding()]
-    [OutputType([bool])]
-    param(
-        [Parameter(Mandatory)]
-        [string]$OldName,
-
-        [Parameter(Mandatory)]
-        [string]$NewName,
-
-        [string]$RemovalVersion,
-
-        [string]$Message
-    )
-
-    if ([string]::IsNullOrWhiteSpace($OldName) -or [string]::IsNullOrWhiteSpace($NewName)) {
-        return $false
-    }
-
-    $replacement = Get-Command -Name $NewName -ErrorAction SilentlyContinue
-    if (-not $replacement) {
-        throw "Replacement command '$NewName' not found."
-    }
-
-    $warningMessage = if ($Message) {
-        $Message
-    }
-    else {
-        $parts = @("'$OldName' is deprecated. Use '$NewName' instead.")
-        if ($RemovalVersion) {
-            $parts += "This command will be removed in version $RemovalVersion."
-        }
-        $parts -join ' '
-    }
-
-    $targetCommandName = $NewName
-    $warningText = $warningMessage
-
-    $wrapper = {
-        Write-Warning $warningText
-        & $targetCommandName @args
-    }.GetNewClosure()
-
-    Set-Item -Path ("Function:\global:" + $OldName) -Value $wrapper -Force | Out-Null
 
     return $true
 }

@@ -11,6 +11,18 @@ The PowerShell profile is designed as a modular, performance-optimized system th
 - **Extensibility**: Easy to add new functionality
 - **Cross-platform**: Works on Windows, Linux, and macOS
 
+### Fragment Management Modules
+
+The profile uses specialized modules in `scripts/lib/` for fragment management:
+
+- **`FragmentConfig.psm1`** - Configuration parsing from `.profile-fragments.json`
+- **`FragmentLoading.psm1`** - Dependency resolution and load order calculation
+- **`FragmentIdempotency.psm1`** - Idempotency state management
+- **`FragmentErrorHandling.psm1`** - Standardized error handling
+- **`ScoopDetection.psm1`** - Scoop installation detection and PATH management
+
+These modules are imported in `Microsoft.PowerShell_profile.ps1` before fragments are loaded, making them available to all fragments.
+
 ## Profile Loader
 
 `Microsoft.PowerShell_profile.ps1` is the main entrypoint that:
@@ -71,6 +83,68 @@ Fragments use numeric prefixes to control load order:
 - **40-69**: Language-specific tools (Go, PHP, Node.js, Python, Rust)
 - **70-79**: Advanced features (performance insights, enhanced history, system monitoring)
 
+### Modular Subdirectory Organization
+
+Many fragments have been refactored to use a modular subdirectory structure. Main fragments (numbered 00-99) load related modules from subdirectories:
+
+**Module Subdirectories:**
+
+- **`cli-modules/`** - Modern CLI tool integrations (gum, navi, eza, etc.)
+- **`container-modules/`** - Container helper modules (Docker/Podman compose, utilities)
+- **`conversion-modules/`** - Data, document, and media format conversion utilities
+  - `data/` - Data format conversions (binary, columnar, structured, scientific)
+  - `document/` - Document format conversions (Markdown, LaTeX, RST)
+  - `helpers/` - Conversion helper utilities (XML, TOML)
+  - `media/` - Media format conversions (audio, images, PDF, video)
+- **`dev-tools-modules/`** - Development tool integrations
+  - `build/` - Build tools and testing frameworks
+  - `crypto/` - Cryptographic utilities (hash, JWT)
+  - `data/` - Data manipulation tools (lorem, units, UUID, timestamps)
+  - `encoding/` - Encoding utilities (base encoding, character encoding)
+  - `format/` - Formatting tools (diff, regex, QR codes)
+- **`diagnostics-modules/`** - Diagnostic and monitoring modules
+  - `core/` - Core diagnostics (error handling, profile diagnostics)
+  - `monitoring/` - System monitoring (performance, system monitor)
+- **`files-modules/`** - File operation modules
+  - `inspection/` - File inspection utilities (hash, head/tail, hexdump, size)
+  - `navigation/` - File navigation helpers (listing, navigation)
+- **`git-modules/`** - Git integration modules
+  - `core/` - Core Git operations (basic, advanced, helpers)
+  - `integrations/` - Git service integrations (GitHub)
+- **`utilities-modules/`** - Utility function modules
+  - `data/` - Data utilities (datetime, encoding)
+  - `filesystem/` - Filesystem utilities
+  - `history/` - Command history utilities (basic, enhanced)
+  - `network/` - Network utilities (basic, advanced)
+  - `system/` - System utilities (env, profile, security)
+
+**Module Loading Pattern:**
+
+Main fragments dot-source modules from their respective subdirectories:
+
+```powershell
+# Example from 02-files.ps1
+$conversionModulesDir = Join-Path $PSScriptRoot 'conversion-modules'
+if (Test-Path $conversionModulesDir) {
+    # Load helper modules first
+    $helpersDir = Join-Path $conversionModulesDir 'helpers'
+    . (Join-Path $helpersDir 'helpers-xml.ps1')
+
+    # Then load feature modules
+    $dataDir = Join-Path $conversionModulesDir 'data'
+    . (Join-Path $dataDir 'core' 'core-basic.ps1')
+    # ... more modules
+}
+```
+
+**Benefits of Modular Structure:**
+
+- **Better Organization**: Related functionality grouped in subdirectories
+- **Easier Maintenance**: Smaller, focused module files
+- **Selective Loading**: Fragments can load only needed modules
+- **Clear Dependencies**: Module structure shows relationships
+- **Improved Testability**: Modules can be tested independently
+
 ### Fragment Template
 
 Every fragment should follow this structure:
@@ -84,16 +158,28 @@ Brief description of what this fragment does.
 
 try {
     # Idempotency check - prevent double-loading
-    if ($null -ne (Get-Variable -Name 'FragmentNameLoaded' -Scope Global -ErrorAction SilentlyContinue)) {
-        return
+    # Use FragmentIdempotency module if available (loaded in main profile)
+    if (Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue) {
+        if (Test-FragmentLoaded -FragmentName 'XX-fragment-name') { return }
+    }
+    else {
+        # Fallback to direct variable check
+        if ($null -ne (Get-Variable -Name 'FragmentNameLoaded' -Scope Global -ErrorAction SilentlyContinue)) {
+            return
+        }
     }
 
     # Fragment implementation
     # Use Set-AgentModeFunction or Set-AgentModeAlias for collision-safe registration
     # Use Test-CachedCommand or Test-HasCommand for command availability checks
 
-    # Mark as loaded
-    Set-Variable -Name 'FragmentNameLoaded' -Value $true -Scope Global -Force
+    # Mark as loaded using FragmentIdempotency module if available
+    if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
+        Set-FragmentLoaded -FragmentName 'XX-fragment-name'
+    }
+    else {
+        Set-Variable -Name 'FragmentNameLoaded' -Value $true -Scope Global -Force
+    }
 }
 catch {
     # Error handling - don't throw, allow other fragments to load
@@ -341,11 +427,25 @@ $configDir = Join-Path $homeDir '.config' 'myapp'
 
 ### Adding New Fragments
 
-1. Use `scripts/utils/new-fragment.ps1` to create template
+1. Use `scripts/utils/fragment/new-fragment.ps1` to create template
 2. Choose appropriate number prefix (00-99)
 3. Follow fragment structure template
 4. Document functions in fragment README
 5. Test idempotency (safe to reload)
+
+### Adding New Modules
+
+When adding functionality that belongs in a module subdirectory:
+
+1. **Identify the appropriate subdirectory** (or create new one if needed)
+2. **Create module file** in the subdirectory (e.g., `profile.d/conversion-modules/data/core-basic.ps1`)
+3. **Update parent fragment** to load the module (e.g., `02-files.ps1` for conversion modules)
+4. **Follow module conventions**:
+   - Use `Set-AgentModeFunction` for function registration
+   - Guard external tool calls with `Test-CachedCommand`
+   - Include error handling for module loading
+   - Document functions with comment-based help
+5. **Test module loading** and ensure idempotency
 
 ### Adding New Helpers
 
@@ -413,11 +513,12 @@ Or using a comment line:
 
 ### Dependency Management Functions
 
-Available from `00-bootstrap.ps1`:
+Available from `FragmentLoading.psm1` module (imported in main profile):
 
 - `Get-FragmentDependencies` - Parses dependencies from fragment headers
 - `Test-FragmentDependencies` - Validates that all dependencies are satisfied
 - `Get-FragmentLoadOrder` - Calculates optimal load order using topological sort
+- `Get-FragmentTiers` - Groups fragments by tier for batch loading
 
 ### Automatic Load Order
 
@@ -485,3 +586,5 @@ See `CONTRIBUTING.md` for:
 - `PROFILE_README.md`: Detailed technical guide
 - `CONTRIBUTING.md`: Development guidelines
 - `CHANGES_SUMMARY.md`: Recent improvements
+- `AGENTS.md`: AI coding assistant guidance
+- `WARP.md`: WARP terminal guidance

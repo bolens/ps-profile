@@ -1,55 +1,65 @@
 <#
 # 04-scoop-completion.ps1
 
-Idempotent import of Scoop completion helpers when available.
+Idempotent lazy-loading setup for Scoop tab completion.
 
-This fragment implements the same behavior previously present in
-`Microsoft.PowerShell_profile.ps1`: prefer using $env:SCOOP, fall back to
-a legacy path if present, and import the Scoop-Completion module quietly.
+This fragment discovers the Scoop completion module path but does not import it immediately.
+Instead, it creates an Enable-ScoopCompletion function that can be called on-demand to enable
+completion features. This lazy loading approach keeps profile startup fast.
 #>
 
 try {
+    # Idempotency check: skip if already processed
     if ($null -ne (Get-Variable -Name 'ScoopCompletionLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
 
+    # Discover Scoop completion module path using ScoopDetection module if available
     $scoopCompletion = $null
-    $scoopRoot = $null
-    
-    # Prefer the environment-provided path
-    if ($env:SCOOP) {
-        $scoopRoot = $env:SCOOP
+    if (Get-Command Get-ScoopCompletionPath -ErrorAction SilentlyContinue) {
+        $scoopCompletion = Get-ScoopCompletionPath
     }
-    # Check default user location (cross-platform compatible)
-    elseif ($env:USERPROFILE -or $env:HOME) {
-        $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
-        $defaultScoop = Join-Path $userHome 'scoop'
-        if (Test-Path $defaultScoop -PathType Container -ErrorAction SilentlyContinue) {
-            $scoopRoot = $defaultScoop
-        }
-    }
-    # Fallback to legacy path (for backward compatibility)
-    if (-not $scoopRoot) {
-        $legacyRoot = 'A:\'
-        if (Test-Path $legacyRoot -PathType Container -ErrorAction SilentlyContinue) {
-            $legacyScoop = Join-Path $legacyRoot 'scoop'
-            if (Test-Path $legacyScoop -PathType Container -ErrorAction SilentlyContinue) {
-                $scoopRoot = $legacyScoop
+    else {
+        # Fallback: manually detect Scoop installation and construct completion path
+        # Check both global and local Scoop installations
+        $scoopRoot = $null
+        
+        # Check global Scoop installation first
+        if ($env:SCOOP_GLOBAL) {
+            $candidate = $env:SCOOP_GLOBAL
+            if (Test-Path $candidate -PathType Container -ErrorAction SilentlyContinue) {
+                $scoopRoot = $candidate
             }
         }
-    }
-    
-    # Build completion module path if Scoop root found
-    if ($scoopRoot) {
-        $candidate = Join-Path $scoopRoot 'apps' 'scoop' 'current' 'supporting' 'completion' 'Scoop-Completion.psd1'
-        if (Test-Path $candidate -PathType Leaf -ErrorAction SilentlyContinue) {
-            $scoopCompletion = $candidate
+        
+        # Check local Scoop installation
+        if (-not $scoopRoot -and $env:SCOOP) {
+            $candidate = $env:SCOOP
+            if (Test-Path $candidate -PathType Container -ErrorAction SilentlyContinue) {
+                $scoopRoot = $candidate
+            }
+        }
+        
+        # Check default user location (cross-platform compatible)
+        if (-not $scoopRoot -and ($env:USERPROFILE -or $env:HOME)) {
+            $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
+            $defaultScoop = Join-Path $userHome 'scoop'
+            if (Test-Path $defaultScoop -PathType Container -ErrorAction SilentlyContinue) {
+                $scoopRoot = $defaultScoop
+            }
+        }
+        
+        if ($scoopRoot) {
+            # Construct path to Scoop completion module (standard Scoop installation structure)
+            $candidate = Join-Path $scoopRoot 'apps' 'scoop' 'current' 'supporting' 'completion' 'Scoop-Completion.psd1'
+            if (Test-Path $candidate -PathType Leaf -ErrorAction SilentlyContinue) {
+                $scoopCompletion = $candidate
+            }
         }
     }
 
     if ($scoopCompletion) {
-        # Register a lazy enabler that imports the Scoop completion PSD1 when the user explicitly
-        # requests completion features. This keeps dot-source cheap and avoids IO on startup.
+        # Create lazy-loading function: Enable-ScoopCompletion imports the module on first call
+        # This defers the import until the user actually needs tab completion, improving startup time
         if (-not (Test-Path Function:\Enable-ScoopCompletion)) {
-            # Create a minimal wrapper that imports the discovered PSD1 path when invoked.
             $p = $scoopCompletion
             $wrapper = {
                 try {

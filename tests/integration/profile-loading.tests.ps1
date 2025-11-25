@@ -23,6 +23,15 @@ try {
         It 'loads with cross-platform compatibility helpers' {
             $testScript = @"
 . '$($script:ProfilePath -replace "'", "''")'
+# Platform.psm1 may not be loaded by default - check if it's available or import it
+if (-not (Get-Command Test-IsWindows -ErrorAction SilentlyContinue)) {
+    # Try to import Platform module
+    `$profileDir = Split-Path -Parent '$($script:ProfilePath -replace "'", "''")'
+    `$platformModule = Join-Path `$profileDir 'scripts' 'lib' 'Platform.psm1'
+    if (Test-Path `$platformModule) {
+        Import-Module `$platformModule -DisableNameChecking -ErrorAction SilentlyContinue
+    }
+}
 if (Get-Command Test-IsWindows -ErrorAction SilentlyContinue) {
     Write-Output 'PLATFORM_HELPERS_AVAILABLE'
 } else {

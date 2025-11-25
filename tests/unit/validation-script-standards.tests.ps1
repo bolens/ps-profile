@@ -5,7 +5,6 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
     $script:ScriptsChecksPath = Get-TestPath -RelativePath 'scripts\checks' -StartPath $PSScriptRoot -EnsureExists
     $script:TempRoot = New-TestTempDirectory -Prefix 'ValidationStandards'
 }

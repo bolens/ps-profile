@@ -30,9 +30,21 @@ param(
     [string]$Path = $null
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathValidation' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'FileFiltering' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Default to scripts directory relative to repository root
 if (-not $Path) {
@@ -47,28 +59,25 @@ if (-not $Path) {
 
 Write-ScriptMessage -Message "Checking script standards in: $Path"
 
-# Use List for better performance than array concatenation
-$issues = [System.Collections.Generic.List[PSCustomObject]]::new()
+# Use Collections module for better performance
+$issues = New-ObjectList
 
-# Compile regex patterns once for better performance
-$exitPattern = [regex]::new('\bexit\s+(\d+)\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$exitVariablePattern = [regex]::new('\bexit\s+\$EXIT', [System.Text.RegularExpressions.RegexOptions]::Compiled)
-$commonImportPattern = [regex]::new('Import-Module.*Common', [System.Text.RegularExpressions.RegexOptions]::Compiled -bor [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+# Get compiled regex patterns from RegexUtilities module
+$patterns = Get-CommonRegexPatterns
+$exitPattern = $patterns['ExitCall']
+$exitVariablePattern = $patterns['ExitVariable']
+$commonImportPattern = $patterns['ImportModule']
 
-# Get all PowerShell scripts using helper function
+# Get all PowerShell scripts using helper function and filter with FileFiltering module
 $allScripts = Get-PowerShellScripts -Path $Path -Recurse
-$scripts = $allScripts | Where-Object {
-    # Exclude Common.psm1 itself and test files
-    $_.Name -ne 'Common.psm1' -and
-    $_.FullName -notmatch '[\\/]tests?[\\/]' -and
-    $_.FullName -notmatch '[\\/]\.git[\\/]'
-}
+$scripts = $allScripts | Filter-Files -ExcludeTests -ExcludeGit -ExcludeNames 'Common.psm1'
 
 foreach ($script in $scripts) {
-    $content = Get-Content -Path $script.FullName -Raw -ErrorAction SilentlyContinue
+    $content = Read-FileContent -Path $script.FullName
     if (-not $content) { continue }
 
-    $relativePath = $script.FullName.Replace((Resolve-Path $Path).Path + '\', '').Replace((Resolve-Path $Path).Path + '/', '')
+    # Use PathUtilities module for relative path calculation
+    $relativePath = Get-RelativePath -From $Path -To $script.FullName
 
     # Check 1: Direct exit calls (excluding exit 0/1 in generated hook scripts)
     $exitMatches = $exitPattern.Matches($content)
@@ -148,25 +157,29 @@ foreach ($script in $scripts) {
     # This is a heuristic check - look for operations that commonly need error handling
     $riskyOperations = @('Get-RepoRoot', 'Ensure-ModuleAvailable', 'Test-Path', 'Get-Content', 'Set-Content')
     foreach ($operation in $riskyOperations) {
-        if ($content -match "\b$operation\b" -and $content -notmatch "try\s*\{[\s\S]*?\b$operation\b") {
-            # Check if it's already in a try-catch block (simplified check)
-            $operationMatches = [regex]::Matches($content, "\b$operation\b")
-            foreach ($opMatch in $operationMatches) {
-                $beforeMatch = $content.Substring(0, $opMatch.Index)
-                $tryCount = ([regex]::Matches($beforeMatch, '\btry\s*\{')).Count
-                $catchCount = ([regex]::Matches($beforeMatch, '\bcatch\s*\{')).Count
-                if ($tryCount -eq $catchCount) {
-                    # Not in a try-catch block
-                    $issues.Add([PSCustomObject]@{
-                            File     = $relativePath
-                            Line     = ($content.Substring(0, $opMatch.Index) -split "`n").Count
-                            Issue    = 'Missing error handling'
-                            Message  = "Consider wrapping '$operation' in try-catch block"
-                            Severity = 'Info'
-                        })
-                    break  # Only flag once per script
-                }
+        if (-not ($content -match "\b$operation\b" -and $content -notmatch "try\s*\{[\s\S]*?\b$operation\b")) {
+            continue
+        }
+        
+        # Check if it's already in a try-catch block (simplified check)
+        $operationMatches = [regex]::Matches($content, "\b$operation\b")
+        foreach ($opMatch in $operationMatches) {
+            $beforeMatch = $content.Substring(0, $opMatch.Index)
+            $tryCount = ([regex]::Matches($beforeMatch, '\btry\s*\{')).Count
+            $catchCount = ([regex]::Matches($beforeMatch, '\bcatch\s*\{')).Count
+            if ($tryCount -ne $catchCount) {
+                continue
             }
+            
+            # Not in a try-catch block
+            $issues.Add([PSCustomObject]@{
+                    File     = $relativePath
+                    Line     = ($content.Substring(0, $opMatch.Index) -split "`n").Count
+                    Issue    = 'Missing error handling'
+                    Message  = "Consider wrapping '$operation' in try-catch block"
+                    Severity = 'Info'
+                })
+            break  # Only flag once per script
         }
     }
 }

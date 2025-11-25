@@ -1,0 +1,9 @@
+# Python package requirements for data format conversions
+# Install with: uv pip install -r requirements.txt
+# Or in a virtual environment: uv venv && .venv\Scripts\activate && uv pip install -r requirements.txt
+
+# Scientific data formats
+h5py>=3.10.0
+netCDF4>=1.6.0
+numpy>=1.24.0
+

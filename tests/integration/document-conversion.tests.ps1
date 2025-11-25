@@ -4,7 +4,9 @@ Describe 'Document Conversion Integration Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-        . (Join-Path $script:ProfileDir '02-files-conversion.ps1')
+        . (Join-Path $script:ProfileDir '02-files.ps1')
+        Ensure-FileConversion-Documents
+        Ensure-FileConversion-Media
     }
 
     Context 'PDF conversion utilities' {

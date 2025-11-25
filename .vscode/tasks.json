@@ -44,7 +44,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1"
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -56,7 +56,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
         "-Suite",
         "Unit"
       ],
@@ -70,7 +70,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
         "-Suite",
         "Integration"
       ],
@@ -84,7 +84,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
         "-Suite",
         "Performance"
       ],
@@ -98,7 +98,7 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run_pester.ps1",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
         "-Coverage"
       ],
       "presentation": { "reveal": "always" },

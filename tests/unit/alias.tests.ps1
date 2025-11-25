@@ -1,8 +1,12 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 Describe 'Alias helper' {
     BeforeAll {
-        $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
+        # Resolve bootstrap path directly
+        $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+        $script:BootstrapPath = Join-Path $repoRoot 'profile.d\00-bootstrap.ps1'
+        if (-not (Test-Path $script:BootstrapPath)) {
+            throw "Bootstrap file not found: $script:BootstrapPath"
+        }
     }
 
     Context 'Alias factory' {
@@ -20,7 +24,12 @@ Describe 'Alias helper' {
 
 Describe 'Documentation Generation' {
     BeforeAll {
-        $script:ScriptsUtilsDocsPath = Get-TestPath -RelativePath 'scripts\utils\docs' -StartPath $PSScriptRoot -EnsureExists
+        # Resolve scripts utils docs path directly
+        $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+        $script:ScriptsUtilsDocsPath = Join-Path $repoRoot 'scripts\utils\docs'
+        if (-not (Test-Path $script:ScriptsUtilsDocsPath)) {
+            throw "Scripts utils docs path not found: $script:ScriptsUtilsDocsPath"
+        }
 
         # Cache compiled regex for comment parsing
         $script:CommentBlockRegex = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
@@ -149,20 +158,23 @@ function Test-Function {
             $true | Should -Be $true
         }
 
-        It 'generates index with alphabetical function list' {
+        It 'generates index with functions and aliases sections' {
             $tempDir = Join-Path $TestDrive 'docs_index'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
             $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
-            $result = & $scriptPath -OutputPath $tempDir 2>&1
+            $outputPath = Join-Path $tempDir 'api'
+            $result = & $scriptPath -OutputPath $outputPath 2>&1
 
-            $readmePath = Join-Path $tempDir 'README.md'
+            $readmePath = Join-Path $outputPath 'README.md'
             if (Test-Path $readmePath) {
                 $content = Get-Content $readmePath -Raw
-                $expectedPatterns = @('## Functions by Fragment', 'Total Functions:', 'Generated:')
-                foreach ($pattern in $expectedPatterns) {
-                    $content | Should -Match $pattern
-                }
+                # Check for new structure with functions and aliases sections
+                $content | Should -Match '## Functions'
+                $content | Should -Match '## Aliases'
+                # Check for links to subdirectories
+                $content | Should -Match 'functions/'
+                $content | Should -Match 'aliases/'
             }
         }
     }

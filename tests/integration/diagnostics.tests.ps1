@@ -1,9 +1,10 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 Describe 'Diagnostics Integration Tests' {
     BeforeAll {
-        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
+        # Source the test support
+        . "$PSScriptRoot\..\TestSupport.ps1"
+
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot
+        $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\00-bootstrap.ps1' -StartPath $PSScriptRoot
         . $script:BootstrapPath
     }
 
@@ -37,6 +38,10 @@ Describe 'Diagnostics Integration Tests' {
 
         It 'Show-CommandUsageStats function is available when debug enabled' {
             Get-Command Show-CommandUsageStats -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+        }
+
+        It 'Show-ProfileDiagnostic runs without error' {
+            { Show-ProfileDiagnostic } | Should -Not -Throw
         }
 
         It 'Show-ProfileStartupTime runs without error' {

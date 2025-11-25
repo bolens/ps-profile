@@ -2,7 +2,9 @@
 
 Describe 'DataFile Module Functions' {
     BeforeAll {
-        Import-TestCommonModule | Out-Null
+        # Import the DataFile module (Common.psm1 no longer exists)
+        $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+        Import-Module (Join-Path $libPath 'DataFile.psm1') -DisableNameChecking -ErrorAction Stop
         $script:TestTempDir = New-TestTempDirectory -Prefix 'DataFileTests'
     }
 

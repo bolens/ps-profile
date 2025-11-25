@@ -17,14 +17,14 @@ Notes:
 #>
 
 try {
-    # Remove existing function to ensure we have the latest version
+    # Remove any existing Initialize-Starship function to ensure we have the latest version
+    # This handles cases where the fragment might be re-sourced during development
     Remove-Item Function:Initialize-Starship -Force -ErrorAction SilentlyContinue
     Remove-Item Function:global:Initialize-Starship -Force -ErrorAction SilentlyContinue
     
-    # Ensure Test-HasCommand is available (from bootstrap)
+    # Ensure Test-HasCommand is available (from 00-bootstrap.ps1)
+    # Bootstrap loads first, so this should always be available, but we check for safety
     if (-not (Get-Command Test-HasCommand -ErrorAction SilentlyContinue)) {
-        # If bootstrap hasn't loaded yet, wait for it
-        # This should not happen since bootstrap loads first, but just in case
         Write-Warning "Test-HasCommand not available - Starship fragment may not initialize correctly"
     }
     
@@ -35,18 +35,24 @@ try {
     <#
     .SYNOPSIS
         Tests if Starship is already initialized.
+    .DESCRIPTION
+        Checks if the current prompt function is a Starship prompt by examining the script block.
     #>
     function Test-StarshipInitialized {
         $promptCmd = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
         if (-not $promptCmd) { return $false }
         
+        # Check script block for Starship-specific patterns
         $script = $promptCmd.ScriptBlock.ToString()
         return ($script -match 'starship|Invoke-Native|Invoke-Starship')
     }
     
     <#
     .SYNOPSIS
-        Checks if a prompt function needs replacement (module-scoped prompts can break).
+        Checks if a prompt function needs replacement.
+    .DESCRIPTION
+        Module-scoped prompts can break when modules are unloaded, so we replace them
+        with direct function calls to the starship executable for reliability.
     #>
     function Test-PromptNeedsReplacement {
         param([System.Management.Automation.FunctionInfo]$PromptCmd)
@@ -60,6 +66,9 @@ try {
     <#
     .SYNOPSIS
         Builds arguments array for starship prompt command.
+    .DESCRIPTION
+        Constructs the command-line arguments that Starship needs to render the prompt,
+        including terminal width, job count, command status, and execution duration.
     #>
     function Get-StarshipPromptArguments {
         param(
@@ -76,7 +85,11 @@ try {
                 $width = $Host.UI.RawUI.WindowSize.Width
             }
         }
-        catch { }
+        catch {
+            if ($env:PS_PROFILE_DEBUG) {
+                Write-Verbose "Failed to get terminal width: $($_.Exception.Message)"
+            }
+        }
         $arguments += "--terminal-width=$width"
         
         # Job count
@@ -107,6 +120,9 @@ try {
     <#
     .SYNOPSIS
         Creates a global prompt function that directly calls starship executable.
+    .DESCRIPTION
+        Creates a prompt function that calls starship directly (bypassing module scope issues).
+        This ensures the prompt continues working even if the Starship module is unloaded.
     #>
     function New-StarshipPromptFunction {
         param([string]$StarshipCommandPath)
@@ -122,16 +138,21 @@ try {
                     return "PS $($executionContext.SessionState.Path.CurrentLocation.Path)> "
                 }
                 
+                # Build arguments and call starship executable directly
                 $arguments = Get-StarshipPromptArguments -LastCommandSucceeded $lastCommandSucceeded -LastExitCode $lastExitCode
                 $promptText = & $global:StarshipCommand @arguments 2>$null
                 
                 if ($promptText -and $promptText.Trim()) {
-                    # Configure PSReadLine for multi-line prompts
+                    # Configure PSReadLine for multi-line prompts (Starship may output multiple lines)
                     try {
                         $lineCount = ($promptText.Split("`n").Length - 1)
                         Set-PSReadLineOption -ExtraPromptLineCount $lineCount -ErrorAction SilentlyContinue
                     }
-                    catch { }
+                    catch {
+                        if ($env:PS_PROFILE_DEBUG) {
+                            Write-Verbose "Failed to set PSReadLine extra prompt line count: $($_.Exception.Message)"
+                        }
+                    }
                     
                     $global:LASTEXITCODE = $lastExitCode
                     return $promptText
@@ -150,6 +171,9 @@ try {
     <#
     .SYNOPSIS
         Ensures Starship module stays loaded to prevent prompt from breaking.
+    .DESCRIPTION
+        Stores a reference to the Starship module globally to prevent it from being garbage collected.
+        This helps maintain prompt functionality even if the module would otherwise be unloaded.
     #>
     function Initialize-StarshipModule {
         $module = Get-Module starship -ErrorAction SilentlyContinue
@@ -169,6 +193,9 @@ try {
     <#
     .SYNOPSIS
         Executes Starship's initialization script and verifies it worked.
+    .DESCRIPTION
+        Runs `starship init powershell --print-full-init` to get the initialization script,
+        writes it to a temp file, executes it, and verifies that a valid prompt function was created.
     #>
     function Invoke-StarshipInitScript {
         param([string]$StarshipCommandPath)
@@ -181,7 +208,7 @@ try {
                 throw "Failed to get starship init script (exit code: $LASTEXITCODE)"
             }
             
-            # Filter out error messages
+            # Filter out error messages and empty lines from starship output
             $cleanOutput = $initOutput | Where-Object {
                 $_ -notmatch '\[ERROR\]' -and
                 $_ -notmatch 'Under a' -and
@@ -315,7 +342,8 @@ try {
                 # Ensure module stays loaded
                 Initialize-StarshipModule
                 
-                # Replace with direct call for reliability (avoids module scope issues)
+                # Replace Starship's module-scoped prompt with direct executable call
+                # This avoids issues if the Starship module gets unloaded
                 New-StarshipPromptFunction -StarshipCommandPath $starCmd.Source
                 
                 # Update VS Code if active
@@ -381,14 +409,21 @@ try {
                     
                     # Git branch (if in git repo)
                     try {
-                        if ((Test-Path ".git") -or (Test-HasCommand git)) {
-                            $gitBranch = & git rev-parse --abbrev-ref HEAD 2>$null
-                            if ($gitBranch -and $gitBranch -ne "HEAD") {
-                                $promptParts += "git:($gitBranch)"
+                        if (Test-HasCommand git) {
+                            if (Test-Path ".git" -ErrorAction SilentlyContinue) {
+                                $gitBranch = & git rev-parse --abbrev-ref HEAD 2>&1
+                                $gitExitCode = $LASTEXITCODE
+                                if ($gitExitCode -eq 0 -and $gitBranch -and $gitBranch.Trim() -ne "HEAD" -and $gitBranch.Trim() -ne "") {
+                                    $promptParts += "git:($($gitBranch.Trim()))"
+                                }
                             }
                         }
                     }
-                    catch { }
+                    catch {
+                        if ($env:PS_PROFILE_DEBUG) {
+                            Write-Verbose "Failed to get git branch for prompt: $($_.Exception.Message)"
+                        }
+                    }
                     
                     # Execution time (if available)
                     if ($global:LastCommandDuration) {
@@ -405,7 +440,11 @@ try {
                             $promptParts += "🔑"
                         }
                     }
-                    catch { }
+                    catch {
+                        if ($env:PS_PROFILE_DEBUG) {
+                            Write-Verbose "Failed to check administrator role for prompt: $($_.Exception.Message)"
+                        }
+                    }
                     
                     # Display prompt
                     $promptString = $promptParts -join " │ "
@@ -484,7 +523,14 @@ try {
     }
 }
 catch {
-    if ($env:PS_PROFILE_DEBUG) {
+    if (-not $env:PS_PROFILE_DEBUG) {
+        return
+    }
+    
+    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+        Write-ProfileError -ErrorRecord $_ -Context "Fragment: 23-starship" -Category 'Fragment'
+    }
+    else {
         Write-Verbose "Starship fragment failed to define initializer: $($_.Exception.Message)"
     }
 }

@@ -54,11 +54,17 @@ param(
     [double]$RegressionThreshold = 1.5  # Allow 50% degradation before failing
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import shared utilities directly (no barrel files)
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
-# Get repository root if not specified
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking
 if (-not $WorkspaceRoot) {
     try {
         $WorkspaceRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
@@ -68,6 +74,24 @@ if (-not $WorkspaceRoot) {
     }
 }
 
+<#
+.SYNOPSIS
+    Measures the execution time of a scriptblock.
+
+.DESCRIPTION
+    Executes a scriptblock and returns the elapsed time in milliseconds.
+    Uses System.Diagnostics.Stopwatch for high-precision timing.
+
+.PARAMETER Script
+    The scriptblock to execute and measure.
+
+.OUTPUTS
+    System.Double. The elapsed time in milliseconds.
+
+.EXAMPLE
+    $duration = Time-Command -Script { Get-Process }
+    Write-Output "Operation took $duration ms"
+#>
 function Time-Command {
     [CmdletBinding()]
     [OutputType([double])]
@@ -199,7 +223,7 @@ $regressionDetected = $false
 if (Test-Path $baselineFile) {
     Write-ScriptMessage -Message "`nPerformance Regression Check:"
     try {
-        $baseline = Get-Content $baselineFile -Raw | ConvertFrom-Json
+        $baseline = Read-JsonFile -Path $baselineFile
 
         # Check full startup time regression
         $baselineMean = $baseline.FullStartupMean
@@ -207,7 +231,7 @@ if (Test-Path $baselineFile) {
         Write-ScriptMessage -Message "Full startup: Current=$currentMean ms, Baseline=$baselineMean ms, Ratio=$([Math]::Round($ratio,2))x"
 
         if ($ratio -gt $RegressionThreshold) {
-            Write-ScriptMessage -Message "PERFORMANCE REGRESSION: Full startup time increased by $([Math]::Round(($ratio-1)*100,1))% (threshold: $([Math]::Round(($RegressionThreshold-1)*100,1))%)" -IsWarning
+            Write-ScriptMessage -Message "PERFORMANCE REGRESSION: Full startup time increased by $([Math]::Round(($ratio - 1) * 100, 1))% (threshold: $([Math]::Round(($RegressionThreshold - 1) * 100, 1))%)" -IsWarning
             $regressionDetected = $true
         }
 
@@ -217,7 +241,7 @@ if (Test-Path $baselineFile) {
             if ($baselineFrag) {
                 $fragRatio = $frag.MeanMs / $baselineFrag.MeanMs
                 if ($fragRatio -gt $RegressionThreshold) {
-                    Write-ScriptMessage -Message "PERFORMANCE REGRESSION: $($frag.Fragment) increased by $([Math]::Round(($fragRatio-1)*100,1))% (current: $($frag.MeanMs)ms, baseline: $($baselineFrag.MeanMs)ms)" -IsWarning
+                    Write-ScriptMessage -Message "PERFORMANCE REGRESSION: $($frag.Fragment) increased by $([Math]::Round(($fragRatio - 1) * 100, 1))% (current: $($frag.MeanMs)ms, baseline: $($baselineFrag.MeanMs)ms)" -IsWarning
                     $regressionDetected = $true
                 }
             }
@@ -251,7 +275,7 @@ if ($UpdateBaseline) {
         }
     }
 
-    $baselineData | ConvertTo-Json -Depth 10 | Set-Content $baselineFile -Encoding UTF8
+    Write-JsonFile -Path $baselineFile -InputObject $baselineData -Depth 10 -EnsureDirectory
     Write-ScriptMessage -Message "`nUpdated performance baseline: $baselineFile"
 }
 

@@ -19,15 +19,30 @@
 # ===============================================
 # PROFILE VERSION INFORMATION
 # ===============================================
-# Track profile version for debugging and support
+# Track profile version and git commit for debugging and support
 if (-not $global:PSProfileVersion) {
     $global:PSProfileVersion = '1.0.0'
     $profileDir = Split-Path -Parent $PSCommandPath
+    
+    # Attempt to get git commit hash if profile is in a git repository
     if (Test-Path (Join-Path $profileDir '.git')) {
         try {
-            Push-Location $profileDir
-            $global:PSProfileGitCommit = git rev-parse --short HEAD 2>$null
-            Pop-Location
+            Push-Location $profileDir -ErrorAction Stop
+            try {
+                $gitOutput = git rev-parse --short HEAD 2>&1
+                if ($LASTEXITCODE -eq 0 -and $gitOutput) {
+                    $global:PSProfileGitCommit = $gitOutput.Trim()
+                }
+                else {
+                    $global:PSProfileGitCommit = 'unknown'
+                }
+            }
+            catch {
+                $global:PSProfileGitCommit = 'unknown'
+            }
+            finally {
+                Pop-Location -ErrorAction SilentlyContinue
+            }
         }
         catch {
             $global:PSProfileGitCommit = 'unknown'
@@ -37,20 +52,18 @@ if (-not $global:PSProfileVersion) {
         $global:PSProfileGitCommit = 'unknown'
     }
 
-    # Display version in debug mode
     if ($env:PS_PROFILE_DEBUG) {
         Write-Host "PowerShell Profile v$global:PSProfileVersion (commit: $global:PSProfileGitCommit)" -ForegroundColor Cyan
     }
 }
 
-# --- Only run interactive initialization (skip for non-interactive hosts) ---
-# If $Host or its RawUI is not available, we're not in an interactive session.
+# Skip interactive initialization for non-interactive hosts (e.g., automation scripts)
+# Non-interactive hosts don't have RawUI, so we exit early to avoid errors
 if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
     return
 }
 
-# --- PSReadLine and command history configuration (improvements + comments) ---
-# PSReadLine is now loaded lazily by profile.d/10-psreadline.ps1 to improve startup performance.
+# PSReadLine is loaded lazily by profile.d/12-psreadline.ps1 to improve startup performance.
 # Call Enable-PSReadLine to load PSReadLine with enhanced configuration.
 
 # ===============================================
@@ -58,47 +71,106 @@ if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
 # ===============================================
 # This profile is intentionally small: feature-rich helpers live in `profile.d/`.
 
-# ===============================================
-# ENVIRONMENT VARIABLES (existing)
-# ===============================================
-# Editor variables are set in profile.d/01-env.ps1 to avoid duplication
-# and ensure proper idempotency checks
+# Environment variables are configured in profile.d/01-env.ps1
 
 # ===============================================
-# SCOOP INTEGRATION (dynamic detection)
+# SCOOP INTEGRATION
 # ===============================================
-# Detect Scoop installation dynamically for portability
-$scoopRoot = $null
-if ($env:SCOOP) {
-    $scoopRoot = $env:SCOOP
-}
-elseif (Test-Path "$env:USERPROFILE\scoop" -ErrorAction SilentlyContinue) {
-    $scoopRoot = "$env:USERPROFILE\scoop"
-}
-elseif (Test-Path "A:\scoop" -ErrorAction SilentlyContinue) {
-    $scoopRoot = "A:\scoop"  # Fallback for legacy setup
-}
-
-if ($scoopRoot) {
-    # Import Scoop completion module if available
-    $scoopCompletion = Join-Path $scoopRoot 'apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
-    if (Test-Path $scoopCompletion -ErrorAction SilentlyContinue) {
-        Import-Module $scoopCompletion -ErrorAction SilentlyContinue
-    }
-
-    # Add Scoop shims and bin to PATH if they exist
-    $scoopShims = Join-Path $scoopRoot 'shims'
-    $scoopBin = Join-Path $scoopRoot 'bin'
-    $pathSeparator = [System.IO.Path]::PathSeparator
-
-    if (Test-Path $scoopShims -ErrorAction SilentlyContinue) {
-        if ($env:PATH -notlike "*$([regex]::Escape($scoopShims))*") {
-            $env:PATH = "$scoopShims$pathSeparator$env:PATH"
+# Dynamically detect and configure Scoop package manager if installed
+# Uses ScoopDetection module for detection
+$profileDir = Split-Path -Parent $PSCommandPath
+$scoopDetectionModule = Join-Path $profileDir 'scripts' 'lib' 'ScoopDetection.psm1'
+if (Test-Path $scoopDetectionModule) {
+    try {
+        Import-Module $scoopDetectionModule -ErrorAction SilentlyContinue -DisableNameChecking
+        if (Get-Command Get-ScoopRoot -ErrorAction SilentlyContinue) {
+            try {
+                $scoopRoot = Get-ScoopRoot
+                if ($scoopRoot) {
+                    # Import Scoop tab completion if available
+                    if (Get-Command Get-ScoopCompletionPath -ErrorAction SilentlyContinue) {
+                        try {
+                            $scoopCompletion = Get-ScoopCompletionPath -ScoopRoot $scoopRoot
+                            if ($scoopCompletion -and (Test-Path $scoopCompletion -ErrorAction SilentlyContinue)) {
+                                Import-Module $scoopCompletion -ErrorAction SilentlyContinue
+                            }
+                        }
+                        catch {
+                            if ($env:PS_PROFILE_DEBUG) {
+                                Write-Verbose "Failed to get Scoop completion path: $($_.Exception.Message)"
+                            }
+                        }
+                    }
+                    # Add Scoop shims and bin directories to PATH
+                    if (Get-Command Add-ScoopToPath -ErrorAction SilentlyContinue) {
+                        try {
+                            Add-ScoopToPath -ScoopRoot $scoopRoot | Out-Null
+                        }
+                        catch {
+                            if ($env:PS_PROFILE_DEBUG) {
+                                Write-Verbose "Failed to add Scoop to PATH: $($_.Exception.Message)"
+                            }
+                        }
+                    }
+                }
+            }
+            catch {
+                if ($env:PS_PROFILE_DEBUG) {
+                    Write-Verbose "Failed to get Scoop root: $($_.Exception.Message)"
+                }
+                # Re-throw to trigger fallback to legacy detection
+                throw
+            }
+        }
+        else {
+            throw "Get-ScoopRoot command not available after module import"
         }
     }
-    if (Test-Path $scoopBin -ErrorAction SilentlyContinue) {
-        if ($env:PATH -notlike "*$([regex]::Escape($scoopBin))*") {
-            $env:PATH = "$scoopBin$pathSeparator$env:PATH"
+    catch {
+        # Fallback to legacy detection if module fails (checks common Scoop installation paths)
+        if ($env:PS_PROFILE_DEBUG) {
+            Write-Verbose "ScoopDetection module failed, using legacy detection: $($_.Exception.Message)"
+        }
+        try {
+            # Check global Scoop installation first
+            if ($env:SCOOP_GLOBAL -and (Test-Path $env:SCOOP_GLOBAL -ErrorAction SilentlyContinue)) {
+                $scoopRoot = $env:SCOOP_GLOBAL
+            }
+            # Check local Scoop installation
+            elseif ($env:SCOOP -and (Test-Path $env:SCOOP -ErrorAction SilentlyContinue)) {
+                $scoopRoot = $env:SCOOP
+            }
+            elseif (Test-Path "$env:USERPROFILE\scoop" -ErrorAction SilentlyContinue) {
+                $scoopRoot = "$env:USERPROFILE\scoop"
+            }
+            elseif (Test-Path "A:\scoop" -ErrorAction SilentlyContinue) {
+                $scoopRoot = "A:\scoop"
+            }
+            if ($scoopRoot) {
+                $scoopCompletion = Join-Path $scoopRoot 'apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
+                if (Test-Path $scoopCompletion -ErrorAction SilentlyContinue) {
+                    Import-Module $scoopCompletion -ErrorAction SilentlyContinue
+                }
+                # Add Scoop directories to PATH (avoid duplicates)
+                $scoopShims = Join-Path $scoopRoot 'shims'
+                $scoopBin = Join-Path $scoopRoot 'bin'
+                $pathSeparator = [System.IO.Path]::PathSeparator
+                if (Test-Path $scoopShims -ErrorAction SilentlyContinue) {
+                    if ($env:PATH -notlike "*$([regex]::Escape($scoopShims))*") {
+                        $env:PATH = "$scoopShims$pathSeparator$env:PATH"
+                    }
+                }
+                if (Test-Path $scoopBin -ErrorAction SilentlyContinue) {
+                    if ($env:PATH -notlike "*$([regex]::Escape($scoopBin))*") {
+                        $env:PATH = "$scoopBin$pathSeparator$env:PATH"
+                    }
+                }
+            }
+        }
+        catch {
+            if ($env:PS_PROFILE_DEBUG) {
+                Write-Verbose "Legacy Scoop detection also failed: $($_.Exception.Message)"
+            }
         }
     }
 }
@@ -106,12 +178,10 @@ if ($scoopRoot) {
 # ===============================================
 # FRAGMENT LOADING HELPERS
 # ===============================================
-# Initialize profile timing tracking
+# Initialize timing tracking for performance profiling (only when debug mode enabled)
 if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
     $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
 }
-
-# Helper function to track fragment load times with granular debug levels
 <#
 .SYNOPSIS
     Measures and tracks the execution time of profile fragments.
@@ -130,14 +200,11 @@ if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
 function Measure-FragmentLoadTime {
     param([string]$FragmentName, [scriptblock]$Action)
 
-    # Parse debug level (default to 1 if set but not numeric)
+    # Parse debug level: 0=off, 1=basic, 2=with timing, 3=verbose timing output
     $debugLevel = 0
     if ($env:PS_PROFILE_DEBUG) {
-        if ([int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Successfully parsed
-        }
-        else {
-            # Non-numeric value means basic debug
+        if (-not [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Non-numeric value defaults to basic debug
             $debugLevel = 1
         }
     }
@@ -147,7 +214,7 @@ function Measure-FragmentLoadTime {
         return
     }
 
-    # Level 2+ includes timing
+    # Level 2+: measure and track execution time
     if ($debugLevel -ge 2) {
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
         try {
@@ -166,80 +233,63 @@ function Measure-FragmentLoadTime {
             }
             $global:PSProfileFragmentTimes.Add($timing)
 
-            # Level 3 shows detailed output
+            # Level 3: display timing information immediately
             if ($debugLevel -ge 3) {
                 Write-Host "Fragment '$FragmentName' loaded in $($timing.Duration)ms" -ForegroundColor Cyan
             }
         }
     }
     else {
-        # Level 1: basic debug, no timing
+        # Level 1: basic debug without timing
         & $Action
     }
 }
 
 # ===============================================
-# LOAD MODULAR PROFILE COMPONENTS (safe, ordered loader)
+# LOAD MODULAR PROFILE COMPONENTS
 # ===============================================
-# The previous loader dot-sourced all `profile.d/*.ps1` files. To improve
-# robustness we load files in sorted order and wrap each load in try/catch.
-# Fragments can be disabled using Disable-ProfileFragment command.
+# Load profile fragments from profile.d/ in dependency-aware order with error handling.
+# Fragments can be disabled via configuration or environment variables.
 $profileDir = Split-Path -Parent $PSCommandPath
 $profileD = Join-Path $profileDir 'profile.d'
 
-# Load fragment configuration (read directly to avoid dependency on bootstrap)
-# After bootstrap loads, we'll use Get-FragmentConfig for enhanced features
-$fragmentConfigPath = Join-Path $profileDir '.profile-fragments.json'
+# Import fragment management modules for configuration, loading order, and error handling
+$fragmentConfigModule = Join-Path $profileDir 'scripts' 'lib' 'FragmentConfig.psm1'
+$fragmentLoadingModule = Join-Path $profileDir 'scripts' 'lib' 'FragmentLoading.psm1'
+$fragmentErrorHandlingModule = Join-Path $profileDir 'scripts' 'lib' 'FragmentErrorHandling.psm1'
+
+# Initialize fragment configuration (disabled fragments, load order, environment sets, feature flags)
 $disabledFragments = @()
 $loadOrderOverride = @()
 $environmentSets = @{}
 $featureFlags = @{}
 $performanceConfig = @{ batchLoad = $false; maxFragmentTime = 500 }
 
-if (Test-Path $fragmentConfigPath) {
+if (Test-Path $fragmentConfigModule) {
     try {
-        $configContent = Get-Content -Path $fragmentConfigPath -Raw -ErrorAction Stop
-        $configObj = $configContent | ConvertFrom-Json
-        if ($configObj.disabled) {
-            $disabledFragments = @($configObj.disabled)
-        }
-        if ($configObj.loadOrder) {
-            $loadOrderOverride = @($configObj.loadOrder)
-        }
-        if ($configObj.environments) {
-            # Convert PSCustomObject to hashtable
-            $configObj.environments.PSObject.Properties | ForEach-Object {
-                $environmentSets[$_.Name] = @($_.Value)
-            }
-        }
-        if ($configObj.featureFlags) {
-            $configObj.featureFlags.PSObject.Properties | ForEach-Object {
-                $featureFlags[$_.Name] = $_.Value
-            }
-        }
-        if ($configObj.performance) {
-            if ($configObj.performance.batchLoad) {
-                $performanceConfig.batchLoad = $configObj.performance.batchLoad
-            }
-            if ($configObj.performance.maxFragmentTime) {
-                $performanceConfig.maxFragmentTime = $configObj.performance.maxFragmentTime
-            }
-        }
+        Import-Module $fragmentConfigModule -ErrorAction SilentlyContinue -DisableNameChecking
+        $config = Get-FragmentConfig -ProfileDir $profileDir
+        $disabledFragments = $config.DisabledFragments
+        $loadOrderOverride = $config.LoadOrder
+        $environmentSets = $config.Environments
+        $featureFlags = $config.FeatureFlags
+        $performanceConfig = $config.Performance
     }
     catch {
         if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "Warning: Failed to load fragment config: $($_.Exception.Message)" -ForegroundColor Yellow
+            Write-Host "Warning: Failed to load fragment config module: $($_.Exception.Message)" -ForegroundColor Yellow
         }
     }
 }
 
-# Check for environment-specific fragment sets
+# Apply environment-specific fragment sets (if PS_PROFILE_ENVIRONMENT is set)
+# Environment sets allow loading only specific fragments (useful for CI/CD or minimal profiles)
 $currentEnvironment = $env:PS_PROFILE_ENVIRONMENT
 if ($currentEnvironment -and $environmentSets.ContainsKey($currentEnvironment)) {
-    # Disable all fragments, then enable only those in the environment set
     $allFragments = Get-ChildItem -Path (Join-Path $profileDir 'profile.d') -Filter '*.ps1' -ErrorAction SilentlyContinue
     $enabledFragments = $environmentSets[$currentEnvironment]
     $allFragmentNames = $allFragments | ForEach-Object { $_.BaseName }
+    # Disable all fragments except those in the environment set (bootstrap always loads)
     $disabledFragments = $allFragmentNames | Where-Object { $_ -notin $enabledFragments -and $_ -ne '00-bootstrap' }
 
     if ($env:PS_PROFILE_DEBUG) {
@@ -253,7 +303,9 @@ if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
     $bootstrapFragment = $allFragments | Where-Object { $_.BaseName -eq '00-bootstrap' }
     $otherFragments = $allFragments | Where-Object { $_.BaseName -ne '00-bootstrap' }
 
+    # Determine fragment load order: use override if specified, otherwise dependency-aware ordering
     if ($loadOrderOverride.Count -gt 0) {
+        # Manual load order: load specified fragments first, then remaining fragments alphabetically
         $orderedFragments = @()
         $unorderedFragments = @()
 
@@ -271,11 +323,19 @@ if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
         $nonBootstrapFragments = $orderedFragments + $unorderedFragments
     }
     else {
-        if (Get-Command Get-FragmentLoadOrder -ErrorAction SilentlyContinue) {
+        # Automatic dependency-aware ordering: analyzes fragment dependencies and loads in correct order
+        if (Test-Path $fragmentLoadingModule) {
             try {
-                $nonBootstrapFragments = Get-FragmentLoadOrder -FragmentFiles $otherFragments -DisabledFragments $disabledFragments
+                Import-Module $fragmentLoadingModule -ErrorAction SilentlyContinue -DisableNameChecking
+                if (Get-Command Get-FragmentLoadOrder -ErrorAction SilentlyContinue) {
+                    $nonBootstrapFragments = Get-FragmentLoadOrder -FragmentFiles $otherFragments -DisabledFragments $disabledFragments
+                }
+                else {
+                    $nonBootstrapFragments = $otherFragments | Sort-Object Name
+                }
             }
             catch {
+                # Fallback to alphabetical if dependency resolution fails
                 $nonBootstrapFragments = $otherFragments | Sort-Object Name
             }
         }
@@ -293,12 +353,14 @@ if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
         }
     }
 
+    # Batch optimization: group fragments by tier (00-09, 10-29, 30-69, 70-99) for parallel loading
     $enableBatchOptimization = $performanceConfig.batchLoad -or
     $env:PS_PROFILE_BATCH_LOAD -eq '1' -or
     $env:PS_PROFILE_BATCH_LOAD -eq 'true'
 
     $fragmentsToLoad = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
 
+    # Always load bootstrap first
     if ($bootstrapFragment) {
         foreach ($fragment in $bootstrapFragment) {
             $fragmentsToLoad.Add($fragment)
@@ -306,17 +368,41 @@ if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
     }
 
     if ($enableBatchOptimization) {
-        $tier0 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^0[1-9]-' }
-        $tier1 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^(1[0-9]|2[0-9])-' }
-        $tier2 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([3-6][0-9])-' }
-        $tier3 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([7-9][0-9])-' }
-
-        foreach ($fragment in $tier0) { $fragmentsToLoad.Add($fragment) }
-        foreach ($fragment in $tier1) { $fragmentsToLoad.Add($fragment) }
-        foreach ($fragment in $tier2) { $fragmentsToLoad.Add($fragment) }
-        foreach ($fragment in $tier3) { $fragmentsToLoad.Add($fragment) }
+        # Group fragments by tier for optimized loading
+        if ((Test-Path $fragmentLoadingModule) -and (Get-Command Get-FragmentTiers -ErrorAction SilentlyContinue)) {
+            try {
+                $tiers = Get-FragmentTiers -FragmentFiles $nonBootstrapFragments -ExcludeBootstrap
+                foreach ($fragment in $tiers.Tier0) { $fragmentsToLoad.Add($fragment) }
+                foreach ($fragment in $tiers.Tier1) { $fragmentsToLoad.Add($fragment) }
+                foreach ($fragment in $tiers.Tier2) { $fragmentsToLoad.Add($fragment) }
+                foreach ($fragment in $tiers.Tier3) { $fragmentsToLoad.Add($fragment) }
+            }
+            catch {
+                # Fallback: group by numeric prefix ranges
+                $tier0 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^0[1-9]-' }
+                $tier1 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^(1[0-9]|2[0-9])-' }
+                $tier2 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([3-6][0-9])-' }
+                $tier3 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([7-9][0-9])-' }
+                foreach ($fragment in $tier0) { $fragmentsToLoad.Add($fragment) }
+                foreach ($fragment in $tier1) { $fragmentsToLoad.Add($fragment) }
+                foreach ($fragment in $tier2) { $fragmentsToLoad.Add($fragment) }
+                foreach ($fragment in $tier3) { $fragmentsToLoad.Add($fragment) }
+            }
+        }
+        else {
+            # Fallback: group by numeric prefix ranges
+            $tier0 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^0[1-9]-' }
+            $tier1 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^(1[0-9]|2[0-9])-' }
+            $tier2 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([3-6][0-9])-' }
+            $tier3 = $nonBootstrapFragments | Where-Object { $_.BaseName -match '^([7-9][0-9])-' }
+            foreach ($fragment in $tier0) { $fragmentsToLoad.Add($fragment) }
+            foreach ($fragment in $tier1) { $fragmentsToLoad.Add($fragment) }
+            foreach ($fragment in $tier2) { $fragmentsToLoad.Add($fragment) }
+            foreach ($fragment in $tier3) { $fragmentsToLoad.Add($fragment) }
+        }
     }
     else {
+        # Standard loading: add all fragments in dependency order
         foreach ($fragment in $nonBootstrapFragments) {
             $fragmentsToLoad.Add($fragment)
         }
@@ -326,6 +412,7 @@ if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
         $fragmentName = $fragment.Name
         $fragmentBaseName = $fragment.BaseName
 
+        # Skip disabled fragments (bootstrap always loads)
         if ($fragmentBaseName -ne '00-bootstrap' -and $disabledSet -and $disabledSet.Contains($fragmentBaseName)) {
             if ($env:PS_PROFILE_DEBUG) { Write-Host "Skipping disabled profile fragment: $fragmentName" -ForegroundColor DarkGray }
             continue
@@ -333,26 +420,37 @@ if (Test-Path -LiteralPath (Join-Path $profileDir 'profile.d')) {
 
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan }
 
-        try {
-            $null = . $fragment.FullName
+        # Load fragment with standardized error handling
+        if ((Test-Path $fragmentErrorHandlingModule) -and (Get-Command Invoke-FragmentSafely -ErrorAction SilentlyContinue)) {
+            $success = Invoke-FragmentSafely -FragmentName $fragmentBaseName -FragmentPath $fragment.FullName
+            if (-not $success -and $env:PS_PROFILE_DEBUG) {
+                Write-Host "Fragment '$fragmentName' failed to load" -ForegroundColor Red
+            }
         }
-        catch {
-            $suppressFragmentWarning = $false
-            if (Get-Command -Name 'Test-FragmentWarningSuppressed' -ErrorAction SilentlyContinue) {
-                try {
-                    $suppressFragmentWarning = Test-FragmentWarningSuppressed -FragmentName $fragmentName
-                }
-                catch {
-                    $suppressFragmentWarning = $false
-                }
+        else {
+            # Fallback: direct execution with manual error handling
+            try {
+                $null = . $fragment.FullName
             }
+            catch {
+                # Check if warnings for this fragment should be suppressed
+                $suppressFragmentWarning = $false
+                if (Get-Command -Name 'Test-FragmentWarningSuppressed' -ErrorAction SilentlyContinue) {
+                    try {
+                        $suppressFragmentWarning = Test-FragmentWarningSuppressed -FragmentName $fragmentName
+                    }
+                    catch {
+                        $suppressFragmentWarning = $false
+                    }
+                }
 
-            if ($env:PS_PROFILE_DEBUG) { Write-Host "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)" -ForegroundColor Red }
-            if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                Write-ProfileError -ErrorRecord $_ -Context "Profile fragment loading" -Category 'Fragment'
-            }
-            elseif (-not $suppressFragmentWarning) {
-                Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
+                if ($env:PS_PROFILE_DEBUG) { Write-Host "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)" -ForegroundColor Red }
+                if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                    Write-ProfileError -ErrorRecord $_ -Context "Profile fragment loading" -Category 'Fragment'
+                }
+                elseif (-not $suppressFragmentWarning) {
+                    Write-Warning "Failed to load profile fragment '$fragmentName': $($_.Exception.Message)"
+                }
             }
         }
     }
@@ -371,7 +469,8 @@ else {
 # ===============================================
 # INITIALIZE ENHANCED FEATURES
 # ===============================================
-# Initialize Starship or smart fallback prompt
+# Initialize prompt system (Starship or fallback) if available
+# This is called after all fragments load to ensure prompt configuration functions are available
 try {
     if ($env:PS_PROFILE_DEBUG) { Write-Host "Checking for Initialize-Starship function..." -ForegroundColor Yellow }
     if (Get-Command Initialize-Starship -ErrorAction SilentlyContinue) {
@@ -379,7 +478,7 @@ try {
         Initialize-Starship
         if ($env:PS_PROFILE_DEBUG) { Write-Host "Initialize-Starship completed" -ForegroundColor Green }
 
-        # Final verification: verify prompt function exists (Initialize-Starship handles making it global)
+        # Verify prompt function was created successfully
         if (Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue) {
             if ($env:PS_PROFILE_DEBUG) { Write-Host "Prompt function verified and active" -ForegroundColor Green }
         }

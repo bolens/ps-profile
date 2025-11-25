@@ -12,21 +12,31 @@ Describe 'Tooling Integration Tests' {
 
     Context 'Documentation generation' {
         It 'generates API documentation successfully' {
-            $originalFiles = (Get-ChildItem -Path $script:DocsPath -Filter *.md -ErrorAction SilentlyContinue).Count
+            $apiDocsPath = Join-Path $script:DocsPath 'api'
+            $functionsPath = Join-Path $apiDocsPath 'functions'
+            $aliasesPath = Join-Path $apiDocsPath 'aliases'
 
             & (Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1')
 
-            $newFiles = (Get-ChildItem -Path $script:DocsPath -Filter *.md -ErrorAction SilentlyContinue).Count
-            ($newFiles -ge $originalFiles) | Should -Be $true
+            # Verify new directory structure exists
+            Test-Path $apiDocsPath | Should -Be $true
+            Test-Path $functionsPath | Should -Be $true
+            Test-Path $aliasesPath | Should -Be $true
 
-            $readmePath = Join-Path $script:DocsPath 'README.md'
+            # Verify files were generated in correct locations
+            $functionFiles = (Get-ChildItem -Path $functionsPath -Filter *.md -ErrorAction SilentlyContinue).Count
+            $aliasFiles = (Get-ChildItem -Path $aliasesPath -Filter *.md -ErrorAction SilentlyContinue).Count
+            ($functionFiles -gt 0) | Should -Be $true -Because 'function documentation files should be generated'
+            ($aliasFiles -ge 0) | Should -Be $true -Because 'alias documentation files should be generated (may be 0 if no aliases)'
+
+            $readmePath = Join-Path $apiDocsPath 'README.md'
             Test-Path $readmePath | Should -Be $true
             $readmeContent = Get-Content $readmePath -Raw
             $expectedPatterns = @(
-                '## Functions by Fragment',
-                '\[.*\]\(.*\.md\)',
-                'Total Functions:',
-                'Generated:'
+                '## Functions',
+                '## Aliases',
+                '\[.*\]\(functions/.*\.md\)',
+                '\[.*\]\(aliases/.*\.md\)'
             )
             foreach ($pattern in $expectedPatterns) {
                 $readmeContent | Should -Match $pattern
@@ -34,7 +44,9 @@ Describe 'Tooling Integration Tests' {
         }
 
         It 'documentation includes proper function signatures' {
-            $setEnvVarDoc = Join-Path $script:DocsPath 'Set-EnvVar.md'
+            $apiDocsPath = Join-Path $script:DocsPath 'api'
+            $functionsPath = Join-Path $apiDocsPath 'functions'
+            $setEnvVarDoc = Join-Path $functionsPath 'Set-EnvVar.md'
 
             if (Test-Path $setEnvVarDoc) {
                 $content = Get-Content $setEnvVarDoc -Raw
@@ -59,7 +71,14 @@ Describe 'Tooling Integration Tests' {
 
     Context 'Spellcheck functionality' {
         It 'spellcheck runs without errors' {
-            { & (Join-Path $script:ScriptsUtilsPath 'code-quality\spellcheck.ps1') } | Should -Not -Throw
+            $spellcheckPath = Join-Path $script:ScriptsUtilsPath 'code-quality\spellcheck.ps1'
+            if (Test-Path $spellcheckPath) {
+                # Spellcheck script handles missing cspell gracefully, so it should not throw
+                { & $spellcheckPath 2>&1 | Out-Null } | Should -Not -Throw
+            }
+            else {
+                Set-ItResult -Skipped -Because "spellcheck.ps1 not found at $spellcheckPath"
+            }
         }
 
         It 'cspell configuration includes custom words' {

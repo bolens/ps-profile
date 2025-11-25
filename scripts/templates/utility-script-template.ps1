@@ -24,18 +24,24 @@ param(
     [string]$ParameterName = "default"
 )
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap)
+# Note: Adjust the path based on script location:
+# - scripts/checks/: Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+# - scripts/utils/*/: Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+# - scripts/git/: Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+$moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
-# Get repository root using shared function
-try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
-}
-catch {
-    Write-Error "Failed to determine repository root: $_"
-    exit $EXIT_SETUP_ERROR
-}
+# Initialize script environment with common modules and paths
+# This replaces multiple Import-LibModule calls and Get-RepoRoot error handling
+$env = Initialize-ScriptEnvironment `
+    -ScriptPath $PSScriptRoot `
+    -ImportModules @('ExitCodes', 'PathResolution', 'Logging') `
+    -GetRepoRoot `
+    -DisableNameChecking `
+    -ExitOnError
+
+$repoRoot = $env.RepoRoot
 
 # Main script logic here
 Write-ScriptMessage -Message "Starting script execution..." -LogLevel Info

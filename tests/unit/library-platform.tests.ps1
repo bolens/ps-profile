@@ -2,7 +2,9 @@
 
 Describe 'Platform Module Functions' {
     BeforeAll {
-        Import-TestCommonModule | Out-Null
+        # Import the Platform module (Common.psm1 no longer exists)
+        $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+        Import-Module (Join-Path $libPath 'Platform.psm1') -DisableNameChecking -ErrorAction Stop
     }
 
     Context 'Get-Platform' {

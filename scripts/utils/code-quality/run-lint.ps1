@@ -16,9 +16,20 @@ scripts/utils/run-lint.ps1
     Runs PSScriptAnalyzer on all PowerShell files in profile.d and scripts directories.
 #>
 
-# Import shared utilities
-$commonModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'Common.psm1'
-Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
+# Import ModuleImport first (bootstrap)
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+
+# Import shared utilities using ModuleImport
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Cache' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathValidation' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root using shared function
 try {
@@ -82,12 +93,9 @@ $reportData = $results | ForEach-Object {
         Column   = $_.Column
     }
 }
-$json = $reportData | ConvertTo-Json -Depth 5
-
 $dataDir = Join-Path $repoRoot 'scripts' 'data'
-Ensure-DirectoryExists -Path $dataDir
 $out = Join-Path $dataDir 'psscriptanalyzer-report.json'
-$json | Out-File -FilePath $out -Encoding utf8
+Write-JsonFile -Path $out -InputObject $reportData -Depth 5 -EnsureDirectory
 Write-ScriptMessage -Message "Saved report to $out"
 
 # Fail if any Error-level findings (matching CI behavior)

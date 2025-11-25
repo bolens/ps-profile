@@ -5,7 +5,6 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    Import-TestCommonModule | Out-Null
     $script:TempRoot = New-TestTempDirectory -Prefix 'ScriptError'
 }
 
