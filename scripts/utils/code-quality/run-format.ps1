@@ -6,8 +6,8 @@ scripts/utils/run-format.ps1
 
 .DESCRIPTION
     Formats PowerShell code using PSScriptAnalyzer's Invoke-Formatter for consistent styling.
-    By default, formats all PowerShell files in the profile.d directory. Preserves original
-    line endings (CRLF or LF) in the formatted output.
+    By default, formats all PowerShell files in the profile.d directory. Normalizes
+    line endings to LF (Unix-style) to match Git's behavior and avoid line ending warnings.
 
 .PARAMETER Path
     The path to format. Defaults to profile.d directory relative to repository root.
@@ -74,8 +74,7 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-# Compile regex pattern once for CRLF detection
-$crlfRegex = [regex]::new("`r`n", [System.Text.RegularExpressions.RegexOptions]::Compiled)
+# Normalize line endings to LF (Unix-style) to match Git's behavior
 
 $filesFormatted = 0
 # Use List for better performance than array concatenation
@@ -97,7 +96,7 @@ foreach ($scriptFile in $scripts) {
             continue
         }
 
-        # Read the original content to detect line endings
+        # Read the original content
         $originalContent = Get-Content -Path $file -Raw -ErrorAction Stop
 
         # Handle empty files
@@ -106,19 +105,14 @@ foreach ($scriptFile in $scripts) {
             continue
         }
 
-        $hasCRLF = $crlfRegex.IsMatch($originalContent)
+        # Normalize line endings to LF first (replace CRLF with LF)
+        $normalizedContent = $originalContent -replace "`r`n", "`n"
 
         # Use Invoke-Formatter from PSScriptAnalyzer to format the file
-        $formattedContent = Invoke-Formatter -ScriptDefinition $originalContent -ErrorAction Stop
+        $formattedContent = Invoke-Formatter -ScriptDefinition $normalizedContent -ErrorAction Stop
 
-        # Trim trailing whitespace and ensure consistent line endings
-        $formattedContent = $formattedContent.TrimEnd()
-        if ($hasCRLF) {
-            $formattedContent += "`r`n"
-        }
-        else {
-            $formattedContent += "`n"
-        }
+        # Trim trailing whitespace and ensure LF line ending
+        $formattedContent = $formattedContent.TrimEnd() + "`n"
 
         $formattedContent | Set-Content -Path $file -Encoding UTF8 -NoNewline -ErrorAction Stop
 
