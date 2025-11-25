@@ -28,17 +28,27 @@ param(
     [switch]$Verbose
 )
 
-# Import ModuleImport first (bootstrap)
-$moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+# Import PathResolution first (required for ModuleImport to work)
+$scriptsDir = Split-Path -Parent $PSScriptRoot
+$pathResolutionPath = Join-Path $scriptsDir 'lib' 'PathResolution.psm1'
+if (-not (Test-Path $pathResolutionPath)) {
+    throw "PathResolution module not found at: $pathResolutionPath. PSScriptRoot: $PSScriptRoot"
+}
+Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction Stop
+
+# Import ModuleImport (bootstrap)
+$moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $moduleImportPath)) {
+    throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
+}
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'AstParsing' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'CommentHelp' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'AstParsing' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'CommentHelp' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root using shared function
 try {

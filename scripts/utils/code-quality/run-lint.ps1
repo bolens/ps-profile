@@ -16,14 +16,24 @@ scripts/utils/run-lint.ps1
     Runs PSScriptAnalyzer on all PowerShell files in profile.d and scripts directories.
 #>
 
-# Import ModuleImport first (bootstrap)
-$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+# Import PathResolution first (required for ModuleImport to work)
+$scriptsDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$pathResolutionPath = Join-Path $scriptsDir 'lib' 'PathResolution.psm1'
+if (-not (Test-Path $pathResolutionPath)) {
+    throw "PathResolution module not found at: $pathResolutionPath. PSScriptRoot: $PSScriptRoot"
+}
+Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction Stop
+
+# Import ModuleImport (bootstrap)
+$moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $moduleImportPath)) {
+    throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
+}
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Cache' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PathValidation' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
