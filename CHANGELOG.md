@@ -1,3 +1,16 @@
+## [1.3.1](https://github.com/bolens/ps-profile/compare/v1.3.0...v1.3.1) (2025-11-25)
+
+
+### Bug Fixes
+
+* **checks:** correct module import order in validate-profile script ([3cc4530](https://github.com/bolens/ps-profile/commit/3cc45308a6998b0deed6fe9cd366578207e3182e))
+* comprehensive fixes for validation, security, and gitignore ([683df0e](https://github.com/bolens/ps-profile/commit/683df0ec9650f9611e2b54051139ca7b1633af02))
+* **format:** normalize line endings to LF in formatter ([9f94886](https://github.com/bolens/ps-profile/commit/9f94886dedd6bccd55a7a51930cf272c82832146))
+* **git:** add -Global flag to module imports in pre-commit hook ([f3ef3e3](https://github.com/bolens/ps-profile/commit/f3ef3e3f38be4d37f724e5d3748a80cd3a35aae1))
+* **git:** correct module import order in pre-commit hook ([40359c8](https://github.com/bolens/ps-profile/commit/40359c85efad13c48599003d416d3f6a1f28fe87))
+* **scripts:** correct module import order in validation and utility scripts ([9abc8c1](https://github.com/bolens/ps-profile/commit/9abc8c1c3f2b1e7bd07c6b4da3d774caa4807f25))
+* **security:** add null checks to prevent null reference errors in security scanner ([ad3e584](https://github.com/bolens/ps-profile/commit/ad3e58441e83ccf7c099c2d645cc77d5a99fdcc0))
+
 # [1.3.0](https://github.com/bolens/ps-profile/compare/v1.2.2...v1.3.0) (2025-11-13)
 
 
