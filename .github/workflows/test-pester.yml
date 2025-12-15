@@ -35,12 +35,12 @@ jobs:
       - name: Run Pester
         run: ${{ matrix.powershell }} -NoProfile -Command 'scripts/utils/run-pester.ps1 -Coverage'
       - name: Upload test results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.powershell }}
           path: pester-results.xml
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.powershell }}
           path: coverage.xml
