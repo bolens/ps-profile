@@ -17,15 +17,15 @@ scripts/checks/validate-profile.ps1
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
-$pathResolutionPath = Join-Path $scriptsDir 'lib' 'PathResolution.psm1'
-if (-not (Test-Path $pathResolutionPath)) {
+$pathResolutionPath = Join-Path $scriptsDir 'lib' 'path' 'PathResolution.psm1'
+if ($pathResolutionPath -and -not [string]::IsNullOrWhiteSpace($pathResolutionPath) -and -not (Test-Path -LiteralPath $pathResolutionPath)) {
     throw "PathResolution module not found at: $pathResolutionPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction Stop
 
 # Import ModuleImport (bootstrap)
 $moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
-if (-not (Test-Path $moduleImportPath)) {
+if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and -not (Test-Path -LiteralPath $moduleImportPath)) {
     throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
@@ -56,6 +56,9 @@ $fragReadme = Join-Path $scriptDir 'check-comment-help.ps1'
 # Determine which PowerShell executable to use
 $psExe = Get-PowerShellExecutable
 
+# Build path to duplicate function check
+$duplicateCheck = Join-Path $utilsDir 'metrics' 'find-duplicate-functions.ps1'
+
 # Run validation checks in sequence
 # Note: format is run separately in pre-commit hook before validation
 $checks = @(
@@ -64,6 +67,7 @@ $checks = @(
     @{ Name = 'spellcheck'; Path = $spellcheck }
     @{ Name = 'comment-based help check'; Path = $fragReadme }
     @{ Name = 'idempotency'; Path = $idemp }
+    @{ Name = 'duplicate functions'; Path = $duplicateCheck }
 )
 
 foreach ($check in $checks) {
@@ -74,5 +78,5 @@ foreach ($check in $checks) {
     }
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: security + lint + spellcheck + comment help + idempotency passed"
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: security + lint + spellcheck + comment help + idempotency + duplicate functions passed"
 

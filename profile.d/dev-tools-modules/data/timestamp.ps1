@@ -16,7 +16,7 @@ function Initialize-DevTools-Timestamp {
     Set-Item -Path Function:Global:_ConvertFrom-Epoch -Value {
         param([long]$Epoch, [switch]$Milliseconds)
         $epochSeconds = if ($Milliseconds) { $Epoch / 1000 } else { $Epoch }
-        [DateTimeOffset]::FromUnixTimeSeconds($epochSeconds).DateTime
+        [DateTimeOffset]::FromUnixTimeSeconds($epochSeconds).LocalDateTime
     } -Force
 
     Set-Item -Path Function:Global:_ConvertTo-Epoch -Value {
@@ -77,5 +77,5 @@ function ConvertTo-Epoch {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertTo-Epoch @PSBoundParameters
 }
-Set-Alias -Name date-to-epoch -Value ConvertTo-Epoch -ErrorAction SilentlyContinue
 
+Set-Alias -Name date-to-epoch -Value ConvertTo-Epoch -ErrorAction SilentlyContinue

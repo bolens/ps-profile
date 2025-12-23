@@ -16,14 +16,42 @@ scripts/lib/ModuleImport.psm1
 #>
 
 # Import dependencies (PathResolution for Get-RepoRoot, Cache for caching support)
-$pathResolutionModulePath = Join-Path $PSScriptRoot 'PathResolution.psm1'
-$cacheModulePath = Join-Path $PSScriptRoot 'Cache.psm1'
-
-if (Test-Path $pathResolutionModulePath) {
-    Import-Module $pathResolutionModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+# Note: These are now in subdirectories (path/ and utilities/)
+# Use SafeImport module if available for safer imports
+$safeImportModulePath = Join-Path $PSScriptRoot 'core' 'SafeImport.psm1'
+if ($safeImportModulePath -and -not [string]::IsNullOrWhiteSpace($safeImportModulePath) -and (Test-Path -LiteralPath $safeImportModulePath)) {
+    Import-Module $safeImportModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
-if (Test-Path $cacheModulePath) {
-    Import-Module $cacheModulePath -ErrorAction SilentlyContinue
+
+# Import ErrorHandling module if available for consistent error action preference handling
+$errorHandlingModulePath = Join-Path $PSScriptRoot 'core' 'ErrorHandling.psm1'
+if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+    Import-ModuleSafely -ModulePath $errorHandlingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+else {
+    # Fallback to manual validation
+    if ($errorHandlingModulePath -and -not [string]::IsNullOrWhiteSpace($errorHandlingModulePath) -and (Test-Path -LiteralPath $errorHandlingModulePath)) {
+        Import-Module $errorHandlingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+    }
+}
+
+# Import PathResolution and Cache modules
+$pathResolutionModulePath = Join-Path $PSScriptRoot 'path' 'PathResolution.psm1'
+$cacheModulePath = Join-Path $PSScriptRoot 'utilities' 'Cache.psm1'
+
+# Use Import-ModuleSafely if available, otherwise fall back to manual check
+if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+    Import-ModuleSafely -ModulePath $pathResolutionModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+    Import-ModuleSafely -ModulePath $cacheModulePath -ErrorAction SilentlyContinue
+}
+else {
+    # Fallback to manual validation
+    if ($pathResolutionModulePath -and -not [string]::IsNullOrWhiteSpace($pathResolutionModulePath) -and (Test-Path -LiteralPath $pathResolutionModulePath)) {
+        Import-Module $pathResolutionModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+    }
+    if ($cacheModulePath -and -not [string]::IsNullOrWhiteSpace($cacheModulePath) -and (Test-Path -LiteralPath $cacheModulePath)) {
+        Import-Module $cacheModulePath -ErrorAction SilentlyContinue
+    }
 }
 
 <#
@@ -43,13 +71,14 @@ if (Test-Path $cacheModulePath) {
     System.String. The absolute path to the scripts/lib directory.
 
 .EXAMPLE
-    $libPath = Get-LibPath -ScriptPath $PSScriptRoot
-    Import-Module (Join-Path $libPath 'Logging.psm1') -DisableNameChecking -ErrorAction Stop
+    # Note: Use Import-LibModule instead of direct paths (automatically resolves subdirectories)
+    Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 .EXAMPLE
+    # Direct path import (requires subdirectory path)
     $libPath = Get-LibPath -ScriptPath $PSScriptRoot
-    $modulePath = Join-Path $libPath 'ExitCodes.psm1'
-    if (Test-Path $modulePath) {
+    $modulePath = Join-Path $libPath 'core' 'ExitCodes.psm1'
+    if ($modulePath -and -not [string]::IsNullOrWhiteSpace($modulePath) -and (Test-Path -LiteralPath $modulePath)) {
         Import-Module $modulePath -DisableNameChecking -ErrorAction Stop
     }
 #>
@@ -61,8 +90,23 @@ function Get-LibPath {
         [string]$ScriptPath
     )
 
+    # Validate ScriptPath first before any operations
+    if (-not $ScriptPath -or [string]::IsNullOrWhiteSpace($ScriptPath)) {
+        throw "ScriptPath cannot be null or empty"
+    }
+    if ($ScriptPath -isnot [string]) {
+        $ScriptPath = [string]$ScriptPath
+    }
+
     # Cache lib path resolution (1 hour TTL since directory structure rarely changes)
-    $cacheKey = "LibPath_$ScriptPath"
+    # Use CacheKey module if available for consistent key generation
+    $cacheKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
+        # New-CacheKey expects Components to be an array, wrap single string in array
+        New-CacheKey -Prefix 'LibPath' -Components @($ScriptPath)
+    }
+    else {
+        "LibPath_$ScriptPath"
+    }
     if (Get-Command Get-CachedValue -ErrorAction SilentlyContinue) {
         $cachedResult = Get-CachedValue -Key $cacheKey
         if ($null -ne $cachedResult) {
@@ -80,8 +124,17 @@ function Get-LibPath {
         $libPath = Join-Path $repoRoot 'scripts' 'lib'
 
         # Verify scripts/lib directory exists
-        if (-not (Test-Path $libPath)) {
-            throw "scripts/lib directory not found at: $libPath"
+        # Use Validation module if available, otherwise fall back to manual check
+        if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+            if (-not (Test-ValidPath -Path $libPath -PathType Directory)) {
+                throw "scripts/lib directory not found at: $libPath"
+            }
+        }
+        else {
+            # Fallback to manual validation
+            if (-not ($libPath -and -not [string]::IsNullOrWhiteSpace($libPath) -and (Test-Path -LiteralPath $libPath))) {
+                throw "scripts/lib directory not found at: $libPath"
+            }
         }
 
         # Normalize to absolute path
@@ -207,7 +260,102 @@ function Import-LibModule {
     else {
         "$ModuleName.psm1"
     }
-    $modulePath = Join-Path $libPath $moduleFileName
+    
+    # Search for module in subdirectories first, then root
+    # Define subdirectory mapping based on organization
+    $subdirectoryMap = @{
+        'ModuleImport'            = $null  # Stays in root
+        'ExitCodes'               = 'core'
+        'Logging'                 = 'core'
+        'Platform'                = 'core'
+        'FragmentConfig'          = 'fragment'
+        'FragmentErrorHandling'   = 'fragment'
+        'FragmentIdempotency'     = 'fragment'
+        'FragmentLoading'         = 'fragment'
+        'PathResolution'          = 'path'
+        'PathUtilities'           = 'path'
+        'PathValidation'          = 'path'
+        'FileContent'             = 'file'
+        'FileFiltering'           = 'file'
+        'FileSystem'              = 'file'
+        'CodeMetrics'             = 'metrics'
+        'CodeQualityScore'        = 'metrics'
+        'MetricsHistory'          = 'metrics'
+        'MetricsSnapshot'         = 'metrics'
+        'MetricsTrendAnalysis'    = 'metrics'
+        'PerformanceAggregation'  = 'performance'
+        'PerformanceMeasurement'  = 'performance'
+        'PerformanceRegression'   = 'performance'
+        'AstParsing'              = 'code-analysis'
+        'CodeSimilarityDetection' = 'code-analysis'
+        'CommentHelp'             = 'code-analysis'
+        'TestCoverage'            = 'code-analysis'
+        'Cache'                   = 'utilities'
+        'Collections'             = 'utilities'
+        'Command'                 = 'utilities'
+        'DataFile'                = 'utilities'
+        'JsonUtilities'           = 'utilities'
+        'RegexUtilities'          = 'utilities'
+        'StringSimilarity'        = 'utilities'
+        'Module'                  = 'runtime'
+        'NodeJs'                  = 'runtime'
+        'PowerShellDetection'     = 'runtime'
+        'Python'                  = 'runtime'
+        'ScoopDetection'          = 'runtime'
+        'Parallel'                = 'parallel'
+    }
+    
+    # Remove .psm1 extension for lookup if present
+    $moduleNameForLookup = if ($ModuleName.EndsWith('.psm1')) {
+        $ModuleName.Substring(0, $ModuleName.Length - 5)
+    }
+    else {
+        $ModuleName
+    }
+    
+    # Determine module path based on subdirectory mapping
+    $modulePath = $null
+    if ($subdirectoryMap.ContainsKey($moduleNameForLookup)) {
+        $subdir = $subdirectoryMap[$moduleNameForLookup]
+        if ($null -eq $subdir) {
+            # Module stays in root (e.g., ModuleImport)
+            $modulePath = Join-Path $libPath $moduleFileName
+        }
+        else {
+            # Module is in a subdirectory
+            $modulePath = Join-Path $libPath $subdir $moduleFileName
+        }
+    }
+    else {
+        # Fallback: try root first, then search all subdirectories
+        $modulePath = Join-Path $libPath $moduleFileName
+        
+        # Use Validation module if available for path checking
+        $pathValid = if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+            Test-ValidPath -Path $modulePath -PathType File -MustExist:$false
+        }
+        else {
+            $modulePath -and -not [string]::IsNullOrWhiteSpace($modulePath)
+        }
+        
+        if ($pathValid -and -not (Test-Path -LiteralPath $modulePath)) {
+            # Search all subdirectories
+            $subdirs = @('core', 'fragment', 'path', 'file', 'metrics', 'performance', 'code-analysis', 'utilities', 'runtime', 'parallel')
+            foreach ($subdir in $subdirs) {
+                $testPath = Join-Path $libPath $subdir $moduleFileName
+                $testPathValid = if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+                    Test-ValidPath -Path $testPath -PathType File
+                }
+                else {
+                    $testPath -and -not [string]::IsNullOrWhiteSpace($testPath) -and (Test-Path -LiteralPath $testPath)
+                }
+                if ($testPathValid) {
+                    $modulePath = $testPath
+                    break
+                }
+            }
+        }
+    }
 
     # Get ErrorAction preference from common parameters
     $errorActionPreference = if ($PSBoundParameters.ContainsKey('ErrorAction')) {
@@ -218,7 +366,15 @@ function Import-LibModule {
     }
 
     # Verify module file exists before attempting import
-    if (-not (Test-Path $modulePath)) {
+    # Use Validation module if available, otherwise fall back to manual check
+    $moduleExists = if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+        Test-ValidPath -Path $modulePath -PathType File
+    }
+    else {
+        $modulePath -and -not [string]::IsNullOrWhiteSpace($modulePath) -and (Test-Path -LiteralPath $modulePath)
+    }
+    
+    if (-not $moduleExists) {
         if ($Required) {
             throw "Module '$ModuleName' not found at: $modulePath"
         }
@@ -333,12 +489,18 @@ function Import-LibModules {
         }
     }
 
-    # Get ErrorAction preference (from CmdletBinding common parameter)
-    $errorActionPreference = if ($PSBoundParameters.ContainsKey('ErrorAction')) {
-        $PSBoundParameters['ErrorAction']
+    # Get ErrorAction preference using ErrorHandling module if available
+    if (Get-Command Get-ErrorActionPreference -ErrorAction SilentlyContinue) {
+        $errorActionPreference = Get-ErrorActionPreference -PSBoundParameters $PSBoundParameters -Default 'Stop'
     }
     else {
-        'Stop'
+        # Fallback to manual extraction
+        $errorActionPreference = if ($PSBoundParameters.ContainsKey('ErrorAction')) {
+            $PSBoundParameters['ErrorAction']
+        }
+        else {
+            'Stop'
+        }
     }
 
     $importedModules = @()
@@ -506,8 +668,8 @@ function Initialize-ScriptEnvironment {
                     }
                 }
                 else {
+                    # ExitCodes/Exit-WithCode not available yet; surface a terminating error
                     Write-Error $errorMessage -ErrorAction Stop
-                    exit 2
                 }
             }
             throw $errorMessage
@@ -516,12 +678,24 @@ function Initialize-ScriptEnvironment {
 
     # Resolve script path to absolute
     try {
-        if (Test-Path $ScriptPath) {
-            $ScriptPath = (Resolve-Path $ScriptPath).Path
+        if ($ScriptPath -and -not [string]::IsNullOrWhiteSpace($ScriptPath)) {
+            if (Test-Path -LiteralPath $ScriptPath) {
+                $ScriptPath = (Resolve-Path $ScriptPath).Path
+            }
+            else {
+                # Script doesn't exist, but parent directory might
+                $parentDir = Split-Path -Parent $ScriptPath
+                if ($parentDir -and -not [string]::IsNullOrWhiteSpace($parentDir) -and (Test-Path -LiteralPath $parentDir)) {
+                    $parentDir = (Resolve-Path $parentDir).Path
+                    $ScriptPath = Join-Path $parentDir (Split-Path -Leaf $ScriptPath)
+                }
+                # If we couldn't resolve, keep the original ScriptPath (it might be valid for Get-RepoRoot)
+            }
         }
-        elseif (Test-Path (Split-Path -Parent $ScriptPath)) {
-            $parentDir = (Resolve-Path (Split-Path -Parent $ScriptPath)).Path
-            $ScriptPath = Join-Path $parentDir (Split-Path -Leaf $ScriptPath)
+        
+        # Ensure ScriptPath is not null or empty after resolution
+        if (-not $ScriptPath -or [string]::IsNullOrWhiteSpace($ScriptPath)) {
+            throw "ScriptPath cannot be null or empty after resolution"
         }
     }
     catch {
@@ -536,15 +710,24 @@ function Initialize-ScriptEnvironment {
                 }
             }
             else {
+                # ExitCodes/Exit-WithCode not available yet; surface a terminating error
                 Write-Error $errorMessage -ErrorAction Stop
-                exit 2
             }
         }
         throw $errorMessage
     }
 
-    # Get lib path
+    # Get lib path (always required)
+    $libPath = $null
     try {
+        # Get-LibPath requires ScriptPath to be a valid path or at least have a valid parent
+        if (-not $ScriptPath -or [string]::IsNullOrWhiteSpace($ScriptPath)) {
+            throw "ScriptPath is required to resolve lib path"
+        }
+        # Ensure ScriptPath is a string before calling Get-LibPath
+        if ($ScriptPath -isnot [string]) {
+            $ScriptPath = [string]$ScriptPath
+        }
         $libPath = Get-LibPath -ScriptPath $ScriptPath
     }
     catch {
@@ -559,8 +742,8 @@ function Initialize-ScriptEnvironment {
                 }
             }
             else {
+                # ExitCodes/Exit-WithCode not available yet; surface a terminating error
                 Write-Error $errorMessage -ErrorAction Stop
-                exit 2
             }
         }
         throw $errorMessage
@@ -570,6 +753,14 @@ function Initialize-ScriptEnvironment {
     $importedModules = @()
     if ($ImportModules.Count -gt 0) {
         try {
+            # Ensure ScriptPath is a valid string before passing to Import-LibModules
+            if (-not $ScriptPath -or [string]::IsNullOrWhiteSpace($ScriptPath)) {
+                throw "ScriptPath cannot be null or empty when importing modules"
+            }
+            if ($ScriptPath -isnot [string]) {
+                $ScriptPath = [string]$ScriptPath
+            }
+            
             $params = @{
                 ModuleNames = $ImportModules
                 ScriptPath  = $ScriptPath
@@ -593,8 +784,8 @@ function Initialize-ScriptEnvironment {
                     }
                 }
                 else {
+                    # ExitCodes/Exit-WithCode not available yet; surface a terminating error
                     Write-Error $errorMessage -ErrorAction Stop
-                    exit 2
                 }
             }
             throw $errorMessage
@@ -606,9 +797,23 @@ function Initialize-ScriptEnvironment {
     if ($GetRepoRoot) {
         try {
             if (Get-Command Get-RepoRootSafe -ErrorAction SilentlyContinue) {
-                $repoRoot = Get-RepoRootSafe -ScriptPath $ScriptPath -ExitOnError:$ExitOnError
+                # Get-RepoRootSafe has ExitOnError as a switch parameter
+                # Pass parameters directly instead of using splatting to avoid parameter binding issues
+                if ($ExitOnError) {
+                    $repoRoot = Get-RepoRootSafe -ScriptPath $ScriptPath -ExitOnError
+                }
+                else {
+                    $repoRoot = Get-RepoRootSafe -ScriptPath $ScriptPath
+                }
             }
             elseif (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
+                # Ensure ScriptPath is a valid string
+                if (-not $ScriptPath -or [string]::IsNullOrWhiteSpace($ScriptPath)) {
+                    throw "ScriptPath cannot be null or empty when calling Get-RepoRoot"
+                }
+                if ($ScriptPath -isnot [string]) {
+                    $ScriptPath = [string]$ScriptPath
+                }
                 $repoRoot = Get-RepoRoot -ScriptPath $ScriptPath
             }
             else {
@@ -627,8 +832,8 @@ function Initialize-ScriptEnvironment {
                     }
                 }
                 else {
+                    # ExitCodes/Exit-WithCode not available yet; surface a terminating error
                     Write-Error $errorMessage -ErrorAction Stop
-                    exit 2
                 }
             }
             throw $errorMessage
@@ -641,9 +846,22 @@ function Initialize-ScriptEnvironment {
         try {
             if (-not $repoRoot) {
                 if (Get-Command Get-RepoRootSafe -ErrorAction SilentlyContinue) {
-                    $repoRoot = Get-RepoRootSafe -ScriptPath $ScriptPath -ExitOnError:$ExitOnError
+                    # Pass ExitOnError switch correctly
+                    if ($ExitOnError) {
+                        $repoRoot = Get-RepoRootSafe -ScriptPath $ScriptPath -ExitOnError
+                    }
+                    else {
+                        $repoRoot = Get-RepoRootSafe -ScriptPath $ScriptPath
+                    }
                 }
                 elseif (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
+                    # Ensure ScriptPath is a valid string
+                    if (-not $ScriptPath -or [string]::IsNullOrWhiteSpace($ScriptPath)) {
+                        throw "ScriptPath cannot be null or empty when calling Get-RepoRoot"
+                    }
+                    if ($ScriptPath -isnot [string]) {
+                        $ScriptPath = [string]$ScriptPath
+                    }
                     $repoRoot = Get-RepoRoot -ScriptPath $ScriptPath
                 }
             }
@@ -670,8 +888,8 @@ function Initialize-ScriptEnvironment {
                     }
                 }
                 else {
+                    # ExitCodes/Exit-WithCode not available yet; surface a terminating error
                     Write-Error $errorMessage -ErrorAction Stop
-                    exit 2
                 }
             }
             throw $errorMessage

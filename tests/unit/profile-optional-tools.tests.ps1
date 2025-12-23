@@ -5,11 +5,37 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-    $script:NaviFragmentPath = Join-Path $script:ProfileDir '62-navi.ps1'
-    $script:GumFragmentPath = Join-Path $script:ProfileDir '63-gum.ps1'
-    $script:OriginalTestHasCommand = Get-Command Test-HasCommand -ErrorAction SilentlyContinue
+    try {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
+        }
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
+        }
+        
+        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
+        if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
+            throw "BootstrapPath is null or empty"
+        }
+        if (-not (Test-Path -LiteralPath $bootstrapPath)) {
+            throw "Bootstrap file not found at: $bootstrapPath"
+        }
+        . $bootstrapPath
+        
+        $script:NaviFragmentPath = Join-Path $script:ProfileDir 'navi.ps1'
+        $script:GumFragmentPath = Join-Path $script:ProfileDir 'gum.ps1'
+        $script:OriginalTestHasCommand = Get-Command Test-HasCommand -ErrorAction SilentlyContinue
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize optional tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
+    }
 }
 
 AfterAll {
@@ -63,66 +89,105 @@ Describe 'Profile optional tool helpers' {
         }
 
         It 'Invoke-NaviSearch forwards query when available' {
-            Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
-            function global:navi {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $null = $script:naviCallHistory.Add($Arguments)
+            try {
+                Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
+                function global:navi {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    # Ensure Arguments is not null before adding
+                    $argsToAdd = if ($null -eq $Arguments) { @() } else { $Arguments }
+                    $null = $script:naviCallHistory.Add($argsToAdd)
+                }
+
+                . $script:NaviFragmentPath
+
+                Invoke-NaviSearch -Query 'git status'
+                $script:naviCallHistory.Count | Should -Be 1 -Because "First call should be recorded"
+                $firstCall = [object[]]$script:naviCallHistory[0]
+                $firstCall | Should -Contain '--query' -Because "First call should contain --query flag"
+                $firstCall | Should -Contain 'git status' -Because "First call should contain the query string"
+
+                Invoke-NaviSearch
+                $script:naviCallHistory.Count | Should -Be 2 -Because "Second call should be recorded"
+                $secondCall = [object[]]$script:naviCallHistory[1]
+                $secondCall.Count | Should -Be 0 -Because "Second call without query should have no arguments"
             }
-
-            . $script:NaviFragmentPath
-
-            Invoke-NaviSearch -Query 'git status'
-            $script:naviCallHistory.Count | Should -Be 1
-            $firstCall = [object[]]$script:naviCallHistory[0]
-            $firstCall | Should -Contain '--query'
-            $firstCall | Should -Contain 'git status'
-
-            Invoke-NaviSearch
-            $script:naviCallHistory.Count | Should -Be 2
-            $secondCall = [object[]]$script:naviCallHistory[1]
-            $secondCall.Count | Should -Be 0
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Invoke-NaviSearch forwards query when available'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "NaviSearch test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Invoke-NaviBest toggles best flag and optional query' {
-            Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
-            function global:navi {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $null = $script:naviCallHistory.Add($Arguments)
+            try {
+                Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
+                function global:navi {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    # Ensure Arguments is not null before adding
+                    $argsToAdd = if ($null -eq $Arguments) { @() } else { $Arguments }
+                    $null = $script:naviCallHistory.Add($argsToAdd)
+                }
+
+                . $script:NaviFragmentPath
+
+                Invoke-NaviBest -Query 'deploy'
+                $firstCall = [object[]]$script:naviCallHistory[0]
+                $firstCall | Should -Contain '--best' -Because "NaviBest should include --best flag"
+                $firstCall | Should -Contain '--query' -Because "NaviBest should include --query flag"
+                $firstCall | Should -Contain 'deploy' -Because "NaviBest should include the query string"
+
+                Invoke-NaviBest
+                $secondCall = [object[]]$script:naviCallHistory[1]
+                $secondCall | Should -Contain '--best' -Because "NaviBest without query should still include --best flag"
+                $secondCall.Count | Should -Be 1 -Because "NaviBest without query should have only --best flag"
             }
-
-            . $script:NaviFragmentPath
-
-            Invoke-NaviBest -Query 'deploy'
-            $firstCall = [object[]]$script:naviCallHistory[0]
-            $firstCall | Should -Contain '--best'
-            $firstCall | Should -Contain '--query'
-            $firstCall | Should -Contain 'deploy'
-
-            Invoke-NaviBest
-            $secondCall = [object[]]$script:naviCallHistory[1]
-            $secondCall | Should -Contain '--best'
-            $secondCall.Count | Should -Be 1
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Invoke-NaviBest toggles best flag and optional query'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "NaviBest test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Invoke-NaviPrint honours optional query' {
-            Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
-            function global:navi {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $null = $script:naviCallHistory.Add($Arguments)
+            try {
+                Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
+                function global:navi {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    # Ensure Arguments is not null before adding
+                    $argsToAdd = if ($null -eq $Arguments) { @() } else { $Arguments }
+                    $null = $script:naviCallHistory.Add($argsToAdd)
+                }
+
+                . $script:NaviFragmentPath
+
+                Invoke-NaviPrint -Query 'status'
+                $firstCall = [object[]]$script:naviCallHistory[0]
+                $firstCall | Should -Contain '--print' -Because "NaviPrint should include --print flag"
+                $firstCall | Should -Contain '--query' -Because "NaviPrint should include --query flag when query provided"
+                $firstCall | Should -Contain 'status' -Because "NaviPrint should include the query string"
+
+                Invoke-NaviPrint
+                $secondCall = [object[]]$script:naviCallHistory[1]
+                $secondCall | Should -Contain '--print' -Because "NaviPrint without query should still include --print flag"
+                $secondCall.Count | Should -Be 1 -Because "NaviPrint without query should have only --print flag"
             }
-
-            . $script:NaviFragmentPath
-
-            Invoke-NaviPrint -Query 'status'
-            $firstCall = [object[]]$script:naviCallHistory[0]
-            $firstCall | Should -Contain '--print'
-            $firstCall | Should -Contain '--query'
-            $firstCall | Should -Contain 'status'
-
-            Invoke-NaviPrint
-            $secondCall = [object[]]$script:naviCallHistory[1]
-            $secondCall | Should -Contain '--print'
-            $secondCall.Count | Should -Be 1
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Invoke-NaviPrint honours optional query'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "NaviPrint test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'warns when navi is unavailable' {

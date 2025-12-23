@@ -11,6 +11,10 @@
 .NOTES
     This is an internal initialization function and should not be called directly.
     Requires PSToml module for TOML output conversions.
+    
+    Internal Dependencies:
+    - helpers-xml.ps1: Provides Convert-JsonToXml for TOML to XML conversions
+    - helpers-toon.ps1: Provides Convert-JsonToToon for TOML to TOON conversions
 #>
 function Initialize-FileConversion-Toml {
     # Ensure PSToml module is available for TOML output conversions
@@ -21,7 +25,24 @@ function Initialize-FileConversion-Toml {
     }
 
     # TOML to JSON
-    Set-Item -Path Function:Global:_ConvertFrom-TomlToJson -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toml$', '.json' }; $json = & yq eval -o=json -p toml '.' $InputPath 2>$null; if ($LASTEXITCODE -eq 0 -and $json) { $json | Set-Content -LiteralPath $OutputPath -Encoding UTF8 } else { throw "yq command failed" } } catch { Write-Error "Failed to convert TOML to JSON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-TomlToJson -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toml$', '.json'
+            }
+            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            if ($LASTEXITCODE -eq 0 -and $json) {
+                $json | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+            }
+            else {
+                throw "yq command failed"
+            }
+        }
+        catch {
+            Write-Error "Failed to convert TOML to JSON: $_"
+        }
+    } -Force
 
     # JSON to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromJson -Value {
@@ -46,7 +67,24 @@ function Initialize-FileConversion-Toml {
     } -Force
 
     # TOML to YAML
-    Set-Item -Path Function:Global:_ConvertFrom-TomlToYaml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toml$', '.yaml' }; $yaml = & yq eval -P -p toml -o yaml '.' $InputPath 2>$null; if ($LASTEXITCODE -eq 0 -and $yaml) { $yaml | Set-Content -LiteralPath $OutputPath -Encoding UTF8 } else { throw "yq command failed" } } catch { Write-Error "Failed to convert TOML to YAML: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-TomlToYaml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toml$', '.yaml'
+            }
+            $yaml = & yq eval -P -p toml -o yaml '.' $InputPath 2>$null
+            if ($LASTEXITCODE -eq 0 -and $yaml) {
+                $yaml | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+            }
+            else {
+                throw "yq command failed"
+            }
+        }
+        catch {
+            Write-Error "Failed to convert TOML to YAML: $_"
+        }
+    } -Force
 
     # YAML to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromYaml -Value {
@@ -75,7 +113,26 @@ function Initialize-FileConversion-Toml {
     } -Force
 
     # TOML to TOON
-    Set-Item -Path Function:Global:_ConvertFrom-TomlToToon -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toml$', '.toon' }; $json = & yq eval -o=json -p toml '.' $InputPath 2>$null; if ($LASTEXITCODE -eq 0 -and $json) { $jsonObj = $json | ConvertFrom-Json; $toon = Convert-JsonToToon -JsonObject $jsonObj; Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8 } else { throw "yq command failed" } } catch { Write-Error "Failed to convert TOML to TOON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-TomlToToon -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toml$', '.toon'
+            }
+            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            if ($LASTEXITCODE -eq 0 -and $json) {
+                $jsonObj = $json | ConvertFrom-Json
+                $toon = Convert-JsonToToon -JsonObject $jsonObj
+                Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8
+            }
+            else {
+                throw "yq command failed"
+            }
+        }
+        catch {
+            Write-Error "Failed to convert TOML to TOON: $_"
+        }
+    } -Force
 
     # TOON to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromToon -Value {
@@ -101,7 +158,26 @@ function Initialize-FileConversion-Toml {
     } -Force
 
     # TOML to XML
-    Set-Item -Path Function:Global:_ConvertFrom-TomlToXml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toml$', '.xml' }; $json = & yq eval -o=json -p toml '.' $InputPath 2>$null; if ($LASTEXITCODE -eq 0 -and $json) { $jsonObj = $json | ConvertFrom-Json; $xml = Convert-JsonToXml -JsonObject $jsonObj; $xml.Save($OutputPath) } else { throw "yq command failed" } } catch { Write-Error "Failed to convert TOML to XML: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-TomlToXml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toml$', '.xml'
+            }
+            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            if ($LASTEXITCODE -eq 0 -and $json) {
+                $jsonObj = $json | ConvertFrom-Json
+                $xml = Convert-JsonToXml -JsonObject $jsonObj
+                $xml.Save($OutputPath)
+            }
+            else {
+                throw "yq command failed"
+            }
+        }
+        catch {
+            Write-Error "Failed to convert TOML to XML: $_"
+        }
+    } -Force
 
     # XML to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromXml -Value {

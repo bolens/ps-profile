@@ -4,7 +4,7 @@
 # ===============================================
 
 # GitHub CLI helpers
-# Use Test-HasCommand which handles caching and fallback internally
+# Use Test-CachedCommand which handles caching and fallback internally
 if (-not (Test-Path Function:New-GitHubPullRequest)) {
     <#
     .SYNOPSIS
@@ -14,7 +14,7 @@ if (-not (Test-Path Function:New-GitHubPullRequest)) {
     #>
     function New-GitHubPullRequest {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
-        if (Test-HasCommand gh) {
+        if (Test-CachedCommand gh) {
             gh pr create @a
         }
         else {
@@ -33,7 +33,7 @@ if (-not (Test-Path Function:Show-GitHubPullRequest)) {
     #>
     function Show-GitHubPullRequest {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
-        if (Test-HasCommand gh) {
+        if (Test-CachedCommand gh) {
             gh pr view --web @a
         }
         else {

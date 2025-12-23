@@ -9,8 +9,8 @@ scripts/utils/code-quality/modules/BaselineComparison.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     try {
         Import-Module $loggingModulePath -DisableNameChecking -ErrorAction Stop
     }
@@ -20,8 +20,8 @@ if (Test-Path $loggingModulePath) {
 }
 
 # Try to import JsonUtilities module from scripts/lib (optional)
-$jsonUtilitiesModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'JsonUtilities.psm1'
-if (Test-Path $jsonUtilitiesModulePath) {
+$jsonUtilitiesModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'utilities' 'JsonUtilities.psm1'
+if ($jsonUtilitiesModulePath -and -not [string]::IsNullOrWhiteSpace($jsonUtilitiesModulePath) -and (Test-Path -LiteralPath $jsonUtilitiesModulePath)) {
     try {
         Import-Module $jsonUtilitiesModulePath -DisableNameChecking -ErrorAction Stop
     }
@@ -66,7 +66,7 @@ function Compare-PerformanceBaseline {
         [int]$Threshold = 5
     )
 
-    if (-not (Test-Path $BaselinePath)) {
+    if ($BaselinePath -and -not [string]::IsNullOrWhiteSpace($BaselinePath) -and -not (Test-Path -LiteralPath $BaselinePath)) {
         Write-ScriptMessage -Message "Baseline file not found: $BaselinePath" -LogLevel 'Warning'
         return @{
             Success       = $false
@@ -215,7 +215,9 @@ Overall Performance Changes:
 
     if ($Comparison.OverallChange.DurationChange) {
         $change = $Comparison.OverallChange.DurationChange
-        $report += "Total Duration: $($change.Baseline) -> $($change.Current) ($($change.ChangePercent)% change)`n"
+        $baselineSeconds = [Math]::Round($change.Baseline.TotalSeconds, 2)
+        $currentSeconds = [Math]::Round($change.Current.TotalSeconds, 2)
+        $report += "Total Duration: ${baselineSeconds}s -> ${currentSeconds}s ($($change.ChangePercent)% change)`n"
         if ($change.IsRegression) {
             $report += "WARNING: Duration increased by more than $($Threshold)%`n"
         }
@@ -231,14 +233,18 @@ Overall Performance Changes:
     if ($Comparison.Regressions.Count -gt 0) {
         $report += "`n`nPerformance Regressions:`n------------------------`n"
         foreach ($regression in $Comparison.Regressions) {
-            $report += "WARNING: $($regression.TestName)`n    File: $($regression.File)`n    Duration: $($regression.Baseline) -> $($regression.Current) ($($regression.ChangePercent)% change)`n"
+            $baselineSeconds = [Math]::Round($regression.Baseline.TotalSeconds, 2)
+            $currentSeconds = [Math]::Round($regression.Current.TotalSeconds, 2)
+            $report += "WARNING: $($regression.TestName)`n    File: $($regression.File)`n    Duration: ${baselineSeconds}s -> ${currentSeconds}s ($($regression.ChangePercent)% change)`n"
         }
     }
 
     if ($Comparison.Improvements.Count -gt 0) {
         $report += "`n`nPerformance Improvements:`n-------------------------`n"
         foreach ($improvement in $Comparison.Improvements) {
-            $report += "IMPROVEMENT: $($improvement.TestName)`n    File: $($improvement.File)`n    Duration: $($improvement.Baseline) -> $($improvement.Current) ($($improvement.ChangePercent)% change)`n"
+            $baselineSeconds = [Math]::Round($improvement.Baseline.TotalSeconds, 2)
+            $currentSeconds = [Math]::Round($improvement.Current.TotalSeconds, 2)
+            $report += "IMPROVEMENT: $($improvement.TestName)`n    File: $($improvement.File)`n    Duration: ${baselineSeconds}s -> ${currentSeconds}s ($($improvement.ChangePercent)% change)`n"
         }
     }
 

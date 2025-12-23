@@ -14,11 +14,11 @@ BeforeAll {
     if (-not (Test-Path $script:ProfileDir)) {
         throw "Profile directory not found: $script:ProfileDir"
     }
-    $script:BootstrapPath = Join-Path $script:ProfileDir '00-bootstrap.ps1'
+    $script:BootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
     . $script:BootstrapPath
-    . (Join-Path $script:ProfileDir '05-utilities.ps1')
-    . (Join-Path $script:ProfileDir '11-git.ps1')
-    . (Join-Path $script:ProfileDir '33-aliases.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
+    . (Join-Path $script:ProfileDir 'git.ps1')
+    . (Join-Path $script:ProfileDir 'aliases.ps1')
 }
 
 Describe 'Profile aliases' {

@@ -166,7 +166,7 @@ function Test-TestEnvironmentHealth {
                 Message = $null
             }
 
-            if (Test-Path $path) {
+            if ($path -and -not [string]::IsNullOrWhiteSpace($path) -and (Test-Path -LiteralPath $path)) {
                 $check.Passed = $true
                 $check.Message = "Path $path exists"
             }

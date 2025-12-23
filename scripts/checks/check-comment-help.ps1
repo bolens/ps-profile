@@ -30,15 +30,15 @@ param(
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
-$pathResolutionPath = Join-Path $scriptsDir 'lib' 'PathResolution.psm1'
-if (-not (Test-Path $pathResolutionPath)) {
+$pathResolutionPath = Join-Path $scriptsDir 'lib' 'path' 'PathResolution.psm1'
+if ($pathResolutionPath -and -not [string]::IsNullOrWhiteSpace($pathResolutionPath) -and -not (Test-Path -LiteralPath $pathResolutionPath)) {
     throw "PathResolution module not found at: $pathResolutionPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction Stop
 
 # Import ModuleImport (bootstrap)
 $moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
-if (-not (Test-Path $moduleImportPath)) {
+if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and -not (Test-Path -LiteralPath $moduleImportPath)) {
     throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
@@ -79,7 +79,7 @@ $issueCount = 0
     System.String[]. Array of function names that are missing comment-based help.
 
 .EXAMPLE
-    $undocumented = Get-FunctionsWithoutCommentHelp -Path "profile.d/01-env.ps1"
+    $undocumented = Get-FunctionsWithoutCommentHelp -Path "profile.d/env.ps1"
     if ($undocumented.Count -gt 0) {
         Write-Warning "Functions without help: $($undocumented -join ', ')"
     }

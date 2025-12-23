@@ -33,7 +33,7 @@ jobs:
       - name: Install Pester
         run: ${{ matrix.powershell }} -NoProfile -Command "Install-Module -Name Pester -Force -Scope CurrentUser"
       - name: Run Pester
-        run: ${{ matrix.powershell }} -NoProfile -Command 'scripts/utils/run-pester.ps1 -Coverage'
+        run: ${{ matrix.powershell }} -NoProfile -Command 'scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel'
       - name: Upload test results
         uses: actions/upload-artifact@v5
         with:

@@ -43,7 +43,7 @@ function Get-TestExecutionOrder {
         }
 
         # Analyze file content for dependencies (basic implementation)
-        if (Test-Path $path) {
+        if ($path -and -not [string]::IsNullOrWhiteSpace($path) -and (Test-Path -LiteralPath $path)) {
             $content = Get-Content $path -Raw
 
             # Look for dependency markers in comments

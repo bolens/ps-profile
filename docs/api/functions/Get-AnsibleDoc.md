@@ -16,11 +16,24 @@ Get-AnsibleDoc
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments to pass to ansible-doc.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-AnsibleDoc ping
+``
+
+### Example 2
+
+`powershell
+Get-AnsibleDoc -l
+``
 
 ## Aliases
 

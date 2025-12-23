@@ -14,15 +14,15 @@
 if (-not (Test-Path "Function:\\Ensure-FileListing")) {
     function Ensure-FileListing {
         # Listing helpers (prefer eza when available)
-        Set-Item -Path Function:global:Get-ChildItemDetailed -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-HasCommand eza) { eza -la --icons --git @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
+        Set-Item -Path Function:global:Get-ChildItemDetailed -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-CachedCommand eza) { eza -la --icons --git @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
         Set-Alias -Name ll -Value Get-ChildItemDetailed -Scope Global -ErrorAction SilentlyContinue
-        Set-Item -Path Function:global:Get-ChildItemAll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-HasCommand eza) { eza -la --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
+        Set-Item -Path Function:global:Get-ChildItemAll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-CachedCommand eza) { eza -la --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
         Set-Alias -Name la -Value Get-ChildItemAll -Scope Global -ErrorAction SilentlyContinue
-        Set-Item -Path Function:global:Get-ChildItemVisible -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-HasCommand eza) { eza --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
+        Set-Item -Path Function:global:Get-ChildItemVisible -Value { param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) if (Test-CachedCommand eza) { eza --icons @fileArgs } else { Get-ChildItem -Force | Format-Table } } -Force | Out-Null
         Set-Alias -Name lx -Value Get-ChildItemVisible -Scope Global -ErrorAction SilentlyContinue
         Set-Item -Path Function:global:Get-DirectoryTree -Value { 
             param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs) 
-            if (Test-HasCommand eza) { 
+            if (Test-CachedCommand eza) { 
                 try {
                     eza -T --icons @fileArgs
                 }

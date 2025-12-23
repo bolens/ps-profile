@@ -9,11 +9,11 @@ tests/unit/library-fragment-config.tests.ps1
 
 BeforeAll {
     # Import PathResolution first (FragmentConfig depends on it)
-    $pathResolutionModulePath = Get-TestPath -RelativePath 'scripts\lib\PathResolution.psm1' -StartPath $PSScriptRoot -EnsureExists
+    $pathResolutionModulePath = Get-TestPath -RelativePath 'scripts\lib\path\PathResolution.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $pathResolutionModulePath -DisableNameChecking -ErrorAction Stop
 
     # Import the FragmentConfig module
-    $fragmentConfigPath = Get-TestPath -RelativePath 'scripts\lib\FragmentConfig.psm1' -StartPath $PSScriptRoot -EnsureExists
+    $fragmentConfigPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentConfig.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $fragmentConfigPath -DisableNameChecking -ErrorAction Stop
 
     # Get test data directory
@@ -55,11 +55,11 @@ Describe 'Get-FragmentConfig' {
             New-Item -Path $tempProfileDir -ItemType Directory -Force | Out-Null
 
             $configJson = @{
-                disabled     = @('11-git', '22-containers')
-                loadOrder    = @('00-bootstrap', '01-env', '05-utilities')
+                disabled     = @('git', 'containers')
+                loadOrder    = @('bootstrap', 'env', 'utilities')
                 environments = @{
-                    minimal     = @('00-bootstrap', '01-env')
-                    development = @('00-bootstrap', '01-env', '11-git')
+                    minimal     = @('bootstrap', 'env')
+                    development = @('bootstrap', 'env', 'git')
                 }
                 featureFlags = @{
                     enableAdvancedFeatures = $true
@@ -75,11 +75,11 @@ Describe 'Get-FragmentConfig' {
 
             $config = Get-FragmentConfig -ProfileDir $tempProfileDir
 
-            $config.DisabledFragments | Should -Contain '11-git'
-            $config.DisabledFragments | Should -Contain '22-containers'
-            $config.LoadOrder | Should -Contain '00-bootstrap'
-            $config.Environments['minimal'] | Should -Contain '00-bootstrap'
-            $config.Environments['development'] | Should -Contain '11-git'
+            $config.DisabledFragments | Should -Contain 'git'
+            $config.DisabledFragments | Should -Contain 'containers'
+            $config.LoadOrder | Should -Contain 'bootstrap'
+            $config.Environments['minimal'] | Should -Contain 'bootstrap'
+            $config.Environments['development'] | Should -Contain 'git'
             $config.FeatureFlags['enableAdvancedFeatures'] | Should -Be $true
             $config.Performance.batchLoad | Should -Be $true
             $config.Performance.maxFragmentTime | Should -Be 1000
@@ -162,15 +162,15 @@ Describe 'Get-DisabledFragments' {
         New-Item -Path $tempProfileDir -ItemType Directory -Force | Out-Null
 
         $configJson = @{
-            disabled = @('11-git', '22-containers')
+            disabled = @('git', 'containers')
         } | ConvertTo-Json
 
         $configPath = Join-Path $tempProfileDir '.profile-fragments.json'
         Set-Content -Path $configPath -Value $configJson
 
         $disabled = Get-DisabledFragments -ProfileDir $tempProfileDir
-        $disabled | Should -Contain '11-git'
-        $disabled | Should -Contain '22-containers'
+        $disabled | Should -Contain 'git'
+        $disabled | Should -Contain 'containers'
 
         Remove-Item $tempProfileDir -Recurse -Force -ErrorAction SilentlyContinue
     }
@@ -186,7 +186,7 @@ Describe 'Get-CurrentEnvironmentFragments' {
 
         $configJson = @{
             environments = @{
-                minimal = @('00-bootstrap', '01-env')
+                minimal = @('bootstrap', 'env')
             }
         } | ConvertTo-Json
 
@@ -197,8 +197,8 @@ Describe 'Get-CurrentEnvironmentFragments' {
         try {
             $env:PS_PROFILE_ENVIRONMENT = 'minimal'
             $fragments = Get-CurrentEnvironmentFragments -ProfileDir $tempProfileDir
-            $fragments | Should -Contain '00-bootstrap'
-            $fragments | Should -Contain '01-env'
+            $fragments | Should -Contain 'bootstrap'
+            $fragments | Should -Contain 'env'
         }
         finally {
             $env:PS_PROFILE_ENVIRONMENT = $originalEnv

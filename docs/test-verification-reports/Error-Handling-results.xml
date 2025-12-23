@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="11" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2025-12-01" time="09:33:12">
+  <environment cwd="C:\Users\bolen\Documents\PowerShell" clr-version="10.0.0" nunit-version="2.5.8.0" platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk4\Partition4" user-domain="BAMBOO" machine-name="BAMBOO" os-version="10.0.28000" user="bolen" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="5.3362" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\error-handling\error-handling.tests.ps1" executed="True" result="Success" success="True" time="5.3362" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\error-handling\error-handling.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Error Handling Module" executed="True" result="Success" success="True" time="3.5546" asserts="0" description="Error Handling Module">
+            <results>
+              <test-suite type="TestFixture" name="Error Handling Module.Write-ProfileError" executed="True" result="Success" success="True" time="0.2768" asserts="0" description="Error Handling Module.Write-ProfileError">
+                <results>
+                  <test-case description="logs error to file when debug mode is enabled" name="Error Handling Module.Write-ProfileError.logs error to file when debug mode is enabled" time="0.1964" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="displays warning when debug mode is disabled" name="Error Handling Module.Write-ProfileError.displays warning when debug mode is disabled" time="0.0272" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="handles different error categories" name="Error Handling Module.Write-ProfileError.handles different error categories" time="0.02" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Error Handling Module.Invoke-ProfileErrorHandler" executed="True" result="Success" success="True" time="0.3534" asserts="0" description="Error Handling Module.Invoke-ProfileErrorHandler">
+                <results>
+                  <test-case description="provides suggestions for CommandNotFoundException" name="Error Handling Module.Invoke-ProfileErrorHandler.provides suggestions for CommandNotFoundException" time="0.0281" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="provides suggestions for network errors" name="Error Handling Module.Invoke-ProfileErrorHandler.provides suggestions for network errors" time="0.0118" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="provides suggestions for access denied errors" name="Error Handling Module.Invoke-ProfileErrorHandler.provides suggestions for access denied errors" time="0.0142" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="provides suggestions for module not found errors" name="Error Handling Module.Invoke-ProfileErrorHandler.provides suggestions for module not found errors" time="0.0094" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Error Handling Module.Invoke-SafeFragmentLoad" executed="True" result="Success" success="True" time="3.5361" asserts="0" description="Error Handling Module.Invoke-SafeFragmentLoad">
+                <results>
+                  <test-case description="successfully loads a valid fragment" name="Error Handling Module.Invoke-SafeFragmentLoad.successfully loads a valid fragment" time="0.0366" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="retries on failure and eventually succeeds" name="Error Handling Module.Invoke-SafeFragmentLoad.retries on failure and eventually succeeds" time="1.0603" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="fails after max retries" name="Error Handling Module.Invoke-SafeFragmentLoad.fails after max retries" time="1.0559" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="handles non-existent fragment file" name="Error Handling Module.Invoke-SafeFragmentLoad.handles non-existent fragment file" time="1.0169" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

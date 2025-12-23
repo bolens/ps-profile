@@ -4,7 +4,7 @@ Describe 'Performance Module Functions' {
     BeforeAll {
         # Import the Performance modules (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-        Import-Module (Join-Path $libPath 'PerformanceAggregation.psm1') -DisableNameChecking -ErrorAction Stop
+        Import-Module (Join-Path $libPath 'performance' 'PerformanceAggregation.psm1') -DisableNameChecking -ErrorAction Stop -Global
     }
 
     Context 'Get-AggregatedMetrics' {

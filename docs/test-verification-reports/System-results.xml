@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="104" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2025-12-01" time="09:41:09">
+  <environment machine-name="BAMBOO" cwd="C:\Users\bolen\Documents\PowerShell" nunit-version="2.5.8.0" clr-version="10.0.0" user="bolen" user-domain="BAMBOO" os-version="10.0.28000" platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk4\Partition4" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="64.8428" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\diagnostics.tests.ps1" executed="True" result="Success" success="True" time="3.8259" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\diagnostics.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Diagnostics Integration Tests" executed="True" result="Success" success="True" time="2.1301" asserts="0" description="Diagnostics Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Diagnostics Integration Tests.Diagnostics functions" executed="True" result="Success" success="True" time="1.999" asserts="0" description="Diagnostics Integration Tests.Diagnostics functions">
+                <results>
+                  <test-case description="Show-ProfileDiagnostic function is available when debug enabled" name="Diagnostics Integration Tests.Diagnostics functions.Show-ProfileDiagnostic function is available when debug enabled" time="0.0624" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-ProfileStartupTime function is available when debug enabled" name="Diagnostics Integration Tests.Diagnostics functions.Show-ProfileStartupTime function is available when debug enabled" time="0.0028" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-ProfileHealth function is available when debug enabled" name="Diagnostics Integration Tests.Diagnostics functions.Test-ProfileHealth function is available when debug enabled" time="0.0026" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-CommandUsageStats function is available when debug enabled" name="Diagnostics Integration Tests.Diagnostics functions.Show-CommandUsageStats function is available when debug enabled" time="0.0025" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-ProfileDiagnostic runs without error" name="Diagnostics Integration Tests.Diagnostics functions.Show-ProfileDiagnostic runs without error" time="0.6238" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-ProfileStartupTime runs without error" name="Diagnostics Integration Tests.Diagnostics functions.Show-ProfileStartupTime runs without error" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-CommandUsageStats runs without error" name="Diagnostics Integration Tests.Diagnostics functions.Show-CommandUsageStats runs without error" time="0.0054" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-ProfileHealth runs without error" name="Diagnostics Integration Tests.Diagnostics functions.Test-ProfileHealth runs without error" time="1.1087" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\environment-variables.tests.ps1" executed="True" result="Success" success="True" time="25.8129" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\environment-variables.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Environment Variables Integration Tests" executed="True" result="Success" success="True" time="24.4877" asserts="0" description="Environment Variables Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Environment Variables Integration Tests.Error recovery tests" executed="True" result="Success" success="True" time="5.4971" asserts="0" description="Environment Variables Integration Tests.Error recovery tests">
+                <results>
+                  <test-case description="Get-EnvVar handles non-existent variables" name="Environment Variables Integration Tests.Error recovery tests.Get-EnvVar handles non-existent variables" time="0.0115" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-EnvVar handles null name" name="Environment Variables Integration Tests.Error recovery tests.Get-EnvVar handles null name" time="0.0138" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-EnvVar handles empty name" name="Environment Variables Integration Tests.Error recovery tests.Get-EnvVar handles empty name" time="0.0039" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-EnvVar retrieves existing variables" name="Environment Variables Integration Tests.Error recovery tests.Get-EnvVar retrieves existing variables" time="5.4463" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-Path handles malformed PATH" name="Environment Variables Integration Tests.Error recovery tests.Remove-Path handles malformed PATH" time="0.0085" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-Path handles PATH with only one entry" name="Environment Variables Integration Tests.Error recovery tests.Remove-Path handles PATH with only one entry" time="0.0026" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Environment Variables Integration Tests.Environment variable management tests" executed="True" result="Success" success="True" time="24.1474" asserts="0" description="Environment Variables Integration Tests.Environment variable management tests">
+                <results>
+                  <test-case description="Set-EnvVar sets user environment variable" name="Environment Variables Integration Tests.Environment variable management tests.Set-EnvVar sets user environment variable" time="3.5868" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-EnvVar handles null value" name="Environment Variables Integration Tests.Environment variable management tests.Set-EnvVar handles null value" time="3.1304" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-EnvVar handles empty value" name="Environment Variables Integration Tests.Environment variable management tests.Set-EnvVar handles empty value" time="3.3214" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-EnvVar handles null name" name="Environment Variables Integration Tests.Environment variable management tests.Set-EnvVar handles null name" time="0.0041" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-EnvVar handles empty name" name="Environment Variables Integration Tests.Environment variable management tests.Set-EnvVar handles empty name" time="0.0031" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Publish-EnvVar function exists and can be called" name="Environment Variables Integration Tests.Environment variable management tests.Publish-EnvVar function exists and can be called" time="0.6349" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Publish-EnvVar handles null value" name="Environment Variables Integration Tests.Environment variable management tests.Publish-EnvVar handles null value" time="3.8533" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Publish-EnvVar handles empty value" name="Environment Variables Integration Tests.Environment variable management tests.Publish-EnvVar handles empty value" time="3.9699" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\environment.tests.ps1" executed="True" result="Success" success="True" time="4.6357" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\environment.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Environment Variable Integration Tests" executed="True" result="Success" success="True" time="3.3836" asserts="0" description="Environment Variable Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Environment Variable Integration Tests.Environment defaults and helpers" executed="True" result="Success" success="True" time="3.2964" asserts="0" description="Environment Variable Integration Tests.Environment defaults and helpers">
+                <results>
+                  <test-case description="sets EDITOR default when not set" name="Environment Variable Integration Tests.Environment defaults and helpers.sets EDITOR default when not set" time="0.2853" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="does not overwrite existing EDITOR" name="Environment Variable Integration Tests.Environment defaults and helpers.does not overwrite existing EDITOR" time="0.2765" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="sets GIT_EDITOR default when not set" name="Environment Variable Integration Tests.Environment defaults and helpers.sets GIT_EDITOR default when not set" time="0.2746" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="sets VISUAL default when not set" name="Environment Variable Integration Tests.Environment defaults and helpers.sets VISUAL default when not set" time="0.3539" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-EnvVar handles non-existent variables" name="Environment Variable Integration Tests.Environment defaults and helpers.Get-EnvVar handles non-existent variables" time="0.1504" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-EnvVar handles null values for deletion" name="Environment Variable Integration Tests.Environment defaults and helpers.Set-EnvVar handles null values for deletion" time="1.9463" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\path-management.tests.ps1" executed="True" result="Success" success="True" time="2.0347" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\path-management.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Path Management Integration Tests" executed="True" result="Success" success="True" time="0.8538" asserts="0" description="Path Management Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Path Management Integration Tests.Utility functions edge cases" executed="True" result="Success" success="True" time="0.3029" asserts="0" description="Path Management Integration Tests.Utility functions edge cases">
+                <results>
+                  <test-case description="Add-Path adds path to beginning when specified" name="Path Management Integration Tests.Utility functions edge cases.Add-Path adds path to beginning when specified" time="0.0299" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-Path adds path to end by default" name="Path Management Integration Tests.Utility functions edge cases.Add-Path adds path to end by default" time="0.0245" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-Path handles duplicate paths" name="Path Management Integration Tests.Utility functions edge cases.Add-Path handles duplicate paths" time="0.042" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-Path removes existing path" name="Path Management Integration Tests.Utility functions edge cases.Remove-Path removes existing path" time="0.0249" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-Path handles non-existent path" name="Path Management Integration Tests.Utility functions edge cases.Remove-Path handles non-existent path" time="0.0054" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Path Management Integration Tests.Path safety tests" executed="True" result="Success" success="True" time="0.5734" asserts="0" description="Path Management Integration Tests.Path safety tests">
+                <results>
+                  <test-case description="Test-SafePath accepts valid paths within base directory" name="Path Management Integration Tests.Path safety tests.Test-SafePath accepts valid paths within base directory" time="0.0312" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-SafePath rejects paths outside base directory" name="Path Management Integration Tests.Path safety tests.Test-SafePath rejects paths outside base directory" time="0.0315" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-SafePath handles relative paths correctly" name="Path Management Integration Tests.Path safety tests.Test-SafePath handles relative paths correctly" time="0.0515" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-SafePath rejects path traversal attempts" name="Path Management Integration Tests.Path safety tests.Test-SafePath rejects path traversal attempts" time="0.0227" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-SafePath handles invalid paths gracefully" name="Path Management Integration Tests.Path safety tests.Test-SafePath handles invalid paths gracefully" time="0.0178" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-SafePath handles base path without trailing separator" name="Path Management Integration Tests.Path safety tests.Test-SafePath handles base path without trailing separator" time="0.0308" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\shortcuts.tests.ps1" executed="True" result="Success" success="True" time="3.58" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\shortcuts.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Shortcuts Integration Tests" executed="True" result="Success" success="True" time="2.2229" asserts="0" description="Shortcuts Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Shortcuts Integration Tests.Shortcuts functions" executed="True" result="Success" success="True" time="2.2032" asserts="0" description="Shortcuts Integration Tests.Shortcuts functions">
+                <results>
+                  <test-case description="Get-AvailableEditor function exists" name="Shortcuts Integration Tests.Shortcuts functions.Get-AvailableEditor function exists" time="0.0025" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-AvailableEditor can be called without error" name="Shortcuts Integration Tests.Shortcuts functions.Get-AvailableEditor can be called without error" time="0.0032" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-VSCode function exists" name="Shortcuts Integration Tests.Shortcuts functions.Open-VSCode function exists" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-VSCode can be called without error" name="Shortcuts Integration Tests.Shortcuts functions.Open-VSCode can be called without error" time="0.0048" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="vsc alias exists" name="Shortcuts Integration Tests.Shortcuts functions.vsc alias exists" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-Editor function exists" name="Shortcuts Integration Tests.Shortcuts functions.Open-Editor function exists" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-Editor warns when no path provided" name="Shortcuts Integration Tests.Shortcuts functions.Open-Editor warns when no path provided" time="0.0039" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-Editor can be called with nonexistent file" name="Shortcuts Integration Tests.Shortcuts functions.Open-Editor can be called with nonexistent file" time="0.0103" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="e alias exists" name="Shortcuts Integration Tests.Shortcuts functions.e alias exists" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-ProjectRoot function exists" name="Shortcuts Integration Tests.Shortcuts functions.Get-ProjectRoot function exists" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-ProjectRoot can be called without error" name="Shortcuts Integration Tests.Shortcuts functions.Get-ProjectRoot can be called without error" time="0.0592" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="project-root alias exists" name="Shortcuts Integration Tests.Shortcuts functions.project-root alias exists" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-information.tests.ps1" executed="True" result="Success" success="True" time="2.8817" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-information.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="System Information Integration Tests" executed="True" result="Success" success="True" time="1.4889" asserts="0" description="System Information Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="System Information Integration Tests.System information functions" executed="True" result="Success" success="True" time="1.4673" asserts="0" description="System Information Integration Tests.System information functions">
+                <results>
+                  <test-case description="Get-SystemUptime (uptime) function is available" name="System Information Integration Tests.System information functions.Get-SystemUptime (uptime) function is available" time="0.0037" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-SystemUptime returns TimeSpan object" name="System Information Integration Tests.System information functions.Get-SystemUptime returns TimeSpan object" time="0.0932" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-BatteryInfo (battery) function is available" name="System Information Integration Tests.System information functions.Get-BatteryInfo (battery) function is available" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-BatteryInfo returns battery information" name="System Information Integration Tests.System information functions.Get-BatteryInfo returns battery information" time="0.0471" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-SystemInfo (sysinfo) function is available" name="System Information Integration Tests.System information functions.Get-SystemInfo (sysinfo) function is available" time="0.0035" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-SystemInfo returns system information" name="System Information Integration Tests.System information functions.Get-SystemInfo returns system information" time="0.0202" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-CpuInfo (cpuinfo) function is available" name="System Information Integration Tests.System information functions.Get-CpuInfo (cpuinfo) function is available" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-CpuInfo returns CPU information" name="System Information Integration Tests.System information functions.Get-CpuInfo returns CPU information" time="1.0823" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-MemoryInfo (meminfo) function is available" name="System Information Integration Tests.System information functions.Get-MemoryInfo (meminfo) function is available" time="0.0031" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-MemoryInfo returns memory information" name="System Information Integration Tests.System information functions.Get-MemoryInfo returns memory information" time="0.0201" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-monitor.tests.ps1" executed="True" result="Success" success="True" time="11.0567" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-monitor.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="System Monitor Integration Tests" executed="True" result="Success" success="True" time="9.7796" asserts="0" description="System Monitor Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="System Monitor Integration Tests.System monitor functions" executed="True" result="Success" success="True" time="9.7666" asserts="0" description="System Monitor Integration Tests.System monitor functions">
+                <results>
+                  <test-case description="Show-SystemDashboard function is available" name="System Monitor Integration Tests.System monitor functions.Show-SystemDashboard function is available" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-SystemDashboard executes without error" name="System Monitor Integration Tests.System monitor functions.Show-SystemDashboard executes without error" time="4.9153" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-SystemStatus function is available" name="System Monitor Integration Tests.System monitor functions.Show-SystemStatus function is available" time="0.0029" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-SystemStatus executes without error" name="System Monitor Integration Tests.System monitor functions.Show-SystemStatus executes without error" time="1.0798" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-CPUInfo function is available" name="System Monitor Integration Tests.System monitor functions.Show-CPUInfo function is available" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-CPUInfo executes without error" name="System Monitor Integration Tests.System monitor functions.Show-CPUInfo executes without error" time="2.1211" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-MemoryInfo function is available" name="System Monitor Integration Tests.System monitor functions.Show-MemoryInfo function is available" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-MemoryInfo executes without error" name="System Monitor Integration Tests.System monitor functions.Show-MemoryInfo executes without error" time="0.0814" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-DiskInfo function is available" name="System Monitor Integration Tests.System monitor functions.Show-DiskInfo function is available" time="0.0023" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-DiskInfo executes without error" name="System Monitor Integration Tests.System monitor functions.Show-DiskInfo executes without error" time="0.0352" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-NetworkInfo function is available" name="System Monitor Integration Tests.System monitor functions.Show-NetworkInfo function is available" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-NetworkInfo executes without error" name="System Monitor Integration Tests.System monitor functions.Show-NetworkInfo executes without error" time="1.4827" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-utilities-aliases.tests.ps1" executed="True" result="Success" success="True" time="3.8635" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-utilities-aliases.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="System Utility Aliases" executed="True" result="Success" success="True" time="2.6935" asserts="0" description="System Utility Aliases">
+            <results>
+              <test-suite type="TestFixture" name="System Utility Aliases.System utility aliases" executed="True" result="Success" success="True" time="2.6779" asserts="0" description="System Utility Aliases.System utility aliases">
+                <results>
+                  <test-case description="rest alias is available" name="System Utility Aliases.System utility aliases.rest alias is available" time="0.0028" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="web alias is available" name="System Utility Aliases.System utility aliases.web alias is available" time="0.0025" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="unzip alias is available" name="System Utility Aliases.System utility aliases.unzip alias is available" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="rest alias invokes Invoke-RestMethod" name="System Utility Aliases.System utility aliases.rest alias invokes Invoke-RestMethod" time="0.0049" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="web alias invokes Invoke-WebRequest" name="System Utility Aliases.System utility aliases.web alias invokes Invoke-WebRequest" time="0.0026" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-RestApi function exists and can be called" name="System Utility Aliases.System utility aliases.Invoke-RestApi function exists and can be called" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-WebRequestCustom function exists and can be called" name="System Utility Aliases.System utility aliases.Invoke-WebRequestCustom function exists and can be called" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Expand-ArchiveCustom function exists and can be called" name="System Utility Aliases.System utility aliases.Expand-ArchiveCustom function exists and can be called" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Compress-ArchiveCustom function exists and can be called" name="System Utility Aliases.System utility aliases.Compress-ArchiveCustom function exists and can be called" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-VSCode function exists and can be called" name="System Utility Aliases.System utility aliases.Open-VSCode function exists and can be called" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-Neovim function exists and can be called" name="System Utility Aliases.System utility aliases.Open-Neovim function exists and can be called" time="1.2203" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-NeovimVi function exists and can be called" name="System Utility Aliases.System utility aliases.Open-NeovimVi function exists and can be called" time="1.2047" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-utilities-edge-cases.tests.ps1" executed="True" result="Success" success="True" time="2.7988" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-utilities-edge-cases.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="System Utility Functions Edge Cases" executed="True" result="Success" success="True" time="1.5421" asserts="0" description="System Utility Functions Edge Cases">
+            <results>
+              <test-suite type="TestFixture" name="System Utility Functions Edge Cases.System utility functions edge cases" executed="True" result="Success" success="True" time="1.5269" asserts="0" description="System Utility Functions Edge Cases.System utility functions edge cases">
+                <results>
+                  <test-case description="which handles non-existent commands" name="System Utility Functions Edge Cases.System utility functions edge cases.which handles non-existent commands" time="0.1099" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="pgrep handles pattern not found" name="System Utility Functions Edge Cases.System utility functions edge cases.pgrep handles pattern not found" time="0.0097" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="touch updates existing file timestamp" name="System Utility Functions Edge Cases.System utility functions edge cases.touch updates existing file timestamp" time="1.1125" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="search handles empty directories" name="System Utility Functions Edge Cases.System utility functions edge cases.search handles empty directories" time="0.0615" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-utilities-functions.tests.ps1" executed="True" result="Success" success="True" time="4.353" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\system\system-utilities-functions.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="System Utility Functions" executed="True" result="Success" success="True" time="3.2136" asserts="0" description="System Utility Functions">
+            <results>
+              <test-suite type="TestFixture" name="System Utility Functions.System utility functions" executed="True" result="Success" success="True" time="3.1649" asserts="0" description="System Utility Functions.System utility functions">
+                <results>
+                  <test-case description="Get-DiskUsage function exists and returns drive information" name="System Utility Functions.System utility functions.Get-DiskUsage function exists and returns drive information" time="0.0319" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-TopProcesses function exists and returns process information" name="System Utility Functions.System utility functions.Get-TopProcesses function exists and returns process information" time="0.0334" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-NetworkPorts function exists" name="System Utility Functions.System utility functions.Get-NetworkPorts function exists" time="0.0477" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-NetworkConnection function exists" name="System Utility Functions.System utility functions.Test-NetworkConnection function exists" time="0.0093" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Resolve-DnsNameCustom function exists" name="System Utility Functions.System utility functions.Resolve-DnsNameCustom function exists" time="0.0183" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Find-File function exists and can search for files" name="System Utility Functions.System utility functions.Find-File function exists and can search for files" time="2.2683" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="New-Directory function exists" name="System Utility Functions.System utility functions.New-Directory function exists" time="0.0204" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-ItemCustom function exists" name="System Utility Functions.System utility functions.Remove-ItemCustom function exists" time="0.0146" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Copy-ItemCustom function exists" name="System Utility Functions.System utility functions.Copy-ItemCustom function exists" time="0.01" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Move-ItemCustom function exists" name="System Utility Functions.System utility functions.Move-ItemCustom function exists" time="0.0086" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-RestApi function exists" name="System Utility Functions.System utility functions.Invoke-RestApi function exists" time="0.1973" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-WebRequestCustom function exists" name="System Utility Functions.System utility functions.Invoke-WebRequestCustom function exists" time="0.1381" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Expand-ArchiveCustom function exists" name="System Utility Functions.System utility functions.Expand-ArchiveCustom function exists" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Compress-ArchiveCustom function exists" name="System Utility Functions.System utility functions.Compress-ArchiveCustom function exists" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Open-VSCode function exists" name="System Utility Functions.System utility functions.Open-VSCode function exists" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

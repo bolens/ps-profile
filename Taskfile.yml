@@ -21,27 +21,27 @@ tasks:
   test:
     desc: Run Pester Tests
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel
 
   test-unit:
     desc: Run Unit Test Suite
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel
 
   test-integration:
     desc: Run Integration Test Suite
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel
 
   test-performance:
     desc: Run Performance Test Suite
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance -Parallel
 
   test-coverage:
     desc: Run Pester Tests with Coverage
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel
 
   benchmark:
     desc: Run Performance Benchmark
@@ -52,6 +52,16 @@ tasks:
     desc: Run Security Scan
     cmds:
       - pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1
+
+  diagnose-profile-performance:
+    desc: Diagnose profile performance issues
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/performance/diagnose-profile-performance.ps1
+
+  optimize-git-performance:
+    desc: Optimize Git performance
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1
 
   check-module-updates:
     desc: Check Module Updates
@@ -68,6 +78,11 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1
 
+  generate-dashboard:
+    desc: Generate metrics dashboard
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1
+
   create-release:
     desc: Create Release (Dry Run)
     cmds:
@@ -83,6 +98,11 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1
 
+  check-script-standards:
+    desc: Check script standards and best practices
+    cmds:
+      - pwsh -NoProfile -File scripts/checks/check-script-standards.ps1
+
   markdownlint:
     desc: Run Markdownlint
     cmds:
@@ -92,6 +112,11 @@ tasks:
     desc: Install Git hooks
     cmds:
       - pwsh -NoProfile -File scripts/git/install-githooks.ps1
+
+  install-pre-commit-hook:
+    desc: Install pre-commit hook only
+    cmds:
+      - pwsh -NoProfile -File scripts/git/install-pre-commit-hook.ps1
 
   format:
     desc: Format Code
@@ -108,6 +133,11 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1
 
+  new-fragment:
+    desc: Create a new profile fragment from template
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/fragment/new-fragment.ps1
+
   check-commit-messages:
     desc: Check Commit Messages
     cmds:
@@ -117,6 +147,26 @@ tasks:
     desc: Update Performance Baseline
     cmds:
       - pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline
+
+  collect-code-metrics:
+    desc: Collect code metrics
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/metrics/collect-code-metrics.ps1
+
+  export-metrics:
+    desc: Export metrics data
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1
+
+  save-metrics-snapshot:
+    desc: Save a metrics snapshot
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1
+
+  track-coverage-trends:
+    desc: Track test coverage trends over time
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1
 
   quality-check:
     desc: Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests + function naming)
@@ -139,10 +189,20 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1
 
+  check-missing-tests:
+    desc: Check for Missing Tests
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/check-missing-tests.ps1
+
   validate-dependencies:
     desc: Validate Dependencies
     cmds:
       - pwsh -NoProfile -File scripts/utils/dependencies/validate-dependencies.ps1
+
+  check-missing-packages:
+    desc: Check for missing packages and modules
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/dependencies/check-missing-packages.ps1
 
   check-vulnerabilities:
     desc: Check Dependency Updates (Vulnerability scanning can be added)
@@ -160,6 +220,16 @@ tasks:
     deps: [generate-docs, generate-fragment-readmes]
     cmds:
       - echo "All documentation generated"
+
+  init-wrangler-config:
+    desc: Initialize wrangler configuration
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1
+
+  dev-setup:
+    desc: Run development environment setup
+    cmds:
+      - pwsh -NoProfile -File scripts/dev/setup.ps1
 
   default:
     desc: Run default task

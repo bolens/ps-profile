@@ -8,6 +8,12 @@ System monitoring dashboard for PowerShell profile.
 Provides quick overview of CPU, memory, disk, and network status.
 #>
 
+# Import Locale module
+$localeModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'core' 'Locale.psm1'
+if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) -and (Test-Path -LiteralPath $localeModulePath)) {
+    Import-Module $localeModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+
 try {
     if ($null -ne (Get-Variable -Name 'SystemMonitorLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
 
@@ -29,7 +35,13 @@ try {
             $cpu = Get-CimInstance Win32_Processor -ErrorAction Stop
             try {
                 $cpuUsage = (Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction Stop).CounterSamples.CookedValue
-                Write-Host ("  Usage: {0:N1}%" -f $cpuUsage)
+                $cpuPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $cpuUsage -Format 'N1'
+                }
+                else {
+                    $cpuUsage.ToString("N1")
+                }
+                Write-Host ("  Usage: {0}%" -f $cpuPercentStr)
             }
             catch {
                 Write-Host "  Usage: Unable to retrieve CPU usage" -ForegroundColor Yellow
@@ -53,9 +65,33 @@ try {
             $usedMemory = $totalMemory - $freeMemory
             $memoryUsagePercent = [math]::Round(($usedMemory / $totalMemory) * 100, 1)
 
-            Write-Host ("  Total: {0:N1} GB" -f $totalMemory)
-            Write-Host ("  Used:  {0:N1} GB ({1:N1}%)" -f $usedMemory, $memoryUsagePercent)
-            Write-Host ("  Free:  {0:N1} GB" -f $freeMemory)
+            $totalMemoryStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $totalMemory -Format 'N1'
+            }
+            else {
+                $totalMemory.ToString("N1")
+            }
+            $usedMemoryStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $usedMemory -Format 'N1'
+            }
+            else {
+                $usedMemory.ToString("N1")
+            }
+            $freeMemoryStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $freeMemory -Format 'N1'
+            }
+            else {
+                $freeMemory.ToString("N1")
+            }
+            $memoryPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $memoryUsagePercent -Format 'N1'
+            }
+            else {
+                $memoryUsagePercent.ToString("N1")
+            }
+            Write-Host ("  Total: {0} GB" -f $totalMemoryStr)
+            Write-Host ("  Used:  {0} GB ({1}%)" -f $usedMemoryStr, $memoryPercentStr)
+            Write-Host ("  Free:  {0} GB" -f $freeMemoryStr)
 
             # Color coding for memory usage
             $color = if ($memoryUsagePercent -gt 90) { "Red" } elseif ($memoryUsagePercent -gt 75) { "Yellow" } else { "Green" }
@@ -75,7 +111,25 @@ try {
                 $usedSpace = $totalSpace - $freeSpace
                 $usagePercent = [math]::Round(($usedSpace / $totalSpace) * 100, 1)
 
-                Write-Host ("  {0}: {1:N1} GB used of {2:N1} GB ({3:N1}%)" -f $drive.DeviceID, $usedSpace, $totalSpace, $usagePercent)
+                $usedSpaceStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $usedSpace -Format 'N1'
+                }
+                else {
+                    $usedSpace.ToString("N1")
+                }
+                $totalSpaceStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $totalSpace -Format 'N1'
+                }
+                else {
+                    $totalSpace.ToString("N1")
+                }
+                $usagePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $usagePercent -Format 'N1'
+                }
+                else {
+                    $usagePercent.ToString("N1")
+                }
+                Write-Host ("  {0}: {1} GB used of {2} GB ({3}%)" -f $drive.DeviceID, $usedSpaceStr, $totalSpaceStr, $usagePercentStr)
 
                 # Color coding for disk usage
                 $color = if ($usagePercent -gt 95) { "Red" } elseif ($usagePercent -gt 85) { "Yellow" } else { "Green" }
@@ -124,7 +178,25 @@ try {
         Write-Host "`n⏰ System Uptime:" -ForegroundColor White
         try {
             $uptime = (Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-            Write-Host ("  {0} days, {1} hours, {2} minutes" -f $uptime.Days, $uptime.Hours, $uptime.Minutes)
+            $daysStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $uptime.Days -Format 'N0'
+            }
+            else {
+                $uptime.Days.ToString("N0")
+            }
+            $hoursStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $uptime.Hours -Format 'N0'
+            }
+            else {
+                $uptime.Hours.ToString("N0")
+            }
+            $minutesStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $uptime.Minutes -Format 'N0'
+            }
+            else {
+                $uptime.Minutes.ToString("N0")
+            }
+            Write-Host ("  {0} days, {1} hours, {2} minutes" -f $daysStr, $hoursStr, $minutesStr)
         }
         catch {
             Write-Host "  Uptime info unavailable" -ForegroundColor Red
@@ -138,7 +210,13 @@ try {
 
         if ($global:PSProfileStartTime) {
             $profileUptime = (Get-Date) - $global:PSProfileStartTime
-            Write-Host ("  Profile uptime: {0:N1} minutes" -f $profileUptime.TotalMinutes)
+            $uptimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $profileUptime.TotalMinutes -Format 'N1'
+            }
+            else {
+                $profileUptime.TotalMinutes.ToString("N1")
+            }
+            Write-Host ("  Profile uptime: {0} minutes" -f $uptimeStr)
         }
     }
 
@@ -172,12 +250,30 @@ try {
             }
 
             Write-Host "🖥️ System Status:" -ForegroundColor Cyan -NoNewline
-            Write-Host (" CPU: {0:N0}%" -f $cpuUsage) -ForegroundColor $cpuColor -NoNewline
+            $cpuPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $cpuUsage -Format 'N0'
+            }
+            else {
+                $cpuUsage.ToString("N0")
+            }
+            Write-Host (" CPU: {0}%" -f $cpuPercentStr) -ForegroundColor $cpuColor -NoNewline
             if ($memory) {
-                Write-Host (" | RAM: {0:N0}%" -f $memoryUsagePercent) -ForegroundColor $memoryColor -NoNewline
+                $memoryPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $memoryUsagePercent -Format 'N0'
+                }
+                else {
+                    $memoryUsagePercent.ToString("N0")
+                }
+                Write-Host (" | RAM: {0}%" -f $memoryPercentStr) -ForegroundColor $memoryColor -NoNewline
             }
             if ($disk) {
-                Write-Host (" | Disk: {0:N0}%" -f $diskUsagePercent) -ForegroundColor $diskColor -NoNewline
+                $diskPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $diskUsagePercent -Format 'N0'
+                }
+                else {
+                    $diskUsagePercent.ToString("N0")
+                }
+                Write-Host (" | Disk: {0}%" -f $diskPercentStr) -ForegroundColor $diskColor -NoNewline
             }
             Write-Host ""
         }
@@ -211,7 +307,13 @@ try {
             Write-Host "`nCurrent Usage:"
             try {
                 $cpuUsage = (Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction Stop).CounterSamples.CookedValue
-                Write-Host ("  Overall CPU Usage: {0:N1}%" -f $cpuUsage)
+                $cpuPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $cpuUsage -Format 'N1'
+                }
+                else {
+                    $cpuUsage.ToString("N1")
+                }
+                Write-Host ("  Overall CPU Usage: {0}%" -f $cpuPercentStr)
             }
             catch {
                 Write-Host "  Overall CPU Usage: Unable to retrieve (performance counter may not be available)" -ForegroundColor Yellow
@@ -258,10 +360,34 @@ try {
             $usedPhysical = $totalPhysical - $freePhysical
             $physicalPercent = [math]::Round(($usedPhysical / $totalPhysical) * 100, 1)
 
+            $totalPhysicalStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $totalPhysical -Format 'N1'
+            }
+            else {
+                $totalPhysical.ToString("N1")
+            }
+            $usedPhysicalStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $usedPhysical -Format 'N1'
+            }
+            else {
+                $usedPhysical.ToString("N1")
+            }
+            $freePhysicalStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $freePhysical -Format 'N1'
+            }
+            else {
+                $freePhysical.ToString("N1")
+            }
+            $physicalPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $physicalPercent -Format 'N1'
+            }
+            else {
+                $physicalPercent.ToString("N1")
+            }
             Write-Host "Physical Memory:"
-            Write-Host ("  Total: {0:N1} GB" -f $totalPhysical)
-            Write-Host ("  Used:  {0:N1} GB ({1:N1}%)" -f $usedPhysical, $physicalPercent)
-            Write-Host ("  Free:  {0:N1} GB" -f $freePhysical)
+            Write-Host ("  Total: {0} GB" -f $totalPhysicalStr)
+            Write-Host ("  Used:  {0} GB ({1}%)" -f $usedPhysicalStr, $physicalPercentStr)
+            Write-Host ("  Free:  {0} GB" -f $freePhysicalStr)
 
             # Virtual memory
             $totalVirtual = [math]::Round($memory.TotalVirtualMemorySize / 1MB, 1)
@@ -269,10 +395,34 @@ try {
             $usedVirtual = $totalVirtual - $freeVirtual
             $virtualPercent = [math]::Round(($usedVirtual / $totalVirtual) * 100, 1)
 
+            $totalVirtualStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $totalVirtual -Format 'N1'
+            }
+            else {
+                $totalVirtual.ToString("N1")
+            }
+            $usedVirtualStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $usedVirtual -Format 'N1'
+            }
+            else {
+                $usedVirtual.ToString("N1")
+            }
+            $freeVirtualStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $freeVirtual -Format 'N1'
+            }
+            else {
+                $freeVirtual.ToString("N1")
+            }
+            $virtualPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $virtualPercent -Format 'N1'
+            }
+            else {
+                $virtualPercent.ToString("N1")
+            }
             Write-Host "`nVirtual Memory:"
-            Write-Host ("  Total: {0:N1} GB" -f $totalVirtual)
-            Write-Host ("  Used:  {0:N1} GB ({1:N1}%)" -f $usedVirtual, $virtualPercent)
-            Write-Host ("  Free:  {0:N1} GB" -f $freeVirtual)
+            Write-Host ("  Total: {0} GB" -f $totalVirtualStr)
+            Write-Host ("  Used:  {0} GB ({1}%)" -f $usedVirtualStr, $virtualPercentStr)
+            Write-Host ("  Free:  {0} GB" -f $freeVirtualStr)
 
             # Top memory-consuming processes
             Write-Host "`nTop Memory-Consuming Processes:"
@@ -318,9 +468,33 @@ try {
 
                 Write-Host ("Drive {0}:" -f $drive.DeviceID)
                 Write-Host ("  File System: {0}" -f $drive.FileSystem)
-                Write-Host ("  Total Space: {0:N2} GB" -f $totalSpace)
-                Write-Host ("  Used Space:  {0:N2} GB ({1:N1}%)" -f $usedSpace, $usagePercent)
-                Write-Host ("  Free Space:  {0:N2} GB" -f $freeSpace)
+                $totalSpaceStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $totalSpace -Format 'N2'
+                }
+                else {
+                    $totalSpace.ToString("N2")
+                }
+                Write-Host ("  Total Space: {0} GB" -f $totalSpaceStr)
+                $usedSpaceStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $usedSpace -Format 'N2'
+                }
+                else {
+                    $usedSpace.ToString("N2")
+                }
+                $usagePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $usagePercent -Format 'N1'
+                }
+                else {
+                    $usagePercent.ToString("N1")
+                }
+                Write-Host ("  Used Space:  {0} GB ({1}%)" -f $usedSpaceStr, $usagePercentStr)
+                $freeSpaceStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $freeSpace -Format 'N2'
+                }
+                else {
+                    $freeSpace.ToString("N2")
+                }
+                Write-Host ("  Free Space:  {0} GB" -f $freeSpaceStr)
 
                 # Status indicator
                 $status = if ($usagePercent -gt 95) { "CRITICAL" } elseif ($usagePercent -gt 85) { "WARNING" } else { "OK" }
@@ -395,7 +569,13 @@ try {
                             if ($tcpClient.Connected) {
                                 $connected = $true
                                 $elapsed = ((Get-Date) - $startTime).TotalMilliseconds
-                                Write-Host ("  {0}: ✓ (TCP port {1}, {2:N0}ms)" -f $testHost.Name, $testHost.Port, $elapsed) -ForegroundColor Green
+                                $elapsedStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                                    Format-LocaleNumber $elapsed -Format 'N0'
+                                }
+                                else {
+                                    $elapsed.ToString("N0")
+                                }
+                                Write-Host ("  {0}: ✓ (TCP port {1}, {2}ms)" -f $testHost.Name, $testHost.Port, $elapsedStr) -ForegroundColor Green
                             }
                         }
                         catch {

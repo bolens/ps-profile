@@ -7,7 +7,7 @@
 BeforeAll {
     # Import the Cache module (Common.psm1 no longer exists)
     $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-    Import-Module (Join-Path $libPath 'Cache.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path $libPath 'utilities' 'Cache.psm1') -DisableNameChecking -ErrorAction Stop -Global
 }
 
 Describe 'Caching Functions' {
@@ -42,8 +42,8 @@ Describe 'Caching Functions' {
         }
 
         It 'Cached values expire after expiration time' {
-            Set-CachedValue -Key 'TestKey3' -Value 'TestValue' -ExpirationSeconds 1
-            Start-Sleep -Seconds 2
+            Set-CachedValue -Key 'TestKey3' -Value 'TestValue' -ExpirationSeconds 0.1
+            Start-Sleep -Milliseconds 150
             $result = Get-CachedValue -Key 'TestKey3'
             $result | Should -BeNullOrEmpty
         }

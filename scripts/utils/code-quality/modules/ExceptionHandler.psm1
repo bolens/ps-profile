@@ -32,7 +32,7 @@ function Get-NamingExceptions {
     $exceptions = @{}
     $exceptionVerbs = @('Ensure', 'Reload', 'Continue', 'Jump', 'Time', 'am', 'Simple', 'Visit')
 
-    if (Test-Path $ExceptionsFile) {
+    if ($ExceptionsFile -and -not [string]::IsNullOrWhiteSpace($ExceptionsFile) -and (Test-Path -LiteralPath $ExceptionsFile)) {
         $exceptionContent = Get-Content -Path $ExceptionsFile -Raw
         # Parse function names from exceptions list
         $exceptionMatches = [regex]::Matches($exceptionContent, '(?:^|\n)\s*-\s+`?([A-Za-z]+-[A-Za-z0-9_]+)`?')

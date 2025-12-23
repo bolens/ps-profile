@@ -9,14 +9,14 @@ scripts/utils/code-quality/modules/TestPathUtilities.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
 # Import OutputPathUtils module for ConvertTo-RepoRelativePath
 $outputPathUtilsModulePath = Join-Path $PSScriptRoot 'OutputPathUtils.psm1'
-if (Test-Path $outputPathUtilsModulePath) {
+if ($outputPathUtilsModulePath -and -not [string]::IsNullOrWhiteSpace($outputPathUtilsModulePath) -and (Test-Path -LiteralPath $outputPathUtilsModulePath)) {
     Import-Module $outputPathUtilsModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
@@ -57,7 +57,7 @@ function Test-TestPaths {
         Write-ScriptMessage -Message "No valid test paths found for suite '$Suite' under $relativeTarget" -LogLevel 'Warning'
         # Return absolute path for consistency with other return values
         $fallbackPath = Join-Path $RepoRoot 'tests'
-        if (Test-Path $fallbackPath) {
+        if ($fallbackPath -and -not [string]::IsNullOrWhiteSpace($fallbackPath) -and (Test-Path -LiteralPath $fallbackPath)) {
             return @($fallbackPath)
         }
         return @('tests')  # Fallback to relative if absolute doesn't exist
@@ -133,13 +133,13 @@ function Filter-TestPaths {
         'test-runner-error-handling.tests.ps1',
         'baseline-comparison.tests.ps1',
         'test-runner-performance.tests.ps1',
-        'run-pester.tests.ps1'
+        'test-runner-run-pester.tests.ps1'
     )
 
     $filteredPaths = @()
 
     foreach ($path in $TestPaths) {
-        if (-not (Test-Path $path)) {
+        if ($path -and -not [string]::IsNullOrWhiteSpace($path) -and -not (Test-Path -LiteralPath $path)) {
             continue
         }
 
@@ -151,7 +151,7 @@ function Filter-TestPaths {
         }
 
         # If it's a directory, expand to individual test files and filter
-        if (Test-Path $resolvedPath -PathType Container) {
+        if ($resolvedPath -and -not [string]::IsNullOrWhiteSpace($resolvedPath) -and (Test-Path -LiteralPath $resolvedPath -PathType Container)) {
             $testFiles = Get-ChildItem -Path $resolvedPath -Filter '*.tests.ps1' -Recurse -File -ErrorAction SilentlyContinue |
             Where-Object {
                 $_.Name -notin $testRunnerTestFiles

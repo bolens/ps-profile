@@ -1,0 +1,234 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "build_systems": [
+    {
+      "name": "Task: lint",
+      "cmd": ["task", "lint"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: validate",
+      "cmd": ["task", "validate"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-comment-help",
+      "cmd": ["task", "check-comment-help"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: test",
+      "cmd": ["task", "test"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: test-unit",
+      "cmd": ["task", "test-unit"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: test-integration",
+      "cmd": ["task", "test-integration"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: test-performance",
+      "cmd": ["task", "test-performance"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: test-coverage",
+      "cmd": ["task", "test-coverage"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: benchmark",
+      "cmd": ["task", "benchmark"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: security-scan",
+      "cmd": ["task", "security-scan"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: diagnose-profile-performance",
+      "cmd": ["task", "diagnose-profile-performance"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: optimize-git-performance",
+      "cmd": ["task", "optimize-git-performance"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-module-updates",
+      "cmd": ["task", "check-module-updates"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: install-module-updates",
+      "cmd": ["task", "install-module-updates"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: generate-changelog",
+      "cmd": ["task", "generate-changelog"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: generate-dashboard",
+      "cmd": ["task", "generate-dashboard"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: create-release",
+      "cmd": ["task", "create-release"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: generate-docs",
+      "cmd": ["task", "generate-docs"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: spellcheck",
+      "cmd": ["task", "spellcheck"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-script-standards",
+      "cmd": ["task", "check-script-standards"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: markdownlint",
+      "cmd": ["task", "markdownlint"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: install-githooks",
+      "cmd": ["task", "install-githooks"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: install-pre-commit-hook",
+      "cmd": ["task", "install-pre-commit-hook"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: format",
+      "cmd": ["task", "format"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: find-duplicates",
+      "cmd": ["task", "find-duplicates"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: generate-fragment-readmes",
+      "cmd": ["task", "generate-fragment-readmes"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: new-fragment",
+      "cmd": ["task", "new-fragment"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-commit-messages",
+      "cmd": ["task", "check-commit-messages"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: update-baseline",
+      "cmd": ["task", "update-baseline"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: collect-code-metrics",
+      "cmd": ["task", "collect-code-metrics"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: export-metrics",
+      "cmd": ["task", "export-metrics"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: save-metrics-snapshot",
+      "cmd": ["task", "save-metrics-snapshot"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: track-coverage-trends",
+      "cmd": ["task", "track-coverage-trends"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: quality-check",
+      "cmd": ["task", "quality-check"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: pre-commit-checks",
+      "cmd": ["task", "pre-commit-checks"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-idempotency",
+      "cmd": ["task", "check-idempotency"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: validate-function-naming",
+      "cmd": ["task", "validate-function-naming"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-missing-tests",
+      "cmd": ["task", "check-missing-tests"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: validate-dependencies",
+      "cmd": ["task", "validate-dependencies"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-missing-packages",
+      "cmd": ["task", "check-missing-packages"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-vulnerabilities",
+      "cmd": ["task", "check-vulnerabilities"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: format-and-lint",
+      "cmd": ["task", "format-and-lint"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: all-docs",
+      "cmd": ["task", "all-docs"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: init-wrangler-config",
+      "cmd": ["task", "init-wrangler-config"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: dev-setup",
+      "cmd": ["task", "dev-setup"],
+      "working_dir": "${project_path}"
+    }
+  ]
+}

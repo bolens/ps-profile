@@ -25,8 +25,8 @@ function Initialize-FileConversion-ColumnarToCsv {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'NodeJs.psm1'
-        if (Test-Path $nodeJsModulePath) {
+        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
+        if ($nodeJsModulePath -and -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }
@@ -143,7 +143,7 @@ const fs = require('fs');
             $tempJson = Join-Path $env:TEMP "arrow-to-csv-$(Get-Random).json"
             try {
                 _ConvertFrom-ArrowToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-                if (-not (Test-Path $tempJson)) {
+                if (-not ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and (Test-Path -LiteralPath $tempJson))) {
                     throw "Arrow to JSON conversion failed - output file not created"
                 }
                 # Use PowerShell's ConvertFrom-Json and Export-Csv

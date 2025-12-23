@@ -12,7 +12,7 @@ on:
     paths:
       # Trigger when metrics-related files change
       - 'scripts/utils/metrics/**'
-      - 'scripts/lib/Common.psm1'
+      - 'scripts/lib/metrics/**'
       - 'scripts/data/**'
   pull_request:
     branches:
@@ -140,7 +140,8 @@ jobs:
         id: analyze-trends
         run: |
           pwsh -NoProfile -Command "
-            Import-Module scripts/lib/Common.psm1 -ErrorAction Stop
+            Import-Module scripts/lib/metrics/MetricsHistory.psm1 -ErrorAction Stop
+            Import-Module scripts/lib/metrics/MetricsTrendAnalysis.psm1 -ErrorAction Stop
             `$historical = Get-HistoricalMetrics -HistoryPath 'scripts/data/history'
             if (`$historical.Count -ge 2) {
               `$filesTrend = Get-MetricsTrend -HistoricalData `$historical -MetricName 'CodeMetrics.TotalFiles'

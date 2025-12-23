@@ -46,6 +46,7 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'NodeJs' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
 
 $ErrorActionPreference = 'Stop'
 
@@ -76,6 +77,25 @@ if (-not $markdownlint -and -not $npx) {
 }
 
 Write-ScriptMessage -Message "Running markdownlint (version: $markdownlintVersion)..."
+try {
+    if ($markdownlint) {
+        markdownlint '**/*.md' --ignore node_modules --ignore '**/Modules/**'
+    }
+    else {
+        npx --yes "markdownlint-cli@$markdownlintVersion" '**/*.md' --ignore node_modules --ignore '**/Modules/**'
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "markdownlint found errors"
+    }
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "markdownlint passed!"
+
+
 try {
     if ($markdownlint) {
         markdownlint '**/*.md' --ignore node_modules --ignore '**/Modules/**'

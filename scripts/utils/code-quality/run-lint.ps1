@@ -18,15 +18,15 @@ scripts/utils/run-lint.ps1
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$pathResolutionPath = Join-Path $scriptsDir 'lib' 'PathResolution.psm1'
-if (-not (Test-Path $pathResolutionPath)) {
+$pathResolutionPath = Join-Path $scriptsDir 'lib' 'path' 'PathResolution.psm1'
+if ($pathResolutionPath -and -not [string]::IsNullOrWhiteSpace($pathResolutionPath) -and -not (Test-Path -LiteralPath $pathResolutionPath)) {
     throw "PathResolution module not found at: $pathResolutionPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction Stop
 
 # Import ModuleImport (bootstrap)
 $moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
-if (-not (Test-Path $moduleImportPath)) {
+if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and -not (Test-Path -LiteralPath $moduleImportPath)) {
     throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
@@ -53,7 +53,7 @@ catch {
 $paths = @(
     Join-Path $repoRoot 'profile.d'
     Join-Path $repoRoot 'scripts'
-) | Where-Object { Test-Path $_ }
+) | Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) }
 
 if (-not $paths) {
     Write-ScriptMessage -Message "No paths found to analyze"
@@ -71,7 +71,7 @@ catch {
 # Locate settings file if present
 $settingsFile = Join-Path $repoRoot 'PSScriptAnalyzerSettings.psd1'
 $settingsParam = @{}
-if (Test-Path $settingsFile) {
+if ($settingsFile -and -not [string]::IsNullOrWhiteSpace($settingsFile) -and (Test-Path -LiteralPath $settingsFile)) {
     Write-ScriptMessage -Message "Using settings file: $settingsFile"
     $settingsParam['Settings'] = $settingsFile
 }

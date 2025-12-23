@@ -157,8 +157,16 @@ function Save-ValidationReport {
         [string]$OutputPath
     )
 
+    # Use locale-aware date formatting for user-facing report
+    $timestamp = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+        Format-LocaleDate (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+    }
+    else {
+        (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+    }
+    
     $report = @{
-        Timestamp    = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+        Timestamp    = $timestamp
         Summary      = @{
             TotalFunctions                     = $Results.TotalFunctions
             FunctionsWithApprovedVerbs         = $Results.FunctionsWithApprovedVerbs

@@ -16,11 +16,24 @@ Invoke-AnsiblePlaybook
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments to pass to ansible-playbook.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-AnsiblePlaybook playbook.yml
+``
+
+### Example 2
+
+`powershell
+Invoke-AnsiblePlaybook playbook.yml --check
+``
 
 ## Aliases
 

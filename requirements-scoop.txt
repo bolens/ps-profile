@@ -1,0 +1,77 @@
+# Scoop package requirements for PowerShell profile tools and conversions
+# Install with: scoop install <package-name>
+# Or install all: scoop install bat fd httpie zoxide git-delta tldr fzf ripgrep eza procs dust bottom navi gum docker podman docker-compose lazydocker pandoc calibre djvulibre imagemagick jq yq rclone minio-client zstd gh kubectl helm terraform aws azure-cli azure-developer-cli bun deno go rustup uv pixi pnpm ngrok tailscale starship oh-my-posh xz snappy lz4 ffmpeg graphicsmagick miktex
+
+# CLI Tools
+bat
+fd
+httpie
+zoxide
+git-delta
+tldr
+fzf
+ripgrep
+eza
+procs
+dust
+bottom
+navi
+gum
+
+# Containers
+docker
+podman
+docker-compose
+lazydocker
+
+# Document Formats
+pandoc
+calibre
+djvulibre
+imagemagick
+
+# File & Data Tools
+jq
+yq
+rclone
+minio-client
+zstd
+
+# Git Tools
+gh
+
+# Kubernetes & Cloud
+kubectl
+helm
+terraform
+aws
+azure-cli
+azure-developer-cli
+
+# Language Runtimes
+bun
+deno
+go
+rustup
+uv
+pixi
+pnpm
+
+# Other Tools
+ngrok
+tailscale
+starship
+oh-my-posh
+
+# Compression Tools (for conversion modules)
+xz
+snappy
+lz4
+
+# Media Tools
+ffmpeg
+graphicsmagick
+
+# LaTeX
+miktex
+

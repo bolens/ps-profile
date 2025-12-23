@@ -7,7 +7,7 @@
 BeforeAll {
     # Import ExitCodes module for Exit-WithCode
     $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $exitCodesModulePath = Join-Path $repoRoot 'scripts' 'lib' 'ExitCodes.psm1'
+    $exitCodesModulePath = Join-Path $repoRoot 'scripts' 'lib' 'core' 'ExitCodes.psm1'
     if (Test-Path $exitCodesModulePath) {
         Import-Module $exitCodesModulePath -DisableNameChecking -ErrorAction Stop
     }

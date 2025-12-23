@@ -17,6 +17,9 @@ scripts/utils/
 │   ├── collect-code-metrics.ps1
 │   ├── export-metrics.ps1
 │   └── find-duplicate-functions.ps1
+├── performance/       # Profile performance optimization scripts
+│   ├── diagnose-profile-performance.ps1
+│   └── optimize-git-performance.ps1
 ├── docs/              # Documentation generation scripts
 │   ├── generate-changelog.ps1
 │   ├── generate-docs.ps1
@@ -53,6 +56,13 @@ Scripts for collecting and analyzing metrics:
 - **collect-code-metrics.ps1** - Collect code metrics
 - **export-metrics.ps1** - Export metrics to various formats
 - **find-duplicate-functions.ps1** - Find duplicate function definitions
+
+### Performance (`performance/`)
+
+Scripts for optimizing profile and prompt performance:
+
+- **diagnose-profile-performance.ps1** - Diagnose profile loading performance issues and identify slow fragments
+- **optimize-git-performance.ps1** - Optimize git operations for prompt rendering (enables features with performance improvements)
 
 ### Documentation (`docs/`)
 
@@ -127,6 +137,10 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1
 
 # Metrics
 pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
+
+# Performance
+pwsh -NoProfile -File scripts/utils/performance/diagnose-profile-performance.ps1
+pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1
 
 # Documentation
 pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1

@@ -9,9 +9,42 @@ scripts/utils/code-quality/modules/TestPathResolution.psm1
 #>
 
 # Import FileSystem module for Get-PowerShellScripts
-$fileSystemModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'FileSystem.psm1'
-if (Test-Path $fileSystemModulePath) {
-    Import-Module $fileSystemModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+# Use proper path resolution to find the lib directory
+$currentPath = $PSScriptRoot
+$libPath = $null
+$maxDepth = 10
+$depth = 0
+
+while ($null -eq $libPath -and $depth -lt $maxDepth) {
+    $testLibPath = Join-Path $currentPath 'lib'
+    if ($testLibPath -and -not [string]::IsNullOrWhiteSpace($testLibPath) -and (Test-Path -LiteralPath $testLibPath)) {
+        $libPath = $testLibPath
+        break
+    }
+    $parent = Split-Path -Parent $currentPath
+    if ($null -eq $parent -or $parent -eq $currentPath) {
+        break
+    }
+    $currentPath = $parent
+    $depth++
+}
+
+if ($null -ne $libPath) {
+    $fileSystemModulePath = Join-Path $libPath 'file' 'FileSystem.psm1'
+    if ($fileSystemModulePath -and -not [string]::IsNullOrWhiteSpace($fileSystemModulePath) -and (Test-Path -LiteralPath $fileSystemModulePath)) {
+        try {
+            Import-Module $fileSystemModulePath -DisableNameChecking -ErrorAction Stop -Global
+        }
+        catch {
+            Write-Warning "Failed to import FileSystem module: $_"
+        }
+    }
+    else {
+        Write-Warning "FileSystem module not found at: $fileSystemModulePath"
+    }
+}
+else {
+    Write-Warning "Could not locate lib directory from $PSScriptRoot"
 }
 
 <#
@@ -21,12 +54,13 @@ if (Test-Path $fileSystemModulePath) {
 .DESCRIPTION
     Determines the appropriate test paths to run based on the Suite parameter
     and TestFile parameter, handling directory-based test organization.
+    Supports multiple test files or directories.
 
 .PARAMETER Suite
     The test suite to run (All, Unit, Integration, Performance).
 
 .PARAMETER TestFile
-    Optional specific test file or directory path.
+    Optional specific test file(s) or directory path(s). Can accept multiple files as an array.
 
 .PARAMETER RepoRoot
     Repository root directory path.
@@ -39,12 +73,12 @@ function Get-TestPaths {
         [ValidateSet('All', 'Unit', 'Integration', 'Performance')]
         [string]$Suite = 'All',
 
-        [string]$TestFile,
+        [string[]]$TestFile,
 
         [string]$RepoRoot
     )
 
-    if ([string]::IsNullOrWhiteSpace($TestFile)) {
+    if ($null -eq $TestFile -or $TestFile.Count -eq 0 -or ($TestFile.Count -eq 1 -and [string]::IsNullOrWhiteSpace($TestFile[0]))) {
         return Get-TestSuitePaths -Suite $Suite -RepoRoot $RepoRoot
     }
     else {
@@ -83,16 +117,24 @@ function Get-TestSuitePaths {
     }
 
     # Convert to full paths and filter to existing directories
-    $existingPaths = $testPaths |
+    $existingDirs = $testPaths |
     ForEach-Object { Join-Path $RepoRoot $_ } |
-    Where-Object { Test-Path $_ }
+    Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) }
 
-    if (-not $existingPaths) {
+    if (-not $existingDirs) {
         # Fallback to tests directory if no suite directories exist
-        return @(Join-Path $RepoRoot 'tests')
+        $existingDirs = @(Join-Path $RepoRoot 'tests')
     }
 
-    return $existingPaths
+    # Expand directories to individual test files (similar to analyze-coverage.ps1)
+    $allTestFiles = @()
+    foreach ($dir in $existingDirs) {
+        $testFiles = Get-TestFilesFromDirectory -Directory $dir
+        $allTestFiles += $testFiles
+    }
+
+    # Remove duplicates and return sorted paths
+    return $allTestFiles | Sort-Object -Unique
 }
 
 <#
@@ -102,34 +144,47 @@ function Get-TestSuitePaths {
 .DESCRIPTION
     Handles resolution of user-specified test files or directories,
     including recursive discovery of .tests.ps1 files in directories.
+    Supports multiple test files or directories.
 #>
 function Get-SpecificTestPaths {
     param(
-        [string]$TestFile,
+        [string[]]$TestFile,
         [string]$Suite,
         [string]$RepoRoot
     )
 
-    if ([string]::IsNullOrWhiteSpace($TestFile)) {
+    if ($null -eq $TestFile -or $TestFile.Count -eq 0) {
         throw "TestFile parameter cannot be null or empty"
     }
 
-    try {
-        $resolvedTestPath = (Resolve-Path -Path $TestFile -ErrorAction Stop).ProviderPath
-    }
-    catch [System.Management.Automation.ItemNotFoundException] {
-        throw "Test file or directory not found: $TestFile"
-    }
-    catch {
-        throw "Failed to resolve test path '$TestFile': $($_.Exception.Message)"
+    $allPaths = @()
+    
+    foreach ($testPath in $TestFile) {
+        if ([string]::IsNullOrWhiteSpace($testPath)) {
+            continue
+        }
+
+        try {
+            $resolvedTestPath = (Resolve-Path -Path $testPath -ErrorAction Stop).ProviderPath
+        }
+        catch [System.Management.Automation.ItemNotFoundException] {
+            throw "Test file or directory not found: $testPath"
+        }
+        catch {
+            throw "Failed to resolve test path '$testPath': $($_.Exception.Message)"
+        }
+
+        if (Test-Path -LiteralPath $resolvedTestPath -PathType Container) {
+            $directoryPaths = Get-TestFilesFromDirectory -Directory $resolvedTestPath
+            $allPaths += $directoryPaths
+        }
+        else {
+            $allPaths += $resolvedTestPath
+        }
     }
 
-    if (Test-Path -LiteralPath $resolvedTestPath -PathType Container) {
-        return Get-TestFilesFromDirectory -Directory $resolvedTestPath
-    }
-    else {
-        return @($resolvedTestPath)
-    }
+    # Remove duplicates and return sorted paths
+    return $allPaths | Sort-Object -Unique
 }
 
 <#

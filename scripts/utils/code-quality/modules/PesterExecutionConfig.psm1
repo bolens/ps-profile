@@ -23,13 +23,12 @@ function Set-PesterExecutionOptions {
     )
 
     # Configure parallel execution
-    if ($Parallel) {
-        # In Pester 5, parallel execution is often handled at the container level or via Invoke-Pester parameters directly.
-        # However, looking at the configuration object, there isn't a direct 'ContainerParallel' property on 'Run'.
-        # If this property doesn't exist, we might need to remove this configuration or find the correct one.
-        # For now, I will comment this out to fix the runtime error, as the property clearly doesn't exist.
-        # $Config.Run.ContainerParallel = $true
-        # $Config.Run.MaximumThreadCount = $Parallel
+    if ($Parallel -and $Parallel -gt 0) {
+        # In Pester 5, parallel execution is configured using Run.Parallel and Run.MaximumThreadCount
+        # Enable parallel execution
+        $Config.Run.Parallel = $true
+        # Set the maximum number of threads
+        $Config.Run.MaximumThreadCount = $Parallel
     }
 
     # Configure randomization
@@ -71,7 +70,12 @@ function Set-PesterTestFilters {
 
     if (-not [string]::IsNullOrWhiteSpace($TestName)) {
         # Parse TestName patterns separated by " or ", commas, or semicolons
-        $namePatterns = $TestName -replace '[;,]', ' or ' -split '\s+or\s+' |
+        # Normalize all separators to a single delimiter, then split
+        # This handles: "pattern1 or pattern2", "pattern1, pattern2", "pattern1; pattern2", or mixed
+        # Use __SEP__ as delimiter to avoid regex issues with pipe characters
+        # Replace semicolons and commas with separator
+        $normalized = $TestName -replace '\s+or\s+', '__SEP__' -replace ';', '__SEP__' -replace ',', '__SEP__'
+        $namePatterns = $normalized -split '__SEP__' |
         ForEach-Object { $_.Trim() } |
         Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
         if ($namePatterns) {

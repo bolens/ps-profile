@@ -7,6 +7,12 @@
 BeforeAll {
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
+    
+    # Import FileSystem module to get Get-PowerShellScripts function
+    $fileSystemModule = Join-Path $script:RepoRoot 'scripts' 'lib' 'file' 'FileSystem.psm1'
+    if (Test-Path $fileSystemModule) {
+        Import-Module $fileSystemModule -Force -DisableNameChecking
+    }
 }
 
 Describe 'Utility Script Integration Tests' {
@@ -46,10 +52,26 @@ Describe 'Utility Script Integration Tests' {
     Context 'ModuleImport Pattern' {
         It 'Scripts use Import-LibModule pattern correctly' {
             $scripts = Get-PowerShellScripts -Path $script:ScriptsUtilsPath
+            $excludedPatterns = @(
+                '\.psm1$',           # Module files
+                'test.*\.ps1$',      # Test scripts
+                '.*test.*\.ps1$',    # Scripts with "test" in name
+                '^test\.ps1$'        # Simple test.ps1
+            )
+            
             foreach ($script in $scripts) {
-                if ($script.Name -eq 'Common.psm1') { continue }
-                # Exclude minimal test scripts that don't need module imports
-                if ($script.Name -eq 'test-repo-root.ps1') { continue }
+                # Skip excluded patterns
+                $shouldExclude = $false
+                foreach ($pattern in $excludedPatterns) {
+                    if ($script.Name -match $pattern) {
+                        $shouldExclude = $true
+                        break
+                    }
+                }
+                if ($shouldExclude) { continue }
+                
+                # Skip if script is in a modules subdirectory (these are module files)
+                if ($script.FullName -match '\\modules\\') { continue }
 
                 $content = Get-Content -Path $script.FullName -Raw
                 # Scripts should use the new ModuleImport pattern

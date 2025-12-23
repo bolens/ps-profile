@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-17-fzf.ps1
+Finds PowerShell commands using fzf fuzzy finder.
 
 ## Description
 
-This is an alias that points to the `Find-FileFuzzy` command.
+Lists all available commands and uses fzf to interactively select one.
 
 ## Alias Information
 

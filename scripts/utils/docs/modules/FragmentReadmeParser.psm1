@@ -11,7 +11,52 @@ scripts/utils/docs/modules/FragmentReadmeParser.psm1
 # Import regex patterns
 $regexModulePath = Join-Path $PSScriptRoot 'FragmentReadmeRegex.psm1'
 if (Test-Path $regexModulePath) {
-    Import-Module $regexModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+    try {
+        Import-Module $regexModulePath -DisableNameChecking -ErrorAction Stop -Force
+        # Ensure regex patterns are available in script scope
+        if (-not $script:regexCommentLine) {
+            $script:regexCommentLine = [regex]::new('^\s*#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        }
+        if (-not $script:regexFunction) {
+            $script:regexFunction = [regex]::new('^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        }
+        if (-not $script:regexDecorativeEquals) {
+            $script:regexDecorativeEquals = [regex]::new('^# =+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        }
+        if (-not $script:regexDecorativeDashes) {
+            $script:regexDecorativeDashes = [regex]::new('^# -+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        }
+        if (-not $script:regexMultilineCommentStart) {
+            $script:regexMultilineCommentStart = [regex]::new('^\s*<#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        }
+        if (-not $script:regexMultilineCommentEnd) {
+            $script:regexMultilineCommentEnd = [regex]::new('^\s*#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        }
+        if (-not $script:regexCommentStart) {
+            $script:regexCommentStart = [regex]::new('^\s*#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        }
+    }
+    catch {
+        Write-Warning "Failed to import regex patterns, using fallback: $($_.Exception.Message)"
+        # Fallback: create regex patterns directly
+        $script:regexCommentLine = [regex]::new('^\s*#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $script:regexFunction = [regex]::new('^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $script:regexDecorativeEquals = [regex]::new('^# =+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $script:regexDecorativeDashes = [regex]::new('^# -+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $script:regexMultilineCommentStart = [regex]::new('^\s*<#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $script:regexMultilineCommentEnd = [regex]::new('^\s*#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $script:regexCommentStart = [regex]::new('^\s*#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    }
+}
+else {
+    # Create regex patterns directly if module not found
+    $script:regexCommentLine = [regex]::new('^\s*#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    $script:regexFunction = [regex]::new('^\s*function\s+([A-Za-z0-9_\-\.\~]+)\b', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    $script:regexDecorativeEquals = [regex]::new('^# =+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    $script:regexDecorativeDashes = [regex]::new('^# -+$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    $script:regexMultilineCommentStart = [regex]::new('^\s*<#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    $script:regexMultilineCommentEnd = [regex]::new('^\s*#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+    $script:regexCommentStart = [regex]::new('^\s*#', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 }
 
 <#
@@ -55,7 +100,11 @@ function Get-FragmentPurpose {
 
             # Look for comment lines
             $m = $script:regexCommentLine.Match($trim)
-            if ($m.Success -or ($inMultilineComment -and $trim -and -not $script:regexMultilineCommentStart.IsMatch($trim) -and -not $script:regexCommentStart.IsMatch($trim))) {
+            if ($m.Success -or
+                ($inMultilineComment -and
+                $trim -and
+                -not $script:regexMultilineCommentStart.IsMatch($trim) -and
+                -not $script:regexCommentStart.IsMatch($trim))) {
                 $purposeText = if ($m.Success) { $m.Groups[1].Value } else { $trim }
                 # Skip generic or decorative text
                 if ($purposeText -notmatch '^=+$' -and $purposeText -notmatch '^-+$' -and $purposeText -notmatch '^\.+$') {
@@ -114,7 +163,13 @@ function Get-FunctionDescription {
         if ($script:regexMultilineCommentStart.IsMatch($checkLine)) { $inMultilineComment = $true; break }
         if ($script:regexMultilineCommentEnd.IsMatch($checkLine) -and $inMultilineComment) { $inMultilineComment = $false; break }
         # Only break on actual code lines, not content inside comments
-        if ($checkLine -and -not $script:regexEmptyLine.IsMatch($checkLine) -and -not $script:regexCommentStart.IsMatch($checkLine) -and -not $script:regexIfStatement.IsMatch($checkLine) -and -not $inMultilineComment) { break }
+        if ($checkLine -and
+            -not $script:regexEmptyLine.IsMatch($checkLine) -and
+            -not $script:regexCommentStart.IsMatch($checkLine) -and
+            -not $script:regexIfStatement.IsMatch($checkLine) -and
+            -not $inMultilineComment) {
+            break
+        }
     }
 
     # Second pass: extract comments
@@ -136,18 +191,29 @@ function Get-FunctionDescription {
             }
         }
         # Check for content inside multiline comments
-        elseif ($inMultilineComment -and $up -and -not $script:regexMultilineCommentStart.IsMatch($up) -and -not $script:regexCommentStart.IsMatch($up)) {
+        elseif ($inMultilineComment -and
+            $up -and
+            -not $script:regexMultilineCommentStart.IsMatch($up) -and
+            -not $script:regexCommentStart.IsMatch($up)) {
             # Extract the first meaningful line from multiline comment
             $descText = $up.Trim()
             # Skip function names, titles, decorative lines
-            if ($descText -notmatch '^[-=\s]*$' -and $descText -notmatch '^[A-Za-z ]+:$' -and $descText -notmatch '^[A-Za-z0-9_\-]+$' -and $descText -notmatch '^-+$' -and $descText.Length -lt 120) {
+            if ($descText -notmatch '^[-=\s]*$' -and
+                $descText -notmatch '^[A-Za-z ]+:$' -and
+                $descText -notmatch '^[A-Za-z0-9_\-]+$' -and
+                $descText -notmatch '^-+$' -and
+                $descText.Length -lt 120) {
                 $desc = $descText
                 break
             }
         }
 
         # Stop if we hit a non-comment, non-empty line
-        if ($up -and -not $script:regexEmptyLine.IsMatch($up) -and -not $script:regexCommentStart.IsMatch($up) -and -not $script:regexIfStatement.IsMatch($up) -and -not $inMultilineComment) {
+        if ($up -and
+            -not $script:regexEmptyLine.IsMatch($up) -and
+            -not $script:regexCommentStart.IsMatch($up) -and
+            -not $script:regexIfStatement.IsMatch($up) -and
+            -not $inMultilineComment) {
             break
         }
     }

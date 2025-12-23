@@ -18,7 +18,7 @@ scripts/utils/new-fragment.ps1
     Optional. Fragment number prefix (00-99). If not provided, uses next available number.
 
 .PARAMETER Dependencies
-    Optional. Array of fragment names that this fragment depends on. Defaults to '00-bootstrap'.
+    Optional. Array of fragment names that this fragment depends on. Defaults to 'bootstrap'.
 
 .PARAMETER Description
     Optional. Brief description of what the fragment does.
@@ -26,10 +26,10 @@ scripts/utils/new-fragment.ps1
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\new-fragment.ps1 -Name 'my-feature' -Number 50
 
-    Creates profile.d/50-my-feature.ps1 with proper structure.
+    Creates profile.d/my-feature.ps1 with proper structure.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\utils\new-fragment.ps1 -Name 'custom-tools' -Dependencies @('00-bootstrap', '01-env')
+    pwsh -NoProfile -File scripts\utils\new-fragment.ps1 -Name 'custom-tools' -Dependencies @('bootstrap', 'env', 'utilities')
 
     Creates a new fragment that depends on bootstrap and env fragments.
 #>
@@ -40,9 +40,14 @@ param(
     
     [int]$Number = -1,
     
-    [string[]]$Dependencies = @('00-bootstrap'),
+    [string[]]$Dependencies = @('bootstrap'),
     
-    [string]$Description = "Profile fragment for $Name"
+    [string]$Description = "Profile fragment for $Name",
+    
+    [ValidateSet('core', 'essential', 'standard', 'optional')]
+    [string]$Tier = 'standard',
+    
+    [string[]]$Environments = @()
 )
 
 # Import shared utilities using ModuleImport pattern
@@ -95,6 +100,19 @@ if (Test-Path $fragmentPath) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Fragment already exists: $fragmentPath"
 }
 
+# Build header metadata
+$headerLines = @()
+$headerLines += "# Tier: $Tier"
+if ($Dependencies.Count -gt 0) {
+    $depsString = $Dependencies -join ', '
+    $headerLines += "# Dependencies: $depsString"
+}
+if ($Environments.Count -gt 0) {
+    $envString = $Environments -join ', '
+    $headerLines += "# Environment: $envString"
+}
+$headerMetadata = $headerLines -join "`n"
+
 # Generate fragment content
 $fragmentContent = @"
 <#
@@ -102,6 +120,8 @@ $fragmentContent = @"
 #
 $Description
 #>
+
+$headerMetadata
 
 try {
     if (`$null -ne (Get-Variable -Name '${Name}Loaded' -Scope Global -ErrorAction SilentlyContinue)) { return }

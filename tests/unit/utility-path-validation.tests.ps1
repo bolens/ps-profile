@@ -6,6 +6,19 @@
 
 BeforeAll {
     $script:TempRoot = New-TestTempDirectory -Prefix 'PathValidation'
+    
+    # Import PathValidation module to get Resolve-DefaultPath function
+    $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $pathValidationModule = Join-Path $repoRoot 'scripts' 'lib' 'path' 'PathValidation.psm1'
+    if (Test-Path $pathValidationModule) {
+        Import-Module $pathValidationModule -Force -DisableNameChecking
+    }
+    
+    # Import FileSystem module to get Ensure-DirectoryExists function
+    $fileSystemModule = Join-Path $repoRoot 'scripts' 'lib' 'file' 'FileSystem.psm1'
+    if (Test-Path $fileSystemModule) {
+        Import-Module $fileSystemModule -Force -DisableNameChecking
+    }
 }
 
 Describe 'Path Validation Helpers' {

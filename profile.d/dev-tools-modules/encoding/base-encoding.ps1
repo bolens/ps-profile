@@ -24,8 +24,8 @@ function Initialize-DevTools-BaseEncoding {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'NodeJs.psm1'
-        if (Test-Path $nodeJsModulePath) {
+        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
+        if ($nodeJsModulePath -and -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }

@@ -4,8 +4,8 @@
 # ===============================================
 
 # Import Platform module for Test-IsWindows
-$platformModulePath = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent) 'scripts' 'lib' 'Platform.psm1'
-if (Test-Path $platformModulePath) {
+$platformModulePath = Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent) 'scripts' 'lib' 'core' 'Platform.psm1'
+if ($platformModulePath -and -not [string]::IsNullOrWhiteSpace($platformModulePath) -and (Test-Path -LiteralPath $platformModulePath)) {
     try {
         Import-Module $platformModulePath -DisableNameChecking -ErrorAction Stop
     }
@@ -279,7 +279,7 @@ function Add-Path {
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [ValidateScript({
-                if (-not (Test-Path $_ -PathType Container -ErrorAction SilentlyContinue)) {
+                if (-not ($_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_ -PathType Container -ErrorAction SilentlyContinue))) {
                     throw "Path does not exist or is not a directory: $_"
                 }
                 $true

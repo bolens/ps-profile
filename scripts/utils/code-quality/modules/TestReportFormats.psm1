@@ -10,9 +10,15 @@ scripts/utils/code-quality/modules/TestReportFormats.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+
+# Import Locale module for locale-aware date formatting
+$localeModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Locale.psm1'
+if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) -and (Test-Path -LiteralPath $localeModulePath)) {
+    Import-Module $localeModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
 <#
@@ -56,14 +62,30 @@ function New-CustomTestReport {
         [switch]$IncludeDetails
     )
 
+    # Use locale-aware date formatting for user-facing report
+    $generatedAt = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+        Format-LocaleDate (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+    }
+    else {
+        (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+    }
+    
+    # Format duration using locale-aware formatting
+    $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+        Format-LocaleNumber ([Math]::Round($TestResult.Time.TotalSeconds, 2)) -Format 'N2'
+    }
+    else {
+        [Math]::Round($TestResult.Time.TotalSeconds, 2).ToString("N2")
+    }
+    
     $reportData = @{
-        GeneratedAt = Get-Date
+        GeneratedAt = $generatedAt
         Summary     = @{
             Total    = $TestResult.TotalCount
             Passed   = $TestResult.PassedCount
             Failed   = $TestResult.FailedCount
             Skipped  = $TestResult.SkippedCount
-            Duration = $TestResult.Time.ToString()
+            Duration = "${durationStr}s"
         }
         Analysis    = $Analysis
     }

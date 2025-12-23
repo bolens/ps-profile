@@ -48,11 +48,11 @@ if (Test-CachedCommand 'docker') {
 
 ### Focus
 
-Keep each fragment focused on a single concern (e.g., `11-git.ps1` for Git helpers, `22-containers.ps1` for container utilities).
+Keep each fragment focused on a single concern (e.g., `git.ps1` for Git helpers, `containers.ps1` for container utilities).
 
 ## Bootstrap Helpers
 
-Available from `00-bootstrap.ps1`:
+Available from `bootstrap.ps1`:
 
 - `Set-AgentModeFunction` — Creates collision-safe functions
 - `Set-AgentModeAlias` — Creates collision-safe aliases
@@ -109,32 +109,32 @@ Many fragments have been refactored to use organized subdirectories for better c
 
 ### Module Subdirectories
 
-- **`cli-modules/`** - Modern CLI tool integrations (loaded by `54-modern-cli.ps1`)
-- **`container-modules/`** - Container helper modules (loaded by `22-containers.ps1`)
+- **`cli-modules/`** - Modern CLI tool integrations (loaded by `modern-cli.ps1`)
+- **`container-modules/`** - Container helper modules (loaded by `containers.ps1`)
   - `container-compose.ps1` - Docker Compose helpers
   - `container-compose-podman.ps1` - Podman Compose helpers
   - `container-helpers.ps1` - General container utilities
-- **`conversion-modules/`** - Format conversion utilities (loaded by `02-files.ps1`)
+- **`conversion-modules/`** - Format conversion utilities (loaded by `files.ps1`)
   - `data/` - Data format conversions (binary, columnar, structured, scientific)
   - `document/` - Document format conversions (Markdown, LaTeX, RST)
   - `helpers/` - Conversion helper utilities (XML, TOML)
   - `media/` - Media format conversions (audio, images, PDF, video)
-- **`dev-tools-modules/`** - Development tool integrations (loaded by `02-files.ps1`, `57-testing.ps1`, `58-build-tools.ps1`)
+- **`dev-tools-modules/`** - Development tool integrations (loaded by `files.ps1`, `testing.ps1`, `build-tools.ps1`)
   - `build/` - Build tools and testing frameworks
   - `crypto/` - Cryptographic utilities (hash, JWT)
   - `data/` - Data manipulation tools (lorem, units, UUID, timestamps)
   - `encoding/` - Encoding utilities
   - `format/` - Formatting tools (diff, regex, QR codes)
-- **`diagnostics-modules/`** - Diagnostic and monitoring modules (loaded by `59-diagnostics.ps1`, `72-error-handling.ps1`, `73-performance-insights.ps1`, `75-system-monitor.ps1`)
+- **`diagnostics-modules/`** - Diagnostic and monitoring modules (loaded by `diagnostics.ps1`, `error-handling.ps1`, `performance-insights.ps1`, `system-monitor.ps1`)
   - `core/` - Core diagnostics (error handling, profile diagnostics)
   - `monitoring/` - System monitoring (performance, system monitor)
-- **`files-modules/`** - File operation modules (loaded by `02-files.ps1`)
+- **`files-modules/`** - File operation modules (loaded by `files.ps1`)
   - `inspection/` - File inspection utilities (hash, head/tail, hexdump, size)
   - `navigation/` - File navigation helpers (listing, navigation)
-- **`git-modules/`** - Git integration modules (loaded by `11-git.ps1`)
+- **`git-modules/`** - Git integration modules (loaded by `git.ps1`)
   - `core/` - Core Git operations (basic, advanced, helpers)
   - `integrations/` - Git service integrations (GitHub)
-- **`utilities-modules/`** - Utility function modules (loaded by `05-utilities.ps1`, `71-network-utils.ps1`, `74-enhanced-history.ps1`)
+- **`utilities-modules/`** - Utility function modules (loaded by `utilities.ps1`, `network-utils.ps1`, `enhanced-history.ps1`)
   - `data/` - Data utilities (datetime, encoding)
   - `filesystem/` - Filesystem utilities
   - `history/` - Command history utilities (basic, enhanced)
@@ -146,7 +146,7 @@ Many fragments have been refactored to use organized subdirectories for better c
 Modules are loaded by their parent fragments using dot-sourcing:
 
 ```powershell
-# Example from 05-utilities.ps1
+# Example from utilities.ps1
 $utilitiesModulesDir = Join-Path $PSScriptRoot 'utilities-modules'
 if (Test-Path $utilitiesModulesDir) {
     $systemDir = Join-Path $utilitiesModulesDir 'system'
@@ -164,6 +164,15 @@ if (Test-Path $utilitiesModulesDir) {
 4. Use `Set-AgentModeFunction` for function registration
 5. Include error handling for module loading
 6. Document functions with comment-based help
+
+## Local Overrides
+
+The `local-overrides.ps1` fragment is **disabled by default** due to performance issues (100+ second delays on some filesystems when the file doesn't exist). To enable it:
+
+1. Set the environment variable: `PS_PROFILE_ENABLE_LOCAL_OVERRIDES=1` in your `.env` file
+2. Create `profile.d/local-overrides.ps1` with your machine-specific customizations
+
+**Note**: Only enable this if you actually have a `local-overrides.ps1` file to load. The fragment is intended for machine-specific tweaks and should be added to `.gitignore` if you plan to keep secrets or local-only settings there.
 
 ## Documentation
 

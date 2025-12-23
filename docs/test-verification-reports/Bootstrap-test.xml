@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="15" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2025-11-30" time="19:02:51">
+  <environment cwd="C:\Users\bolen\Documents\PowerShell" nunit-version="2.5.8.0" platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk4\Partition4" clr-version="10.0.0" user="bolen" os-version="10.0.28000" machine-name="BAMBOO" user-domain="BAMBOO" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="7.7136" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-helper-functions.tests.ps1" executed="True" result="Success" success="True" time="2.1437" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-helper-functions.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Bootstrap Helper Functions" executed="True" result="Success" success="True" time="0.6943" asserts="0" description="Bootstrap Helper Functions">
+            <results>
+              <test-suite type="TestFixture" name="Bootstrap Helper Functions.Bootstrap helper functions" executed="True" result="Success" success="True" time="0.5436" asserts="0" description="Bootstrap Helper Functions.Bootstrap helper functions">
+                <results>
+                  <test-case description="Test-CachedCommand caches command availability results" name="Bootstrap Helper Functions.Bootstrap helper functions.Test-CachedCommand caches command availability results" time="0.0869" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-CachedCommand returns false for non-existent commands" name="Bootstrap Helper Functions.Bootstrap helper functions.Test-CachedCommand returns false for non-existent commands" time="0.1139" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-HasCommand checks function provider first" name="Bootstrap Helper Functions.Bootstrap helper functions.Test-HasCommand checks function provider first" time="0.0082" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-HasCommand checks alias provider" name="Bootstrap Helper Functions.Bootstrap helper functions.Test-HasCommand checks alias provider" time="0.1274" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-HasCommand returns false for non-existent commands" name="Bootstrap Helper Functions.Bootstrap helper functions.Test-HasCommand returns false for non-existent commands" time="0.1059" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Clear-TestCachedCommandCache clears all cached entries" name="Bootstrap Helper Functions.Bootstrap helper functions.Clear-TestCachedCommandCache clears all cached entries" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-AssumedCommands returns list of assumed commands" name="Bootstrap Helper Functions.Bootstrap helper functions.Get-AssumedCommands returns list of assumed commands" time="0.0504" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-AgentModeFunction returns false when function already exists" name="Bootstrap Helper Functions.Bootstrap helper functions.Set-AgentModeFunction returns false when function already exists" time="0.0059" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-AgentModeAlias returns false when alias already exists" name="Bootstrap Helper Functions.Bootstrap helper functions.Set-AgentModeAlias returns false when alias already exists" time="0.005" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-idempotency.tests.ps1" executed="True" result="Success" success="True" time="1.6673" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-idempotency.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Bootstrap Idempotency Tests" executed="True" result="Success" success="True" time="0.5774" asserts="0" description="Bootstrap Idempotency Tests">
+            <results>
+              <test-suite type="TestFixture" name="Bootstrap Idempotency Tests.Idempotency tests" executed="True" result="Success" success="True" time="0.4259" asserts="0" description="Bootstrap Idempotency Tests.Idempotency tests">
+                <results>
+                  <test-case description="Set-AgentModeFunction is idempotent" name="Bootstrap Idempotency Tests.Idempotency tests.Set-AgentModeFunction is idempotent" time="0.1912" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-AgentModeAlias is idempotent" name="Bootstrap Idempotency Tests.Idempotency tests.Set-AgentModeAlias is idempotent" time="0.2233" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-performance.tests.ps1" executed="True" result="Success" success="True" time="2.2343" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-performance.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Bootstrap Performance and Memory Tests" executed="True" result="Success" success="True" time="1.1356" asserts="0" description="Bootstrap Performance and Memory Tests">
+            <results>
+              <test-suite type="TestFixture" name="Bootstrap Performance and Memory Tests.Performance and memory tests" executed="True" result="Success" success="True" time="0.9534" asserts="0" description="Bootstrap Performance and Memory Tests.Performance and memory tests">
+                <results>
+                  <test-case description="Test-CachedCommand improves performance on repeated calls" name="Bootstrap Performance and Memory Tests.Performance and memory tests.Test-CachedCommand improves performance on repeated calls" time="0.0143" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-AgentModeFunction does not leak memory on repeated calls" name="Bootstrap Performance and Memory Tests.Performance and memory tests.Set-AgentModeFunction does not leak memory on repeated calls" time="0.8023" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-scoping.tests.ps1" executed="True" result="Success" success="True" time="1.6683" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\bootstrap\bootstrap-scoping.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Bootstrap Function Scoping and Visibility" executed="True" result="Success" success="True" time="0.4114" asserts="0" description="Bootstrap Function Scoping and Visibility">
+            <results>
+              <test-suite type="TestFixture" name="Bootstrap Function Scoping and Visibility.Function scoping and visibility" executed="True" result="Success" success="True" time="0.2399" asserts="0" description="Bootstrap Function Scoping and Visibility.Function scoping and visibility">
+                <results>
+                  <test-case description="Set-AgentModeFunction creates global functions" name="Bootstrap Function Scoping and Visibility.Function scoping and visibility.Set-AgentModeFunction creates global functions" time="0.1199" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Set-AgentModeAlias creates global aliases" name="Bootstrap Function Scoping and Visibility.Function scoping and visibility.Set-AgentModeAlias creates global aliases" time="0.1108" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

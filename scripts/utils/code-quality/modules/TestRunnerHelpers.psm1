@@ -10,8 +10,8 @@ scripts/utils/code-quality/modules/TestRunnerHelpers.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
@@ -44,13 +44,20 @@ function Invoke-TestDryRun {
     Write-ScriptMessage -Message "DRY RUN MODE: Showing test discovery without execution"
 
     # Create a separate configuration for dry run
+    # In Pester 5, Path must be set on config object (cannot use both -Configuration and -Path together)
     $dryRunConfig = New-PesterConfiguration
     $dryRunConfig.Run.PassThru = $false
     $dryRunConfig.Output.Verbosity = 'Detailed'
     $dryRunConfig.Run.Path = $TestPaths
-    $dryRunConfig.Filter.FullName = $Config.Filter.FullName
-    $dryRunConfig.Filter.Tag = $Config.Filter.Tag
-    $dryRunConfig.Filter.ExcludeTag = $Config.Filter.ExcludeTag
+    if ($Config.Filter.FullName.Value) {
+        $dryRunConfig.Filter.FullName = $Config.Filter.FullName.Value
+    }
+    if ($Config.Filter.Tag.Value) {
+        $dryRunConfig.Filter.Tag = $Config.Filter.Tag.Value
+    }
+    if ($Config.Filter.ExcludeTag.Value) {
+        $dryRunConfig.Filter.ExcludeTag = $Config.Filter.ExcludeTag.Value
+    }
 
     $dryRunConfig.Run.ScriptBlock = {
         param($Context)
@@ -58,6 +65,7 @@ function Invoke-TestDryRun {
         Write-Host "Discovered test file: $($Context.TestFile)"
     }
 
+    # Use only -Configuration (path is set in config, cannot use both -Configuration and -Path)
     Invoke-Pester -Configuration $dryRunConfig
     Write-ScriptMessage -Message "Dry run completed. Use -Verbose for more details."
 }

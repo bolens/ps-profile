@@ -74,6 +74,7 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Locale' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Import fragment README modules
@@ -116,17 +117,62 @@ foreach ($ps in $psFiles) {
         continue
     }
 
-    # Extract fragment information
-    $purpose = Get-FragmentPurpose -FilePath $ps.FullName -FileInfo $ps
-    $functions = Get-FragmentFunctions -FilePath $ps.FullName
-    $enableHelpers = Get-FragmentEnableHelpers -FilePath $ps.FullName
+    try {
+        # Extract fragment information
+        $purpose = Get-FragmentPurpose -FilePath $ps.FullName -FileInfo $ps -ErrorAction Stop
+        $functions = Get-FragmentFunctions -FilePath $ps.FullName -ErrorAction Stop
+        $enableHelpers = Get-FragmentEnableHelpers -FilePath $ps.FullName -ErrorAction Stop
 
-    # Generate markdown content
-    $mdContent = New-FragmentReadmeContent -FileName $ps.Name -Purpose $purpose -Functions $functions -EnableHelpers $enableHelpers
+        # Ensure we have at least a purpose
+        if ([string]::IsNullOrWhiteSpace($purpose)) {
+            $purpose = "See the fragment source file for details."
+        }
 
-    # Write README file
-    $mdContent | Out-File -FilePath $mdPath -Encoding utf8 -Force
-    Write-ScriptMessage -Message ("Created: {0}" -f (Split-Path $mdPath -Leaf))
+        # Generate markdown content
+        $mdContent = New-FragmentReadmeContent -FileName $ps.Name -Purpose $purpose -Functions $functions -EnableHelpers $enableHelpers -ErrorAction Stop
+
+        # Ensure content is not empty
+        if ([string]::IsNullOrWhiteSpace($mdContent)) {
+            throw "Generated content is empty"
+        }
+
+        # Write README file
+        $mdContent | Out-File -FilePath $mdPath -Encoding utf8 -Force
+        Write-ScriptMessage -Message ("Created: {0}" -f (Split-Path $mdPath -Leaf))
+    }
+    catch {
+        Write-Warning "Failed to generate README for $($ps.Name): $($_.Exception.Message)"
+        # Create a minimal README with basic info
+        $displayFileName = $ps.Name
+        if ($ps.Name -match '^\d+-(.+)') {
+            $displayFileName = $matches[1]
+        }
+        $minimalContent = @"
+profile.d/$displayFileName
+
+Purpose
+-------
+See the fragment source file for details.
+
+Usage
+-----
+See the fragment source: ``$displayFileName`` for examples and usage notes.
+
+Functions
+---------
+(Unable to parse functions - see source file)
+
+Dependencies
+------------
+None explicit; see the fragment for runtime checks and optional tooling dependencies.
+
+Notes
+-----
+Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.
+"@
+        $minimalContent | Out-File -FilePath $mdPath -Encoding utf8 -Force
+        Write-ScriptMessage -Message ("Created minimal README: {0}" -f (Split-Path $mdPath -Leaf))
+    }
 }
 
 # Copy fragment READMEs to output directory and generate index
@@ -195,9 +241,18 @@ if (Test-Path $fragmentsDocsPath) {
 }
 
 # Generate fragment index
-if (Get-Command Write-FragmentIndex -ErrorAction SilentlyContinue) {
-    Write-ScriptMessage -Message "`nGenerating fragment index..."
-    Write-FragmentIndex -FragmentsPath $fragmentsDocsPath -ProfilePath $fragDir
+try {
+    if (Get-Command Write-FragmentIndex -ErrorAction SilentlyContinue) {
+        Write-ScriptMessage -Message "`nGenerating fragment index..."
+        Write-FragmentIndex -FragmentsPath $fragmentsDocsPath -ProfilePath $fragDir -ErrorAction Stop
+    }
+    else {
+        Write-Warning "Write-FragmentIndex function not available. Index generation skipped."
+    }
+}
+catch {
+    Write-Warning "Failed to generate fragment index: $($_.Exception.Message)"
+    # Don't fail the entire script if index generation fails
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Done generating fragment README files and index.'

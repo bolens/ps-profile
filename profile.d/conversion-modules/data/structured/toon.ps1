@@ -10,13 +10,16 @@
     This function is called automatically by Ensure-FileConversion-Data.
 .NOTES
     This is an internal initialization function and should not be called directly.
+    Internal dependencies: helpers-xml.ps1 (for Convert-JsonToXml), helpers-toon.ps1 (for Convert-JsonToToon, Convert-ToonToJson)
 #>
 function Initialize-FileConversion-Toon {
     # JSON to TOON helper
     Set-Item -Path Function:Global:_ConvertTo-ToonFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         try {
-            if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.toon' }
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.json$', '.toon'
+            }
             $json = Get-Content -LiteralPath $InputPath -Raw | ConvertFrom-Json
             $toon = Convert-JsonToToon -JsonObject $json
             Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8
@@ -30,7 +33,9 @@ function Initialize-FileConversion-Toon {
     Set-Item -Path Function:Global:_ConvertFrom-ToonToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         try {
-            if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toon$', '.json' }
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toon$', '.json'
+            }
             $toon = Get-Content -LiteralPath $InputPath -Raw
             $json = Convert-ToonToJson -ToonString $toon
             $json | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
@@ -41,22 +46,117 @@ function Initialize-FileConversion-Toon {
     } -Force
 
     # TOON to YAML
-    Set-Item -Path Function:Global:_ConvertFrom-ToonToYaml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toon$', '.yaml' }; $json = Get-Content -LiteralPath $InputPath -Raw; $jsonObj = Convert-ToonToJson -ToonString $json; $jsonObj | ConvertTo-Json -Depth 100 | & yq eval -P | Out-File -FilePath $OutputPath -Encoding UTF8 } catch { Write-Error "Failed to convert TOON to YAML: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-ToonToYaml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toon$', '.yaml'
+            }
+            $json = Get-Content -LiteralPath $InputPath -Raw
+            $jsonObj = Convert-ToonToJson -ToonString $json
+            $jsonObj | ConvertTo-Json -Depth 100 | & yq eval -P | Out-File -FilePath $OutputPath -Encoding UTF8
+        }
+        catch {
+            Write-Error "Failed to convert TOON to YAML: $_"
+        }
+    } -Force
 
     # YAML to TOON
-    Set-Item -Path Function:Global:_ConvertTo-ToonFromYaml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.ya?ml$', '.toon' }; $json = & yq eval -o=json $InputPath 2>$null; if ($LASTEXITCODE -eq 0 -and $json) { $jsonObj = $json | ConvertFrom-Json; $toon = Convert-JsonToToon -JsonObject $jsonObj; Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8 } } catch { Write-Error "Failed to convert YAML to TOON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-ToonFromYaml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.ya?ml$', '.toon'
+            }
+            $json = & yq eval -o=json $InputPath 2>$null
+            if ($LASTEXITCODE -eq 0 -and $json) {
+                $jsonObj = $json | ConvertFrom-Json
+                $toon = Convert-JsonToToon -JsonObject $jsonObj
+                Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8
+            }
+        }
+        catch {
+            Write-Error "Failed to convert YAML to TOON: $_"
+        }
+    } -Force
 
     # TOON to CSV
-    Set-Item -Path Function:Global:_ConvertFrom-ToonToCsv -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toon$', '.csv' }; $json = Get-Content -LiteralPath $InputPath -Raw; $jsonObj = Convert-ToonToJson -ToonString $json; $data = $jsonObj | ConvertTo-Json -Depth 100 | ConvertFrom-Json; if ($data -is [array]) { $data | Export-Csv -NoTypeInformation -Path $OutputPath } elseif ($data -is [PSCustomObject]) { @($data) | Export-Csv -NoTypeInformation -Path $OutputPath } else { Write-Error "TOON must represent an array of objects or a single object" } } catch { Write-Error "Failed to convert TOON to CSV: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-ToonToCsv -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toon$', '.csv'
+            }
+            $json = Get-Content -LiteralPath $InputPath -Raw
+            $jsonObj = Convert-ToonToJson -ToonString $json
+            $data = $jsonObj | ConvertTo-Json -Depth 100 | ConvertFrom-Json
+            if ($data -is [array]) {
+                $data | Export-Csv -NoTypeInformation -Path $OutputPath
+            }
+            elseif ($data -is [PSCustomObject]) {
+                @($data) | Export-Csv -NoTypeInformation -Path $OutputPath
+            }
+            else {
+                Write-Error "TOON must represent an array of objects or a single object"
+            }
+        }
+        catch {
+            Write-Error "Failed to convert TOON to CSV: $_"
+        }
+    } -Force
 
     # CSV to TOON
-    Set-Item -Path Function:Global:_ConvertTo-ToonFromCsv -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.csv$', '.toon' }; $data = Import-Csv -Path $InputPath; $jsonObj = $data | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $toon = Convert-JsonToToon -JsonObject $jsonObj; Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8 } catch { Write-Error "Failed to convert CSV to TOON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-ToonFromCsv -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.csv$', '.toon'
+            }
+            $data = Import-Csv -Path $InputPath
+            $jsonObj = $data | ConvertTo-Json -Depth 10 | ConvertFrom-Json
+            $toon = Convert-JsonToToon -JsonObject $jsonObj
+            Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8
+        }
+        catch {
+            Write-Error "Failed to convert CSV to TOON: $_"
+        }
+    } -Force
 
     # TOON to XML
-    Set-Item -Path Function:Global:_ConvertFrom-ToonToXml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toon$', '.xml' }; $json = Get-Content -LiteralPath $InputPath -Raw; $jsonObj = Convert-ToonToJson -ToonString $json; $xml = Convert-JsonToXml -JsonObject $jsonObj; $xml.Save($OutputPath) } catch { Write-Error "Failed to convert TOON to XML: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-ToonToXml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toon$', '.xml'
+            }
+            $json = Get-Content -LiteralPath $InputPath -Raw
+            $jsonObj = Convert-ToonToJson -ToonString $json
+            $xml = Convert-JsonToXml -JsonObject $jsonObj
+            $xml.Save($OutputPath)
+        }
+        catch {
+            Write-Error "Failed to convert TOON to XML: $_"
+        }
+    } -Force
 
     # XML to TOON
-    Set-Item -Path Function:Global:_ConvertTo-ToonFromXml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.xml$', '.toon' }; $xml = [xml](Get-Content -LiteralPath $InputPath -Raw); $result = @{}; $result[$xml.DocumentElement.Name] = Convert-XmlToJsonObject $xml.DocumentElement; $jsonObj = [PSCustomObject]$result; $toon = Convert-JsonToToon -JsonObject $jsonObj; Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8 } catch { Write-Error "Failed to convert XML to TOON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-ToonFromXml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.xml$', '.toon'
+            }
+            $xml = [xml](Get-Content -LiteralPath $InputPath -Raw)
+            $result = @{}
+            $result[$xml.DocumentElement.Name] = Convert-XmlToJsonObject $xml.DocumentElement
+            $jsonObj = [PSCustomObject]$result
+            $toon = Convert-JsonToToon -JsonObject $jsonObj
+            Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8
+        }
+        catch {
+            Write-Error "Failed to convert XML to TOON: $_"
+        }
+    } -Force
 }
 
 # Public functions and aliases

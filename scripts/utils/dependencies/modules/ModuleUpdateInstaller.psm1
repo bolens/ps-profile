@@ -8,6 +8,43 @@ scripts/utils/dependencies/modules/ModuleUpdateInstaller.psm1
     Provides functions for installing module updates with retry logic.
 #>
 
+# Import Retry module if available for consistent retry behavior
+# Use safe path resolution that handles cases where $PSScriptRoot might not be set
+try {
+    if ($null -ne $PSScriptRoot -and -not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        # Start from the directory containing the script (or the script path itself if it's a directory)
+        $currentDir = if ([System.IO.Directory]::Exists($PSScriptRoot)) {
+            $PSScriptRoot
+        }
+        else {
+            [System.IO.Path]::GetDirectoryName($PSScriptRoot)
+        }
+        
+        $maxDepth = 4
+        $depth = 0
+        
+        # Traverse up to repository root (4 levels: modules -> dependencies -> utils -> scripts -> repo root)
+        while ($depth -lt $maxDepth -and $currentDir -and -not [string]::IsNullOrWhiteSpace($currentDir)) {
+            $parentDir = [System.IO.Path]::GetDirectoryName($currentDir)
+            if ([string]::IsNullOrWhiteSpace($parentDir) -or $parentDir -eq $currentDir) {
+                break
+            }
+            $currentDir = $parentDir
+            $depth++
+        }
+        
+        if ($currentDir -and -not [string]::IsNullOrWhiteSpace($currentDir)) {
+            $retryModulePath = Join-Path $currentDir 'scripts' 'lib' 'core' 'Retry.psm1'
+            if (-not [string]::IsNullOrWhiteSpace($retryModulePath) -and (Test-Path -LiteralPath $retryModulePath -ErrorAction SilentlyContinue)) {
+                Import-Module $retryModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}
+catch {
+    # Silently fail if path resolution fails - module will use fallback retry logic
+}
+
 <#
 .SYNOPSIS
     Installs updates for a single module.
@@ -28,13 +65,9 @@ function Install-ModuleUpdate {
     )
 
     try {
-        # Retry logic for module updates
-        $maxRetries = 3
-        $retryCount = 0
-        $updateSuccess = $false
-
-        while ($retryCount -lt $maxRetries -and -not $updateSuccess) {
-            try {
+        # Use Retry module if available, otherwise fall back to manual retry logic
+        if (Get-Command Invoke-WithRetry -ErrorAction SilentlyContinue) {
+            Invoke-WithRetry -ScriptBlock {
                 if ($ModuleUpdate.Source -eq "Local") {
                     # For local modules, update in place
                     Update-Module -Name $ModuleUpdate.Name -RequiredVersion $ModuleUpdate.LatestVersion -Force -ErrorAction Stop
@@ -43,25 +76,52 @@ function Install-ModuleUpdate {
                     # For system modules, update normally
                     Install-Module -Name $ModuleUpdate.Name -RequiredVersion $ModuleUpdate.LatestVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
                 }
-                $updateSuccess = $true
                 Write-ScriptMessage -Message "✓ Updated $($ModuleUpdate.Name)"
 
                 # Clear cache for this module
                 Clear-CachedValue -Key "ModuleVersion_$($ModuleUpdate.Name)"
+            } -MaxRetries 3 -RetryDelaySeconds 2 -ExponentialBackoff -OnRetry {
+                param($Attempt, $MaxRetries, $DelaySeconds, $Exception)
+                Write-ScriptMessage -Message "Retry $Attempt/$MaxRetries for updating $($ModuleUpdate.Name)..." -IsWarning
             }
-            catch {
-                $retryCount++
-                if ($retryCount -lt $maxRetries) {
-                    Write-ScriptMessage -Message "Retry $retryCount/$maxRetries for updating $($ModuleUpdate.Name)..." -IsWarning
-                    Start-Sleep -Seconds (2 * $retryCount)  # Exponential backoff
-                }
-                else {
-                    throw
-                }
-            }
+            return $true
         }
+        else {
+            # Fallback to manual retry logic
+            $maxRetries = 3
+            $retryCount = 0
+            $updateSuccess = $false
 
-        return $updateSuccess
+            while ($retryCount -lt $maxRetries -and -not $updateSuccess) {
+                try {
+                    if ($ModuleUpdate.Source -eq "Local") {
+                        # For local modules, update in place
+                        Update-Module -Name $ModuleUpdate.Name -RequiredVersion $ModuleUpdate.LatestVersion -Force -ErrorAction Stop
+                    }
+                    else {
+                        # For system modules, update normally
+                        Install-Module -Name $ModuleUpdate.Name -RequiredVersion $ModuleUpdate.LatestVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+                    }
+                    $updateSuccess = $true
+                    Write-ScriptMessage -Message "✓ Updated $($ModuleUpdate.Name)"
+
+                    # Clear cache for this module
+                    Clear-CachedValue -Key "ModuleVersion_$($ModuleUpdate.Name)"
+                }
+                catch {
+                    $retryCount++
+                    if ($retryCount -lt $maxRetries) {
+                        Write-ScriptMessage -Message "Retry $retryCount/$maxRetries for updating $($ModuleUpdate.Name)..." -IsWarning
+                        Start-Sleep -Seconds (2 * $retryCount)  # Exponential backoff
+                    }
+                    else {
+                        throw
+                    }
+                }
+            }
+
+            return $updateSuccess
+        }
     }
     catch {
         Write-ScriptMessage -Message "Failed to update $($ModuleUpdate.Name): $($_.Exception.Message)" -IsWarning

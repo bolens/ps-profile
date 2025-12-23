@@ -65,8 +65,8 @@ function Invoke-SecurityScan {
 
     # Try to import Collections and FileContent modules from scripts/lib (optional)
     $libPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib'
-    $collectionsModulePath = Join-Path $libPath 'Collections.psm1'
-    $fileContentModulePath = Join-Path $libPath 'FileContent.psm1'
+    $collectionsModulePath = Join-Path $libPath 'utilities' 'Collections.psm1'
+    $fileContentModulePath = Join-Path $libPath 'file' 'FileContent.psm1'
     if (Test-Path $collectionsModulePath) {
         Import-Module $collectionsModulePath -DisableNameChecking -ErrorAction SilentlyContinue
     }
@@ -167,7 +167,10 @@ function Invoke-SecurityScan {
                                     continue
                                 }
 
-                                $codePart = if ($trimmedLine -match '^([^#]+)#' -and $null -ne $matches -and $matches.Count -gt 1 -and $null -ne $matches[1]) {
+                                $codePart = if ($trimmedLine -match '^([^#]+)#' -and
+                                    $null -ne $matches -and
+                                    $matches.Count -gt 1 -and
+                                    $null -ne $matches[1]) {
                                     $matches[1]
                                 }
                                 else {

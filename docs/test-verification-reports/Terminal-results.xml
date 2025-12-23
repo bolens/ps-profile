@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="63" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="1" invalid="0" date="2025-12-01" time="09:40:51">
+  <environment clr-version="10.0.0" platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk4\Partition4" machine-name="BAMBOO" cwd="C:\Users\bolen\Documents\PowerShell" user-domain="BAMBOO" nunit-version="2.5.8.0" user="bolen" os-version="10.0.28000" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Ignored" success="True" time="12.3945" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\enhanced-history-extended.tests.ps1" executed="True" result="Success" success="True" time="2.3538" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\enhanced-history-extended.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests" executed="True" result="Success" success="True" time="0.6304" asserts="0" description="Enhanced History Module - Additional Tests">
+            <results>
+              <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests.Show-HistoryStats" executed="True" result="Success" success="True" time="0.2015" asserts="0" description="Enhanced History Module - Additional Tests.Show-HistoryStats">
+                <results>
+                  <test-case description="Should display history statistics when history exists" name="Enhanced History Module - Additional Tests.Show-HistoryStats.Should display history statistics when history exists" time="0.1598" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle empty history gracefully" name="Enhanced History Module - Additional Tests.Show-HistoryStats.Should handle empty history gracefully" time="0.0116" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests.Find-HistoryFuzzy" executed="True" result="Success" success="True" time="0.3233" asserts="0" description="Enhanced History Module - Additional Tests.Find-HistoryFuzzy">
+                <results>
+                  <test-case description="Should find commands matching pattern" name="Enhanced History Module - Additional Tests.Find-HistoryFuzzy.Should find commands matching pattern" time="0.0192" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle no matches gracefully" name="Enhanced History Module - Additional Tests.Find-HistoryFuzzy.Should handle no matches gracefully" time="0.0759" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle empty pattern" name="Enhanced History Module - Additional Tests.Find-HistoryFuzzy.Should handle empty pattern" time="0.0048" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle case insensitive search" name="Enhanced History Module - Additional Tests.Find-HistoryFuzzy.Should handle case insensitive search" time="0.0102" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests.Find-HistoryQuick" executed="True" result="Success" success="True" time="0.3471" asserts="0" description="Enhanced History Module - Additional Tests.Find-HistoryQuick">
+                <results>
+                  <test-case description="Should find commands with quick search" name="Enhanced History Module - Additional Tests.Find-HistoryQuick.Should find commands with quick search" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle empty pattern" name="Enhanced History Module - Additional Tests.Find-HistoryQuick.Should handle empty pattern" time="0.003" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests.Invoke-LastCommand" executed="True" result="Success" success="True" time="0.3766" asserts="0" description="Enhanced History Module - Additional Tests.Invoke-LastCommand">
+                <results>
+                  <test-case description="Should find and display last command matching pattern" name="Enhanced History Module - Additional Tests.Invoke-LastCommand.Should find and display last command matching pattern" time="0.0091" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle no matches" name="Enhanced History Module - Additional Tests.Invoke-LastCommand.Should handle no matches" time="0.0078" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle empty pattern" name="Enhanced History Module - Additional Tests.Invoke-LastCommand.Should handle empty pattern" time="0.0028" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests.Show-RecentCommands" executed="True" result="Success" success="True" time="0.4234" asserts="0" description="Enhanced History Module - Additional Tests.Show-RecentCommands">
+                <results>
+                  <test-case description="Should display recent commands" name="Enhanced History Module - Additional Tests.Show-RecentCommands.Should display recent commands" time="0.0136" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle empty history" name="Enhanced History Module - Additional Tests.Show-RecentCommands.Should handle empty history" time="0.0092" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should accept custom count parameter" name="Enhanced History Module - Additional Tests.Show-RecentCommands.Should accept custom count parameter" time="0.0133" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests.Remove-HistoryDuplicates" executed="True" result="Success" success="True" time="0.4756" asserts="0" description="Enhanced History Module - Additional Tests.Remove-HistoryDuplicates">
+                <results>
+                  <test-case description="Should remove duplicate commands" name="Enhanced History Module - Additional Tests.Remove-HistoryDuplicates.Should remove duplicate commands" time="0.0328" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle empty history" name="Enhanced History Module - Additional Tests.Remove-HistoryDuplicates.Should handle empty history" time="0.0091" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Enhanced History Module - Additional Tests.Remove-OldHistory" executed="True" result="Success" success="True" time="0.5145" asserts="0" description="Enhanced History Module - Additional Tests.Remove-OldHistory">
+                <results>
+                  <test-case description="Should remove old commands" name="Enhanced History Module - Additional Tests.Remove-OldHistory.Should remove old commands" time="0.0202" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle no old commands" name="Enhanced History Module - Additional Tests.Remove-OldHistory.Should handle no old commands" time="0.0078" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\enhanced-history.tests.ps1" executed="True" result="Success" success="True" time="1.3702" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\enhanced-history.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Enhanced History Integration Tests" executed="True" result="Success" success="True" time="0.1505" asserts="0" description="Enhanced History Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Enhanced History Integration Tests.Enhanced history functions" executed="True" result="Success" success="True" time="0.1366" asserts="0" description="Enhanced History Integration Tests.Enhanced history functions">
+                <results>
+                  <test-case description="Find-HistoryFuzzy function is available" name="Enhanced History Integration Tests.Enhanced history functions.Find-HistoryFuzzy function is available" time="0.0115" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Find-HistoryFuzzy executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Find-HistoryFuzzy executes without error" time="0.0402" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Find-HistoryQuick function is available" name="Enhanced History Integration Tests.Enhanced history functions.Find-HistoryQuick function is available" time="0.0023" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Find-HistoryQuick executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Find-HistoryQuick executes without error" time="0.0035" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-HistoryStats function is available" name="Enhanced History Integration Tests.Enhanced history functions.Show-HistoryStats function is available" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-HistoryStats executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Show-HistoryStats executes without error" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-HistoryDuplicates function is available" name="Enhanced History Integration Tests.Enhanced history functions.Remove-HistoryDuplicates function is available" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-HistoryDuplicates executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Remove-HistoryDuplicates executes without error" time="0.0029" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-OldHistory function is available" name="Enhanced History Integration Tests.Enhanced history functions.Remove-OldHistory function is available" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Remove-OldHistory executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Remove-OldHistory executes without error" time="0.0037" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-LastCommand function is available" name="Enhanced History Integration Tests.Enhanced history functions.Invoke-LastCommand function is available" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-LastCommand executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Invoke-LastCommand executes without error" time="0.0027" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-RecentCommands function is available" name="Enhanced History Integration Tests.Enhanced history functions.Show-RecentCommands function is available" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-RecentCommands executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Show-RecentCommands executes without error" time="0.0028" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="r function is available" name="Enhanced History Integration Tests.Enhanced history functions.r function is available" time="0.0032" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="r executes without error" name="Enhanced History Integration Tests.Enhanced history functions.r executes without error" time="0.0049" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Search-HistoryInteractive function is available" name="Enhanced History Integration Tests.Enhanced history functions.Search-HistoryInteractive function is available" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Search-HistoryInteractive executes without error" name="Enhanced History Integration Tests.Enhanced history functions.Search-HistoryInteractive executes without error" time="0.0045" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\oh-my-posh.tests.ps1" executed="True" result="Success" success="True" time="3.9909" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\oh-my-posh.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Oh My Posh Module" executed="True" result="Success" success="True" time="2.6575" asserts="0" description="Oh My Posh Module">
+            <results>
+              <test-suite type="TestFixture" name="Oh My Posh Module.Initialize-OhMyPosh" executed="True" result="Success" success="True" time="0.7368" asserts="0" description="Oh My Posh Module.Initialize-OhMyPosh">
+                <results>
+                  <test-case description="Should exist and be callable" name="Oh My Posh Module.Initialize-OhMyPosh.Should exist and be callable" time="0.4963" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should skip initialization if already initialized" name="Oh My Posh Module.Initialize-OhMyPosh.Should skip initialization if already initialized" time="0.0225" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle oh-my-posh not available gracefully" name="Oh My Posh Module.Initialize-OhMyPosh.Should handle oh-my-posh not available gracefully" time="0.208" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Oh My Posh Module.prompt function" executed="True" result="Success" success="True" time="2.6475" asserts="0" description="Oh My Posh Module.prompt function">
+                <results>
+                  <test-case description="Should exist and be callable" name="Oh My Posh Module.prompt function.Should exist and be callable" time="1.4218" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return a string" name="Oh My Posh Module.prompt function.Should return a string" time="0.4795" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\scoop-completion.tests.ps1" executed="True" result="Success" success="True" time="2.0279" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\scoop-completion.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Scoop Completion Integration Tests" executed="True" result="Success" success="True" time="0.8465" asserts="0" description="Scoop Completion Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Scoop Completion Integration Tests.Scoop completion setup" executed="True" result="Success" success="True" time="0.8279" asserts="0" description="Scoop Completion Integration Tests.Scoop completion setup">
+                <results>
+                  <test-case description="Sets ScoopCompletionLoaded global variable on load" name="Scoop Completion Integration Tests.Scoop completion setup.Sets ScoopCompletionLoaded global variable on load" time="0.1334" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Does not create Enable-ScoopCompletion when no scoop installation found" name="Scoop Completion Integration Tests.Scoop completion setup.Does not create Enable-ScoopCompletion when no scoop installation found" time="0.2466" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Enable-ScoopCompletion when scoop found via SCOOP environment variable" name="Scoop Completion Integration Tests.Scoop completion setup.Creates Enable-ScoopCompletion when scoop found via SCOOP environment variable" time="0.1359" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Enable-ScoopCompletion can be called" name="Scoop Completion Integration Tests.Scoop completion setup.Enable-ScoopCompletion can be called" time="0.1609" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles errors during scoop completion setup gracefully" name="Scoop Completion Integration Tests.Scoop completion setup.Handles errors during scoop completion setup gracefully" time="0.1419" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\starship.tests.ps1" executed="True" result="Ignored" success="True" time="2.6517" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\terminal\starship.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Starship Module Tests" executed="True" result="Ignored" success="True" time="0.8295" asserts="0" description="Starship Module Tests">
+            <results>
+              <test-suite type="TestFixture" name="Starship Module Tests.Test-StarshipInitialized" executed="True" result="Success" success="True" time="0.1947" asserts="0" description="Starship Module Tests.Test-StarshipInitialized">
+                <results>
+                  <test-case description="Returns false when no prompt function exists" name="Starship Module Tests.Test-StarshipInitialized.Returns false when no prompt function exists" time="0.1309" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns false when prompt function doesn't contain starship" name="Starship Module Tests.Test-StarshipInitialized.Returns false when prompt function doesn't contain starship" time="0.0446" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns true when prompt function contains starship" name="Starship Module Tests.Test-StarshipInitialized.Returns true when prompt function contains starship" time="0.0102" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.Test-PromptNeedsReplacement" executed="True" result="Success" success="True" time="0.2142" asserts="0" description="Starship Module Tests.Test-PromptNeedsReplacement">
+                <results>
+                  <test-case description="Function exists and can be called" name="Starship Module Tests.Test-PromptNeedsReplacement.Function exists and can be called" time="0.0105" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.Get-StarshipPromptArguments" executed="True" result="Success" success="True" time="0.5831" asserts="0" description="Starship Module Tests.Get-StarshipPromptArguments">
+                <results>
+                  <test-case description="Function exists and can be called" name="Starship Module Tests.Get-StarshipPromptArguments.Function exists and can be called" time="0.3591" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.New-StarshipPromptFunction" executed="True" result="Success" success="True" time="0.6261" asserts="0" description="Starship Module Tests.New-StarshipPromptFunction">
+                <results>
+                  <test-case description="Creates a global prompt function" name="Starship Module Tests.New-StarshipPromptFunction.Creates a global prompt function" time="0.0187" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns fallback prompt when starship command not found" name="Starship Module Tests.New-StarshipPromptFunction.Returns fallback prompt when starship command not found" time="0.014" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.Initialize-StarshipModule" executed="True" result="Success" success="True" time="0.6762" asserts="0" description="Starship Module Tests.Initialize-StarshipModule">
+                <results>
+                  <test-case description="Stores starship module globally when available" name="Starship Module Tests.Initialize-StarshipModule.Stores starship module globally when available" time="0.0249" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles missing starship module gracefully" name="Starship Module Tests.Initialize-StarshipModule.Handles missing starship module gracefully" time="0.0146" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.Invoke-StarshipInitScript" executed="True" result="Success" success="True" time="0.6961" asserts="0" description="Starship Module Tests.Invoke-StarshipInitScript">
+                <results>
+                  <test-case description="Executes without error when starship is available" name="Starship Module Tests.Invoke-StarshipInitScript.Executes without error when starship is available" time="0.008" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.Update-VSCodePrompt" executed="True" result="Success" success="True" time="0.7403" asserts="0" description="Starship Module Tests.Update-VSCodePrompt">
+                <results>
+                  <test-case description="Handles VS Code state gracefully" name="Starship Module Tests.Update-VSCodePrompt.Handles VS Code state gracefully" time="0.0109" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles missing VS Code state gracefully" name="Starship Module Tests.Update-VSCodePrompt.Handles missing VS Code state gracefully" time="0.0235" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.Initialize-Starship" executed="True" result="Success" success="True" time="0.7918" asserts="0" description="Starship Module Tests.Initialize-Starship">
+                <results>
+                  <test-case description="Uses smart prompt when starship not available" name="Starship Module Tests.Initialize-Starship.Uses smart prompt when starship not available" time="0.0174" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles starship initialization errors gracefully" name="Starship Module Tests.Initialize-Starship.Handles starship initialization errors gracefully" time="0.0242" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Starship Module Tests.Initialize-SmartPrompt" executed="True" result="Ignored" success="True" time="0.8211" asserts="0" description="Starship Module Tests.Initialize-SmartPrompt">
+                <results>
+                  <test-case description="Creates enhanced prompt function" name="Starship Module Tests.Initialize-SmartPrompt.Creates enhanced prompt function" time="0.0117" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Sets up command timing tracking when performance hooks are available" name="Starship Module Tests.Initialize-SmartPrompt.Sets up command timing tracking when performance hooks are available" time="0.0018" asserts="0" success="False" result="Ignored" executed="False" />
+                  <test-case description="Does not reinitialize if already done" name="Starship Module Tests.Initialize-SmartPrompt.Does not reinitialize if already done" time="0.0066" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

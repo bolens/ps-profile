@@ -51,7 +51,7 @@ param(
 # Import shared utilities directly (no barrel files)
 # Import ModuleImport first (bootstrap)
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
-if (Test-Path $moduleImportPath) {
+if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and (Test-Path -LiteralPath $moduleImportPath)) {
     Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
     Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Required:$false
 }
@@ -102,8 +102,18 @@ if ($OutputPath) {
 
 # Return exit code based on issues
 if ($results.Issues.Count -gt 0) {
-    exit 1
+    if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Function naming validation failed with $($results.Issues.Count) issue(s)."
+    }
+    else {
+        Write-Error "Function naming validation failed with $($results.Issues.Count) issue(s)." -ErrorAction Stop
+    }
 }
 else {
-    exit 0
+    if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Function naming validation passed with no issues."
+    }
+    else {
+        return
+    }
 }

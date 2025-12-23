@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Opens files in Visual Studio Code.
+Opens current directory in the best available editor.
 
 ## Description
 
-Launches Visual Studio Code with the specified files or directories.
+Launches the best available editor in the current directory.
 
 ## Alias Information
 

@@ -16,11 +16,24 @@ Invoke-AnsibleGalaxy
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments to pass to ansible-galaxy.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-AnsibleGalaxy install geerlingguy.docker
+``
+
+### Example 2
+
+`powershell
+Invoke-AnsibleGalaxy list
+``
 
 ## Aliases
 

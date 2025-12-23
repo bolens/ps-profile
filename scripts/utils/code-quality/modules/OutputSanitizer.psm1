@@ -10,7 +10,7 @@ scripts/utils/code-quality/modules/OutputSanitizer.psm1
 
 # Import path utilities
 $pathUtilsModulePath = Join-Path $PSScriptRoot 'OutputPathUtils.psm1'
-if (Test-Path $pathUtilsModulePath) {
+if ($pathUtilsModulePath -and -not [string]::IsNullOrWhiteSpace($pathUtilsModulePath) -and (Test-Path -LiteralPath $pathUtilsModulePath)) {
     Import-Module $pathUtilsModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 

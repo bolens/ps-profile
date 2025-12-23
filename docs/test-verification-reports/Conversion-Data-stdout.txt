@@ -1,0 +1,177 @@
+
+[32;1mModuleType[0m[32;1m Version   [0m [32;1;3mPreRelease[0m[32;1m Name                               [0m[32;1m ExportedCo[0m
+[32;1m          [0m[32;1m           [0m [32;1;3m          [0m[32;1m                                    [0m[32;1m mmands[0m
+[32;1m----------[0m [32;1m-------   [0m [32;1m----------[0m [32;1m----                               [0m [32;1m----------[0m
+Script     0.0                   ExitCodes                           Exit-With…
+Script     0.0                   PathResolution                      {Get-Prof…
+Script     0.0                   Logging                             Write-Scr…
+Script     0.0                   Module                              {Ensure-M…
+Using Pester v5.7.1
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-text-gaps.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-xml.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-xz.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-speed.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-guid.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-energy.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-volume.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-base64.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-lz4.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-area.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-timezone.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-temperature.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-rfc3339.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-weight.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-gzip.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-angle.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-zstd.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-length.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-datasize.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-csv.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-unix.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-human-readable.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-json.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-brotli.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-duration.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-uuid.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-iso8601.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-json-extended.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-pressure.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-snappy.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-yaml.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-roman.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-modhex.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-ascii.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-hex.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-binary.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-numeric.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base32.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base36.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base58.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base62.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base85.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-z85.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base91.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-utf16-utf32.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-rot.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-morse.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-url.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-text-gaps.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-xml.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-xz.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-speed.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-guid.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-energy.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-volume.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-base64.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-lz4.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-area.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-timezone.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-temperature.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-rfc3339.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-weight.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-gzip.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-angle.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-zstd.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-length.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-datasize.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-csv.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-unix.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-human-readable.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-json.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-brotli.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-duration.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-uuid.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-time-iso8601.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-json-extended.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-units-pressure.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-compression-snappy.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-basic-yaml.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-roman.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-modhex.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-ascii.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-hex.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-binary.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-numeric.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base32.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base36.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base58.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base62.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base85.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-z85.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-base91.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-utf16-utf32.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-rot.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-morse.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\data\core\core-encoding-url.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-audio.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-images.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-video.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-pdf.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-oklch.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-convert.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-cmyk.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-oklab.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-hsl.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-lch.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-hex.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-named.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-ncol.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-lab.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-hwb.ps1[0m
+[33;1mWARNING: Module file not found: C:\Users\bolen\Documents\PowerShell\profile.d\conversion-modules\media\media-colors-parse.ps1[0m
+Starting test execution...
+
+[32;1mContainers            : [0m{[-] C:\Users\bolen\Documents\PowerShell\tests\integrat
+                        ion\conversion\data\base64\base64-decoding.tests.ps1, 
+                        [-] C:\Users\bolen\Documents\PowerShell\tests\integrati
+                        on\conversion\data\base64\base64-encoding.tests.ps1, 
+                        [-] C:\Users\bolen\Documents\PowerShell\tests\integrati
+                        on\conversion\data\base64\base64-roundtrip.tests.ps1, 
+                        [-] C:\Users\bolen\Documents\PowerShell\tests\integrati
+                        on\conversion\data\binary-to-text\bson-to-csv.tests.ps1
+                        …}
+[32;1mResult                : [0mFailed
+[32;1mFailedCount           : [0m916
+[32;1mFailedBlocksCount     : [0m109
+[32;1mFailedContainersCount : [0m1
+[32;1mPassedCount           : [0m0
+[32;1mSkippedCount          : [0m0
+[32;1mInconclusiveCount     : [0m0
+[32;1mNotRunCount           : [0m0
+[32;1mTotalCount            : [0m916
+[32;1mDuration              : [0m00:12:56.7891593
+[32;1mExecuted              : [0mTrue
+[32;1mExecutedAt            : [0m12/1/2025 9:45:08 AM
+[32;1mVersion               : [0m5.7.1
+[32;1mPSVersion             : [0m7.6.0-preview.5
+[32;1mPSBoundParameters     : [0m{[Configuration, PesterConfiguration]}
+[32;1mPlugins               : [0m
+[32;1mPluginConfiguration   : [0m
+[32;1mPluginData            : [0m
+[32;1mConfiguration         : [0mPesterConfiguration
+[32;1mDiscoveryDuration     : [0m00:02:08.1478020
+[32;1mUserDuration          : [0m00:10:41.5666382
+[32;1mFrameworkDuration     : [0m00:00:07.0747191
+[32;1mFailed                : [0m{[-] ConvertFrom-Base64 decodes base64 to string, [-] 
+                        ConvertFrom-Base64 handles empty base64 string, [-] 
+                        ConvertFrom-Base64 handles invalid base64 gracefully, 
+                        [-] ConvertTo-Base64 encodes string to base64…}
+[32;1mFailedBlocks          : [0m{[-] Base64 Decoding Integration Tests, [-] Base64 
+                        Encoding Integration Tests, [-] Base64 Roundtrip 
+                        Integration Tests, [-] BSON to CSV Conversion Tests…}
+[32;1mFailedContainers      : [0m{[-] C:\Users\bolen\Documents\PowerShell\tests\integrat
+                        ion\conversion\data\csv-xml\csv-xml-roundtrip.tests.ps1
+                        }
+[32;1mPassed                : [0m{}
+[32;1mSkipped               : [0m{}
+[32;1mInconclusive          : [0m{}
+[32;1mNotRun                : [0m{}
+[32;1mTests                 : [0m{[-] ConvertFrom-Base64 decodes base64 to string, [-] 
+                        ConvertFrom-Base64 handles empty base64 string, [-] 
+                        ConvertFrom-Base64 handles invalid base64 gracefully, 
+                        [-] ConvertTo-Base64 encodes string to base64…}
+[32;1mCodeCoverage          : [0m
+
+

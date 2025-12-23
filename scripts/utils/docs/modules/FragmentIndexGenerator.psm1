@@ -14,7 +14,7 @@ scripts/utils/docs/modules/FragmentIndexGenerator.psm1
 
 .DESCRIPTION
     Reads fragment README files from the fragments directory and generates a comprehensive
-    index file that groups fragments by their number ranges (00-09, 10-19, etc.).
+    index file listing all fragments alphabetically.
 
 .PARAMETER FragmentsPath
     Path to the fragments documentation directory (e.g., docs/fragments).
@@ -67,24 +67,27 @@ function Write-FragmentIndex {
     $fragments = [System.Collections.Generic.List[PSCustomObject]]::new()
     
     foreach ($readme in $fragmentReadmes) {
-        $content = Get-Content -Path $readme.FullName -Raw -ErrorAction SilentlyContinue
-        if (-not $content) {
-            continue
-        }
-
         # Extract fragment name (e.g., "00-bootstrap" from "00-bootstrap.md")
         $fragmentName = $readme.BaseName
         
         # Extract purpose from README (between "Purpose" and next section)
         $purpose = ''
-        if ($content -match '(?s)Purpose\s+-+\s+(.*?)(?=\r?\n\r?\n\w)') {
-            $purpose = $matches[1].Trim()
+        $content = Get-Content -Path $readme.FullName -Raw -ErrorAction SilentlyContinue
+        if ($content -and -not [string]::IsNullOrWhiteSpace($content)) {
+            if ($content -match '(?s)Purpose\s+-+\s+(.*?)(?=\r?\n\r?\n\w)') {
+                $purpose = $matches[1].Trim()
+            }
+        }
+        
+        # If no purpose found, use a default
+        if ([string]::IsNullOrWhiteSpace($purpose)) {
+            $purpose = "See fragment source for details."
         }
 
-        # Extract fragment number
-        $fragmentNumber = -1
-        if ($fragmentName -match '^(\d+)-') {
-            $fragmentNumber = [int]$matches[1]
+        # Strip number prefix from fragment name for display (e.g., "00-bootstrap" -> "bootstrap")
+        $displayName = $fragmentName
+        if ($fragmentName -match '^\d+-(.+)') {
+            $displayName = $matches[1]
         }
 
         # Check if source file exists
@@ -92,66 +95,42 @@ function Write-FragmentIndex {
         $hasSource = Test-Path $sourceFile
 
         $fragments.Add([PSCustomObject]@{
-                Name       = $fragmentName
-                Number     = $fragmentNumber
-                Purpose    = $purpose
-                ReadmePath = $readme.Name
-                HasSource  = $hasSource
+                Name        = $fragmentName
+                DisplayName = $displayName
+                Purpose     = $purpose
+                ReadmePath  = $readme.Name
+                HasSource   = $hasSource
             })
     }
 
-    # Group fragments by number ranges
-    $groupedFragments = $fragments | 
-    Where-Object { $_.Number -ge 0 } | 
-    Group-Object { 
-        [math]::Floor($_.Number / 10) * 10 
-    } | 
-    Sort-Object Name
+    # Sort fragments alphabetically by display name
+    $sortedFragments = $fragments | Sort-Object DisplayName
 
     # Generate index content
     $indexContent = "# Fragment Documentation`n`n"
     $indexContent += "This documentation provides an overview of all profile fragments. Each fragment is a modular component of the PowerShell profile.`n`n"
     $indexContent += "**Total Fragments:** $($fragments.Count)`n"
-    $indexContent += "**Generated:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")`n`n"
+    # Use locale-aware date formatting for user-facing documentation
+    $generatedDate = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+        Format-LocaleDate (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+    }
+    else {
+        (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+    }
+    $indexContent += "**Generated:** $generatedDate`n`n"
     $indexContent += "## Fragment Overview`n`n"
-    $indexContent += "Fragments are loaded in numerical order (00-99). Each fragment provides specific functionality and can be enabled or disabled independently.`n`n"
+    $indexContent += "Each fragment provides specific functionality and can be enabled or disabled independently.`n`n"
 
-    # Add fragments by range
-    foreach ($group in $groupedFragments) {
-        $rangeStart = $group.Name
-        $rangeEnd = $rangeStart + 9
-        $indexContent += "`n### Fragments $rangeStart-$rangeEnd`n`n"
-        
-        $sortedFragments = $group.Group | Sort-Object Number
-        foreach ($fragment in $sortedFragments) {
-            $link = "[$($fragment.Name)]($($fragment.ReadmePath))"
-            $purposeText = if ($fragment.Purpose) { " — $($fragment.Purpose)" } else { "" }
-            $indexContent += "- $link$purposeText`n"
-        }
+    # Add all fragments in alphabetical order
+    $indexContent += "## All Fragments`n`n"
+    foreach ($fragment in $sortedFragments) {
+        $link = "[$($fragment.DisplayName)]($($fragment.ReadmePath))"
+        $purposeText = if ($fragment.Purpose) { " — $($fragment.Purpose)" } else { "" }
+        $indexContent += "- $link$purposeText`n"
     }
-
-    # Add any fragments without numbers
-    $unnumberedFragments = $fragments | Where-Object { $_.Number -lt 0 }
-    if ($unnumberedFragments.Count -gt 0) {
-        $indexContent += "`n### Unnumbered Fragments`n`n"
-        foreach ($fragment in $unnumberedFragments) {
-            $link = "[$($fragment.Name)]($($fragment.ReadmePath))"
-            $purposeText = if ($fragment.Purpose) { " — $($fragment.Purpose)" } else { "" }
-            $indexContent += "- $link$purposeText`n"
-        }
-    }
-
-    $indexContent += "`n`n## Fragment Load Order`n`n"
-    $indexContent += "Fragments are loaded in the following order based on their numeric prefix:`n`n"
-    $indexContent += "- **00-09**: Core bootstrap, environment, helpers`n"
-    $indexContent += "- **10-19**: Terminal configuration (PSReadLine, prompts, Git)`n"
-    $indexContent += "- **20-29**: Container engines, cloud tools`n"
-    $indexContent += "- **30-39**: Development tools and aliases`n"
-    $indexContent += "- **40-69**: Language-specific tools`n"
-    $indexContent += "- **70-79**: Advanced features`n`n"
 
     $indexContent += "## Generation`n`n"
-    $indexContent += "This index is automatically generated from fragment README files in the `profile.d/` directory.`n"
+    $indexContent += "This index is automatically generated from fragment README files in this directory, which are themselves generated from source files in the `profile.d/` directory.`n"
 
     # Write index file
     $indexPath = Join-Path $FragmentsPath 'README.md'

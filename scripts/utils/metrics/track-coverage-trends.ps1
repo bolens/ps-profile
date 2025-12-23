@@ -50,6 +50,7 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'Locale' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking
 
@@ -91,7 +92,13 @@ if ($currentCoverage.Error) {
     Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
-Write-ScriptMessage -Message "Current Coverage: $($currentCoverage.CoveragePercent)%" -LogLevel Info
+$coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+    Format-LocaleNumber $currentCoverage.CoveragePercent -Format 'N2'
+}
+else {
+    $currentCoverage.CoveragePercent.ToString("N2")
+}
+Write-ScriptMessage -Message "Current Coverage: ${coveragePercentStr}%" -LogLevel Info
 Write-ScriptMessage -Message "  Covered Lines: $($currentCoverage.CoveredLines) / $($currentCoverage.TotalLines)" -LogLevel Info
 
 # Set up history directory
@@ -166,14 +173,46 @@ $linesChange = $last.TotalLines - $first.TotalLines
 $coveredLinesChange = $last.CoveredLines - $first.CoveredLines
 
 Write-ScriptMessage -Message "`nCoverage Trends (last $Days days):" -LogLevel Info
-Write-ScriptMessage -Message "  Period: $($first.Date.ToString('yyyy-MM-dd')) to $($last.Date.ToString('yyyy-MM-dd'))" -LogLevel Info
-Write-ScriptMessage -Message "  Coverage Change: $([math]::Round($coverageChange, 2))% ($(if ($coverageChange -ge 0) { '+' } else { '' })$([math]::Round($coverageChange, 2))%)" -LogLevel Info
+
+# Use locale-aware date formatting for user-facing dates
+$firstDateStr = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+    Format-LocaleDate $first.Date -Format 'yyyy-MM-dd'
+}
+else {
+    $first.Date.ToString('yyyy-MM-dd')
+}
+$lastDateStr = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+    Format-LocaleDate $last.Date -Format 'yyyy-MM-dd'
+}
+else {
+    $last.Date.ToString('yyyy-MM-dd')
+}
+Write-ScriptMessage -Message "  Period: $firstDateStr to $lastDateStr" -LogLevel Info
+$coverageChangeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+    Format-LocaleNumber ([math]::Round($coverageChange, 2)) -Format 'N2'
+}
+else {
+    [math]::Round($coverageChange, 2).ToString("N2")
+}
+$coverageChangeSignedStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+    Format-LocaleNumber ([math]::Round($coverageChange, 2)) -Format 'N2'
+}
+else {
+    [math]::Round($coverageChange, 2).ToString("N2")
+}
+Write-ScriptMessage -Message "  Coverage Change: ${coverageChangeStr}% ($(if ($coverageChange -ge 0) { '+' } else { '' })${coverageChangeSignedStr}%)" -LogLevel Info
 Write-ScriptMessage -Message "  Total Lines Change: $linesChange ($(if ($linesChange -ge 0) { '+' } else { '' })$linesChange)" -LogLevel Info
 Write-ScriptMessage -Message "  Covered Lines Change: $coveredLinesChange ($(if ($coveredLinesChange -ge 0) { '+' } else { '' })$coveredLinesChange)" -LogLevel Info
 
 # Calculate average coverage
 $avgCoverage = ($historicalData | Measure-Object -Property CoveragePercent -Average).Average
-Write-ScriptMessage -Message "  Average Coverage: $([math]::Round($avgCoverage, 2))%" -LogLevel Info
+$avgCoverageStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+    Format-LocaleNumber ([math]::Round($avgCoverage, 2)) -Format 'N2'
+}
+else {
+    [math]::Round($avgCoverage, 2).ToString("N2")
+}
+Write-ScriptMessage -Message "  Average Coverage: ${avgCoverageStr}%" -LogLevel Info
 
 # Determine trend direction
 if ($coverageChange -gt 1) {

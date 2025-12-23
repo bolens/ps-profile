@@ -41,6 +41,7 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Locale' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Import documentation modules
@@ -195,7 +196,7 @@ Remove-StaleDocumentation -DocsPath $aliasesPath -DocumentedCommandNames $docume
 
 # Clean up ALL old function and alias documentation files from root docs/ directory (migrated to docs/api/functions/ and docs/api/aliases/)
 $oldDocsPath = Split-Path -Parent $docsPath
-if (Test-Path $oldDocsPath) {
+if ($oldDocsPath -and -not [string]::IsNullOrWhiteSpace($oldDocsPath) -and (Test-Path -LiteralPath $oldDocsPath)) {
     Write-ScriptMessage -Message "`nCleaning up old function and alias documentation files from root docs/ directory (moved to docs/api/)..."
     
     # Get all markdown files in root docs/ that look like function or alias docs

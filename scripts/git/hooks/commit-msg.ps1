@@ -46,7 +46,7 @@ Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNam
 Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking
 Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $hookScriptPath -DisableNameChecking
 
-if (-not $CommitMsgFile -or -not (Test-Path $CommitMsgFile)) {
+if (-not $CommitMsgFile -or [string]::IsNullOrWhiteSpace($CommitMsgFile) -or -not (Test-Path -LiteralPath $CommitMsgFile)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "commit-msg: commit message file not provided or not found"
 }
 

@@ -22,7 +22,7 @@ scripts/checks/check-script-standards.ps1
 
 param(
     [ValidateScript({
-            if ($_ -and -not (Test-Path $_)) {
+            if ($_ -and -not [string]::IsNullOrWhiteSpace($_) -and -not (Test-Path -LiteralPath $_)) {
                 throw "Path does not exist: $_"
             }
             $true

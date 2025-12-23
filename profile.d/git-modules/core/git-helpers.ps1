@@ -17,7 +17,7 @@
 function Test-GitRepositoryContext {
     param([string]$CommandName = 'git command')
 
-    if (-not (Test-HasCommand git)) {
+    if (-not (Test-CachedCommand git)) {
         Write-Verbose "Skipping ${CommandName}: git command unavailable."
         return $false
     }

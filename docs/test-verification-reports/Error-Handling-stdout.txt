@@ -1,0 +1,107 @@
+
+[32;1mModuleType[0m[32;1m Version   [0m [32;1;3mPreRelease[0m[32;1m Name                               [0m[32;1m ExportedCo[0m
+[32;1m          [0m[32;1m           [0m [32;1;3m          [0m[32;1m                                    [0m[32;1m mmands[0m
+[32;1m----------[0m [32;1m-------   [0m [32;1m----------[0m [32;1m----                               [0m [32;1m----------[0m
+Script     0.0                   ExitCodes                           Exit-With…
+Script     0.0                   PathResolution                      {Get-Prof…
+Script     0.0                   Logging                             Write-Scr…
+Script     0.0                   Module                              {Ensure-M…
+Using Pester v5.7.1
+[2025-12-01 09:33:14] [Profile] Error in C:\Users\bolen\Documents\PowerShell\tests\integration\error-handling\error-handling.tests.ps1:48
+Context: Test context
+Type: RuntimeException
+Message: Test error
+[33;1mWARNING: Command Error: Test error[0m
+[2025-12-01 09:33:14] [Network] Error in :
+Context: 
+Type: Exception
+Message: Network error
+[2025-12-01 09:33:14] [Profile] Error in :
+Context: Global error handler
+Type: CommandNotFoundException
+Message: The term 'missingcommand' is not recognized
+[2025-12-01 09:33:14] [Profile] Error in :
+Context: Global error handler
+Type: Exception
+Message: Network connection failed
+Suggestion: Check network connectivity and proxy settings
+[2025-12-01 09:33:14] [Profile] Error in :
+Context: Global error handler
+Type: UnauthorizedAccessException
+Message: Access to the path is denied
+Suggestion: Run as administrator or check permissions
+[2025-12-01 09:33:14] [Profile] Error in :
+Context: Global error handler
+Type: Exception
+Message: Module 'MissingModule' is not installed
+[2025-12-01 09:33:14] [Fragment] Error in C:\Users\bolen\AppData\Local\Temp\tmpvacydz.tmp.ps1:3
+Context: Fragment load attempt 1/3
+Type: RuntimeException
+Message: Temporary load failure
+Retrying fragment load in 1000ms...
+[2025-12-01 09:33:15] [Fragment] Error in C:\Users\bolen\AppData\Local\Temp\tmpgshorx.tmp.ps1:1
+Context: Fragment load attempt 1/2
+Type: RuntimeException
+Message: Persistent failure
+Retrying fragment load in 1000ms...
+[2025-12-01 09:33:16] [Fragment] Error in C:\Users\bolen\AppData\Local\Temp\tmpgshorx.tmp.ps1:1
+Context: Fragment load attempt 2/2
+Type: RuntimeException
+Message: Persistent failure
+[33;1mWARNING: Failed to load profile fragment 'TestFailFragment' after 2 attempts: Persistent failure[0m
+[2025-12-01 09:33:16] [Fragment] Error in C:\Users\bolen\Documents\PowerShell\profile.d\diagnostics-modules\core\diagnostics-error-handling.ps1:188
+Context: Fragment load attempt 1/2
+Type: CommandNotFoundException
+Message: The term 'C:\NonExistentFragment.ps1' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+Retrying fragment load in 1000ms...
+[2025-12-01 09:33:17] [Fragment] Error in C:\Users\bolen\Documents\PowerShell\profile.d\diagnostics-modules\core\diagnostics-error-handling.ps1:188
+Context: Fragment load attempt 2/2
+Type: CommandNotFoundException
+Message: The term 'C:\NonExistentFragment.ps1' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+[33;1mWARNING: Failed to load profile fragment 'NonExistent' after 2 attempts: The term 'C:\NonExistentFragment.ps1' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.[0m
+Starting test execution...
+
+[32;1mContainers            : [0m{[+] C:\Users\bolen\Documents\PowerShell\tests\integrat
+                        ion\error-handling\error-handling.tests.ps1}
+[32;1mResult                : [0mPassed
+[32;1mFailedCount           : [0m0
+[32;1mFailedBlocksCount     : [0m0
+[32;1mFailedContainersCount : [0m0
+[32;1mPassedCount           : [0m11
+[32;1mSkippedCount          : [0m0
+[32;1mInconclusiveCount     : [0m0
+[32;1mNotRunCount           : [0m0
+[32;1mTotalCount            : [0m11
+[32;1mDuration              : [0m00:00:05.3361794
+[32;1mExecuted              : [0mTrue
+[32;1mExecutedAt            : [0m12/1/2025 9:33:12 AM
+[32;1mVersion               : [0m5.7.1
+[32;1mPSVersion             : [0m7.6.0-preview.5
+[32;1mPSBoundParameters     : [0m{[Configuration, PesterConfiguration]}
+[32;1mPlugins               : [0m
+[32;1mPluginConfiguration   : [0m
+[32;1mPluginData            : [0m
+[32;1mConfiguration         : [0mPesterConfiguration
+[32;1mDiscoveryDuration     : [0m00:00:01.3202938
+[32;1mUserDuration          : [0m00:00:03.5373060
+[32;1mFrameworkDuration     : [0m00:00:00.4785796
+[32;1mFailed                : [0m{}
+[32;1mFailedBlocks          : [0m{}
+[32;1mFailedContainers      : [0m{}
+[32;1mPassed                : [0m{[+] logs error to file when debug mode is enabled, 
+                        [+] displays warning when debug mode is disabled, [+] 
+                        handles different error categories, [+] provides 
+                        suggestions for CommandNotFoundException…}
+[32;1mSkipped               : [0m{}
+[32;1mInconclusive          : [0m{}
+[32;1mNotRun                : [0m{}
+[32;1mTests                 : [0m{[+] logs error to file when debug mode is enabled, 
+                        [+] displays warning when debug mode is disabled, [+] 
+                        handles different error categories, [+] provides 
+                        suggestions for CommandNotFoundException…}
+[32;1mCodeCoverage          : [0m
+
+

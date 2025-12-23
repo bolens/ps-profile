@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Opens files in Visual Studio Code.
+Opens current directory in the best available editor.
 
 ## Description
 
-Launches Visual Studio Code with the specified files or directories.
+Launches the best available editor in the current directory.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\07-system.ps1
+Defined in: ..\profile.d\15-shortcuts.ps1

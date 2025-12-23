@@ -16,11 +16,24 @@ Invoke-AnsibleVault
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments to pass to ansible-vault.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-AnsibleVault encrypt secrets.yml
+``
+
+### Example 2
+
+`powershell
+Invoke-AnsibleVault decrypt secrets.yml
+``
 
 ## Aliases
 

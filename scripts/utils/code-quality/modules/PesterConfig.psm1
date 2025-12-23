@@ -21,13 +21,13 @@ $outputConfigPath = Join-Path $PSScriptRoot 'PesterOutputConfig.psm1'
 $coverageConfigPath = Join-Path $PSScriptRoot 'PesterCoverageConfig.psm1'
 $executionConfigPath = Join-Path $PSScriptRoot 'PesterExecutionConfig.psm1'
 
-if (Test-Path $outputConfigPath) {
+if ($outputConfigPath -and -not [string]::IsNullOrWhiteSpace($outputConfigPath) -and (Test-Path -LiteralPath $outputConfigPath)) {
     Import-Module $outputConfigPath -DisableNameChecking -ErrorAction SilentlyContinue
 }
-if (Test-Path $coverageConfigPath) {
+if ($coverageConfigPath -and -not [string]::IsNullOrWhiteSpace($coverageConfigPath) -and (Test-Path -LiteralPath $coverageConfigPath)) {
     Import-Module $coverageConfigPath -DisableNameChecking -ErrorAction SilentlyContinue
 }
-if (Test-Path $executionConfigPath) {
+if ($executionConfigPath -and -not [string]::IsNullOrWhiteSpace($executionConfigPath) -and (Test-Path -LiteralPath $executionConfigPath)) {
     Import-Module $executionConfigPath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
@@ -120,7 +120,7 @@ function New-PesterTestConfiguration {
         [ValidateRange(0, 100)]
         [int]$MinimumCoverage,
 
-        [ValidateRange(1, 16)]
+        [ValidateRange(1, 100)]
         [int]$Parallel,
 
         [switch]$Randomize,
@@ -136,7 +136,9 @@ function New-PesterTestConfiguration {
 
         [string]$ProfileDir,
 
-        [string]$RepoRoot
+        [string]$RepoRoot,
+
+        [string[]]$TestPaths
     )
 
     $config = New-PesterConfiguration
@@ -161,8 +163,21 @@ function New-PesterTestConfiguration {
     # Configure test results
     $config = Set-PesterTestResults -Config $config -OutputPath $OutputPath -TestResultPath $TestResultPath
 
-    # Configure code coverage
-    $config = Set-PesterCodeCoverage -Config $config -Coverage:$Coverage -ShowCoverageSummary:$ShowCoverageSummary -CodeCoverageOutputFormat $CodeCoverageOutputFormat -CoverageReportPath $CoverageReportPath -MinimumCoverage $MinimumCoverage -ProfileDir $ProfileDir -RepoRoot $RepoRoot
+    # Configure code coverage (pass TestPaths for targeted coverage)
+    $coverageParams = @{
+        Config                   = $config
+        Coverage                 = $Coverage
+        ShowCoverageSummary      = $ShowCoverageSummary
+        CodeCoverageOutputFormat = $CodeCoverageOutputFormat
+        CoverageReportPath       = $CoverageReportPath
+        MinimumCoverage          = $MinimumCoverage
+        ProfileDir               = $ProfileDir
+        RepoRoot                 = $RepoRoot
+    }
+    if ($TestPaths) {
+        $coverageParams['TestPaths'] = $TestPaths
+    }
+    $config = Set-PesterCodeCoverage @coverageParams
 
     # Configure execution options
     $executionOptions = @{

@@ -7,7 +7,7 @@
 BeforeAll {
     # Import the Parallel module (Common.psm1 no longer exists)
     $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-    Import-Module (Join-Path $libPath 'Parallel.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path $libPath 'parallel' 'Parallel.psm1') -DisableNameChecking -ErrorAction Stop -Global
 }
 
 Describe 'Invoke-Parallel' {

@@ -47,6 +47,7 @@ try {
         #>
         $sbStop = {
             if ($global:PSProfileCommandTimer) {
+                # Stop the timer immediately to get execution time as close as possible
                 $global:PSProfileCommandTimer.Timer.Stop()
                 $duration = $global:PSProfileCommandTimer.Timer.Elapsed.TotalMilliseconds
                 $commandName = $global:PSProfileCommandTimer.Name
@@ -63,9 +64,20 @@ try {
                 }
 
                 # Show timing for slow commands
+                # Note: This measurement includes minimal overhead from command lookup and prompt rendering
+                # For precise execution-only timing, use Measure-Command { command }
                 if ($duration -gt 1000) {
                     # Commands taking more than 1 second
-                    Write-Host ("🐌 Slow command: {0} took {1:N2}s" -f $commandName, ($duration / 1000)) -ForegroundColor Yellow
+                    # $duration is in milliseconds, convert to seconds
+                    $durationSeconds = [Math]::Round($duration / 1000, 2)
+                    # Use locale-aware number formatting if available
+                    $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                        Format-LocaleNumber $durationSeconds -Format 'F2'
+                    }
+                    else {
+                        $durationSeconds.ToString("F2")
+                    }
+                    Write-Host ("🐌 Slow command: {0} took {1}s" -f $commandName, $durationStr) -ForegroundColor Yellow
                 }
 
                 $global:PSProfileCommandTimer = $null
@@ -172,7 +184,19 @@ try {
         if ($slowCommands) {
             Write-Host "• Consider optimizing these frequently slow commands:"
             $slowCommands | Select-Object -First 5 | ForEach-Object {
-                Write-Host ("  - {0} (avg: {1:N0}ms, total impact: {2:N1}s)" -f $_.Command, $_.AvgTime, ($_.TotalTime / 1000))
+                $avgTimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $_.AvgTime -Format 'N0'
+                }
+                else {
+                    $_.AvgTime.ToString("N0")
+                }
+                $totalTimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber ($_.TotalTime / 1000) -Format 'N1'
+                }
+                else {
+                    ($_.TotalTime / 1000).ToString("N1")
+                }
+                Write-Host ("  - {0} (avg: {1}ms, total impact: {2}s)" -f $_.Command, $avgTimeStr, $totalTimeStr)
             }
         }
 
@@ -180,13 +204,25 @@ try {
         if ($frequentCommands) {
             Write-Host "• Consider caching or optimizing these frequently used commands:"
             $frequentCommands | Sort-Object -Property Executions -Descending | Select-Object -First 5 | ForEach-Object {
-                Write-Host ("  - {0} (used {1} times, avg: {2:N0}ms)" -f $_.Command, $_.Executions, $_.AvgTime)
+                $avgTimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $_.AvgTime -Format 'N0'
+                }
+                else {
+                    $_.AvgTime.ToString("N0")
+                }
+                Write-Host ("  - {0} (used {1} times, avg: {2}ms)" -f $_.Command, $_.Executions, $avgTimeStr)
             }
         }
 
         # Show memory usage
         $estimatedMemory = $global:PSProfileCommandTimings.Count * 200  # Rough estimate per command entry
-        Write-Host ("`n📊 Tracking {0} commands, estimated memory usage: ~{1} KB" -f $global:PSProfileCommandTimings.Count, [math]::Round($estimatedMemory / 1024, 1))
+        $memoryKBStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+            Format-LocaleNumber ([math]::Round($estimatedMemory / 1024, 1)) -Format 'N1'
+        }
+        else {
+            [math]::Round($estimatedMemory / 1024, 1).ToString("N1")
+        }
+        Write-Host ("`n📊 Tracking {0} commands, estimated memory usage: ~{1} KB" -f $global:PSProfileCommandTimings.Count, $memoryKBStr)
     }
 
     # Quick performance check
@@ -217,7 +253,13 @@ try {
         # Profile load time (if available)
         if ($global:PSProfileStartTime) {
             $uptime = [DateTime]::Now - $global:PSProfileStartTime
-            Write-Host ("Profile uptime: {0:N1} minutes" -f $uptime.TotalMinutes)
+            $uptimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $uptime.TotalMinutes -Format 'N1'
+            }
+            else {
+                $uptime.TotalMinutes.ToString("N1")
+            }
+            Write-Host ("Profile uptime: {0} minutes" -f $uptimeStr)
         }
 
         # Performance rating
@@ -248,97 +290,100 @@ try {
     # Auto-track commands (integrate with prompt or InvokeCommand events)
     # Set up command tracking regardless of prompt framework
     if (-not $global:PSProfileCommandTrackingSetup) {
-        # Use InvokeCommand events for reliable tracking
-        $ExecutionContext.SessionState.InvokeCommand.PreCommandLookupAction = {
-            param($command, $eventArgs)
-            if (-not $global:PSProfileCommandTimer) {
-                Start-CommandTimer -CommandName $command
-            }
-        }
-
+        # Use PostCommandLookupAction to start timing right before command execution
+        # This fires after command lookup/resolution but before actual execution begins
         $ExecutionContext.SessionState.InvokeCommand.PostCommandLookupAction = {
             param($command, $eventArgs)
-            if ($global:PSProfileCommandTimer -and $global:PSProfileCommandTimer.Name -eq $command) {
-                Stop-CommandTimer
+            
+            # Skip timing for internal calls (commands called from within prompt/profile code)
+            # Check call stack depth - if > 2, it's likely an internal call
+            # Depth 0 = PostCommandLookupAction itself, Depth 1 = command invocation, Depth 2+ = internal calls
+            $stackDepth = (Get-PSCallStack).Count
+            if ($stackDepth -gt 3) {
+                # This is likely an internal call from prompt/profile code, skip timing
+                return
+            }
+            
+            # Also skip if we're currently in the prompt function (internal prompt calls)
+            $callStack = Get-PSCallStack
+            $isInPrompt = $callStack | Where-Object { $_.FunctionName -eq 'prompt' -or $_.ScriptName -like '*prompt*' -or $_.ScriptName -like '*diagnostics-performance*' }
+            if ($isInPrompt) {
+                # This is a call from within the prompt or performance monitoring code itself, skip
+                return
+            }
+            
+            # Exclude Test-Path from measurements (too frequent and not meaningful for performance insights)
+            if ($command -eq 'Test-Path') {
+                return
+            }
+            
+            # Only start timer if one isn't already running (prevents multiple starts for aliases)
+            if (-not $global:PSProfileCommandTimer) {
+                Start-CommandTimer -CommandName $command
             }
         }
 
         $global:PSProfileCommandTrackingSetup = $true
     }
 
-    # Only set up prompt integration if no prompt framework is active
-    $promptFrameworkActive = $false
-    try {
-        # Check for prompt framework variables (set after initialization)
-        $promptFrameworkActive = (
-            (Get-Variable -Name 'StarshipInitialized' -Scope Global -ErrorAction SilentlyContinue) -or
-            (Get-Variable -Name 'StarshipActive' -Scope Global -ErrorAction SilentlyContinue) -or
-            (Get-Variable -Name 'OhMyPoshInitialized' -Scope Global -ErrorAction SilentlyContinue)
-        )
+    <#
+    .SYNOPSIS
+        Wraps the current prompt function with performance timing.
+    
+    .DESCRIPTION
+        Wraps the active prompt function (Starship, Oh-My-Posh, or default) with
+        performance timing functionality. This function can be called multiple times
+        to re-wrap the prompt after prompt frameworks initialize, ensuring performance
+        insights work correctly with any prompt system.
+    
+    .NOTES
+        This function is called automatically when the performance insights fragment loads,
+        and should be called again after Starship or other prompt frameworks initialize
+        to ensure the wrapper captures the final prompt function.
+    
+    .EXAMPLE
+        Update-PerformanceInsightsPrompt
         
-        # Also check if starship module is loaded (even if variables not set yet)
-        if (-not $promptFrameworkActive) {
-            $starshipModule = Get-Module starship -ErrorAction SilentlyContinue
-            if ($starshipModule) {
-                $promptFunc = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
-                if ($promptFunc -and $promptFunc.ModuleName -eq 'starship') {
-                    $promptFrameworkActive = $true
+        Wraps the current prompt function with performance timing.
+    #>
+    function Update-PerformanceInsightsPrompt {
+        $currentPrompt = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
+        if ($currentPrompt) {
+            # Check if this is already our wrapper (avoid double-wrapping)
+            $promptScript = $currentPrompt.ScriptBlock.ToString()
+            if ($promptScript -match 'PSProfileCommandTimer|Start-CommandTimer') {
+                # Already wrapped, just update the stored prompt
+                if (-not $global:PSProfileOriginalPrompt) {
+                    # Extract the original prompt from the wrapper if possible
+                    # For now, just store the current prompt as-is
+                    $global:PSProfileOriginalPrompt = $currentPrompt.ScriptBlock
                 }
-            }
-        }
-        
-        # Check if Starship command is available (will be initialized later)
-        # Don't override prompt if Starship will be initialized
-        if (-not $promptFrameworkActive) {
-            $hasStarship = $false
-            if (Get-Command Test-HasCommand -ErrorAction SilentlyContinue) {
-                $hasStarship = Test-HasCommand starship
-            }
-            else {
-                $hasStarship = $null -ne (Get-Command starship -ErrorAction SilentlyContinue)
+                return
             }
             
-            # Also check if Initialize-Starship function exists (will be called later)
-            if ($hasStarship -or (Get-Command Initialize-Starship -ErrorAction SilentlyContinue)) {
-                $promptFrameworkActive = $true
-            }
+            # Store the current prompt function as a script block
+            $global:PSProfileOriginalPrompt = $currentPrompt.ScriptBlock
         }
-        
-        # Check if current prompt already has starship in it
-        if (-not $promptFrameworkActive) {
-            $promptFunc = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
-            if ($promptFunc) {
-                $promptScript = $promptFunc.ScriptBlock.ToString()
-                if ($promptScript -match 'starship|Invoke-Native|Invoke-Starship') {
-                    $promptFrameworkActive = $true
+        else {
+            # Fallback to default prompt if none exists
+            if (-not $global:PSProfileOriginalPrompt) {
+                $global:PSProfileOriginalPrompt = {
+                    "PS $($executionContext.SessionState.Path.CurrentLocation.Path)> "
                 }
             }
         }
-    }
-    catch {
-        if ($env:PS_PROFILE_DEBUG) {
-            if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                Write-ProfileError -ErrorRecord $_ -Context "Performance insights: prompt detection" -Category 'Profile'
-            }
-            else {
-                Write-Verbose "Performance insights: failed to detect prompt framework: $($_.Exception.Message)"
-            }
-        }
-    }
 
-    if (-not $promptFrameworkActive) {
-        if (-not $global:PSProfileOriginalPrompt) {
-            $global:PSProfileOriginalPrompt = $function:prompt
-        }
-
-        # Enhanced prompt with timing
+        # Enhanced prompt with timing that wraps the existing prompt
         function global:prompt {
-            # Stop any running timer
+            # Stop timer IMMEDIATELY at the start of prompt (before any prompt rendering)
+            # This minimizes the overhead from output rendering and prompt generation
+            # The timer was started in PostCommandLookupAction (just before execution)
+            # so this measures: execution time + minimal prompt overhead
             if ($global:PSProfileCommandTimer) {
                 Stop-CommandTimer
             }
 
-            # Call original prompt
+            # Call original prompt (works with Starship, Oh-My-Posh, or default)
             if ($global:PSProfileOriginalPrompt) {
                 & $global:PSProfileOriginalPrompt
             }
@@ -346,9 +391,20 @@ try {
                 "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
             }
 
-            # Start timing for next command
-            Start-CommandTimer -CommandName "prompt"
+            # Note: We don't start a timer here because PostCommandLookupAction will handle it
+            # when a command is about to execute. Starting a timer here would measure
+            # the time between prompts, not command execution time.
         }
+    }
+
+    # Initial wrap of the current prompt
+    Update-PerformanceInsightsPrompt
+
+    # Export the function so it can be called after Starship initializes
+    # Ensure function is available in global scope
+    if (-not (Get-Command Update-PerformanceInsightsPrompt -Scope Global -ErrorAction SilentlyContinue)) {
+        # Copy function to global scope
+        $null = New-Item -Path 'Function:\global:Update-PerformanceInsightsPrompt' -Value $function:Update-PerformanceInsightsPrompt -Force -ErrorAction SilentlyContinue
     }
 
     Set-Variable -Name 'PerformanceInsightsLoaded' -Value $true -Scope Global -Force

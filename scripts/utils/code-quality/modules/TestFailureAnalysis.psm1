@@ -10,7 +10,7 @@ scripts/utils/code-quality/modules/TestFailureAnalysis.psm1
 
 # Import TestCategorization module for Get-TestCategory
 $categorizationModulePath = Join-Path $PSScriptRoot 'TestCategorization.psm1'
-if (Test-Path $categorizationModulePath) {
+if ($categorizationModulePath -and -not [string]::IsNullOrWhiteSpace($categorizationModulePath) -and (Test-Path -LiteralPath $categorizationModulePath)) {
     Import-Module $categorizationModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 

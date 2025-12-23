@@ -5,5 +5,29 @@
 # Scientific data formats
 h5py>=3.10.0
 netCDF4>=1.6.0
+xarray>=2024.0.0
 numpy>=1.24.0
+astropy>=5.0.0
+scipy>=1.10.0
+pandas>=2.0.0
+polars>=0.20.0
+pyreadstat>=1.2.0
+
+# Structured data formats
+ion-python>=0.10.0
+
+# Database formats
+pyodbc>=5.0.0
+dbfread>=2.0.7
+dbf>=0.99.0
+
+# Columnar/binary formats
+pyarrow>=14.0.0
+fastparquet>=2024.0.0
+delta-spark>=3.0.0
+deltalake>=0.15.0
+pyiceberg>=0.5.0
+
+# Compression
+python-snappy>=0.7.0
 

@@ -8,6 +8,43 @@ scripts/utils/dependencies/modules/ModuleUpdateChecker.psm1
     Provides functions for checking module versions and detecting available updates.
 #>
 
+# Import Retry module if available for consistent retry behavior
+# Use safe path resolution that handles cases where $PSScriptRoot might not be set
+try {
+    if ($null -ne $PSScriptRoot -and -not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        # Start from the directory containing the script (or the script path itself if it's a directory)
+        $currentDir = if ([System.IO.Directory]::Exists($PSScriptRoot)) {
+            $PSScriptRoot
+        }
+        else {
+            [System.IO.Path]::GetDirectoryName($PSScriptRoot)
+        }
+        
+        $maxDepth = 4
+        $depth = 0
+        
+        # Traverse up to repository root (4 levels: modules -> dependencies -> utils -> scripts -> repo root)
+        while ($depth -lt $maxDepth -and $currentDir -and -not [string]::IsNullOrWhiteSpace($currentDir)) {
+            $parentDir = [System.IO.Path]::GetDirectoryName($currentDir)
+            if ([string]::IsNullOrWhiteSpace($parentDir) -or $parentDir -eq $currentDir) {
+                break
+            }
+            $currentDir = $parentDir
+            $depth++
+        }
+        
+        if ($currentDir -and -not [string]::IsNullOrWhiteSpace($currentDir)) {
+            $retryModulePath = Join-Path $currentDir 'scripts' 'lib' 'core' 'Retry.psm1'
+            if (-not [string]::IsNullOrWhiteSpace($retryModulePath) -and (Test-Path -LiteralPath $retryModulePath -ErrorAction SilentlyContinue)) {
+                Import-Module $retryModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}
+catch {
+    # Silently fail if path resolution fails - module will use fallback retry logic
+}
+
 <#
 .SYNOPSIS
     Gets local modules from the Modules directory.
@@ -88,44 +125,71 @@ function Test-ModuleUpdate {
         }
         else {
             # Get installed version with retry logic
-            $maxRetries = 3
-            $retryCount = 0
-            $installed = $null
-
-            while ($retryCount -lt $maxRetries -and $null -eq $installed) {
-                try {
-                    $installed = Get-Module -Name $ModuleName -ListAvailable -ErrorAction Stop |
+            if (Get-Command Invoke-WithRetry -ErrorAction SilentlyContinue) {
+                # Use Retry module
+                $installed = Invoke-WithRetry -ScriptBlock {
+                    Get-Module -Name $ModuleName -ListAvailable -ErrorAction Stop |
                     Sort-Object Version -Descending | Select-Object -First 1
+                } -MaxRetries 3 -RetryDelaySeconds 0.5 -ExponentialBackoff -OnRetry {
+                    param($Attempt, $MaxRetries, $DelaySeconds, $Exception)
+                    Write-Verbose "Retry $Attempt/$MaxRetries for Get-Module $ModuleName"
+                }
+
+                # Check PowerShell Gallery for latest version with retry logic
+                try {
+                    $galleryInfo = Invoke-WithRetry -ScriptBlock {
+                        Find-Module -Name $ModuleName -ErrorAction Stop
+                    } -MaxRetries 3 -RetryDelaySeconds 0.5 -ExponentialBackoff -OnRetry {
+                        param($Attempt, $MaxRetries, $DelaySeconds, $Exception)
+                        Write-Verbose "Retry $Attempt/$MaxRetries for Find-Module $ModuleName"
+                    }
                 }
                 catch {
-                    $retryCount++
-                    if ($retryCount -lt $maxRetries) {
-                        Write-Verbose "Retry $retryCount/$maxRetries for Get-Module $ModuleName"
-                        Start-Sleep -Milliseconds (500 * $retryCount)  # Exponential backoff
-                    }
-                    else {
-                        throw
-                    }
+                    Write-Verbose "Could not find module $ModuleName in gallery (may not be published)"
+                    $galleryInfo = $null
                 }
             }
+            else {
+                # Fallback to manual retry logic
+                $maxRetries = 3
+                $retryCount = 0
+                $installed = $null
 
-            # Check PowerShell Gallery for latest version with retry logic
-            $galleryInfo = $null
-            $retryCount = 0
-
-            while ($retryCount -lt $maxRetries -and $null -eq $galleryInfo) {
-                try {
-                    $galleryInfo = Find-Module -Name $ModuleName -ErrorAction Stop
-                }
-                catch {
-                    $retryCount++
-                    if ($retryCount -lt $maxRetries) {
-                        Write-Verbose "Retry $retryCount/$maxRetries for Find-Module $ModuleName"
-                        Start-Sleep -Milliseconds (500 * $retryCount)  # Exponential backoff
+                while ($retryCount -lt $maxRetries -and $null -eq $installed) {
+                    try {
+                        $installed = Get-Module -Name $ModuleName -ListAvailable -ErrorAction Stop |
+                        Sort-Object Version -Descending | Select-Object -First 1
                     }
-                    else {
-                        Write-Verbose "Could not find module $ModuleName in gallery (may not be published)"
-                        $galleryInfo = $null
+                    catch {
+                        $retryCount++
+                        if ($retryCount -lt $maxRetries) {
+                            Write-Verbose "Retry $retryCount/$maxRetries for Get-Module $ModuleName"
+                            Start-Sleep -Milliseconds (500 * $retryCount)  # Exponential backoff
+                        }
+                        else {
+                            throw
+                        }
+                    }
+                }
+
+                # Check PowerShell Gallery for latest version with retry logic
+                $galleryInfo = $null
+                $retryCount = 0
+
+                while ($retryCount -lt $maxRetries -and $null -eq $galleryInfo) {
+                    try {
+                        $galleryInfo = Find-Module -Name $ModuleName -ErrorAction Stop
+                    }
+                    catch {
+                        $retryCount++
+                        if ($retryCount -lt $maxRetries) {
+                            Write-Verbose "Retry $retryCount/$maxRetries for Find-Module $ModuleName"
+                            Start-Sleep -Milliseconds (500 * $retryCount)  # Exponential backoff
+                        }
+                        else {
+                            Write-Verbose "Could not find module $ModuleName in gallery (may not be published)"
+                            $galleryInfo = $null
+                        }
                     }
                 }
             }

@@ -211,12 +211,18 @@ function Parse-AliasesFromFile {
             $description = ""
             if ($helpContent) {
                 $synopsisMatch = $helpContent -match '(?s)\.SYNOPSIS\s*\n\s*(.+?)(?=\n\s*\.(?:DESCRIPTION|PARAMETER|EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)'
-                if ($synopsisMatch -and $matches -and $matches.Count -gt 1 -and $matches[1]) {
+                if ($synopsisMatch -and
+                    $matches -and
+                    $matches.Count -gt 1 -and
+                    $matches[1]) {
                     $synopsis = $matches[1].Trim() -replace '\r\n', ' ' -replace '\n', ' ' -replace '\s+', ' '
                 }
 
                 $descMatch = $helpContent -match '(?s)\.DESCRIPTION\s*\n\s*(.+?)(?=\n\s*\.(?:PARAMETER|EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)'
-                if ($descMatch -and $matches -and $matches.Count -gt 1 -and $matches[1]) {
+                if ($descMatch -and
+                    $matches -and
+                    $matches.Count -gt 1 -and
+                    $matches[1]) {
                     $description = $matches[1].Trim() -replace '\r\n', ' ' -replace '\n', ' ' -replace '\s+', ' '
                 }
 

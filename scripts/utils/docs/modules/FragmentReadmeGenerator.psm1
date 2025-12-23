@@ -47,7 +47,13 @@ function New-FragmentReadmeContent {
         [string[]]$EnableHelpers
     )
 
-    $title = "profile.d/$FileName"
+    # Strip number prefix from filename (e.g., "00-bootstrap.ps1" -> "bootstrap.ps1")
+    $displayFileName = $FileName
+    if ($FileName -match '^\d+-(.+)') {
+        $displayFileName = $matches[1]
+    }
+    
+    $title = "profile.d/$displayFileName"
     $underline = '=' * $title.Length
 
     $md = @()
@@ -60,7 +66,7 @@ function New-FragmentReadmeContent {
     $md += ''
     $md += 'Usage'
     $md += '-----'
-    $md += ('See the fragment source: `{0}` for examples and usage notes.' -f $FileName)
+    $md += ('See the fragment source: `{0}` for examples and usage notes.' -f $displayFileName)
 
     if ($Functions.Count -gt 0) {
         $md += ''

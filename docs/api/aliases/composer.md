@@ -1,0 +1,23 @@
+# composer
+
+## Synopsis
+
+Executes Composer commands.
+
+## Description
+
+Wrapper function for Composer that checks for command availability before execution.
+
+## Alias Information
+
+**Alias for:** `Invoke-Composer`
+
+Use this alias as a shorthand for the full command name.
+
+## Examples
+
+No examples provided.
+
+## Source
+
+Defined in: ..\profile.d\42-php.ps1

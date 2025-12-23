@@ -25,8 +25,8 @@ function Initialize-FileConversion-ScientificDirect {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'Python.psm1'
-        if (Test-Path $pythonModulePath) {
+        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'Python.psm1'
+        if ($pythonModulePath -and -not [string]::IsNullOrWhiteSpace($pythonModulePath) -and (Test-Path -LiteralPath $pythonModulePath)) {
             Import-Module $pythonModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }
@@ -43,7 +43,7 @@ function Initialize-FileConversion-ScientificDirect {
             $tempJson = Join-Path $env:TEMP "hdf5-to-netcdf-$(Get-Random).json"
             try {
                 _ConvertFrom-Hdf5ToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-                if (-not (Test-Path $tempJson)) {
+                if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                     throw "HDF5 to JSON conversion failed - output file not created"
                 }
                 _ConvertTo-NetCdfFromJson -InputPath $tempJson -OutputPath $OutputPath -ErrorAction Stop
@@ -82,7 +82,7 @@ function Initialize-FileConversion-ScientificDirect {
             $tempJson = Join-Path $env:TEMP "netcdf-to-hdf5-$(Get-Random).json"
             try {
                 _ConvertFrom-NetCdfToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-                if (-not (Test-Path $tempJson)) {
+                if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                     throw "NetCDF to JSON conversion failed - output file not created"
                 }
                 _ConvertTo-Hdf5FromJson -InputPath $tempJson -OutputPath $OutputPath -ErrorAction Stop

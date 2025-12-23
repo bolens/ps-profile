@@ -83,7 +83,14 @@ try {
                 },
                 @{
                     Name       = "Time"
-                    Expression = { $_.StartExecutionTime.ToString("HH:mm:ss") }
+                    Expression = {
+                        if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+                            Format-LocaleDate $_.StartExecutionTime -Format 'HH:mm:ss'
+                        }
+                        else {
+                            $_.StartExecutionTime.ToString("HH:mm:ss")
+                        }
+                    }
                     Width      = 8
                 }
             ) -AutoSize
@@ -96,7 +103,13 @@ try {
                 if ($cmd.Length -gt 60) {
                     $cmd = $cmd.Substring(0, 57) + "..."
                 }
-                Write-Host ("{0,5} {1} {2}" -f $_.Id, $cmd, $_.StartExecutionTime.ToString("HH:mm:ss"))
+                $timeStr = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+                    Format-LocaleDate $_.StartExecutionTime -Format 'HH:mm:ss'
+                }
+                else {
+                    $_.StartExecutionTime.ToString("HH:mm:ss")
+                }
+                Write-Host ("{0,5} {1} {2}" -f $_.Id, $cmd, $timeStr)
             }
         }
     }
@@ -172,8 +185,20 @@ try {
 
         if ($oldestCommand -and $newestCommand) {
             $timeSpan = $newestCommand.StartExecutionTime - $oldestCommand.StartExecutionTime
-            Write-Host ("History spans: {0:N1} days" -f $timeSpan.TotalDays)
-            Write-Host ("Average commands per day: {0:N1}" -f ($totalCommands / $timeSpan.TotalDays))
+            $daysStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $timeSpan.TotalDays -Format 'N1'
+            }
+            else {
+                $timeSpan.TotalDays.ToString("N1")
+            }
+            $avgCommandsStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber ($totalCommands / $timeSpan.TotalDays) -Format 'N1'
+            }
+            else {
+                ($totalCommands / $timeSpan.TotalDays).ToString("N1")
+            }
+            Write-Host ("History spans: {0} days" -f $daysStr)
+            Write-Host ("Average commands per day: {0}" -f $avgCommandsStr)
         }
 
         # Most frequent commands
@@ -387,7 +412,7 @@ try {
                 }
             }
             else {
-                Write-Host "Command execution cancelled." -ForegroundColor Yellow
+                Write-Host "Command execution canceled." -ForegroundColor Yellow
             }
         }
         else {
@@ -410,7 +435,7 @@ try {
     #>
     function Search-HistoryInteractive {
         # In test mode, return early to avoid hanging on ReadKey
-        if ($env:PS_PROFILE_TEST_MODE -eq '1') {
+        if (Test-EnvBool $env:PS_PROFILE_TEST_MODE) {
             Write-Host "🔍 Interactive History Search (test mode - skipping interactive input)" -ForegroundColor Cyan
             return
         }

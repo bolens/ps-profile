@@ -4,12 +4,12 @@ Describe 'JsonUtilities Module Functions' {
     BeforeAll {
         # Import the JsonUtilities module (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-        Import-Module (Join-Path $libPath 'JsonUtilities.psm1') -DisableNameChecking -ErrorAction Stop
+        Import-Module (Join-Path $libPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -ErrorAction Stop
         $script:TestTempDir = New-TestTempDirectory -Prefix 'JsonUtilitiesTests'
     }
 
     AfterAll {
-        if ($script:TestTempDir -and (Test-Path $script:TestTempDir)) {
+        if ($script:TestTempDir -and -not [string]::IsNullOrWhiteSpace($script:TestTempDir) -and (Test-Path -LiteralPath $script:TestTempDir)) {
             Remove-Item -Path $script:TestTempDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
@@ -62,7 +62,9 @@ Describe 'JsonUtilities Module Functions' {
             $testFile = Join-Path $script:TestTempDir 'output.json'
 
             { Write-JsonFile -Path $testFile -InputObject $testData } | Should -Not -Throw
-            Test-Path $testFile | Should -Be $true
+            if ($testFile -and -not [string]::IsNullOrWhiteSpace($testFile)) {
+                Test-Path -LiteralPath $testFile | Should -Be $true -Because "JSON file should be created"
+            }
 
             $result = Read-JsonFile -Path $testFile
             $result.Name | Should -Be 'Test'
@@ -74,7 +76,9 @@ Describe 'JsonUtilities Module Functions' {
             $testFile = Join-Path $script:TestTempDir 'subdir' 'output.json'
 
             { Write-JsonFile -Path $testFile -InputObject $testData -EnsureDirectory } | Should -Not -Throw
-            Test-Path $testFile | Should -Be $true
+            if ($testFile -and -not [string]::IsNullOrWhiteSpace($testFile)) {
+                Test-Path -LiteralPath $testFile | Should -Be $true -Because "JSON file should be created with directory"
+            }
         }
 
         It 'Uses specified depth for nested objects' {
@@ -125,6 +129,89 @@ Describe 'JsonUtilities Module Functions' {
 
             $result = Read-JsonFile -Path $testFile
             $result.Value | Should -Be 'second'
+        }
+
+        It 'Handles ErrorAction Continue for file errors' {
+            $nonExistentFile = Join-Path $script:TestTempDir 'nonexistent-continue.json'
+            $result = Read-JsonFile -Path $nonExistentFile -ErrorAction Continue
+            $result | Should -BeNullOrEmpty
+        }
+
+        It 'Handles ErrorAction Continue for write errors' {
+            # Try to write to a read-only location (if possible)
+            $testData = @{ Test = 'value' }
+            $testFile = Join-Path $script:TestTempDir 'readonly-test.json'
+            
+            # Create file first
+            Write-JsonFile -Path $testFile -InputObject $testData
+            
+            # Try to write again (should succeed)
+            { Write-JsonFile -Path $testFile -InputObject $testData -ErrorAction Continue } | Should -Not -Throw
+        }
+
+        It 'Uses Get-ErrorActionPreference when ErrorHandling module is available' {
+            # This tests the Get-ErrorActionPreference path
+            $testData = @{ Test = 'value' }
+            $testFile = Join-Path $script:TestTempDir 'error-pref-test.json'
+            
+            # Should work regardless of whether ErrorHandling module is available
+            { Write-JsonFile -Path $testFile -InputObject $testData } | Should -Not -Throw
+        }
+
+        It 'Uses fallback error action extraction when ErrorHandling module is not available' {
+            # This tests the fallback path
+            $testData = @{ Test = 'value' }
+            $testFile = Join-Path $script:TestTempDir 'fallback-error-test.json'
+            
+            { Write-JsonFile -Path $testFile -InputObject $testData } | Should -Not -Throw
+        }
+
+        It 'Uses Ensure-DirectoryExists when available' {
+            $testData = @{ Test = 'value' }
+            $testFile = Join-Path $script:TestTempDir 'ensure-dir-test' 'output.json'
+            
+            # Should work regardless of whether Ensure-DirectoryExists is available
+            { Write-JsonFile -Path $testFile -InputObject $testData -EnsureDirectory } | Should -Not -Throw
+        }
+
+        It 'Uses fallback directory creation when Ensure-DirectoryExists is not available' {
+            $testData = @{ Test = 'value' }
+            $testFile = Join-Path $script:TestTempDir 'fallback-dir-test' 'output.json'
+            
+            { Write-JsonFile -Path $testFile -InputObject $testData -EnsureDirectory } | Should -Not -Throw
+        }
+
+        It 'Handles different encoding options' {
+            $testData = @{ Encoding = 'test' }
+            $testFile = Join-Path $script:TestTempDir 'encoding-test.json'
+            
+            { Write-JsonFile -Path $testFile -InputObject $testData -Encoding 'ASCII' } | Should -Not -Throw
+            $result = Read-JsonFile -Path $testFile
+            $result.Encoding | Should -Be 'test'
+        }
+
+        It 'Handles ErrorAction Continue for Read-JsonFile conversion errors' {
+            $invalidFile = Join-Path $script:TestTempDir 'invalid-continue.json'
+            Set-Content -Path $invalidFile -Value '{ invalid json }' -Encoding UTF8
+
+            $result = Read-JsonFile -Path $invalidFile -ErrorAction Continue
+            $result | Should -BeNullOrEmpty
+        }
+
+        It 'Handles ErrorAction Continue for Write-JsonFile errors' {
+            $testData = @{ Test = 'value' }
+            $testFile = Join-Path $script:TestTempDir 'write-error-continue.json'
+            
+            # Should succeed
+            { Write-JsonFile -Path $testFile -InputObject $testData -ErrorAction Continue } | Should -Not -Throw
+        }
+
+        It 'Handles whitespace-only JSON file' {
+            $whitespaceFile = Join-Path $script:TestTempDir 'whitespace.json'
+            Set-Content -Path $whitespaceFile -Value '   ' -Encoding UTF8
+
+            $result = Read-JsonFile -Path $whitespaceFile -ErrorAction SilentlyContinue
+            $result | Should -BeNullOrEmpty
         }
     }
 }

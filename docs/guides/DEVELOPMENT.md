@@ -78,7 +78,7 @@ pwsh -NoProfile -File scripts\utils\run-pester.ps1 -Suite Performance
 Run a specific test file:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\run-pester.ps1 -TestFile tests\Common.tests.ps1
+pwsh -NoProfile -File scripts\utils\run-pester.ps1 -TestFile tests\unit\library-common.tests.ps1
 ```
 
 Run tests with code coverage:
@@ -87,10 +87,10 @@ Run tests with code coverage:
 pwsh -NoProfile -File scripts\utils\run-pester.ps1 -Coverage
 ```
 
-Or use Taskfile shortcuts:
+Or use task runner shortcuts (works with task, just, make, npm run):
 
 ```powershell
-task test-unit         # Unit suite only
+task test-unit         # Unit suite only (or: just test-unit, make test-unit, npm run test-unit)
 task test-integration  # Integration suite only
 task test-performance  # Performance suite only
 ```
@@ -176,10 +176,10 @@ Run security scan:
 pwsh -NoProfile -File scripts\utils\run-security-scan.ps1
 ```
 
-Run all quality checks:
+Run all quality checks (works with task, just, make, npm run):
 
 ```powershell
-task quality-check
+task quality-check    # or: just quality-check, make quality-check, npm run quality-check
 ```
 
 ### Code Standards
@@ -394,10 +394,10 @@ pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1
 
 ### Pre-commit Checks
 
-Before committing, run:
+Before committing, run (works with task, just, make, npm run):
 
 ```powershell
-task format-and-lint
+task format-and-lint    # or: just format-and-lint, make format-and-lint, npm run format-and-lint
 ```
 
 Or manually:
@@ -409,10 +409,10 @@ pwsh -NoProfile -File scripts\utils\run-lint.ps1
 
 ### Full Validation
 
-Run all validation checks:
+Run all validation checks (works with task, just, make, npm run):
 
 ```powershell
-task validate
+task validate    # or: just validate, make validate, npm run validate
 ```
 
 ### Update Dependencies
@@ -474,4 +474,4 @@ If `Get-RepoRoot` fails:
 
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
 - [CODEBASE_IMPROVEMENTS.md](../CODEBASE_IMPROVEMENTS.md) - Planned improvements
-- [requirements.psd1](../requirements.psd1) - Dependency requirements
+- [requirements/](../requirements/) - Modular dependency requirements structure

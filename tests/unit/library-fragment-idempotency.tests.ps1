@@ -9,7 +9,7 @@ tests/unit/library-fragment-idempotency.tests.ps1
 
 BeforeAll {
     # Import the FragmentIdempotency module
-    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts\lib\FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop
 }
 

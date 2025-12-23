@@ -25,8 +25,8 @@ function Initialize-FileConversion-ScientificToColumnar {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'Python.psm1'
-        if (Test-Path $pythonModulePath) {
+        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'Python.psm1'
+        if ($pythonModulePath -and -not [string]::IsNullOrWhiteSpace($pythonModulePath) -and (Test-Path -LiteralPath $pythonModulePath)) {
             Import-Module $pythonModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }
@@ -41,8 +41,8 @@ function Initialize-FileConversion-ScientificToColumnar {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'NodeJs.psm1'
-        if (Test-Path $nodeJsModulePath) {
+        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
+        if ($nodeJsModulePath -and -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }
@@ -63,7 +63,7 @@ function Initialize-FileConversion-ScientificToColumnar {
             $tempJson = Join-Path $env:TEMP "hdf5-to-parquet-$(Get-Random).json"
             try {
                 _ConvertFrom-Hdf5ToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-                if (-not (Test-Path $tempJson)) {
+                if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                     throw "HDF5 to JSON conversion failed - output file not created"
                 }
                 # Use columnar module function
@@ -113,7 +113,7 @@ function Initialize-FileConversion-ScientificToColumnar {
                 # Use columnar module function
                 if (Get-Command _ConvertFrom-ParquetToJson -ErrorAction SilentlyContinue) {
                     _ConvertFrom-ParquetToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-                    if (-not (Test-Path $tempJson)) {
+                    if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                         throw "Parquet to JSON conversion failed - output file not created"
                     }
                     _ConvertTo-Hdf5FromJson -InputPath $tempJson -OutputPath $OutputPath -ErrorAction Stop
@@ -159,7 +159,7 @@ function Initialize-FileConversion-ScientificToColumnar {
             $tempJson = Join-Path $env:TEMP "netcdf-to-parquet-$(Get-Random).json"
             try {
                 _ConvertFrom-NetCdfToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-                if (-not (Test-Path $tempJson)) {
+                if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                     throw "NetCDF to JSON conversion failed - output file not created"
                 }
                 # Use columnar module function
@@ -209,7 +209,7 @@ function Initialize-FileConversion-ScientificToColumnar {
                 # Use columnar module function
                 if (Get-Command _ConvertFrom-ParquetToJson -ErrorAction SilentlyContinue) {
                     _ConvertFrom-ParquetToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-                    if (-not (Test-Path $tempJson)) {
+                    if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                         throw "Parquet to JSON conversion failed - output file not created"
                     }
                     _ConvertTo-NetCdfFromJson -InputPath $tempJson -OutputPath $OutputPath -ErrorAction Stop

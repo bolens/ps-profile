@@ -194,7 +194,14 @@ function Get-DashboardHtmlTemplate {
         <header>
             <h1>📊 PowerShell Profile Metrics Dashboard</h1>
             <p>Comprehensive code quality and performance insights</p>
-            <div class="timestamp">Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')</div>
+            <div class="timestamp">Generated: $(
+                if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+                    Format-LocaleDate (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+                }
+                else {
+                    (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+                }
+            )</div>
         </header>
 
         <div class="grid">

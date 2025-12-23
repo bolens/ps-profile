@@ -1,0 +1,8 @@
+unknown shorthand flag: 'D' in -D
+no configuration file provided: not found
+no configuration file provided: not found
+failed to connect to the docker API at npipe:////./pipe/docker_engine; check if the path is correct and if the daemon is running: open //./pipe/docker_engine: The system cannot find the file specified.
+unknown shorthand flag: 'D' in -D
+no configuration file provided: not found
+no configuration file provided: not found
+failed to connect to the docker API at npipe:////./pipe/docker_engine; check if the path is correct and if the daemon is running: open //./pipe/docker_engine: The system cannot find the file specified.

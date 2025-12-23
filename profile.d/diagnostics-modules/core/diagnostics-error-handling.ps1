@@ -38,7 +38,21 @@ try {
             [ValidateSet('Profile', 'Fragment', 'Command', 'Network', 'System')] [string]$Category = 'Profile'
         )
 
-        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        # Use DateTimeFormatting module if available for unified date formatting
+        $timestamp = if (Get-Command Format-DateTimeLog -ErrorAction SilentlyContinue) {
+            Format-DateTimeLog -DateTime (Get-Date)
+        }
+        elseif (Get-Command Format-DateTime -ErrorAction SilentlyContinue) {
+            Format-DateTime -DateTime (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+        }
+        elseif (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+            # Fallback to Format-LocaleDate if DateTimeFormatting not available
+            Format-LocaleDate (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+        }
+        else {
+            # Final fallback to standard format
+            (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+        }
         $errorMessage = $ErrorRecord.Exception.Message
         $errorType = $ErrorRecord.Exception.GetType().Name
         $scriptName = $ErrorRecord.InvocationInfo.ScriptName
@@ -67,7 +81,7 @@ Message: $errorMessage
 
             if ($userHome) {
                 $logDir = Join-Path $userHome '.local' 'share' 'powershell'
-                if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+                if (-not ($logDir -and -not [string]::IsNullOrWhiteSpace($logDir) -and (Test-Path -LiteralPath $logDir))) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
                 $logFile = Join-Path $logDir 'profile-errors.log'
             }
             else {

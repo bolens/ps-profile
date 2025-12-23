@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="11" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2025-12-01" time="09:42:20">
+  <environment clr-version="10.0.0" machine-name="BAMBOO" cwd="C:\Users\bolen\Documents\PowerShell" platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk4\Partition4" user-domain="BAMBOO" os-version="10.0.28000" nunit-version="2.5.8.0" user="bolen" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="1.9298" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\test-runner\performance-insights.tests.ps1" executed="True" result="Success" success="True" time="1.9298" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\test-runner\performance-insights.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Performance Insights Integration Tests" executed="True" result="Success" success="True" time="0.3843" asserts="0" description="Performance Insights Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Performance Insights Integration Tests.Performance insights functions" executed="True" result="Success" success="True" time="0.2889" asserts="0" description="Performance Insights Integration Tests.Performance insights functions">
+                <results>
+                  <test-case description="Show-PerformanceInsights function is available" name="Performance Insights Integration Tests.Performance insights functions.Show-PerformanceInsights function is available" time="0.1412" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Show-PerformanceInsights executes without error" name="Performance Insights Integration Tests.Performance insights functions.Show-PerformanceInsights executes without error" time="0.0226" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-PerformanceHealth function is available" name="Performance Insights Integration Tests.Performance insights functions.Test-PerformanceHealth function is available" time="0.0044" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-PerformanceHealth executes without error" name="Performance Insights Integration Tests.Performance insights functions.Test-PerformanceHealth executes without error" time="0.0372" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Clear-PerformanceData function is available" name="Performance Insights Integration Tests.Performance insights functions.Clear-PerformanceData function is available" time="0.0044" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Clear-PerformanceData executes without error" name="Performance Insights Integration Tests.Performance insights functions.Clear-PerformanceData executes without error" time="0.0057" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Performance Insights Integration Tests.Update-PerformanceInsightsPrompt function" executed="True" result="Success" success="True" time="0.3546" asserts="0" description="Performance Insights Integration Tests.Update-PerformanceInsightsPrompt function">
+                <results>
+                  <test-case description="Update-PerformanceInsightsPrompt function is available" name="Performance Insights Integration Tests.Update-PerformanceInsightsPrompt function.Update-PerformanceInsightsPrompt function is available" time="0.0042" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Update-PerformanceInsightsPrompt wraps existing prompt" name="Performance Insights Integration Tests.Update-PerformanceInsightsPrompt function.Update-PerformanceInsightsPrompt wraps existing prompt" time="0.0087" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Update-PerformanceInsightsPrompt handles missing prompt gracefully" name="Performance Insights Integration Tests.Update-PerformanceInsightsPrompt function.Update-PerformanceInsightsPrompt handles missing prompt gracefully" time="0.0055" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Update-PerformanceInsightsPrompt can be called multiple times safely" name="Performance Insights Integration Tests.Update-PerformanceInsightsPrompt function.Update-PerformanceInsightsPrompt can be called multiple times safely" time="0.0076" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Update-PerformanceInsightsPrompt prevents double-wrapping" name="Performance Insights Integration Tests.Update-PerformanceInsightsPrompt function.Update-PerformanceInsightsPrompt prevents double-wrapping" time="0.006" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

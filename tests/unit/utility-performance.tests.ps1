@@ -7,12 +7,12 @@
 BeforeAll {
     # Import the Performance and CodeMetrics modules (Common.psm1 no longer exists)
     $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-    Import-Module (Join-Path $libPath 'PerformanceMeasurement.psm1') -DisableNameChecking -ErrorAction Stop -Global
-    Import-Module (Join-Path $libPath 'PerformanceRegression.psm1') -DisableNameChecking -ErrorAction Stop -Global
-    Import-Module (Join-Path $libPath 'CodeMetrics.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path $libPath 'performance' 'PerformanceMeasurement.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path $libPath 'performance' 'PerformanceRegression.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path $libPath 'metrics' 'CodeMetrics.psm1') -DisableNameChecking -ErrorAction Stop -Global
     # Import dependencies
-    Import-Module (Join-Path $libPath 'FileSystem.psm1') -DisableNameChecking -ErrorAction Stop -Global
-    Import-Module (Join-Path $libPath 'AstParsing.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path $libPath 'file' 'FileSystem.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path $libPath 'code-analysis' 'AstParsing.psm1') -DisableNameChecking -ErrorAction Stop -Global
     $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
 }
 

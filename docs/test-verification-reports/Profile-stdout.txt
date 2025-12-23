@@ -1,0 +1,79 @@
+
+[32;1mModuleType[0m[32;1m Version   [0m [32;1;3mPreRelease[0m[32;1m Name                               [0m[32;1m ExportedCo[0m
+[32;1m          [0m[32;1m           [0m [32;1;3m          [0m[32;1m                                    [0m[32;1m mmands[0m
+[32;1m----------[0m [32;1m-------   [0m [32;1m----------[0m [32;1m----                               [0m [32;1m----------[0m
+Script     0.0                   ExitCodes                           Exit-With…
+Script     0.0                   PathResolution                      {Get-Prof…
+Script     0.0                   Logging                             Write-Scr…
+Script     0.0                   Module                              {Ensure-M…
+Using Pester v5.7.1
+
+🔄 Profile Updates Available!
+You're 1 commit(s) behind origin/main
+
+Recent changes:
+  6fe95c8 chore(release): 1.3.1 [skip ci]
+
+📋 View full changelog: C:\Users\bolen\Documents\PowerShell\CHANGELOG.md
+
+💡 Run 'git pull' to update your profile
+
+
+🔄 Profile Updates Available!
+You're 1 commit(s) behind origin/main
+
+Recent changes:
+  6fe95c8 chore(release): 1.3.1 [skip ci]
+
+📋 View full changelog: C:\Users\bolen\Documents\PowerShell\CHANGELOG.md
+
+💡 Run 'git pull' to update your profile
+
+Starting test execution...
+
+[32;1mContainers            : [0m{[+] C:\Users\bolen\Documents\PowerShell\tests\integrat
+                        ion\profile\profile-fragments.tests.ps1, [+] C:\Users\b
+                        olen\Documents\PowerShell\tests\integration\profile\pro
+                        file-loading.tests.ps1, [+] C:\Users\bolen\Documents\Po
+                        werShell\tests\integration\profile\profile-quality.test
+                        s.ps1, [+] C:\Users\bolen\Documents\PowerShell\tests\in
+                        tegration\profile\profile-structure.tests.ps1…}
+[32;1mResult                : [0mPassed
+[32;1mFailedCount           : [0m0
+[32;1mFailedBlocksCount     : [0m0
+[32;1mFailedContainersCount : [0m0
+[32;1mPassedCount           : [0m21
+[32;1mSkippedCount          : [0m0
+[32;1mInconclusiveCount     : [0m0
+[32;1mNotRunCount           : [0m0
+[32;1mTotalCount            : [0m21
+[32;1mDuration              : [0m00:03:24.8093279
+[32;1mExecuted              : [0mTrue
+[32;1mExecutedAt            : [0m12/1/2025 9:34:33 AM
+[32;1mVersion               : [0m5.7.1
+[32;1mPSVersion             : [0m7.6.0-preview.5
+[32;1mPSBoundParameters     : [0m{[Configuration, PesterConfiguration]}
+[32;1mPlugins               : [0m
+[32;1mPluginConfiguration   : [0m
+[32;1mPluginData            : [0m
+[32;1mConfiguration         : [0mPesterConfiguration
+[32;1mDiscoveryDuration     : [0m00:00:06.8054113
+[32;1mUserDuration          : [0m00:03:17.2126773
+[32;1mFrameworkDuration     : [0m00:00:00.7912393
+[32;1mFailed                : [0m{}
+[32;1mFailedBlocks          : [0m{}
+[32;1mFailedContainers      : [0m{}
+[32;1mPassed                : [0m{[+] all profile fragments exist and are readable, [+] 
+                        profile fragments have valid PowerShell syntax, [+] 
+                        Get-ProfileFragment lists fragments, [+] loads 
+                        successfully in current PowerShell environment…}
+[32;1mSkipped               : [0m{}
+[32;1mInconclusive          : [0m{}
+[32;1mNotRun                : [0m{}
+[32;1mTests                 : [0m{[+] all profile fragments exist and are readable, [+] 
+                        profile fragments have valid PowerShell syntax, [+] 
+                        Get-ProfileFragment lists fragments, [+] loads 
+                        successfully in current PowerShell environment…}
+[32;1mCodeCoverage          : [0m
+
+

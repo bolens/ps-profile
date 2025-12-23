@@ -1,0 +1,62 @@
+
+[32;1mModuleType[0m[32;1m Version   [0m [32;1;3mPreRelease[0m[32;1m Name                               [0m[32;1m ExportedCo[0m
+[32;1m          [0m[32;1m           [0m [32;1;3m          [0m[32;1m                                    [0m[32;1m mmands[0m
+[32;1m----------[0m [32;1m-------   [0m [32;1m----------[0m [32;1m----                               [0m [32;1m----------[0m
+Script     0.0                   ExitCodes                           Exit-With…
+Script     0.0                   PathResolution                      {Get-Prof…
+Script     0.0                   Logging                             Write-Scr…
+Script     0.0                   Module                              {Ensure-M…
+Using Pester v5.7.1
+⚡ Performance Insights
+======================
+No command timing data collected yet.
+Commands will be tracked automatically as you use them.
+🏥 Performance Health Check
+===========================
+Memory usage: 202.5 MB
+Tracked commands: 0
+Performance rating: Fair
+🧹 Performance data cleared.
+Starting test execution...
+
+[32;1mContainers            : [0m{[+] C:\Users\bolen\Documents\PowerShell\tests\integrat
+                        ion\test-runner\performance-insights.tests.ps1}
+[32;1mResult                : [0mPassed
+[32;1mFailedCount           : [0m0
+[32;1mFailedBlocksCount     : [0m0
+[32;1mFailedContainersCount : [0m0
+[32;1mPassedCount           : [0m11
+[32;1mSkippedCount          : [0m0
+[32;1mInconclusiveCount     : [0m0
+[32;1mNotRunCount           : [0m0
+[32;1mTotalCount            : [0m11
+[32;1mDuration              : [0m00:00:01.9297952
+[32;1mExecuted              : [0mTrue
+[32;1mExecutedAt            : [0m12/1/2025 9:42:20 AM
+[32;1mVersion               : [0m5.7.1
+[32;1mPSVersion             : [0m7.6.0-preview.5
+[32;1mPSBoundParameters     : [0m{[Configuration, PesterConfiguration]}
+[32;1mPlugins               : [0m
+[32;1mPluginConfiguration   : [0m
+[32;1mPluginData            : [0m
+[32;1mConfiguration         : [0mPesterConfiguration
+[32;1mDiscoveryDuration     : [0m00:00:01.2369752
+[32;1mUserDuration          : [0m00:00:00.2774723
+[32;1mFrameworkDuration     : [0m00:00:00.4153477
+[32;1mFailed                : [0m{}
+[32;1mFailedBlocks          : [0m{}
+[32;1mFailedContainers      : [0m{}
+[32;1mPassed                : [0m{[+] Show-PerformanceInsights function is available, 
+                        [+] Show-PerformanceInsights executes without error, 
+                        [+] Test-PerformanceHealth function is available, [+] 
+                        Test-PerformanceHealth executes without error…}
+[32;1mSkipped               : [0m{}
+[32;1mInconclusive          : [0m{}
+[32;1mNotRun                : [0m{}
+[32;1mTests                 : [0m{[+] Show-PerformanceInsights function is available, 
+                        [+] Show-PerformanceInsights executes without error, 
+                        [+] Test-PerformanceHealth function is available, [+] 
+                        Test-PerformanceHealth executes without error…}
+[32;1mCodeCoverage          : [0m
+
+

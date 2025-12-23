@@ -20,7 +20,15 @@ if (-not (Test-Path Function:Start-ContainerComposePodman)) {
             'podman-compose' { podman-compose up -D @args }
             'docker' { docker compose up -D @args }
             'docker-compose' { docker-compose up -D @args }
-            default { Write-Warning 'neither podman nor docker found' }
+            default { 
+                $engineInfo = Get-ContainerEnginePreference
+                if ($engineInfo.InstallationCommand) {
+                    Write-Warning "Neither podman nor docker found. Install with: $($engineInfo.InstallationCommand)"
+                }
+                else {
+                    Write-Warning 'neither podman nor docker found'
+                }
+            }
         }
     }
     Set-Alias -Name pcu -Value Start-ContainerComposePodman -ErrorAction SilentlyContinue
@@ -42,7 +50,15 @@ if (-not (Test-Path Function:Stop-ContainerComposePodman)) {
             'podman-compose' { podman-compose down @args }
             'docker' { docker compose down @args }
             'docker-compose' { docker-compose down @args }
-            default { Write-Warning 'neither podman nor docker found' }
+            default { 
+                $engineInfo = Get-ContainerEnginePreference
+                if ($engineInfo.InstallationCommand) {
+                    Write-Warning "Neither podman nor docker found. Install with: $($engineInfo.InstallationCommand)"
+                }
+                else {
+                    Write-Warning 'neither podman nor docker found'
+                }
+            }
         }
     }
     Set-Alias -Name pcd -Value Stop-ContainerComposePodman -ErrorAction SilentlyContinue
@@ -64,7 +80,15 @@ if (-not (Test-Path Function:Get-ContainerComposeLogsPodman)) {
             'podman-compose' { podman-compose logs -f @args }
             'docker' { docker compose logs -f @args }
             'docker-compose' { docker-compose logs -f @args }
-            default { Write-Warning 'neither podman nor docker found' }
+            default { 
+                $engineInfo = Get-ContainerEnginePreference
+                if ($engineInfo.InstallationCommand) {
+                    Write-Warning "Neither podman nor docker found. Install with: $($engineInfo.InstallationCommand)"
+                }
+                else {
+                    Write-Warning 'neither podman nor docker found'
+                }
+            }
         }
     }
     Set-Alias -Name pcl -Value Get-ContainerComposeLogsPodman -ErrorAction SilentlyContinue
@@ -83,7 +107,15 @@ if (-not (Test-Path Function:Clear-ContainerSystemPodman)) {
         $info = Get-ContainerEngineInfo
         if ($info.Engine -in @('podman', 'podman-compose')) { podman system prune -f @args }
         elseif ($info.Engine -in @('docker', 'docker-compose')) { docker system prune -f @args }
-        else { Write-Warning 'neither podman nor docker found' }
+        else { 
+            $engineInfo = Get-ContainerEnginePreference
+            if ($engineInfo.InstallationCommand) {
+                Write-Warning "Neither podman nor docker found. Install with: $($engineInfo.InstallationCommand)"
+            }
+            else {
+                Write-Warning 'neither podman nor docker found'
+            }
+        }
     }
     Set-Alias -Name pprune -Value Clear-ContainerSystemPodman -ErrorAction SilentlyContinue
 }

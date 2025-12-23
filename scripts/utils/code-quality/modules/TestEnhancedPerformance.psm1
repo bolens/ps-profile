@@ -11,7 +11,7 @@ scripts/utils/code-quality/modules/TestEnhancedPerformance.psm1
 
 # Import TestPerformanceMonitoring module for Measure-TestPerformance
 $performanceModulePath = Join-Path $PSScriptRoot 'TestPerformanceMonitoring.psm1'
-if (Test-Path $performanceModulePath) {
+if ($performanceModulePath -and -not [string]::IsNullOrWhiteSpace($performanceModulePath) -and (Test-Path -LiteralPath $performanceModulePath)) {
     Import-Module $performanceModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 

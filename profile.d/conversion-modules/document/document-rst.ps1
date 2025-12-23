@@ -21,7 +21,7 @@ function Initialize-FileConversion-DocumentRst {
             if (-not $InputPath) {
                 throw "InputPath parameter is required"
             }
-            if (-not (Test-Path $InputPath)) {
+            if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) {
                 throw "Input file not found: $InputPath"
             }
             
@@ -39,8 +39,8 @@ function Initialize-FileConversion-DocumentRst {
             $exitCode = $LASTEXITCODE
             
             if ($exitCode -ne 0) {
-                $errorMessage = if ($errorOutput) { $errorOutput -join "`n" } else { "Unknown error" }
-                throw "pandoc failed with exit code $exitCode : $errorMessage"
+                $errorText = if ($errorOutput) { ($errorOutput | Out-String).Trim() } else { "Unknown error" }
+                throw "pandoc failed with exit code $exitCode when converting RST to Markdown. Error: $errorText"
             }
         }
         catch {
@@ -57,7 +57,7 @@ function Initialize-FileConversion-DocumentRst {
             if (-not $InputPath) {
                 throw "InputPath parameter is required"
             }
-            if (-not (Test-Path $InputPath)) {
+            if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) {
                 throw "Input file not found: $InputPath"
             }
             
@@ -74,8 +74,8 @@ function Initialize-FileConversion-DocumentRst {
             $exitCode = $LASTEXITCODE
             
             if ($exitCode -ne 0) {
-                $errorMessage = if ($errorOutput) { $errorOutput -join "`n" } else { "Unknown error" }
-                throw "pandoc failed with exit code $exitCode : $errorMessage"
+                $errorText = if ($errorOutput) { ($errorOutput | Out-String).Trim() } else { "Unknown error" }
+                throw "pandoc failed with exit code $exitCode when converting RST to HTML. Error: $errorText"
             }
         }
         catch {
@@ -92,7 +92,7 @@ function Initialize-FileConversion-DocumentRst {
             if (-not $InputPath) {
                 throw "InputPath parameter is required"
             }
-            if (-not (Test-Path $InputPath)) {
+            if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) {
                 throw "Input file not found: $InputPath"
             }
             
@@ -109,8 +109,8 @@ function Initialize-FileConversion-DocumentRst {
             $exitCode = $LASTEXITCODE
             
             if ($exitCode -ne 0) {
-                $errorMessage = if ($errorOutput) { $errorOutput -join "`n" } else { "Unknown error" }
-                throw "pandoc failed with exit code $exitCode : $errorMessage"
+                $errorText = if ($errorOutput) { ($errorOutput | Out-String).Trim() } else { "Unknown error" }
+                throw "pandoc failed with exit code $exitCode when converting RST to PDF. Error: $errorText"
             }
         }
         catch {
@@ -127,7 +127,7 @@ function Initialize-FileConversion-DocumentRst {
             if (-not $InputPath) {
                 throw "InputPath parameter is required"
             }
-            if (-not (Test-Path $InputPath)) {
+            if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) {
                 throw "Input file not found: $InputPath"
             }
             
@@ -144,8 +144,8 @@ function Initialize-FileConversion-DocumentRst {
             $exitCode = $LASTEXITCODE
             
             if ($exitCode -ne 0) {
-                $errorMessage = if ($errorOutput) { $errorOutput -join "`n" } else { "Unknown error" }
-                throw "pandoc failed with exit code $exitCode : $errorMessage"
+                $errorText = if ($errorOutput) { ($errorOutput | Out-String).Trim() } else { "Unknown error" }
+                throw "pandoc failed with exit code $exitCode when converting RST to DOCX. Error: $errorText"
             }
         }
         catch {
@@ -162,7 +162,7 @@ function Initialize-FileConversion-DocumentRst {
             if (-not $InputPath) {
                 throw "InputPath parameter is required"
             }
-            if (-not (Test-Path $InputPath)) {
+            if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) {
                 throw "Input file not found: $InputPath"
             }
             
@@ -179,8 +179,8 @@ function Initialize-FileConversion-DocumentRst {
             $exitCode = $LASTEXITCODE
             
             if ($exitCode -ne 0) {
-                $errorMessage = if ($errorOutput) { $errorOutput -join "`n" } else { "Unknown error" }
-                throw "pandoc failed with exit code $exitCode : $errorMessage"
+                $errorText = if ($errorOutput) { ($errorOutput | Out-String).Trim() } else { "Unknown error" }
+                throw "pandoc failed with exit code $exitCode when converting RST to LaTeX. Error: $errorText"
             }
         }
         catch {

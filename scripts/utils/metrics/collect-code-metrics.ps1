@@ -94,7 +94,13 @@ if ($CoverageXmlPath) {
     if (Test-Path -Path $CoverageXmlPath) {
         Write-ScriptMessage -Message "Collecting test coverage metrics..." -LogLevel Info
         $testCoverage = Get-TestCoverage -CoverageXmlPath $CoverageXmlPath
-        Write-ScriptMessage -Message "  Coverage: $($testCoverage.CoveragePercent)%" -LogLevel Info
+        $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+            Format-LocaleNumber $testCoverage.CoveragePercent -Format 'N2'
+        }
+        else {
+            $testCoverage.CoveragePercent.ToString("N2")
+        }
+        Write-ScriptMessage -Message "  Coverage: ${coveragePercentStr}%" -LogLevel Info
     }
     else {
         Write-ScriptMessage -Message "Coverage file not found: $CoverageXmlPath" -IsWarning
@@ -111,7 +117,13 @@ else {
         if (Test-Path -Path $coveragePath) {
             Write-ScriptMessage -Message "Found coverage file: $coveragePath" -LogLevel Info
             $testCoverage = Get-TestCoverage -CoverageXmlPath $coveragePath
-            Write-ScriptMessage -Message "  Coverage: $($testCoverage.CoveragePercent)%" -LogLevel Info
+            $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $testCoverage.CoveragePercent -Format 'N2'
+            }
+            else {
+                $testCoverage.CoveragePercent.ToString("N2")
+            }
+            Write-ScriptMessage -Message "  Coverage: ${coveragePercentStr}%" -LogLevel Info
             break
         }
     }
@@ -173,9 +185,9 @@ if ($testCoverage -and $testCoverage.FileCoverage) {
     }
 }
 
-# Calculate code quality score if requested
+# Calculate code quality score (enabled by default, can be disabled with -IncludeQualityScore:$false)
 $qualityScore = $null
-if ($IncludeQualityScore) {
+if ($IncludeQualityScore -or -not $PSBoundParameters.ContainsKey('IncludeQualityScore')) {
     Write-ScriptMessage -Message "Calculating code quality score..." -LogLevel Info
     $aggregatedMetrics = [PSCustomObject]@{
         TotalFiles               = $totalFiles
@@ -187,31 +199,43 @@ if ($IncludeQualityScore) {
         AverageFunctionsPerFile  = if ($totalFiles -gt 0) { [math]::Round($totalFunctions / $totalFiles, 2) } else { 0 }
         AverageComplexityPerFile = if ($totalFiles -gt 0) { [math]::Round($totalComplexity / $totalFiles, 2) } else { 0 }
     }
-    $qualityScore = Get-CodeQualityScore -CodeMetrics $aggregatedMetrics -TestCoverage $testCoverage
-    Write-ScriptMessage -Message "  Quality Score: $($qualityScore.Score)/100" -LogLevel Info
+    try {
+        Import-LibModule -ModuleName 'CodeQualityScore' -ScriptPath $PSScriptRoot -DisableNameChecking
+        $qualityScore = Get-CodeQualityScore -CodeMetrics $aggregatedMetrics -TestCoverage $testCoverage
+        Write-ScriptMessage -Message "  Quality Score: $($qualityScore.Score)/100" -LogLevel Info
+    }
+    catch {
+        Write-ScriptMessage -Message "  Failed to calculate quality score: $($_.Exception.Message)" -IsWarning
+    }
 }
 
-# Detect code similarity if requested
+# Detect code similarity (enabled by default, can be disabled with -IncludeCodeSimilarity:$false)
 $codeSimilarity = $null
-if ($IncludeCodeSimilarity) {
+if ($IncludeCodeSimilarity -or -not $PSBoundParameters.ContainsKey('IncludeCodeSimilarity')) {
     Write-ScriptMessage -Message "Detecting code similarity..." -LogLevel Info
-    $similarityResults = [System.Collections.Generic.List[PSCustomObject]]::new()
-    foreach ($path in $pathsToAnalyze) {
-        $similar = Get-CodeSimilarity -Path $path -Recurse -MinSimilarity $SimilarityThreshold
-        if ($similar) {
-            $similarityResults.AddRange($similar)
+    try {
+        Import-LibModule -ModuleName 'CodeSimilarityDetection' -ScriptPath $PSScriptRoot -DisableNameChecking
+        $similarityResults = [System.Collections.Generic.List[PSCustomObject]]::new()
+        foreach ($path in $pathsToAnalyze) {
+            $similar = Get-CodeSimilarity -Path $path -Recurse -MinSimilarity $SimilarityThreshold
+            if ($similar) {
+                $similarityResults.AddRange($similar)
+            }
         }
+        $codeSimilarity = $similarityResults.ToArray()
+        foreach ($similar in $codeSimilarity) {
+            if ($similar.PSObject.Properties['File1']) {
+                $similar.File1 = & $toRelativePath $similar.File1
+            }
+            if ($similar.PSObject.Properties['File2']) {
+                $similar.File2 = & $toRelativePath $similar.File2
+            }
+        }
+        Write-ScriptMessage -Message "  Found $($codeSimilarity.Count) similar code blocks" -LogLevel Info
     }
-    $codeSimilarity = $similarityResults.ToArray()
-    foreach ($similar in $codeSimilarity) {
-        if ($similar.PSObject.Properties['File1']) {
-            $similar.File1 = & $toRelativePath $similar.File1
-        }
-        if ($similar.PSObject.Properties['File2']) {
-            $similar.File2 = & $toRelativePath $similar.File2
-        }
+    catch {
+        Write-ScriptMessage -Message "  Failed to detect code similarity: $($_.Exception.Message)" -IsWarning
     }
-    Write-ScriptMessage -Message "  Found $($codeSimilarity.Count) similar code blocks" -LogLevel Info
 }
 
 $summary = [PSCustomObject]@{
@@ -236,9 +260,27 @@ Write-ScriptMessage -Message "  Total Files: $totalFiles" -LogLevel Info
 Write-ScriptMessage -Message "  Total Lines: $totalLines" -LogLevel Info
 Write-ScriptMessage -Message "  Total Functions: $totalFunctions" -LogLevel Info
 Write-ScriptMessage -Message "  Total Complexity: $totalComplexity" -LogLevel Info
-Write-ScriptMessage -Message "  Avg Lines/File: $($summary.AverageLinesPerFile)" -LogLevel Info
-Write-ScriptMessage -Message "  Avg Functions/File: $($summary.AverageFunctionsPerFile)" -LogLevel Info
-Write-ScriptMessage -Message "  Avg Complexity/File: $($summary.AverageComplexityPerFile)" -LogLevel Info
+$avgLinesStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+    Format-LocaleNumber ([Math]::Round($summary.AverageLinesPerFile, 2)) -Format 'N2'
+}
+else {
+    [Math]::Round($summary.AverageLinesPerFile, 2).ToString("N2")
+}
+$avgFunctionsStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+    Format-LocaleNumber ([Math]::Round($summary.AverageFunctionsPerFile, 2)) -Format 'N2'
+}
+else {
+    [Math]::Round($summary.AverageFunctionsPerFile, 2).ToString("N2")
+}
+$avgComplexityStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+    Format-LocaleNumber ([Math]::Round($summary.AverageComplexityPerFile, 2)) -Format 'N2'
+}
+else {
+    [Math]::Round($summary.AverageComplexityPerFile, 2).ToString("N2")
+}
+Write-ScriptMessage -Message "  Avg Lines/File: $avgLinesStr" -LogLevel Info
+Write-ScriptMessage -Message "  Avg Functions/File: $avgFunctionsStr" -LogLevel Info
+Write-ScriptMessage -Message "  Avg Complexity/File: $avgComplexityStr" -LogLevel Info
 
 if ($summary.DuplicateFunctions -gt 0) {
     Write-ScriptMessage -Message "  Duplicate Functions: $($summary.DuplicateFunctions)" -IsWarning
@@ -254,7 +296,13 @@ if ($summary.DuplicateFunctions -gt 0) {
 
 if ($testCoverage) {
     Write-ScriptMessage -Message "`nTest Coverage:" -LogLevel Info
-    Write-ScriptMessage -Message "  Overall Coverage: $($testCoverage.CoveragePercent)%" -LogLevel Info
+    $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+        Format-LocaleNumber $testCoverage.CoveragePercent -Format 'N2'
+    }
+    else {
+        $testCoverage.CoveragePercent.ToString("N2")
+    }
+    Write-ScriptMessage -Message "  Overall Coverage: ${coveragePercentStr}%" -LogLevel Info
     Write-ScriptMessage -Message "  Covered Lines: $($testCoverage.CoveredLines) / $($testCoverage.TotalLines)" -LogLevel Info
 }
 
@@ -272,7 +320,13 @@ if ($codeSimilarity -and $codeSimilarity.Count -gt 0) {
     Write-ScriptMessage -Message "`nCode Similarity Detected:" -IsWarning
     $topSimilar = $codeSimilarity | Select-Object -First 5
     foreach ($similar in $topSimilar) {
-        Write-ScriptMessage -Message "  $($similar.File1) <-> $($similar.File2): $($similar.SimilarityPercent)% similar" -IsWarning
+        $similarityPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+            Format-LocaleNumber $similar.SimilarityPercent -Format 'N2'
+        }
+        else {
+            $similar.SimilarityPercent.ToString("N2")
+        }
+        Write-ScriptMessage -Message "  $($similar.File1) <-> $($similar.File2): ${similarityPercentStr}% similar" -IsWarning
     }
     if ($codeSimilarity.Count -gt 5) {
         Write-ScriptMessage -Message "  ... and $($codeSimilarity.Count - 5) more similar blocks" -IsWarning

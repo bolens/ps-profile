@@ -9,7 +9,7 @@ tests/unit/library-scoop-detection.tests.ps1
 
 BeforeAll {
     # Import the ScoopDetection module
-    $scoopDetectionPath = Get-TestPath -RelativePath 'scripts\lib\ScoopDetection.psm1' -StartPath $PSScriptRoot -EnsureExists
+    $scoopDetectionPath = Get-TestPath -RelativePath 'scripts\lib\runtime\ScoopDetection.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $scoopDetectionPath -DisableNameChecking -ErrorAction Stop
 
     # Get test data directory

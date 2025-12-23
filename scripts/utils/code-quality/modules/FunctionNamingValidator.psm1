@@ -99,7 +99,7 @@ function Test-UsesAgentModeFunction {
         [string]$FunctionName
     )
 
-    if (-not (Test-Path $FilePath)) {
+    if ($FilePath -and -not [string]::IsNullOrWhiteSpace($FilePath) -and -not (Test-Path -LiteralPath $FilePath)) {
         return $false
     }
 

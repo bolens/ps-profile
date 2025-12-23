@@ -141,3 +141,21 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
+    $args += '--unreleased'
+}
+
+Write-ScriptMessage -Message "Running: git-cliff $($args -join ' ')"
+try {
+    & git-cliff @args
+
+    if ($LASTEXITCODE -eq 0) {
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Changelog generated successfully: $changelogPath"
+    }
+    else {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog (exit code: $LASTEXITCODE)"
+    }
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+

@@ -1,0 +1,60 @@
+
+[32;1mModuleType[0m[32;1m Version   [0m [32;1;3mPreRelease[0m[32;1m Name                               [0m[32;1m ExportedCo[0m
+[32;1m          [0m[32;1m           [0m [32;1;3m          [0m[32;1m                                    [0m[32;1m mmands[0m
+[32;1m----------[0m [32;1m-------   [0m [32;1m----------[0m [32;1m----                               [0m [32;1m----------[0m
+Script     0.0                   ExitCodes                           Exit-With…
+Script     0.0                   PathResolution                      {Get-Prof…
+Script     0.0                   Logging                             Write-Scr…
+Script     0.0                   Module                              {Ensure-M…
+Using Pester v5.7.1
+Starting test execution...
+
+[32;1mContainers            : [0m{[+] C:\Users\bolen\Documents\PowerShell\tests\integrat
+                        ion\fragments\fragment-error-recovery.tests.ps1, [+] C:
+                        \Users\bolen\Documents\PowerShell\tests\integration\fra
+                        gments\fragment-idempotency.tests.ps1, [+] C:\Users\bol
+                        en\Documents\PowerShell\tests\integration\fragments\fra
+                        gment-loading-failures.tests.ps1, [+] C:\Users\bolen\Do
+                        cuments\PowerShell\tests\integration\fragments\fragment
+                        -loading.tests.ps1…}
+[32;1mResult                : [0mPassed
+[32;1mFailedCount           : [0m0
+[32;1mFailedBlocksCount     : [0m0
+[32;1mFailedContainersCount : [0m0
+[32;1mPassedCount           : [0m15
+[32;1mSkippedCount          : [0m0
+[32;1mInconclusiveCount     : [0m0
+[32;1mNotRunCount           : [0m0
+[32;1mTotalCount            : [0m15
+[32;1mDuration              : [0m00:02:00.9096647
+[32;1mExecuted              : [0mTrue
+[32;1mExecutedAt            : [0m12/1/2025 9:38:04 AM
+[32;1mVersion               : [0m5.7.1
+[32;1mPSVersion             : [0m7.6.0-preview.5
+[32;1mPSBoundParameters     : [0m{[Configuration, PesterConfiguration]}
+[32;1mPlugins               : [0m
+[32;1mPluginConfiguration   : [0m
+[32;1mPluginData            : [0m
+[32;1mConfiguration         : [0mPesterConfiguration
+[32;1mDiscoveryDuration     : [0m00:00:05.1890286
+[32;1mUserDuration          : [0m00:01:55.0815303
+[32;1mFrameworkDuration     : [0m00:00:00.6391058
+[32;1mFailed                : [0m{}
+[32;1mFailedBlocks          : [0m{}
+[32;1mFailedContainers      : [0m{}
+[32;1mPassed                : [0m{[+] recovers from fragment loading error and allows 
+                        subsequent loads, [+] handles missing profile.d 
+                        directory, [+] handles corrupted fragment 
+                        configuration file, [+] handles fragment that modifies 
+                        global state multiple times…}
+[32;1mSkipped               : [0m{}
+[32;1mInconclusive          : [0m{}
+[32;1mNotRun                : [0m{}
+[32;1mTests                 : [0m{[+] recovers from fragment loading error and allows 
+                        subsequent loads, [+] handles missing profile.d 
+                        directory, [+] handles corrupted fragment 
+                        configuration file, [+] handles fragment that modifies 
+                        global state multiple times…}
+[32;1mCodeCoverage          : [0m
+
+

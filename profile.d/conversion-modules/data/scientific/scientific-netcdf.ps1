@@ -25,8 +25,8 @@ function Initialize-FileConversion-ScientificNetCdf {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'Python.psm1'
-        if (Test-Path $pythonModulePath) {
+        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'Python.psm1'
+        if ($pythonModulePath -and -not [string]::IsNullOrWhiteSpace($pythonModulePath) -and (Test-Path -LiteralPath $pythonModulePath)) {
             Import-Module $pythonModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }

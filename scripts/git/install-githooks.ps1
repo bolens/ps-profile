@@ -30,7 +30,7 @@ param(
 # Import ModuleImport first (bootstrap)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
 $moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
-if (-not (Test-Path $moduleImportPath)) {
+if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and -not (Test-Path -LiteralPath $moduleImportPath)) {
     throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
@@ -52,12 +52,12 @@ catch {
 }
 
 $gitHooksDir = Join-Path $repoRoot $GitDir
-if (-not (Test-Path $gitHooksDir)) {
+if ($gitHooksDir -and -not [string]::IsNullOrWhiteSpace($gitHooksDir) -and -not (Test-Path -LiteralPath $gitHooksDir)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Git hooks directory '$gitHooksDir' not found. Run this from the repo root."
 }
 
 $srcHooks = Join-Path $repoRoot 'scripts' 'git' 'hooks'
-if (-not (Test-Path $srcHooks)) {
+if ($srcHooks -and -not [string]::IsNullOrWhiteSpace($srcHooks) -and -not (Test-Path -LiteralPath $srcHooks)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Source hooks directory not found: $srcHooks"
 }
 

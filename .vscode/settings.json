@@ -70,5 +70,6 @@
 
   // Workspace settings
   "workspace.trusted": true,
-  "kiroAgent.configureMCP": "Disabled"
+  "kiroAgent.configureMCP": "Disabled",
+  "makefile.configureOnOpen": false
 }

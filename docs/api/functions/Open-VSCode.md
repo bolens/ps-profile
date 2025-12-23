@@ -26,8 +26,8 @@ No examples provided.
 
 This function has the following aliases:
 
-- `code` - Opens files in Visual Studio Code.
-- `vsc` - Opens files in Visual Studio Code.
+- `code` - Opens current directory in the best available editor.
+- `vsc` - Opens current directory in the best available editor.
 
 
 ## Source

@@ -41,8 +41,8 @@ function Get-FunctionsFromPath {
     Import-Module $validatorModule -ErrorAction Stop
 
     # Try to import FileContent module from scripts/lib (optional)
-    $fileContentModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'FileContent.psm1'
-    if (Test-Path $fileContentModulePath) {
+    $fileContentModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'file' 'FileContent.psm1'
+    if ($fileContentModulePath -and -not [string]::IsNullOrWhiteSpace($fileContentModulePath) -and (Test-Path -LiteralPath $fileContentModulePath)) {
         Import-Module $fileContentModulePath -DisableNameChecking -ErrorAction SilentlyContinue
     }
 
@@ -114,18 +114,6 @@ function Get-FunctionsFromPath {
                 IsValidFormat            = $parts.IsValidFormat
                 HasApprovedVerb          = if ($parts.Verb) { Test-ApprovedVerb -Verb $parts.Verb } else { $false }
                 FilePath                 = $file.FullName
-                RelativePath             = $file.FullName.Replace($RepoRoot, '').TrimStart('\', '/')
-                IsProfileDFile           = $file.FullName -like '*\profile.d\*'
-                UsesSetAgentModeFunction = $true
-            }
-        }
-    }
-
-    return $functions
-}
-
-Export-ModuleMember -Function Get-FunctionsFromPath
-
                 RelativePath             = $file.FullName.Replace($RepoRoot, '').TrimStart('\', '/')
                 IsProfileDFile           = $file.FullName -like '*\profile.d\*'
                 UsesSetAgentModeFunction = $true

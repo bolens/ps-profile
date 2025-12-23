@@ -23,4 +23,4 @@ jobs:
         env:
           PS_PROFILE_DEBUG: '1'
         run: |
-          pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/utils/run-pester.ps1
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/utils/code-quality/run-pester.ps1 -Parallel

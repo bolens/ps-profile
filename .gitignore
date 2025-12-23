@@ -27,12 +27,23 @@ obj/
 # Ignore generated data files
 scripts/**/*.csv
 scripts/data/coverage.xml
+scripts/data/coverage/
 scripts/data/performance-baseline.json
 scripts/data/psscriptanalyzer-report.json
+
+# Ignore coverage reports (root level and anywhere)
+coverage.xml
+**/coverage*.xml
+**/coverage*.json
+**/coverage*.html
 
 # Ignore user-specific fragment configuration
 .profile-fragments.json
 .profile-last-update-check
+
+# Ignore environment variable files (user-specific configuration)
+.env
+.env.local
 
 # Ignore Python virtual environments
 .venv/
@@ -43,8 +54,12 @@ __pycache__/
 *.pyd
 .Python
 
+# Ignore Node.js dependencies
+node_modules/
+.pnp
+.pnp.js
+
 # Ignore test data and temporary test files
 **/test-data/**
-# Ignore any single-digit numeric files that might be created by tests
-/[0-9]
-/[0-9][0-9]
+# Ignore test artifacts directory (test scripts and files created by tests)
+tests/test-artifacts/

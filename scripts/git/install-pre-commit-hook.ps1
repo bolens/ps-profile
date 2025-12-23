@@ -30,7 +30,7 @@ param(
 # Import ModuleImport first (bootstrap)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
 $moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
-if (-not (Test-Path $moduleImportPath)) {
+if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and -not (Test-Path -LiteralPath $moduleImportPath)) {
     throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
 }
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
@@ -58,7 +58,7 @@ if (-not (Test-Path -Path (Join-Path $RepoRoot '.git') -PathType Container -Erro
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'No .git directory found. Run this from the repository root.'
 }
 
-if (Test-Path $hookPath) {
+if ($hookPath -and -not [string]::IsNullOrWhiteSpace($hookPath) -and (Test-Path -LiteralPath $hookPath)) {
     $bak = $hookPath + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak'
     Write-ScriptMessage -Message "Backing up existing hook to $bak"
     Copy-Item $hookPath $bak -Force

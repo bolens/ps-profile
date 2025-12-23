@@ -1,0 +1,78 @@
+
+[32;1mModuleType[0m[32;1m Version   [0m [32;1;3mPreRelease[0m[32;1m Name                               [0m[32;1m ExportedCo[0m
+[32;1m          [0m[32;1m           [0m [32;1;3m          [0m[32;1m                                    [0m[32;1m mmands[0m
+[32;1m----------[0m [32;1m-------   [0m [32;1m----------[0m [32;1m----                               [0m [32;1m----------[0m
+Script     0.0                   ExitCodes                           Exit-With…
+Script     0.0                   PathResolution                      {Get-Prof…
+Script     0.0                   Logging                             Write-Scr…
+Script     0.0                   Module                              {Ensure-M…
+Using Pester v5.7.1
+Test-HasCommand called with: 'docker', returning: True
+Test-HasCommand called with: 'docker-compose', returning: False
+Test-HasCommand called with: 'podman', returning: False
+Test-HasCommand called with: 'podman-compose', returning: False
+docker compose version called, setting LASTEXITCODE=0
+Result: {
+  "Engine": "docker",
+  "Compose": "subcommand",
+  "Preferred": ""
+}
+Files are identical.
+Files are different.
+[33;1mWARNING: bat not found[0m
+[33;1mWARNING: fd not found[0m
+[33;1mWARNING: httpie (http) not found[0m
+[33;1mWARNING: zoxide not found[0m
+[33;1mWARNING: delta not found[0m
+[33;1mWARNING: tldr not found[0m
+[33;1mWARNING: procs not found[0m
+[33;1mWARNING: dust not found[0m
+[33;1mWARNING: Usage: Add-SSHKeyIfNotLoaded <path-to-key>[0m
+Starting test execution...
+
+[32;1mContainers            : [0m{[+] C:\Users\bolen\Documents\PowerShell\tests\integrat
+                        ion\tools\cloud-tools.tests.ps1, [+] C:\Users\bolen\Doc
+                        uments\PowerShell\tests\integration\tools\containers\co
+                        ntainer-utils.tests.ps1, [+] C:\Users\bolen\Documents\P
+                        owerShell\tests\integration\tools\containers\containers
+                        .tests.ps1, [+] C:\Users\bolen\Documents\PowerShell\tes
+                        ts\integration\tools\dev-tools.tests.ps1…}
+[32;1mResult                : [0mPassed
+[32;1mFailedCount           : [0m0
+[32;1mFailedBlocksCount     : [0m0
+[32;1mFailedContainersCount : [0m0
+[32;1mPassedCount           : [0m208
+[32;1mSkippedCount          : [0m0
+[32;1mInconclusiveCount     : [0m0
+[32;1mNotRunCount           : [0m0
+[32;1mTotalCount            : [0m208
+[32;1mDuration              : [0m00:02:33.0738939
+[32;1mExecuted              : [0mTrue
+[32;1mExecutedAt            : [0m12/1/2025 9:42:28 AM
+[32;1mVersion               : [0m5.7.1
+[32;1mPSVersion             : [0m7.6.0-preview.5
+[32;1mPSBoundParameters     : [0m{[Configuration, PesterConfiguration]}
+[32;1mPlugins               : [0m
+[32;1mPluginConfiguration   : [0m
+[32;1mPluginData            : [0m
+[32;1mConfiguration         : [0mPesterConfiguration
+[32;1mDiscoveryDuration     : [0m00:00:15.2489782
+[32;1mUserDuration          : [0m00:02:15.8354888
+[32;1mFrameworkDuration     : [0m00:00:01.9894269
+[32;1mFailed                : [0m{}
+[32;1mFailedBlocks          : [0m{}
+[32;1mFailedContainers      : [0m{}
+[32;1mPassed                : [0m{[+] Creates aws function, [+] aws function handles 
+                        missing tool gracefully, [+] Creates aws-profile 
+                        function, [+] aws-profile sets AWS_PROFILE environment 
+                        variable…}
+[32;1mSkipped               : [0m{}
+[32;1mInconclusive          : [0m{}
+[32;1mNotRun                : [0m{}
+[32;1mTests                 : [0m{[+] Creates aws function, [+] aws function handles 
+                        missing tool gracefully, [+] Creates aws-profile 
+                        function, [+] aws-profile sets AWS_PROFILE environment 
+                        variable…}
+[32;1mCodeCoverage          : [0m
+
+

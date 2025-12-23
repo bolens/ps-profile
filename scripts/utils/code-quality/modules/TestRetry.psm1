@@ -10,8 +10,8 @@ scripts/utils/code-quality/modules/TestRetry.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
@@ -38,6 +38,9 @@ if (Test-Path $loggingModulePath) {
 .PARAMETER RetryOnFailure
     Only retry on test failures, not on setup errors (default: true).
 
+.PARAMETER SuppressRetryWarnings
+    Suppress retry warning messages by changing log level to Debug (default: false).
+
 .OUTPUTS
     Test execution result object
 #>
@@ -54,7 +57,9 @@ function Invoke-TestWithRetry {
 
         [switch]$ExponentialBackoff,
 
-        [switch]$RetryOnFailure
+        [switch]$RetryOnFailure,
+
+        [switch]$SuppressRetryWarnings
     )
 
     $attempt = 0
@@ -91,7 +96,8 @@ function Invoke-TestWithRetry {
                 }
 
                 if (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
-                    Write-ScriptMessage -Message "Test execution failed, retrying in $delay seconds... ($($MaxRetries - $attempt + 1) attempts remaining)" -LogLevel 'Warning'
+                    $logLevel = if ($SuppressRetryWarnings) { 'Debug' } else { 'Warning' }
+                    Write-ScriptMessage -Message "Test execution failed, retrying in $delay seconds... ($($MaxRetries - $attempt + 1) attempts remaining)" -LogLevel $logLevel
                 }
                 Start-Sleep -Seconds $delay
             }

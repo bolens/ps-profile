@@ -40,6 +40,19 @@ Set-Alias -Name epoch -Value Get-Epoch -ErrorAction SilentlyContinue
 .DESCRIPTION
     Displays the current date and time in a standard format.
 #>
-function Get-DateTime { Get-Date -Format "yyyy-MM-dd HH:mm:ss" }
+function Get-DateTime {
+    # Use DateTimeFormatting module if available for unified date formatting
+    if (Get-Command Format-DateTime -ErrorAction SilentlyContinue) {
+        Format-DateTime -DateTime (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+    }
+    elseif (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+        # Fallback to Format-LocaleDate if DateTimeFormatting not available
+        Format-LocaleDate (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
+    }
+    else {
+        # Final fallback to standard format
+        Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    }
+}
 Set-Alias -Name now -Value Get-DateTime -ErrorAction SilentlyContinue
 

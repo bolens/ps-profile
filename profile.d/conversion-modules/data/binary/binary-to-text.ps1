@@ -25,8 +25,8 @@ function Initialize-FileConversion-BinaryToText {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'NodeJs.psm1'
-        if (Test-Path $nodeJsModulePath) {
+        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
+        if ($nodeJsModulePath -and -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }
@@ -162,7 +162,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToCsv -Value {
         $tempJson = Join-Path $env:TEMP "bson-to-csv-$(Get-Random).json"
         try {
             _ConvertFrom-BsonToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-            if (-not (Test-Path $tempJson)) {
+            if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "BSON to JSON conversion failed - output file not created"
             }
             # Use PowerShell's ConvertFrom-Json and Export-Csv
@@ -208,7 +208,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToCsv -Value {
         $tempJson = Join-Path $env:TEMP "msgpack-to-csv-$(Get-Random).json"
         try {
             _ConvertFrom-MessagePackToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-            if (-not (Test-Path $tempJson)) {
+            if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "MessagePack to JSON conversion failed - output file not created"
             }
             # Use PowerShell's ConvertFrom-Json and Export-Csv
@@ -254,7 +254,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToCsv -Value {
         $tempJson = Join-Path $env:TEMP "cbor-to-csv-$(Get-Random).json"
         try {
             _ConvertFrom-CborToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-            if (-not (Test-Path $tempJson)) {
+            if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "CBOR to JSON conversion failed - output file not created"
             }
             # Use PowerShell's ConvertFrom-Json and Export-Csv
@@ -303,7 +303,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToYaml -Value {
         $tempJson = Join-Path $env:TEMP "bson-to-yaml-$(Get-Random).json"
         try {
             _ConvertFrom-BsonToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-            if (-not (Test-Path $tempJson)) {
+            if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "BSON to JSON conversion failed - output file not created"
             }
             $yamlResult = & yq eval -p json -o yaml '.' $tempJson 2>$null
@@ -348,7 +348,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToYaml -Value {
         $tempJson = Join-Path $env:TEMP "msgpack-to-yaml-$(Get-Random).json"
         try {
             _ConvertFrom-MessagePackToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-            if (-not (Test-Path $tempJson)) {
+            if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "MessagePack to JSON conversion failed - output file not created"
             }
             $yamlResult = & yq eval -p json -o yaml '.' $tempJson 2>$null
@@ -393,7 +393,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToYaml -Value {
         $tempJson = Join-Path $env:TEMP "cbor-to-yaml-$(Get-Random).json"
         try {
             _ConvertFrom-CborToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
-            if (-not (Test-Path $tempJson)) {
+            if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "CBOR to JSON conversion failed - output file not created"
             }
             $yamlResult = & yq eval -p json -o yaml '.' $tempJson 2>$null

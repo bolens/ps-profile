@@ -4,7 +4,7 @@ Describe 'FileFiltering Module Functions' {
     BeforeAll {
         # Import the FileFiltering module (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-        Import-Module (Join-Path $libPath 'FileFiltering.psm1') -DisableNameChecking -ErrorAction Stop
+        Import-Module (Join-Path $libPath 'file' 'FileFiltering.psm1') -DisableNameChecking -ErrorAction Stop
         $script:TestTempDir = New-TestTempDirectory -Prefix 'FileFilteringTests'
         
         # Create test directory structure

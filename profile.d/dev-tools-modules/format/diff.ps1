@@ -16,8 +16,8 @@ function Initialize-DevTools-Diff {
     Set-Item -Path Function:Global:_Compare-TextFiles -Value {
         param([string]$File1, [string]$File2)
         try {
-            if (-not (Test-Path $File1)) { throw "File not found: $File1" }
-            if (-not (Test-Path $File2)) { throw "File not found: $File2" }
+            if (-not ($File1 -and -not [string]::IsNullOrWhiteSpace($File1) -and (Test-Path -LiteralPath $File1))) { throw "File not found: $File1" }
+            if (-not ($File2 -and -not [string]::IsNullOrWhiteSpace($File2) -and (Test-Path -LiteralPath $File2))) { throw "File not found: $File2" }
             $content1 = Get-Content -LiteralPath $File1 -Raw
             $content2 = Get-Content -LiteralPath $File2 -Raw
             if ($content1 -eq $content2) {

@@ -44,7 +44,9 @@
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1"
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "-Coverage",
+        "-Parallel"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -58,7 +60,8 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
         "-Suite",
-        "Unit"
+        "Unit",
+        "-Parallel"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -72,7 +75,8 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
         "-Suite",
-        "Integration"
+        "Integration",
+        "-Parallel"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -86,7 +90,8 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
         "-Suite",
-        "Performance"
+        "Performance",
+        "-Parallel"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -99,7 +104,8 @@
         "-NoProfile",
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
-        "-Coverage"
+        "-Coverage",
+        "-Parallel"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -125,6 +131,32 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\security\\run-security-scan.ps1"
       ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Diagnose Profile Performance",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\performance\\diagnose-profile-performance.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Optimize Git Performance",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\performance\\optimize-git-performance.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
       "problemMatcher": []
     },
@@ -166,6 +198,19 @@
       "problemMatcher": []
     },
     {
+      "label": "Generate Metrics Dashboard",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\generate-dashboard.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Create Release (Dry Run)",
       "type": "shell",
       "command": "pwsh",
@@ -203,6 +248,19 @@
       "problemMatcher": []
     },
     {
+      "label": "Check Script Standards",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\checks\\check-script-standards.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Run Markdownlint",
       "type": "shell",
       "command": "pwsh",
@@ -222,6 +280,19 @@
         "-NoProfile",
         "-File",
         "${workspaceFolder}\\scripts\\git\\install-githooks.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install Pre-commit Hook",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\git\\install-pre-commit-hook.ps1"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
@@ -267,6 +338,19 @@
       "problemMatcher": []
     },
     {
+      "label": "Create New Fragment",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\fragment\\new-fragment.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Check Commit Messages",
       "type": "shell",
       "command": "pwsh",
@@ -289,6 +373,58 @@
         "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1",
         "-UpdateBaseline"
       ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Collect Code Metrics",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\collect-code-metrics.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Export Metrics",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\export-metrics.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Save Metrics Snapshot",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\save-metrics-snapshot.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Track Coverage Trends",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\track-coverage-trends.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
       "problemMatcher": []
     },
@@ -386,6 +522,58 @@
       "problemMatcher": []
     },
     {
+      "label": "Check Missing Tests",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\check-missing-tests.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate Dependencies",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\dependencies\\validate-dependencies.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check Missing Packages",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-missing-packages.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check Vulnerabilities",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Fix All Markdown",
       "dependsOn": [
         "Fix Markdown Blank Lines",
@@ -403,6 +591,32 @@
     {
       "label": "Generate All Documentation",
       "dependsOn": ["Generate API Documentation", "Generate Fragment READMEs"],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Initialize Wrangler Config",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\setup\\init-wrangler-config.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Development Setup",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\dev\\setup.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
       "problemMatcher": []
     }

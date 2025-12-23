@@ -14,22 +14,18 @@
     Requires Node.js and respective npm packages for each format.
 #>
 function Initialize-FileConversion-BinarySimple {
-    # Ensure NodeJs module is imported (use repo root from bootstrap if available)
-    if (-not (Get-Command Invoke-NodeScript -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Variable -Name 'RepoRoot' -Scope Script -ErrorAction SilentlyContinue) {
-            $script:RepoRoot
-        }
-        elseif (Get-Variable -Name 'BootstrapRoot' -Scope Script -ErrorAction SilentlyContinue) {
-            Split-Path -Parent $script:BootstrapRoot
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-        }
-        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'NodeJs.psm1'
-        if (Test-Path $nodeJsModulePath) {
-            Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
-        }
+    # Capture the base path during initialization for use in script blocks (use global scope)
+    # binary-simple.ps1 is at: profile.d/conversion-modules/data/binary/
+    # Need to go up 4 levels: binary -> data -> conversion-modules -> profile.d -> repo root
+    $basePath = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))
+    $global:BinaryConversionBasePath = $basePath
+    
+    # Load NodeJs module during initialization to avoid on-demand loading issues
+    $nodeJsModulePath = Join-Path $basePath 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
+    if (Test-Path -LiteralPath $nodeJsModulePath -ErrorAction SilentlyContinue) {
+        Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
     }
+    
     # JSON to BSON
     Set-Item -Path Function:Global:_ConvertTo-BsonFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
@@ -37,6 +33,10 @@ function Initialize-FileConversion-BinarySimple {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.bson' }
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 throw "Node.js is not available. Install Node.js to use BSON conversions."
+            }
+            # Check if Invoke-NodeScript is available (should be loaded during initialization)
+            if (-not (Get-Command Invoke-NodeScript -ErrorAction SilentlyContinue)) {
+                throw "Invoke-NodeScript is not available. NodeJs module was not loaded during initialization."
             }
             $jsonContent = Get-Content -LiteralPath $InputPath -Raw
             $nodeScript = @"
@@ -81,6 +81,10 @@ try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.bson$', '.json' }
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 throw "Node.js is not available. Install Node.js to use BSON conversions."
+            }
+            # Check if Invoke-NodeScript is available (should be loaded during initialization)
+            if (-not (Get-Command Invoke-NodeScript -ErrorAction SilentlyContinue)) {
+                throw "Invoke-NodeScript is not available. NodeJs module was not loaded during initialization."
             }
             $nodeScript = @"
 try {
@@ -168,6 +172,10 @@ try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.msgpack$', '.json' }
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 throw "Node.js is not available. Install Node.js to use MessagePack conversions."
+            }
+            # Check if Invoke-NodeScript is available (should be loaded during initialization)
+            if (-not (Get-Command Invoke-NodeScript -ErrorAction SilentlyContinue)) {
+                throw "Invoke-NodeScript is not available. NodeJs module was not loaded during initialization."
             }
             $nodeScript = @"
 try {

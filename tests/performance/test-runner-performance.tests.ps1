@@ -10,62 +10,110 @@ tests/performance/test-runner-performance.tests.ps1
 #>
 
 BeforeAll {
-    # Import test support
-    . $PSScriptRoot/../TestSupport.ps1
+    try {
+        # Import test support
+        $testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
+        if (-not (Test-Path $testSupportPath)) {
+            throw "TestSupport file not found at: $testSupportPath"
+        }
+        . $testSupportPath
 
-    # Set up test environment
-    $script:TestRepoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-    $script:RunPesterPath = Join-Path $script:TestRepoRoot 'scripts/utils/code-quality/run-pester.ps1'
-    $script:TempTestDir = Join-Path $TestDrive 'performance-tests'
+        # Set up test environment
+        $script:TestRepoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+        $script:RunPesterPath = Join-Path $script:TestRepoRoot 'scripts/utils/code-quality/run-pester.ps1'
+        $script:TempTestDir = Join-Path $TestDrive 'performance-tests'
 
-    # Ensure the script exists
-    if (-not (Test-Path $script:RunPesterPath)) {
-        throw "Test runner script not found at: $script:RunPesterPath"
+        # Ensure the script exists
+        if (-not (Test-Path $script:RunPesterPath)) {
+            throw "Test runner script not found at: $script:RunPesterPath"
+        }
+
+        # Create temporary test directory
+        if (-not (Test-Path $script:TempTestDir)) {
+            New-Item -ItemType Directory -Path $script:TempTestDir -Force | Out-Null
+        }
+
+        # Performance thresholds (adjust based on system capabilities)
+        $script:MaxTestRunnerStartupTime = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_TEST_RUNNER_STARTUP_MS' -Default 5000
+        $script:MaxUnitTestExecutionTime = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_UNIT_TEST_TIME_MS' -Default 120000
+        $script:MaxMemoryUsageMB = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_TEST_RUNNER_MEMORY_MB' -Default 500
     }
-
-    # Create temporary test directory
-    if (-not (Test-Path $script:TempTestDir)) {
-        New-Item -ItemType Directory -Path $script:TempTestDir -Force | Out-Null
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize test runner performance tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
-
-    # Performance thresholds (adjust based on system capabilities)
-    $script:MaxTestRunnerStartupTime = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_TEST_RUNNER_STARTUP_MS' -Default 5000
-    $script:MaxUnitTestExecutionTime = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_UNIT_TEST_TIME_MS' -Default 120000
-    $script:MaxMemoryUsageMB = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_TEST_RUNNER_MEMORY_MB' -Default 500
 }
 
 Describe 'Test Runner Performance Tests' {
     Context 'Test Runner Startup Performance' {
         It 'Starts up within acceptable time limits' {
-            $startupTime = Measure-Command {
-                $result = & $script:RunPesterPath -DryRun -OutputFormat None
-            }
+            try {
+                $startupTime = Measure-Command {
+                    $result = & $script:RunPesterPath -DryRun -OutputFormat None
+                }
 
-            $startupTime.TotalMilliseconds | Should -BeLessThan $script:MaxTestRunnerStartupTime
-            $result | Should -Not -BeNullOrEmpty
+                $startupTime.TotalMilliseconds | Should -BeLessThan $script:MaxTestRunnerStartupTime -Because "Test runner should start within $script:MaxTestRunnerStartupTime ms"
+                $result | Should -Not -BeNullOrEmpty -Because "Test runner should return a result"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Starts up within acceptable time limits'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Test runner startup performance test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Initializes modules efficiently' {
-            $initTime = Measure-Command {
-                # Force module reload by running in separate process
-                $result = Invoke-TestPwshScript -ScriptContent @"
+            try {
+                $initTime = Measure-Command {
+                    # Force module reload by running in separate process
+                    $result = Invoke-TestPwshScript -ScriptContent @"
 & '$($script:RunPesterPath -replace "'", "''")' -DryRun -OutputFormat None
 "@
-            }
+                }
 
-            $initTime.TotalMilliseconds | Should -BeLessThan $script:MaxTestRunnerStartupTime
+                $initTime.TotalMilliseconds | Should -BeLessThan $script:MaxTestRunnerStartupTime -Because "Module initialization should complete within $script:MaxTestRunnerStartupTime ms"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Initializes modules efficiently'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Module initialization performance test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
     }
 
     Context 'Test Execution Performance' {
         It 'Executes unit tests within time limits' {
-            $executionTime = Measure-Command {
-                $result = & $script:RunPesterPath -Suite Unit -OutputFormat None
-            }
+            try {
+                $executionTime = Measure-Command {
+                    $result = & $script:RunPesterPath -Suite Unit -OutputFormat None
+                }
 
-            $executionTime.TotalMilliseconds | Should -BeLessThan $script:MaxUnitTestExecutionTime
-            $result | Should -Not -BeNullOrEmpty
-            $result.PassedCount | Should -BeGreaterThan 0
+                $executionTime.TotalMilliseconds | Should -BeLessThan $script:MaxUnitTestExecutionTime -Because "Unit tests should execute within $script:MaxUnitTestExecutionTime ms"
+                $result | Should -Not -BeNullOrEmpty -Because "Test runner should return a result"
+                $result.PassedCount | Should -BeGreaterThan 0 -Because "At least some tests should pass"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Executes unit tests within time limits'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Unit test execution performance test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Executes integration tests within time limits' {

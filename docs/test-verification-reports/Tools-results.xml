@@ -1,0 +1,549 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="208" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2025-12-01" time="09:42:28">
+  <environment user-domain="BAMBOO" machine-name="BAMBOO" cwd="C:\Users\bolen\Documents\PowerShell" platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk4\Partition4" os-version="10.0.28000" user="bolen" nunit-version="2.5.8.0" clr-version="10.0.0" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="153.0739" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\cloud-tools.tests.ps1" executed="True" result="Success" success="True" time="2.1326" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\cloud-tools.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Cloud Tools Integration Tests" executed="True" result="Success" success="True" time="0.5462" asserts="0" description="Cloud Tools Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1)" executed="True" result="Success" success="True" time="0.2574" asserts="0" description="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1)">
+                <results>
+                  <test-case description="Creates aws function" name="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1).Creates aws function" time="0.05" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="aws function handles missing tool gracefully" name="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1).aws function handles missing tool gracefully" time="0.1176" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates aws-profile function" name="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1).Creates aws-profile function" time="0.0033" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="aws-profile sets AWS_PROFILE environment variable" name="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1).aws-profile sets AWS_PROFILE environment variable" time="0.0381" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates aws-region function" name="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1).Creates aws-region function" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="aws-region sets AWS_REGION environment variable" name="Cloud Tools Integration Tests.AWS CLI helpers (31-aws.ps1).aws-region sets AWS_REGION environment variable" time="0.0122" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1)" executed="True" result="Success" success="True" time="0.3566" asserts="0" description="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1)">
+                <results>
+                  <test-case description="Creates az function" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).Creates az function" time="0.0028" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="az function handles missing tool gracefully" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).az function handles missing tool gracefully" time="0.0466" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates azd function" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).Creates azd function" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="azd function handles missing tool gracefully" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).azd function handles missing tool gracefully" time="0.0067" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates az-login function" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).Creates az-login function" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="az-login handles missing tool gracefully" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).az-login handles missing tool gracefully" time="0.0069" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates azd-up function" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).Creates azd-up function" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="azd-up handles missing tool gracefully" name="Cloud Tools Integration Tests.Azure CLI helpers (50-azure.ps1).azd-up handles missing tool gracefully" time="0.0078" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1)" executed="True" result="Success" success="True" time="0.4244" asserts="0" description="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1)">
+                <results>
+                  <test-case description="Creates gcloud function" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).Creates gcloud function" time="0.0025" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="gcloud function handles missing tool gracefully" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).gcloud function handles missing tool gracefully" time="0.0084" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates gcloud-auth function" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).Creates gcloud-auth function" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="gcloud-auth handles missing tool gracefully" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).gcloud-auth handles missing tool gracefully" time="0.0099" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates gcloud-config function" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).Creates gcloud-config function" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="gcloud-config handles missing tool gracefully" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).gcloud-config handles missing tool gracefully" time="0.0148" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates gcloud-projects function" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).Creates gcloud-projects function" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="gcloud-projects handles missing tool gracefully" name="Cloud Tools Integration Tests.Google Cloud CLI helpers (51-gcloud.ps1).gcloud-projects handles missing tool gracefully" time="0.006" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\containers\container-utils.tests.ps1" executed="True" result="Success" success="True" time="1.5815" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\containers\container-utils.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Container Utils Module" executed="True" result="Success" success="True" time="0.3874" asserts="0" description="Container Utils Module">
+            <results>
+              <test-suite type="TestFixture" name="Container Utils Module.Test-ContainerEngine" executed="True" result="Success" success="True" time="0.1678" asserts="0" description="Container Utils Module.Test-ContainerEngine">
+                <results>
+                  <test-case description="Should return container engine info when docker is available" name="Container Utils Module.Test-ContainerEngine.Should return container engine info when docker is available" time="0.0451" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should return container engine info when podman is available" name="Container Utils Module.Test-ContainerEngine.Should return container engine info when podman is available" time="0.0651" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should respect environment preference for docker" name="Container Utils Module.Test-ContainerEngine.Should respect environment preference for docker" time="0.0171" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should respect environment preference for podman" name="Container Utils Module.Test-ContainerEngine.Should respect environment preference for podman" time="0.0169" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should handle no container engines available" name="Container Utils Module.Test-ContainerEngine.Should handle no container engines available" time="0.0129" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Utils Module.Set-ContainerEnginePreference" executed="True" result="Success" success="True" time="0.2059" asserts="0" description="Container Utils Module.Set-ContainerEnginePreference">
+                <results>
+                  <test-case description="Should set preference to docker" name="Container Utils Module.Set-ContainerEnginePreference.Should set preference to docker" time="0.013" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should set preference to podman" name="Container Utils Module.Set-ContainerEnginePreference.Should set preference to podman" time="0.0031" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should validate engine parameter" name="Container Utils Module.Set-ContainerEnginePreference.Should validate engine parameter" time="0.0122" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\containers\containers.tests.ps1" executed="True" result="Success" success="True" time="3.5383" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\containers\containers.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Container Functions" executed="True" result="Success" success="True" time="2.3312" asserts="0" description="Container Functions">
+            <results>
+              <test-suite type="TestFixture" name="Container Functions.Get-ContainerEngineInfo" executed="True" result="Success" success="True" time="0.339" asserts="0" description="Container Functions.Get-ContainerEngineInfo">
+                <results>
+                  <test-case description="Returns container engine info object" name="Container Functions.Get-ContainerEngineInfo.Returns container engine info object" time="0.1262" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns cached result on subsequent calls" name="Container Functions.Get-ContainerEngineInfo.Returns cached result on subsequent calls" time="0.0974" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Respects CONTAINER_ENGINE_PREFERENCE environment variable" name="Container Functions.Get-ContainerEngineInfo.Respects CONTAINER_ENGINE_PREFERENCE environment variable" time="0.1063" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Start-ContainerCompose" executed="True" result="Success" success="True" time="0.5338" asserts="0" description="Container Functions.Start-ContainerCompose">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Start-ContainerCompose.Executes without error when function exists" time="0.1817" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has dcu alias" name="Container Functions.Start-ContainerCompose.Has dcu alias" time="0.0046" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Stop-ContainerCompose" executed="True" result="Success" success="True" time="0.8241" asserts="0" description="Container Functions.Stop-ContainerCompose">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Stop-ContainerCompose.Executes without error when function exists" time="0.279" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has dcd alias" name="Container Functions.Stop-ContainerCompose.Has dcd alias" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Get-ContainerComposeLogs" executed="True" result="Success" success="True" time="1.0449" asserts="0" description="Container Functions.Get-ContainerComposeLogs">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Get-ContainerComposeLogs.Executes without error when function exists" time="0.2091" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has dcl alias" name="Container Functions.Get-ContainerComposeLogs.Has dcl alias" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Clear-ContainerSystem" executed="True" result="Success" success="True" time="1.2349" asserts="0" description="Container Functions.Clear-ContainerSystem">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Clear-ContainerSystem.Executes without error when function exists" time="0.1786" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has dprune alias" name="Container Functions.Clear-ContainerSystem.Has dprune alias" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Start-ContainerComposePodman" executed="True" result="Success" success="True" time="1.4345" asserts="0" description="Container Functions.Start-ContainerComposePodman">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Start-ContainerComposePodman.Executes without error when function exists" time="0.1866" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has pcu alias" name="Container Functions.Start-ContainerComposePodman.Has pcu alias" time="0.0026" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Stop-ContainerComposePodman" executed="True" result="Success" success="True" time="1.7095" asserts="0" description="Container Functions.Stop-ContainerComposePodman">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Stop-ContainerComposePodman.Executes without error when function exists" time="0.261" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has pcd alias" name="Container Functions.Stop-ContainerComposePodman.Has pcd alias" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Get-ContainerComposeLogsPodman" executed="True" result="Success" success="True" time="1.9545" asserts="0" description="Container Functions.Get-ContainerComposeLogsPodman">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Get-ContainerComposeLogsPodman.Executes without error when function exists" time="0.2335" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has pcl alias" name="Container Functions.Get-ContainerComposeLogsPodman.Has pcl alias" time="0.0026" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Container Functions.Clear-ContainerSystemPodman" executed="True" result="Success" success="True" time="2.1599" asserts="0" description="Container Functions.Clear-ContainerSystemPodman">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Container Functions.Clear-ContainerSystemPodman.Executes without error when function exists" time="0.194" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Has pprune alias" name="Container Functions.Clear-ContainerSystemPodman.Has pprune alias" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\dev-tools.tests.ps1" executed="True" result="Success" success="True" time="96.7035" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\dev-tools.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Developer Tools Integration Tests" executed="True" result="Success" success="True" time="95.3341" asserts="0" description="Developer Tools Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Hash generator utilities" executed="True" result="Success" success="True" time="0.0354" asserts="0" description="Developer Tools Integration Tests.Hash generator utilities">
+                <results>
+                  <test-case description="Get-TextHash calculates hash of text" name="Developer Tools Integration Tests.Hash generator utilities.Get-TextHash calculates hash of text" time="0.0197" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-TextHash supports different algorithms" name="Developer Tools Integration Tests.Hash generator utilities.Get-TextHash supports different algorithms" time="0.005" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.JWT utilities" executed="True" result="Success" success="True" time="0.0958" asserts="0" description="Developer Tools Integration Tests.JWT utilities">
+                <results>
+                  <test-case description="Decode-Jwt decodes a JWT token" name="Developer Tools Integration Tests.JWT utilities.Decode-Jwt decodes a JWT token" time="0.0305" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Encode-Jwt requires Node.js" name="Developer Tools Integration Tests.JWT utilities.Encode-Jwt requires Node.js" time="0.0213" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Timestamp conversion utilities" executed="True" result="Success" success="True" time="0.1316" asserts="0" description="Developer Tools Integration Tests.Timestamp conversion utilities">
+                <results>
+                  <test-case description="ConvertFrom-Epoch converts Unix timestamp to DateTime" name="Developer Tools Integration Tests.Timestamp conversion utilities.ConvertFrom-Epoch converts Unix timestamp to DateTime" time="0.0104" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="ConvertTo-Epoch converts DateTime to Unix timestamp" name="Developer Tools Integration Tests.Timestamp conversion utilities.ConvertTo-Epoch converts DateTime to Unix timestamp" time="0.0114" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles roundtrip epoch conversion" name="Developer Tools Integration Tests.Timestamp conversion utilities.Handles roundtrip epoch conversion" time="0.0058" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.UUID generator utilities" executed="True" result="Success" success="True" time="0.1458" asserts="0" description="Developer Tools Integration Tests.UUID generator utilities">
+                <results>
+                  <test-case description="New-Uuid generates a UUID" name="Developer Tools Integration Tests.UUID generator utilities.New-Uuid generates a UUID" time="0.0041" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="New-Uuid supports v4 version" name="Developer Tools Integration Tests.UUID generator utilities.New-Uuid supports v4 version" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Encoding utilities" executed="True" result="Success" success="True" time="0.1717" asserts="0" description="Developer Tools Integration Tests.Encoding utilities">
+                <results>
+                  <test-case description="ConvertTo-UrlEncoded encodes URL strings" name="Developer Tools Integration Tests.Encoding utilities.ConvertTo-UrlEncoded encodes URL strings" time="0.0075" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="ConvertFrom-UrlEncoded decodes URL strings" name="Developer Tools Integration Tests.Encoding utilities.ConvertFrom-UrlEncoded decodes URL strings" time="0.0042" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="ConvertTo-HtmlEncoded encodes HTML strings" name="Developer Tools Integration Tests.Encoding utilities.ConvertTo-HtmlEncoded encodes HTML strings" time="0.0048" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Text comparison utilities" executed="True" result="Success" success="True" time="0.2096" asserts="0" description="Developer Tools Integration Tests.Text comparison utilities">
+                <results>
+                  <test-case description="Compare-TextFiles compares two files" name="Developer Tools Integration Tests.Text comparison utilities.Compare-TextFiles compares two files" time="0.0163" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Compare-TextFiles detects differences" name="Developer Tools Integration Tests.Text comparison utilities.Compare-TextFiles detects differences" time="0.0103" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Regex testing utilities" executed="True" result="Success" success="True" time="0.2501" asserts="0" description="Developer Tools Integration Tests.Regex testing utilities">
+                <results>
+                  <test-case description="Test-Regex tests regular expressions" name="Developer Tools Integration Tests.Regex testing utilities.Test-Regex tests regular expressions" time="0.0156" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-Regex supports AllMatches" name="Developer Tools Integration Tests.Regex testing utilities.Test-Regex supports AllMatches" time="0.0122" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-Regex supports IgnoreCase" name="Developer Tools Integration Tests.Regex testing utilities.Test-Regex supports IgnoreCase" time="0.0042" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Number base conversion utilities" executed="True" result="Success" success="True" time="0.2708" asserts="0" description="Developer Tools Integration Tests.Number base conversion utilities">
+                <results>
+                  <test-case description="Convert-NumberBase converts between bases" name="Developer Tools Integration Tests.Number base conversion utilities.Convert-NumberBase converts between bases" time="0.0082" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Convert-NumberBase converts binary to decimal" name="Developer Tools Integration Tests.Number base conversion utilities.Convert-NumberBase converts binary to decimal" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Lorem Ipsum generator utilities" executed="True" result="Success" success="True" time="0.294" asserts="0" description="Developer Tools Integration Tests.Lorem Ipsum generator utilities">
+                <results>
+                  <test-case description="Get-LoremIpsum generates placeholder text" name="Developer Tools Integration Tests.Lorem Ipsum generator utilities.Get-LoremIpsum generates placeholder text" time="0.0105" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-LoremIpsum supports paragraphs" name="Developer Tools Integration Tests.Lorem Ipsum generator utilities.Get-LoremIpsum supports paragraphs" time="0.0039" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Unit conversion utilities" executed="True" result="Success" success="True" time="0.3178" asserts="0" description="Developer Tools Integration Tests.Unit conversion utilities">
+                <results>
+                  <test-case description="Convert-Units converts file sizes" name="Developer Tools Integration Tests.Unit conversion utilities.Convert-Units converts file sizes" time="0.0127" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Convert-Units converts time units" name="Developer Tools Integration Tests.Unit conversion utilities.Convert-Units converts time units" time="0.0023" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Developer Tools Integration Tests.Error handling" executed="True" result="Success" success="True" time="0.3392" asserts="0" description="Developer Tools Integration Tests.Error handling">
+                <results>
+                  <test-case description="Handles invalid JWT token gracefully" name="Developer Tools Integration Tests.Error handling.Handles invalid JWT token gracefully" time="0.0056" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles invalid regex pattern gracefully" name="Developer Tools Integration Tests.Error handling.Handles invalid regex pattern gracefully" time="0.0029" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles invalid number base conversion gracefully" name="Developer Tools Integration Tests.Error handling.Handles invalid number base conversion gracefully" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\git.tests.ps1" executed="True" result="Success" success="True" time="5.0303" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\git.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Git Integration Tests" executed="True" result="Success" success="True" time="3.8583" asserts="0" description="Git Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Git Integration Tests.Git helpers" executed="True" result="Success" success="True" time="1.0678" asserts="0" description="Git Integration Tests.Git helpers">
+                <results>
+                  <test-case description="git shortcuts handle non-git directories" name="Git Integration Tests.Git helpers.git shortcuts handle non-git directories" time="0.1075" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Ensure-GitHelper is idempotent" name="Git Integration Tests.Git helpers.Ensure-GitHelper is idempotent" time="0.0107" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="additional git shortcuts are available" name="Git Integration Tests.Git helpers.additional git shortcuts are available" time="0.0039" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="git shortcuts forward arguments correctly" name="Git Integration Tests.Git helpers.git shortcuts forward arguments correctly" time="0.4752" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-GitChanges function exists" name="Git Integration Tests.Git helpers.Add-GitChanges function exists" time="0.0023" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Save-GitCommit function exists" name="Git Integration Tests.Git helpers.Save-GitCommit function exists" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Publish-GitChanges function exists" name="Git Integration Tests.Git helpers.Publish-GitChanges function exists" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-GitLog function exists" name="Git Integration Tests.Git helpers.Get-GitLog function exists" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Compare-GitChanges function exists" name="Git Integration Tests.Git helpers.Compare-GitChanges function exists" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-GitBranch function exists" name="Git Integration Tests.Git helpers.Get-GitBranch function exists" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Switch-GitBranch function exists" name="Git Integration Tests.Git helpers.Switch-GitBranch function exists" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Save-GitCommitWithMessage function exists" name="Git Integration Tests.Git helpers.Save-GitCommitWithMessage function exists" time="0.0014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-GitChanges function exists" name="Git Integration Tests.Git helpers.Get-GitChanges function exists" time="0.0014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Receive-GitChanges function exists" name="Git Integration Tests.Git helpers.Receive-GitChanges function exists" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-GitRepositoryContext returns false outside repo" name="Git Integration Tests.Git helpers.Test-GitRepositoryContext returns false outside repo" time="0.0985" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-GitRepositoryHasCommits returns false in empty repo" name="Git Integration Tests.Git helpers.Test-GitRepositoryHasCommits returns false in empty repo" time="0.182" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\infrastructure-tools.tests.ps1" executed="True" result="Success" success="True" time="1.4608" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\infrastructure-tools.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Infrastructure Tools Integration Tests" executed="True" result="Success" success="True" time="0.2798" asserts="0" description="Infrastructure Tools Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1)" executed="True" result="Success" success="True" time="0.0644" asserts="0" description="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1)">
+                <results>
+                  <test-case description="Creates k function" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).Creates k function" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="k function handles missing tool gracefully" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).k function handles missing tool gracefully" time="0.0084" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates kn function for context switching" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).Creates kn function for context switching" time="0.0013" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="kn function handles missing kubectl gracefully" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).kn function handles missing kubectl gracefully" time="0.0081" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates kg function for get operations" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).Creates kg function for get operations" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="kg function handles missing kubectl gracefully" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).kg function handles missing kubectl gracefully" time="0.0068" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates kd function for describe operations" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).Creates kd function for describe operations" time="0.0012" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="kd function handles missing kubectl gracefully" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).kd function handles missing kubectl gracefully" time="0.006" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates kctx function for current context" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).Creates kctx function for current context" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="kctx function handles missing kubectl gracefully" name="Infrastructure Tools Integration Tests.kubectl helpers (17-kubectl.ps1).kctx function handles missing kubectl gracefully" time="0.0074" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1)" executed="True" result="Success" success="True" time="0.1242" asserts="0" description="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1)">
+                <results>
+                  <test-case description="Creates tf function" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).Creates tf function" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="tf function handles missing tool gracefully" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).tf function handles missing tool gracefully" time="0.0075" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates tfi function for init" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).Creates tfi function for init" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="tfi function handles missing terraform gracefully" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).tfi function handles missing terraform gracefully" time="0.0071" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates tfp function for plan" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).Creates tfp function for plan" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="tfp function handles missing terraform gracefully" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).tfp function handles missing terraform gracefully" time="0.0055" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates tfa function for apply" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).Creates tfa function for apply" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="tfa function handles missing terraform gracefully" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).tfa function handles missing terraform gracefully" time="0.006" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates tfd function for destroy" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).Creates tfd function for destroy" time="0.0019" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="tfd function handles missing terraform gracefully" name="Infrastructure Tools Integration Tests.Terraform helpers (18-terraform.ps1).tfd function handles missing terraform gracefully" time="0.0067" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\modern-cli.tests.ps1" executed="True" result="Success" success="True" time="1.6199" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\modern-cli.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Modern CLI Tools" executed="True" result="Success" success="True" time="0.4214" asserts="0" description="Modern CLI Tools">
+            <results>
+              <test-suite type="TestFixture" name="Modern CLI Tools.bat function" executed="True" result="Success" success="True" time="0.069" asserts="0" description="Modern CLI Tools.bat function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.bat function.Executes without error when function exists" time="0.0266" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.bat function.Function is defined" time="0.0323" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Modern CLI Tools.fd function" executed="True" result="Success" success="True" time="0.0975" asserts="0" description="Modern CLI Tools.fd function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.fd function.Executes without error when function exists" time="0.012" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.fd function.Function is defined" time="0.0066" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Modern CLI Tools.http function" executed="True" result="Success" success="True" time="0.1242" asserts="0" description="Modern CLI Tools.http function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.http function.Executes without error when function exists" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.http function.Function is defined" time="0.0067" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Modern CLI Tools.zoxide function" executed="True" result="Success" success="True" time="0.1502" asserts="0" description="Modern CLI Tools.zoxide function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.zoxide function.Executes without error when function exists" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.zoxide function.Function is defined" time="0.0059" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Modern CLI Tools.delta function" executed="True" result="Success" success="True" time="0.1751" asserts="0" description="Modern CLI Tools.delta function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.delta function.Executes without error when function exists" time="0.0098" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.delta function.Function is defined" time="0.006" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Modern CLI Tools.tldr function" executed="True" result="Success" success="True" time="0.2014" asserts="0" description="Modern CLI Tools.tldr function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.tldr function.Executes without error when function exists" time="0.0096" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.tldr function.Function is defined" time="0.0064" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Modern CLI Tools.procs function" executed="True" result="Success" success="True" time="0.2266" asserts="0" description="Modern CLI Tools.procs function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.procs function.Executes without error when function exists" time="0.0103" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.procs function.Function is defined" time="0.0062" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Modern CLI Tools.dust function" executed="True" result="Success" success="True" time="0.2498" asserts="0" description="Modern CLI Tools.dust function">
+                <results>
+                  <test-case description="Executes without error when function exists" name="Modern CLI Tools.dust function.Executes without error when function exists" time="0.0091" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Function is defined" name="Modern CLI Tools.dust function.Function is defined" time="0.0058" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\network\network-failure.tests.ps1" executed="True" result="Success" success="True" time="2.2529" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\network\network-failure.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Network Failure Scenarios" executed="True" result="Success" success="True" time="0.0647" asserts="0" description="Network Failure Scenarios">
+            <results>
+              <test-suite type="TestFixture" name="Network Failure Scenarios.Module Update Checks with Network Failures" executed="True" result="Success" success="True" time="0.0274" asserts="0" description="Network Failure Scenarios.Module Update Checks with Network Failures">
+                <results>
+                  <test-case description="Handles PowerShell Gallery connection failures gracefully" name="Network Failure Scenarios.Module Update Checks with Network Failures.Handles PowerShell Gallery connection failures gracefully" time="0.0042" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles timeout errors when checking module versions" name="Network Failure Scenarios.Module Update Checks with Network Failures.Handles timeout errors when checking module versions" time="0.0112" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles network unavailable errors" name="Network Failure Scenarios.Module Update Checks with Network Failures.Handles network unavailable errors" time="0.0035" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Network Failure Scenarios.Dependency Validation with Network Failures" executed="True" result="Success" success="True" time="0.0424" asserts="0" description="Network Failure Scenarios.Dependency Validation with Network Failures">
+                <results>
+                  <test-case description="Handles module installation failures due to network issues" name="Network Failure Scenarios.Dependency Validation with Network Failures.Handles module installation failures due to network issues" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles Find-Module failures when checking module availability" name="Network Failure Scenarios.Dependency Validation with Network Failures.Handles Find-Module failures when checking module availability" time="0.0033" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Network Failure Scenarios.Retry Logic for Network Operations" executed="True" result="Success" success="True" time="0.0567" asserts="0" description="Network Failure Scenarios.Retry Logic for Network Operations">
+                <results>
+                  <test-case description="check-module-updates.ps1 retries failed network operations with exponential backoff" name="Network Failure Scenarios.Retry Logic for Network Operations.check-module-updates.ps1 retries failed network operations with exponential backoff" time="0.0033" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Handles all retry attempts failing gracefully" name="Network Failure Scenarios.Retry Logic for Network Operations.Handles all retry attempts failing gracefully" time="0.0027" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="External Dependency Mocking" executed="True" result="Success" success="True" time="0.9779" asserts="0" description="External Dependency Mocking">
+            <results>
+              <test-suite type="TestFixture" name="External Dependency Mocking.Mocking PowerShell Gallery Commands" executed="True" result="Success" success="True" time="0.8668" asserts="0" description="External Dependency Mocking.Mocking PowerShell Gallery Commands">
+                <results>
+                  <test-case description="Find-Module command is available for dependency checks" name="External Dependency Mocking.Mocking PowerShell Gallery Commands.Find-Module command is available for dependency checks" time="0.8543" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-Module command is available for dependency checks" name="External Dependency Mocking.Mocking PowerShell Gallery Commands.Get-Module command is available for dependency checks" time="0.0031" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="External Dependency Mocking.Mocking External Commands" executed="True" result="Success" success="True" time="0.8931" asserts="0" description="External Dependency Mocking.Mocking External Commands">
+                <results>
+                  <test-case description="git command is available for repository checks" name="External Dependency Mocking.Mocking External Commands.git command is available for repository checks" time="0.0129" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="pwsh executable is available for script execution" name="External Dependency Mocking.Mocking External Commands.pwsh executable is available for script execution" time="0.0041" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="External Dependency Mocking.Mocking File System Operations" executed="True" result="Success" success="True" time="0.9049" asserts="0" description="External Dependency Mocking.Mocking File System Operations">
+                <results>
+                  <test-case description="Test-Path cmdlet is available for dependency validation" name="External Dependency Mocking.Mocking File System Operations.Test-Path cmdlet is available for dependency validation" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-Content cmdlet is available for reading requirements files" name="External Dependency Mocking.Mocking File System Operations.Get-Content cmdlet is available for reading requirements files" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\network\network-utils.tests.ps1" executed="True" result="Success" success="True" time="2.6539" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\network\network-utils.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Network Utils Module" executed="True" result="Success" success="True" time="1.3272" asserts="0" description="Network Utils Module">
+            <results>
+              <test-suite type="TestFixture" name="Network Utils Module.Invoke-WithRetry" executed="True" result="Success" success="True" time="0.0486" asserts="0" description="Network Utils Module.Invoke-WithRetry">
+                <results>
+                  <test-case description="executes successful operation without retries" name="Network Utils Module.Invoke-WithRetry.executes successful operation without retries" time="0.014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="retries on failure and succeeds" name="Network Utils Module.Invoke-WithRetry.retries on failure and succeeds" time="0.0084" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="fails after max retries" name="Network Utils Module.Invoke-WithRetry.fails after max retries" time="0.0078" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="passes arguments to script block" name="Network Utils Module.Invoke-WithRetry.passes arguments to script block" time="0.0101" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Network Utils Module.Test-NetworkConnectivity" executed="True" result="Success" success="True" time="1.2082" asserts="0" description="Network Utils Module.Test-NetworkConnectivity">
+                <results>
+                  <test-case description="returns true for valid connectivity test" name="Network Utils Module.Test-NetworkConnectivity.returns true for valid connectivity test" time="0.3971" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="returns false for failed connectivity test" name="Network Utils Module.Test-NetworkConnectivity.returns false for failed connectivity test" time="0.4014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="uses default timeout when not specified" name="Network Utils Module.Test-NetworkConnectivity.uses default timeout when not specified" time="0.3501" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Network Utils Module.Invoke-HttpRequestWithRetry" executed="True" result="Success" success="True" time="1.239" asserts="0" description="Network Utils Module.Invoke-HttpRequestWithRetry">
+                <results>
+                  <test-case description="executes successful HTTP request" name="Network Utils Module.Invoke-HttpRequestWithRetry.executes successful HTTP request" time="0.0147" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="handles HTTP request failure" name="Network Utils Module.Invoke-HttpRequestWithRetry.handles HTTP request failure" time="0.0066" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Network Utils Module.Resolve-HostWithRetry" executed="True" result="Success" success="True" time="1.3186" asserts="0" description="Network Utils Module.Resolve-HostWithRetry">
+                <results>
+                  <test-case description="resolves valid hostname" name="Network Utils Module.Resolve-HostWithRetry.resolves valid hostname" time="0.0619" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="handles DNS resolution failure" name="Network Utils Module.Resolve-HostWithRetry.handles DNS resolution failure" time="0.0081" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\package-managers.tests.ps1" executed="True" result="Success" success="True" time="1.9459" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\package-managers.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Package Manager Integration Tests" executed="True" result="Success" success="True" time="0.7653" asserts="0" description="Package Manager Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Package Manager Integration Tests.Scoop package manager functions" executed="True" result="Success" success="True" time="0.2683" asserts="0" description="Package Manager Integration Tests.Scoop package manager functions">
+                <results>
+                  <test-case description="Install-ScoopPackage function exists when scoop is available" name="Package Manager Integration Tests.Scoop package manager functions.Install-ScoopPackage function exists when scoop is available" time="0.0204" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Find-ScoopPackage function exists when scoop is available" name="Package Manager Integration Tests.Scoop package manager functions.Find-ScoopPackage function exists when scoop is available" time="0.0164" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Update-ScoopPackage function exists when scoop is available" name="Package Manager Integration Tests.Scoop package manager functions.Update-ScoopPackage function exists when scoop is available" time="0.0159" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Uninstall-ScoopPackage function exists when scoop is available" name="Package Manager Integration Tests.Scoop package manager functions.Uninstall-ScoopPackage function exists when scoop is available" time="0.0171" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-ScoopPackage function exists when scoop is available" name="Package Manager Integration Tests.Scoop package manager functions.Get-ScoopPackage function exists when scoop is available" time="0.0159" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-ScoopPackageInfo function exists when scoop is available" name="Package Manager Integration Tests.Scoop package manager functions.Get-ScoopPackageInfo function exists when scoop is available" time="0.0157" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Clear-ScoopCache function exists when scoop is available" name="Package Manager Integration Tests.Scoop package manager functions.Clear-ScoopCache function exists when scoop is available" time="0.017" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Package Manager Integration Tests.UV package manager functions" executed="True" result="Success" success="True" time="0.4804" asserts="0" description="Package Manager Integration Tests.UV package manager functions">
+                <results>
+                  <test-case description="Install-UVTool function exists when uv is available" name="Package Manager Integration Tests.UV package manager functions.Install-UVTool function exists when uv is available" time="0.0152" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-UVRun function exists when uv is available" name="Package Manager Integration Tests.UV package manager functions.Invoke-UVRun function exists when uv is available" time="0.0153" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-UVTool function exists when uv is available" name="Package Manager Integration Tests.UV package manager functions.Invoke-UVTool function exists when uv is available" time="0.0147" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-UVDependency function exists when uv is available" name="Package Manager Integration Tests.UV package manager functions.Add-UVDependency function exists when uv is available" time="0.0151" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Sync-UVDependencies function exists when uv is available" name="Package Manager Integration Tests.UV package manager functions.Sync-UVDependencies function exists when uv is available" time="0.0144" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Package Manager Integration Tests.PNPM package manager functions" executed="True" result="Success" success="True" time="0.7528" asserts="0" description="Package Manager Integration Tests.PNPM package manager functions">
+                <results>
+                  <test-case description="Install-PnpmPackage function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Install-PnpmPackage function exists when pnpm is available" time="0.0159" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-PnpmPackage function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Add-PnpmPackage function exists when pnpm is available" time="0.0166" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-PnpmDevPackage function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Add-PnpmDevPackage function exists when pnpm is available" time="0.0157" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Invoke-PnpmScript function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Invoke-PnpmScript function exists when pnpm is available" time="0.0159" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Start-PnpmProject function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Start-PnpmProject function exists when pnpm is available" time="0.0167" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Build-PnpmProject function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Build-PnpmProject function exists when pnpm is available" time="0.0172" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Test-PnpmProject function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Test-PnpmProject function exists when pnpm is available" time="0.0158" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Start-PnpmDev function exists when pnpm is available" name="Package Manager Integration Tests.PNPM package manager functions.Start-PnpmDev function exists when pnpm is available" time="0.0178" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\ssh.tests.ps1" executed="True" result="Success" success="True" time="1.4602" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\ssh.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="SSH Integration Tests" executed="True" result="Success" success="True" time="0.2613" asserts="0" description="SSH Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="SSH Integration Tests.SSH functions" executed="True" result="Success" success="True" time="0.2482" asserts="0" description="SSH Integration Tests.SSH functions">
+                <results>
+                  <test-case description="Get-SSHKeys function exists" name="SSH Integration Tests.SSH functions.Get-SSHKeys function exists" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Get-SSHKeys can be called without error" name="SSH Integration Tests.SSH functions.Get-SSHKeys can be called without error" time="0.0524" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="ssh-list alias exists" name="SSH Integration Tests.SSH functions.ssh-list alias exists" time="0.0029" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-SSHKeyIfNotLoaded function exists" name="SSH Integration Tests.SSH functions.Add-SSHKeyIfNotLoaded function exists" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-SSHKeyIfNotLoaded warns when no path provided" name="SSH Integration Tests.SSH functions.Add-SSHKeyIfNotLoaded warns when no path provided" time="0.0034" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Add-SSHKeyIfNotLoaded can be called with nonexistent file" name="SSH Integration Tests.SSH functions.Add-SSHKeyIfNotLoaded can be called with nonexistent file" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="ssh-add-if alias exists" name="SSH Integration Tests.SSH functions.ssh-add-if alias exists" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Start-SSHAgent function exists" name="SSH Integration Tests.SSH functions.Start-SSHAgent function exists" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Start-SSHAgent can be called without error" name="SSH Integration Tests.SSH functions.Start-SSHAgent can be called without error" time="0.0305" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="ssh-agent-start alias exists" name="SSH Integration Tests.SSH functions.ssh-agent-start alias exists" time="0.0022" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\tooling.tests.ps1" executed="True" result="Success" success="True" time="31.2445" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\tooling.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Tooling Integration Tests" executed="True" result="Success" success="True" time="29.9599" asserts="0" description="Tooling Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Tooling Integration Tests.Documentation generation" executed="True" result="Success" success="True" time="10.7477" asserts="0" description="Tooling Integration Tests.Documentation generation">
+                <results>
+                  <test-case description="generates API documentation successfully" name="Tooling Integration Tests.Documentation generation.generates API documentation successfully" time="10.732" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="documentation includes proper function signatures" name="Tooling Integration Tests.Documentation generation.documentation includes proper function signatures" time="0.0059" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Tooling Integration Tests.Spellcheck functionality" executed="True" result="Success" success="True" time="14.9274" asserts="0" description="Tooling Integration Tests.Spellcheck functionality">
+                <results>
+                  <test-case description="spellcheck runs without errors" name="Tooling Integration Tests.Spellcheck functionality.spellcheck runs without errors" time="4.1641" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="cspell configuration includes custom words" name="Tooling Integration Tests.Spellcheck functionality.cspell configuration includes custom words" time="0.0064" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Tooling Integration Tests.Linting and formatting" executed="True" result="Success" success="True" time="29.9306" asserts="0" description="Tooling Integration Tests.Linting and formatting">
+                <results>
+                  <test-case description="PSScriptAnalyzer runs without critical errors" name="Tooling Integration Tests.Linting and formatting.PSScriptAnalyzer runs without critical errors" time="14.9897" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\wsl-ansible-github.tests.ps1" executed="True" result="Success" success="True" time="1.4498" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\tools\wsl-ansible-github.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="WSL, Ansible, and GitHub CLI Integration Tests" executed="True" result="Success" success="True" time="0.2512" asserts="0" description="WSL, Ansible, and GitHub CLI Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1)" executed="True" result="Success" success="True" time="0.0282" asserts="0" description="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1)">
+                <results>
+                  <test-case description="Creates Stop-WSL function" name="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1).Creates Stop-WSL function" time="0.0029" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates wsl-shutdown alias" name="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1).Creates wsl-shutdown alias" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Get-WSLDistribution function" name="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1).Creates Get-WSLDistribution function" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates wsl-list alias" name="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1).Creates wsl-list alias" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Start-UbuntuWSL function" name="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1).Creates Start-UbuntuWSL function" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates ubuntu alias" name="WSL, Ansible, and GitHub CLI Integration Tests.WSL helpers (10-wsl.ps1).Creates ubuntu alias" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1)" executed="True" result="Success" success="True" time="0.0656" asserts="0" description="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1)">
+                <results>
+                  <test-case description="Creates Invoke-Ansible function" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates Invoke-Ansible function" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates ansible alias" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates ansible alias" time="0.0014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Invoke-AnsiblePlaybook function" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates Invoke-AnsiblePlaybook function" time="0.0014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates ansible-playbook alias" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates ansible-playbook alias" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Invoke-AnsibleGalaxy function" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates Invoke-AnsibleGalaxy function" time="0.002" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates ansible-galaxy alias" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates ansible-galaxy alias" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Invoke-AnsibleVault function" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates Invoke-AnsibleVault function" time="0.0014" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates ansible-vault alias" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates ansible-vault alias" time="0.0013" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Get-AnsibleDoc function" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates Get-AnsibleDoc function" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates ansible-doc alias" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates ansible-doc alias" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates Get-AnsibleInventory function" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates Get-AnsibleInventory function" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates ansible-inventory alias" name="WSL, Ansible, and GitHub CLI Integration Tests.Ansible wrappers (13-ansible.ps1).Creates ansible-inventory alias" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="WSL, Ansible, and GitHub CLI Integration Tests.GitHub CLI helpers (20-gh.ps1)" executed="True" result="Success" success="True" time="0.1017" asserts="0" description="WSL, Ansible, and GitHub CLI Integration Tests.GitHub CLI helpers (20-gh.ps1)">
+                <results>
+                  <test-case description="Creates gh-open function" name="WSL, Ansible, and GitHub CLI Integration Tests.GitHub CLI helpers (20-gh.ps1).Creates gh-open function" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="gh-open function handles missing gh gracefully" name="WSL, Ansible, and GitHub CLI Integration Tests.GitHub CLI helpers (20-gh.ps1).gh-open function handles missing gh gracefully" time="0.0099" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Creates gh-pr function" name="WSL, Ansible, and GitHub CLI Integration Tests.GitHub CLI helpers (20-gh.ps1).Creates gh-pr function" time="0.0024" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="gh-pr function handles missing gh gracefully" name="WSL, Ansible, and GitHub CLI Integration Tests.GitHub CLI helpers (20-gh.ps1).gh-pr function handles missing gh gracefully" time="0.0021" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

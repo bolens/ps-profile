@@ -47,7 +47,7 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
             }
 
             $desktop = Join-Path $resolvedHome 'Desktop'
-            if (Test-Path $desktop) {
+            if ($desktop -and -not [string]::IsNullOrWhiteSpace($desktop) -and (Test-Path -LiteralPath $desktop)) {
                 Set-Location $desktop
             }
             else {
@@ -63,7 +63,7 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
             }
 
             $downloads = Join-Path $resolvedHome 'Downloads'
-            if (Test-Path $downloads) {
+            if ($downloads -and -not [string]::IsNullOrWhiteSpace($downloads) -and (Test-Path -LiteralPath $downloads)) {
                 Set-Location $downloads
             }
             else {
@@ -79,7 +79,7 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
             }
 
             $documents = Join-Path $resolvedHome 'Documents'
-            if (Test-Path $documents) {
+            if ($documents -and -not [string]::IsNullOrWhiteSpace($documents) -and (Test-Path -LiteralPath $documents)) {
                 Set-Location $documents
             }
             else {

@@ -6,6 +6,43 @@
 # Skip if already loaded
 if ($null -ne (Get-Variable -Name 'NetworkUtilsLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
 
+# Import Retry module if available for retryable error detection
+# Use safe path resolution that handles cases where $PSScriptRoot might not be set
+try {
+    if ($null -ne $PSScriptRoot -and -not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        # Start from the directory containing the script (or the script path itself if it's a directory)
+        $currentDir = if ([System.IO.Directory]::Exists($PSScriptRoot)) {
+            $PSScriptRoot
+        }
+        else {
+            [System.IO.Path]::GetDirectoryName($PSScriptRoot)
+        }
+        
+        $maxDepth = 4
+        $depth = 0
+        
+        # Traverse up to repository root (4 levels: network -> utilities-modules -> profile.d -> repo root)
+        while ($depth -lt $maxDepth -and $currentDir -and -not [string]::IsNullOrWhiteSpace($currentDir)) {
+            $parentDir = [System.IO.Path]::GetDirectoryName($currentDir)
+            if ([string]::IsNullOrWhiteSpace($parentDir) -or $parentDir -eq $currentDir) {
+                break
+            }
+            $currentDir = $parentDir
+            $depth++
+        }
+        
+        if ($currentDir -and -not [string]::IsNullOrWhiteSpace($currentDir)) {
+            $retryModulePath = Join-Path $currentDir 'scripts' 'lib' 'core' 'Retry.psm1'
+            if (-not [string]::IsNullOrWhiteSpace($retryModulePath) -and (Test-Path -LiteralPath $retryModulePath -ErrorAction SilentlyContinue)) {
+                Import-Module $retryModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}
+catch {
+    # Silently fail if path resolution fails - module will use fallback retry logic
+}
+
 # Network operation wrapper with retry and timeout
 <#
 .SYNOPSIS
@@ -44,26 +81,64 @@ function Invoke-WithRetry {
     while ($attempt -lt $MaxRetries) {
         $attempt++
 
-        $job = $null
+        $powershell = $null
+        $runspacePool = $null
 
         try {
-            # Create a job to run the operation with timeout
-            $job = Start-Job -ScriptBlock $ScriptBlock -ArgumentList $ArgumentList -ErrorAction Stop
+            # Use runspace for timeout operation (much faster than job)
+            $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
+            $runspacePool.Open()
+            
+            $powershell = [PowerShell]::Create()
+            $powershell.RunspacePool = $runspacePool
+            
+            # Wrap the scriptblock to accept arguments
+            $wrapperScript = {
+                param($ScriptBlock, $ArgumentList)
+                if ($ArgumentList) {
+                    & $ScriptBlock @ArgumentList
+                }
+                else {
+                    & $ScriptBlock
+                }
+            }
+            
+            $null = $powershell.AddScript($wrapperScript)
+            $null = $powershell.AddArgument($ScriptBlock)
+            $null = $powershell.AddArgument($ArgumentList)
+            $handle = $powershell.BeginInvoke()
 
-            # Wait for completion or timeout
-            $completed = Wait-Job $job -Timeout $TimeoutSeconds
+            # Wait for completion or timeout using polling (STA-compatible)
+            $timeoutMs = $TimeoutSeconds * 1000
+            $pollIntervalMs = 50
+            $elapsedMs = 0
+            $completed = $false
+
+            while ($elapsedMs -lt $timeoutMs) {
+                if ($handle.IsCompleted) {
+                    $completed = $true
+                    break
+                }
+                Start-Sleep -Milliseconds $pollIntervalMs
+                $elapsedMs += $pollIntervalMs
+            }
 
             if (-not $completed) {
                 # Timeout occurred
-                Stop-Job $job -ErrorAction SilentlyContinue
-                Remove-Job $job -ErrorAction SilentlyContinue
+                $powershell.Stop()
+                $powershell.Dispose()
+                $runspacePool.Close()
+                $runspacePool.Dispose()
                 throw "Operation timed out after $TimeoutSeconds seconds"
             }
 
             # Get the result
-            $result = Receive-Job $job -ErrorAction Stop
-            Remove-Job $job -ErrorAction SilentlyContinue
-            $job = $null
+            $result = $powershell.EndInvoke($handle)
+            $powershell.Dispose()
+            $runspacePool.Close()
+            $runspacePool.Dispose()
+            $powershell = $null
+            $runspacePool = $null
 
             return $result
 
@@ -71,27 +146,48 @@ function Invoke-WithRetry {
         catch {
             $lastError = $_
 
-            if ($job) {
-                Stop-Job $job -ErrorAction SilentlyContinue
-                Remove-Job $job -ErrorAction SilentlyContinue
-                $job = $null
+            if ($powershell) {
+                try {
+                    $powershell.Stop()
+                    $powershell.Dispose()
+                }
+                catch {
+                    # Ignore cleanup errors
+                }
+                $powershell = $null
+            }
+            if ($runspacePool) {
+                try {
+                    $runspacePool.Close()
+                    $runspacePool.Dispose()
+                }
+                catch {
+                    # Ignore cleanup errors
+                }
+                $runspacePool = $null
             }
 
-            # Check if this is a retryable error
-            $retryableErrors = @(
-                "timeout",
-                "connection",
-                "network",
-                "unreachable",
-                "name resolution",
-                "dns"
-            )
-
+            # Check if this is a retryable error using Retry module if available
             $isRetryable = $false
-            foreach ($pattern in $retryableErrors) {
-                if ($_.Exception.Message -match $pattern) {
-                    $isRetryable = $true
-                    break
+            if (Get-Command Test-IsRetryableError -ErrorAction SilentlyContinue) {
+                $isRetryable = Test-IsRetryableError -Exception $_.Exception
+            }
+            else {
+                # Fallback to manual retryable error detection
+                $retryableErrors = @(
+                    "timeout",
+                    "connection",
+                    "network",
+                    "unreachable",
+                    "name resolution",
+                    "dns"
+                )
+
+                foreach ($pattern in $retryableErrors) {
+                    if ($_.Exception.Message -match $pattern) {
+                        $isRetryable = $true
+                        break
+                    }
                 }
             }
 
@@ -107,12 +203,6 @@ function Invoke-WithRetry {
             }
 
             Start-Sleep -Seconds $RetryDelaySeconds
-        }
-        finally {
-            if ($job) {
-                Remove-Job $job -ErrorAction SilentlyContinue
-                $job = $null
-            }
         }
     }
 

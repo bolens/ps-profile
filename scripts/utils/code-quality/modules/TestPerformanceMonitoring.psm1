@@ -9,8 +9,8 @@ scripts/utils/code-quality/modules/TestPerformanceMonitoring.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
@@ -57,103 +57,106 @@ function Measure-TestPerformance {
     $memorySamples = @()
     $cpuSamples = @()
 
-    # Start performance monitoring job if tracking is enabled
-    $monitorJob = $null
+    # Start performance monitoring runspace if tracking is enabled
+    $monitorRunspace = $null
+    $monitorPool = $null
+    $monitorHandle = $null
+    
     if ($TrackMemory -or $TrackCPU) {
-        $monitorJob = Start-Job -Name 'PerformanceMonitor' -ScriptBlock {
-            param($TrackMemory, $TrackCPU, $ParentProcessId)
+        try {
+            $monitorPool = [runspacefactory]::CreateRunspacePool(1, 1)
+            $monitorPool.Open()
+            
+            $monitorRunspace = [PowerShell]::Create()
+            $monitorRunspace.RunspacePool = $monitorPool
+            
+            $scriptBlock = {
+                param($TrackMemory, $TrackCPU, $ParentProcessId)
 
-            $samples = @{
-                Memory = @()
-                CPU    = @()
-            }
+                $samples = New-Object System.Collections.ArrayList
 
-            $startTime = Get-Date
-            $lastParentCheck = Get-Date
-            while ($true) {
-                try {
-                    # Check if parent process is still running (with timeout)
-                    if (((Get-Date) - $lastParentCheck).TotalSeconds -gt 5) {
-                        $parentProcess = Get-Process -Id $ParentProcessId -ErrorAction Stop
-                        $lastParentCheck = Get-Date
-                    }
-                }
-                catch {
-                    # Parent process ended
-                    break
-                }
-
-                if ($TrackMemory) {
+                $startTime = Get-Date
+                $lastParentCheck = Get-Date
+                while ($true) {
                     try {
-                        $process = Get-Process -Id $ParentProcessId -ErrorAction Stop
-                        $memoryMB = [Math]::Round($process.WorkingSet64 / 1MB, 2)
-                        $samples.Memory += $memoryMB
+                        # Check if parent process is still running (with timeout)
+                        if (((Get-Date) - $lastParentCheck).TotalSeconds -gt 5) {
+                            $parentProcess = Get-Process -Id $ParentProcessId -ErrorAction Stop
+                            $lastParentCheck = Get-Date
+                        }
                     }
                     catch {
-                        # Process might have ended
+                        # Parent process ended
+                        break
+                    }
+
+                    $sample = @{
+                        Memory = $null
+                        CPU    = $null
+                        Time   = Get-Date
+                    }
+
+                    if ($TrackMemory) {
+                        try {
+                            $process = Get-Process -Id $ParentProcessId -ErrorAction Stop
+                            $sample.Memory = [Math]::Round($process.WorkingSet64 / 1MB, 2)
+                        }
+                        catch {
+                            # Process might have ended
+                            break
+                        }
+                    }
+
+                    if ($TrackCPU) {
+                        try {
+                            # Use Get-Counter directly (no need for nested job in runspace)
+                            $cpu = Get-Counter '\Process(*)\% Processor Time' -MaxSamples 1 -ErrorAction SilentlyContinue |
+                            Where-Object { $_.CounterSamples.InstanceName -eq (Get-Process -Id $ParentProcessId -ErrorAction SilentlyContinue).Name } |
+                            Select-Object -ExpandProperty CounterSamples |
+                            Select-Object -ExpandProperty CookedValue
+                            if ($cpu -and $cpu -is [double]) {
+                                $sample.CPU = [Math]::Round($cpu, 2)
+                            }
+                        }
+                        catch {
+                            Write-Verbose "CPU monitoring error: $($_.Exception.Message)"
+                        }
+                    }
+
+                    [void]$samples.Add($sample)
+                    Start-Sleep -Milliseconds 500  # Reduce frequency to prevent excessive CPU usage
+
+                    # Timeout after 30 minutes to prevent runaway monitoring
+                    if (((Get-Date) - $startTime).TotalMinutes -gt 30) {
                         break
                     }
                 }
 
-                if ($TrackCPU) {
-                    try {
-                        # Use a timeout for CPU monitoring to prevent hanging
-                        $cpuJob = $null
-                        try {
-                            $cpuJob = Start-Job -ScriptBlock {
-                                param($ProcessId)
-                                try {
-                                    $cpu = Get-Counter '\Process(*)\% Processor Time' -MaxSamples 1 -ErrorAction Stop |
-                                    Where-Object { $_.CounterSamples.InstanceName -eq (Get-Process -Id $ProcessId).Name } |
-                                    Select-Object -ExpandProperty CounterSamples |
-                                    Select-Object -ExpandProperty CookedValue
-                                    return $cpu
-                                }
-                                catch {
-                                    return $null
-                                }
-                            } -ArgumentList $ParentProcessId -ThrottleLimit 1 -ErrorAction Stop
-                        }
-                        catch {
-                            Write-Verbose "Failed to start CPU monitoring job: $($_.Exception.Message)"
-                            # Continue without CPU monitoring
-                            $cpuJob = $null
-                        }
-
-                        if ($null -ne $cpuJob) {
-                            # Wait for CPU job with timeout
-                            try {
-                                $cpuResult = $cpuJob | Wait-Job -Timeout 2 | Receive-Job
-                                if ($cpuResult -and $cpuResult -is [double]) {
-                                    $samples.CPU += [Math]::Round($cpuResult, 2)
-                                }
-                            }
-                            catch {
-                                Write-Verbose "CPU monitoring job failed or timed out: $($_.Exception.Message)"
-                            }
-                            finally {
-                                if ($cpuJob) {
-                                    Remove-Job -Job $cpuJob -Force -ErrorAction SilentlyContinue
-                                }
-                            }
-                        }
+                # Convert to hashtable format for compatibility
+                $result = @{
+                    Memory = @()
+                    CPU    = @()
+                }
+                foreach ($s in $samples) {
+                    if ($null -ne $s.Memory) {
+                        $result.Memory += $s.Memory
                     }
-                    catch {
-                        # CPU monitoring failed or timed out, continue
-                        Write-Verbose "CPU monitoring error: $($_.Exception.Message)"
+                    if ($null -ne $s.CPU) {
+                        $result.CPU += $s.CPU
                     }
                 }
-
-                Start-Sleep -Milliseconds 500  # Reduce frequency to prevent excessive CPU usage
-
-                # Timeout after 30 minutes to prevent runaway jobs (reduced from 1 hour)
-                if (((Get-Date) - $startTime).TotalMinutes -gt 30) {
-                    break
-                }
+                return $result
             }
-
-            return $samples
-        } -ArgumentList $TrackMemory, $TrackCPU, $PID
+            
+            $null = $monitorRunspace.AddScript($scriptBlock)
+            $null = $monitorRunspace.AddArgument($TrackMemory)
+            $null = $monitorRunspace.AddArgument($TrackCPU)
+            $null = $monitorRunspace.AddArgument($PID)
+            $monitorHandle = $monitorRunspace.BeginInvoke()
+        }
+        catch {
+            Write-Verbose "Failed to start performance monitoring: $($_.Exception.Message)"
+        }
     }
 
     try {
@@ -165,9 +168,42 @@ function Measure-TestPerformance {
         $metrics.Duration = $metrics.EndTime - $metrics.StartTime
 
         # Collect performance data
-        if ($monitorJob) {
-            Stop-Job -Job $monitorJob -ErrorAction SilentlyContinue
-            $performanceData = Receive-Job -Job $monitorJob -Wait -AutoRemoveJob
+        if ($monitorRunspace -and $monitorHandle) {
+            try {
+                # Stop monitoring
+                $monitorRunspace.Stop()
+                
+                # Wait a moment for cleanup
+                Start-Sleep -Milliseconds 100
+                
+                # Get results if completed
+                if ($monitorHandle.IsCompleted) {
+                    $performanceData = $monitorRunspace.EndInvoke($monitorHandle)
+                }
+                else {
+                    # Timeout or stopped, create empty result
+                    $performanceData = @{
+                        Memory = @()
+                        CPU    = @()
+                    }
+                }
+            }
+            catch {
+                Write-Verbose "Error collecting performance data: $($_.Exception.Message)"
+                $performanceData = @{
+                    Memory = @()
+                    CPU    = @()
+                }
+            }
+            finally {
+                if ($monitorRunspace) {
+                    $monitorRunspace.Dispose()
+                }
+                if ($monitorPool) {
+                    $monitorPool.Close()
+                    $monitorPool.Dispose()
+                }
+            }
 
             if ($TrackMemory -and $performanceData.Memory) {
                 $metrics.PeakMemoryMB = ($performanceData.Memory | Measure-Object -Maximum).Maximum

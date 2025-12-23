@@ -6,10 +6,10 @@ This file provides guidance for AI coding assistants (Claude, Cursor, GitHub Cop
 
 This is a **modular PowerShell profile** with:
 
-- **228 functions** and **255 aliases**
+- **110+ functions** and **100+ aliases** (see `docs/api/README.md` for current counts)
 - **Comprehensive testing** with Pester (unit, integration, performance)
 - **Strict code quality** standards (PSScriptAnalyzer, formatting, security scanning)
-- **Lazy loading** for performance optimization
+- **Performance optimized** with lazy loading, caching, and deferred initialization
 - **Cross-platform** support (Windows, Linux, macOS)
 
 ## Project Structure
@@ -28,11 +28,31 @@ This is a **modular PowerShell profile** with:
 │   ├── cli-modules/                   # Modern CLI tool modules
 │   ├── container-modules/             # Container helper modules
 │   ├── conversion-modules/            # Data/document/media conversion modules
+│   │   ├── data/                      # Data format conversions (binary, columnar, core, scientific, structured)
+│   │   ├── document/                  # Document format conversions
+│   │   ├── helpers/                   # Conversion helper utilities
+│   │   └── media/                     # Media format conversions (including color conversions)
 │   ├── dev-tools-modules/             # Development tool modules
+│   │   ├── build/                     # Build tools and testing frameworks
+│   │   ├── crypto/                    # Cryptographic utilities
+│   │   ├── data/                      # Data manipulation tools
+│   │   ├── encoding/                  # Encoding utilities
+│   │   └── format/                    # Formatting tools (including qrcode/)
 │   ├── diagnostics-modules/          # Diagnostic and monitoring modules
+│   │   ├── core/                      # Core diagnostics
+│   │   └── monitoring/                # System monitoring
 │   ├── files-modules/                 # File operation modules
+│   │   ├── inspection/                # File inspection utilities
+│   │   └── navigation/                # File navigation helpers
 │   ├── git-modules/                   # Git integration modules
+│   │   ├── core/                      # Core Git operations
+│   │   └── integrations/              # Git service integrations
 │   └── utilities-modules/             # Utility function modules
+│       ├── data/                      # Data utilities
+│       ├── filesystem/                # Filesystem utilities
+│       ├── history/                   # Command history utilities
+│       ├── network/                   # Network utilities
+│       └── system/                    # System utilities
 ├── scripts/                           # Validation & utilities
 │   ├── lib/                           # Shared utility modules (ALWAYS use these)
 │   │   ├── ModuleImport.psm1          # Module import helper (import first)
@@ -56,7 +76,19 @@ This is a **modular PowerShell profile** with:
 │       └── fragment/                  # Fragment management
 ├── tests/                             # Pester tests
 │   ├── unit/                          # Unit tests
-│   ├── integration/                   # Integration tests
+│   ├── integration/                   # Integration tests (domain-organized)
+│   │   ├── bootstrap/                 # Bootstrap tests
+│   │   ├── conversion/                # Conversion utilities (data/document/media)
+│   │   ├── filesystem/                # Filesystem utilities
+│   │   ├── fragments/                 # Fragment management
+│   │   ├── profile/                   # Profile loading
+│   │   ├── tools/                     # Development tools
+│   │   ├── system/                    # System utilities
+│   │   ├── terminal/                  # Terminal/prompt tools
+│   │   ├── test-runner/               # Test runner tests
+│   │   ├── utilities/                 # Utility functions
+│   │   ├── cross-platform/            # Cross-platform tests
+│   │   └── error-handling/            # Error handling
 │   └── performance/                   # Performance tests
 └── docs/                              # Auto-generated API docs
 ```
@@ -73,6 +105,7 @@ $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptR
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import specific modules using Import-LibModule
+# Note: Import-LibModule automatically resolves subdirectories (core/, fragment/, path/, etc.)
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
@@ -85,19 +118,21 @@ Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 
 **Available Library Modules:**
 
-- `ExitCodes.psm1` - Standardized exit codes (`Exit-WithCode`, `$EXIT_SUCCESS`, etc.)
-- `PathResolution.psm1` - Repository root resolution (`Get-RepoRoot`)
-- `Logging.psm1` - Consistent output formatting (`Write-ScriptMessage`)
-- `Module.psm1` - Module installation/import (`Ensure-ModuleAvailable`)
-- `Command.psm1` - Command existence check (`Test-CommandAvailable`)
-- `FileSystem.psm1` - Directory creation (`Ensure-DirectoryExists`)
-- `ModuleImport.psm1` - Module import helper (`Import-LibModule`, `Get-LibPath`)
-- `FragmentConfig.psm1` - Fragment configuration parsing (`Get-FragmentConfig`, `Get-DisabledFragments`, etc.)
-- `FragmentLoading.psm1` - Fragment dependency resolution and load order (`Get-FragmentLoadOrder`, `Get-FragmentDependencies`, etc.)
-- `FragmentIdempotency.psm1` - Fragment idempotency management (`Test-FragmentLoaded`, `Set-FragmentLoaded`, etc.)
-- `FragmentErrorHandling.psm1` - Standardized fragment error handling (`Invoke-FragmentSafely`, `Write-FragmentError`)
-- `ScoopDetection.psm1` - Scoop installation detection (`Get-ScoopRoot`, `Get-ScoopCompletionPath`, `Add-ScoopToPath`, etc.)
-- And many more specialized modules (see `scripts/lib/` directory)
+The `scripts/lib/` directory is organized into category-based subdirectories. Use `Import-LibModule` to import modules - it automatically resolves subdirectories:
+
+- **Core modules** (`core/`): `ExitCodes.psm1`, `Logging.psm1`, `Platform.psm1`
+- **Fragment modules** (`fragment/`): `FragmentConfig.psm1`, `FragmentLoading.psm1`, `FragmentIdempotency.psm1`, `FragmentErrorHandling.psm1`
+- **Path modules** (`path/`): `PathResolution.psm1`, `PathUtilities.psm1`, `PathValidation.psm1`
+- **File modules** (`file/`): `FileContent.psm1`, `FileFiltering.psm1`, `FileSystem.psm1`
+- **Runtime modules** (`runtime/`): `Module.psm1`, `NodeJs.psm1`, `PowerShellDetection.psm1`, `Python.psm1`, `ScoopDetection.psm1`
+- **Utilities** (`utilities/`): `Cache.psm1`, `Command.psm1`, `Collections.psm1`, `DataFile.psm1`, `JsonUtilities.psm1`, `RegexUtilities.psm1`, `StringSimilarity.psm1`
+- **Metrics** (`metrics/`): `CodeMetrics.psm1`, `CodeQualityScore.psm1`, `MetricsHistory.psm1`, `MetricsSnapshot.psm1`, `MetricsTrendAnalysis.psm1`
+- **Performance** (`performance/`): `PerformanceAggregation.psm1`, `PerformanceMeasurement.psm1`, `PerformanceRegression.psm1`
+- **Code Analysis** (`code-analysis/`): `AstParsing.psm1`, `CodeSimilarityDetection.psm1`, `CommentHelp.psm1`, `TestCoverage.psm1`
+- **Parallel** (`parallel/`): `Parallel.psm1`
+- **Module Import Helper** (root): `ModuleImport.psm1` - Provides `Import-LibModule`, `Get-LibPath`, etc.
+
+**Note**: When using `Import-LibModule`, you don't need to specify subdirectory paths - it automatically resolves them. Only use direct paths if you're importing modules without using `Import-LibModule`.
 
 ### 2. Exit Code Standards
 
@@ -146,6 +181,14 @@ Set-AgentModeFunction -Name 'Enable-MyTool' -Body {
 }
 ```
 
+**Note:** The profile loader implements several performance optimizations:
+
+- Git commit hash calculation is lazy (only runs when accessed)
+- Fragment file lists are cached to avoid duplicate `Get-ChildItem` calls
+- Fragment dependency parsing is cached with file modification time tracking
+- Module path existence checks are cached to reduce `Test-Path` operations
+- See `ARCHITECTURE.md` and `PROFILE_README.md` for detailed information
+
 **Guard External Tools**:
 
 ```powershell
@@ -159,20 +202,30 @@ if (Test-CachedCommand 'docker') {
 **ALWAYS write tests** for new functionality:
 
 ```powershell
-# Run tests before committing
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1
+# ⚠️ CRITICAL: Use analyze-coverage.ps1 for test execution and coverage analysis
+# This script runs non-interactively, generates comprehensive coverage reports, and identifies coverage gaps
 
-# Run specific test suite
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit
+# Analyze coverage for a specific file or directory
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap
 
-# Run with coverage
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage
+# Analyze coverage for multiple paths
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap,profile.d/11-git.ps1
+
+# The script automatically:
+# - Matches test files to source files based on naming conventions
+# - Runs Pester tests with coverage analysis
+# - Reports per-file coverage percentages
+# - Identifies files with < 80% coverage
+# - Generates JSON coverage reports
+
+# For legacy/test purposes only (use analyze-coverage.ps1 instead):
+# pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit
 ```
 
 **Test file naming:**
 
 - Unit tests: `tests/unit/*.tests.ps1`
-- Integration tests: `tests/integration/*.tests.ps1`
+- Integration tests: `tests/integration/**/*.tests.ps1` (recursive discovery, domain-organized)
 - Performance tests: `tests/performance/*.tests.ps1`
 
 ### 5. Code Quality Standards
@@ -181,14 +234,14 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage
 
 ```powershell
 # Full quality check (recommended)
-task quality-check
+task quality-check    # or: just quality-check, make quality-check, npm run quality-check
 
 # Or individual checks
-task format          # Format code
-task lint            # PSScriptAnalyzer
-task test            # Run tests
-task spellcheck      # Spellcheck
-task markdownlint    # Markdown linting
+task format          # Format code (or: just format, make format, npm run format)
+task lint            # PSScriptAnalyzer (or: just lint, make lint, npm run lint)
+task test            # Run tests (or: just test, make test, npm run test)
+task spellcheck      # Spellcheck (or: just spellcheck, make spellcheck, npm run spellcheck)
+task markdownlint    # Markdown linting (or: just markdownlint, make markdownlint, npm run markdownlint)
 ```
 
 **PSScriptAnalyzer Rules:**
@@ -236,8 +289,8 @@ function Get-Example {
 **Generate documentation:**
 
 ```powershell
-task generate-docs  # API documentation
-task generate-fragment-readmes  # Fragment READMEs
+task generate-docs              # API documentation (or: just generate-docs, make generate-docs, npm run generate-docs)
+task generate-fragment-readmes  # Fragment READMEs (or: just generate-fragment-readmes, make generate-fragment-readmes, npm run generate-fragment-readmes)
 ```
 
 ## Common Development Tasks
@@ -245,7 +298,7 @@ task generate-fragment-readmes  # Fragment READMEs
 ### Running Tests
 
 ```powershell
-# All tests
+# All tests (works with: task, just, make, npm run)
 task test
 
 # Specific suite
@@ -253,17 +306,32 @@ task test-unit
 task test-integration
 task test-performance
 
-# With coverage
-task test-coverage
+# ⚠️ CRITICAL: Use analyze-coverage.ps1 for test execution and coverage analysis
+# This script runs non-interactively, generates comprehensive coverage reports, and identifies coverage gaps
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap
 
-# Advanced features
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -MaxRetries 3 -TrackPerformance
+# Analyze coverage for specific file or directory
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/22-containers.ps1
+
+# Analyze coverage for multiple paths
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap,profile.d/11-git.ps1
+
+# Advanced features (direct script execution - use analyze-coverage.ps1 instead)
+# pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -MaxRetries 3 -TrackPerformance
 ```
+
+**Important**: Always use `analyze-coverage.ps1` for test execution during development. It provides:
+
+- Non-interactive execution (no prompts)
+- Automatic test file matching
+- Per-file coverage reporting
+- Coverage gap identification
+- JSON report generation
 
 ### Validation
 
 ```powershell
-# Full validation
+# Full validation (works with: task, just, make, npm run)
 task validate
 
 # Individual checks

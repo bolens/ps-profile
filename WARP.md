@@ -8,9 +8,16 @@ This file provides guidance to WARP (warp.dev) terminal when working with code i
 
 ### Using Tasks (Recommended)
 
-**VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
+This project supports multiple task runners. Choose the one that fits your workflow:
 
-**Taskfile**: Run `task <task-name>` (e.g., `task lint`, `task validate`)
+- **Task** (recommended): `task <task-name>` (e.g., `task lint`, `task validate`)
+- **Just**: `just <recipe-name>` (e.g., `just lint`, `just validate`)
+- **Make**: `make <target>` (e.g., `make lint`, `make validate`)
+- **npm/pnpm**: `npm run <script>` or `pnpm run <script>` (e.g., `npm run lint`, `pnpm run validate`)
+- **VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
+- **Sublime Text**: Tools → Build System → "Task: <name>"
+
+All task runners have full parity - the same 48+ tasks are available in each format.
 
 **Common Tasks**:
 

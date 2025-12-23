@@ -5,15 +5,15 @@ Describe 'CodeAnalysis Module Functions' {
         # Import the modules that contain the functions (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         # Import dependencies first
-        Import-Module (Join-Path $libPath 'FileSystem.psm1') -DisableNameChecking -ErrorAction Stop -Global
-        Import-Module (Join-Path $libPath 'AstParsing.psm1') -DisableNameChecking -ErrorAction Stop -Global
-        Import-Module (Join-Path $libPath 'FileContent.psm1') -DisableNameChecking -ErrorAction Stop -Global
-        Import-Module (Join-Path $libPath 'Collections.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'file' 'FileSystem.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'code-analysis' 'AstParsing.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'file' 'FileContent.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'utilities' 'Collections.psm1') -DisableNameChecking -ErrorAction Stop -Global
         # Import the modules that contain the functions
-        Import-Module (Join-Path $libPath 'TestCoverage.psm1') -DisableNameChecking -ErrorAction Stop -Global
-        Import-Module (Join-Path $libPath 'CodeQualityScore.psm1') -DisableNameChecking -ErrorAction Stop -Global
-        Import-Module (Join-Path $libPath 'StringSimilarity.psm1') -DisableNameChecking -ErrorAction Stop -Global
-        Import-Module (Join-Path $libPath 'CodeSimilarityDetection.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'code-analysis' 'TestCoverage.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'metrics' 'CodeQualityScore.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'utilities' 'StringSimilarity.psm1') -DisableNameChecking -ErrorAction Stop -Global
+        Import-Module (Join-Path $libPath 'code-analysis' 'CodeSimilarityDetection.psm1') -DisableNameChecking -ErrorAction Stop -Global
         $script:TestTempDir = New-TestTempDirectory -Prefix 'CodeAnalysisTests'
     }
 

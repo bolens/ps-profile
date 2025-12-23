@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="2" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="1" invalid="0" date="2025-12-01" time="09:33:23">
+  <environment platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk4\Partition4" user="bolen" nunit-version="2.5.8.0" cwd="C:\Users\bolen\Documents\PowerShell" os-version="10.0.28000" user-domain="BAMBOO" clr-version="10.0.0" machine-name="BAMBOO" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Ignored" success="True" time="18.8568" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Users\bolen\Documents\PowerShell\tests\integration\cross-platform\cross-platform.tests.ps1" executed="True" result="Ignored" success="True" time="18.8568" asserts="0" description="C:\Users\bolen\Documents\PowerShell\tests\integration\cross-platform\cross-platform.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Cross-Platform Compatibility Integration Tests" executed="True" result="Ignored" success="True" time="17.2773" asserts="0" description="Cross-Platform Compatibility Integration Tests">
+            <results>
+              <test-suite type="TestFixture" name="Cross-Platform Compatibility Integration Tests.Cross-platform compatibility" executed="True" result="Ignored" success="True" time="17.2495" asserts="0" description="Cross-Platform Compatibility Integration Tests.Cross-platform compatibility">
+                <results>
+                  <test-case description="path separators are handled correctly" name="Cross-Platform Compatibility Integration Tests.Cross-platform compatibility.path separators are handled correctly" time="0.0682" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="functions work with both Windows and Unix-style paths" name="Cross-Platform Compatibility Integration Tests.Cross-platform compatibility.functions work with both Windows and Unix-style paths" time="17.1068" asserts="0" success="False" result="Ignored" executed="False" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

@@ -24,8 +24,8 @@ function Initialize-DevTools-QrCode {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'NodeJs.psm1'
-        if (Test-Path $nodeJsModulePath) {
+        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
+        if ($nodeJsModulePath -and -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }
@@ -98,7 +98,7 @@ try {
 
     # Initialize sub-modules
     $qrcodeDir = $PSScriptRoot
-    if (Test-Path $qrcodeDir) {
+    if ($qrcodeDir -and -not [string]::IsNullOrWhiteSpace($qrcodeDir) -and (Test-Path -LiteralPath $qrcodeDir)) {
         . (Join-Path $qrcodeDir 'qrcode-formats.ps1')
         . (Join-Path $qrcodeDir 'qrcode-communication.ps1')
         . (Join-Path $qrcodeDir 'qrcode-specialized.ps1')

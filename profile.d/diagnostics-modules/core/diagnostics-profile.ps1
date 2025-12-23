@@ -34,8 +34,8 @@ try {
 
         if ($missingNetworkFunctions) {
             $profileRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            $networkUtilsPath = Join-Path $profileRoot '71-network-utils.ps1'
-            if (Test-Path $networkUtilsPath) {
+            $networkUtilsPath = Join-Path $profileRoot 'network-utils.ps1'
+            if ($networkUtilsPath -and -not [string]::IsNullOrWhiteSpace($networkUtilsPath) -and (Test-Path -LiteralPath $networkUtilsPath)) {
                 . $networkUtilsPath
             }
         }
@@ -71,14 +71,29 @@ try {
         #>
         function Show-ProfileStartupTime {
             $startupTime = [DateTime]::Now - $global:PSProfileStartTime
+            
+            # Use locale-aware number formatting if available
+            $startupTimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                Format-LocaleNumber $startupTime.TotalSeconds -Format 'N2'
+            }
+            else {
+                $startupTime.TotalSeconds.ToString("N2")
+            }
+            
             Write-Host "-- Profile startup time --"
-            Write-Host ("Total startup time: {0:N2} seconds" -f $startupTime.TotalSeconds)
+            Write-Host ("Total startup time: {0} seconds" -f $startupTimeStr)
 
             # Show fragment load times if available
             if ($global:PSProfileFragmentTimes -and $global:PSProfileFragmentTimes.Count -gt 0) {
                 Write-Host "Fragment load times (slowest first):"
                 $global:PSProfileFragmentTimes | Sort-Object -Property Duration -Descending | Select-Object -First 10 | ForEach-Object {
-                    Write-Host ("  {0}: {1:N2}ms" -f $_.Fragment, $_.Duration)
+                    $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                        Format-LocaleNumber $_.Duration -Format 'N2'
+                    }
+                    else {
+                        $_.Duration.ToString("N2")
+                    }
+                    Write-Host ("  {0}: {1}ms" -f $_.Fragment, $durationStr)
                 }
             }
         }
@@ -102,12 +117,12 @@ try {
                 },
                 @{
                     Name    = "Scoop"
-                    Test    = { Test-HasCommand scoop }
+                    Test    = { Test-CachedCommand scoop }
                     Message = "Scoop package manager not found"
                 },
                 @{
                     Name    = "Git"
-                    Test    = { Test-HasCommand git }
+                    Test    = { Test-CachedCommand git }
                     Message = "Git not found - version control features will be limited"
                 },
                 @{

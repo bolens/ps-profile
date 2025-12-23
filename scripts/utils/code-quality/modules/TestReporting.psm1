@@ -28,19 +28,19 @@ $categorizationModulePath = Join-Path $PSScriptRoot 'TestCategorization.psm1'
 $recommendationsModulePath = Join-Path $PSScriptRoot 'TestRecommendations.psm1'
 $trendAnalysisModulePath = Join-Path $PSScriptRoot 'TestTrendAnalysis.psm1'
 
-if (Test-Path $failureAnalysisModulePath) {
+if ($failureAnalysisModulePath -and -not [string]::IsNullOrWhiteSpace($failureAnalysisModulePath) -and (Test-Path -LiteralPath $failureAnalysisModulePath)) {
     Import-Module $failureAnalysisModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
-if (Test-Path $performanceAnalysisModulePath) {
+if ($performanceAnalysisModulePath -and -not [string]::IsNullOrWhiteSpace($performanceAnalysisModulePath) -and (Test-Path -LiteralPath $performanceAnalysisModulePath)) {
     Import-Module $performanceAnalysisModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
-if (Test-Path $categorizationModulePath) {
+if ($categorizationModulePath -and -not [string]::IsNullOrWhiteSpace($categorizationModulePath) -and (Test-Path -LiteralPath $categorizationModulePath)) {
     Import-Module $categorizationModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
-if (Test-Path $recommendationsModulePath) {
+if ($recommendationsModulePath -and -not [string]::IsNullOrWhiteSpace($recommendationsModulePath) -and (Test-Path -LiteralPath $recommendationsModulePath)) {
     Import-Module $recommendationsModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
-if (Test-Path $trendAnalysisModulePath) {
+if ($trendAnalysisModulePath -and -not [string]::IsNullOrWhiteSpace($trendAnalysisModulePath) -and (Test-Path -LiteralPath $trendAnalysisModulePath)) {
     Import-Module $trendAnalysisModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 

@@ -4,7 +4,7 @@ This document provides detailed technical information about the profile architec
 
 ## Overview
 
-The PowerShell profile is designed as a modular, performance-optimized system that loads functionality from numbered fragments in `profile.d/`. This architecture enables:
+The PowerShell profile is designed as a modular, performance-optimized system that loads functionality from named fragments in `profile.d/` using dependency-aware loading. This architecture enables:
 
 - **Fast startup**: Lazy loading and deferred initialization
 - **Maintainability**: Small, focused fragments
@@ -13,13 +13,17 @@ The PowerShell profile is designed as a modular, performance-optimized system th
 
 ### Fragment Management Modules
 
-The profile uses specialized modules in `scripts/lib/` for fragment management:
+The profile uses specialized modules in `scripts/lib/` for fragment management. The `scripts/lib/` directory is organized into category-based subdirectories:
 
-- **`FragmentConfig.psm1`** - Configuration parsing from `.profile-fragments.json`
-- **`FragmentLoading.psm1`** - Dependency resolution and load order calculation
-- **`FragmentIdempotency.psm1`** - Idempotency state management
-- **`FragmentErrorHandling.psm1`** - Standardized error handling
-- **`ScoopDetection.psm1`** - Scoop installation detection and PATH management
+- **`fragment/`** - Fragment-related modules:
+  - **`FragmentConfig.psm1`** - Configuration parsing from `.profile-fragments.json`
+  - **`FragmentLoading.psm1`** - Dependency resolution and load order calculation
+  - **`FragmentIdempotency.psm1`** - Idempotency state management
+  - **`FragmentErrorHandling.psm1`** - Standardized error handling
+- **`runtime/`** - Runtime environment modules:
+  - **`ScoopDetection.psm1`** - Scoop installation detection and PATH management
+
+**Note**: The `ModuleImport.psm1` module (located in `scripts/lib/` root) automatically resolves subdirectories when using `Import-LibModule`, so you don't need to specify subdirectory paths when importing modules.
 
 These modules are imported in `Microsoft.PowerShell_profile.ps1` before fragments are loaded, making them available to all fragments.
 
@@ -28,10 +32,47 @@ These modules are imported in `Microsoft.PowerShell_profile.ps1` before fragment
 `Microsoft.PowerShell_profile.ps1` is the main entrypoint that:
 
 1. Checks for interactive session (skips non-interactive hosts)
-2. Detects and configures Scoop (if installed)
-3. Loads fragments from `profile.d/` in lexical order
-4. Initializes prompt framework (Starship or fallback)
-5. Includes robust error handling that reports which fragment failed
+2. Tracks profile version (git commit hash loaded lazily to avoid blocking startup)
+3. Detects and configures Scoop (if installed) with optimized path checks
+4. Loads fragments from `profile.d/` in dependency-aware order with caching optimizations
+5. Initializes prompt framework (Starship or fallback)
+6. Includes robust error handling that reports which fragment failed
+
+### Performance Optimizations
+
+The profile loader implements several performance optimizations to minimize startup time:
+
+**1. Lazy Git Commit Hash Calculation**
+
+- Git commit hash is calculated on-demand rather than during startup
+- Only runs when accessed (e.g., in debug mode) to avoid blocking startup
+- Uses a lazy getter function that caches the result after first access
+
+**2. Fragment File List Caching**
+
+- Fragment file list is retrieved once and cached
+- Eliminates duplicate `Get-ChildItem` calls during loading
+- Reduces file system I/O operations
+
+**3. Fragment Dependency Parsing Cache**
+
+- `FragmentLoading.psm1` caches parsed dependencies with file modification times
+- Dependencies are only re-parsed when fragment files change
+- Cache automatically invalidates when files are modified
+- Significantly reduces file reading and parsing operations
+
+**4. Optimized Path Checks**
+
+- `Test-Path` results are cached for module existence checks
+- Module paths are computed once and reused
+- Scoop detection optimized to check environment variables before filesystem operations
+- Reduces redundant filesystem operations
+
+**5. Module Path Caching**
+
+- Fragment management module paths computed once and stored
+- Eliminates repeated `Join-Path` operations
+- Module existence checks cached to avoid repeated `Test-Path` calls
 
 ### Fragment Loading Process
 
@@ -56,52 +97,74 @@ Get-ChildItem -Path $profileD -File -Filter '*.ps1' |
 **Batch-Optimized Mode (Optional):**
 Enable with `$env:PS_PROFILE_BATCH_LOAD=1`:
 
-- Tier 0 (00-09): Loaded sequentially (critical bootstrap)
-- Tier 1 (10-29): Loaded sequentially after tier 0
-- Tier 2 (30-69): Loaded sequentially after tier 1
-- Tier 3 (70-99): Loaded sequentially after tier 2
+- **Tier 0 (Core)**: Critical bootstrap fragments (e.g., `bootstrap.ps1`) - loaded sequentially first
+- **Tier 1 (Essential)**: Core functionality fragments (e.g., `env.ps1`, `files.ps1`, `utilities.ps1`) - loaded sequentially after tier 0
+- **Tier 2 (Standard)**: Common development tools (e.g., `git.ps1`, `containers.ps1`, `aws.ps1`) - loaded sequentially after tier 1
+- **Tier 3 (Optional)**: Advanced features (e.g., `performance-insights.ps1`, `system-monitor.ps1`) - loaded sequentially after tier 2
 
 **Key characteristics:**
 
-- Fragments are loaded in sorted order (00-99 prefix)
+- Fragments are loaded using dependency-aware topological sorting
+- Fragments declare dependencies explicitly in their headers: `# Dependencies: bootstrap, env`
+- Fragments can declare tiers: `# Tier: standard`
 - Each fragment is wrapped in try-catch to prevent one failure from stopping all
 - Fragments can be disabled via `.profile-fragments.json`
 - Loading is idempotent (safe to reload)
 - Batch optimization groups fragments by dependency tiers for more efficient loading
-- **Note:** True parallel loading is not implemented because fragments must modify the current session scope, which requires sequential execution
+- **Parallel dependency parsing:** Fragments with 5+ files automatically parse dependencies in parallel using PowerShell runspaces, significantly reducing I/O overhead (from ~10s to <400ms). Control via `PS_PROFILE_PARALLEL_DEPENDENCIES` (default: enabled). Uses runspaces instead of jobs for much better performance (no process spawning overhead).
+- **EXPERIMENTAL: Parallel fragment loading:** Hybrid approach that attempts to load independent fragments (same dependency level) in parallel using PowerShell runspaces, then falls back to sequential loading if parallel execution fails. Enable via `PS_PROFILE_PARALLEL_LOADING=1`. WARNING: Experimental feature - may have issues with fragments that modify session state extensively
+- **Note:** Fragment execution is sequential by default for reliability. Parallel dependency parsing is enabled by default and provides significant speedup. Parallel fragment loading is experimental and opt-in. All parallel processing now uses runspaces (not jobs) for optimal performance.
 
 ## Fragment Structure
 
 ### Naming Convention
 
-Fragments use numeric prefixes to control load order:
+Fragments use descriptive names and explicit dependency declarations:
 
-- **00-09**: Core bootstrap, environment, and registration helpers
-- **10-19**: Terminal configuration (PSReadLine, prompts, Git)
-- **20-29**: Container engines and cloud tools
-- **30-39**: Development tools and aliases
-- **40-69**: Language-specific tools (Go, PHP, Node.js, Python, Rust)
-- **70-79**: Advanced features (performance insights, enhanced history, system monitoring)
+- **Core Tier**: Critical bootstrap and initialization (e.g., `bootstrap.ps1`)
+- **Essential Tier**: Core functionality needed by most workflows (e.g., `env.ps1`, `files.ps1`, `utilities.ps1`)
+- **Standard Tier**: Common development tools (e.g., `git.ps1`, `containers.ps1`, `aws.ps1`, `dev.ps1`)
+- **Optional Tier**: Advanced features (e.g., `performance-insights.ps1`, `system-monitor.ps1`)
+
+Fragments declare dependencies in their headers:
+
+```powershell
+# Dependencies: bootstrap, env
+# Tier: standard
+```
+
+Load order is determined by dependency resolution (topological sorting), not numeric prefixes. This allows for unlimited scalability and clearer dependency relationships.
 
 ### Modular Subdirectory Organization
 
-Many fragments have been refactored to use a modular subdirectory structure. Main fragments (numbered 00-99) load related modules from subdirectories:
+Many fragments have been refactored to use a modular subdirectory structure. Main fragments (e.g., `files.ps1`, `utilities.ps1`) load related modules from subdirectories:
 
 **Module Subdirectories:**
 
 - **`cli-modules/`** - Modern CLI tool integrations (gum, navi, eza, etc.)
 - **`container-modules/`** - Container helper modules (Docker/Podman compose, utilities)
 - **`conversion-modules/`** - Data, document, and media format conversion utilities
-  - `data/` - Data format conversions (binary, columnar, structured, scientific)
-  - `document/` - Document format conversions (Markdown, LaTeX, RST)
-  - `helpers/` - Conversion helper utilities (XML, TOML)
-  - `media/` - Media format conversions (audio, images, PDF, video)
+  - `data/` - Data format conversions
+    - `binary/` - Binary format conversions (direct, schema formats: Avro, FlatBuffers, Protobuf, Thrift)
+    - `columnar/` - Columnar format conversions (Arrow, Parquet, CSV)
+    - `core/` - Core data conversions (base64, CSV, JSON, XML, YAML, encoding utilities)
+    - Encoding sub-modules: `core-encoding-*.ps1` (ASCII, Binary, Base32, Hex, ModHex, Numeric, Roman, URL)
+    - `scientific/` - Scientific format conversions (HDF5, NetCDF)
+    - `structured/` - Structured data formats (SuperJSON, TOML, TOON)
+  - `document/` - Document format conversions (DOCX, EPUB, HTML, LaTeX, Markdown, RST)
+  - `helpers/` - Conversion helper utilities (TOON, XML)
+  - `media/` - Media format conversions
+    - Audio, image, PDF, video conversions
+    - Color format conversions (CMYK, HEX, HSL, HWB, LAB, LCH, named colors, NCOL, OKLAB, OKLCH, parsing)
 - **`dev-tools-modules/`** - Development tool integrations
   - `build/` - Build tools and testing frameworks
   - `crypto/` - Cryptographic utilities (hash, JWT)
-  - `data/` - Data manipulation tools (lorem, units, UUID, timestamps)
+  - `data/` - Data manipulation tools (lorem, number base conversion, timestamps, units, UUID)
   - `encoding/` - Encoding utilities (base encoding, character encoding)
-  - `format/` - Formatting tools (diff, regex, QR codes)
+  - `format/` - Formatting tools
+    - `diff/` - Diff utilities
+    - `qrcode/` - QR code generation (communication, formats, specialized)
+    - `regex/` - Regular expression utilities
 - **`diagnostics-modules/`** - Diagnostic and monitoring modules
   - `core/` - Core diagnostics (error handling, profile diagnostics)
   - `monitoring/` - System monitoring (performance, system monitor)
@@ -193,9 +256,95 @@ catch {
 }
 ```
 
+## Refactored Fragments
+
+Several fragments have been refactored into modular subdirectories for better organization and maintainability:
+
+### 00-bootstrap.ps1
+
+The bootstrap fragment has been refactored into focused modules:
+
+```
+00-bootstrap.ps1 (thin loader, ~50 lines)
+00-bootstrap/
+├── GlobalState.ps1           # Global variable initialization
+├── TestHasCommand.ps1        # Test-HasCommand (core command detection)
+├── CommandCache.ps1         # Test-CachedCommand, cache management
+├── AssumedCommands.ps1       # Add-AssumedCommand, Remove-AssumedCommand, Get-AssumedCommands
+├── MissingToolWarnings.ps1 # Write-MissingToolWarning, Clear-MissingToolWarnings
+├── FragmentWarnings.ps1      # Initialize-FragmentWarningSuppression, Test-FragmentWarningSuppressed
+├── FunctionRegistration.ps1 # Set-AgentModeFunction, Set-AgentModeAlias, Register-LazyFunction
+└── UserHome.ps1             # Get-UserHome
+```
+
+### 23-starship.ps1
+
+The Starship prompt fragment has been refactored into focused modules:
+
+```
+23-starship.ps1 (main initialization, ~226 lines)
+23-starship/
+├── StarshipHelpers.ps1       # Test-StarshipInitialized, Test-PromptNeedsReplacement, Get-StarshipPromptArguments
+├── StarshipPrompt.ps1        # New-StarshipPromptFunction
+├── StarshipModule.ps1        # Initialize-StarshipModule
+├── StarshipInit.ps1          # Invoke-StarshipInitScript
+├── StarshipVSCode.ps1        # Update-VSCodePrompt
+└── SmartPrompt.ps1           # Initialize-SmartPrompt (complete fallback prompt)
+```
+
+### 07-system.ps1
+
+The system utilities fragment has been refactored into category-based modules:
+
+```
+07-system.ps1 (thin loader, ~60 lines)
+07-system/
+├── FileOperations.ps1    # touch, mkdir, rm, cp, mv, find (search)
+├── SystemInfo.ps1        # df, htop, which
+├── NetworkOperations.ps1 # ptest, dns, rest, web, ports
+├── ArchiveOperations.ps1 # zip, unzip
+├── EditorAliases.ps1     # vim, vi
+└── TextSearch.ps1        # grep (Find-String, pgrep)
+```
+
+### 02-files.ps1
+
+The files fragment includes extracted modules:
+
+```
+02-files.ps1 (main loader, ~425 lines - mostly module loading)
+02-files/
+└── LaTeXDetection.ps1    # Test-DocumentLatexEngineAvailable, Ensure-DocumentLatexEngine
+```
+
+### conversion-modules/data/core/core-encoding.ps1
+
+The encoding conversion module has been refactored into format-specific sub-modules:
+
+```
+core-encoding.ps1 (thin loader, ~60 lines)
+core/
+├── core-encoding-roman.ps1    # Roman numeral conversions (16 functions)
+├── core-encoding-modhex.ps1    # ModHex conversions (16 functions)
+├── core-encoding-ascii.ps1     # ASCII conversions (8 functions)
+├── core-encoding-hex.ps1        # Hex conversions (15 functions)
+├── core-encoding-binary.ps1     # Binary conversions (16 functions)
+├── core-encoding-numeric.ps1   # Octal/Decimal conversions (30 functions)
+├── core-encoding-base32.ps1    # Base32 conversions (16 functions)
+└── core-encoding-url.ps1       # URL/Percent encoding conversions (16 functions)
+```
+
+**Benefits of Refactoring:**
+
+- **Reduced complexity**: Main files reduced from 600-2400 lines to 50-226 lines
+- **Better organization**: Related functionality grouped in focused modules
+- **Easier maintenance**: Smaller files are easier to understand and modify
+- **Improved testability**: Modules can be tested independently
+- **Clear separation of concerns**: Each module has a single, well-defined responsibility
+
 ## Bootstrap Helpers
 
-`00-bootstrap.ps1` provides essential helpers available to all fragments:
+`00-bootstrap.ps1` (now a thin loader) provides essential helpers available to all fragments through its sub-modules:
 
 ### Set-AgentModeFunction
 
@@ -515,16 +664,22 @@ Or using a comment line:
 
 Available from `FragmentLoading.psm1` module (imported in main profile):
 
-- `Get-FragmentDependencies` - Parses dependencies from fragment headers
+- `Get-FragmentDependencies` - Parses dependencies from fragment headers (with caching)
 - `Test-FragmentDependencies` - Validates that all dependencies are satisfied
 - `Get-FragmentLoadOrder` - Calculates optimal load order using topological sort
 - `Get-FragmentTiers` - Groups fragments by tier for batch loading
+
+**Performance Note:** `Get-FragmentDependencies` implements intelligent caching:
+
+- Dependencies are parsed once per file and cached with file modification times
+- Cache automatically invalidates when fragment files are modified
+- Reduces file I/O and parsing overhead, especially for profiles with many fragments
 
 ### Automatic Load Order
 
 The profile loader automatically:
 
-1. Parses dependencies from all fragments
+1. Parses dependencies from all fragments (using cached results when available)
 2. Validates that dependencies exist and are enabled
 3. Sorts fragments topologically to satisfy dependencies
 4. Detects and warns about circular dependencies
@@ -562,14 +717,22 @@ if (Test-SafePath -Path $userPath -BasePath $homeDir) {
 
 ## Version Tracking
 
+Profile version information is tracked with lazy loading to avoid blocking startup:
+
+- `$global:PSProfileVersion` - Profile version string (set immediately, e.g., '1.0.0')
+- `$global:PSProfileGitCommit` - Git commit hash (calculated lazily on first access)
+- `$global:PSProfileGitCommitGetter` - Lazy getter function for commit hash
+
+The git commit hash is only calculated when accessed (e.g., in debug mode), avoiding the overhead of spawning a git subprocess during profile startup.
+
 Profile version information is available via:
 
 ```powershell
 $global:PSProfileVersion    # Version string (e.g., '1.0.0')
-$global:PSProfileGitCommit  # Git commit hash (if in git repo)
+$global:PSProfileGitCommit  # Git commit hash (if in git repo, calculated lazily)
 ```
 
-Displayed in debug mode on profile load.
+Displayed in debug mode on profile load (triggers lazy calculation if not already done).
 
 ## Contributing
 

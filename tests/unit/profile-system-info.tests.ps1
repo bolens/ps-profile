@@ -6,8 +6,8 @@
 
 BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    . (Join-Path $script:ProfileDir '00-bootstrap.ps1')
-    . (Join-Path $script:ProfileDir '08-system-info.ps1')
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'system-info.ps1')
 }
 
 Describe 'Profile system info functions' {

@@ -9,20 +9,20 @@ scripts/utils/code-quality/modules/BaselineGeneration.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
 # Import TestEnvironment module for Get-TestEnvironment
 $testEnvironmentModulePath = Join-Path $PSScriptRoot 'TestEnvironment.psm1'
-if (Test-Path $testEnvironmentModulePath) {
+if ($testEnvironmentModulePath -and -not [string]::IsNullOrWhiteSpace($testEnvironmentModulePath) -and (Test-Path -LiteralPath $testEnvironmentModulePath)) {
     Import-Module $testEnvironmentModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
 # Try to import JsonUtilities module from scripts/lib (optional)
-$jsonUtilitiesModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'JsonUtilities.psm1'
-if (Test-Path $jsonUtilitiesModulePath) {
+$jsonUtilitiesModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'utilities' 'JsonUtilities.psm1'
+if ($jsonUtilitiesModulePath -and -not [string]::IsNullOrWhiteSpace($jsonUtilitiesModulePath) -and (Test-Path -LiteralPath $jsonUtilitiesModulePath)) {
     Import-Module $jsonUtilitiesModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 

@@ -10,8 +10,8 @@ scripts/utils/code-quality/modules/TestCache.psm1
 #>
 
 # Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'Logging.psm1'
-if (Test-Path $loggingModulePath) {
+$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
+if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
@@ -54,13 +54,13 @@ function Get-TestCacheStatus {
         return $cacheStatus
     }
 
-    if (-not (Test-Path $CachePath)) {
+    if ($CachePath -and -not [string]::IsNullOrWhiteSpace($CachePath) -and -not (Test-Path -LiteralPath $CachePath)) {
         $cacheStatus.Reason = 'Cache directory does not exist'
         return $cacheStatus
     }
 
     $cacheFile = Join-Path $CachePath 'results.cache'
-    if (-not (Test-Path $cacheFile)) {
+    if ($cacheFile -and -not [string]::IsNullOrWhiteSpace($cacheFile) -and -not (Test-Path -LiteralPath $cacheFile)) {
         $cacheStatus.Reason = 'Cache file does not exist'
         return $cacheStatus
     }
@@ -71,7 +71,7 @@ function Get-TestCacheStatus {
         # Check if test files have changed
         $cacheValid = $true
         foreach ($testPath in $TestPaths) {
-            if (Test-Path $testPath) {
+            if ($testPath -and -not [string]::IsNullOrWhiteSpace($testPath) -and (Test-Path -LiteralPath $testPath)) {
                 $fileHash = Get-FileHash $testPath -Algorithm SHA256
                 $cachedHash = $cachedData.FileHashes.$testPath
 
@@ -123,13 +123,13 @@ function Save-TestCache {
     )
 
     try {
-        if (-not (Test-Path $CachePath)) {
+        if ($CachePath -and -not [string]::IsNullOrWhiteSpace($CachePath) -and -not (Test-Path -LiteralPath $CachePath)) {
             New-Item -ItemType Directory -Path $CachePath -Force | Out-Null
         }
 
         $fileHashes = @{}
         foreach ($testPath in $TestPaths) {
-            if (Test-Path $testPath) {
+            if ($testPath -and -not [string]::IsNullOrWhiteSpace($testPath) -and (Test-Path -LiteralPath $testPath)) {
                 $fileHash = Get-FileHash $testPath -Algorithm SHA256
                 $fileHashes[$testPath] = $fileHash.Hash
             }

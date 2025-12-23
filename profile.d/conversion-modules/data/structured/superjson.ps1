@@ -11,6 +11,7 @@
 .NOTES
     This is an internal initialization function and should not be called directly.
     Requires Node.js and the superjson package.
+    Internal dependencies: helpers-xml.ps1 (for Convert-JsonToXml), helpers-toon.ps1 (for Convert-JsonToToon, Convert-ToonToJson)
 #>
 function Initialize-FileConversion-SuperJson {
     # Ensure NodeJs module is imported (use repo root from bootstrap if available)
@@ -24,8 +25,10 @@ function Initialize-FileConversion-SuperJson {
         else {
             Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
         }
-        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'NodeJs.psm1'
-        if (Test-Path $nodeJsModulePath) {
+        $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
+        if ($nodeJsModulePath -and
+            -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and
+            (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
         }
     }
@@ -33,7 +36,9 @@ function Initialize-FileConversion-SuperJson {
     Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         try {
-            if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.superjson' }
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.json$', '.superjson'
+            }
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 throw "Node.js is not available. Install Node.js to use SuperJSON conversions."
             }
@@ -76,7 +81,9 @@ try {
     Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         try {
-            if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.superjson$', '.json' }
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.superjson$', '.json'
+            }
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 throw "Node.js is not available. Install Node.js to use SuperJSON conversions."
             }
@@ -115,34 +122,263 @@ try {
     } -Force
 
     # SuperJSON to YAML
-    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToYaml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.superjson$', '.yaml' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; if (-not (Get-Command yq -ErrorAction SilentlyContinue)) { throw "yq command not available" }; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson; if (Test-Path $tempJson) { $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json; $jsonObj | ConvertTo-Json -Depth 100 | & yq eval -P | Out-File -FilePath $OutputPath -Encoding UTF8; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } } catch { Write-Error "Failed to convert SuperJSON to YAML: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToYaml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.superjson$', '.yaml'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+                throw "yq command not available"
+            }
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
+            if ($tempJson -and
+                -not [string]::IsNullOrWhiteSpace($tempJson) -and
+                (Test-Path -LiteralPath $tempJson)) {
+                $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
+                $jsonObj | ConvertTo-Json -Depth 100 | & yq eval -P | Out-File -FilePath $OutputPath -Encoding UTF8
+                Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+            }
+        }
+        catch {
+            Write-Error "Failed to convert SuperJSON to YAML: $_"
+        }
+    } -Force
 
     # YAML to SuperJSON
-    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromYaml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.ya?ml$', '.superjson' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; if (-not (Get-Command yq -ErrorAction SilentlyContinue)) { throw "yq command not available" }; $json = & yq eval -o=json $InputPath 2>$null; if ($LASTEXITCODE -eq 0 -and $json) { $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; $json | Set-Content -LiteralPath $tempJson -Encoding UTF8; _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } else { throw "yq command failed" } } catch { Write-Error "Failed to convert YAML to SuperJSON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromYaml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.ya?ml$', '.superjson'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+                throw "yq command not available"
+            }
+            $json = & yq eval -o=json $InputPath 2>$null
+            if ($LASTEXITCODE -eq 0 -and $json) {
+                $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+                $json | Set-Content -LiteralPath $tempJson -Encoding UTF8
+                _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
+                Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+            }
+            else {
+                throw "yq command failed"
+            }
+        }
+        catch {
+            Write-Error "Failed to convert YAML to SuperJSON: $_"
+        }
+    } -Force
 
     # SuperJSON to TOON
-    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToToon -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.superjson$', '.toon' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson; $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json; $toon = Convert-JsonToToon -JsonObject $jsonObj; Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } catch { Write-Error "Failed to convert SuperJSON to TOON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToToon -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.superjson$', '.toon'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
+            $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
+            $toon = Convert-JsonToToon -JsonObject $jsonObj
+            Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8
+            Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to convert SuperJSON to TOON: $_"
+        }
+    } -Force
 
     # TOON to SuperJSON
-    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromToon -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toon$', '.superjson' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; $toon = Get-Content -LiteralPath $InputPath -Raw; $jsonObj = Convert-ToonToJson -ToonString $toon; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; $jsonObj | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $tempJson -Encoding UTF8; _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } catch { Write-Error "Failed to convert TOON to SuperJSON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromToon -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toon$', '.superjson'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            $toon = Get-Content -LiteralPath $InputPath -Raw
+            $jsonObj = Convert-ToonToJson -ToonString $toon
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $jsonObj | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $tempJson -Encoding UTF8
+            _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
+            Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to convert TOON to SuperJSON: $_"
+        }
+    } -Force
 
     # SuperJSON to TOML
-    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToToml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.superjson$', '.toml' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; if (-not (Get-Command yq -ErrorAction SilentlyContinue)) { throw "yq command not available" }; if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) { throw "PSToml module is not available" }; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson; $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json; $toml = $jsonObj | ConvertTo-Toml -Depth 100; if ($toml) { Set-Content -LiteralPath $OutputPath -Value $toml -Encoding UTF8 } else { throw "PSToml conversion failed" }; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } catch { Write-Error "Failed to convert SuperJSON to TOML: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToToml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.superjson$', '.toml'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+                throw "yq command not available"
+            }
+            if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
+                throw "PSToml module is not available"
+            }
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
+            $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
+            $toml = $jsonObj | ConvertTo-Toml -Depth 100
+            if ($toml) {
+                Set-Content -LiteralPath $OutputPath -Value $toml -Encoding UTF8
+            }
+            else {
+                throw "PSToml conversion failed"
+            }
+            Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to convert SuperJSON to TOML: $_"
+        }
+    } -Force
 
     # TOML to SuperJSON
-    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromToml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.toml$', '.superjson' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; if (-not (Get-Command yq -ErrorAction SilentlyContinue)) { throw "yq command not available" }; $json = & yq eval -o=json -p toml '.' $InputPath 2>$null; if ($LASTEXITCODE -eq 0 -and $json) { $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; $json | Set-Content -LiteralPath $tempJson -Encoding UTF8; _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } else { throw "yq command failed" } } catch { Write-Error "Failed to convert TOML to SuperJSON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromToml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.toml$', '.superjson'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+                throw "yq command not available"
+            }
+            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            if ($LASTEXITCODE -eq 0 -and $json) {
+                $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+                $json | Set-Content -LiteralPath $tempJson -Encoding UTF8
+                _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
+                Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+            }
+            else {
+                throw "yq command failed"
+            }
+        }
+        catch {
+            Write-Error "Failed to convert TOML to SuperJSON: $_"
+        }
+    } -Force
 
     # SuperJSON to XML
-    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToXml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.superjson$', '.xml' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson; $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json; $xml = Convert-JsonToXml -JsonObject $jsonObj; $xml.Save($OutputPath); Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } catch { Write-Error "Failed to convert SuperJSON to XML: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToXml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.superjson$', '.xml'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
+            $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
+            $xml = Convert-JsonToXml -JsonObject $jsonObj
+            $xml.Save($OutputPath)
+            Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to convert SuperJSON to XML: $_"
+        }
+    } -Force
 
     # XML to SuperJSON
-    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromXml -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.xml$', '.superjson' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; $xml = [xml](Get-Content -LiteralPath $InputPath -Raw); $result = @{}; $result[$xml.DocumentElement.Name] = Convert-XmlToJsonObject $xml.DocumentElement; $jsonObj = [PSCustomObject]$result; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; $jsonObj | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $tempJson -Encoding UTF8; _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } catch { Write-Error "Failed to convert XML to SuperJSON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromXml -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.xml$', '.superjson'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            $xml = [xml](Get-Content -LiteralPath $InputPath -Raw)
+            $result = @{}
+            $result[$xml.DocumentElement.Name] = Convert-XmlToJsonObject $xml.DocumentElement
+            $jsonObj = [PSCustomObject]$result
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $jsonObj | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $tempJson -Encoding UTF8
+            _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
+            Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to convert XML to SuperJSON: $_"
+        }
+    } -Force
 
     # SuperJSON to CSV
-    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToCsv -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.superjson$', '.csv' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson; $data = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json; if ($data -is [array]) { $data | Export-Csv -NoTypeInformation -Path $OutputPath } elseif ($data -is [PSCustomObject]) { @($data) | Export-Csv -NoTypeInformation -Path $OutputPath } else { throw "SuperJSON must represent an array of objects or a single object" }; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } catch { Write-Error "Failed to convert SuperJSON to CSV: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertFrom-SuperJsonToCsv -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.superjson$', '.csv'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
+            $data = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
+            if ($data -is [array]) {
+                $data | Export-Csv -NoTypeInformation -Path $OutputPath
+            }
+            elseif ($data -is [PSCustomObject]) {
+                @($data) | Export-Csv -NoTypeInformation -Path $OutputPath
+            }
+            else {
+                throw "SuperJSON must represent an array of objects or a single object"
+            }
+            Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to convert SuperJSON to CSV: $_"
+        }
+    } -Force
 
     # CSV to SuperJSON
-    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromCsv -Value { param([string]$InputPath, [string]$OutputPath) try { if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.csv$', '.superjson' }; if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is not available" }; $data = Import-Csv -Path $InputPath; $tempJson = $env:TEMP + "\temp-$(Get-Random).json"; $data | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $tempJson -Encoding UTF8; _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath; Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue } catch { Write-Error "Failed to convert CSV to SuperJSON: $_" } } -Force
+    Set-Item -Path Function:Global:_ConvertTo-SuperJsonFromCsv -Value {
+        param([string]$InputPath, [string]$OutputPath)
+        try {
+            if (-not $OutputPath) {
+                $OutputPath = $InputPath -replace '\.csv$', '.superjson'
+            }
+            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                throw "Node.js is not available"
+            }
+            $data = Import-Csv -Path $InputPath
+            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $data | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $tempJson -Encoding UTF8
+            _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
+            Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to convert CSV to SuperJSON: $_"
+        }
+    } -Force
 }
 
 # Public functions and aliases

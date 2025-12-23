@@ -84,7 +84,7 @@ Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 - `FileSystem.psm1` - File system operations (`Ensure-DirectoryExists`, `Test-PathExists`)
 - `PathUtilities.psm1` - Path manipulation utilities
 - `Platform.psm1` - Platform detection (`Get-PowerShellExecutable`)
-- And many more specialized modules (see `scripts/lib/` directory)
+- And many more specialized modules (39 total modules, see `scripts/lib/` directory)
 
 **New Helper Functions:**
 
@@ -263,14 +263,22 @@ Run these checks before opening a PR:
 
 ### Using Tasks (Recommended)
 
-**VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task  
-**Taskfile**: Run `task <task-name>`
+This project supports multiple task runners. Choose the one that fits your workflow:
+
+- **Task** (recommended): `task <task-name>`
+- **Just**: `just <recipe-name>`
+- **Make**: `make <target>`
+- **npm/pnpm**: `npm run <script>` or `pnpm run <script>`
+- **VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
+- **Sublime Text**: Tools → Build System → "Task: <name>"
+
+All task runners have full parity - the same 48+ tasks are available in each format.
 
 ```powershell
 # Full quality check (recommended before PR)
-task quality-check
+task quality-check    # or: just quality-check, make quality-check, npm run quality-check
 
-# Or individual tasks
+# Or individual tasks (all work with task, just, make, npm run)
 task validate                 # Full validation (format + security + lint + spellcheck + help + idempotency)
 task format                   # Format code
 task lint                     # Lint code
@@ -511,14 +519,22 @@ Run these checks before opening a PR:
 
 ### Using Tasks (Recommended)
 
-**VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task  
-**Taskfile**: Run `task <task-name>`
+This project supports multiple task runners. Choose the one that fits your workflow:
+
+- **Task** (recommended): `task <task-name>`
+- **Just**: `just <recipe-name>`
+- **Make**: `make <target>`
+- **npm/pnpm**: `npm run <script>` or `pnpm run <script>`
+- **VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
+- **Sublime Text**: Tools → Build System → "Task: <name>"
+
+All task runners have full parity - the same 48+ tasks are available in each format.
 
 ```powershell
 # Full quality check (recommended before PR)
-task quality-check
+task quality-check    # or: just quality-check, make quality-check, npm run quality-check
 
-# Or individual tasks
+# Or individual tasks (all work with task, just, make, npm run)
 task validate                 # Full validation (format + security + lint + spellcheck + help + idempotency)
 task format                   # Format code
 task lint                     # Lint code

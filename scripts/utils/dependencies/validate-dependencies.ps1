@@ -6,14 +6,17 @@ scripts/utils/validate-dependencies.ps1
 
 .DESCRIPTION
     Checks PowerShell version, required modules, and optional external tools
-    against the requirements.psd1 file. Reports missing dependencies and
+    against the requirements configuration (modular structure in requirements/
+    directory). Reports missing dependencies and
     provides installation instructions.
 
 .PARAMETER InstallMissing
     If specified, attempts to install missing PowerShell modules automatically.
 
 .PARAMETER RequirementsFile
-    Path to requirements file. Defaults to requirements.psd1 in repository root.
+    Path to specific requirements file (optional). If not specified, uses the
+    modular requirements loader (requirements/load-requirements.ps1) which
+    automatically loads all category files.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1
@@ -51,6 +54,7 @@ Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChec
 Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Cache' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'DataFile' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'RequirementsLoader' -ScriptPath $PSScriptRoot -DisableNameChecking
 
 # Get repository root
 try {
@@ -60,17 +64,24 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-# Load requirements file
-if (-not $RequirementsFile) {
-    $RequirementsFile = Join-Path $repoRoot 'requirements.psd1'
-}
-
-if (-not (Test-Path -Path $RequirementsFile)) {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Requirements file not found: $RequirementsFile"
-}
-
+# Load requirements file using the new loader
 try {
-    $requirements = Import-CachedPowerShellDataFile -Path $RequirementsFile -ErrorAction Stop
+    if ($RequirementsFile) {
+        # If specific file provided, use legacy import
+        if (-not (Test-Path -Path $RequirementsFile)) {
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Requirements file not found: $RequirementsFile"
+        }
+        if (Get-Command Import-CachedPowerShellDataFile -ErrorAction SilentlyContinue) {
+            $requirements = Import-CachedPowerShellDataFile -Path $RequirementsFile -ErrorAction Stop
+        }
+        else {
+            $requirements = Import-PowerShellDataFile -Path $RequirementsFile -ErrorAction Stop
+        }
+    }
+    else {
+        # Use new modular loader
+        $requirements = Import-Requirements -RepoRoot $repoRoot -UseCache
+    }
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
@@ -177,7 +188,25 @@ if ($requirements.ExternalTools) {
                 Write-ScriptMessage -Message "  ✗ $toolName (REQUIRED) - Missing" -IsError
                 
                 if ($toolReq.InstallCommand) {
-                    Write-ScriptMessage -Message "    Install with: $($toolReq.InstallCommand)" -LogLevel Info
+                    $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
+                        Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName
+                    }
+                    else {
+                        # Fallback: resolve platform-specific command manually
+                        $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
+                        elseif ($IsLinux) { 'Linux' }
+                        elseif ($IsMacOS) { 'macOS' }
+                        else { 'Windows' }
+                        if ($toolReq.InstallCommand -is [hashtable]) {
+                            $toolReq.InstallCommand[$platform]
+                        }
+                        else {
+                            $toolReq.InstallCommand
+                        }
+                    }
+                    if ($resolvedCmd) {
+                        Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
+                    }
                 }
             }
             else {
@@ -185,7 +214,25 @@ if ($requirements.ExternalTools) {
                 Write-ScriptMessage -Message "  ⚠ $toolName (OPTIONAL) - Missing" -IsWarning
                 
                 if ($toolReq.InstallCommand) {
-                    Write-ScriptMessage -Message "    Install with: $($toolReq.InstallCommand)" -LogLevel Info
+                    $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
+                        Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName
+                    }
+                    else {
+                        # Fallback: resolve platform-specific command manually
+                        $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
+                        elseif ($IsLinux) { 'Linux' }
+                        elseif ($IsMacOS) { 'macOS' }
+                        else { 'Windows' }
+                        if ($toolReq.InstallCommand -is [hashtable]) {
+                            $toolReq.InstallCommand[$platform]
+                        }
+                        else {
+                            $toolReq.InstallCommand
+                        }
+                    }
+                    if ($resolvedCmd) {
+                        Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
+                    }
                 }
             }
         }

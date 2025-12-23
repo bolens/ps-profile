@@ -16,11 +16,24 @@ Get-AnsibleInventory
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments to pass to ansible-inventory.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-AnsibleInventory --list
+``
+
+### Example 2
+
+`powershell
+Get-AnsibleInventory --host webserver
+``
 
 ## Aliases
 
