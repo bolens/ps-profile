@@ -429,6 +429,7 @@ PS_PROFILE_BATCH_LOAD=1
 - `PS_PROFILE_PARALLEL_LOADING` - **EXPERIMENTAL**: Enable parallel fragment loading (`0` or `1`, default: `0`). Attempts to load independent fragments in parallel, falls back to sequential on failure
 - `PS_PROFILE_DEBUG` - Enable debug output (`0` or `1`)
 - `PS_PROFILE_DEBUG_TIMINGS` - Enable performance timing (`0` or `1`)
+- `PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS` - Show individual fragment loading messages instead of batched output (`0` or `1`, default: `0`). When `PS_PROFILE_DEBUG=1`, fragments are shown in batches of 10 by default
 - `PS_PROFILE_ENABLE_LOCAL_OVERRIDES` - Enable local-overrides.ps1 loading (`0` or `1`, default: `0`) - **WARNING**: Disabled by default due to performance issues (100+ second delays on some filesystems when file doesn't exist)
 
 **Features:**

@@ -191,6 +191,38 @@ $script:FileConversionModuleRegistry = @{
         @{ Dir = 'dev-tools-modules/data'; File = 'number-base.ps1' }
         @{ Dir = 'dev-tools-modules/data'; File = 'units.ps1' }
     )
+    
+    'Ensure-Utilities'                  = @(
+        # System utilities (profile management, security, environment)
+        @{ Dir = 'utilities-modules/system'; File = 'utilities-profile.ps1' }
+        @{ Dir = 'utilities-modules/system'; File = 'utilities-security.ps1' }
+        @{ Dir = 'utilities-modules/system'; File = 'utilities-env.ps1' }
+        # Network utilities (connectivity, DNS, port checking)
+        @{ Dir = 'utilities-modules/network'; File = 'utilities-network.ps1' }
+        # Command history utilities (search, filtering, management)
+        @{ Dir = 'utilities-modules/history'; File = 'utilities-history.ps1' }
+        # Data utilities (encoding, date/time manipulation)
+        @{ Dir = 'utilities-modules/data'; File = 'utilities-encoding.ps1' }
+        @{ Dir = 'utilities-modules/data'; File = 'utilities-datetime.ps1' }
+        # Filesystem utilities (path manipulation, directory operations)
+        @{ Dir = 'utilities-modules/filesystem'; File = 'utilities-filesystem.ps1' }
+    )
+    
+    'Ensure-System'                     = @(
+        @{ Dir = 'system'; File = 'FileOperations.ps1' }
+        @{ Dir = 'system'; File = 'SystemInfo.ps1' }
+        @{ Dir = 'system'; File = 'NetworkOperations.ps1' }
+        @{ Dir = 'system'; File = 'ArchiveOperations.ps1' }
+        @{ Dir = 'system'; File = 'EditorAliases.ps1' }
+        @{ Dir = 'system'; File = 'TextSearch.ps1' }
+    )
+    
+    'Ensure-Git'                        = @(
+        @{ Dir = 'git-modules/core'; File = 'git-helpers.ps1' }
+        @{ Dir = 'git-modules/core'; File = 'git-basic.ps1' }
+        @{ Dir = 'git-modules/core'; File = 'git-advanced.ps1' }
+        @{ Dir = 'git-modules/integrations'; File = 'git-github.ps1' }
+    )
 }
 
 <#

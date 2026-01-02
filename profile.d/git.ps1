@@ -35,102 +35,33 @@ try {
         Set-Alias -Name Prompt-GitSegment -Value Format-PromptGitSegment -ErrorAction SilentlyContinue
     }
 
-    # Load Git utility modules (loaded eagerly as they provide commonly-used Git helpers)
-    # Use standardized module loading if available, otherwise fall back to manual loading
-    if (Get-Command Import-FragmentModules -ErrorAction SilentlyContinue) {
-        try {
-            $modules = @(
-                @{ ModulePath = @('git-modules', 'core', 'git-helpers.ps1'); Context = 'Fragment: git (git-helpers.ps1)' },
-                @{ ModulePath = @('git-modules', 'core', 'git-basic.ps1'); Context = 'Fragment: git (git-basic.ps1)' },
-                @{ ModulePath = @('git-modules', 'core', 'git-advanced.ps1'); Context = 'Fragment: git (git-advanced.ps1)' },
-                @{ ModulePath = @('git-modules', 'integrations', 'git-github.ps1'); Context = 'Fragment: git (git-github.ps1)' }
-            )
-            
-            $result = Import-FragmentModules -FragmentRoot $PSScriptRoot -Modules $modules
-            
-            if ($env:PS_PROFILE_DEBUG -and $result.FailureCount -gt 0) {
-                Write-Verbose "Loaded $($result.SuccessCount) git modules (failed: $($result.FailureCount))"
-            }
+    # ===============================================
+    # Git Modules - DEFERRED LOADING
+    # ===============================================
+    # Modules are now loaded on-demand via Ensure-Git function.
+    # See files-module-registry.ps1 for module mappings.
+    #
+    # OLD EAGER LOADING CODE (commented out for performance):
+    # Previously loaded 4 modules eagerly at startup, adding 200-500ms to load time.
+    # Now modules are loaded only when Ensure-Git is called.
+    
+    # Lazy bulk initializer for Git utility functions
+    <#
+    .SYNOPSIS
+        Sets up all Git utility functions when any of them is called for the first time.
+        This lazy loading approach improves profile startup performance.
+        Loads Git modules from the git-modules subdirectory.
+    #>
+    function Ensure-Git {
+        if ($global:GitInitialized) { return }
+
+        # Load modules from registry (deferred loading - only loads when this function is called)
+        if (Get-Command Load-EnsureModules -ErrorAction SilentlyContinue) {
+            Load-EnsureModules -EnsureFunctionName 'Ensure-Git' -BaseDir $PSScriptRoot
         }
-        catch {
-            if ($env:PS_PROFILE_DEBUG) {
-                if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                    Write-ProfileError -ErrorRecord $_ -Context "Fragment: git" -Category 'Fragment'
-                }
-                else {
-                    Write-Warning "Failed to load git fragment: $($_.Exception.Message)"
-                }
-            }
-        }
-    }
-    else {
-        # Fallback: manual loading for environments where Import-FragmentModules is not yet available
-        try {
-            $gitModulesDir = Join-Path $PSScriptRoot 'git-modules'
-            if ($gitModulesDir -and -not [string]::IsNullOrWhiteSpace($gitModulesDir) -and (Test-Path -LiteralPath $gitModulesDir)) {
-                # Core Git operations (helpers, basic commands, advanced workflows)
-                $coreDir = Join-Path $gitModulesDir 'core'
-                try { . (Join-Path $coreDir 'git-helpers.ps1') }
-                catch { 
-                    if ($env:PS_PROFILE_DEBUG) { 
-                        if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                            Write-ProfileError -ErrorRecord $_ -Context "Fragment: git (git-helpers)" -Category 'Fragment'
-                        }
-                        else {
-                            Write-Warning "Failed to load git-helpers.ps1: $($_.Exception.Message)" 
-                        }
-                    } 
-                }
-                
-                try { . (Join-Path $coreDir 'git-basic.ps1') }
-                catch { 
-                    if ($env:PS_PROFILE_DEBUG) { 
-                        if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                            Write-ProfileError -ErrorRecord $_ -Context "Fragment: git (git-basic)" -Category 'Fragment'
-                        }
-                        else {
-                            Write-Warning "Failed to load git-basic.ps1: $($_.Exception.Message)" 
-                        }
-                    } 
-                }
-                
-                try { . (Join-Path $coreDir 'git-advanced.ps1') }
-                catch { 
-                    if ($env:PS_PROFILE_DEBUG) { 
-                        if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                            Write-ProfileError -ErrorRecord $_ -Context "Fragment: git (git-advanced)" -Category 'Fragment'
-                        }
-                        else {
-                            Write-Warning "Failed to load git-advanced.ps1: $($_.Exception.Message)" 
-                        }
-                    } 
-                }
-                
-                # Git service integrations (GitHub-specific helpers)
-                $integrationsDir = Join-Path $gitModulesDir 'integrations'
-                try { . (Join-Path $integrationsDir 'git-github.ps1') }
-                catch { 
-                    if ($env:PS_PROFILE_DEBUG) { 
-                        if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                            Write-ProfileError -ErrorRecord $_ -Context "Fragment: git (git-github)" -Category 'Fragment'
-                        }
-                        else {
-                            Write-Warning "Failed to load git-github.ps1: $($_.Exception.Message)" 
-                        }
-                    } 
-                }
-            }
-        }
-        catch {
-            if ($env:PS_PROFILE_DEBUG) {
-                if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                    Write-ProfileError -ErrorRecord $_ -Context "Fragment: git" -Category 'Fragment'
-                }
-                else {
-                    Write-Warning "Failed to load git fragment: $($_.Exception.Message)"
-                }
-            }
-        }
+
+        # Mark as initialized
+        $global:GitInitialized = $true
     }
 
     # Mark fragment as loaded

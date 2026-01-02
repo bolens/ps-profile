@@ -102,6 +102,37 @@ pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1
 . $PROFILE
 ```
 
+## Terminal Key Bindings
+
+### Ctrl+C Behavior
+
+If Ctrl+C is closing your WARP terminal pane instead of canceling the current command, you need to configure WARP's key bindings:
+
+1. Open WARP Settings (Command Palette: `Cmd/Ctrl+Shift+P` → "Preferences: Open Settings")
+2. Search for "key bindings" or navigate to Key Bindings
+3. Find the binding for `Ctrl+C` (or `Cmd+C` on macOS)
+4. Change it to pass the signal through to the shell instead of closing the pane
+5. Alternatively, unbind `Ctrl+C` from the "Close Pane" action
+
+**PowerShell Configuration:**
+
+The profile configures PSReadLine to use the default `CopyOrCancelLine` behavior for Ctrl+C:
+
+- Copies selected text if there's a selection
+- Sends interrupt signal (cancels running command) if no selection
+
+This is configured in `profile.d/psreadline.ps1`. However, if WARP intercepts Ctrl+C before it reaches PowerShell, you must fix it in WARP's settings.
+
+**Verifying the Fix:**
+
+After updating WARP settings, test with:
+
+```powershell
+# Start a long-running command
+Start-Sleep -Seconds 30
+# Press Ctrl+C - it should cancel the command, not close the pane
+```
+
 ## Code Architecture
 
 ### Core Structure

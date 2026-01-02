@@ -43,8 +43,7 @@ $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = '99-test-*'
 
 Set the variable to `1`, `true`, or `*` to hide all fragment warnings for the current session. The test harness automatically enables suppression for fragments named `99-test-*` so integration tests stay quiet while still logging details to the debug file when needed.
 
-Timings / micro-instrumentation
---------------------------------
+## Timings / micro-instrumentation
 
 Some fragments include lightweight instrumentation that appends CSV rows to
 `scripts/*.csv` when enabled. To enable per-step timing for development:
@@ -57,3 +56,29 @@ $env:PS_PROFILE_DEBUG_TIMINGS = '1'
 After running, check the generated CSV (for example `scripts/alias-instrument.csv`).
 Remove the file when finished to keep the workspace clean; it is safe to
 recreate by re-running the instrumented fragment.
+
+### Fragment Loading Output
+
+When `PS_PROFILE_DEBUG=1` is enabled, fragment loading messages are shown in batches of 10 by default to reduce output verbosity:
+
+```
+Loading fragments (10 total): bootstrap, env, files-module-registry, ai-tools, aliases, angular, ansible, api-tools, asdf, aws
+Loading fragments (20 total): azure, beads, bottom, build-tools, bun, chocolatey, clipboard, cocoapods, conan, conda
+...
+Loaded 119 fragments successfully
+```
+
+To show individual fragment loading messages (one per line), set:
+
+```powershell
+$env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS = '1'
+```
+
+This will display:
+
+```
+Loading profile fragment: bootstrap.ps1
+Loading profile fragment: env.ps1
+Loading profile fragment: files-module-registry.ps1
+...
+```

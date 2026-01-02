@@ -111,6 +111,17 @@ function Initialize-FragmentLoading {
     $allSucceeded = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     $allFailed = [System.Collections.Generic.List[hashtable]]::new()
     $failedNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    
+    # Initialize fragment tracking for consolidated output (if not already initialized)
+    if (-not $script:LoadedFragments) {
+        $script:LoadedFragments = [System.Collections.Generic.List[string]]::new()
+    }
+    else {
+        $script:LoadedFragments.Clear()
+    }
+    if (-not $script:FragmentLoadingBatchSize) {
+        $script:FragmentLoadingBatchSize = 10  # Show fragments in batches of 10
+    }
 
     # Treat bootstrap as a pre-stage: load first, but do NOT include in batch numbering
     $bootstrapNameSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
@@ -239,8 +250,33 @@ function Initialize-FragmentLoading {
             return $null
         }
 
+        # Collect fragment name for consolidated output
         if ($env:PS_PROFILE_DEBUG -and -not $env:PS_PROFILE_DEBUG_PARALLEL_SUPPRESS) {
-            Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan
+            # Check if we should show individual messages or batch them
+            $showIndividualFragments = $false
+            if (Get-Command Test-EnvBool -ErrorAction SilentlyContinue) {
+                $showIndividualFragments = Test-EnvBool -Value $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS
+            }
+            elseif ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
+                $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
+                $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
+            }
+            
+            if ($showIndividualFragments) {
+                Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan
+            }
+            else {
+                # Collect for batch display
+                $script:LoadedFragments.Add($fragmentBaseName)
+                
+                # Show batch every N fragments
+                if ($script:LoadedFragments.Count % $script:FragmentLoadingBatchSize -eq 0) {
+                    $batchStart = [Math]::Max(0, $script:LoadedFragments.Count - $script:FragmentLoadingBatchSize)
+                    $batch = $script:LoadedFragments[$batchStart..($script:LoadedFragments.Count - 1)]
+                    $fragmentList = ($batch -join ', ')
+                    Write-Host "Loading fragments ($($script:LoadedFragments.Count) total): $fragmentList" -ForegroundColor Cyan
+                }
+            }
         }
 
         $originalProfileFragmentRoot = $global:ProfileFragmentRoot
@@ -468,6 +504,34 @@ function Initialize-FragmentLoading {
 
     if ($null -ne $dependencyParsingTimeMs -and (Get-Command Record-DependencyParsing -ErrorAction SilentlyContinue)) {
         Record-DependencyParsing -ParsingTime $dependencyParsingTimeMs -DependencyLevels $dependencyLevelsCount
+    }
+    
+    # Show remaining fragments if we're batching
+    if ($env:PS_PROFILE_DEBUG) {
+        $showIndividualFragments = $false
+        if (Get-Command Test-EnvBool -ErrorAction SilentlyContinue) {
+            $showIndividualFragments = Test-EnvBool -Value $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS
+        }
+        elseif ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
+            $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
+            $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
+        }
+        
+        if (-not $showIndividualFragments) {
+            $remainingCount = $script:LoadedFragments.Count % $script:FragmentLoadingBatchSize
+            if ($remainingCount -gt 0) {
+                $batchStart = $script:LoadedFragments.Count - $remainingCount
+                $batch = $script:LoadedFragments[$batchStart..($script:LoadedFragments.Count - 1)]
+                $fragmentList = ($batch -join ', ')
+                Write-Host "Loading fragments ($($script:LoadedFragments.Count) total): $fragmentList" -ForegroundColor Cyan
+            }
+            
+            # Show summary
+            if ($script:LoadedFragments.Count -gt 0) {
+                Write-Host ""
+                Write-Host "Loaded $($script:LoadedFragments.Count) fragments successfully" -ForegroundColor Green
+            }
+        }
     }
 }
 

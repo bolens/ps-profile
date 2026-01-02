@@ -379,6 +379,8 @@ if ($profileDExists -and $allFragments) {
                 }
             }
             # Fallback: use simple sequential loading
+            $fallbackLoadedFragments = [System.Collections.Generic.List[string]]::new()
+            $fallbackBatchSize = 10
             foreach ($fragment in $fragmentsToLoad) {
                 $fragmentName = $fragment.Name
                 $fragmentBaseName = $fragment.BaseName
@@ -388,8 +390,25 @@ if ($profileDExists -and $allFragments) {
                     continue
                 }
 
-                if ($env:PS_PROFILE_DEBUG) { 
-                    Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan 
+                if ($env:PS_PROFILE_DEBUG) {
+                    $showIndividualFragments = $false
+                    if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
+                        $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
+                        $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
+                    }
+                    
+                    if ($showIndividualFragments) {
+                        Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan
+                    }
+                    else {
+                        $fallbackLoadedFragments.Add($fragmentBaseName)
+                        if ($fallbackLoadedFragments.Count % $fallbackBatchSize -eq 0) {
+                            $batchStart = [Math]::Max(0, $fallbackLoadedFragments.Count - $fallbackBatchSize)
+                            $batch = $fallbackLoadedFragments[$batchStart..($fallbackLoadedFragments.Count - 1)]
+                            $fragmentList = ($batch -join ', ')
+                            Write-Host "Loading fragments ($($fallbackLoadedFragments.Count) total): $fragmentList" -ForegroundColor Cyan
+                        }
+                    }
                 }
 
                 $originalProfileFragmentRoot = $global:ProfileFragmentRoot
@@ -409,10 +428,33 @@ if ($profileDExists -and $allFragments) {
                     $global:ProfileFragmentRoot = $originalProfileFragmentRoot
                 }
             }
+            
+            # Show remaining fragments if batching
+            if ($env:PS_PROFILE_DEBUG -and $fallbackLoadedFragments.Count -gt 0) {
+                $showIndividualFragments = $false
+                if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
+                    $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
+                    $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
+                }
+                
+                if (-not $showIndividualFragments) {
+                    $remainingCount = $fallbackLoadedFragments.Count % $fallbackBatchSize
+                    if ($remainingCount -gt 0) {
+                        $batchStart = $fallbackLoadedFragments.Count - $remainingCount
+                        $batch = $fallbackLoadedFragments[$batchStart..($fallbackLoadedFragments.Count - 1)]
+                        $fragmentList = ($batch -join ', ')
+                        Write-Host "Loading fragments ($($fallbackLoadedFragments.Count) total): $fragmentList" -ForegroundColor Cyan
+                    }
+                    Write-Host ""
+                    Write-Host "Loaded $($fallbackLoadedFragments.Count) fragments successfully" -ForegroundColor Green
+                }
+            }
         }
     }
     else {
         # Fallback: use simple sequential loading
+        $fallbackLoadedFragments2 = [System.Collections.Generic.List[string]]::new()
+        $fallbackBatchSize2 = 10
         foreach ($fragment in $fragmentsToLoad) {
             $fragmentName = $fragment.Name
             $fragmentBaseName = $fragment.BaseName
@@ -422,8 +464,25 @@ if ($profileDExists -and $allFragments) {
                 continue
             }
 
-            if ($env:PS_PROFILE_DEBUG) { 
-                Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan 
+            if ($env:PS_PROFILE_DEBUG) {
+                $showIndividualFragments = $false
+                if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
+                    $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
+                    $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
+                }
+                
+                if ($showIndividualFragments) {
+                    Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan
+                }
+                else {
+                    $fallbackLoadedFragments2.Add($fragmentBaseName)
+                    if ($fallbackLoadedFragments2.Count % $fallbackBatchSize2 -eq 0) {
+                        $batchStart = [Math]::Max(0, $fallbackLoadedFragments2.Count - $fallbackBatchSize2)
+                        $batch = $fallbackLoadedFragments2[$batchStart..($fallbackLoadedFragments2.Count - 1)]
+                        $fragmentList = ($batch -join ', ')
+                        Write-Host "Loading fragments ($($fallbackLoadedFragments2.Count) total): $fragmentList" -ForegroundColor Cyan
+                    }
+                }
             }
 
             $originalProfileFragmentRoot = $global:ProfileFragmentRoot
@@ -441,6 +500,27 @@ if ($profileDExists -and $allFragments) {
             }
             finally {
                 $global:ProfileFragmentRoot = $originalProfileFragmentRoot
+            }
+        }
+        
+        # Show remaining fragments if batching
+        if ($env:PS_PROFILE_DEBUG -and $fallbackLoadedFragments2.Count -gt 0) {
+            $showIndividualFragments = $false
+            if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
+                $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
+                $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
+            }
+            
+            if (-not $showIndividualFragments) {
+                $remainingCount = $fallbackLoadedFragments2.Count % $fallbackBatchSize2
+                if ($remainingCount -gt 0) {
+                    $batchStart = $fallbackLoadedFragments2.Count - $remainingCount
+                    $batch = $fallbackLoadedFragments2[$batchStart..($fallbackLoadedFragments2.Count - 1)]
+                    $fragmentList = ($batch -join ', ')
+                    Write-Host "Loading fragments ($($fallbackLoadedFragments2.Count) total): $fragmentList" -ForegroundColor Cyan
+                }
+                Write-Host ""
+                Write-Host "Loaded $($fallbackLoadedFragments2.Count) fragments successfully" -ForegroundColor Green
             }
         }
     }

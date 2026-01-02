@@ -21,39 +21,40 @@ function Show-ProfileEnvVariables {
     # Define all known PS_PROFILE variables with their defaults, grouped by category
     $knownVariables = @{
         # Debug & Performance
-        'PS_PROFILE_DEBUG'                      = @{ Default = '0'; Category = 'Debug'; Description = 'Enable debug output for profile loading' }
-        'PS_PROFILE_DEBUG_TIMINGS'              = @{ Default = '0'; Category = 'Debug'; Description = 'Enable performance timing output for fragment loading' }
-        'PS_PROFILE_DEBUG_PARALLEL_SUPPRESS'    = @{ Default = '0'; Category = 'Debug'; Description = 'Suppress individual fragment messages during parallel loading' }
-        'PS_PROFILE_DEBUG_TESTPATH'             = @{ Default = '0'; Category = 'Debug'; Description = 'Enable Test-Path interception debugging' }
-        'PS_PROFILE_DEBUG_TESTPATH_TRACE'       = @{ Default = '0'; Category = 'Debug'; Description = 'Enable Test-Path trace debugging (detailed logging)' }
-        'PS_PROFILE_DEBUG_SHOW_ALL_VARS'        = @{ Default = '0'; Category = 'Debug'; Description = 'Show all environment variables in debug output (including defaults)' }
+        'PS_PROFILE_DEBUG'                           = @{ Default = '0'; Category = 'Debug'; Description = 'Enable debug output for profile loading' }
+        'PS_PROFILE_DEBUG_TIMINGS'                   = @{ Default = '0'; Category = 'Debug'; Description = 'Enable performance timing output for fragment loading' }
+        'PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS' = @{ Default = '0'; Category = 'Debug'; Description = 'Show individual fragment loading messages (instead of batched output)' }
+        'PS_PROFILE_DEBUG_PARALLEL_SUPPRESS'         = @{ Default = '0'; Category = 'Debug'; Description = 'Suppress individual fragment messages during parallel loading' }
+        'PS_PROFILE_DEBUG_TESTPATH'                  = @{ Default = '0'; Category = 'Debug'; Description = 'Enable Test-Path interception debugging' }
+        'PS_PROFILE_DEBUG_TESTPATH_TRACE'            = @{ Default = '0'; Category = 'Debug'; Description = 'Enable Test-Path trace debugging (detailed logging)' }
+        'PS_PROFILE_DEBUG_SHOW_ALL_VARS'             = @{ Default = '0'; Category = 'Debug'; Description = 'Show all environment variables in debug output (including defaults)' }
         
         # Loading & Performance
-        'PS_PROFILE_PARALLEL_LOADING'           = @{ Default = '0'; Category = 'Loading'; Description = 'EXPERIMENTAL: Enable parallel fragment loading (hybrid approach with sequential fallback)' }
-        'PS_PROFILE_PARALLEL_DEPENDENCIES'      = @{ Default = '1'; Category = 'Loading'; Description = 'Enable parallel dependency parsing (speeds up dependency analysis)' }
-        'PS_PROFILE_LOAD_ALL'                   = @{ Default = '0'; Category = 'Loading'; Description = 'Load all fragments (override disabled fragments and environment restrictions)' }
-        'PS_PROFILE_ENABLE_LOCAL_OVERRIDES'     = @{ Default = '0'; Category = 'Loading'; Description = 'Enable local-overrides.ps1 loading (WARNING: may cause performance issues)' }
-        'PS_PROFILE_BATCH_LOAD'                 = @{ Default = '0'; Category = 'Loading'; Description = 'Enable batch loading optimization for faster startup' }
+        'PS_PROFILE_PARALLEL_LOADING'                = @{ Default = '0'; Category = 'Loading'; Description = 'EXPERIMENTAL: Enable parallel fragment loading (hybrid approach with sequential fallback)' }
+        'PS_PROFILE_PARALLEL_DEPENDENCIES'           = @{ Default = '1'; Category = 'Loading'; Description = 'Enable parallel dependency parsing (speeds up dependency analysis)' }
+        'PS_PROFILE_LOAD_ALL'                        = @{ Default = '0'; Category = 'Loading'; Description = 'Load all fragments (override disabled fragments and environment restrictions)' }
+        'PS_PROFILE_ENABLE_LOCAL_OVERRIDES'          = @{ Default = '0'; Category = 'Loading'; Description = 'Enable local-overrides.ps1 loading (WARNING: may cause performance issues)' }
+        'PS_PROFILE_BATCH_LOAD'                      = @{ Default = '0'; Category = 'Loading'; Description = 'Enable batch loading optimization for faster startup' }
         
         # Configuration
-        'PS_PROFILE_ENVIRONMENT'                = @{ Default = ''; Category = 'Config'; Description = 'Active environment (minimal/testing/ci/server/cloud/containers/web/full/development)' }
-        'PS_PROFILE_AUTOENABLE_ALIASES'         = @{ Default = '0'; Category = 'Config'; Description = 'Auto-enable aliases on profile load (instead of on-demand)' }
-        'PS_PROFILE_AUTOENABLE_PSREADLINE'      = @{ Default = '0'; Category = 'Config'; Description = 'Auto-enable PSReadLine (mainly for benchmarking)' }
-        'PS_PROFILE_SKIP_UPDATES'               = @{ Default = '0'; Category = 'Config'; Description = 'Skip automatic profile update checks' }
-        'PS_PROFILE_SUPPRESS_TOOL_WARNINGS'     = @{ Default = '0'; Category = 'Config'; Description = 'Suppress missing tool warnings' }
-        'PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS' = @{ Default = ''; Category = 'Config'; Description = 'Suppress warnings from specific fragments (comma/semicolon/space-separated fragment names, or all/*/1/true for all)' }
-        'PS_PROFILE_ASSUME_COMMANDS'            = @{ Default = ''; Category = 'Config'; Description = 'Assume these commands are available even if not found on PATH (comma/semicolon/space-separated)' }
-        'PS_PROFILE_TEST_MODE'                  = @{ Default = '0'; Category = 'Config'; Description = 'Enable test mode (disables certain interactive features, for testing/CI)' }
+        'PS_PROFILE_ENVIRONMENT'                     = @{ Default = ''; Category = 'Config'; Description = 'Active environment (minimal/testing/ci/server/cloud/containers/web/full/development)' }
+        'PS_PROFILE_AUTOENABLE_ALIASES'              = @{ Default = '0'; Category = 'Config'; Description = 'Auto-enable aliases on profile load (instead of on-demand)' }
+        'PS_PROFILE_AUTOENABLE_PSREADLINE'           = @{ Default = '0'; Category = 'Config'; Description = 'Auto-enable PSReadLine (mainly for benchmarking)' }
+        'PS_PROFILE_SKIP_UPDATES'                    = @{ Default = '0'; Category = 'Config'; Description = 'Skip automatic profile update checks' }
+        'PS_PROFILE_SUPPRESS_TOOL_WARNINGS'          = @{ Default = '0'; Category = 'Config'; Description = 'Suppress missing tool warnings' }
+        'PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS'      = @{ Default = ''; Category = 'Config'; Description = 'Suppress warnings from specific fragments (comma/semicolon/space-separated fragment names, or all/*/1/true for all)' }
+        'PS_PROFILE_ASSUME_COMMANDS'                 = @{ Default = ''; Category = 'Config'; Description = 'Assume these commands are available even if not found on PATH (comma/semicolon/space-separated)' }
+        'PS_PROFILE_TEST_MODE'                       = @{ Default = '0'; Category = 'Config'; Description = 'Enable test mode (disables certain interactive features, for testing/CI)' }
         
         # Prompt Display
-        'PS_PROFILE_SHOW_GIT_BRANCH'            = @{ Default = '0'; Category = 'Prompt'; Description = 'Show git branch in prompt (SmartPrompt.ps1)' }
-        'PS_PROFILE_SHOW_UV'                    = @{ Default = '0'; Category = 'Prompt'; Description = 'Show uv project status in prompt (SmartPrompt.ps1)' }
-        'PS_PROFILE_SHOW_NPM'                   = @{ Default = '0'; Category = 'Prompt'; Description = 'Show npm project status in prompt (SmartPrompt.ps1)' }
-        'PS_PROFILE_SHOW_PNPM'                  = @{ Default = '0'; Category = 'Prompt'; Description = 'Show pnpm/yarn project status in prompt (SmartPrompt.ps1)' }
-        'PS_PROFILE_SHOW_RUST'                  = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Rust project status in prompt (SmartPrompt.ps1)' }
-        'PS_PROFILE_SHOW_GO'                    = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Go project status in prompt (SmartPrompt.ps1)' }
-        'PS_PROFILE_SHOW_DOCKER'                = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Docker project status in prompt (SmartPrompt.ps1)' }
-        'PS_PROFILE_SHOW_POETRY'                = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Poetry project status in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_GIT_BRANCH'                 = @{ Default = '0'; Category = 'Prompt'; Description = 'Show git branch in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_UV'                         = @{ Default = '0'; Category = 'Prompt'; Description = 'Show uv project status in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_NPM'                        = @{ Default = '0'; Category = 'Prompt'; Description = 'Show npm project status in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_PNPM'                       = @{ Default = '0'; Category = 'Prompt'; Description = 'Show pnpm/yarn project status in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_RUST'                       = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Rust project status in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_GO'                         = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Go project status in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_DOCKER'                     = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Docker project status in prompt (SmartPrompt.ps1)' }
+        'PS_PROFILE_SHOW_POETRY'                     = @{ Default = '0'; Category = 'Prompt'; Description = 'Show Poetry project status in prompt (SmartPrompt.ps1)' }
     }
     
     # Cache environment variables (only call Get-ChildItem once)

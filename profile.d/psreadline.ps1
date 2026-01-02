@@ -37,6 +37,10 @@ try {
             # Enable better editing
             Set-PSReadLineKeyHandler -Key Ctrl+d -Function DeleteChar -ErrorAction SilentlyContinue
             Set-PSReadLineKeyHandler -Key Ctrl+w -Function BackwardDeleteWord -ErrorAction SilentlyContinue
+
+            # Ensure Ctrl+C uses default CopyOrCancelLine behavior
+            # (copies selected text if there's a selection, sends interrupt signal if no selection)
+            Set-PSReadLineKeyHandler -Key Ctrl+c -Function CopyOrCancelLine -ErrorAction SilentlyContinue
         }
     }
 }
