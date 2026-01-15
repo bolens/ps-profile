@@ -231,7 +231,7 @@ Two prompt systems are supported with lazy initialization:
 - **PS_PROFILE_DEBUG=1**: Enable verbose output from bootstrap helpers
   - Local: Uses `Write-Verbose` (requires `$VerbosePreference = 'Continue'`)
   - CI: Writes to stdout for GitHub Actions logs
-- **PS_PROFILE_DEBUG_TIMINGS=1**: Enable micro-instrumentation CSV output
+- **PS_PROFILE_DEBUG=2**: Enable timing information and micro-instrumentation CSV output (Level 2+ includes timing)
 
 ## Commit Messages
 

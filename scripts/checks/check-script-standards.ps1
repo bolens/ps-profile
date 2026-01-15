@@ -36,6 +36,7 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'CommonEnums' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathValidation' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
@@ -53,7 +54,7 @@ if (-not $Path) {
         $Path = Join-Path $repoRoot 'scripts'
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
 }
 
@@ -98,7 +99,7 @@ foreach ($script in $scripts) {
                 Line     = ($content.Substring(0, $match.Index) -split "`n").Count
                 Issue    = 'Direct exit call'
                 Message  = "Found 'exit $exitCode' - use Exit-WithCode instead"
-                Severity = 'Warning'
+                Severity = [SeverityLevel]::Warning
             })
     }
 
@@ -117,7 +118,7 @@ foreach ($script in $scripts) {
                     Line     = 0
                     Issue    = 'Inconsistent Common.psm1 import'
                     Message  = "Scripts in utils/ should use: Join-Path (Split-Path -Parent `$PSScriptRoot) 'lib' 'Common.psm1'"
-                    Severity = 'Info'
+                    Severity = [SeverityLevel]::Information
                 })
         }
         elseif ($isInChecks -and $content -notmatch "Join-Path\s+\(Split-Path\s+-Parent\s+`\$PSScriptRoot\)\s+['\`"]lib['\`"]\s+['\`"]Common\.psm1['\`"]") {
@@ -126,7 +127,7 @@ foreach ($script in $scripts) {
                     Line     = 0
                     Issue    = 'Inconsistent Common.psm1 import'
                     Message  = "Scripts in checks/ should use: Join-Path (Split-Path -Parent `$PSScriptRoot) 'lib' 'Common.psm1'"
-                    Severity = 'Info'
+                    Severity = [SeverityLevel]::Information
                 })
         }
         elseif ($isInGit -and $content -notmatch "Join-Path\s+`\$scriptsDir\s+['\`"]lib['\`"]\s+['\`"]Common\.psm1['\`"]") {
@@ -137,7 +138,7 @@ foreach ($script in $scripts) {
                         Line     = 0
                         Issue    = 'Inconsistent Common.psm1 import'
                         Message  = "Scripts in git/ should use: `$scriptsDir = Split-Path -Parent `$PSScriptRoot; Join-Path `$scriptsDir 'lib' 'Common.psm1'"
-                        Severity = 'Info'
+                        Severity = [SeverityLevel]::Information
                     })
             }
         }
@@ -149,7 +150,7 @@ foreach ($script in $scripts) {
                 Line     = 0
                 Issue    = 'Missing Common.psm1 import'
                 Message  = "Script does not import Common.psm1 - ensure this is intentional"
-                Severity = 'Info'
+                Severity = [SeverityLevel]::Information
             })
     }
 
@@ -177,7 +178,7 @@ foreach ($script in $scripts) {
                     Line     = ($content.Substring(0, $opMatch.Index) -split "`n").Count
                     Issue    = 'Missing error handling'
                     Message  = "Consider wrapping '$operation' in try-catch block"
-                    Severity = 'Info'
+                    Severity = [SeverityLevel]::Information
                 })
             break  # Only flag once per script
         }
@@ -189,9 +190,9 @@ if ($issues.Count -gt 0) {
     Write-ScriptMessage -Message "`nFound $($issues.Count) issue(s):"
     
     # Group by severity
-    $errors = $issues | Where-Object { $_.Severity -eq 'Error' }
-    $warnings = $issues | Where-Object { $_.Severity -eq 'Warning' }
-    $info = $issues | Where-Object { $_.Severity -eq 'Info' }
+    $errors = $issues | Where-Object { $_.Severity -eq [SeverityLevel]::Error }
+    $warnings = $issues | Where-Object { $_.Severity -eq [SeverityLevel]::Warning }
+    $info = $issues | Where-Object { $_.Severity -eq [SeverityLevel]::Information }
     
     if ($errors.Count -gt 0) {
         Write-ScriptMessage -Message "`nErrors:" -ForegroundColor Red
@@ -210,14 +211,15 @@ if ($issues.Count -gt 0) {
     
     # Exit with validation failure if there are errors or warnings
     if ($errors.Count -gt 0 -or $warnings.Count -gt 0) {
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($errors.Count + $warnings.Count) issue(s) that need attention"
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Found $($errors.Count + $warnings.Count) issue(s) that need attention"
     }
     else {
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Found $($info.Count) informational issue(s) - no action required"
+        Exit-WithCode -ExitCode [ExitCode]::Success -Message "Found $($info.Count) informational issue(s) - no action required"
     }
 }
 else {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All scripts comply with codebase standards"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "All scripts comply with codebase standards"
 }
+
 
 

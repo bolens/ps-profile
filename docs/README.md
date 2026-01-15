@@ -21,7 +21,7 @@ Documentation for each profile fragment, explaining what each fragment does and 
 - **Fragment Index**: [Browse all fragments](fragments/README.md) organized by load order
 - **Individual Fragments**: See detailed documentation for each fragment
 
-Fragments are modular components of the profile, loaded in dependency-aware order (00-99). Many fragments use organized subdirectories for related modules:
+Fragments are modular components of the profile, loaded in dependency-aware order (tier-based: core, essential, standard, optional). Many fragments use organized subdirectories for related modules:
 
 - **Main Fragments** (00-99): Core fragments that load and orchestrate modules
 - **Module Subdirectories**: Organized modules loaded by parent fragments
@@ -39,8 +39,11 @@ Fragments are modular components of the profile, loaded in dependency-aware orde
 Comprehensive guides for developers working on or contributing to the profile.
 
 - **Development Guide**: [DEVELOPMENT.md](guides/DEVELOPMENT.md) - Developer guide and advanced testing
-- **Codebase Improvements**: [CODEBASE_IMPROVEMENTS.md](guides/CODEBASE_IMPROVEMENTS.md) - Improvement proposals and implementation status
-- **Improvements Implemented**: [IMPROVEMENTS_IMPLEMENTED.md](guides/IMPROVEMENTS_IMPLEMENTED.md) - Details of implemented improvements
+- **Type Safety Guide**: [TYPE_SAFETY.md](guides/TYPE_SAFETY.md) - Improving type safety with enums, classes, and validation
+- **Type Safety Implementation**: [TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md](guides/TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md) - Summary of implemented type safety improvements
+- **Type Safety Migration Status**: [TYPE_SAFETY_MIGRATION_STATUS.md](guides/TYPE_SAFETY_MIGRATION_STATUS.md) - Current migration status from constants to enums
+- **Refactoring Opportunities**: [REFACTORING_OPPORTUNITIES.md](guides/REFACTORING_OPPORTUNITIES.md) - Identified refactoring opportunities and priorities
+- **Remaining Tasks**: [REMAINING_TASKS.md](guides/REMAINING_TASKS.md) - Actionable items for ongoing maintenance and future work
 - **Function Naming Exceptions**: [FUNCTION_NAMING_EXCEPTIONS.md](guides/FUNCTION_NAMING_EXCEPTIONS.md) - Exceptions to standard naming conventions
 - **Security Allowlist**: [SECURITY_ALLOWLIST.md](guides/SECURITY_ALLOWLIST.md) - Security scanning allowlist
 

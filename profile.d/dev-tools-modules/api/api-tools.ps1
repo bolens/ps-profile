@@ -118,21 +118,45 @@ try {
             }
 
             if (-not (Test-Path -LiteralPath $collection)) {
-                Write-Error "Collection path not found: $collection"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("Collection path not found: $collection"),
+                            'CollectionPathNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $collection
+                        )) -OperationName 'dev-tools.api.bruno.invoke' -Context @{ collection_path = $collection }
+                }
+                else {
+                    Write-Error "Collection path not found: $collection"
+                }
                 return $null
             }
 
-            try {
-                $args = @('run', $collection)
-                if (-not [string]::IsNullOrWhiteSpace($Environment)) {
-                    $args += @('--env', $Environment)
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'dev-tools.api.bruno.invoke' -Context @{
+                    collection_path = $collection
+                    environment     = $Environment
+                } -ScriptBlock {
+                    $args = @('run', $collection)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        $args += @('--env', $Environment)
+                    }
+                    & bruno $args 2>&1
                 }
-                $result = & bruno $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run bruno: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @('run', $collection)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        $args += @('--env', $Environment)
+                    }
+                    $result = & bruno $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run bruno: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -214,26 +238,56 @@ try {
             }
 
             if (-not (Test-Path -LiteralPath $TestFile)) {
-                Write-Error "Test file not found: $TestFile"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("Test file not found: $TestFile"),
+                            'TestFileNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $TestFile
+                        )) -OperationName 'dev-tools.api.hurl.invoke' -Context @{ test_file = $TestFile }
+                }
+                else {
+                    Write-Error "Test file not found: $TestFile"
+                }
                 return $null
             }
 
-            try {
-                $args = @($TestFile)
-                if ($Variable) {
-                    foreach ($var in $Variable) {
-                        $args += @('--variable', $var)
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'dev-tools.api.hurl.invoke' -Context @{
+                    test_file     = $TestFile
+                    has_variables = ($null -ne $Variable)
+                    output_path   = $Output
+                } -ScriptBlock {
+                    $args = @($TestFile)
+                    if ($Variable) {
+                        foreach ($var in $Variable) {
+                            $args += @('--variable', $var)
+                        }
                     }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    & hurl $args 2>&1
                 }
-                if (-not [string]::IsNullOrWhiteSpace($Output)) {
-                    $args += @('--output', $Output)
-                }
-                $result = & hurl $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run hurl: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @($TestFile)
+                    if ($Variable) {
+                        foreach ($var in $Variable) {
+                            $args += @('--variable', $var)
+                        }
+                    }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    $result = & hurl $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run hurl: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -327,33 +381,72 @@ try {
             }
 
             if ([string]::IsNullOrWhiteSpace($Url)) {
-                Write-Error "URL is required"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.ArgumentException]::new("URL is required"),
+                            'UrlRequired',
+                            [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                            $null
+                        )) -OperationName 'dev-tools.api.httpie.invoke' -Context @{}
+                }
+                else {
+                    Write-Error "URL is required"
+                }
                 return $null
             }
 
-            try {
-                $args = @()
-                if ($Method -ne 'GET') {
-                    $args += $Method
-                }
-                $args += $Url
-                if (-not [string]::IsNullOrWhiteSpace($Body)) {
-                    $args += $Body
-                }
-                if ($Header) {
-                    foreach ($h in $Header) {
-                        $args += $h
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'dev-tools.api.httpie.invoke' -Context @{
+                    url         = $Url
+                    method      = $Method
+                    has_body    = (-not [string]::IsNullOrWhiteSpace($Body))
+                    has_headers = ($null -ne $Header)
+                    output_path = $Output
+                } -ScriptBlock {
+                    $args = @()
+                    if ($Method -ne 'GET') {
+                        $args += $Method
                     }
+                    $args += $Url
+                    if (-not [string]::IsNullOrWhiteSpace($Body)) {
+                        $args += $Body
+                    }
+                    if ($Header) {
+                        foreach ($h in $Header) {
+                            $args += $h
+                        }
+                    }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    & http $args 2>&1
                 }
-                if (-not [string]::IsNullOrWhiteSpace($Output)) {
-                    $args += @('--output', $Output)
-                }
-                $result = & http $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run httpie: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @()
+                    if ($Method -ne 'GET') {
+                        $args += $Method
+                    }
+                    $args += $Url
+                    if (-not [string]::IsNullOrWhiteSpace($Body)) {
+                        $args += $Body
+                    }
+                    if ($Header) {
+                        foreach ($h in $Header) {
+                            $args += $h
+                        }
+                    }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    $result = & http $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run httpie: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -426,17 +519,31 @@ try {
             return $null
         }
 
-        try {
-            $args = @('--port', $Port.ToString())
-            if ($Passthrough) {
-                $args += '--passthrough'
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'dev-tools.api.httptoolkit.start' -Context @{
+                port        = $Port
+                passthrough = $Passthrough.IsPresent
+            } -ScriptBlock {
+                $args = @('--port', $Port.ToString())
+                if ($Passthrough) {
+                    $args += '--passthrough'
+                }
+                Start-Process -FilePath 'httptoolkit' -ArgumentList $args -PassThru -NoNewWindow
             }
-            $process = Start-Process -FilePath 'httptoolkit' -ArgumentList $args -PassThru -NoNewWindow
-            return $process
         }
-        catch {
-            Write-Error "Failed to start httptoolkit: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @('--port', $Port.ToString())
+                if ($Passthrough) {
+                    $args += '--passthrough'
+                }
+                $process = Start-Process -FilePath 'httptoolkit' -ArgumentList $args -PassThru -NoNewWindow
+                return $process
+            }
+            catch {
+                Write-Error "Failed to start httptoolkit: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 

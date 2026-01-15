@@ -7,12 +7,28 @@ scripts/utils/code-quality/modules/TestCache.psm1
 .DESCRIPTION
     Provides functions for caching test results based on file hashes and timestamps
     to avoid re-running unchanged tests, significantly improving CI performance.
+    Uses SQLite database for persistent storage when available, falls back to JSON files.
 #>
 
 # Import Logging module for Write-ScriptMessage
 $loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
 if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
     Import-Module $loggingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+
+# Try to import SQLite test cache database module
+$testCacheDbModule = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'database' 'TestCacheDatabase.psm1'
+$script:UseSqliteCache = $false
+if ($testCacheDbModule -and (Test-Path -LiteralPath $testCacheDbModule)) {
+    try {
+        Import-Module $testCacheDbModule -DisableNameChecking -ErrorAction SilentlyContinue
+        if (Get-Command Get-TestCache -ErrorAction SilentlyContinue) {
+            $script:UseSqliteCache = $true
+        }
+    }
+    catch {
+        # SQLite cache not available, fall back to JSON
+    }
 }
 
 <#
@@ -54,6 +70,34 @@ function Get-TestCacheStatus {
         return $cacheStatus
     }
 
+    # Try SQLite cache first if available
+    if ($script:UseSqliteCache -and $TestPaths -and $TestPaths.Count -gt 0) {
+        try {
+            # Check cache for first test file (for compatibility with existing interface)
+            $firstTestPath = $TestPaths[0]
+            if ($firstTestPath -and (Test-Path -LiteralPath $firstTestPath)) {
+                $cached = Get-TestCache -TestFilePath $firstTestPath
+                if ($cached -and $cached.IsValid) {
+                    $cacheStatus.IsValid = $true
+                    $cacheStatus.CachedResults = $cached.TestResult
+                    $cacheStatus.Reason = 'Cache is valid (SQLite)'
+                    return $cacheStatus
+                }
+                else {
+                    $cacheStatus.Reason = 'Cache invalid or not found (SQLite)'
+                    return $cacheStatus
+                }
+            }
+        }
+        catch {
+            # Fall through to JSON cache
+            if ($env:PS_PROFILE_DEBUG) {
+                Write-Host "  [TestCache] SQLite cache failed, falling back to JSON: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
+    }
+
+    # Fall back to JSON cache
     if ($CachePath -and -not [string]::IsNullOrWhiteSpace($CachePath) -and -not (Test-Path -LiteralPath $CachePath)) {
         $cacheStatus.Reason = 'Cache directory does not exist'
         return $cacheStatus
@@ -122,6 +166,32 @@ function Save-TestCache {
         [string]$CachePath = '.pester-cache'
     )
 
+    # Try SQLite cache first if available
+    if ($script:UseSqliteCache -and $TestPaths -and $TestPaths.Count -gt 0) {
+        try {
+            foreach ($testPath in $TestPaths) {
+                if ($testPath -and (Test-Path -LiteralPath $testPath)) {
+                    # Extract counts from test result
+                    $passedCount = if ($TestResult.PassedCount) { $TestResult.PassedCount } else { 0 }
+                    $failedCount = if ($TestResult.FailedCount) { $TestResult.FailedCount } else { 0 }
+                    $skippedCount = if ($TestResult.SkippedCount) { $TestResult.SkippedCount } else { 0 }
+                    $executionTime = if ($TestResult.Time) { $TestResult.Time.TotalSeconds } elseif ($TestResult.Duration) { $TestResult.Duration.TotalSeconds } else { 0 }
+                    
+                    Save-TestCache -TestFilePath $testPath -TestResult $TestResult -ExecutionTime $executionTime -PassedCount $passedCount -FailedCount $failedCount -SkippedCount $skippedCount
+                }
+            }
+            Write-ScriptMessage -Message "Test results cached to SQLite database"
+            return
+        }
+        catch {
+            # Fall through to JSON cache
+            if ($env:PS_PROFILE_DEBUG) {
+                Write-Host "  [TestCache] SQLite cache save failed, falling back to JSON: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
+    }
+
+    # Fall back to JSON cache
     try {
         if ($CachePath -and -not [string]::IsNullOrWhiteSpace($CachePath) -and -not (Test-Path -LiteralPath $CachePath)) {
             New-Item -ItemType Directory -Path $CachePath -Force | Out-Null

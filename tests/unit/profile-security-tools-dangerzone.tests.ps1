@@ -1,4 +1,4 @@
-# ===============================================
+﻿# ===============================================
 # profile-security-tools-dangerzone.tests.ps1
 # Unit tests for Invoke-DangerzoneConvert function
 # ===============================================
@@ -202,6 +202,22 @@ Describe 'security-tools.ps1 - Invoke-DangerzoneConvert' {
             Mock-CommandAvailabilityPester -CommandName 'dangerzone' -Available $false
             
             # Create a function mock for Get-ToolInstallHint so Get-Command can find it
+            <#
+            .SYNOPSIS
+                Performs operations related to Get-ToolInstallHint.
+            
+            .DESCRIPTION
+                Performs operations related to Get-ToolInstallHint.
+            
+            .PARAMETER ToolName
+                The ToolName parameter.
+            
+            .PARAMETER RepoRoot
+                The RepoRoot parameter.
+            
+            .OUTPUTS
+                object
+            #>
             function Get-ToolInstallHint {
                 param([string]$ToolName, [string]$RepoRoot)
                 return 'Install with: scoop install dangerzone'

@@ -46,7 +46,7 @@ else {
 
 <#
 .SYNOPSIS
-    Loads requirements configuration from modular or legacy format.
+    Loads requirements configuration from modular structure.
 
 .DESCRIPTION
     Loads requirements configuration from the modular structure in
@@ -69,7 +69,7 @@ else {
 .EXAMPLE
     $requirements = Import-Requirements -RepoRoot $repoRoot
     
-    Loads requirements configuration from modular or legacy format.
+    Loads requirements configuration from modular structure.
 #>
 function Import-Requirements {
     [CmdletBinding()]
@@ -123,7 +123,10 @@ function Import-Requirements {
         }
         $cachedResult = Get-CachedValue -Key $cacheKey
         if ($null -ne $cachedResult) {
-            Write-Verbose "Using cached requirements from $RepoRoot"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [requirements-loader.import] Using cached requirements from $RepoRoot" -ForegroundColor DarkGray
+            }
             return $cachedResult
         }
     }
@@ -140,27 +143,128 @@ function Import-Requirements {
     }
     if ($loaderExists) {
         try {
-            Write-Verbose "Loading requirements from modular structure: $requirementsLoaderPath"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[requirements-loader.import] Loading requirements from modular structure: $requirementsLoaderPath"
+            }
+            
             $requirements = & $requirementsLoaderPath
             
             # Cache result if enabled
             if ($UseCache -and (Get-Command Set-CachedValue -ErrorAction SilentlyContinue)) {
                 Set-CachedValue -Key $cacheKey -Value $requirements -ExpirationSeconds 300
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [requirements-loader.import] Cached requirements with key: $cacheKey" -ForegroundColor DarkGray
+                }
+            }
+            
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[requirements-loader.import] Successfully loaded requirements from $RepoRoot"
             }
             
             return $requirements
         }
         catch {
-            Write-Warning "Failed to load modular requirements: $($_.Exception.Message). Falling back to legacy format."
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to load modular requirements" -OperationName 'requirements-loader.import' -Context @{
+                            requirements_loader_path = $requirementsLoaderPath
+                            repo_root = $RepoRoot
+                            error_message = $_.Exception.Message
+                        } -Code 'ModularRequirementsLoadFailed'
+                    }
+                    else {
+                        Write-Warning "[requirements-loader.import] Failed to load modular requirements: $($_.Exception.Message)."
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [requirements-loader.import] Load error details - Path: $requirementsLoaderPath, RepoRoot: $RepoRoot, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to load modular requirements" -OperationName 'requirements-loader.import' -Context @{
+                        # Technical context
+                        requirements_loader_path = $requirementsLoaderPath
+                        repo_root = $RepoRoot
+                        use_cache = $UseCache
+                        # Error context
+                        error_message = $_.Exception.Message
+                        ErrorType = $_.Exception.GetType().FullName
+                        # Invocation context
+                        FunctionName = 'Import-Requirements'
+                    } -Code 'ModularRequirementsLoadFailed'
+                }
+                else {
+                    Write-Warning "[requirements-loader.import] Failed to load modular requirements: $($_.Exception.Message)."
+                }
+            }
         }
     }
 
     # No fallback - modular structure is required
-    throw "Requirements loader not found at: $requirementsLoaderPath. Please ensure the modular requirements structure exists in the requirements/ directory."
+    $errorMsg = "Requirements loader not found at: $requirementsLoaderPath. Please ensure the modular requirements structure exists in the requirements/ directory."
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        if ($debugLevel -ge 1) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                    [System.Exception]::new($errorMsg),
+                    'RequirementsLoaderNotFound',
+                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                    $requirementsLoaderPath
+                )) -OperationName 'requirements-loader.import' -Context @{
+                    # Technical context
+                    requirements_loader_path = $requirementsLoaderPath
+                    repo_root = $RepoRoot
+                    use_cache = $UseCache
+                    # Error context
+                    ErrorType = 'System.Exception'
+                    # Invocation context
+                    FunctionName = 'Import-Requirements'
+                }
+            }
+            else {
+                Write-Error "[requirements-loader.import] $errorMsg" -ErrorAction Continue
+            }
+        }
+        # Level 3: Log detailed error information
+        if ($debugLevel -ge 3) {
+            Write-Host "  [requirements-loader.import] Loader not found details - Path: $requirementsLoaderPath, RepoRoot: $RepoRoot, UseCache: $UseCache" -ForegroundColor DarkGray
+        }
+    }
+    else {
+        # Always log critical errors even if debug is off
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                [System.Exception]::new($errorMsg),
+                'RequirementsLoaderNotFound',
+                [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                $requirementsLoaderPath
+            )) -OperationName 'requirements-loader.import' -Context @{
+                # Technical context
+                requirements_loader_path = $requirementsLoaderPath
+                repo_root = $RepoRoot
+                use_cache = $UseCache
+                # Error context
+                ErrorType = 'System.Exception'
+                # Invocation context
+                FunctionName = 'Import-Requirements'
+            }
+        }
+        else {
+            Write-Error "[requirements-loader.import] $errorMsg" -ErrorAction Continue
+        }
+    }
+    throw $errorMsg
 }
 
 # Export functions
-Export-ModuleMember -Function 'Import-Requirements'
-
 Export-ModuleMember -Function 'Import-Requirements'
 

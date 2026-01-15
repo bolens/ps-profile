@@ -127,18 +127,33 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @()
-            if ($Version) {
-                $cmdArgs += '--version', $Version
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'rust.cargo-binstall.invoke' -Context @{
+                packages = $Packages
+                version  = $Version
+            } -ScriptBlock {
+                $cmdArgs = @()
+                if ($Version) {
+                    $cmdArgs += '--version', $Version
+                }
+                $cmdArgs += $Packages
+                & cargo-binstall @cmdArgs 2>&1
             }
-            $cmdArgs += $Packages
-            $result = & cargo-binstall @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run cargo-binstall: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @()
+                if ($Version) {
+                    $cmdArgs += '--version', $Version
+                }
+                $cmdArgs += $Packages
+                $result = & cargo-binstall @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run cargo-binstall: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -231,18 +246,33 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @('-x', "cargo $Command")
-            if ($Arguments) {
-                $cmdArgs += '--'
-                $cmdArgs += $Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'rust.cargo-watch.invoke' -Context @{
+                command             = $Command
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @('-x', "cargo $Command")
+                if ($Arguments) {
+                    $cmdArgs += '--'
+                    $cmdArgs += $Arguments
+                }
+                & cargo-watch @cmdArgs 2>&1
             }
-            $result = & cargo-watch @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run cargo-watch: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @('-x', "cargo $Command")
+                if ($Arguments) {
+                    $cmdArgs += '--'
+                    $cmdArgs += $Arguments
+                }
+                $result = & cargo-watch @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run cargo-watch: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -324,13 +354,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & cargo-audit $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'rust.cargo-audit.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & cargo-audit $Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run cargo-audit: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & cargo-audit $Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run cargo-audit: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -412,13 +451,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & cargo-outdated $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'rust.cargo-outdated.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & cargo-outdated $Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run cargo-outdated: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & cargo-outdated $Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run cargo-outdated: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -498,17 +546,30 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @('build', '--release')
-            if ($Arguments) {
-                $cmdArgs += $Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'rust.cargo.build-release' -Context @{
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @('build', '--release')
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & cargo @cmdArgs 2>&1
             }
-            $result = & cargo @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run cargo build --release: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @('build', '--release')
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & cargo @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run cargo build --release: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -588,17 +649,30 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @('update')
-            if ($Arguments) {
-                $cmdArgs += $Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'rust.cargo.update' -Context @{
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @('update')
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & cargo @cmdArgs 2>&1
             }
-            $result = & cargo @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run cargo update: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @('update')
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & cargo @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run cargo update: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -715,7 +789,15 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to run cargo cache cleanup: $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'rust.cargo.cache-cleanup' -Context @{
+                    autoclean = $Autoclean.IsPresent
+                    all       = $All.IsPresent
+                }
+            }
+            else {
+                Write-Error "Failed to run cargo cache cleanup: $($_.Exception.Message)"
+            }
             return $null
         }
     }

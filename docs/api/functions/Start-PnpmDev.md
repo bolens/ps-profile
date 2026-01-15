@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `pndev` - Runs development server using PNPM.
+- `pndevserver` - Runs development server using PNPM.
 
 
 ## Source
 
-Defined in: ..\profile.d\09-package-managers.ps1
+Defined in: ..\profile.d\pnpm.ps1

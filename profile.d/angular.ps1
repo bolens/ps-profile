@@ -12,7 +12,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common Angular CLI operations.
-    Functions check for npx/ng availability using Test-HasCommand for efficient
+    Functions check for npx/ng availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

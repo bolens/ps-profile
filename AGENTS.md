@@ -74,6 +74,8 @@ This is a **modular PowerShell profile** with:
 │       ├── security/                  # Security scanning
 │       │   └── modules/                # Security modules
 │       └── fragment/                  # Fragment management
+│           ├── new-fragment.ps1        # Create new fragment template
+│           └── generate-command-wrappers.ps1  # Generate standalone wrappers
 ├── tests/                             # Pester tests
 │   ├── unit/                          # Unit tests
 │   ├── integration/                   # Integration tests (domain-organized)
@@ -394,6 +396,8 @@ Creates functions without overwriting:
 Set-AgentModeFunction -Name 'MyFunc' -Body { Write-Output "Hello" }
 ```
 
+**Note**: Functions registered with `Set-AgentModeFunction` are automatically registered in the fragment command registry for on-demand loading.
+
 ### Set-AgentModeAlias
 
 Creates aliases or function wrappers:
@@ -402,13 +406,15 @@ Creates aliases or function wrappers:
 Set-AgentModeAlias -Name 'gs' -Target 'git status'
 ```
 
+**Note**: Aliases registered with `Set-AgentModeAlias` are automatically registered in the fragment command registry.
+
 ### Test-CachedCommand
 
 Fast command existence check with caching:
 
 ```powershell
 if (Test-CachedCommand 'docker') {
-    # Configure docker helpers
+ # Configure docker helpers
 }
 ```
 
@@ -420,17 +426,79 @@ Lazy-loading function registration:
 Register-LazyFunction -Name 'Invoke-GitClone' -Initializer { Ensure-GitHelper } -Alias 'gcl'
 ```
 
+## Fragment Command Access
+
+The profile includes a comprehensive command access system that enables:
+
+- **Automatic command registration** - All functions and aliases are automatically registered with their source fragments
+- **On-demand fragment loading** - Fragments can be loaded automatically when commands are called
+- **Command dispatcher** - Transparent auto-loading via PowerShell's CommandNotFoundAction
+- **Standalone wrappers** - Generate executable scripts for fragment commands
+
+### Key Modules
+
+- `scripts/lib/fragment/FragmentCommandRegistry.psm1` - Command registry management
+- `scripts/lib/fragment/FragmentLoader.psm1` - On-demand fragment loading
+- `scripts/lib/fragment/CommandDispatcher.psm1` - Automatic command detection
+
+### Usage
+
+Commands are automatically available when fragments are loaded. The command dispatcher enables transparent access:
+
+```powershell
+# Command automatically loads fragment if needed
+Invoke-Aws --version
+```
+
+### Generating Wrappers
+
+Generate standalone script wrappers:
+
+```powershell
+task generate-command-wrappers
+# or
+pwsh -NoProfile -File scripts\utils\fragment\generate-command-wrappers.ps1
+```
+
+See `docs/guides/FRAGMENT_COMMAND_ACCESS.md` for complete documentation.
+
 ## Error Handling Patterns
 
 **Always use try-catch for risky operations:**
 
 ```powershell
 try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
-    Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
+ $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+ Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+ Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+```
+
+**Color Coding for Messages:**
+
+The profile uses a standardized color scheme for console output. See `docs/guides/ERROR_HANDLING_STANDARD.md` for complete details:
+
+- **Green**: Success indicators (cache hits, commands found, operations completed)
+- **Yellow**: Warnings (cache misses, missing modules, fallback paths)
+- **Red**: Errors (import failures, critical errors)
+- **Cyan**: Status/Headers (section headers, important operations)
+- **Blue**: Informational Diagnostics (cache statistics, parsed counts)
+- **Magenta**: Special Debug Tracing (Level 3+ only, function call tracing)
+- **DarkGray**: Standard Debug Output (Level 2+, detailed debug information)
+
+Always check debug levels before emitting colored debug output:
+
+```powershell
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    if ($debugLevel -ge 2) {
+        Write-Host "  [operation] Debug message" -ForegroundColor DarkGray
+    }
+    if ($debugLevel -ge 3) {
+        Write-Host "  [operation] Special trace" -ForegroundColor Magenta
+    }
 }
 ```
 
@@ -456,7 +524,7 @@ $env:PS_PROFILE_DEBUG = '1'
 $VerbosePreference = 'Continue'
 
 # Performance profiling
-$env:PS_PROFILE_DEBUG_TIMINGS = '1'
+$env:PS_PROFILE_DEBUG = '2'  # Level 2+ includes timing information
 ```
 
 ## Key Files to Reference
@@ -465,6 +533,7 @@ $env:PS_PROFILE_DEBUG_TIMINGS = '1'
 - **ARCHITECTURE.md** - Technical architecture details
 - **PROFILE_README.md** - Comprehensive profile documentation
 - **docs/guides/DEVELOPMENT.md** - Developer guide and advanced testing
+- **docs/guides/ERROR_HANDLING_STANDARD.md** - Error handling, logging, and color coding standards
 - **PROFILE_DEBUG.md** - Debugging and instrumentation
 - **Taskfile.yml** - Available tasks
 - **PSScriptAnalyzerSettings.psd1** - Linter configuration

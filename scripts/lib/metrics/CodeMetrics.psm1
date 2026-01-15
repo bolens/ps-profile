@@ -128,6 +128,7 @@ function Get-CodeMetrics {
     [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
 
         [switch]$Recurse
@@ -138,6 +139,11 @@ function Get-CodeMetrics {
     }
 
     $scripts = Get-PowerShellScripts -Path $Path -Recurse:$Recurse
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [code-metrics.analyze] Found $($scripts.Count) PowerShell scripts to analyze" -ForegroundColor DarkGray
+    }
 
     # Use Collections module for better performance
     $fileMetrics = if (Get-Command New-ObjectList -ErrorAction SilentlyContinue) {
@@ -148,6 +154,10 @@ function Get-CodeMetrics {
     }
 
     foreach ($script in $scripts) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Verbose "[code-metrics.analyze] Analyzing script: $($script.FullName)"
+        }
         $content = $null
         $lineCount = 0
         $functionCount = 0
@@ -242,6 +252,10 @@ function Get-CodeMetrics {
                         Complexity = $complexity
                     })
                 $fileAdded = $true
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [code-metrics.analyze] Added metrics for $($script.Name): Lines=$lineCount, Functions=$functionCount, Complexity=$complexity" -ForegroundColor DarkGray
+                }
             }
         }
         catch {
@@ -273,7 +287,59 @@ function Get-CodeMetrics {
             }
             # Also clean up repetitive patterns like multiple semicolons
             $errorMsg = $errorMsg -replace ';{3,}', ';'
-            Write-Warning "Failed to analyze $($script.FullName): $errorMsg"
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
+                    script_path   = $script.FullName
+                    error_message = $errorMsg
+                } -Code 'ScriptAnalysisFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
+                                    # Technical context
+                                    script_path   = $script.FullName
+                                    script_name   = $script.Name
+                                    # Error context
+                                    error_message = $errorMsg
+                                    ErrorType     = $_.Exception.GetType().FullName
+                                    # Operation context
+                                    Recurse       = $Recurse
+                                    # Invocation context
+                                    FunctionName  = 'Get-CodeMetrics'
+                                } -Code 'AnalysisFailed'
+                            }
+                            else {
+                                Write-Warning "[code-metrics.analyze] Failed to analyze $($script.FullName): $errorMsg"
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Verbose "[code-metrics.analyze] Analysis failure details - ScriptPath: $($script.FullName), Exception: $($_.Exception.GetType().FullName), Message: $errorMsg, Stack: $($_.ScriptStackTrace)"
+                        }
+                    }
+                    else {
+                        # Always log warnings even if debug is off
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
+                                script_path   = $script.FullName
+                                script_name   = $script.Name
+                                error_message = $errorMsg
+                                ErrorType     = $_.Exception.GetType().FullName
+                                Recurse       = $Recurse
+                                FunctionName  = 'Get-CodeMetrics'
+                            } -Code 'AnalysisFailed'
+                        }
+                        else {
+                            Write-Warning "[code-metrics.analyze] Failed to analyze $($script.FullName): $errorMsg"
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -285,6 +351,11 @@ function Get-CodeMetrics {
     $totalLines = if ($fileMetrics.Count -gt 0) { ($fileMetrics | Measure-Object -Property Lines -Sum).Sum } else { 0 }
     $totalFunctions = if ($fileMetrics.Count -gt 0) { ($fileMetrics | Measure-Object -Property Functions -Sum).Sum } else { 0 }
     $totalComplexity = if ($fileMetrics.Count -gt 0) { ($fileMetrics | Measure-Object -Property Complexity -Sum).Sum } else { 0 }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [code-metrics.analyze] Aggregated metrics: TotalLines=$totalLines, TotalFunctions=$totalFunctions, TotalComplexity=$totalComplexity" -ForegroundColor DarkGray
+    }
 
     # Detect code duplication (functions with identical names)
     $functionNames = if (Get-Command New-TypedList -ErrorAction SilentlyContinue) {

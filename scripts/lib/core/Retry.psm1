@@ -67,9 +67,13 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 #>
 function Invoke-WithRetry {
     [CmdletBinding()]
+    # Note: [OutputType([object])] is intentional - this function returns whatever
+    # the ScriptBlock returns, which can be any type. This provides maximum flexibility
+    # for callers who need to retry arbitrary operations with different return types.
     [OutputType([object])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNull()]
         [scriptblock]$ScriptBlock,
 
         [ValidateRange(0, 10)]
@@ -92,11 +96,20 @@ function Invoke-WithRetry {
 
     $attempt = 0
     $lastException = $null
+    $debugLevel = 0
 
     do {
         try {
             $attempt++
+            # Level 3: Log attempt start
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [retry.operation] Starting attempt $attempt of $($MaxRetries + 1)" -ForegroundColor DarkGray
+            }
             $result = & $ScriptBlock
+            # Level 2: Log successful completion
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[retry.operation] Operation succeeded on attempt $attempt"
+            }
             return $result
         }
         catch {
@@ -109,6 +122,66 @@ function Invoke-WithRetry {
             }
 
             if (-not $isRetryable -or $attempt -gt $MaxRetries) {
+                # Level 1: Log final failure
+                $reason = if (-not $isRetryable) { "error is not retryable" } else { "max retries ($MaxRetries) exceeded" }
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'retry.operation' -Context @{
+                                # Technical context
+                                attempt             = $attempt
+                                max_retries         = $MaxRetries
+                                # Error context
+                                reason              = $reason
+                                error_message       = $_.Exception.Message
+                                ErrorType           = $_.Exception.GetType().FullName
+                                # Operation context
+                                retry_delay_seconds = $RetryDelaySeconds
+                                exponential_backoff = $ExponentialBackoff.IsPresent
+                                linear_backoff      = $LinearBackoff.IsPresent
+                                max_delay_seconds   = $MaxDelaySeconds
+                                # Invocation context
+                                FunctionName        = 'Invoke-WithRetry'
+                            }
+                        }
+                        else {
+                            Write-Error "Operation failed after $attempt attempts: $reason" -ErrorAction Continue
+                        }
+                    }
+                    # Level 3: Log detailed failure information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [retry.operation] Final failure details - Attempt: $attempt, MaxRetries: $MaxRetries, Reason: $reason, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                    }
+                }
+                else {
+                    # Always log critical errors even if debug is off
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'retry.operation' -Context @{
+                            # Technical context
+                            attempt             = $attempt
+                            max_retries         = $MaxRetries
+                            # Error context
+                            reason              = $reason
+                            error_message       = $_.Exception.Message
+                            ErrorType           = $_.Exception.GetType().FullName
+                            # Operation context
+                            retry_delay_seconds = $RetryDelaySeconds
+                            exponential_backoff = $ExponentialBackoff.IsPresent
+                            linear_backoff      = $LinearBackoff.IsPresent
+                            max_delay_seconds   = $MaxDelaySeconds
+                            # Invocation context
+                            FunctionName        = 'Invoke-WithRetry'
+                        }
+                    }
+                    else {
+                        Write-Error "Operation failed after $attempt attempts: $reason" -ErrorAction Continue
+                    }
+                    # Level 3: Log detailed failure information (even if debug was off, check again for level 3)
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Host "  [retry.operation] Final failure details - Attempt: $attempt, MaxRetries: $MaxRetries, Reason: $reason, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                    }
+                }
                 throw
             }
 
@@ -129,8 +202,17 @@ function Invoke-WithRetry {
             if (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
                 Write-ScriptMessage -Message "Operation failed, retrying in $delay seconds... (attempt $attempt of $($MaxRetries + 1))" -LogLevel 'Warning'
             }
-            elseif ($VerbosePreference -eq 'Continue') {
-                Write-Verbose "Operation failed, retrying in $delay seconds... (attempt $attempt of $($MaxRetries + 1))"
+            else {
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    # Level 2: Log retry attempt
+                    if ($debugLevel -ge 2) {
+                        Write-Verbose "[retry.operation] Operation failed, retrying in $delay seconds... (attempt $attempt of $($MaxRetries + 1))"
+                    }
+                    # Level 3: Log detailed retry information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [retry.operation] Retry details - Error: $($_.Exception.Message), Delay: $delay seconds, Backoff: $(if ($ExponentialBackoff) { 'Exponential' } elseif ($LinearBackoff) { 'Linear' } else { 'Fixed' })" -ForegroundColor DarkGray
+                    }
+                }
             }
 
             Start-Sleep -Seconds $delay
@@ -270,4 +352,3 @@ Export-ModuleMember -Function @(
     'Test-IsRetryableError',
     'Get-RetryDelay'
 )
-

@@ -47,7 +47,20 @@ function Test-FragmentLoaded {
 
     $variableName = "${FragmentName}Loaded"
     $loaded = Get-Variable -Name $variableName -Scope Global -ErrorAction SilentlyContinue
-    return ($null -ne $loaded)
+    $isLoaded = ($null -ne $loaded)
+    
+    $debugLevel = 0
+    $hasDebug = $false
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        $hasDebug = $debugLevel -ge 1
+    }
+    
+    # Level 3: Log detailed idempotency check
+    if ($hasDebug -and $debugLevel -ge 3) {
+        Write-Host "  [fragment-idempotency.test] Fragment '$FragmentName' loaded state: $isLoaded (variable: $variableName)" -ForegroundColor DarkGray
+    }
+    
+    return $isLoaded
 }
 
 <#
@@ -77,6 +90,17 @@ function Set-FragmentLoaded {
 
     $variableName = "${FragmentName}Loaded"
     Set-Variable -Name $variableName -Value $true -Scope Global -Force | Out-Null
+    
+    $debugLevel = 0
+    $hasDebug = $false
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        $hasDebug = $debugLevel -ge 1
+    }
+    
+    # Level 3: Log detailed idempotency marking
+    if ($hasDebug -and $debugLevel -ge 3) {
+        Write-Host "  [fragment-idempotency.set] Marked fragment '$FragmentName' as loaded (variable: $variableName)" -ForegroundColor DarkGray
+    }
 }
 
 <#
@@ -98,6 +122,7 @@ function Clear-FragmentLoaded {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentName
     )
 
@@ -106,7 +131,24 @@ function Clear-FragmentLoaded {
     }
 
     $variableName = "${FragmentName}Loaded"
+    $existed = (Get-Variable -Name $variableName -Scope Global -ErrorAction SilentlyContinue) -ne $null
     Remove-Variable -Name $variableName -Scope Global -ErrorAction SilentlyContinue
+    
+    $debugLevel = 0
+    $hasDebug = $false
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        $hasDebug = $debugLevel -ge 1
+    }
+    
+    # Level 3: Log detailed idempotency clearing
+    if ($hasDebug -and $debugLevel -ge 3) {
+        if ($existed) {
+            Write-Host "  [fragment-idempotency.clear] Cleared loaded state for fragment '$FragmentName' (variable: $variableName)" -ForegroundColor DarkGray
+        }
+        else {
+            Write-Host "  [fragment-idempotency.clear] Fragment '$FragmentName' was not marked as loaded (variable: $variableName)" -ForegroundColor DarkGray
+        }
+    }
 }
 
 <#
@@ -133,6 +175,7 @@ function Get-FragmentIdempotencyCheck {
     [OutputType([scriptblock])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentName
     )
 
@@ -148,4 +191,5 @@ Export-ModuleMember -Function @(
     'Clear-FragmentLoaded',
     'Get-FragmentIdempotencyCheck'
 )
+
 

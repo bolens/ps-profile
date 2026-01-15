@@ -28,10 +28,54 @@ try {
         $sbStart = {
             param([string]$CommandName)
 
-            $timer = [System.Diagnostics.Stopwatch]::StartNew()
-            $global:PSProfileCommandTimer = @{
-                Name  = $CommandName
-                Timer = $timer
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [performance.timer] Starting timer for command: $CommandName" -ForegroundColor DarkGray
+                }
+            }
+
+            try {
+                $timer = [System.Diagnostics.Stopwatch]::StartNew()
+                $startTime = [DateTime]::Now
+                $global:PSProfileCommandTimer = @{
+                    Name      = $CommandName
+                    Timer     = $timer
+                    StartTime = $startTime
+                }
+                
+                # Level 2: Log timer start
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[performance.timer] Started timer for command: $CommandName"
+                }
+                
+                # Level 3: Detailed timer start information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [performance.timer] Timer started for '$CommandName' at $($startTime.ToString('HH:mm:ss.fff'))" -ForegroundColor DarkGray
+                }
+            }
+            catch {
+                # Level 1: Log error
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'performance.timer.start' -Context @{
+                            command = $CommandName
+                        }
+                    }
+                    else {
+                        Write-Error "Failed to start command timer: $($_.Exception.Message)"
+                    }
+                }
+                
+                # Level 2: More details
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[performance.timer] Error starting timer: $($_.Exception.Message)"
+                }
+                
+                # Level 3: Full error details
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [performance.timer] Timer start error - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Command: $CommandName" -ForegroundColor DarkGray
+                }
             }
         }
         # Create function in global scope explicitly
@@ -39,49 +83,177 @@ try {
     }
 
     if (-not (Test-Path "Function:\\global:Stop-CommandTimer")) {
+        # Try to import Command History Database module for persistent storage
+        $commandHistoryModule = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'scripts' 'lib' 'database' 'CommandHistoryDatabase.psm1'
+        $script:UseCommandHistoryDb = $false
+        if ($commandHistoryModule -and (Test-Path -LiteralPath $commandHistoryModule)) {
+            try {
+                Import-Module $commandHistoryModule -DisableNameChecking -ErrorAction SilentlyContinue
+                if (Get-Command Add-CommandHistory -ErrorAction SilentlyContinue) {
+                    $script:UseCommandHistoryDb = $true
+                }
+            }
+            catch {
+                # Command history database not available, continue with in-memory only
+            }
+        }
+        
         <#
         .SYNOPSIS
             Stops command timing and records the duration.
         .DESCRIPTION
             Stops the command timer and records the execution duration for analysis.
+            Also records to persistent SQLite database if available.
         #>
         $sbStop = {
-            if ($global:PSProfileCommandTimer) {
-                # Stop the timer immediately to get execution time as close as possible
-                $global:PSProfileCommandTimer.Timer.Stop()
-                $duration = $global:PSProfileCommandTimer.Timer.Elapsed.TotalMilliseconds
-                $commandName = $global:PSProfileCommandTimer.Name
-
-                # Record timing for analysis
-                if (-not $global:PSProfileCommandTimings.ContainsKey($commandName)) {
-                    $global:PSProfileCommandTimings[$commandName] = [System.Collections.Generic.List[double]]::new()
-                }
-                $global:PSProfileCommandTimings[$commandName].Add($duration)
-
-                # Keep only last 100 timings per command to avoid memory bloat
-                if ($global:PSProfileCommandTimings[$commandName].Count -gt 100) {
-                    $global:PSProfileCommandTimings[$commandName].RemoveAt(0)
-                }
-
-                # Show timing for slow commands
-                # Note: This measurement includes minimal overhead from command lookup and prompt rendering
-                # For precise execution-only timing, use Measure-Command { command }
-                if ($duration -gt 1000) {
-                    # Commands taking more than 1 second
-                    # $duration is in milliseconds, convert to seconds
-                    $durationSeconds = [Math]::Round($duration / 1000, 2)
-                    # Use locale-aware number formatting if available
-                    $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
-                        Format-LocaleNumber $durationSeconds -Format 'F2'
-                    }
-                    else {
-                        $durationSeconds.ToString("F2")
-                    }
-                    Write-Host ("🐌 Slow command: {0} took {1}s" -f $commandName, $durationStr) -ForegroundColor Yellow
-                }
-
-                $global:PSProfileCommandTimer = $null
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                # Debug level is available
             }
+
+            if ($global:PSProfileCommandTimer) {
+                # Only show debug message when there's actually a timer to stop
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [performance.timer] Stopping command timer (if running)" -ForegroundColor DarkGray
+                }
+                try {
+                    # Stop the timer immediately to get execution time as close as possible
+                    $global:PSProfileCommandTimer.Timer.Stop()
+                    $duration = $global:PSProfileCommandTimer.Timer.Elapsed.TotalMilliseconds
+                    $commandName = $global:PSProfileCommandTimer.Name
+                    $startTime = $global:PSProfileCommandTimer.StartTime
+                    $endTime = [DateTime]::Now
+
+                    # Level 2: Log timing information
+                    if ($debugLevel -ge 2) {
+                        Write-Verbose "[performance.timer] Command execution completed: $commandName took ${duration}ms"
+                    }
+                    
+                    # Level 3: Detailed timing breakdown
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [performance.timer] Execution time: ${duration}ms (started at $($startTime.ToString('HH:mm:ss.fff')), stopped at $($endTime.ToString('HH:mm:ss.fff')))" -ForegroundColor DarkGray
+                    }
+
+                    # Warn if timing seems incorrect (likely measuring time between commands)
+                    if ($duration -gt 5000 -and $debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Unusually long command execution time detected - may be measuring time between commands instead of execution time" -OperationName 'performance.timer' -Context @{
+                                command      = $commandName
+                                duration_ms  = $duration
+                                start_time   = $startTime.ToString('o')
+                                stop_time    = $endTime.ToString('o')
+                                warning_code = 'TIMING_SUSPICIOUS'
+                            } -Code 'TIMING_SUSPICIOUS'
+                        }
+                        else {
+                            Write-Warning "Unusually long command execution time detected for '$commandName' (${duration}ms) - may be measuring time between commands instead of execution time"
+                        }
+                    }
+
+                    # Record timing for analysis (in-memory)
+                    if (-not $global:PSProfileCommandTimings.ContainsKey($commandName)) {
+                        $global:PSProfileCommandTimings[$commandName] = [System.Collections.Generic.List[double]]::new()
+                    }
+                    $global:PSProfileCommandTimings[$commandName].Add($duration)
+
+                    # Keep only last 100 timings per command to avoid memory bloat
+                    if ($global:PSProfileCommandTimings[$commandName].Count -gt 100) {
+                        $global:PSProfileCommandTimings[$commandName].RemoveAt(0)
+                    }
+
+                    # Record to persistent database if available
+                    if ($script:UseCommandHistoryDb) {
+                        try {
+                            # Get the actual command line from history if available
+                            $commandLine = $commandName
+                            $lastHistory = Get-History -Count 1 -ErrorAction SilentlyContinue
+                            if ($lastHistory) {
+                                $commandLine = $lastHistory.CommandLine
+                            }
+                            
+                            # Get exit code
+                            $exitCode = if ($LASTEXITCODE) { $LASTEXITCODE } else { if ($?) { 0 } else { 1 } }
+                            
+                            Add-CommandHistory -CommandLine $commandLine -ExecutionTime $duration -ExitCode $exitCode -StartTime $startTime -EndTime $endTime
+                            
+                            # Level 3: Log database recording
+                            if ($debugLevel -ge 3) {
+                                Write-Host "  [performance.timer] Recorded to database: $commandLine" -ForegroundColor DarkGray
+                            }
+                        }
+                        catch {
+                            # Level 1: Log error
+                            if ($debugLevel -ge 1) {
+                                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                    Write-StructuredError -ErrorRecord $_ -OperationName 'performance.timer.database' -Context @{
+                                        command      = $commandName
+                                        command_line = $commandLine
+                                    }
+                                }
+                                else {
+                                    Write-Error "Failed to record command to database: $($_.Exception.Message)"
+                                }
+                            }
+                            
+                            # Level 2: More details
+                            if ($debugLevel -ge 2) {
+                                Write-Verbose "[performance.timer] Database recording error: $($_.Exception.Message)"
+                            }
+                            
+                            # Level 3: Full error details
+                            if ($debugLevel -ge 3) {
+                                Write-Host "  [performance.timer] Database error - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                            }
+                        }
+                    }
+
+                    # Show timing for slow commands
+                    # Note: This measurement includes minimal overhead from command lookup and prompt rendering
+                    # For precise execution-only timing, use Measure-Command { command }
+                    if ($duration -gt 1000) {
+                        # Commands taking more than 1 second
+                        # $duration is in milliseconds, convert to seconds
+                        $durationSeconds = [Math]::Round($duration / 1000, 2)
+                        # Use locale-aware number formatting if available
+                        $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                            Format-LocaleNumber $durationSeconds -Format 'F2'
+                        }
+                        else {
+                            $durationSeconds.ToString("F2")
+                        }
+                        Write-Host ("🐌 Slow command: {0} took {1}s" -f $commandName, $durationStr) -ForegroundColor Yellow
+                    }
+
+                    $global:PSProfileCommandTimer = $null
+                }
+                catch {
+                    # Level 1: Log error
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'performance.timer.stop' -Context @{
+                                command = if ($global:PSProfileCommandTimer) { $global:PSProfileCommandTimer.Name } else { 'unknown' }
+                            }
+                        }
+                        else {
+                            Write-Error "Failed to stop command timer: $($_.Exception.Message)"
+                        }
+                    }
+                    
+                    # Level 2: More details
+                    if ($debugLevel -ge 2) {
+                        Write-Verbose "[performance.timer] Error stopping timer: $($_.Exception.Message)"
+                    }
+                    
+                    # Level 3: Full error details
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [performance.timer] Timer stop error - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                    }
+                    
+                    # Clear timer on error to prevent stale state
+                    $global:PSProfileCommandTimer = $null
+                }
+            }
+            # Suppress "No active timer to stop" message - it's not useful and creates noise during profile reload
         }
         # Create function in global scope explicitly
         Set-Item -Path "Function:\global:Stop-CommandTimer" -Value $sbStop -Force | Out-Null
@@ -292,38 +464,161 @@ try {
     if (-not $global:PSProfileCommandTrackingSetup) {
         # Use PostCommandLookupAction to start timing right before command execution
         # This fires after command lookup/resolution but before actual execution begins
+        # This is more accurate than PreCommandLookupAction which fires too early (during parsing)
+        # PreCommandLookupAction would include time between commands, not just execution time
         $ExecutionContext.SessionState.InvokeCommand.PostCommandLookupAction = {
             param($command, $eventArgs)
             
-            # Skip timing for internal calls (commands called from within prompt/profile code)
-            # Check call stack depth - if > 2, it's likely an internal call
-            # Depth 0 = PostCommandLookupAction itself, Depth 1 = command invocation, Depth 2+ = internal calls
-            $stackDepth = (Get-PSCallStack).Count
-            if ($stackDepth -gt 3) {
-                # This is likely an internal call from prompt/profile code, skip timing
+            # CRITICAL: Use recursion guard to prevent infinite loops
+            # This flag is set when we're already processing inside the handler
+            if ($global:PSProfilePostCommandLookupInProgress) {
                 return
             }
-            
-            # Also skip if we're currently in the prompt function (internal prompt calls)
-            $callStack = Get-PSCallStack
-            $isInPrompt = $callStack | Where-Object { $_.FunctionName -eq 'prompt' -or $_.ScriptName -like '*prompt*' -or $_.ScriptName -like '*diagnostics-performance*' }
-            if ($isInPrompt) {
-                # This is a call from within the prompt or performance monitoring code itself, skip
-                return
+            $global:PSProfilePostCommandLookupInProgress = $true
+            try {
+                # Normalize command to string (handle both string and CommandInfo objects)
+                $commandName = if ($command -is [string]) {
+                    $command
+                }
+                elseif ($command -is [System.Management.Automation.CommandInfo]) {
+                    $command.Name
+                }
+                else {
+                    $command.ToString()
+                }
+                
+                # CRITICAL: Exclude output/logging commands FIRST to prevent infinite loops
+                # These commands would trigger PostCommandLookupAction recursively
+                $excludedCommands = @(
+                    'Write-Host', 'Write-Verbose', 'Write-Error', 'Write-Warning', 'Write-Output',
+                    'Write-Debug', 'Write-Information', 'Write-Progress',
+                    'Out-Host', 'Out-String', 'Out-Default',
+                    'Test-Path', 'Get-PSCallStack', 'Get-Command'
+                )
+                if ($commandName -in $excludedCommands) {
+                    return
+                }
+                
+                # Skip timing for internal calls (commands called from within prompt/profile code)
+                # Check call stack depth - if > 3, it's likely an internal call
+                # Depth 0 = PostCommandLookupAction itself, Depth 1 = command invocation, Depth 2+ = internal calls
+                # Do this BEFORE any logging to avoid recursive calls
+                # Use recursion guard when calling Get-PSCallStack to prevent re-entry
+                $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                $global:PSProfilePostCommandLookupInProgress = $false
+                try {
+                    $stackDepth = (Get-PSCallStack).Count
+                }
+                finally {
+                    $global:PSProfilePostCommandLookupInProgress = $tempGuard
+                }
+                if ($stackDepth -gt 3) {
+                    return
+                }
+                
+                # Also skip if we're currently in the prompt function (internal prompt calls)
+                $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                $global:PSProfilePostCommandLookupInProgress = $false
+                try {
+                    $callStack = Get-PSCallStack
+                    $isInPrompt = $callStack | Where-Object { $_.FunctionName -eq 'prompt' -or $_.ScriptName -like '*prompt*' -or $_.ScriptName -like '*diagnostics-performance*' }
+                }
+                finally {
+                    $global:PSProfilePostCommandLookupInProgress = $tempGuard
+                }
+                if ($isInPrompt) {
+                    return
+                }
+                
+                # Now safe to do debug logging (after exclusions)
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 3) {
+                        # Temporarily disable guard for Write-Host (it's excluded, but be safe)
+                        $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                        $global:PSProfilePostCommandLookupInProgress = $false
+                        try {
+                            Write-Host "  [performance.tracking] PostCommandLookupAction fired for command: $commandName" -ForegroundColor DarkGray
+                        }
+                        finally {
+                            $global:PSProfilePostCommandLookupInProgress = $tempGuard
+                        }
+                    }
+                }
+                
+                # Only start timer if one isn't already running (prevents multiple starts for aliases)
+                if (-not $global:PSProfileCommandTimer) {
+                    try {
+                        Start-CommandTimer -CommandName $commandName
+                    }
+                    catch {
+                        # Level 1: Log error
+                        if ($debugLevel -ge 1) {
+                            $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                            $global:PSProfilePostCommandLookupInProgress = $false
+                            try {
+                                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                    Write-StructuredError -ErrorRecord $_ -OperationName 'performance.tracking.start' -Context @{
+                                        command = $commandName
+                                    }
+                                }
+                                else {
+                                    Write-Error "Failed to start command timer: $($_.Exception.Message)"
+                                }
+                            }
+                            finally {
+                                $global:PSProfilePostCommandLookupInProgress = $tempGuard
+                            }
+                        }
+                        
+                        # Level 2: More details
+                        if ($debugLevel -ge 2) {
+                            $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                            $global:PSProfilePostCommandLookupInProgress = $false
+                            try {
+                                Write-Verbose "[performance.tracking] Error starting timer: $($_.Exception.Message)"
+                            }
+                            finally {
+                                $global:PSProfilePostCommandLookupInProgress = $tempGuard
+                            }
+                        }
+                        
+                        # Level 3: Full error details
+                        if ($debugLevel -ge 3) {
+                            $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                            $global:PSProfilePostCommandLookupInProgress = $false
+                            try {
+                                Write-Host "  [performance.tracking] Timer start error - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Command: $commandName" -ForegroundColor DarkGray
+                            }
+                            finally {
+                                $global:PSProfilePostCommandLookupInProgress = $tempGuard
+                            }
+                        }
+                    }
+                }
+                elseif ($debugLevel -ge 2) {
+                    $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                    $global:PSProfilePostCommandLookupInProgress = $false
+                    try {
+                        Write-Verbose "[performance.tracking] Timer already running, skipping start for command: $commandName"
+                    }
+                    finally {
+                        $global:PSProfilePostCommandLookupInProgress = $tempGuard
+                    }
+                }
             }
-            
-            # Exclude Test-Path from measurements (too frequent and not meaningful for performance insights)
-            if ($command -eq 'Test-Path') {
-                return
-            }
-            
-            # Only start timer if one isn't already running (prevents multiple starts for aliases)
-            if (-not $global:PSProfileCommandTimer) {
-                Start-CommandTimer -CommandName $command
+            finally {
+                $global:PSProfilePostCommandLookupInProgress = $false
             }
         }
 
         $global:PSProfileCommandTrackingSetup = $true
+        
+        # Level 1: Log setup completion
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            Write-Verbose "[performance.tracking] Command tracking initialized using PostCommandLookupAction"
+        }
     }
 
     <#
@@ -379,9 +674,45 @@ try {
             # This minimizes the overhead from output rendering and prompt generation
             # The timer was started in PostCommandLookupAction (just before execution)
             # so this measures: execution time + minimal prompt overhead
-            if ($global:PSProfileCommandTimer) {
-                Stop-CommandTimer
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                # Debug level is available
             }
+            
+            if ($global:PSProfileCommandTimer) {
+                # Only show debug message when there's actually a timer to stop
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [performance.prompt] Stopping command timer (if running)" -ForegroundColor DarkGray
+                }
+                
+                try {
+                    Stop-CommandTimer
+                }
+                catch {
+                    # Level 1: Log error
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'performance.prompt' -Context @{
+                                operation = 'stop_timer'
+                            }
+                        }
+                        else {
+                            Write-Error "Failed to stop command timer in prompt: $($_.Exception.Message)"
+                        }
+                    }
+                    
+                    # Level 2: More details
+                    if ($debugLevel -ge 2) {
+                        Write-Verbose "[performance.prompt] Error stopping timer: $($_.Exception.Message)"
+                    }
+                    
+                    # Level 3: Full error details
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [performance.prompt] Timer stop error - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                    }
+                }
+            }
+            # Suppress "No active timer to stop" message - it's not useful and creates noise during profile reload
 
             # Call original prompt (works with Starship, Oh-My-Posh, or default)
             if ($global:PSProfileOriginalPrompt) {
@@ -412,4 +743,5 @@ try {
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Performance insights fragment failed: $($_.Exception.Message)" }
 }
+
 

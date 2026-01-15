@@ -26,10 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `uvr` - Runs Python commands with UV.
 - `uvrun` - Runs Python commands in temporary virtual environments using uv.
 
 
 ## Source
 
-Defined in: ..\profile.d\67-uv.ps1
+Defined in: ..\profile.d\uv.ps1

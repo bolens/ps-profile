@@ -26,12 +26,21 @@ try {
         and other system metrics in a clean, organized format.
     #>
     function Show-SystemDashboard {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[diagnostics.system-monitor] Showing system dashboard"
+            }
+        }
+
+        $dashboardStartTime = [DateTime]::Now
         Write-Host "🖥️  System Dashboard" -ForegroundColor Cyan
         Write-Host "==================" -ForegroundColor Cyan
 
         # CPU Information
         Write-Host "`n🧠 CPU Information:" -ForegroundColor Yellow
         try {
+            $cpuStartTime = [DateTime]::Now
             $cpu = Get-CimInstance Win32_Processor -ErrorAction Stop
             try {
                 $cpuUsage = (Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction Stop).CounterSamples.CookedValue
@@ -42,18 +51,52 @@ try {
                     $cpuUsage.ToString("N1")
                 }
                 Write-Host ("  Usage: {0}%" -f $cpuPercentStr)
+                if ($debugLevel -ge 3) {
+                    $cpuDuration = ([DateTime]::Now - $cpuStartTime).TotalMilliseconds
+                    Write-Host "  [diagnostics.system-monitor] CPU info retrieved in ${cpuDuration}ms" -ForegroundColor DarkGray
+                }
             }
             catch {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Unable to retrieve CPU usage" -OperationName 'diagnostics.system-monitor.cpu' -Context @{
+                            error = $_.Exception.Message
+                        } -Code 'CPU_USAGE_UNAVAILABLE'
+                    }
+                }
                 Write-Host "  Usage: Unable to retrieve CPU usage" -ForegroundColor Yellow
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[diagnostics.system-monitor] CPU usage retrieval failed: $($_.Exception.Message)"
+                }
             }
             Write-Host ("  Model: {0}" -f $cpu.Name)
             Write-Host ("  Cores: {0} physical, {1} logical" -f $cpu.NumberOfCores, $cpu.NumberOfLogicalProcessors)
         }
         catch [System.Management.ManagementException] {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor.cpu' -Context @{
+                        error_type = 'WMI/CIM'
+                    }
+                }
+            }
             Write-Host "  CPU info unavailable (WMI/CIM error)" -ForegroundColor Red
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.system-monitor] CPU info unavailable (WMI/CIM error): $($_.Exception.Message)"
+            }
         }
         catch {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor.cpu' -Context @{
+                        error_type = 'General'
+                    }
+                }
+            }
             Write-Host "  CPU info unavailable: $($_.Exception.Message)" -ForegroundColor Red
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.system-monitor] CPU info error: $($_.Exception.Message)"
+            }
         }
 
         # Memory Information
@@ -98,7 +141,15 @@ try {
             Write-Host ("  Status: {0}" -f $(if ($memoryUsagePercent -gt 90) { "Critical" } elseif ($memoryUsagePercent -gt 75) { "High" } else { "Normal" })) -ForegroundColor $color
         }
         catch {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor.memory' -Context @{}
+                }
+            }
             Write-Host "  Memory info unavailable" -ForegroundColor Red
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.system-monitor] Memory info error: $($_.Exception.Message)"
+            }
         }
 
         # Disk Information
@@ -137,7 +188,15 @@ try {
             }
         }
         catch {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor.disk' -Context @{}
+                }
+            }
             Write-Host "  Disk info unavailable" -ForegroundColor Red
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.system-monitor] Disk info error: $($_.Exception.Message)"
+            }
         }
 
         # Network Information
@@ -171,7 +230,15 @@ try {
             }
         }
         catch {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor.network' -Context @{}
+                }
+            }
             Write-Host "  Network info unavailable" -ForegroundColor Red
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.system-monitor] Network info error: $($_.Exception.Message)"
+            }
         }
 
         # System Uptime
@@ -199,7 +266,15 @@ try {
             Write-Host ("  {0} days, {1} hours, {2} minutes" -f $daysStr, $hoursStr, $minutesStr)
         }
         catch {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor.uptime' -Context @{}
+                }
+            }
             Write-Host "  Uptime info unavailable" -ForegroundColor Red
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.system-monitor] Uptime info error: $($_.Exception.Message)"
+            }
         }
 
         # PowerShell Session Info
@@ -217,6 +292,14 @@ try {
                 $profileUptime.TotalMinutes.ToString("N1")
             }
             Write-Host ("  Profile uptime: {0} minutes" -f $uptimeStr)
+        }
+
+        $totalDuration = ([DateTime]::Now - $dashboardStartTime).TotalMilliseconds
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[diagnostics.system-monitor] System dashboard completed in ${totalDuration}ms"
+        }
+        if ($debugLevel -ge 3) {
+            Write-Host "  [diagnostics.system-monitor] Dashboard generation time: ${totalDuration}ms" -ForegroundColor DarkGray
         }
     }
 
@@ -636,6 +719,35 @@ try {
     Set-Variable -Name 'SystemMonitorLoaded' -Value $true -Scope Global -Force
 }
 catch {
-    if ($env:PS_PROFILE_DEBUG) { Write-Verbose "System monitor fragment failed: $($_.Exception.Message)" }
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        if ($debugLevel -ge 1) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor' -Context @{
+                    fragment = 'diagnostics-system-monitor'
+                }
+            }
+            else {
+                Write-Error "System monitor fragment failed: $($_.Exception.Message)"
+            }
+        }
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[diagnostics.system-monitor] Fragment load error: $($_.Exception.Message)"
+        }
+        if ($debugLevel -ge 3) {
+            Write-Host "  [diagnostics.system-monitor] Fragment error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+        }
+    }
+    else {
+        # Always log errors even if debug is off
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor' -Context @{
+                fragment = 'diagnostics-system-monitor'
+            }
+        }
+        else {
+            Write-Error "System monitor fragment failed: $($_.Exception.Message)"
+        }
+    }
 }
 

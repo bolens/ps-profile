@@ -12,7 +12,12 @@ scripts/lib/Cache.psm1
 .NOTES
     Module Version: 1.0.0
     PowerShell Version: 3.0+
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 <#
 .SYNOPSIS
@@ -50,9 +55,10 @@ scripts/lib/Cache.psm1
 #>
 function Get-CachedValue {
     [CmdletBinding()]
-    [OutputType([object])]
+    [OutputType([object])]  # Generic return type - can be any cached value type
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Key,
 
         [object]$Value,
@@ -132,6 +138,7 @@ function Set-CachedValue {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Key,
 
         [Parameter(Mandatory)]
@@ -168,6 +175,7 @@ function Clear-CachedValue {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Key
     )
 

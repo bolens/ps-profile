@@ -119,21 +119,45 @@ try {
             }
 
             if (-not (Test-Path -LiteralPath $collection)) {
-                Write-Error "Collection path not found: $collection"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("Collection path not found: $collection"),
+                            'CollectionPathNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $collection
+                        )) -OperationName 'api.bruno.run' -Context @{ collection_path = $collection }
+                }
+                else {
+                    Write-Error "Collection path not found: $collection"
+                }
                 return $null
             }
 
-            try {
-                $args = @('run', $collection)
-                if (-not [string]::IsNullOrWhiteSpace($Environment)) {
-                    $args += @('--env', $Environment)
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'api.bruno.run' -Context @{
+                    collection_path = $collection
+                    environment     = $Environment
+                } -ScriptBlock {
+                    $args = @('run', $collection)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        $args += @('--env', $Environment)
+                    }
+                    & bruno $args 2>&1
                 }
-                $result = & bruno $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run bruno: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @('run', $collection)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        $args += @('--env', $Environment)
+                    }
+                    $result = & bruno $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run bruno: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -215,26 +239,56 @@ try {
             }
 
             if (-not (Test-Path -LiteralPath $TestFile)) {
-                Write-Error "Test file not found: $TestFile"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("Test file not found: $TestFile"),
+                            'TestFileNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $TestFile
+                        )) -OperationName 'api.hurl.run' -Context @{ test_file = $TestFile }
+                }
+                else {
+                    Write-Error "Test file not found: $TestFile"
+                }
                 return $null
             }
 
-            try {
-                $args = @($TestFile)
-                if ($Variable) {
-                    foreach ($var in $Variable) {
-                        $args += @('--variable', $var)
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'api.hurl.run' -Context @{
+                    test_file     = $TestFile
+                    has_variables = ($null -ne $Variable)
+                    output_file   = $Output
+                } -ScriptBlock {
+                    $args = @($TestFile)
+                    if ($Variable) {
+                        foreach ($var in $Variable) {
+                            $args += @('--variable', $var)
+                        }
                     }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    & hurl $args 2>&1
                 }
-                if (-not [string]::IsNullOrWhiteSpace($Output)) {
-                    $args += @('--output', $Output)
-                }
-                $result = & hurl $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run hurl: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @($TestFile)
+                    if ($Variable) {
+                        foreach ($var in $Variable) {
+                            $args += @('--variable', $var)
+                        }
+                    }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    $result = & hurl $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run hurl: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -328,33 +382,72 @@ try {
             }
 
             if ([string]::IsNullOrWhiteSpace($Url)) {
-                Write-Error "URL is required"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.ArgumentException]::new("URL is required"),
+                            'UrlRequired',
+                            [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                            $null
+                        )) -OperationName 'api.httpie.request' -Context @{ method = $Method }
+                }
+                else {
+                    Write-Error "URL is required"
+                }
                 return $null
             }
 
-            try {
-                $args = @()
-                if ($Method -ne 'GET') {
-                    $args += $Method
-                }
-                $args += $Url
-                if (-not [string]::IsNullOrWhiteSpace($Body)) {
-                    $args += $Body
-                }
-                if ($Header) {
-                    foreach ($h in $Header) {
-                        $args += $h
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'api.httpie.request' -Context @{
+                    method      = $Method
+                    url         = $Url
+                    has_body    = (-not [string]::IsNullOrWhiteSpace($Body))
+                    has_headers = ($null -ne $Header)
+                    output_file = $Output
+                } -ScriptBlock {
+                    $args = @()
+                    if ($Method -ne 'GET') {
+                        $args += $Method
                     }
+                    $args += $Url
+                    if (-not [string]::IsNullOrWhiteSpace($Body)) {
+                        $args += $Body
+                    }
+                    if ($Header) {
+                        foreach ($h in $Header) {
+                            $args += $h
+                        }
+                    }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    & http $args 2>&1
                 }
-                if (-not [string]::IsNullOrWhiteSpace($Output)) {
-                    $args += @('--output', $Output)
-                }
-                $result = & http $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run httpie: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @()
+                    if ($Method -ne 'GET') {
+                        $args += $Method
+                    }
+                    $args += $Url
+                    if (-not [string]::IsNullOrWhiteSpace($Body)) {
+                        $args += $Body
+                    }
+                    if ($Header) {
+                        foreach ($h in $Header) {
+                            $args += $h
+                        }
+                    }
+                    if (-not [string]::IsNullOrWhiteSpace($Output)) {
+                        $args += @('--output', $Output)
+                    }
+                    $result = & http $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run httpie: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -427,17 +520,31 @@ try {
             return $null
         }
 
-        try {
-            $args = @('--port', $Port.ToString())
-            if ($Passthrough) {
-                $args += '--passthrough'
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'api.httptoolkit.start' -Context @{
+                port        = $Port
+                passthrough = $Passthrough.IsPresent
+            } -ScriptBlock {
+                $args = @('--port', $Port.ToString())
+                if ($Passthrough) {
+                    $args += '--passthrough'
+                }
+                Start-Process -FilePath 'httptoolkit' -ArgumentList $args -PassThru -NoNewWindow
             }
-            $process = Start-Process -FilePath 'httptoolkit' -ArgumentList $args -PassThru -NoNewWindow
-            return $process
         }
-        catch {
-            Write-Error "Failed to start httptoolkit: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @('--port', $Port.ToString())
+                if ($Passthrough) {
+                    $args += '--passthrough'
+                }
+                $process = Start-Process -FilePath 'httptoolkit' -ArgumentList $args -PassThru -NoNewWindow
+                return $process
+            }
+            catch {
+                Write-Error "Failed to start httptoolkit: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -518,21 +625,45 @@ try {
             }
 
             if (-not (Test-Path -LiteralPath $collection)) {
-                Write-Error "Collection path not found: $collection"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("Collection path not found: $collection"),
+                            'CollectionPathNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $collection
+                        )) -OperationName 'api.insomnia.run' -Context @{ collection_path = $collection }
+                }
+                else {
+                    Write-Error "Collection path not found: $collection"
+                }
                 return $null
             }
 
-            try {
-                $args = @('run', $collection)
-                if (-not [string]::IsNullOrWhiteSpace($Environment)) {
-                    $args += @('--env', $Environment)
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'api.insomnia.run' -Context @{
+                    collection_path = $collection
+                    environment     = $Environment
+                } -ScriptBlock {
+                    $args = @('run', $collection)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        $args += @('--env', $Environment)
+                    }
+                    & insomnia $args 2>&1
                 }
-                $result = & insomnia $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run insomnia: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @('run', $collection)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        $args += @('--env', $Environment)
+                    }
+                    $result = & insomnia $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run insomnia: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -622,43 +753,100 @@ try {
             if (-not (Test-Path -LiteralPath $CollectionPath)) {
                 # Check if it's a URL (starts with http:// or https://)
                 if (-not ($CollectionPath -match '^https?://')) {
-                    Write-Error "Collection path not found: $CollectionPath"
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                                [System.IO.FileNotFoundException]::new("Collection path not found: $CollectionPath"),
+                                'CollectionPathNotFound',
+                                [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                                $CollectionPath
+                            )) -OperationName 'api.postman.run' -Context @{ collection_path = $CollectionPath }
+                    }
+                    else {
+                        Write-Error "Collection path not found: $CollectionPath"
+                    }
                     return $null
                 }
             }
 
-            try {
-                $args = @('run', $CollectionPath)
-                if (-not [string]::IsNullOrWhiteSpace($Environment)) {
-                    if (-not (Test-Path -LiteralPath $Environment)) {
-                        Write-Error "Environment file not found: $Environment"
-                        return $null
-                    }
-                    $args += @('--environment', $Environment)
-                }
-                if ($Reporters) {
-                    foreach ($reporter in $Reporters) {
-                        $args += @('--reporter', $reporter)
-                        if (-not [string]::IsNullOrWhiteSpace($OutputFile)) {
-                            $reporterOutput = if ($Reporters.Count -eq 1) {
-                                $OutputFile
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'api.postman.run' -Context @{
+                    collection_path = $CollectionPath
+                    environment     = $Environment
+                    reporters       = $Reporters
+                    output_file     = $OutputFile
+                } -ScriptBlock {
+                    $args = @('run', $CollectionPath)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        if (-not (Test-Path -LiteralPath $Environment)) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                                        [System.IO.FileNotFoundException]::new("Environment file not found: $Environment"),
+                                        'EnvironmentFileNotFound',
+                                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                                        $Environment
+                                    )) -OperationName 'api.postman.run' -Context @{ environment_file = $Environment }
                             }
                             else {
-                                $baseName = [System.IO.Path]::GetFileNameWithoutExtension($OutputFile)
-                                $extension = [System.IO.Path]::GetExtension($OutputFile)
-                                $dir = Split-Path -Parent $OutputFile
-                                Join-Path $dir "$baseName-$reporter$extension"
+                                Write-Error "Environment file not found: $Environment"
                             }
-                            $args += $reporterOutput
+                            return $null
+                        }
+                        $args += @('--environment', $Environment)
+                    }
+                    if ($Reporters) {
+                        foreach ($reporter in $Reporters) {
+                            $args += @('--reporter', $reporter)
+                            if (-not [string]::IsNullOrWhiteSpace($OutputFile)) {
+                                $reporterOutput = if ($Reporters.Count -eq 1) {
+                                    $OutputFile
+                                }
+                                else {
+                                    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($OutputFile)
+                                    $extension = [System.IO.Path]::GetExtension($OutputFile)
+                                    $dir = Split-Path -Parent $OutputFile
+                                    Join-Path $dir "$baseName-$reporter$extension"
+                                }
+                                $args += $reporterOutput
+                            }
                         }
                     }
+                    & newman $args 2>&1
                 }
-                $result = & newman $args 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to run newman: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @('run', $CollectionPath)
+                    if (-not [string]::IsNullOrWhiteSpace($Environment)) {
+                        if (-not (Test-Path -LiteralPath $Environment)) {
+                            Write-Error "Environment file not found: $Environment"
+                            return $null
+                        }
+                        $args += @('--environment', $Environment)
+                    }
+                    if ($Reporters) {
+                        foreach ($reporter in $Reporters) {
+                            $args += @('--reporter', $reporter)
+                            if (-not [string]::IsNullOrWhiteSpace($OutputFile)) {
+                                $reporterOutput = if ($Reporters.Count -eq 1) {
+                                    $OutputFile
+                                }
+                                else {
+                                    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($OutputFile)
+                                    $extension = [System.IO.Path]::GetExtension($OutputFile)
+                                    $dir = Split-Path -Parent $OutputFile
+                                    Join-Path $dir "$baseName-$reporter$extension"
+                                }
+                                $args += $reporterOutput
+                            }
+                        }
+                    }
+                    $result = & newman $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run newman: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }

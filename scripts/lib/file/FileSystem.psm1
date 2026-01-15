@@ -9,9 +9,22 @@ scripts/lib/FileSystem.psm1
     and other file system operations used across utility scripts.
 
 .NOTES
-    Module Version: 1.0.0
-    PowerShell Version: 3.0+
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe path type handling.
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
+
+# Import CommonEnums for FileSystemPathType enum
+$commonEnumsPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 <#
 .SYNOPSIS
@@ -36,6 +49,7 @@ function Ensure-DirectoryExists {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
 
         [string]$ErrorMessage
@@ -44,11 +58,44 @@ function Ensure-DirectoryExists {
     if (-not (Test-Path -Path $Path)) {
         try {
             New-Item -ItemType Directory -Path $Path -Force | Out-Null
-            Write-Verbose "Created directory: $Path"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[filesystem.directory] Created directory: $Path"
+            }
         }
         catch {
             if (-not $ErrorMessage) {
                 $ErrorMessage = "Failed to create directory: $Path"
+            }
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.directory' -Context @{
+                            Path         = $Path
+                            ErrorMessage = $ErrorMessage
+                        }
+                    }
+                    else {
+                        Write-Error $ErrorMessage -ErrorAction Continue
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[filesystem.directory] Directory creation error details - Path: $Path, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
+                }
+            }
+            else {
+                # Always log critical errors even if debug is off
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.directory' -Context @{
+                        Path         = $Path
+                        ErrorMessage = $ErrorMessage
+                    }
+                }
+                else {
+                    Write-Error $ErrorMessage -ErrorAction Continue
+                }
             }
             throw $ErrorMessage
         }
@@ -92,6 +139,7 @@ function Get-PowerShellScripts {
     [OutputType([System.IO.FileInfo[]])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
 
         [switch]$Recurse,
@@ -117,12 +165,72 @@ function Get-PowerShellScripts {
         $scripts = Get-ChildItem @params -ErrorAction Stop
     }
     catch [System.UnauthorizedAccessException] {
-        Write-Warning "Access denied to some directories in '$Path'. Results may be incomplete."
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Access denied to some directories" -OperationName 'filesystem.get-scripts' -Context @{
+                        path = $Path
+                    } -Code 'AccessDenied'
+                }
+                else {
+                    Write-Warning "[filesystem.get-scripts] Access denied to some directories in '$Path'. Results may be incomplete."
+                }
+            }
+            # Level 3: Log detailed access denied information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [filesystem.get-scripts] Access denied details - Path: $Path, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log warnings even if debug is off
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Access denied to some directories" -OperationName 'filesystem.get-scripts' -Context @{
+                    path = $Path
+                } -Code 'AccessDenied'
+            }
+            else {
+                Write-Warning "[filesystem.get-scripts] Access denied to some directories in '$Path'. Results may be incomplete."
+            }
+        }
         # Try with ErrorAction SilentlyContinue to get partial results
         $scripts = Get-ChildItem @params -ErrorAction SilentlyContinue
     }
     catch {
-        throw "Failed to get PowerShell scripts from '$Path': $($_.Exception.Message)"
+        $errorMessage = "Failed to get PowerShell scripts from '$Path': $($_.Exception.Message)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.get-scripts' -Context @{
+                        Path         = $Path
+                        Recurse      = $Recurse
+                        ErrorMessage = $errorMessage
+                    }
+                }
+                else {
+                    Write-Error $errorMessage -ErrorAction Continue
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [filesystem.get-scripts] Get scripts error details - Path: $Path, Recurse: $Recurse, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log critical errors even if debug is off
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.get-scripts' -Context @{
+                    Path         = $Path
+                    Recurse      = $Recurse
+                    ErrorMessage = $errorMessage
+                }
+            }
+            else {
+                Write-Error $errorMessage -ErrorAction Continue
+            }
+        }
+        throw $errorMessage
     }
 
     if ($SortByName) {
@@ -161,17 +269,20 @@ function Test-PathExists {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
 
-        [ValidateSet('Any', 'File', 'Directory')]
-        [string]$PathType = 'Any',
+        [FileSystemPathType]$PathType = [FileSystemPathType]::Any,
 
         [string]$ErrorMessage
     )
 
+    # Convert enum to string
+    $pathTypeString = $PathType.ToString()
+    
     if (-not (Test-Path -Path $Path)) {
         if (-not $ErrorMessage) {
-            $typeLabel = switch ($PathType) {
+            $typeLabel = switch ($pathTypeString) {
                 'File' { 'file' }
                 'Directory' { 'directory' }
                 default { 'path' }
@@ -181,11 +292,11 @@ function Test-PathExists {
         throw $ErrorMessage
     }
 
-    if ($PathType -eq 'File' -and -not (Test-Path -Path $Path -PathType Leaf)) {
+    if ($pathTypeString -eq 'File' -and -not (Test-Path -Path $Path -PathType Leaf)) {
         throw "Path exists but is not a file: $Path"
     }
 
-    if ($PathType -eq 'Directory' -and -not (Test-Path -Path $Path -PathType Container)) {
+    if ($pathTypeString -eq 'Directory' -and -not (Test-Path -Path $Path -PathType Container)) {
         throw "Path exists but is not a directory: $Path"
     }
 
@@ -256,8 +367,7 @@ function Test-PathParameter {
         [Parameter(Mandatory = $false)]
         [object]$Path,
 
-        [ValidateSet('Any', 'File', 'Directory')]
-        [string]$PathType = 'Any',
+        [FileSystemPathType]$PathType = [FileSystemPathType]::Any,
 
         [switch]$Optional
     )
@@ -278,9 +388,12 @@ function Test-PathParameter {
         return $true
     }
 
+    # Convert enum to string
+    $pathTypeString = $PathType.ToString()
+    
     # Validate path exists
     if (-not (Test-Path -Path $pathString)) {
-        $typeLabel = switch ($PathType) {
+        $typeLabel = switch ($pathTypeString) {
             'File' { 'file' }
             'Directory' { 'directory' }
             default { 'path' }
@@ -289,11 +402,11 @@ function Test-PathParameter {
     }
 
     # Validate path type if specified
-    if ($PathType -eq 'File' -and -not (Test-Path -Path $pathString -PathType Leaf)) {
+    if ($pathTypeString -eq 'File' -and -not (Test-Path -Path $pathString -PathType Leaf)) {
         throw "Path exists but is not a file: $pathString"
     }
 
-    if ($PathType -eq 'Directory' -and -not (Test-Path -Path $pathString -PathType Container)) {
+    if ($pathTypeString -eq 'Directory' -and -not (Test-Path -Path $pathString -PathType Container)) {
         throw "Path exists but is not a directory: $pathString"
     }
 

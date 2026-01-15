@@ -381,7 +381,17 @@ if (Test-CachedCommand brew) {
         )
         
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Brewfile not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Brewfile not found: $Path"),
+                        'BrewfileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'homebrew.packages.import' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "Brewfile not found: $Path"
+            }
             return
         }
         
@@ -392,7 +402,19 @@ if (Test-CachedCommand brew) {
         if ($NoUpgrade) {
             $args += '--no-upgrade'
         }
-        & brew @args
+        
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'homebrew.packages.import' -Context @{
+                path       = $Path
+                no_lock    = $NoLock.IsPresent
+                no_upgrade = $NoUpgrade.IsPresent
+            } -ScriptBlock {
+                & brew @args
+            } | Out-Null
+        }
+        else {
+            & brew @args
+        }
     }
     Set-Alias -Name brewimport -Value Import-BrewPackages -ErrorAction SilentlyContinue
     Set-Alias -Name brewrestore -Value Import-BrewPackages -ErrorAction SilentlyContinue

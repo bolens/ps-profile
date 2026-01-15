@@ -42,20 +42,37 @@ function Initialize-ProfileVersion {
                     
                     # Quick check: only attempt if .git directory exists
                     $gitDir = Join-Path $capturedProfileDir '.git'
+                    $debugLevel = 0
                     if ($gitDir -and -not [string]::IsNullOrWhiteSpace($gitDir) -and (Test-Path -LiteralPath $gitDir)) {
+                        # Level 3: Log git directory found
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Host "  [profile-version.git] Git directory found: $gitDir" -ForegroundColor DarkGray
+                        }
                         try {
                             Push-Location $capturedProfileDir -ErrorAction Stop
                             try {
                                 $gitOutput = git rev-parse --short HEAD 2>&1
                                 if ($LASTEXITCODE -eq 0 -and $gitOutput) {
                                     $global:PSProfileGitCommit = $gitOutput.Trim()
+                                    # Level 3: Log successful git commit hash retrieval
+                                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                                        Write-Verbose "[profile-version.git] Successfully retrieved commit hash: $global:PSProfileGitCommit"
+                                    }
                                 }
                                 else {
                                     $global:PSProfileGitCommit = 'unknown'
+                                    # Level 2: Log git command failure
+                                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                                        Write-Verbose "[profile-version.git] Git command failed or returned empty output"
+                                    }
                                 }
                             }
                             catch {
                                 $global:PSProfileGitCommit = 'unknown'
+                                # Level 2: Log git command exception
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                                    Write-Verbose "[profile-version.git] Git command exception: $($_.Exception.Message)"
+                                }
                             }
                             finally {
                                 Pop-Location -ErrorAction SilentlyContinue
@@ -63,19 +80,39 @@ function Initialize-ProfileVersion {
                         }
                         catch {
                             $global:PSProfileGitCommit = 'unknown'
+                            # Level 2: Log push-location failure
+                            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                                Write-Verbose "[profile-version.git] Failed to change directory: $($_.Exception.Message)"
+                            }
                         }
                     }
                     else {
                         $global:PSProfileGitCommit = 'unknown'
+                        # Level 3: Log git directory not found
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Host "  [profile-version.git] Git directory not found: $gitDir" -ForegroundColor DarkGray
+                        }
                     }
                 }
                 return $global:PSProfileGitCommit
             }
         }
 
-        if ($env:PS_PROFILE_DEBUG) {
-            $commitHash = if ($global:PSProfileGitCommitGetter) { & $global:PSProfileGitCommitGetter } else { 'unknown' }
-            Write-Host "PowerShell Profile v$global:PSProfileVersion (commit: $commitHash)" -ForegroundColor Cyan
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                $commitHash = if ($global:PSProfileGitCommitGetter) { & $global:PSProfileGitCommitGetter } else { 'unknown' }
+                Write-Verbose "[profile-version.init] PowerShell Profile v$global:PSProfileVersion (commit: $commitHash)"
+            }
+            # Level 2: Log successful initialization
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[profile-version.init] Profile version initialized: $global:PSProfileVersion"
+            }
+            # Level 3: Log detailed initialization information
+            if ($debugLevel -ge 3) {
+                $commitHash = if ($global:PSProfileGitCommitGetter) { & $global:PSProfileGitCommitGetter } else { 'unknown' }
+                Write-Host "  [profile-version.init] Initialization details - Version: $global:PSProfileVersion, Commit: $commitHash, ProfileDir: $ProfileDir" -ForegroundColor DarkGray
+            }
         }
     }
 }

@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\15-shortcuts.ps1
+Defined in: ..\profile.d\shortcuts.ps1

@@ -49,7 +49,7 @@ catch {
 # Get commit list between base and HEAD (exclude merges)
 $commits = & git rev-list --no-merges --reverse $Base..HEAD 2>$null
 if (-not $commits) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No commits to check against $Base"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "No commits to check against $Base"
 }
 
 # Use List for better performance than array concatenation
@@ -79,8 +79,8 @@ foreach ($c in $commits) {
 if ($errors.Count -gt 0) {
     $errorDetails = $errors | ForEach-Object { "Commit: {0} - {1}" -f $_.Commit, $_.Subject }
     $errorMessage = "Found $($errors.Count) commit(s) with invalid commit subjects:`n$($errorDetails -join "`n")"
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message $errorMessage
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message $errorMessage
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All commit subjects conform to Conventional Commits"
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "All commit subjects conform to Conventional Commits"
 

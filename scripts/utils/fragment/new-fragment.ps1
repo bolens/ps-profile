@@ -44,29 +44,49 @@ param(
     
     [string]$Description = "Profile fragment for $Name",
     
-    [ValidateSet('core', 'essential', 'standard', 'optional')]
-    [string]$Tier = 'standard',
+    [FragmentTier]$Tier = [FragmentTier]::standard
     
     [string[]]$Environments = @()
 )
+
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
 
 # Import shared utilities using ModuleImport pattern
 # Import ModuleImport first (bootstrap)
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
+# Import CommonEnums for FragmentTier enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+
 # Import required modules using Import-LibModule
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+
+# Convert enum to string
+$tierString = $Tier.ToString()
 
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 $profileDDir = Join-Path $repoRoot 'profile.d'
+
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[fragment.new] Creating new fragment: $Name"
+    Write-Verbose "[fragment.new] Tier: $tierString, Dependencies: $($Dependencies -join ', ')"
+}
 
 # Determine fragment number
 if ($Number -lt 0) {
@@ -89,7 +109,7 @@ if ($Number -lt 0) {
 
 # Ensure number is in valid range
 if ($Number -lt 0 -or $Number -gt 99) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Fragment number must be between 00 and 99"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Fragment number must be between 00 and 99"
 }
 
 $fragmentFileName = "{0:D2}-{1}.ps1" -f $Number, $Name
@@ -97,12 +117,12 @@ $fragmentPath = Join-Path $profileDDir $fragmentFileName
 
 # Check if fragment already exists
 if (Test-Path $fragmentPath) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Fragment already exists: $fragmentPath"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Fragment already exists: $fragmentPath"
 }
 
 # Build header metadata
 $headerLines = @()
-$headerLines += "# Tier: $Tier"
+$headerLines += "# Tier: $tierString"
 if ($Dependencies.Count -gt 0) {
     $depsString = $Dependencies -join ', '
     $headerLines += "# Dependencies: $depsString"
@@ -128,7 +148,7 @@ try {
 
     # Fragment implementation here
     # Use Set-AgentModeFunction or Set-AgentModeAlias for collision-safe registration
-    # Use Test-CachedCommand or Test-HasCommand for command availability checks
+    # Use Test-CachedCommand for command availability checks
 
     Set-Variable -Name '${Name}Loaded' -Value `$true -Scope Global -Force
 }
@@ -177,7 +197,14 @@ Notes
 Keep this fragment idempotent and avoid heavy probes at dot-source. Prefer provider-first checks and lazy enablers like Enable-* helpers.
 "@
 
+# Level 1: File creation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[fragment.new] Writing fragment file: $fragmentPath"
+    Write-Verbose "[fragment.new] Writing README file: $readmePath"
+}
+
 # Write files
+$writeStartTime = Get-Date
 try {
     Set-Content -Path $fragmentPath -Value $fragmentContent -Encoding UTF8
     Write-Host "Created fragment: $fragmentPath" -ForegroundColor Green
@@ -185,15 +212,36 @@ try {
     Set-Content -Path $readmePath -Value $readmeContent -Encoding UTF8
     Write-Host "Created README: $readmePath" -ForegroundColor Green
     
+    $writeDuration = ((Get-Date) - $writeStartTime).TotalMilliseconds
+    
+    # Level 2: Timing information
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[fragment.new] Files created in ${writeDuration}ms"
+    }
+    
+    # Level 3: Performance breakdown
+    if ($debugLevel -ge 3) {
+        $fragmentSize = (Get-Item $fragmentPath).Length
+        $readmeSize = (Get-Item $readmePath).Length
+        Write-Host "  [fragment.new] Performance - Write: ${writeDuration}ms, Fragment: ${fragmentSize} bytes, README: ${readmeSize} bytes" -ForegroundColor DarkGray
+    }
+    
     Write-Host "`nNext steps:" -ForegroundColor Cyan
     Write-Host "1. Edit $fragmentFileName to implement your functionality" -ForegroundColor Yellow
     Write-Host "2. Update the README with function documentation" -ForegroundColor Yellow
     Write-Host "3. Test the fragment by reloading your profile: . `$PROFILE" -ForegroundColor Yellow
     
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Fragment created successfully"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Fragment created successfully"
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+        Write-StructuredError -ErrorRecord $_ -OperationName 'fragment.new.create' -Context @{
+            fragment_name = $fragmentFileName
+            fragment_path = $fragmentPath
+            readme_path = $readmePath
+        }
+    }
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 

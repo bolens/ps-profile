@@ -51,6 +51,10 @@ function Get-PythonPath {
                     $pythonExe -and -not [string]::IsNullOrWhiteSpace($pythonExe) -and (Test-Path -LiteralPath $pythonExe)
                 }
                 if ($pythonExists) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                    }
                     return $pythonExe
                 }
             }
@@ -64,6 +68,10 @@ function Get-PythonPath {
                     $envValue -and -not [string]::IsNullOrWhiteSpace($envValue) -and (Test-Path -LiteralPath $envValue)
                 }
                 if ($pythonExists) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Host "  [python.get-path] Found Python via PYTHON env var: $envValue" -ForegroundColor DarkGray
+                    }
                     return $envValue
                 }
             }
@@ -98,10 +106,19 @@ function Get-PythonPath {
                     $pythonExe -and -not [string]::IsNullOrWhiteSpace($pythonExe) -and (Test-Path -LiteralPath $pythonExe)
                 }
                 if ($pythonExists) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                    }
                     return $pythonExe
                 }
             }
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [python.get-path] No Python found via environment variables, checking virtual environment and system Python" -ForegroundColor DarkGray
     }
 
     # Try to get repo root if not provided
@@ -146,6 +163,10 @@ function Get-PythonPath {
                 $venvPythonPath -and -not [string]::IsNullOrWhiteSpace($venvPythonPath) -and (Test-Path -LiteralPath $venvPythonPath)
             }
             if ($pythonExists) {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                    Write-Host "  [python.get-path] Found Python in virtual environment: $venvPythonPath" -ForegroundColor DarkGray
+                }
                 return $venvPythonPath
             }
             # Try Unix-style path
@@ -157,12 +178,20 @@ function Get-PythonPath {
                 $venvPythonPath -and -not [string]::IsNullOrWhiteSpace($venvPythonPath) -and (Test-Path -LiteralPath $venvPythonPath)
             }
             if ($pythonExists) {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                    Write-Host "  [python.get-path] Found Python in virtual environment: $venvPythonPath" -ForegroundColor DarkGray
+                }
                 return $venvPythonPath
             }
         }
     }
 
     # Fall back to system Python, respecting PS_PYTHON_RUNTIME preference
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [python.get-path] Virtual environment not found, checking system Python (PS_PYTHON_RUNTIME: $($env:PS_PYTHON_RUNTIME ?? 'auto'))" -ForegroundColor DarkGray
+    }
     $pythonRuntime = if ($env:PS_PYTHON_RUNTIME) {
         $env:PS_PYTHON_RUNTIME.ToLower()
     }
@@ -185,13 +214,44 @@ function Get-PythonPath {
     
     # Auto-detect: prefer python3, then python, then py
     if (Get-Command python3 -ErrorAction SilentlyContinue) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [python.get-path] Found system Python: python3" -ForegroundColor DarkGray
+        }
         return 'python3'
     }
     elseif (Get-Command python -ErrorAction SilentlyContinue) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[python.get-path] Found system Python: python"
+        }
         return 'python'
     }
     elseif (Get-Command py -ErrorAction SilentlyContinue) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [python.get-path] Found system Python: py" -ForegroundColor DarkGray
+        }
         return 'py'
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        if ($debugLevel -ge 1) {
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Python not found in environment variables, virtual environment, or system PATH" -OperationName 'python.get-path' -Context @{
+                    RepoRoot      = $RepoRoot
+                    PythonRuntime = $env:PS_PYTHON_RUNTIME
+                }
+            }
+            else {
+                Write-Warning "[python.get-path] Python not found in environment variables, virtual environment, or system PATH"
+            }
+        }
+        # Level 3: Log detailed Python detection information
+        if ($debugLevel -ge 3) {
+            Write-Host "  [python.get-path] Python detection details - RepoRoot: $RepoRoot, PythonRuntime: $($env:PS_PYTHON_RUNTIME ?? 'auto'), CheckedEnvVars: $($pythonEnvVars -join ', ')" -ForegroundColor DarkGray
+        }
     }
 
     return $null
@@ -257,33 +317,155 @@ function Invoke-PythonScript {
     if (-not $pythonPath) {
         $errorMessage = "Python is not available. Install Python to use Python-based conversions."
         $errorMessage += "`nSuggestion: Install Python from https://www.python.org/ or use a package manager (scoop, choco, winget)"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                    [System.Exception]::new($errorMessage),
+                    'PythonNotAvailable',
+                    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                    $null
+                )) -OperationName 'python.invoke-script' -Context @{
+                script_path = $ScriptPath
+            }
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                                [System.Exception]::new($errorMessage),
+                                'PythonPathNotFound',
+                                [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                                $null
+                            )) -OperationName 'python.invoke-script' -Context @{
+                            ScriptPath = $ScriptPath
+                            RepoRoot   = $RepoRoot
+                        }
+                    }
+                    else {
+                        Write-Error "[python.invoke-script] $errorMessage" -ErrorAction Continue
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [python.invoke-script] Python path error details - ScriptPath: $ScriptPath, RepoRoot: $RepoRoot, ErrorMessage: $errorMessage" -ForegroundColor DarkGray
+                }
+            }
+        }
         throw $errorMessage
     }
+    
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [python.invoke-script] Using Python: $pythonPath" -ForegroundColor DarkGray
+        }
     
     # Validate Python executable is actually usable
     try {
         $pythonVersion = & $pythonPath --version 2>&1
         if ($LASTEXITCODE -ne 0) {
-            throw "Python command exists but failed to execute (exit code: $LASTEXITCODE)"
+            $errorMsg = "Python command exists but failed to execute (exit code: $LASTEXITCODE)"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message $errorMsg -OperationName 'python.invoke-script' -Context @{
+                            PythonPath    = $pythonPath
+                            ExitCode      = $LASTEXITCODE
+                            PythonVersion = $pythonVersion
+                        }
+                    }
+                    else {
+                        Write-Warning "[python.invoke-script] $errorMsg"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [python.invoke-script] Python version check error details - PythonPath: $pythonPath, ExitCode: $LASTEXITCODE, PythonVersion: $pythonVersion" -ForegroundColor DarkGray
+                }
+            }
+            throw $errorMsg
+        }
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Verbose "[python.invoke-script] Python version: $pythonVersion"
         }
     }
     catch {
-        throw "Python command found at '$pythonPath' but is not executable: $($_.Exception.Message)"
+        $errorMsg = "Python command found at '$pythonPath' but is not executable: $($_.Exception.Message)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message $errorMsg -OperationName 'python.invoke-script' -Context @{
+                        PythonPath = $pythonPath
+                        Error      = $_.Exception.Message
+                    }
+                }
+                else {
+                    Write-Warning "[python.invoke-script] $errorMsg"
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [python.invoke-script] Python executable error details - PythonPath: $pythonPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
+        throw $errorMsg
     }
 
     # Execute Python script
     # Capture both stdout and stderr, but check exit code to determine if output is valid
     try {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            $argsStr = if ($Arguments -and $Arguments.Count -gt 0) { " with arguments: $($Arguments -join ' ')" } else { '' }
+            Write-Verbose "[python.invoke-script] Executing Python script: $ScriptPath$argsStr"
+        }
+        
         $output = & $pythonPath $ScriptPath @Arguments 2>&1
         $exitCode = $LASTEXITCODE
         
         if ($exitCode -eq 0) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Host "  [python.invoke-script] Python script executed successfully (exit code: $exitCode)" -ForegroundColor DarkGray
+                }
+                # Level 3: Log detailed success information
+                if ($debugLevel -ge 3) {
+                    $outputLength = if ($output) { $output.Count } else { 0 }
+                    Write-Host "  [python.invoke-script] Script execution success details - ScriptPath: $ScriptPath, PythonPath: $pythonPath, ExitCode: $exitCode, OutputLength: $outputLength" -ForegroundColor DarkGray
+                }
+            }
             return $output
         }
         
         # Build error message
         if (-not $output) {
-            throw "Python script failed with exit code ${exitCode}: Unknown error (no output from script)"
+            $errorMsg = "Python script failed with exit code ${exitCode}: Unknown error (no output from script)"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message $errorMsg -OperationName 'python.invoke-script' -Context @{
+                            ScriptPath = $ScriptPath
+                            PythonPath = $pythonPath
+                            ExitCode   = $exitCode
+                            HasOutput  = $false
+                        }
+                    }
+                    else {
+                        Write-Warning "[python.invoke-script] $errorMsg"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [python.invoke-script] Script execution error details - ScriptPath: $ScriptPath, PythonPath: $pythonPath, ExitCode: $exitCode, Output: null" -ForegroundColor DarkGray
+                }
+            }
+            throw $errorMsg
         }
         
         # Filter out common non-error messages
@@ -302,17 +484,51 @@ function Invoke-PythonScript {
         if ($errorMessage) {
             $fullErrorMessage += ": $errorMessage"
         }
-        throw $fullErrorMessage
         
-        # On success, return the output (stdout)
-        return $output
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message $fullErrorMessage -OperationName 'python.invoke-script' -Context @{
+                        ScriptPath   = $ScriptPath
+                        PythonPath   = $pythonPath
+                        ExitCode     = $exitCode
+                        ErrorMessage = $errorMessage
+                        HasOutput    = $true
+                    }
+                }
+                else {
+                    Write-Warning "[python.invoke-script] $fullErrorMessage"
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [python.invoke-script] Script execution error details - ScriptPath: $ScriptPath, PythonPath: $pythonPath, ExitCode: $exitCode, ErrorMessage: $errorMessage, OutputLength: $($output.Count)" -ForegroundColor DarkGray
+            }
+        }
+        
+        throw $fullErrorMessage
     }
     catch {
         $errorContext = "Failed to execute Python script '$ScriptPath'"
         if ($Arguments -and $Arguments.Count -gt 0) {
             $errorContext += " with arguments: $($Arguments -join ' ')"
         }
-        Write-Error "$errorContext`: $($_.Exception.Message)"
+        
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'python.invoke-script' -Context @{
+                script_path   = $ScriptPath
+                python_path   = $pythonPath
+                arguments     = $Arguments
+                error_context = $errorContext
+            }
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                Write-Error "[python.invoke-script] $errorContext`: $($_.Exception.Message)" -ErrorAction Continue
+            }
+        }
         throw
     }
 }

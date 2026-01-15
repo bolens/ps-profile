@@ -6,75 +6,6 @@ This directory contains comprehensive guides for developers working on or contri
 
 ### Implementation & Planning
 
-#### [Module Expansion Plan](MODULE_EXPANSION_PLAN.md)
-
-Comprehensive plan for adding new modules and enhancing existing ones:
-
-- 39+ new modules planned
-- 6 modules to enhance
-- Implementation standards and requirements
-- Testing requirements (100% coverage mandatory)
-- Documentation standards
-
-**When to use**: When planning new modules, understanding implementation requirements, or reviewing module standards.
-
-#### [Module Expansion Summary](MODULE_EXPANSION_SUMMARY.md)
-
-Quick reference summary of the module expansion plan:
-
-- New modules by category
-- Enhanced modules list
-- Implementation phases
-- Key requirements
-
-**When to use**: Quick overview of planned modules and implementation order.
-
-#### [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md)
-
-Detailed implementation roadmap with phases, dependencies, and timeline:
-
-- Phase 0: Foundation (CRITICAL - start here)
-- Phase 1: Fragment migration
-- Phases 2-4: New modules (high/medium/low priority)
-- Phase 5: Enhanced modules
-- Phase 6: Pattern extraction
-- Week-by-week schedule
-
-**When to use**: Understanding implementation order, dependencies, and timeline.
-
-#### [Implementation Progress](IMPLEMENTATION_PROGRESS.md)
-
-Progress tracking for the implementation roadmap:
-
-- Task checklists for each phase
-- Module implementation checklist
-- Metrics tracking
-- Blockers and issues
-
-**When to use**: Tracking implementation progress and status.
-
-#### [Fragment Numbering Migration](FRAGMENT_NUMBERING_MIGRATION.md)
-
-Plan for migrating from numbered to named fragments:
-
-- Migration strategy
-- Dependency resolution
-- Backward compatibility
-- Testing approach
-
-**When to use**: When migrating fragments or understanding the new naming convention.
-
-#### [Refactoring Opportunities](REFACTORING_OPPORTUNITIES.md)
-
-Identified refactoring opportunities and priorities:
-
-- High priority: Module loading, tool wrappers, command detection
-- Medium priority: Pattern extraction
-- Low priority: Consolidation and optimization
-- Migration checklists
-
-**When to use**: When refactoring code or understanding code quality improvements.
-
 #### [Module Loading Standard](MODULE_LOADING_STANDARD.md)
 
 Standardized module loading pattern specification:
@@ -113,34 +44,17 @@ Advanced developer guide covering:
 
 **When to use**: When writing tests, debugging test failures, or working on the test infrastructure.
 
-#### [Test Verification Plan](TEST_VERIFICATION_PLAN.md)
-
-Comprehensive plan for test verification and improvement:
-
-- Test execution strategy
-- Error handling enhancement
-- Coverage analysis
-- Tool detection
-- Documentation
-
-**When to use**: Understanding test verification strategy and phases.
-
-#### [Test Verification Progress](TEST_VERIFICATION_PROGRESS.md)
-
-Progress tracking for test verification:
-
-- Phase status (1-9)
-- Test results summary
-- Module migration status
-- Next steps
-
-**When to use**: Tracking test verification progress and status.
-
 #### [Test Verification Mocking Guide](TEST_VERIFICATION_MOCKING_GUIDE.md)
 
 Guide for using mocking frameworks in tests.
 
 **When to use**: When writing tests that require mocking.
+
+#### [Verify Coverage Guide](VERIFY_COVERAGE.md)
+
+Guide for verifying test coverage for utility modules.
+
+**When to use**: When verifying test coverage or understanding coverage requirements.
 
 #### [Tool Requirements](TOOL_REQUIREMENTS.md)
 
@@ -164,23 +78,11 @@ Security scanning allowlist for PSScriptAnalyzer rules that are intentionally su
 
 ### Performance
 
-#### [Profile Performance Summary](PROFILE_PERFORMANCE_SUMMARY.md)
-
-Summary of profile performance optimizations.
-
-**When to use**: Understanding profile performance characteristics.
-
 #### [Profile Performance Optimization](PROFILE_PERFORMANCE_OPTIMIZATION.md)
 
 Detailed performance optimization guide.
 
 **When to use**: When optimizing profile performance.
-
-#### [Profile Performance Quick Wins](PROFILE_PERFORMANCE_QUICK_WINS.md)
-
-Quick performance improvements.
-
-**When to use**: When looking for easy performance wins.
 
 #### [Profile Loading Performance Analysis](PROFILE_LOADING_PERFORMANCE_ANALYSIS.md)
 
@@ -188,17 +90,17 @@ Analysis of profile loading performance.
 
 **When to use**: Understanding profile loading performance.
 
+#### [Parallel Loading State Merge Analysis](PARALLEL_LOADING_STATE_MERGE_ANALYSIS.md)
+
+Technical analysis of parallel loading state merging challenges and alternatives.
+
+**When to use**: Understanding why state merging is difficult and what alternatives exist.
+
 #### [Prompt Performance Troubleshooting](PROMPT_PERFORMANCE_TROUBLESHOOTING.md)
 
 Troubleshooting guide for prompt performance issues.
 
 **When to use**: When debugging prompt performance problems.
-
-#### [Test Optimization Summary](TEST_OPTIMIZATION_SUMMARY.md)
-
-Summary of test optimization efforts.
-
-**When to use**: Understanding test performance characteristics.
 
 ## Related Documentation
 

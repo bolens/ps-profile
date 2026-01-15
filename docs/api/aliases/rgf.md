@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\29-rg.ps1
+Defined in: ..\profile.d\rg.ps1

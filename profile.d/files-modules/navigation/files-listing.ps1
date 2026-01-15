@@ -32,16 +32,33 @@ if (-not (Test-Path "Function:\\Ensure-FileListing")) {
                         Get-ChildItem -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer } | Select-Object FullName
                     }
                     catch {
-                        Write-Error "Failed to get directory tree: $($_.Exception.Message)"
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'files.listing.directory-tree' -Context @{
+                                tool     = 'eza'
+                                fallback = $true
+                            }
+                        }
+                        else {
+                            Write-Error "Failed to get directory tree: $($_.Exception.Message)"
+                        }
                     }
                 }
             } 
             else { 
-                try {
-                    Get-ChildItem -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer } | Select-Object FullName
+                if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                    Invoke-WithWideEvent -OperationName 'files.listing.directory-tree' -Context @{
+                        tool = 'Get-ChildItem'
+                    } -ScriptBlock {
+                        Get-ChildItem -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer } | Select-Object FullName
+                    } | Out-Null
                 }
-                catch {
-                    Write-Error "Failed to get directory tree: $($_.Exception.Message)"
+                else {
+                    try {
+                        Get-ChildItem -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer } | Select-Object FullName
+                    }
+                    catch {
+                        Write-Error "Failed to get directory tree: $($_.Exception.Message)"
+                    }
                 }
             } 
         } -Force | Out-Null

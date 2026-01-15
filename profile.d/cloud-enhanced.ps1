@@ -106,39 +106,71 @@ try {
             return
         }
 
-        try {
-            if ($List) {
-                $output = & az account list --output table 2>&1
-                if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'cloud.azure.subscription.manage' -Context @{
+                action          = if ($List) { 'list' } elseif ($SubscriptionId) { 'set' } else { 'show' }
+                subscription_id = $SubscriptionId
+            } -ScriptBlock {
+                if ($List) {
+                    $output = & az account list --output table 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Failed to list subscriptions. Exit code: $LASTEXITCODE"
+                    }
                     return $output
                 }
-                else {
-                    Write-Error "Failed to list subscriptions. Exit code: $LASTEXITCODE"
-                }
-            }
-            elseif ($SubscriptionId) {
-                $output = & az account set --subscription $SubscriptionId 2>&1
-                if ($LASTEXITCODE -eq 0) {
+                elseif ($SubscriptionId) {
+                    $output = & az account set --subscription $SubscriptionId 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Failed to switch subscription. Exit code: $LASTEXITCODE"
+                    }
                     Write-Host "Switched to subscription: $SubscriptionId" -ForegroundColor Green
                     return $output
                 }
                 else {
-                    Write-Error "Failed to switch subscription. Exit code: $LASTEXITCODE"
-                }
-            }
-            else {
-                # Show current subscription
-                $output = & az account show --output table 2>&1
-                if ($LASTEXITCODE -eq 0) {
+                    # Show current subscription
+                    $output = & az account show --output table 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Failed to get current subscription. Exit code: $LASTEXITCODE"
+                    }
                     return $output
-                }
-                else {
-                    Write-Error "Failed to get current subscription. Exit code: $LASTEXITCODE"
                 }
             }
         }
-        catch {
-            Write-Error "Failed to run az account command: $_"
+        else {
+            try {
+                if ($List) {
+                    $output = & az account list --output table 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        return $output
+                    }
+                    else {
+                        Write-Error "Failed to list subscriptions. Exit code: $LASTEXITCODE"
+                    }
+                }
+                elseif ($SubscriptionId) {
+                    $output = & az account set --subscription $SubscriptionId 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host "Switched to subscription: $SubscriptionId" -ForegroundColor Green
+                        return $output
+                    }
+                    else {
+                        Write-Error "Failed to switch subscription. Exit code: $LASTEXITCODE"
+                    }
+                }
+                else {
+                    # Show current subscription
+                    $output = & az account show --output table 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        return $output
+                    }
+                    else {
+                        Write-Error "Failed to get current subscription. Exit code: $LASTEXITCODE"
+                    }
+                }
+            }
+            catch {
+                Write-Error "Failed to run az account command: $_"
+            }
         }
     }
 
@@ -201,39 +233,71 @@ try {
             return
         }
 
-        try {
-            if ($List) {
-                $output = & gcloud projects list 2>&1
-                if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'cloud.gcp.project.manage' -Context @{
+                action     = if ($List) { 'list' } elseif ($ProjectId) { 'set' } else { 'show' }
+                project_id = $ProjectId
+            } -ScriptBlock {
+                if ($List) {
+                    $output = & gcloud projects list 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Failed to list projects. Exit code: $LASTEXITCODE"
+                    }
                     return $output
                 }
-                else {
-                    Write-Error "Failed to list projects. Exit code: $LASTEXITCODE"
-                }
-            }
-            elseif ($ProjectId) {
-                $output = & gcloud config set project $ProjectId 2>&1
-                if ($LASTEXITCODE -eq 0) {
+                elseif ($ProjectId) {
+                    $output = & gcloud config set project $ProjectId 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Failed to switch project. Exit code: $LASTEXITCODE"
+                    }
                     Write-Host "Switched to project: $ProjectId" -ForegroundColor Green
                     return $output
                 }
                 else {
-                    Write-Error "Failed to switch project. Exit code: $LASTEXITCODE"
-                }
-            }
-            else {
-                # Show current project
-                $output = & gcloud config get-value project 2>&1
-                if ($LASTEXITCODE -eq 0) {
+                    # Show current project
+                    $output = & gcloud config get-value project 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Failed to get current project. Exit code: $LASTEXITCODE"
+                    }
                     return $output
-                }
-                else {
-                    Write-Error "Failed to get current project. Exit code: $LASTEXITCODE"
                 }
             }
         }
-        catch {
-            Write-Error "Failed to run gcloud command: $_"
+        else {
+            try {
+                if ($List) {
+                    $output = & gcloud projects list 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        return $output
+                    }
+                    else {
+                        Write-Error "Failed to list projects. Exit code: $LASTEXITCODE"
+                    }
+                }
+                elseif ($ProjectId) {
+                    $output = & gcloud config set project $ProjectId 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host "Switched to project: $ProjectId" -ForegroundColor Green
+                        return $output
+                    }
+                    else {
+                        Write-Error "Failed to switch project. Exit code: $LASTEXITCODE"
+                    }
+                }
+                else {
+                    # Show current project
+                    $output = & gcloud config get-value project 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        return $output
+                    }
+                    else {
+                        Write-Error "Failed to get current project. Exit code: $LASTEXITCODE"
+                    }
+                }
+            }
+            catch {
+                Write-Error "Failed to run gcloud command: $_"
+            }
         }
     }
 
@@ -328,17 +392,33 @@ try {
             $arguments += '--format', 'shell'
         }
 
-        try {
-            $output = & doppler $arguments 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'cloud.doppler.secrets.get' -Context @{
+                project       = $Project
+                config        = $Config
+                secret        = $Secret
+                output_format = $OutputFormat
+            } -ScriptBlock {
+                $output = & doppler $arguments 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Failed to get Doppler secrets. Exit code: $LASTEXITCODE"
+                }
                 return $output
             }
-            else {
-                Write-Error "Failed to get Doppler secrets. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run doppler: $_"
+        else {
+            try {
+                $output = & doppler $arguments 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    return $output
+                }
+                else {
+                    Write-Error "Failed to get Doppler secrets. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run doppler: $_"
+            }
         }
     }
 
@@ -408,48 +488,88 @@ try {
             return
         }
 
-        try {
-            switch ($Action) {
-                'deploy' {
-                    $output = & git push heroku $Branch 2>&1
-                    if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "cloud.heroku.$Action" -Context @{
+                app_name = $AppName
+                action   = $Action
+                branch   = $Branch
+            } -ScriptBlock {
+                switch ($Action) {
+                    'deploy' {
+                        $output = & git push heroku $Branch 2>&1
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Heroku deployment failed. Exit code: $LASTEXITCODE"
+                        }
                         return $output
                     }
-                    else {
-                        Write-Error "Heroku deployment failed. Exit code: $LASTEXITCODE"
-                    }
-                }
-                'logs' {
-                    $output = & heroku logs --tail --app $AppName 2>&1
-                    if ($LASTEXITCODE -eq 0) {
+                    'logs' {
+                        $output = & heroku logs --tail --app $AppName 2>&1
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Failed to get Heroku logs. Exit code: $LASTEXITCODE"
+                        }
                         return $output
                     }
-                    else {
-                        Write-Error "Failed to get Heroku logs. Exit code: $LASTEXITCODE"
-                    }
-                }
-                'status' {
-                    $output = & heroku ps --app $AppName 2>&1
-                    if ($LASTEXITCODE -eq 0) {
+                    'status' {
+                        $output = & heroku ps --app $AppName 2>&1
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Failed to get Heroku status. Exit code: $LASTEXITCODE"
+                        }
                         return $output
                     }
-                    else {
-                        Write-Error "Failed to get Heroku status. Exit code: $LASTEXITCODE"
-                    }
-                }
-                'restart' {
-                    $output = & heroku restart --app $AppName 2>&1
-                    if ($LASTEXITCODE -eq 0) {
+                    'restart' {
+                        $output = & heroku restart --app $AppName 2>&1
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Failed to restart Heroku app. Exit code: $LASTEXITCODE"
+                        }
                         return $output
-                    }
-                    else {
-                        Write-Error "Failed to restart Heroku app. Exit code: $LASTEXITCODE"
                     }
                 }
             }
         }
-        catch {
-            Write-Error "Failed to run Heroku command: $_"
+        else {
+            try {
+                switch ($Action) {
+                    'deploy' {
+                        $output = & git push heroku $Branch 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Heroku deployment failed. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                    'logs' {
+                        $output = & heroku logs --tail --app $AppName 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Failed to get Heroku logs. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                    'status' {
+                        $output = & heroku ps --app $AppName 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Failed to get Heroku status. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                    'restart' {
+                        $output = & heroku restart --app $AppName 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Failed to restart Heroku app. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                }
+            }
+            catch {
+                Write-Error "Failed to run Heroku command: $_"
+            }
         }
     }
 
@@ -518,48 +638,91 @@ try {
             return
         }
 
-        try {
-            Push-Location $ProjectPath
-
-            switch ($Action) {
-                'deploy' {
-                    $arguments = @()
-                    if ($Production) {
-                        $arguments += '--prod'
-                    }
-                    $output = & vercel $arguments 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        return $output
-                    }
-                    else {
-                        Write-Error "Vercel deployment failed. Exit code: $LASTEXITCODE"
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "cloud.vercel.$Action" -Context @{
+                action       = $Action
+                project_path = $ProjectPath
+                production   = $Production.IsPresent
+            } -ScriptBlock {
+                Push-Location $ProjectPath
+                try {
+                    switch ($Action) {
+                        'deploy' {
+                            $arguments = @()
+                            if ($Production) {
+                                $arguments += '--prod'
+                            }
+                            $output = & vercel $arguments 2>&1
+                            if ($LASTEXITCODE -ne 0) {
+                                throw "Vercel deployment failed. Exit code: $LASTEXITCODE"
+                            }
+                            return $output
+                        }
+                        'list' {
+                            $output = & vercel ls 2>&1
+                            if ($LASTEXITCODE -ne 0) {
+                                throw "Failed to list Vercel deployments. Exit code: $LASTEXITCODE"
+                            }
+                            return $output
+                        }
+                        'remove' {
+                            $output = & vercel remove 2>&1
+                            if ($LASTEXITCODE -ne 0) {
+                                throw "Failed to remove Vercel deployment. Exit code: $LASTEXITCODE"
+                            }
+                            return $output
+                        }
                     }
                 }
-                'list' {
-                    $output = & vercel ls 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        return $output
-                    }
-                    else {
-                        Write-Error "Failed to list Vercel deployments. Exit code: $LASTEXITCODE"
-                    }
-                }
-                'remove' {
-                    $output = & vercel remove 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        return $output
-                    }
-                    else {
-                        Write-Error "Failed to remove Vercel deployment. Exit code: $LASTEXITCODE"
-                    }
+                finally {
+                    Pop-Location
                 }
             }
         }
-        catch {
-            Write-Error "Failed to run Vercel command: $_"
-        }
-        finally {
-            Pop-Location
+        else {
+            try {
+                Push-Location $ProjectPath
+
+                switch ($Action) {
+                    'deploy' {
+                        $arguments = @()
+                        if ($Production) {
+                            $arguments += '--prod'
+                        }
+                        $output = & vercel $arguments 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Vercel deployment failed. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                    'list' {
+                        $output = & vercel ls 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Failed to list Vercel deployments. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                    'remove' {
+                        $output = & vercel remove 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Failed to remove Vercel deployment. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                }
+            }
+            catch {
+                Write-Error "Failed to run Vercel command: $_"
+            }
+            finally {
+                Pop-Location
+            }
         }
     }
 
@@ -628,48 +791,91 @@ try {
             return
         }
 
-        try {
-            Push-Location $ProjectPath
-
-            switch ($Action) {
-                'deploy' {
-                    $arguments = @('deploy')
-                    if ($Production) {
-                        $arguments += '--prod'
-                    }
-                    $output = & netlify $arguments 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        return $output
-                    }
-                    else {
-                        Write-Error "Netlify deployment failed. Exit code: $LASTEXITCODE"
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "cloud.netlify.$Action" -Context @{
+                action       = $Action
+                project_path = $ProjectPath
+                production   = $Production.IsPresent
+            } -ScriptBlock {
+                Push-Location $ProjectPath
+                try {
+                    switch ($Action) {
+                        'deploy' {
+                            $arguments = @('deploy')
+                            if ($Production) {
+                                $arguments += '--prod'
+                            }
+                            $output = & netlify $arguments 2>&1
+                            if ($LASTEXITCODE -ne 0) {
+                                throw "Netlify deployment failed. Exit code: $LASTEXITCODE"
+                            }
+                            return $output
+                        }
+                        'status' {
+                            $output = & netlify status 2>&1
+                            if ($LASTEXITCODE -ne 0) {
+                                throw "Failed to get Netlify status. Exit code: $LASTEXITCODE"
+                            }
+                            return $output
+                        }
+                        'open' {
+                            $output = & netlify open 2>&1
+                            if ($LASTEXITCODE -ne 0) {
+                                throw "Failed to open Netlify site. Exit code: $LASTEXITCODE"
+                            }
+                            return $output
+                        }
                     }
                 }
-                'status' {
-                    $output = & netlify status 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        return $output
-                    }
-                    else {
-                        Write-Error "Failed to get Netlify status. Exit code: $LASTEXITCODE"
-                    }
-                }
-                'open' {
-                    $output = & netlify open 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        return $output
-                    }
-                    else {
-                        Write-Error "Failed to open Netlify site. Exit code: $LASTEXITCODE"
-                    }
+                finally {
+                    Pop-Location
                 }
             }
         }
-        catch {
-            Write-Error "Failed to run Netlify command: $_"
-        }
-        finally {
-            Pop-Location
+        else {
+            try {
+                Push-Location $ProjectPath
+
+                switch ($Action) {
+                    'deploy' {
+                        $arguments = @('deploy')
+                        if ($Production) {
+                            $arguments += '--prod'
+                        }
+                        $output = & netlify $arguments 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Netlify deployment failed. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                    'status' {
+                        $output = & netlify status 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Failed to get Netlify status. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                    'open' {
+                        $output = & netlify open 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            return $output
+                        }
+                        else {
+                            Write-Error "Failed to open Netlify site. Exit code: $LASTEXITCODE"
+                        }
+                    }
+                }
+            }
+            catch {
+                Write-Error "Failed to run Netlify command: $_"
+            }
+            finally {
+                Pop-Location
+            }
         }
     }
 

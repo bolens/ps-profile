@@ -77,7 +77,12 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate QR code SVG: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.svg' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate QR code SVG: $_"
+            }
         }
     } -Force
 
@@ -128,7 +133,12 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate terminal QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.terminal' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate terminal QR code: $_"
+            }
         }
     } -Force
 
@@ -192,7 +202,12 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate QR code data URI: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.data-uri' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate QR code data URI: $_"
+            }
         }
     } -Force
 }

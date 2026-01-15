@@ -10,6 +10,8 @@ The `kubernetes-enhanced.ps1` fragment provides enhanced wrapper functions for K
 - **Namespace Management**: Switch namespaces with kubens or kubectl
 - **Log Tailing**: Multi-pod log aggregation with stern or kubectl
 - **Resource Management**: Enhanced resource queries with kubectl
+- **Pod Operations**: Execute commands in pods, port forwarding
+- **Resource Operations**: Enhanced describe, apply multiple manifests
 - **Local Clusters**: Minikube cluster management
 - **TUI Tools**: k9s terminal UI for Kubernetes
 
@@ -245,6 +247,196 @@ Start-K9s -Namespace "production"
 ```powershell
 scoop install k9s
 ```
+
+---
+
+### Exec-KubePod
+
+Executes commands in Kubernetes pods.
+
+**Syntax:**
+
+```powershell
+Exec-KubePod -Pod <string> [-Command <string>] [-Container <string>] [-Namespace <string>] [-Interactive] [-Tty] [<CommonParameters>]
+```
+
+**Parameters:**
+
+- `Pod` (Required) - Pod name or pattern to match.
+- `Command` - Command to execute. Defaults to shell (/bin/sh or /bin/bash).
+- `Container` - Optional container name if pod has multiple containers.
+- `Namespace` - Kubernetes namespace. Defaults to current namespace.
+- `Interactive` - Run command interactively (default: false).
+- `Tty` - Allocate a TTY for the command (default: false).
+
+**Examples:**
+
+```powershell
+# Execute ls -la in a pod
+Exec-KubePod -Pod "my-app" -Command "ls -la"
+
+# Open interactive shell in pod
+Exec-KubePod -Pod "nginx" -Container "web" -Command "/bin/sh" -Interactive -Tty
+
+# Execute command in specific namespace
+Exec-KubePod -Pod "my-pod" -Command "cat /etc/hosts" -Namespace "production"
+```
+
+**Installation:**
+
+```powershell
+scoop install kubectl
+```
+
+**Notes:**
+
+- Uses `kubectl exec` to execute commands
+- Supports interactive and non-interactive execution
+- Can target specific containers in multi-container pods
+
+---
+
+### PortForward-KubeService
+
+Forwards ports from Kubernetes services or pods to local machine.
+
+**Syntax:**
+
+```powershell
+PortForward-KubeService -Resource <string> [-ResourceType <string>] [-LocalPort <int>] [-RemotePort <int>] [-Namespace <string>] [-Address <string>] [<CommonParameters>]
+```
+
+**Parameters:**
+
+- `Resource` (Required) - Resource name (pod or service).
+- `ResourceType` - Resource type: pod or service. Defaults to pod.
+- `LocalPort` - Local port to forward to. Defaults to same as remote port.
+- `RemotePort` - Remote port to forward from. Required for services.
+- `Namespace` - Kubernetes namespace. Defaults to current namespace.
+- `Address` - Local address to bind to. Defaults to localhost.
+
+**Examples:**
+
+```powershell
+# Forward local port 8080 to pod port 80
+PortForward-KubeService -Resource "my-pod" -LocalPort 8080 -RemotePort 80
+
+# Forward from service
+PortForward-KubeService -Resource "my-service" -ResourceType "service" -LocalPort 8080 -RemotePort 80
+
+# Forward to specific address
+PortForward-KubeService -Resource "my-pod" -LocalPort 8080 -RemotePort 80 -Address "0.0.0.0"
+```
+
+**Installation:**
+
+```powershell
+scoop install kubectl
+```
+
+**Notes:**
+
+- Uses `kubectl port-forward` for port forwarding
+- Supports both pods and services
+- RemotePort is required when forwarding from services
+- Runs until interrupted (Ctrl+C)
+
+---
+
+### Describe-KubeResource
+
+Gets detailed description of Kubernetes resources.
+
+**Syntax:**
+
+```powershell
+Describe-KubeResource -ResourceType <string> [-ResourceName <string>] [-Namespace <string>] [-ShowEvents] [-ShowYaml] [<CommonParameters>]
+```
+
+**Parameters:**
+
+- `ResourceType` (Required) - Kubernetes resource type (e.g., pods, services, deployments).
+- `ResourceName` - Resource name. If not specified, describes all resources of the type.
+- `Namespace` - Kubernetes namespace. Defaults to current namespace.
+- `ShowEvents` - Include events in the description (default: true).
+- `ShowYaml` - Show resource YAML instead of describe output.
+
+**Examples:**
+
+```powershell
+# Describe a specific pod
+Describe-KubeResource -ResourceType "pods" -ResourceName "my-pod"
+
+# Show YAML for all deployments in production
+Describe-KubeResource -ResourceType "deployments" -Namespace "production" -ShowYaml
+
+# Describe without events
+Describe-KubeResource -ResourceType "services" -ResourceName "my-service" -ShowEvents:$false
+```
+
+**Installation:**
+
+```powershell
+scoop install kubectl
+```
+
+**Notes:**
+
+- Uses `kubectl describe` for detailed resource information
+- Can show YAML format instead of describe output
+- Can exclude events section for cleaner output
+- Works with all Kubernetes resource types
+
+---
+
+### Apply-KubeManifests
+
+Applies multiple Kubernetes manifest files.
+
+**Syntax:**
+
+```powershell
+Apply-KubeManifests -Path <string> [-Recursive] [-DryRun] [-Namespace <string>] [-ServerSide] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+**Parameters:**
+
+- `Path` (Required) - Path to manifest file or directory containing manifests.
+- `Recursive` - Process directories recursively (default: false).
+- `DryRun` - Perform a dry-run without actually applying (default: false).
+- `Namespace` - Kubernetes namespace to apply to. Overrides namespace in manifests.
+- `ServerSide` - Use server-side apply (default: false).
+- `Force` - Force apply even if resources already exist (default: false).
+
+**Examples:**
+
+```powershell
+# Apply all manifests in a directory
+Apply-KubeManifests -Path "manifests/"
+
+# Apply recursively with dry-run
+Apply-KubeManifests -Path "k8s/" -Recursive -DryRun
+
+# Apply to specific namespace with server-side apply
+Apply-KubeManifests -Path "deployment.yaml" -Namespace "production" -ServerSide
+
+# Force apply
+Apply-KubeManifests -Path "manifests/" -Force
+```
+
+**Installation:**
+
+```powershell
+scoop install kubectl
+```
+
+**Notes:**
+
+- Uses `kubectl apply` for applying manifests
+- Supports single files and directories
+- Recursive mode processes subdirectories
+- Dry-run mode validates without applying
+- Supports server-side apply for better conflict resolution
 
 ---
 

@@ -123,6 +123,7 @@ function Test-CommentBlockHasHelp {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$CommentBlock
     )
 
@@ -156,6 +157,7 @@ function Get-HelpContentFromCommentBlock {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$CommentBlock
     )
 
@@ -227,6 +229,7 @@ function Test-FunctionHasHelp {
         [System.Management.Automation.Language.FunctionDefinitionAst]$FuncAst,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Content,
 
         [switch]$CheckBody

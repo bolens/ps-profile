@@ -129,9 +129,17 @@ try {
         
         $arguments += $Url
 
-        try {
-            $output = & yt-dlp $arguments 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'content.video.download' -Context @{
+                url         = $Url
+                output_path = $OutputPath
+                format      = $Format
+                audio_only  = $AudioOnly.IsPresent
+            } -ScriptBlock {
+                $output = & yt-dlp $arguments 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Video download failed. Exit code: $LASTEXITCODE"
+                }
                 # Extract file path from output if possible
                 $fileMatch = $output | Select-String -Pattern '\[download\].*?(\S+\.(mp4|webm|mkv|mp3))' | Select-Object -First 1
                 if ($fileMatch) {
@@ -139,12 +147,25 @@ try {
                 }
                 return $OutputPath
             }
-            else {
-                Write-Error "Video download failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run yt-dlp: $_"
+        else {
+            try {
+                $output = & yt-dlp $arguments 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    # Extract file path from output if possible
+                    $fileMatch = $output | Select-String -Pattern '\[download\].*?(\S+\.(mp4|webm|mkv|mp3))' | Select-Object -First 1
+                    if ($fileMatch) {
+                        return $fileMatch.Matches[0].Groups[1].Value
+                    }
+                    return $OutputPath
+                }
+                else {
+                    Write-Error "Video download failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run yt-dlp: $_"
+            }
         }
     }
 
@@ -205,17 +226,31 @@ try {
 
         $arguments = @('-D', $OutputPath, $Url)
 
-        try {
-            & gallery-dl $arguments 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'content.gallery.download' -Context @{
+                url         = $Url
+                output_path = $OutputPath
+            } -ScriptBlock {
+                & gallery-dl $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Gallery download failed. Exit code: $LASTEXITCODE"
+                }
                 Write-Host "Gallery downloaded to: $OutputPath" -ForegroundColor Green
-            }
-            else {
-                Write-Error "Gallery download failed. Exit code: $LASTEXITCODE"
-            }
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to run gallery-dl: $_"
+        else {
+            try {
+                & gallery-dl $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "Gallery downloaded to: $OutputPath" -ForegroundColor Green
+                }
+                else {
+                    Write-Error "Gallery download failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run gallery-dl: $_"
+            }
         }
     }
 
@@ -287,17 +322,32 @@ try {
         
         $arguments += $Url
 
-        try {
-            & yt-dlp $arguments 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'content.playlist.download' -Context @{
+                url         = $Url
+                output_path = $OutputPath
+                audio_only  = $AudioOnly.IsPresent
+            } -ScriptBlock {
+                & yt-dlp $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Playlist download failed. Exit code: $LASTEXITCODE"
+                }
                 Write-Host "Playlist downloaded to: $OutputPath" -ForegroundColor Green
-            }
-            else {
-                Write-Error "Playlist download failed. Exit code: $LASTEXITCODE"
-            }
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to run yt-dlp: $_"
+        else {
+            try {
+                & yt-dlp $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "Playlist downloaded to: $OutputPath" -ForegroundColor Green
+                }
+                else {
+                    Write-Error "Playlist download failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run yt-dlp: $_"
+            }
         }
     }
 
@@ -356,17 +406,31 @@ try {
             $OutputFile = Join-Path (Get-Location).Path 'archived-page.html'
         }
 
-        try {
-            & monolith $Url '-o' $OutputFile 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'content.webpage.archive' -Context @{
+                url         = $Url
+                output_file = $OutputFile
+            } -ScriptBlock {
+                & monolith $Url '-o' $OutputFile 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Web page archiving failed. Exit code: $LASTEXITCODE"
+                }
                 return $OutputFile
             }
-            else {
-                Write-Error "Web page archiving failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run monolith: $_"
+        else {
+            try {
+                & monolith $Url '-o' $OutputFile 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    return $OutputFile
+                }
+                else {
+                    Write-Error "Web page archiving failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run monolith: $_"
+            }
         }
     }
 
@@ -447,17 +511,32 @@ try {
             $arguments += '-q', $Quality
         }
 
-        try {
-            & $twitchCmd $arguments 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'content.twitch.download' -Context @{
+                url         = $Url
+                output_path = $OutputPath
+                quality     = $Quality
+            } -ScriptBlock {
+                & $twitchCmd $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Twitch download failed. Exit code: $LASTEXITCODE"
+                }
                 Write-Host "Twitch content downloaded to: $OutputPath" -ForegroundColor Green
-            }
-            else {
-                Write-Error "Twitch download failed. Exit code: $LASTEXITCODE"
-            }
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to run twitchdownloader: $_"
+        else {
+            try {
+                & $twitchCmd $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "Twitch content downloaded to: $OutputPath" -ForegroundColor Green
+                }
+                else {
+                    Write-Error "Twitch download failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run twitchdownloader: $_"
+            }
         }
     }
 

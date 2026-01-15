@@ -16,7 +16,8 @@ scripts/lib/FragmentErrorHandling.psm1
 
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
-$safeImportModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'SafeImport.psm1'
+$parentDir = Split-Path -Parent $PSScriptRoot
+$safeImportModulePath = Join-Path $parentDir 'core' 'SafeImport.psm1'
 if ($safeImportModulePath -and -not [string]::IsNullOrWhiteSpace($safeImportModulePath) -and (Test-Path -LiteralPath $safeImportModulePath)) {
     Import-Module $safeImportModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
@@ -67,9 +68,11 @@ function Invoke-FragmentSafely {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentName,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentPath,
 
         [scriptblock]$ScriptBlock,
@@ -113,12 +116,26 @@ function Invoke-FragmentSafely {
                 $errorContext.ErrorType = 'FileNotFound'
                 $errorMessage = "Fragment file not found: $FragmentPath"
                 
-                if ($env:PS_PROFILE_DEBUG) {
-                    if ($hasWriteScriptMessage) {
-                        Write-ScriptMessage -Message $errorMessage -IsWarning
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
+                                FragmentName = $FragmentName
+                                FragmentPath = $FragmentPath
+                                ErrorType    = 'FileNotFound'
+                            }
+                        }
+                        elseif ($hasWriteScriptMessage) {
+                            Write-ScriptMessage -Message "[fragment-error-handling.load] $errorMessage" -IsWarning
+                        }
+                        else {
+                            Write-Warning "[fragment-error-handling.load] $errorMessage"
+                        }
                     }
-                    else {
-                        Write-Warning $errorMessage
+                    # Level 3: Log detailed file not found information
+                    if ($debugLevel -ge 3) {
+                        Write-Verbose "[fragment-error-handling.load] File not found details - FragmentName: $FragmentName, FragmentPath: $FragmentPath"
                     }
                 }
                 return $false
@@ -135,26 +152,56 @@ function Invoke-FragmentSafely {
                 $errorContext.ErrorType = 'FileAccessError'
                 $errorMessage = "Cannot access fragment file '$FragmentPath': $($_.Exception.Message)"
                 
-                if (-not $env:PS_PROFILE_DEBUG) {
-                    return $false
-                }
-                
-                if ($hasWriteScriptMessage) {
-                    Write-ScriptMessage -Message $errorMessage -IsError
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-error-handling.load' -Context @{
+                                FragmentName = $FragmentName
+                                FragmentPath = $FragmentPath
+                                ErrorType    = 'FileAccessError'
+                            }
+                        }
+                        elseif ($hasWriteScriptMessage) {
+                            Write-ScriptMessage -Message "[fragment-error-handling.load] $errorMessage" -IsError
+                        }
+                        else {
+                            Write-Error "[fragment-error-handling.load] $errorMessage"
+                        }
+                    }
+                    # Level 3: Log detailed file access error information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [fragment-error-handling.load] File access error details - FragmentName: $FragmentName, FragmentPath: $FragmentPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                    }
                 }
                 else {
-                    Write-Host $errorMessage -ForegroundColor Red
+                    return $false
                 }
                 return $false
             }
 
             # Attempt to load the fragment
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [fragment-error-handling.load] Loading fragment: $FragmentName from $FragmentPath" -ForegroundColor DarkGray
+            }
             try {
                 $null = . $FragmentPath
+                # Level 2: Log successful fragment load
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                    Write-Host "  [fragment-error-handling.load] Successfully loaded fragment: $FragmentName" -ForegroundColor DarkGray
+                }
             }
             catch {
                 # Re-throw to be caught by outer catch block
                 throw
+            }
+        }
+        # Level 2: Log successful scriptblock execution
+        if ($ScriptBlock) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[fragment-error-handling.load] Successfully executed scriptblock for fragment: $FragmentName"
             }
         }
         return $true
@@ -186,28 +233,78 @@ function Invoke-FragmentSafely {
             $errorMessage += " (Line: $($errorContext.LineNumber))"
         }
 
-        if ($env:PS_PROFILE_DEBUG) {
-            if ($hasWriteScriptMessage) {
-                Write-ScriptMessage -Message $errorMessage -IsError
-            }
-            else {
-                Write-Host $errorMessage -ForegroundColor Red
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-error-handling.load' -Context @{
+                        FragmentName    = $FragmentName
+                        FragmentPath    = $FragmentPath
+                        ErrorType       = $errorContext.ErrorType
+                        LineNumber      = $errorContext.LineNumber
+                        SuppressWarning = $suppressFragmentWarning
+                    }
+                }
+                elseif ($hasWriteScriptMessage) {
+                    Write-ScriptMessage -Message "[fragment-error-handling.load] $errorMessage" -IsError
+                }
+                else {
+                    Write-Error "[fragment-error-handling.load] $errorMessage"
+                }
             }
             
-            # Provide additional context in debug mode
-            if ($errorContext.PositionMessage) {
-                Write-Host "Position: $($errorContext.PositionMessage)" -ForegroundColor DarkGray
+            # Provide additional context in verbose debug mode
+            if ($debugLevel -ge 2 -and $errorContext.PositionMessage) {
+                Write-Host "  [fragment-error-handling.load] Position: $($errorContext.PositionMessage)" -ForegroundColor DarkGray
             }
-        }
+            
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [fragment-error-handling.load] Error details - FragmentName: $FragmentName, ErrorType: $($errorContext.ErrorType), LineNumber: $($errorContext.LineNumber), Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                if ($errorContext.PositionMessage) {
+                    Write-Host "  [fragment-error-handling.load] Position details: $($errorContext.PositionMessage)" -ForegroundColor DarkGray
+                }
+            }
 
-        # Use Write-ProfileError if available
-        if ($hasWriteProfileError) {
-            Write-ProfileError -ErrorRecord $_ -Context "Fragment: $FragmentName" -Category 'Fragment'
+            # Use Write-ProfileError if available (legacy support)
+            if ($hasWriteProfileError -and $debugLevel -ge 1) {
+                try {
+                    Write-ProfileError -ErrorRecord $_ -Context "Fragment: $FragmentName" -Category 'Fragment'
+                }
+                catch {
+                    # Silently ignore if Write-ProfileError fails
+                }
+            }
+            elseif (-not $suppressFragmentWarning -and $debugLevel -ge 1) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
+                        FragmentName = $FragmentName
+                        FragmentPath = $FragmentPath
+                        ErrorType    = $errorContext.ErrorType
+                        LineNumber   = $errorContext.LineNumber
+                    }
+                }
+                else {
+                    Write-Warning $errorMessage
+                }
+            }
+
+            return $false
         }
         elseif (-not $suppressFragmentWarning) {
-            Write-Warning $errorMessage
+            # Even without debug, show warning if not suppressed
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
+                    FragmentName = $FragmentName
+                    FragmentPath = $FragmentPath
+                    ErrorType    = $errorContext.ErrorType
+                }
+            }
+            else {
+                Write-Warning $errorMessage
+            }
+            return $false
         }
-
         return $false
     }
 }
@@ -245,6 +342,7 @@ function Write-FragmentError {
         [System.Management.Automation.ErrorRecord]$ErrorRecord,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentName,
 
         [string]$Context
@@ -349,6 +447,7 @@ function Get-FragmentErrorInfo {
         [System.Management.Automation.ErrorRecord]$ErrorRecord,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentName
     )
 
@@ -394,4 +493,5 @@ Export-ModuleMember -Function @(
     'Write-FragmentError',
     'Get-FragmentErrorInfo'
 )
+
 

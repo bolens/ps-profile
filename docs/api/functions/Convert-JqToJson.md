@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\28-jq-yq.ps1
+Defined in: ..\profile.d\jq-yq.ps1

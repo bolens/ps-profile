@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\43-laravel.ps1
+Defined in: ..\profile.d\laravel.ps1

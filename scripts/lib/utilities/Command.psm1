@@ -37,7 +37,16 @@ if ($PSScriptRoot -and -not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
                 }
                 catch {
                     # Cache module is optional - function will work without it, just without caching
-                    Write-Verbose "Failed to import Cache module: $($_.Exception.Message). Caching features will be unavailable."
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 2) {
+                            Write-Verbose "[command.module-import] Failed to import Cache module: $($_.Exception.Message). Caching features will be unavailable."
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [command.module-import] Cache module import error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                        }
+                    }
                 }
             }
         }
@@ -87,6 +96,7 @@ function Test-CommandAvailable {
 
     # Check cache first (cache for 5 minutes)
     # Use CacheKey module if available for consistent key generation
+    $debugLevel = 0
     $cacheKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
         # New-CacheKey expects Components to be an array, wrap single string in array
         New-CacheKey -Prefix 'CommandAvailable' -Components @($CommandName)
@@ -97,6 +107,10 @@ function Test-CommandAvailable {
     if (Get-Command Get-CachedValue -ErrorAction SilentlyContinue) {
         $cachedResult = Get-CachedValue -Key $cacheKey
         if ($null -ne $cachedResult) {
+            # Level 3: Log cache hit
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [command.available] Cache hit for command: $CommandName, Result: $cachedResult" -ForegroundColor DarkGray
+            }
             return $cachedResult
         }
     }
@@ -107,6 +121,14 @@ function Test-CommandAvailable {
         if (Get-Command Set-CachedValue -ErrorAction SilentlyContinue) {
             Set-CachedValue -Key $cacheKey -Value $result -ExpirationSeconds 300
         }
+        # Level 2: Log command availability check result
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[command.available] Command '$CommandName' availability: $result (using Test-CachedCommand)"
+        }
+        # Level 3: Log detailed check information
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [command.available] Check details - Command: $CommandName, CacheKey: $cacheKey, Result: $result" -ForegroundColor DarkGray
+        }
         return $result
     }
 
@@ -115,6 +137,15 @@ function Test-CommandAvailable {
     $result = $null -ne $command
     if (Get-Command Set-CachedValue -ErrorAction SilentlyContinue) {
         Set-CachedValue -Key $cacheKey -Value $result -ExpirationSeconds 300
+    }
+    # Level 2: Log command availability check result
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[command.available] Command '$CommandName' availability: $result (using Get-Command)"
+    }
+    # Level 3: Log detailed check information
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        $commandType = if ($command) { $command.CommandType } else { 'None' }
+        Write-Host "  [command.available] Check details - Command: $CommandName, CacheKey: $cacheKey, Result: $result, Type: $commandType" -ForegroundColor DarkGray
     }
     return $result
 }
@@ -238,9 +269,14 @@ function Resolve-InstallCommand {
             }
             catch {
                 # If call fails, return platform command as-is
-                Write-Verbose "Failed to get Node.js package recommendation: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                    Write-Verbose "[command.package-recommendation] Failed to get Node.js package recommendation: $($_.Exception.Message)"
+                }
             }
         }
+        # Return platform command as-is if Node.js recommendation failed
+        return $platformCommand
     }
     
     # Check if this is a Python package manager command
@@ -256,7 +292,7 @@ function Resolve-InstallCommand {
                 $PackageName = $matches[1]
             }
         }
-        
+    
         if ($PackageName -and (Get-Command Get-PythonPackageInstallRecommendation -ErrorAction SilentlyContinue)) {
             $isGlobal = $platformCommand -match '--system|--global|-g' -and $platformCommand -notmatch '--user'
             try {
@@ -272,9 +308,32 @@ function Resolve-InstallCommand {
             }
             catch {
                 # If call fails, return platform command as-is
-                Write-Verbose "Failed to get Python package recommendation: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Failed to get Python package recommendation: $($_.Exception.Message)" -OperationName 'command.package-recommendation' -Context @{
+                                PackageName     = $PackageName
+                                PlatformCommand = $platformCommand
+                                Error           = $_.Exception.Message
+                            }
+                        }
+                        else {
+                            Write-Warning "Failed to get Python package recommendation: $($_.Exception.Message)"
+                        }
+                    }
+                    if ($debugLevel -ge 2) {
+                        Write-Verbose "[command.package-recommendation] Failed to get Python package recommendation: $($_.Exception.Message)"
+                    }
+                    # Level 3: Log detailed error information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [command.package-recommendation] Python recommendation error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), PackageName: $PackageName" -ForegroundColor DarkGray
+                    }
+                }
             }
         }
+        # Return platform command as-is if Python recommendation failed
+        return $platformCommand
     }
     
     # Return platform-specific command as-is for other package managers (scoop, apt, brew, etc.)
@@ -322,6 +381,7 @@ function Invoke-CommandIfAvailable {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$CommandName,
 
         [object]$Arguments,
@@ -351,30 +411,75 @@ function Invoke-CommandIfAvailable {
             }
         }
         catch {
-            Write-Verbose "Failed to execute command '$CommandName': $($_.Exception.Message)"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to execute command '$CommandName': $($_.Exception.Message)" -OperationName 'command.execute' -Context @{
+                            CommandName = $CommandName
+                            Arguments   = $Arguments
+                            Error       = $_.Exception.Message
+                        }
+                    }
+                    else {
+                        Write-Warning "Failed to execute command '$CommandName': $($_.Exception.Message)"
+                    }
+                }
+                if ($debugLevel -ge 2) {
+                    Write-Host "  [command.execute] Failed to execute command '$CommandName': $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [command.execute] Command execution error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), CommandName: $CommandName" -ForegroundColor DarkGray
+                }
+            }
             # Fall through to fallback
         }
-    }
 
-    # Use fallback
-    if ($null -ne $FallbackScriptBlock) {
-        if ($null -ne $Arguments) {
-            if ($Arguments -is [hashtable]) {
-                return & $FallbackScriptBlock @Arguments
-            }
-            elseif ($Arguments -is [array]) {
-                return & $FallbackScriptBlock $Arguments
+        # Use fallback
+        if ($null -ne $FallbackScriptBlock) {
+            if ($null -ne $Arguments) {
+                if ($Arguments -is [hashtable]) {
+                    return & $FallbackScriptBlock @Arguments
+                }
+                elseif ($Arguments -is [array]) {
+                    return & $FallbackScriptBlock $Arguments
+                }
+                else {
+                    return & $FallbackScriptBlock $Arguments
+                }
             }
             else {
-                return & $FallbackScriptBlock $Arguments
+                return & $FallbackScriptBlock
             }
         }
-        else {
-            return & $FallbackScriptBlock
-        }
-    }
 
-    return $FallbackValue
+        return $FallbackValue
+    }
+    else {
+        # Command not available, use fallback
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [command.execute] Command '$CommandName' not available, using fallback" -ForegroundColor DarkGray
+        }
+        if ($null -ne $FallbackScriptBlock) {
+            if ($null -ne $Arguments) {
+                if ($Arguments -is [hashtable]) {
+                    return & $FallbackScriptBlock @Arguments
+                }
+                elseif ($Arguments -is [array]) {
+                    return & $FallbackScriptBlock $Arguments
+                }
+                else {
+                    return & $FallbackScriptBlock $Arguments
+                }
+            }
+            else {
+                return & $FallbackScriptBlock
+            }
+        }
+        return $FallbackValue
+    }
 }
 
 <#
@@ -513,4 +618,5 @@ Export-ModuleMember -Function @(
     'Invoke-CommandIfAvailable',
     'Get-ToolInstallHint'
 )
+
 

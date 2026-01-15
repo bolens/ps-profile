@@ -92,7 +92,16 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.generate' -Context @{
+                    output_path = $OutputPath
+                    size = $Size
+                    error_correction_level = $ErrorCorrectionLevel
+                }
+            }
+            else {
+                Write-Error "Failed to generate QR code: $_"
+            }
         }
     } -Force
 

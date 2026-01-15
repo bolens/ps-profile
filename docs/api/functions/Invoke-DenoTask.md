@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\37-deno.ps1
+Defined in: ..\profile.d\deno.ps1

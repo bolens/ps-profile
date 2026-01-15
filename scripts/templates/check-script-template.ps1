@@ -45,7 +45,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Default to repository root if path not specified
@@ -67,7 +67,7 @@ try {
     
     if ($issuesFound) {
         Write-ScriptMessage -Message "Validation checks completed with issues" -LogLevel Warning
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
     else {
         Write-ScriptMessage -Message "All validation checks passed" -LogLevel Info
@@ -76,7 +76,7 @@ try {
 }
 catch {
     Write-ScriptMessage -Message "Validation script failed: $_" -LogLevel Error
-    Exit-WithCode -ExitCode $EXIT_OTHER_ERROR
+    Exit-WithCode -ExitCode [ExitCode]::OtherError
 }
 
 

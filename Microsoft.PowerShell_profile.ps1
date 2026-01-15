@@ -17,15 +17,200 @@
 #>
 
 # ===============================================
+# FILE-BASED LOGGING (IMMEDIATE - BEFORE ANYTHING)
+# ===============================================
+# Write to a log file immediately to track where profile execution stops
+# This works even if console output is blocked or profile hangs
+$profileLogFile = Join-Path $env:TEMP "powershell-profile-load.log"
+try {
+    $logEntry = "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Profile execution started"
+    $logEntry | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+}
+catch {
+    # Ignore logging errors - we can't do anything about them
+}
+
+# ===============================================
+# LOAD .ENV FILES FIRST (BEFORE DEBUG CHECKS)
+# ===============================================
+# Load .env files BEFORE checking debug level so that PS_PROFILE_DEBUG from .env is available
+# This ensures debug output works on initial startup when PS_PROFILE_DEBUG is set in .env
+if (-not [string]::IsNullOrWhiteSpace($PSCommandPath)) {
+    $profileDir = Split-Path -Parent $PSCommandPath
+    $profileEnvFilesModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileEnvFiles.psm1'
+    if ($profileEnvFilesModule -and -not [string]::IsNullOrWhiteSpace($profileEnvFilesModule) -and (Test-Path -LiteralPath $profileEnvFilesModule)) {
+        try {
+            # Log PS_PROFILE_DEBUG value BEFORE loading .env files
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Before .env load: PS_PROFILE_DEBUG='$($env:PS_PROFILE_DEBUG)'" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+            
+            Import-Module $profileEnvFilesModule -ErrorAction SilentlyContinue -DisableNameChecking
+            if (Get-Command Initialize-ProfileEnvFiles -ErrorAction SilentlyContinue) {
+                Initialize-ProfileEnvFiles -ProfileDir $profileDir
+                
+                # Log PS_PROFILE_DEBUG value AFTER loading .env files
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] After .env load: PS_PROFILE_DEBUG='$($env:PS_PROFILE_DEBUG)'" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
+            }
+        }
+        catch {
+            # Silently fail - .env loading shouldn't block profile startup
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Failed to load ProfileEnvFiles module: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+        }
+    }
+}
+
+# ===============================================
+# PROFILE STARTUP LOGGING
+# ===============================================
+# Log profile startup immediately (before any checks) if debug is enabled
+# This helps diagnose if the profile file is being executed at all
+try {
+    if ($env:PS_PROFILE_DEBUG) {
+        $initialDebugLevel = 0
+        if ([int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$initialDebugLevel) -and $initialDebugLevel -ge 1) {
+            $msg = "[profile] Profile startup detected - PSCommandPath: $PSCommandPath"
+            # Use Write-Host instead of Write-Output for initial startup visibility
+            # Write-Host writes directly to console, bypassing output stream buffering
+            try {
+                Write-Host $msg -ForegroundColor Cyan
+            }
+            catch {
+                # Fallback to Write-Output if Write-Host fails (non-interactive host)
+                Write-Output $msg
+            }
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] $msg" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+        }
+    }
+    else {
+        try {
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Profile startup (PSCommandPath: $PSCommandPath, Debug: NOT SET)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+    }
+}
+catch {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error in startup logging: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+}
+
+# ===============================================
+# DEBUG MODE SETUP (EARLY - BEFORE ANY CHECKS)
+# ===============================================
+# Parse debug level immediately so we can use it for all early exit logging
+try {
+    $debugLevel = 0
+    $debugValue = $env:PS_PROFILE_DEBUG
+    $parseSuccess = $false
+    
+    # Always log the raw value for diagnostics
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Debug check: PS_PROFILE_DEBUG='$debugValue' (type: $($debugValue.GetType().Name))" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+    
+    if ($debugValue -and [int]::TryParse($debugValue, [ref]$debugLevel)) {
+        $parseSuccess = $true
+        try {
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Debug parsed: level=$debugLevel" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+        
+        if ($debugLevel -ge 1) {
+            # Enable verbose output for Write-Verbose debug messages (set globally so all modules see it)
+            $global:VerbosePreference = 'Continue'
+            $VerbosePreference = 'Continue'  # Also set in script scope for immediate use
+            
+            # Use Write-Host for early debug messages (more reliable during initial startup)
+            # Write-Host writes directly to console, bypassing output stream buffering
+            $msg = "[profile] Debug mode enabled (level $debugLevel)"
+            try {
+                Write-Host $msg -ForegroundColor Green
+            }
+            catch {
+                # Fallback to Write-Output if Write-Host fails (non-interactive host)
+                Write-Output $msg
+            }
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] $msg" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+            
+            # Level 3: Show diagnostic information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [profile.debug] ✓ Debug level 3 detected and enabled" -ForegroundColor Green
+                Write-Host "  [profile.debug] VerbosePreference (global): $($global:VerbosePreference)" -ForegroundColor DarkGray
+                Write-Host "  [profile.debug] VerbosePreference (script): $VerbosePreference" -ForegroundColor DarkGray
+                Write-Host "  [profile.debug] Environment variable PS_PROFILE_DEBUG='$debugValue'" -ForegroundColor DarkGray
+                Write-Host "  [profile.debug] All Write-Verbose messages will now be displayed" -ForegroundColor DarkGray
+            }
+        }
+    }
+    else {
+        try {
+            $reason = if (-not $debugValue) { "not set" } elseif (-not $parseSuccess) { "parse failed" } else { "level < 1" }
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Debug mode check: PS_PROFILE_DEBUG='$debugValue' - $reason" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+    }
+}
+catch {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error in debug setup: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+}
+
+# ===============================================
 # NO-PROFILE DETECTION
 # ===============================================
 # If $PSCommandPath is empty, this profile was likely loaded via a module manifest
 # or PowerShell configuration despite -NoProfile being used. Exit early to respect
 # the -NoProfile flag. This prevents the profile from loading when -NoProfile is used.
-if ([string]::IsNullOrWhiteSpace($PSCommandPath)) {
-    # Profile was loaded via non-standard mechanism (likely module manifest)
-    # Exit early to respect -NoProfile flag
-    return
+try {
+    if ([string]::IsNullOrWhiteSpace($PSCommandPath)) {
+        # Profile was loaded via non-standard mechanism (likely module manifest)
+        # Exit early to respect -NoProfile flag
+        $msg = "[profile] Early exit: PSCommandPath is empty (NoProfile detected)"
+        if ($debugLevel -ge 1) {
+            try {
+                Write-Host $msg -ForegroundColor Yellow
+            }
+            catch {
+                # Fallback to Write-Output if Write-Host fails (non-interactive host)
+                Write-Output $msg
+            }
+        }
+        try {
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] $msg" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+        return
+    }
+    else {
+        try {
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] PSCommandPath check passed: $PSCommandPath" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+    }
+}
+catch {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error in NoProfile detection: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
 }
 
 # ===============================================
@@ -33,19 +218,82 @@ if ([string]::IsNullOrWhiteSpace($PSCommandPath)) {
 # ===============================================
 # Intercept Test-Path calls to log null/empty paths when debug mode is enabled
 # This helps identify which Test-Path calls are receiving null/empty paths
-if ($env:PS_PROFILE_DEBUG_TESTPATH -or $env:PS_PROFILE_DEBUG_TESTPATH_TRACE) {
-    $interceptScriptPath = Join-Path (Split-Path -Parent $PSCommandPath) 'scripts' 'utils' 'debug' 'intercept-testpath.ps1'
-    if ($interceptScriptPath -and -not [string]::IsNullOrWhiteSpace($interceptScriptPath) -and (Test-Path -LiteralPath $interceptScriptPath)) {
+try {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Before Test-Path interception check" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+    
+    if ($env:PS_PROFILE_DEBUG_TESTPATH -or $env:PS_PROFILE_DEBUG_TESTPATH_TRACE) {
         try {
-            . $interceptScriptPath
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Test-Path interception enabled, checking script path" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
         }
-        catch {
-            # Silently fail - interception is optional
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Warning "Failed to load Test-Path interception: $($_.Exception.Message)"
+        catch { }
+        
+        $interceptScriptPath = Join-Path (Split-Path -Parent $PSCommandPath) 'scripts' 'utils' 'debug' 'intercept-testpath.ps1'
+        
+        try {
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Intercept script path: $interceptScriptPath" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+        
+        if ($interceptScriptPath -and -not [string]::IsNullOrWhiteSpace($interceptScriptPath)) {
+            # Use Microsoft.PowerShell.Management\Test-Path to avoid potential recursion if interception is already active
+            $interceptExists = $false
+            try {
+                $interceptExists = Microsoft.PowerShell.Management\Test-Path -LiteralPath $interceptScriptPath -ErrorAction SilentlyContinue
+            }
+            catch {
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error checking intercept script path: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
+            }
+            
+            if ($interceptExists) {
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Loading Test-Path interception script" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
+                
+                try {
+                    . $interceptScriptPath
+                    try {
+                        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Test-Path interception script loaded successfully" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                    }
+                    catch { }
+                }
+                catch {
+                    # Silently fail - interception is optional
+                    try {
+                        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Failed to load Test-Path interception: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                    }
+                    catch { }
+                    if ($env:PS_PROFILE_DEBUG) {
+                        Write-Warning "Failed to load Test-Path interception: $($_.Exception.Message)"
+                    }
+                }
+            }
+            else {
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Test-Path interception script not found at: $interceptScriptPath" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
             }
         }
     }
+    else {
+        try {
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Test-Path interception not enabled" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+    }
+}
+catch {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error in Test-Path interception section: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
 }
 
 # ===============================================
@@ -53,26 +301,134 @@ if ($env:PS_PROFILE_DEBUG_TESTPATH -or $env:PS_PROFILE_DEBUG_TESTPATH_TRACE) {
 # ===============================================
 # Track profile version and git commit for debugging and support
 # Git commit hash is loaded lazily to avoid blocking startup
-$profileDir = Split-Path -Parent $PSCommandPath
-$profileVersionModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileVersion.psm1'
-if ($profileVersionModule -and -not [string]::IsNullOrWhiteSpace($profileVersionModule) -and (Test-Path -LiteralPath $profileVersionModule)) {
+try {
     try {
-        Import-Module $profileVersionModule -ErrorAction SilentlyContinue -DisableNameChecking
-        if (Get-Command Initialize-ProfileVersion -ErrorAction SilentlyContinue) {
-            Initialize-ProfileVersion -ProfileDir $profileDir
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Before profile version section" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+    
+    $profileDir = Split-Path -Parent $PSCommandPath
+    $profileVersionModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileVersion.psm1'
+    
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] ProfileDir: $profileDir, VersionModule: $profileVersionModule" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+    
+    if ($profileVersionModule -and -not [string]::IsNullOrWhiteSpace($profileVersionModule)) {
+        # Use Microsoft.PowerShell.Management\Test-Path to avoid potential issues
+        $versionModuleExists = $false
+        try {
+            $versionModuleExists = Microsoft.PowerShell.Management\Test-Path -LiteralPath $profileVersionModule -ErrorAction SilentlyContinue
+        }
+        catch {
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error checking version module path: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+        }
+        
+        if ($versionModuleExists) {
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Loading ProfileVersion module" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+            
+            try {
+                Import-Module $profileVersionModule -ErrorAction SilentlyContinue -DisableNameChecking
+                if (Get-Command Initialize-ProfileVersion -ErrorAction SilentlyContinue) {
+                    try {
+                        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Calling Initialize-ProfileVersion" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                    }
+                    catch { }
+                    Initialize-ProfileVersion -ProfileDir $profileDir
+                    try {
+                        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Initialize-ProfileVersion completed" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                    }
+                    catch { }
+                }
+                else {
+                    try {
+                        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Initialize-ProfileVersion function not found after module import" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                    }
+                    catch { }
+                }
+            }
+            catch {
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Failed to load ProfileVersion module: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
+                if ($env:PS_PROFILE_DEBUG) {
+                    Write-Warning "Failed to load ProfileVersion module: $($_.Exception.Message)"
+                }
+            }
+        }
+        else {
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] ProfileVersion module not found at: $profileVersionModule" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
         }
     }
-    catch {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Warning "Failed to load ProfileVersion module: $($_.Exception.Message)"
-        }
+}
+catch {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error in profile version section: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
     }
+    catch { }
 }
 
 # Skip interactive initialization for non-interactive hosts (e.g., automation scripts)
 # Non-interactive hosts don't have RawUI, so we exit early to avoid errors
-if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
-    return
+try {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Before host check" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+    
+    if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
+        $hostInfo = if ($Host) { $Host.Name } else { "null" }
+        $uiInfo = if ($Host -and $Host.UI) { "present" } else { "null" }
+        $rawUiInfo = if ($Host -and $Host.UI -and $Host.UI.RawUI) { "present" } else { "null" }
+        $msg = "[profile] Early exit: Non-interactive host detected (Host: $hostInfo, UI: $uiInfo, RawUI: $rawUiInfo)"
+        if ($debugLevel -ge 1) {
+            try {
+                Write-Host $msg -ForegroundColor Yellow
+            }
+            catch {
+                # Fallback to Write-Output if Write-Host fails (non-interactive host)
+                Write-Output $msg
+            }
+        }
+        try {
+            "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] $msg" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch { }
+        return
+    }
+
+    # Debug: Confirm we passed the host check
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Host check passed" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+    
+    if ($debugLevel -ge 2) {
+        try {
+            Write-Host "[profile] Host check passed - continuing with profile loading" -ForegroundColor Green
+        }
+        catch {
+            # Fallback to Write-Output if Write-Host fails (non-interactive host)
+            Write-Output "[profile] Host check passed - continuing with profile loading"
+        }
+    }
+}
+catch {
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Error in host check: $($_.Exception.Message)" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
 }
 
 # PSReadLine is loaded lazily by profile.d/psreadline.ps1 to improve startup performance.
@@ -98,7 +454,7 @@ if ($profileScoopModule -and -not [string]::IsNullOrWhiteSpace($profileScoopModu
     try {
         Import-Module $profileScoopModule -ErrorAction SilentlyContinue -DisableNameChecking
         if (Get-Command Initialize-ProfileScoop -ErrorAction SilentlyContinue) {
-            Initialize-ProfileScoop -ProfileDir $profileDir
+            $null = Initialize-ProfileScoop -ProfileDir $profileDir
         }
     }
     catch {
@@ -131,32 +487,11 @@ if ($profileFragmentTimingModule -and -not [string]::IsNullOrWhiteSpace($profile
 }
 
 # ===============================================
-# LOAD .ENV FILES EARLY
+# NOTE: .ENV FILES ALREADY LOADED EARLIER
 # ===============================================
-# Load .env files before checking environment variables so that variables like
-# PS_PROFILE_PARALLEL_LOADING can be set in .env files
-# Note: If $PSCommandPath is empty, we already returned early above, so this should never execute
-# with an empty $PSCommandPath, but we check again to be safe
-if ([string]::IsNullOrWhiteSpace($PSCommandPath)) {
-    return
-}
-if (-not $profileDir) {
-    $profileDir = Split-Path -Parent $PSCommandPath
-}
-$profileEnvFilesModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileEnvFiles.psm1'
-if ($profileEnvFilesModule -and -not [string]::IsNullOrWhiteSpace($profileEnvFilesModule) -and (Test-Path -LiteralPath $profileEnvFilesModule)) {
-    try {
-        Import-Module $profileEnvFilesModule -ErrorAction SilentlyContinue -DisableNameChecking
-        if (Get-Command Initialize-ProfileEnvFiles -ErrorAction SilentlyContinue) {
-            Initialize-ProfileEnvFiles -ProfileDir $profileDir
-        }
-    }
-    catch {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Warning "Failed to load ProfileEnvFiles module: $($_.Exception.Message)"
-        }
-    }
-}
+# .env files are now loaded at the very beginning (before debug checks)
+# to ensure PS_PROFILE_DEBUG from .env is available for all debug output
+# This section is kept for reference but .env loading happens earlier
 
 # ===============================================
 # DISPLAY PS_PROFILE ENVIRONMENT VARIABLES (DEBUG)
@@ -266,7 +601,13 @@ else {
 #           '0', 'false' (case-insensitive), empty/null -> $false
 if (-not (Get-Command Test-EnvBool -ErrorAction SilentlyContinue)) {
     function Test-EnvBool {
-        param([string]$Value)
+        [CmdletBinding()]
+        param(
+            [Parameter(Mandatory = $false)]
+            [AllowEmptyString()]
+            [AllowNull()]
+            [string]$Value
+        )
         if ([string]::IsNullOrWhiteSpace($Value)) {
             return $false
         }
@@ -339,12 +680,55 @@ if ($profileDExists -and $allFragments) {
     }
 
     # Load fragments using parallel or sequential approach
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Before fragment loading section" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
+    
     $profileFragmentLoaderModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileFragmentLoader.psm1'
+    
+    try {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Fragment loader module path: $profileFragmentLoaderModule" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+    }
+    catch { }
     
     if ($profileFragmentLoaderModule -and -not [string]::IsNullOrWhiteSpace($profileFragmentLoaderModule) -and (Test-Path -LiteralPath $profileFragmentLoaderModule)) {
         try {
-            Import-Module $profileFragmentLoaderModule -ErrorAction SilentlyContinue -DisableNameChecking
-            if (Get-Command Initialize-FragmentLoading -ErrorAction SilentlyContinue) {
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Fragment loader module exists, importing..." | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+            
+            $importError = $null
+            Import-Module $profileFragmentLoaderModule -ErrorAction Stop -DisableNameChecking -ErrorVariable importError
+            
+            try {
+                "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Fragment loader module imported successfully" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+            }
+            catch { }
+            $initFunc = Get-Command Initialize-FragmentLoading -ErrorAction SilentlyContinue
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                if ($initFunc) {
+                    Write-Host "[profile] Initialize-FragmentLoading function found, calling..." -ForegroundColor DarkGray
+                }
+                else {
+                    Write-Host "[profile] ✗ Initialize-FragmentLoading function NOT found after module import" -ForegroundColor Red
+                    $module = Get-Module ProfileFragmentLoader -ErrorAction SilentlyContinue
+                    if ($module) {
+                        Write-Host "[profile] Module loaded: $($module.Name), ExportedFunctions: $($module.ExportedFunctions.Keys -join ', ')" -ForegroundColor DarkGray
+                    }
+                    else {
+                        Write-Host "[profile] Module ProfileFragmentLoader not found in Get-Module" -ForegroundColor DarkGray
+                    }
+                }
+            }
+            if ($initFunc) {
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Calling Initialize-FragmentLoading with $($fragmentsToLoad.Count) fragments" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
+                
                 Initialize-FragmentLoading `
                     -FragmentsToLoad $fragmentsToLoad `
                     -BootstrapFragment $bootstrapFragment `
@@ -357,10 +741,23 @@ if ($profileDExists -and $allFragments) {
                     -FragmentErrorHandlingModule $fragmentErrorHandlingModule `
                     -FragmentErrorHandlingModuleExists $fragmentErrorHandlingModuleExists `
                     -ProfileD $profileD
+                
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Initialize-FragmentLoading completed" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
+            }
+            else {
+                try {
+                    "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Initialize-FragmentLoading function not found" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
+                }
+                catch { }
             }
         }
         catch {
             if ($env:PS_PROFILE_DEBUG) {
+                $debugLevel = 0
+                [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) | Out-Null
                 $posMsg = $null
                 try {
                     if ($_.InvocationInfo -and $_.InvocationInfo.PositionMessage) {
@@ -371,7 +768,17 @@ if ($profileDExists -and $allFragments) {
                     $posMsg = $null
                 }
 
-                if ($posMsg) {
+                if ($debugLevel -ge 3) {
+                    Write-Host "[profile] ✗ Failed to load ProfileFragmentLoader module: $($_.Exception.Message)" -ForegroundColor Red
+                    if ($posMsg) {
+                        Write-Host "[profile] Position: $posMsg" -ForegroundColor DarkGray
+                    }
+                    Write-Host "[profile] Exception type: $($_.Exception.GetType().FullName)" -ForegroundColor DarkGray
+                    if ($_.ScriptStackTrace) {
+                        Write-Host "[profile] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                    }
+                }
+                elseif ($posMsg) {
                     Write-Warning ("Failed to load ProfileFragmentLoader module: {0}`n{1}" -f $_.Exception.Message, $posMsg)
                 }
                 else {
@@ -391,11 +798,10 @@ if ($profileDExists -and $allFragments) {
                 }
 
                 if ($env:PS_PROFILE_DEBUG) {
-                    $showIndividualFragments = $false
-                    if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
-                        $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
-                        $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
-                    }
+                    # Debug level behavior: Level 1 = batched, Level 2+ = individual messages
+                    $debugLevel = 0
+                    [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) | Out-Null
+                    $showIndividualFragments = $debugLevel -ge 2
                     
                     if ($showIndividualFragments) {
                         Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan
@@ -415,6 +821,14 @@ if ($profileDExists -and $allFragments) {
                 if ($fragment -and $fragment.DirectoryName) {
                     $global:ProfileFragmentRoot = $fragment.DirectoryName
                 }
+
+                # Set fragment context for command registry
+                $originalFragmentContext = $null
+                if (Get-Variable -Name 'CurrentFragmentContext' -Scope Global -ErrorAction SilentlyContinue) {
+                    $originalFragmentContext = $global:CurrentFragmentContext
+                }
+                $global:CurrentFragmentContext = $fragmentBaseName
+
                 try {
                     $null = . $fragment.FullName
                 }
@@ -426,16 +840,22 @@ if ($profileDExists -and $allFragments) {
                 }
                 finally {
                     $global:ProfileFragmentRoot = $originalProfileFragmentRoot
+                    # Restore or clear fragment context
+                    if ($null -ne $originalFragmentContext) {
+                        $global:CurrentFragmentContext = $originalFragmentContext
+                    }
+                    else {
+                        Remove-Variable -Name 'CurrentFragmentContext' -Scope Global -ErrorAction SilentlyContinue
+                    }
                 }
             }
             
             # Show remaining fragments if batching
+            # Debug level behavior: Level 1 = batched, Level 2+ = individual messages (already shown)
             if ($env:PS_PROFILE_DEBUG -and $fallbackLoadedFragments.Count -gt 0) {
-                $showIndividualFragments = $false
-                if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
-                    $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
-                    $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
-                }
+                $debugLevel = 0
+                [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) | Out-Null
+                $showIndividualFragments = $debugLevel -ge 2
                 
                 if (-not $showIndividualFragments) {
                     $remainingCount = $fallbackLoadedFragments.Count % $fallbackBatchSize
@@ -465,11 +885,10 @@ if ($profileDExists -and $allFragments) {
             }
 
             if ($env:PS_PROFILE_DEBUG) {
-                $showIndividualFragments = $false
-                if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
-                    $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
-                    $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
-                }
+                # Debug level behavior: Level 1 = batched, Level 2+ = individual messages
+                $debugLevel = 0
+                [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) | Out-Null
+                $showIndividualFragments = $debugLevel -ge 2
                 
                 if ($showIndividualFragments) {
                     Write-Host "Loading profile fragment: $fragmentName" -ForegroundColor Cyan
@@ -489,6 +908,14 @@ if ($profileDExists -and $allFragments) {
             if ($fragment -and $fragment.DirectoryName) {
                 $global:ProfileFragmentRoot = $fragment.DirectoryName
             }
+
+            # Set fragment context for command registry
+            $originalFragmentContext = $null
+            if (Get-Variable -Name 'CurrentFragmentContext' -Scope Global -ErrorAction SilentlyContinue) {
+                $originalFragmentContext = $global:CurrentFragmentContext
+            }
+            $global:CurrentFragmentContext = $fragmentBaseName
+
             try {
                 $null = . $fragment.FullName
             }
@@ -500,16 +927,22 @@ if ($profileDExists -and $allFragments) {
             }
             finally {
                 $global:ProfileFragmentRoot = $originalProfileFragmentRoot
+                # Restore or clear fragment context
+                if ($null -ne $originalFragmentContext) {
+                    $global:CurrentFragmentContext = $originalFragmentContext
+                }
+                else {
+                    Remove-Variable -Name 'CurrentFragmentContext' -Scope Global -ErrorAction SilentlyContinue
+                }
             }
         }
         
         # Show remaining fragments if batching
+        # Debug level behavior: Level 1 = batched, Level 2+ = individual messages (already shown)
         if ($env:PS_PROFILE_DEBUG -and $fallbackLoadedFragments2.Count -gt 0) {
-            $showIndividualFragments = $false
-            if ($env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS) {
-                $normalized = $env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS.Trim().ToLowerInvariant()
-                $showIndividualFragments = ($normalized -eq '1' -or $normalized -eq 'true')
-            }
+            $debugLevel = 0
+            [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) | Out-Null
+            $showIndividualFragments = $debugLevel -ge 2
             
             if (-not $showIndividualFragments) {
                 $remainingCount = $fallbackLoadedFragments2.Count % $fallbackBatchSize2
@@ -539,14 +972,71 @@ else {
 $profilePromptModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfilePrompt.psm1'
 if ($profilePromptModule -and -not [string]::IsNullOrWhiteSpace($profilePromptModule) -and (Test-Path -LiteralPath $profilePromptModule)) {
     try {
-        Import-Module $profilePromptModule -ErrorAction SilentlyContinue -DisableNameChecking
+        # Parse debug level once at function/script start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled, $debugLevel contains the numeric level (1-3)
+        }
+        
+        # Level 2: Verbose debug - module loading details
+        if ($debugLevel -ge 2) {
+            Write-Host "  [profile.prompt] Loading ProfilePrompt module..." -ForegroundColor DarkGray
+        }
+        
+        Import-Module $profilePromptModule -ErrorAction Stop -DisableNameChecking
+        
         if (Get-Command Initialize-ProfilePrompt -ErrorAction SilentlyContinue) {
+            # Level 2: Verbose debug - initialization details
+            if ($debugLevel -ge 2) {
+                Write-Host "  [profile.prompt] Calling Initialize-ProfilePrompt..." -ForegroundColor DarkGray
+            }
             Initialize-ProfilePrompt
+        }
+        else {
+            # Level 1: Basic debug - function not found warning
+            if ($debugLevel -ge 1) {
+                Write-Warning "[profile.prompt] Initialize-ProfilePrompt function not found after importing module"
+            }
         }
     }
     catch {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Warning "Failed to load ProfilePrompt module: $($_.Exception.Message)"
+        $errorMsg = "Failed to load ProfilePrompt module: $($_.Exception.Message)"
+        
+        # Always use structured error handling if available
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'profile.load-prompt-module' -Context @{
+                module_path = $profilePromptModule
+            }
+        }
+        
+        # Parse debug level for error display
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Level 1: Basic error display (errors should be prominently displayed)
+            if ($debugLevel -ge 1) {
+                Write-Host "[profile.prompt] $errorMsg" -ForegroundColor Red
+            }
+            # Level 3: Detailed error information including stack trace
+            if ($debugLevel -ge 3) {
+                if ($_.ScriptStackTrace) {
+                    Write-Host "  [profile.prompt] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                }
+                Write-Host "  [profile.prompt] Exception type: $($_.Exception.GetType().FullName)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always show errors even if debug is off
+            Write-Warning $errorMsg
+        }
+    }
+}
+else {
+    # Parse debug level for module not found message
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        # Level 2: Verbose debug - module path diagnostics
+        if ($debugLevel -ge 2) {
+            Write-Host "  [profile.prompt] ProfilePrompt module not found at: $profilePromptModule" -ForegroundColor DarkGray
         }
     }
 }

@@ -68,7 +68,12 @@ try {
                 }
             }
             catch {
-                Write-Error "Failed to encode Base32: $_"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.encoding.base32.encode' -Context @{}
+                }
+                else {
+                    Write-Error "Failed to encode Base32: $_"
+                }
             }
         }
     } -Force
@@ -112,7 +117,12 @@ try {
                 }
             }
             catch {
-                Write-Error "Failed to decode Base32: $_"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.encoding.base32.decode' -Context @{}
+                }
+                else {
+                    Write-Error "Failed to decode Base32: $_"
+                }
             }
         }
     } -Force

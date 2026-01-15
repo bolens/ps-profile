@@ -42,13 +42,13 @@ try {
     $profileD = Join-Path $repoRoot 'profile.d'
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 Write-ScriptMessage -Message "Building temporary idempotency runner..."
 $files = Get-ChildItem -Path $profileD -Filter '*.ps1' | Sort-Object Name | ForEach-Object { $_.FullName }
 if ($files.Count -eq 0) {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "No fragments found in $profileD"
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "No fragments found in $profileD"
 }
 
 $temp = [IO.Path]::Combine($env:TEMP, [IO.Path]::GetRandomFileName() + '.ps1')
@@ -77,8 +77,8 @@ Remove-Item -LiteralPath $temp -ErrorAction SilentlyContinue
 
 if ($code -ne 0) {
     Write-ScriptMessage -Message $out
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Idempotency runner failed (exit code $code)"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Idempotency runner failed (exit code $code)"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Idempotency: all profile.d fragments loaded twice without errors"
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "Idempotency: all profile.d fragments loaded twice without errors"
 

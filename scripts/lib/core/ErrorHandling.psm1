@@ -82,9 +82,13 @@ function Get-ErrorActionPreference {
     $result = Invoke-WithErrorHandling -ScriptBlock { Import-Module $module } -ErrorAction 'SilentlyContinue'
 #>
 function Invoke-WithErrorHandling {
+    # Note: [OutputType([object])] is intentional - this function returns whatever
+    # the ScriptBlock returns, which can be any type. This provides maximum flexibility
+    # for callers who need to execute arbitrary code blocks with error handling.
     [OutputType([object])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNull()]
         [scriptblock]$ScriptBlock,
 
         [System.Management.Automation.ActionPreference]$ErrorActionPreference = 'Stop',
@@ -93,9 +97,18 @@ function Invoke-WithErrorHandling {
     )
 
     try {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [error-handling.invoke] Executing scriptblock with ErrorAction: $ErrorActionPreference" -ForegroundColor DarkGray
+        }
         return & $ScriptBlock
     }
     catch {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [error-handling.invoke] Scriptblock execution failed: $($_.Exception.Message) (ErrorAction: $ErrorActionPreference)" -ForegroundColor DarkGray
+        }
+        
         if ($ErrorActionPreference -eq 'Stop') {
             if ($ErrorMessage) {
                 throw $ErrorMessage
@@ -108,6 +121,10 @@ function Invoke-WithErrorHandling {
         }
         else {
             # SilentlyContinue or other - return null without error
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [error-handling.invoke] Suppressing error due to ErrorAction: $ErrorActionPreference" -ForegroundColor DarkGray
+            }
             return $null
         }
     }
@@ -149,6 +166,7 @@ function Write-ErrorOrThrow {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Message,
 
         [System.Management.Automation.ActionPreference]$ErrorActionPreference = 'Stop',
@@ -160,6 +178,11 @@ function Write-ErrorOrThrow {
         [System.Management.Automation.ErrorCategory]$Category = [System.Management.Automation.ErrorCategory]::InvalidOperation
     )
 
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [error-handling.write-error-or-throw] Error handling with ErrorAction: $ErrorActionPreference, Message: $Message" -ForegroundColor DarkGray
+    }
+    
     if ($ErrorActionPreference -eq 'Stop') {
         if ($Exception) {
             throw $Exception
@@ -187,4 +210,3 @@ Export-ModuleMember -Function @(
     'Invoke-WithErrorHandling',
     'Write-ErrorOrThrow'
 )
-

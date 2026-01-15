@@ -1,4 +1,4 @@
-#
+﻿#
 # Tests for shortcut helper functions.
 #
 
@@ -38,6 +38,16 @@ Describe 'Profile shortcut functions' {
             }
             
             # Set up mock that always returns null
+            <#
+            .SYNOPSIS
+                Performs operations related to Get-AvailableEditor.
+            
+            .DESCRIPTION
+                Performs operations related to Get-AvailableEditor.
+            
+            .OUTPUTS
+                object
+            #>
             function Get-AvailableEditor {
                 return $null
             }

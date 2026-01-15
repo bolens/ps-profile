@@ -19,6 +19,12 @@ scripts/utils/find-duplicate-functions.ps1
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
@@ -35,7 +41,7 @@ try {
     Test-PathExists -Path $profileDir -PathType 'Directory'
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 $files = Get-PowerShellScripts -Path $profileDir -SortByName
@@ -47,11 +53,18 @@ $found = New-ObjectList
 $patterns = Get-CommonRegexPatterns
 $functionRegex = $patterns['FunctionDefinition']
 
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[metrics.find-duplicates] Starting duplicate function detection"
+    Write-Verbose "[metrics.find-duplicates] Files to scan: $($files.Count)"
+}
+
 Write-ScriptMessage -Message "Scanning $($files.Count) file(s) for duplicate functions..."
 
 # Process files in parallel for better performance
 # Note: Invoke-Parallel uses Start-Job which runs in separate process, so we need to recreate regex in scriptblock
 $functionRegexPattern = "function\s+([A-Za-z0-9_-]+)\s*\{"
+$scanStartTime = Get-Date
 $scanResults = Invoke-Parallel -Items $files -ScriptBlock {
     param($File)
     
@@ -70,11 +83,25 @@ $scanResults = Invoke-Parallel -Items $files -ScriptBlock {
         }
     }
     catch {
-        Write-Warning "Failed to scan $($File.FullName): $($_.Exception.Message)"
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to scan file for duplicate functions" -OperationName 'metrics.find-duplicates.scan' -Context @{
+                file_path = $File.FullName
+            } -Code 'FileScanFailed'
+        }
+        else {
+            Write-Warning "Failed to scan $($File.FullName): $($_.Exception.Message)"
+        }
     }
     
     return $fileFunctions.ToArray()
 } -ThrottleLimit 5
+
+$scanDuration = ((Get-Date) - $scanStartTime).TotalMilliseconds
+
+# Level 2: Scan timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[metrics.find-duplicates] File scan completed in ${scanDuration}ms"
+}
 
 # Collect results
 foreach ($result in $scanResults) {
@@ -83,10 +110,29 @@ foreach ($result in $scanResults) {
     }
 }
 
+# Level 2: Results details
+if ($debugLevel -ge 2) {
+    Write-Verbose "[metrics.find-duplicates] Found $($found.Count) function definition(s) across all files"
+}
+
+$groupStartTime = Get-Date
 $groups = $found | Group-Object Name | Where-Object { $_.Count -gt 1 }
+$groupDuration = ((Get-Date) - $groupStartTime).TotalMilliseconds
+
+# Level 2: Grouping timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[metrics.find-duplicates] Grouping completed in ${groupDuration}ms"
+    Write-Verbose "[metrics.find-duplicates] Duplicate groups found: $($groups.Count)"
+}
+
+# Level 3: Performance breakdown
+if ($debugLevel -ge 3) {
+    $totalDuration = $scanDuration + $groupDuration
+    Write-Host "  [metrics.find-duplicates] Performance - Scan: ${scanDuration}ms, Group: ${groupDuration}ms, Total: ${totalDuration}ms, Functions: $($found.Count), Duplicates: $($groups.Count)" -ForegroundColor DarkGray
+}
 
 if ($groups.Count -eq 0) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No duplicate function definitions found in profile.d"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "No duplicate function definitions found in profile.d"
 }
 
 foreach ($g in $groups) {
@@ -96,5 +142,5 @@ foreach ($g in $groups) {
 }
 
 # Exit with validation failure if duplicates found (non-zero exit indicates issue)
-Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($groups.Count) duplicate function definition(s)"
+Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Found $($groups.Count) duplicate function definition(s)"
 

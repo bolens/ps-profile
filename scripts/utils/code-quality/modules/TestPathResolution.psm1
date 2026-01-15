@@ -6,7 +6,19 @@ scripts/utils/code-quality/modules/TestPathResolution.psm1
 
 .DESCRIPTION
     Provides functions for resolving test file and directory paths based on suite specifications.
+
+.NOTES
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe configuration values.
 #>
+
+# Import CommonEnums for TestSuite enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 # Import FileSystem module for Get-PowerShellScripts
 # Use proper path resolution to find the lib directory
@@ -57,7 +69,7 @@ else {
     Supports multiple test files or directories.
 
 .PARAMETER Suite
-    The test suite to run (All, Unit, Integration, Performance).
+    The test suite to run. Must be a TestSuite enum value.
 
 .PARAMETER TestFile
     Optional specific test file(s) or directory path(s). Can accept multiple files as an array.
@@ -70,19 +82,21 @@ else {
 #>
 function Get-TestPaths {
     param(
-        [ValidateSet('All', 'Unit', 'Integration', 'Performance')]
-        [string]$Suite = 'All',
+        [TestSuite]$Suite = [TestSuite]::All,
 
         [string[]]$TestFile,
 
         [string]$RepoRoot
     )
 
+    # Convert enum to string
+    $suiteString = $Suite.ToString()
+
     if ($null -eq $TestFile -or $TestFile.Count -eq 0 -or ($TestFile.Count -eq 1 -and [string]::IsNullOrWhiteSpace($TestFile[0]))) {
-        return Get-TestSuitePaths -Suite $Suite -RepoRoot $RepoRoot
+        return Get-TestSuitePaths -Suite $suiteString -RepoRoot $RepoRoot
     }
     else {
-        return Get-SpecificTestPaths -TestFile $TestFile -Suite $Suite -RepoRoot $RepoRoot
+        return Get-SpecificTestPaths -TestFile $TestFile -Suite $suiteString -RepoRoot $RepoRoot
     }
 }
 

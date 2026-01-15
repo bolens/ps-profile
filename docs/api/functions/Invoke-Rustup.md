@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\39-rustup.ps1
+Defined in: ..\profile.d\rustup.ps1

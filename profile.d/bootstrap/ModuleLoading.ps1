@@ -65,6 +65,7 @@ function global:Import-FragmentModule {
         [string[]]$ModulePath,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Context,
 
         [switch]$Required,
@@ -362,17 +363,41 @@ function global:Import-FragmentModule {
         @{ ModulePath = @('dev-tools-modules', 'build', 'testing-frameworks.ps1'); Context = 'testing' }
     )
 #>
+# Module import result class for type-safe return values
+class ModuleImportResult {
+    [hashtable]$Results
+    [string[]]$Failed
+    [int]$SuccessCount
+    [int]$FailureCount
+
+    ModuleImportResult() {
+        $this.Results = @{}
+        $this.Failed = @()
+        $this.SuccessCount = 0
+        $this.FailureCount = 0
+    }
+
+    [bool]IsSuccess() {
+        return $this.FailureCount -eq 0
+    }
+
+    [double]GetSuccessRate() {
+        $total = $this.SuccessCount + $this.FailureCount
+        if ($total -eq 0) { return 0.0 }
+        return $this.SuccessCount / $total
+    }
+}
+
 function global:Import-FragmentModules {
     [CmdletBinding()]
-    [OutputType([hashtable])]
+    [OutputType([ModuleImportResult])]
     param(
         [Parameter(Mandatory)]
-        [AllowNull()]
-        [AllowEmptyString()]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentRoot,
 
         [Parameter(Mandatory)]
-        [AllowNull()]
+        [ValidateNotNull()]
         [hashtable[]]$Modules,
 
         [switch]$StopOnError
@@ -466,12 +491,14 @@ function global:Import-FragmentModules {
         }
     }
 
-    return @{
+    $result = [ModuleImportResult]@{
         Results      = $results
         Failed       = $failed
         SuccessCount = ($results.Values | Where-Object { $_.Success }).Count
         FailureCount = $failed.Count
     }
+
+    return $result
 }
 
 <#
@@ -511,8 +538,7 @@ function global:Test-FragmentModulePath {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory, ParameterSetName = 'BySegments')]
-        [AllowNull()]
-        [AllowEmptyString()]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentRoot,
 
         [Parameter(Mandatory, ParameterSetName = 'BySegments')]

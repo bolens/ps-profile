@@ -14,7 +14,19 @@ scripts/utils/code-quality/modules/PesterConfig.psm1
     - PesterExecutionConfig.psm1: Execution options and test filtering
     
     Note: Import submodules directly to use their functions - this module only exports New-PesterTestConfiguration.
+
+.NOTES
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe configuration values.
 #>
+
+# Import CommonEnums for PesterVerbosity and CodeCoverageOutputFormat enums
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 # Import specialized submodules
 $outputConfigPath = Join-Path $PSScriptRoot 'PesterOutputConfig.psm1'
@@ -99,8 +111,7 @@ if ($executionConfigPath -and -not [string]::IsNullOrWhiteSpace($executionConfig
 #>
 function New-PesterTestConfiguration {
     param(
-        [ValidateSet('Normal', 'Detailed', 'Minimal', 'None')]
-        [string]$OutputFormat = 'Detailed',
+        [PesterVerbosity]$OutputFormat = [PesterVerbosity]::Detailed
 
         [switch]$CI,
 
@@ -112,8 +123,7 @@ function New-PesterTestConfiguration {
 
         [switch]$ShowCoverageSummary,
 
-        [ValidateSet('JaCoCo', 'CoverageGutters', 'Cobertura')]
-        [string]$CodeCoverageOutputFormat = 'JaCoCo',
+        [object]$CodeCoverageOutputFormat = [CodeCoverageOutputFormat]::JaCoCo,  # Accepts CodeCoverageOutputFormat enum or string for backward compatibility
 
         [string]$CoverageReportPath,
 
@@ -141,6 +151,10 @@ function New-PesterTestConfiguration {
         [string[]]$TestPaths
     )
 
+    # Convert enums to strings
+    $outputFormatString = $OutputFormat.ToString()
+    $coverageFormatString = $CodeCoverageOutputFormat.ToString()
+
     $config = New-PesterConfiguration
     $config.Run.PassThru = $true
     $config.Run.Exit = $false
@@ -148,7 +162,7 @@ function New-PesterTestConfiguration {
     # Configure output verbosity
     $verbosityParams = @{
         Config       = $config
-        OutputFormat = $OutputFormat
+        OutputFormat = $outputFormatString
     }
     if ($CI) { $verbosityParams['CI'] = $true }
     if ($Quiet) { $verbosityParams['Quiet'] = $true }
@@ -168,7 +182,7 @@ function New-PesterTestConfiguration {
         Config                   = $config
         Coverage                 = $Coverage
         ShowCoverageSummary      = $ShowCoverageSummary
-        CodeCoverageOutputFormat = $CodeCoverageOutputFormat
+        CodeCoverageOutputFormat = $coverageFormatString
         CoverageReportPath       = $CoverageReportPath
         MinimumCoverage          = $MinimumCoverage
         ProfileDir               = $ProfileDir

@@ -51,7 +51,12 @@ function Initialize-DevTools-QrCode-Communication {
             _New-QrCode @params
         }
         catch {
-            Write-Error "Failed to generate URL QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.url' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate URL QR code: $_"
+            }
         }
     } -Force
 
@@ -89,7 +94,12 @@ function Initialize-DevTools-QrCode-Communication {
             _New-QrCode @params
         }
         catch {
-            Write-Error "Failed to generate SMS QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.sms' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate SMS QR code: $_"
+            }
         }
     } -Force
 
@@ -133,7 +143,12 @@ function Initialize-DevTools-QrCode-Communication {
             _New-QrCode @params
         }
         catch {
-            Write-Error "Failed to generate email QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.email' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate email QR code: $_"
+            }
         }
     } -Force
 
@@ -165,7 +180,12 @@ function Initialize-DevTools-QrCode-Communication {
             _New-QrCode @params
         }
         catch {
-            Write-Error "Failed to generate phone QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.phone' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate phone QR code: $_"
+            }
         }
     } -Force
 }

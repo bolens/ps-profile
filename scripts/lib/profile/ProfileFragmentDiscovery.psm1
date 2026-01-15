@@ -58,6 +58,7 @@ function Initialize-FragmentDiscovery {
         [string[]]$DisabledFragments = @(),
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentLoadingModule,
 
         [Parameter(Mandatory)]
@@ -70,6 +71,7 @@ function Initialize-FragmentDiscovery {
         [hashtable]$PerformanceConfig,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentLibDir
     )
 

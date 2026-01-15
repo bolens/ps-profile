@@ -67,7 +67,16 @@ if (-not (Test-Path Function:vsc)) {
                     Write-Verbose "Opened current directory in $($editor.DisplayName)"
                 }
                 catch {
-                    Write-Error "Failed to execute $($editor.DisplayName) ($($editor.Command)): $($_.Exception.Message)"
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'shortcuts.editor.open' -Context @{
+                            editor_display_name = $editor.DisplayName
+                            editor_command      = $editor.Command
+                            path                = $currentPath.Path
+                        }
+                    }
+                    else {
+                        Write-Error "Failed to execute $($editor.DisplayName) ($($editor.Command)): $($_.Exception.Message)"
+                    }
                     throw
                 }
             }
@@ -76,7 +85,12 @@ if (-not (Test-Path Function:vsc)) {
             }
         }
         catch {
-            Write-Error "Failed to open editor: $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'shortcuts.editor.open' -Context @{}
+            }
+            else {
+                Write-Error "Failed to open editor: $($_.Exception.Message)"
+            }
             throw
         }
     }
@@ -103,33 +117,63 @@ if (-not (Test-Path Function:Open-Editor)) {
         
         # Validate path exists
         if (-not ($p -and -not [string]::IsNullOrWhiteSpace($p) -and (Test-Path -LiteralPath $p -ErrorAction SilentlyContinue))) {
-            Write-Error "Path not found: $p"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Path not found: $p"),
+                        'PathNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $p
+                    )) -OperationName 'shortcuts.editor.open-file' -Context @{ path = $p }
+            }
+            else {
+                Write-Error "Path not found: $p"
+            }
             return
         }
         
-        try {
-            $editor = Get-AvailableEditor
-            if ($editor) {
-                $resolvedPath = Resolve-Path $p -ErrorAction Stop | Select-Object -ExpandProperty Path
-                try {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'shortcuts.editor.open-file' -Context @{
+                path = $p
+            } -ScriptBlock {
+                $editor = Get-AvailableEditor
+                if ($editor) {
+                    $resolvedPath = Resolve-Path $p -ErrorAction Stop | Select-Object -ExpandProperty Path
                     & $editor.Command $resolvedPath 2>&1 | Out-Null
                     if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) {
                         throw "Editor command failed with exit code $LASTEXITCODE"
                     }
                     Write-Verbose "Opened '$resolvedPath' in $($editor.DisplayName)"
                 }
-                catch {
-                    Write-Error "Failed to execute $($editor.DisplayName) ($($editor.Command)): $($_.Exception.Message)"
-                    throw
+                else {
+                    Write-Warning 'No supported editor found in PATH. Install VS Code, VSCodium, Neovim, Vim, Emacs, Micro, or Nano.'
+                }
+            } | Out-Null
+        }
+        else {
+            try {
+                $editor = Get-AvailableEditor
+                if ($editor) {
+                    $resolvedPath = Resolve-Path $p -ErrorAction Stop | Select-Object -ExpandProperty Path
+                    try {
+                        & $editor.Command $resolvedPath 2>&1 | Out-Null
+                        if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) {
+                            throw "Editor command failed with exit code $LASTEXITCODE"
+                        }
+                        Write-Verbose "Opened '$resolvedPath' in $($editor.DisplayName)"
+                    }
+                    catch {
+                        Write-Error "Failed to execute $($editor.DisplayName) ($($editor.Command)): $($_.Exception.Message)"
+                        throw
+                    }
+                }
+                else {
+                    Write-Warning 'No supported editor found in PATH. Install VS Code, VSCodium, Neovim, Vim, Emacs, Micro, or Nano.'
                 }
             }
-            else {
-                Write-Warning 'No supported editor found in PATH. Install VS Code, VSCodium, Neovim, Vim, Emacs, Micro, or Nano.'
+            catch {
+                Write-Error "Failed to open file in editor: $($_.Exception.Message)"
+                throw
             }
-        }
-        catch {
-            Write-Error "Failed to open file in editor: $($_.Exception.Message)"
-            throw
         }
     }
 }
@@ -158,13 +202,23 @@ if (-not (Test-Path Function:project-root)) {
             $exitCode = $LASTEXITCODE
             
             if ($exitCode -eq 0 -and $root -and $root.Trim()) {
-                try {
-                    Set-Location -LiteralPath $root.Trim() -ErrorAction Stop
-                    Write-Verbose "Changed to project root: $root"
+                if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                    Invoke-WithWideEvent -OperationName 'shortcuts.project.root' -Context @{
+                        git_root = $root.Trim()
+                    } -ScriptBlock {
+                        Set-Location -LiteralPath $root.Trim() -ErrorAction Stop
+                        Write-Verbose "Changed to project root: $root"
+                    } | Out-Null
                 }
-                catch {
-                    Write-Error "Failed to change to project root '$root': $($_.Exception.Message)"
-                    throw
+                else {
+                    try {
+                        Set-Location -LiteralPath $root.Trim() -ErrorAction Stop
+                        Write-Verbose "Changed to project root: $root"
+                    }
+                    catch {
+                        Write-Error "Failed to change to project root '$root': $($_.Exception.Message)"
+                        throw
+                    }
                 }
             }
             else {
@@ -173,7 +227,12 @@ if (-not (Test-Path Function:project-root)) {
             }
         }
         catch {
-            Write-Error "Failed to find project root: $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'shortcuts.project.root' -Context @{}
+            }
+            else {
+                Write-Error "Failed to find project root: $($_.Exception.Message)"
+            }
             throw
         }
     }

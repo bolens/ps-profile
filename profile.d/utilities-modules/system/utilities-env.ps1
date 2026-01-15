@@ -158,15 +158,38 @@ function Set-EnvVar {
         Publish-EnvVar
     }
     catch [System.UnauthorizedAccessException] {
-        Write-Error "Access denied setting environment variable '$Name'. Run with elevated permissions for system-wide variables."
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'utilities.env.set' -Context @{
+                env_var_name = $Name
+                error_type   = 'UnauthorizedAccessException'
+            }
+        }
+        else {
+            Write-Error "Access denied setting environment variable '$Name'. Run with elevated permissions for system-wide variables."
+        }
         throw
     }
     catch [System.Security.SecurityException] {
-        Write-Error "Security exception setting environment variable '$Name': $($_.Exception.Message)"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'utilities.env.set' -Context @{
+                env_var_name = $Name
+                error_type   = 'SecurityException'
+            }
+        }
+        else {
+            Write-Error "Security exception setting environment variable '$Name': $($_.Exception.Message)"
+        }
         throw
     }
     catch {
-        Write-Error "Failed to set environment variable '$Name': $($_.Exception.Message)"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'utilities.env.set' -Context @{
+                env_var_name = $Name
+            }
+        }
+        else {
+            Write-Error "Failed to set environment variable '$Name': $($_.Exception.Message)"
+        }
         throw
     }
 }

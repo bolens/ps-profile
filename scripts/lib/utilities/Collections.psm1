@@ -39,7 +39,10 @@ function New-ObjectList {
     # Use object type instead of PSCustomObject since PSCustomObject is a PowerShell type accelerator
     # and may not work reliably with generic types. List[object] works the same for PSCustomObject items.
     try {
-        Write-Verbose "New-ObjectList: Starting list creation"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Verbose "[collections.object-list] Starting list creation"
+        }
         
         # Use wrapper function if available (for testing), otherwise use direct call
         # Check for wrapper function - try multiple detection methods for test compatibility
@@ -77,7 +80,10 @@ function New-ObjectList {
             }
             catch {
                 # If wrapper call fails, fall back to direct call
-                Write-Verbose "New-ObjectList: Wrapper call failed, using direct call: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Verbose "[collections.object-list] Wrapper call failed, using direct call: $($_.Exception.Message)"
+                }
                 $useWrapper = $false
                 $listType = $null
             }
@@ -89,11 +95,24 @@ function New-ObjectList {
         
         if ($null -eq $listType) {
             $errorMsg = "New-ObjectList: MakeGenericType returned null for List[object]"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to create generic list type" -OperationName 'collections.object-list' -Context @{
+                    error_message = $errorMsg
+                } -Code 'MakeGenericTypeFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.object-list] $errorMsg"
+                }
+            }
             return $null
         }
         
-        Write-Verbose "New-ObjectList: Created generic type: $($listType.FullName)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[collections.object-list] Created generic type: $($listType.FullName)"
+        }
         
         # Use wrapper function if available (for testing), otherwise use direct call
         # Check for wrapper function - try multiple detection methods for test compatibility
@@ -125,13 +144,19 @@ function New-ObjectList {
                 }
                 # If wrapper returns null, fall back to direct call
                 if ($null -eq $list) {
-                    Write-Verbose "New-ObjectList: Wrapper returned null, falling back to direct call"
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Host "  [collections.object-list] Wrapper returned null, falling back to direct call" -ForegroundColor DarkGray
+                    }
                     $list = [System.Activator]::CreateInstance($listType)
                 }
             }
             catch {
                 # If wrapper call fails, fall back to direct call
-                Write-Verbose "New-ObjectList: Wrapper call failed, using direct call: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [collections.object-list] Wrapper call failed, using direct call: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
                 $list = [System.Activator]::CreateInstance($listType)
             }
         }
@@ -141,8 +166,24 @@ function New-ObjectList {
         
         if ($null -eq $list) {
             $errorMsg = "New-ObjectList: CreateInstance returned null for type $($listType.FullName)"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to create list instance" -OperationName 'collections.object-list' -Context @{
+                    type_name     = $listType.FullName
+                    error_message = $errorMsg
+                } -Code 'CreateInstanceFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.object-list] $errorMsg"
+                }
+            }
             return $null
+        }
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[collections.object-list] Successfully created List[object] instance"
         }
         
         # Return the list - ensure it's the only output
@@ -150,7 +191,17 @@ function New-ObjectList {
     }
     catch {
         $errorMsg = "New-ObjectList: Exception occurred: $($_.Exception.Message) | Type: $($_.Exception.GetType().FullName) | StackTrace: $($_.ScriptStackTrace)"
-        Write-Verbose $errorMsg
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'collections.object-list' -Context @{
+                error_message = $errorMsg
+            }
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                Write-Error "[collections.object-list] $errorMsg" -ErrorAction Continue
+            }
+        }
         return $null
     }
 }
@@ -178,7 +229,10 @@ function New-StringList {
     param()
 
     try {
-        Write-Verbose "New-StringList: Starting list creation"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Verbose "[collections.string-list] Starting list creation"
+        }
         
         # Use wrapper function if available (for testing), otherwise use direct call
         # Check for wrapper function - try multiple detection methods for test compatibility
@@ -211,13 +265,19 @@ function New-StringList {
                 }
                 # If wrapper returns null, fall back to direct call
                 if ($null -eq $list) {
-                    Write-Verbose "New-StringList: Wrapper returned null, falling back to direct call"
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Host "  [collections.string-list] Wrapper returned null, falling back to direct call" -ForegroundColor DarkGray
+                    }
                     $list = [System.Collections.Generic.List[string]]::new()
                 }
             }
             catch {
                 # If wrapper call fails, fall back to direct call
-                Write-Verbose "New-StringList: Wrapper call failed, using direct call: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [collections.string-list] Wrapper call failed, using direct call: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
                 $list = [System.Collections.Generic.List[string]]::new()
             }
         }
@@ -227,15 +287,41 @@ function New-StringList {
         
         if ($null -eq $list) {
             $errorMsg = "New-StringList: Constructor returned null"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to create string list instance" -OperationName 'collections.string-list' -Context @{
+                    error_message = $errorMsg
+                } -Code 'ConstructorFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.string-list] $errorMsg"
+                }
+            }
             return $null
         }
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[collections.string-list] Successfully created List[string] instance"
+        }
+        
         # Return the list - ensure it's the only output
         , $list
     }
     catch {
         $errorMsg = "New-StringList: Exception occurred: $($_.Exception.Message) | Type: $($_.Exception.GetType().FullName) | StackTrace: $($_.ScriptStackTrace)"
-        Write-Verbose $errorMsg
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'collections.string-list' -Context @{
+                error_message = $errorMsg
+            }
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                Write-Error "[collections.string-list] $errorMsg" -ErrorAction Continue
+            }
+        }
         return $null
     }
 }
@@ -272,12 +358,26 @@ function New-TypedList {
     )
 
     try {
-        Write-Verbose "New-TypedList: Starting list creation for type: $Type"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Verbose "[collections.typed-list] Starting list creation for type: $Type"
+        }
         
         # Handle null, empty, or whitespace-only strings
         if ($null -eq $Type -or ($Type -is [string] -and [string]::IsNullOrWhiteSpace($Type))) {
             $errorMsg = "New-TypedList: Type cannot be null, empty, or whitespace"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Invalid type parameter" -OperationName 'collections.typed-list' -Context @{
+                    type_value    = $Type
+                    error_message = $errorMsg
+                } -Code 'InvalidTypeParameter'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.typed-list] $errorMsg"
+                }
+            }
             return
         }
         
@@ -294,17 +394,42 @@ function New-TypedList {
         catch {
             # Type conversion failed (invalid type name, etc.)
             $errorMsg = "New-TypedList: Failed to convert '$Type' to Type object: $($_.Exception.Message)"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to convert type" -OperationName 'collections.typed-list' -Context @{
+                    type_value    = $Type
+                    error_message = $_.Exception.Message
+                } -Code 'TypeConversionFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.typed-list] $errorMsg"
+                }
+            }
             return
         }
         
         if ($null -eq $typeObj) {
             $errorMsg = "New-TypedList: Failed to convert '$Type' to Type object"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Type conversion returned null" -OperationName 'collections.typed-list' -Context @{
+                    type_value    = $Type
+                    error_message = $errorMsg
+                } -Code 'TypeConversionNull'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.typed-list] $errorMsg"
+                }
+            }
             return $null
         }
         
-        Write-Verbose "New-TypedList: Resolved type to: $($typeObj.FullName)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[collections.typed-list] Resolved type to: $($typeObj.FullName)"
+        }
         
         # Use wrapper function if available (for testing), otherwise use direct call
         # Check for wrapper function - try multiple detection methods for test compatibility
@@ -342,7 +467,10 @@ function New-TypedList {
             }
             catch {
                 # If wrapper call fails, fall back to direct call
-                Write-Verbose "New-TypedList: Wrapper call failed, using direct call: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Verbose "[collections.typed-list] Wrapper call failed, using direct call: $($_.Exception.Message)"
+                }
                 $useWrapper = $false
                 $listType = $null
             }
@@ -354,11 +482,25 @@ function New-TypedList {
         
         if ($null -eq $listType) {
             $errorMsg = "New-TypedList: MakeGenericType returned null for type $($typeObj.FullName)"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to create generic list type" -OperationName 'collections.typed-list' -Context @{
+                    type_name     = $typeObj.FullName
+                    error_message = $errorMsg
+                } -Code 'MakeGenericTypeFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.typed-list] $errorMsg"
+                }
+            }
             return $null
         }
         
-        Write-Verbose "New-TypedList: Created generic type: $($listType.FullName)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[collections.typed-list] Created generic type: $($listType.FullName)"
+        }
         
         # Use wrapper function if available (for testing), otherwise use direct call
         # Check for wrapper function - try multiple detection methods for test compatibility
@@ -390,13 +532,19 @@ function New-TypedList {
                 }
                 # If wrapper returns null, fall back to direct call
                 if ($null -eq $list) {
-                    Write-Verbose "New-TypedList: Wrapper returned null, falling back to direct call"
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Host "  [collections.typed-list] Wrapper returned null, falling back to direct call" -ForegroundColor DarkGray
+                    }
                     $list = [System.Activator]::CreateInstance($listType)
                 }
             }
             catch {
                 # If wrapper call fails, fall back to direct call
-                Write-Verbose "New-TypedList: Wrapper call failed, using direct call: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [collections.typed-list] Wrapper call failed, using direct call: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
                 $list = [System.Activator]::CreateInstance($listType)
             }
         }
@@ -405,8 +553,24 @@ function New-TypedList {
         }
         if ($null -eq $list) {
             $errorMsg = "New-TypedList: CreateInstance returned null for type $($listType.FullName)"
-            Write-Verbose $errorMsg
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to create list instance" -OperationName 'collections.typed-list' -Context @{
+                    type_name     = $listType.FullName
+                    error_message = $errorMsg
+                } -Code 'CreateInstanceFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[collections.typed-list] $errorMsg"
+                }
+            }
             return $null
+        }
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[collections.typed-list] Successfully created List[$($typeObj.FullName)] instance"
         }
         
         # Return the list - ensure it's the only output
@@ -414,7 +578,18 @@ function New-TypedList {
     }
     catch {
         $errorMsg = "New-TypedList: Exception occurred: $($_.Exception.Message) | Type: $($_.Exception.GetType().FullName) | StackTrace: $($_.ScriptStackTrace)"
-        Write-Verbose $errorMsg
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'collections.typed-list' -Context @{
+                type_value    = $Type
+                error_message = $errorMsg
+            }
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                Write-Error "[collections.typed-list] $errorMsg" -ErrorAction Continue
+            }
+        }
         return $null
     }
 }

@@ -241,16 +241,40 @@ if (Test-CachedCommand poetry) {
         )
         
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Requirements file not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Requirements file not found: $Path"),
+                        'RequirementsFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'poetry.dependencies.import' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "Requirements file not found: $Path"
+            }
             return
         }
         
         if (Test-CachedCommand pip) {
-            $args = @('install', '-r', $Path)
-            if ($NoDeps) {
-                $args += '--no-deps'
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Invoke-WithWideEvent -OperationName 'poetry.dependencies.import' -Context @{
+                    path    = $Path
+                    no_deps = $NoDeps.IsPresent
+                } -ScriptBlock {
+                    $args = @('install', '-r', $Path)
+                    if ($NoDeps) {
+                        $args += '--no-deps'
+                    }
+                    & pip @args
+                } | Out-Null
             }
-            & pip @args
+            else {
+                $args = @('install', '-r', $Path)
+                if ($NoDeps) {
+                    $args += '--no-deps'
+                }
+                & pip @args
+            }
         }
         else {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'

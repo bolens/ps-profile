@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\06-oh-my-posh.ps1
+Defined in: ..\profile.d\oh-my-posh.ps1

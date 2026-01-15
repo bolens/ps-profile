@@ -37,10 +37,28 @@ function Initialize-FileConversion-Cfg {
     # CFG to JSON
     Set-Item -Path Function:Global:_ConvertFrom-CfgToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.to-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.(cfg|conf|config)$', '.json' }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.to-json] Output path: $OutputPath"
+            }
+            
             $pythonCmd = Get-PythonPath
             if (-not $pythonCmd) {
                 throw "Python is not available. Install Python to use CFG/ConfigParser conversions."
@@ -76,10 +94,31 @@ except Exception as e:
 "@
             $tempScript = Join-Path $env:TEMP "cfg-to-json-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
+            
+            # Level 1: Conversion execution
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.to-json] Executing Python conversion script"
+            }
+            
+            $convStartTime = Get-Date
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
                 if ($LASTEXITCODE -ne 0) {
                     throw "Python script failed: $result"
+                }
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.cfg.to-json] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path $InputPath) { (Get-Item $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path $OutputPath) { (Get-Item $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.cfg.to-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
                 }
             }
             finally {
@@ -87,7 +126,26 @@ except Exception as e:
             }
         }
         catch {
-            Write-Error "Failed to convert CFG to JSON: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.cfg.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                }
+            }
+            else {
+                Write-Error "Failed to convert CFG to JSON: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.to-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.cfg.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -95,10 +153,28 @@ except Exception as e:
     # JSON to CFG
     Set-Item -Path Function:Global:_ConvertTo-CfgFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.from-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.cfg' }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.from-json] Output path: $OutputPath"
+            }
+            
             $pythonCmd = Get-PythonPath
             if (-not $pythonCmd) {
                 throw "Python is not available. Install Python to use CFG/ConfigParser conversions."
@@ -139,10 +215,31 @@ except Exception as e:
 "@
             $tempScript = Join-Path $env:TEMP "json-to-cfg-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
+            
+            # Level 1: Conversion execution
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.from-json] Executing Python conversion script"
+            }
+            
+            $convStartTime = Get-Date
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
                 if ($LASTEXITCODE -ne 0) {
                     throw "Python script failed: $result"
+                }
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.cfg.from-json] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.cfg.from-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
                 }
             }
             finally {
@@ -150,7 +247,30 @@ except Exception as e:
             }
         }
         catch {
-            Write-Error "Failed to convert JSON to CFG: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.cfg.from-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    python_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSON to CFG: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.from-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.cfg.from-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -158,11 +278,29 @@ except Exception as e:
     # CFG to YAML
     Set-Item -Path Function:Global:_ConvertFrom-CfgToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.to-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.(cfg|conf|config)$', '.yaml' }
             
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.to-yaml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert CFG to JSON first, then to YAML
             $tempJson = Join-Path $env:TEMP "cfg-to-yaml-$(Get-Random).json"
             try {
@@ -195,9 +333,45 @@ except Exception as e:
             finally {
                 Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.to-yaml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.cfg.to-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert CFG to YAML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.cfg.to-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert CFG to YAML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.to-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.cfg.to-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -205,11 +379,29 @@ except Exception as e:
     # YAML to CFG
     Set-Item -Path Function:Global:_ConvertTo-CfgFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.from-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.ya?ml$', '.cfg' }
             
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.from-yaml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert YAML to JSON first, then to CFG
             $tempJson = Join-Path $env:TEMP "yaml-to-cfg-$(Get-Random).json"
             try {
@@ -235,9 +427,45 @@ except Exception as e:
             finally {
                 Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.from-yaml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.cfg.from-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert YAML to CFG: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.cfg.from-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert YAML to CFG: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.from-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.cfg.from-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -245,10 +473,27 @@ except Exception as e:
     # CFG to INI
     Set-Item -Path Function:Global:_ConvertFrom-CfgToIni -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.to-ini] Starting conversion: $InputPath"
+            }
+            
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.(cfg|conf|config)$', '.ini' }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.to-ini] Output path: $OutputPath"
+            }
             
             # CFG and INI are very similar formats, so we can mostly copy the content
             # But we'll use Python's configparser to ensure proper handling
@@ -276,10 +521,31 @@ except Exception as e:
 "@
             $tempScript = Join-Path $env:TEMP "cfg-to-ini-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
+            
+            # Level 1: Conversion execution
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.to-ini] Executing Python conversion script"
+            }
+            
+            $convStartTime = Get-Date
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
                 if ($LASTEXITCODE -ne 0) {
                     throw "Python script failed: $result"
+                }
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.cfg.to-ini] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.cfg.to-ini] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
                 }
             }
             finally {
@@ -287,7 +553,30 @@ except Exception as e:
             }
         }
         catch {
-            Write-Error "Failed to convert CFG to INI: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.cfg.to-ini' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    python_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert CFG to INI: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.to-ini] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.cfg.to-ini] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -295,10 +584,27 @@ except Exception as e:
     # INI to CFG
     Set-Item -Path Function:Global:_ConvertTo-CfgFromIni -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.from-ini] Starting conversion: $InputPath"
+            }
+            
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.ini$', '.cfg' }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.from-ini] Output path: $OutputPath"
+            }
             
             # INI and CFG are very similar formats, so we can mostly copy the content
             # But we'll use Python's configparser to ensure proper handling
@@ -326,10 +632,31 @@ except Exception as e:
 "@
             $tempScript = Join-Path $env:TEMP "ini-to-cfg-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
+            
+            # Level 1: Conversion execution
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.cfg.from-ini] Executing Python conversion script"
+            }
+            
+            $convStartTime = Get-Date
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
                 if ($LASTEXITCODE -ne 0) {
                     throw "Python script failed: $result"
+                }
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.cfg.from-ini] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.cfg.from-ini] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
                 }
             }
             finally {
@@ -337,7 +664,30 @@ except Exception as e:
             }
         }
         catch {
-            Write-Error "Failed to convert INI to CFG: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.cfg.from-ini' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    python_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert INI to CFG: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.cfg.from-ini] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.cfg.from-ini] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force

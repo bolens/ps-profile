@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\10-wsl.ps1
+Defined in: ..\profile.d\wsl.ps1

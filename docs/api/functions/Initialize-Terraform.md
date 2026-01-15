@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\18-terraform.ps1
+Defined in: ..\profile.d\terraform.ps1

@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\49-nuxt.ps1
+Defined in: ..\profile.d\nuxt.ps1

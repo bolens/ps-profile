@@ -46,6 +46,12 @@ param(
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
@@ -61,7 +67,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Load requirements file using the new loader
@@ -69,7 +75,7 @@ try {
     if ($RequirementsFile) {
         # If specific file provided, use legacy import
         if (-not (Test-Path -Path $RequirementsFile)) {
-            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Requirements file not found: $RequirementsFile"
+            Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Requirements file not found: $RequirementsFile"
         }
         if (Get-Command Import-CachedPowerShellDataFile -ErrorAction SilentlyContinue) {
             $requirements = Import-CachedPowerShellDataFile -Path $RequirementsFile -ErrorAction Stop
@@ -84,7 +90,13 @@ try {
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
+}
+
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[dependencies.validate] Starting dependency validation"
+    Write-Verbose "[dependencies.validate] Install missing: $InstallMissing, Requirements file: $RequirementsFile"
 }
 
 Write-ScriptMessage -Message "Validating dependencies..." -LogLevel Info
@@ -93,6 +105,11 @@ $allValid = $true
 $missingRequired = [System.Collections.Generic.List[string]]::new()
 $missingOptional = [System.Collections.Generic.List[string]]::new()
 $versionMismatches = [System.Collections.Generic.List[string]]::new()
+
+# Level 1: PowerShell version check start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[dependencies.validate] Checking PowerShell version"
+}
 
 # Check PowerShell version
 if ($requirements.PowerShellVersion) {
@@ -117,57 +134,114 @@ if ($requirements.PowerShellVersion) {
 if ($requirements.Modules) {
     Write-ScriptMessage -Message "`nChecking PowerShell modules..." -LogLevel Info
     
+    # Level 1: Module check start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[dependencies.validate] Starting PowerShell module validation"
+        Write-Verbose "[dependencies.validate] Modules to check: $($requirements.Modules.Keys.Count)"
+    }
+    
+    $moduleCheckErrors = [System.Collections.Generic.List[string]]::new()
+    $moduleCheckStartTime = Get-Date
     foreach ($moduleName in $requirements.Modules.Keys) {
-        $moduleReq = $requirements.Modules[$moduleName]
-        $required = $moduleReq.Required
-        $requiredVersion = if ($moduleReq.Version) { [Version]$moduleReq.Version } else { $null }
-        
-        # Check cache first (cache for 5 minutes)
-        $cacheKey = "ModuleAvailable_$moduleName"
-        $cachedModule = Get-CachedValue -Key $cacheKey
-        if ($null -ne $cachedModule) {
-            $installedModule = $cachedModule
-        }
-        else {
-            $installedModule = Get-Module -ListAvailable -Name $moduleName -ErrorAction SilentlyContinue
-            # Cache the result (even if null)
-            Set-CachedValue -Key $cacheKey -Value $installedModule -ExpirationSeconds 300
-        }
-        
-        if (-not $installedModule) {
-            if ($required) {
-                $allValid = $false
-                $missingRequired.Add($moduleName)
-                Write-ScriptMessage -Message "  ✗ $moduleName (REQUIRED) - Missing" -IsError
-                
-                if ($InstallMissing) {
-                    try {
-                        Write-ScriptMessage -Message "    Installing $moduleName..." -LogLevel Info
-                        Ensure-ModuleAvailable -ModuleName $moduleName
-                        Write-ScriptMessage -Message "    ✓ $moduleName installed" -LogLevel Info
-                        $missingRequired.Remove($moduleName) | Out-Null
+        try {
+            $moduleReq = $requirements.Modules[$moduleName]
+            $required = $moduleReq.Required
+            $requiredVersion = if ($moduleReq.Version) { [Version]$moduleReq.Version } else { $null }
+            
+            # Check cache first (cache for 5 minutes)
+            $cacheKey = "ModuleAvailable_$moduleName"
+            $cachedModule = Get-CachedValue -Key $cacheKey
+            if ($null -ne $cachedModule) {
+                $installedModule = $cachedModule
+            }
+            else {
+                try {
+                    $installedModule = Get-Module -ListAvailable -Name $moduleName -ErrorAction Stop
+                    # Cache the result (even if null)
+                    Set-CachedValue -Key $cacheKey -Value $installedModule -ExpirationSeconds 300
+                }
+                catch {
+                    # If Get-Module fails, treat as not installed
+                    $installedModule = $null
+                    Set-CachedValue -Key $cacheKey -Value $null -ExpirationSeconds 300
+                }
+            }
+            
+            if (-not $installedModule) {
+                if ($required) {
+                    $allValid = $false
+                    $missingRequired.Add($moduleName)
+                    Write-ScriptMessage -Message "  ✗ $moduleName (REQUIRED) - Missing" -IsError
+                    
+                    if ($InstallMissing) {
+                        try {
+                            Write-ScriptMessage -Message "    Installing $moduleName..." -LogLevel Info
+                            Ensure-ModuleAvailable -ModuleName $moduleName -ErrorAction Stop
+                            Write-ScriptMessage -Message "    ✓ $moduleName installed" -LogLevel Info
+                            $missingRequired.Remove($moduleName) | Out-Null
+                        }
+                        catch {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'dependencies.validate.install-module' -Context @{
+                                    module_name = $moduleName
+                                }
+                            }
+                            else {
+                                Write-ScriptMessage -Message "    ✗ Failed to install $moduleName`: $($_.Exception.Message)" -IsError
+                            }
+                        }
                     }
-                    catch {
-                        Write-ScriptMessage -Message "    ✗ Failed to install $moduleName`: $($_.Exception.Message)" -IsError
-                    }
+                }
+                else {
+                    $missingOptional.Add($moduleName)
+                    Write-ScriptMessage -Message "  ⚠ $moduleName (OPTIONAL) - Missing" -IsWarning
                 }
             }
             else {
-                $missingOptional.Add($moduleName)
-                Write-ScriptMessage -Message "  ⚠ $moduleName (OPTIONAL) - Missing" -IsWarning
+                $installedVersion = $installedModule.Version
+                if ($requiredVersion -and $installedVersion -lt $requiredVersion) {
+                    $allValid = $false
+                    $versionMismatches.Add("$moduleName version $installedVersion is below required $requiredVersion")
+                    Write-ScriptMessage -Message "  ⚠ $moduleName - Version mismatch (installed: $installedVersion, required: $requiredVersion)" -IsWarning
+                }
+                else {
+                    Write-ScriptMessage -Message "  ✓ $moduleName - Installed (version $installedVersion)" -LogLevel Info
+                }
             }
         }
-        else {
-            $installedVersion = $installedModule.Version
-            if ($requiredVersion -and $installedVersion -lt $requiredVersion) {
-                $allValid = $false
-                $versionMismatches.Add("$moduleName version $installedVersion is below required $requiredVersion")
-                Write-ScriptMessage -Message "  ⚠ $moduleName - Version mismatch (installed: $installedVersion, required: $requiredVersion)" -IsWarning
+        catch {
+            $moduleCheckErrors.Add($moduleName)
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dependencies.validate.check-module' -Context @{
+                    module_name = $moduleName
+                }
             }
             else {
-                Write-ScriptMessage -Message "  ✓ $moduleName - Installed (version $installedVersion)" -LogLevel Info
+                Write-ScriptMessage -Message "  ✗ $moduleName - Error checking: $($_.Exception.Message)" -IsError
+            }
+            # Treat check errors as missing for required modules
+            if ($requirements.Modules[$moduleName].Required) {
+                $allValid = $false
+                if (-not $missingRequired.Contains($moduleName)) {
+                    $missingRequired.Add($moduleName)
+                }
             }
         }
+    }
+    if ($moduleCheckErrors.Count -gt 0) {
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Some module checks failed" -OperationName 'dependencies.validate.check-module' -Context @{
+                failed_modules = $moduleCheckErrors -join ','
+                failed_count = $moduleCheckErrors.Count
+            } -Code 'ModuleCheckPartialFailure'
+        }
+    }
+    $moduleCheckDuration = ((Get-Date) - $moduleCheckStartTime).TotalMilliseconds
+    
+    # Level 2: Module check timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[dependencies.validate] Module check completed in ${moduleCheckDuration}ms"
+        Write-Verbose "[dependencies.validate] Missing required: $($missingRequired.Count), Missing optional: $($missingOptional.Count), Errors: $($moduleCheckErrors.Count)"
     }
 }
 
@@ -175,71 +249,144 @@ if ($requirements.Modules) {
 if ($requirements.ExternalTools) {
     Write-ScriptMessage -Message "`nChecking external tools..." -LogLevel Info
     
+    # Level 1: Tool check start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[dependencies.validate] Starting external tool validation"
+        Write-Verbose "[dependencies.validate] Tools to check: $($requirements.ExternalTools.Keys.Count)"
+    }
+    
+    $toolCheckErrors = [System.Collections.Generic.List[string]]::new()
+    $toolCheckStartTime = Get-Date
     foreach ($toolName in $requirements.ExternalTools.Keys) {
-        $toolReq = $requirements.ExternalTools[$toolName]
-        $required = $toolReq.Required
-        
-        $isAvailable = Test-CommandAvailable -CommandName $toolName
-        
-        if (-not $isAvailable) {
-            if ($required) {
-                $allValid = $false
-                $missingRequired.Add($toolName)
-                Write-ScriptMessage -Message "  ✗ $toolName (REQUIRED) - Missing" -IsError
-                
-                if ($toolReq.InstallCommand) {
-                    $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
-                        Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName
-                    }
-                    else {
-                        # Fallback: resolve platform-specific command manually
-                        $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
-                        elseif ($IsLinux) { 'Linux' }
-                        elseif ($IsMacOS) { 'macOS' }
-                        else { 'Windows' }
-                        if ($toolReq.InstallCommand -is [hashtable]) {
-                            $toolReq.InstallCommand[$platform]
+        try {
+            $toolReq = $requirements.ExternalTools[$toolName]
+            $required = $toolReq.Required
+            
+            $isAvailable = Test-CommandAvailable -CommandName $toolName -ErrorAction Stop
+            
+            if (-not $isAvailable) {
+                if ($required) {
+                    $allValid = $false
+                    $missingRequired.Add($toolName)
+                    Write-ScriptMessage -Message "  ✗ $toolName (REQUIRED) - Missing" -IsError
+                    
+                    if ($toolReq.InstallCommand) {
+                        try {
+                            $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
+                                Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName -ErrorAction Stop
+                            }
+                            else {
+                                # Fallback: resolve platform-specific command manually
+                                $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
+                                elseif ($IsLinux) { 'Linux' }
+                                elseif ($IsMacOS) { 'macOS' }
+                                else { 'Windows' }
+                                if ($toolReq.InstallCommand -is [hashtable]) {
+                                    $toolReq.InstallCommand[$platform]
+                                }
+                                else {
+                                    $toolReq.InstallCommand
+                                }
+                            }
+                            if ($resolvedCmd) {
+                                Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
+                            }
                         }
-                        else {
-                            $toolReq.InstallCommand
+                        catch {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Failed to resolve install command" -OperationName 'dependencies.validate.resolve-install' -Context @{
+                                    tool_name = $toolName
+                                } -Code 'InstallCommandResolutionFailed'
+                            }
                         }
                     }
-                    if ($resolvedCmd) {
-                        Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
+                }
+                else {
+                    $missingOptional.Add($toolName)
+                    Write-ScriptMessage -Message "  ⚠ $toolName (OPTIONAL) - Missing" -IsWarning
+                    
+                    if ($toolReq.InstallCommand) {
+                        try {
+                            $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
+                                Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName -ErrorAction Stop
+                            }
+                            else {
+                                # Fallback: resolve platform-specific command manually
+                                $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
+                                elseif ($IsLinux) { 'Linux' }
+                                elseif ($IsMacOS) { 'macOS' }
+                                else { 'Windows' }
+                                if ($toolReq.InstallCommand -is [hashtable]) {
+                                    $toolReq.InstallCommand[$platform]
+                                }
+                                else {
+                                    $toolReq.InstallCommand
+                                }
+                            }
+                            if ($resolvedCmd) {
+                                Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
+                            }
+                        }
+                        catch {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Failed to resolve install command" -OperationName 'dependencies.validate.resolve-install' -Context @{
+                                    tool_name = $toolName
+                                } -Code 'InstallCommandResolutionFailed'
+                            }
+                        }
                     }
                 }
             }
             else {
-                $missingOptional.Add($toolName)
-                Write-ScriptMessage -Message "  ⚠ $toolName (OPTIONAL) - Missing" -IsWarning
-                
-                if ($toolReq.InstallCommand) {
-                    $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
-                        Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName
-                    }
-                    else {
-                        # Fallback: resolve platform-specific command manually
-                        $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
-                        elseif ($IsLinux) { 'Linux' }
-                        elseif ($IsMacOS) { 'macOS' }
-                        else { 'Windows' }
-                        if ($toolReq.InstallCommand -is [hashtable]) {
-                            $toolReq.InstallCommand[$platform]
-                        }
-                        else {
-                            $toolReq.InstallCommand
-                        }
-                    }
-                    if ($resolvedCmd) {
-                        Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
-                    }
+                Write-ScriptMessage -Message "  ✓ $toolName - Available" -LogLevel Info
+            }
+        }
+        catch {
+            $toolCheckErrors.Add($toolName)
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dependencies.validate.check-tool' -Context @{
+                    tool_name = $toolName
+                }
+            }
+            else {
+                Write-ScriptMessage -Message "  ✗ $toolName - Error checking: $($_.Exception.Message)" -IsError
+            }
+            # Treat check errors as missing for required tools
+            if ($requirements.ExternalTools[$toolName].Required) {
+                $allValid = $false
+                if (-not $missingRequired.Contains($toolName)) {
+                    $missingRequired.Add($toolName)
                 }
             }
         }
-        else {
-            Write-ScriptMessage -Message "  ✓ $toolName - Available" -LogLevel Info
+    }
+    $toolCheckDuration = ((Get-Date) - $toolCheckStartTime).TotalMilliseconds
+    
+    # Level 2: Tool check timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[dependencies.validate] Tool check completed in ${toolCheckDuration}ms"
+        Write-Verbose "[dependencies.validate] Missing required: $($missingRequired.Count), Missing optional: $($missingOptional.Count), Errors: $($toolCheckErrors.Count)"
+    }
+    
+    if ($toolCheckErrors.Count -gt 0) {
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Some tool checks failed" -OperationName 'dependencies.validate.check-tool' -Context @{
+                failed_tools = $toolCheckErrors -join ','
+                failed_count = $toolCheckErrors.Count
+            } -Code 'ToolCheckPartialFailure'
         }
     }
+}
+
+# Level 1: Summary generation
+if ($debugLevel -ge 1) {
+    Write-Verbose "[dependencies.validate] Generating validation summary"
+}
+
+# Level 3: Performance breakdown
+if ($debugLevel -ge 3) {
+    $totalDuration = $moduleCheckDuration + $toolCheckDuration
+    Write-Host "  [dependencies.validate] Performance - Module check: ${moduleCheckDuration}ms, Tool check: ${toolCheckDuration}ms, Total: ${totalDuration}ms" -ForegroundColor DarkGray
 }
 
 # Summary
@@ -252,7 +399,7 @@ if ($missingRequired.Count -eq 0 -and $versionMismatches.Count -eq 0) {
         Write-ScriptMessage -Message "  ⚠ $($missingOptional.Count) optional dependency(ies) missing" -IsWarning
     }
     
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Dependency validation passed"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Dependency validation passed"
 }
 else {
     Write-ScriptMessage -Message "  ✗ Missing or invalid dependencies found:" -IsError
@@ -271,7 +418,7 @@ else {
         Write-ScriptMessage -Message "`nRun with -InstallMissing to automatically install missing PowerShell modules." -LogLevel Info
     }
     
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Dependency validation failed"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Dependency validation failed"
 }
 
 

@@ -125,7 +125,17 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
-            Write-Error "Repository path not found: $repoPath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.DirectoryNotFoundException]::new("Repository path not found: $repoPath"),
+                        'RepositoryPathNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $repoPath
+                    )) -OperationName 'security.gitleaks.scan' -Context @{ repository_path = $repoPath }
+            }
+            else {
+                Write-Error "Repository path not found: $repoPath"
+            }
             return $null
         }
 
@@ -138,13 +148,24 @@ try {
             $args += '--no-git'
         }
 
-        try {
-            $result = & gitleaks $args 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'security.gitleaks.scan' -Context @{
+                repository_path = $repoPath
+                output_format   = $OutputFormat
+                report_path     = $ReportPath
+            } -ScriptBlock {
+                & gitleaks $args 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run gitleaks: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & gitleaks $args 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run gitleaks: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -219,18 +240,39 @@ try {
             }
 
             if (-not (Test-Path -LiteralPath $scanPath)) {
-                Write-Error "Path not found: $scanPath"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.PathNotFoundException]::new("Path not found: $scanPath"),
+                            'PathNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $scanPath
+                        )) -OperationName 'security.trufflehog.scan' -Context @{ scan_path = $scanPath }
+                }
+                else {
+                    Write-Error "Path not found: $scanPath"
+                }
                 return $null
             }
 
-            try {
-                $args = @('filesystem', $scanPath, "--$OutputFormat")
-                $result = & trufflehog $args 2>&1
-                return $result
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'security.trufflehog.scan' -Context @{
+                    scan_path     = $scanPath
+                    output_format = $OutputFormat
+                } -ScriptBlock {
+                    $args = @('filesystem', $scanPath, "--$OutputFormat")
+                    & trufflehog $args 2>&1
+                }
             }
-            catch {
-                Write-Error "Failed to run trufflehog: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @('filesystem', $scanPath, "--$OutputFormat")
+                    $result = & trufflehog $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run trufflehog: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -305,18 +347,39 @@ try {
             }
 
             if (-not (Test-Path -LiteralPath $scanPath)) {
-                Write-Error "Path not found: $scanPath"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.PathNotFoundException]::new("Path not found: $scanPath"),
+                            'PathNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $scanPath
+                        )) -OperationName 'security.osv.scan' -Context @{ scan_path = $scanPath }
+                }
+                else {
+                    Write-Error "Path not found: $scanPath"
+                }
                 return $null
             }
 
-            try {
-                $args = @('--format', $OutputFormat, $scanPath)
-                $result = & osv-scanner $args 2>&1
-                return $result
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'security.osv.scan' -Context @{
+                    scan_path     = $scanPath
+                    output_format = $OutputFormat
+                } -ScriptBlock {
+                    $args = @('--format', $OutputFormat, $scanPath)
+                    & osv-scanner $args 2>&1
+                }
             }
-            catch {
-                Write-Error "Failed to run osv-scanner: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $args = @('--format', $OutputFormat, $scanPath)
+                    $result = & osv-scanner $args 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to run osv-scanner: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
     }
@@ -388,27 +451,63 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $FilePath)) {
-            Write-Error "File path not found: $FilePath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("File path not found: $FilePath"),
+                        'FilePathNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $FilePath
+                    )) -OperationName 'security.yara.scan' -Context @{ file_path = $FilePath }
+            }
+            else {
+                Write-Error "File path not found: $FilePath"
+            }
             return $null
         }
 
         if (-not (Test-Path -LiteralPath $RulesPath)) {
-            Write-Error "Rules path not found: $RulesPath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Rules path not found: $RulesPath"),
+                        'RulesPathNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $RulesPath
+                    )) -OperationName 'security.yara.scan' -Context @{ rules_path = $RulesPath }
+            }
+            else {
+                Write-Error "Rules path not found: $RulesPath"
+            }
             return $null
         }
 
-        try {
-            $args = @()
-            if ($Recursive) {
-                $args += '-r'
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'security.yara.scan' -Context @{
+                file_path  = $FilePath
+                rules_path = $RulesPath
+                recursive  = $Recursive.IsPresent
+            } -ScriptBlock {
+                $args = @()
+                if ($Recursive) {
+                    $args += '-r'
+                }
+                $args += $RulesPath, $FilePath
+                & yara $args 2>&1
             }
-            $args += $RulesPath, $FilePath
-            $result = & yara $args 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run yara: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @()
+                if ($Recursive) {
+                    $args += '-r'
+                }
+                $args += $RulesPath, $FilePath
+                $result = & yara $args 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run yara: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -477,28 +576,60 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Path not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.PathNotFoundException]::new("Path not found: $Path"),
+                        'PathNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'security.clamav.scan' -Context @{ scan_path = $Path }
+            }
+            else {
+                Write-Error "Path not found: $Path"
+            }
             return $null
         }
 
-        try {
-            $args = @()
-            if ($Recursive) {
-                $args += '-r'
-            }
-            if ($Quarantine) {
-                if (-not (Test-Path -LiteralPath $Quarantine -PathType Container)) {
-                    New-Item -ItemType Directory -Path $Quarantine -Force | Out-Null
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'security.clamav.scan' -Context @{
+                scan_path  = $Path
+                recursive  = $Recursive.IsPresent
+                quarantine = $Quarantine
+            } -ScriptBlock {
+                $args = @()
+                if ($Recursive) {
+                    $args += '-r'
                 }
-                $args += '--move', $Quarantine
+                if ($Quarantine) {
+                    if (-not (Test-Path -LiteralPath $Quarantine -PathType Container)) {
+                        New-Item -ItemType Directory -Path $Quarantine -Force | Out-Null
+                    }
+                    $args += '--move', $Quarantine
+                }
+                $args += $Path
+                & clamscan $args 2>&1
             }
-            $args += $Path
-            $result = & clamscan $args 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run clamscan: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @()
+                if ($Recursive) {
+                    $args += '-r'
+                }
+                if ($Quarantine) {
+                    if (-not (Test-Path -LiteralPath $Quarantine -PathType Container)) {
+                        New-Item -ItemType Directory -Path $Quarantine -Force | Out-Null
+                    }
+                    $args += '--move', $Quarantine
+                }
+                $args += $Path
+                $result = & clamscan $args 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run clamscan: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -566,26 +697,55 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $InputPath)) {
-            Write-Error "Input file not found: $InputPath"
-            return $null
-        }
-
-        try {
-            $output = if ($OutputPath) {
-                $OutputPath
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Input file not found: $InputPath"),
+                        'InputFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $InputPath
+                    )) -OperationName 'security.dangerzone.convert' -Context @{ input_path = $InputPath }
             }
             else {
-                $baseName = [System.IO.Path]::GetFileNameWithoutExtension($InputPath)
-                $dir = Split-Path -Parent $InputPath
-                Join-Path $dir "$baseName.safe.pdf"
+                Write-Error "Input file not found: $InputPath"
             }
-
-            $result = & dangerzone --input $InputPath --output $output 2>&1
-            return $result
-        }
-        catch {
-            Write-Error "Failed to run dangerzone: $($_.Exception.Message)"
             return $null
+        }
+
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'security.dangerzone.convert' -Context @{
+                input_path  = $InputPath
+                output_path = $OutputPath
+            } -ScriptBlock {
+                $output = if ($OutputPath) {
+                    $OutputPath
+                }
+                else {
+                    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($InputPath)
+                    $dir = Split-Path -Parent $InputPath
+                    Join-Path $dir "$baseName.safe.pdf"
+                }
+
+                & dangerzone --input $InputPath --output $output 2>&1
+            }
+        }
+        else {
+            try {
+                $output = if ($OutputPath) {
+                    $OutputPath
+                }
+                else {
+                    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($InputPath)
+                    $dir = Split-Path -Parent $InputPath
+                    Join-Path $dir "$baseName.safe.pdf"
+                }
+
+                $result = & dangerzone --input $InputPath --output $output 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run dangerzone: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 

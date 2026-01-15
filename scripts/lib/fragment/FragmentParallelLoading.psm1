@@ -121,6 +121,23 @@ function Invoke-FragmentsInParallel {
             }
         }
         catch {
+            # Log error for single fragment failure
+            $debugLevel = 0
+            $hasDebug = $false
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                $hasDebug = $debugLevel -ge 1
+            }
+            
+            if ($hasDebug -and $debugLevel -ge 2) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to load single fragment: $($fragment.BaseName)" -OperationName 'fragment-parallel-loading.single' -Context @{
+                        FragmentName = $fragment.BaseName
+                        Error        = $_.Exception.Message
+                        ErrorType    = $_.Exception.GetType().FullName
+                    } -Code 'SingleFragmentLoadFailed'
+                }
+            }
+            
             return @{
                 SuccessCount       = 0
                 FailureCount       = 1
@@ -169,24 +186,41 @@ function Invoke-FragmentsInParallel {
                 if ($BootstrapPath -and (Test-Path -LiteralPath $BootstrapPath)) {
                     try {
                         $null = . $BootstrapPath
-                        if ($env:PS_PROFILE_DEBUG) {
-                            Write-Verbose "Bootstrap loaded successfully in runspace for fragment '$FragmentName'"
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Host "  [fragment-parallel-loading.bootstrap] Bootstrap loaded successfully in runspace for fragment '$FragmentName'" -ForegroundColor DarkGray
                         }
                     }
                     catch {
                         # Bootstrap loading failure is non-fatal - fragments might not need it
                         # But log it for debugging
-                        if ($env:PS_PROFILE_DEBUG) {
-                            Write-Verbose "Failed to load bootstrap in runspace for fragment '$FragmentName': $($_.Exception.Message)"
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                            if ($debugLevel -ge 2) {
+                                Write-Host "  [fragment-parallel-loading.bootstrap] Failed to load bootstrap in runspace for fragment '$FragmentName': $($_.Exception.Message)" -ForegroundColor DarkGray
+                            }
+                            # Level 3: Log detailed bootstrap loading error
+                            if ($debugLevel -ge 3) {
+                                Write-Host "  [fragment-parallel-loading.bootstrap] Bootstrap loading error details - FragmentName: $FragmentName, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                            }
                         }
                     }
                 }
-                elseif ($env:PS_PROFILE_DEBUG) {
-                    if (-not $BootstrapPath) {
-                        Write-Verbose "No bootstrap path provided for fragment '$FragmentName'"
-                    }
-                    elseif (-not (Test-Path -LiteralPath $BootstrapPath)) {
-                        Write-Verbose "Bootstrap path does not exist: $BootstrapPath"
+                else {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 2) {
+                            if (-not $BootstrapPath) {
+                                Write-Host "  [fragment-parallel-loading.bootstrap] No bootstrap path provided for fragment '$FragmentName'"
+                            }
+                            elseif (-not (Test-Path -LiteralPath $BootstrapPath)) {
+                                Write-Host "  fragment-parallel-loading.bootstrap] Bootstrap path does not exist: $BootstrapPath"
+                            }
+                        }
+                        # Level 3: Log detailed bootstrap path information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [fragment-parallel-loading.bootstrap] Bootstrap path details - FragmentName: $FragmentName, BootstrapPath: $BootstrapPath, Exists: $(if ($BootstrapPath) { (Test-Path -LiteralPath $BootstrapPath) } else { $false })" -ForegroundColor DarkGray
+                        }
                     }
                 }
 
@@ -283,8 +317,44 @@ function Invoke-FragmentsInParallel {
             else {
                 "Not all fragments completed"
             }
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Host "  ⚠ Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails" -ForegroundColor Yellow
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails" -OperationName 'fragment-parallel-loading.execute' -Context @{
+                            CompletedCount    = $completedCount
+                            TotalFragments    = $FragmentFiles.Count
+                            TimeoutSeconds    = $totalTimeoutSeconds
+                            TimedOutFragments = $timedOutFragments
+                        }
+                    }
+                    else {
+                        Write-Warning "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails"
+                    }
+                }
+                # Level 3: Log detailed timeout information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [fragment-parallel-loading.execute] Timeout details - Completed: $completedCount, Total: $($FragmentFiles.Count), Timeout: ${totalTimeoutSeconds}s, TimedOut: $($timedOutFragments -join ', ')" -ForegroundColor DarkGray
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails" -OperationName 'fragment-parallel-loading.execute' -Context @{
+                        # Technical context
+                        CompletedCount    = $completedCount
+                        TotalFragments    = $FragmentFiles.Count
+                        TimeoutSeconds    = $totalTimeoutSeconds
+                        TimedOutFragments = $timedOutFragments
+                        # Operation context
+                        ThrottleLimit     = $ThrottleLimit
+                        # Invocation context
+                        FunctionName      = 'Invoke-FragmentsInParallel'
+                    } -Code 'Timeout'
+                }
+                else {
+                    Write-Warning "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails"
+                }
             }
         }
 
@@ -323,6 +393,23 @@ function Invoke-FragmentsInParallel {
                             Name  = $rs.Fragment.BaseName
                             Error = $_.Exception.Message
                         })
+                    
+                    # Log error for failed fragment collection
+                    $debugLevel = 0
+                    $hasDebug = $false
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        $hasDebug = $debugLevel -ge 1
+                    }
+                    
+                    if ($hasDebug -and $debugLevel -ge 2) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Failed to collect result for fragment: $($rs.Fragment.BaseName)" -OperationName 'fragment-parallel-loading.collect' -Context @{
+                                FragmentName = $rs.Fragment.BaseName
+                                Error        = $_.Exception.Message
+                                ErrorType    = $_.Exception.GetType().FullName
+                            } -Code 'ResultCollectionFailed'
+                        }
+                    }
                 }
                 finally {
                     $rs.PowerShell.Dispose()
@@ -333,18 +420,27 @@ function Invoke-FragmentsInParallel {
             # For now, we'll re-execute sequentially to ensure proper session state
             # This is a hybrid: parallel execution validates fragments, sequential ensures state
             # NOTE: Individual loading messages are suppressed during this re-execution
-            # (controlled by PS_PROFILE_DEBUG_PARALLEL_SUPPRESS in the caller)
+            # (message display controlled by PS_PROFILE_DEBUG level: Level 1 = suppress during parallel, Level 2+ = show)
             if ($successCount -eq $FragmentFiles.Count) {
                 $parallelSucceeded = $true
                 if ($env:PS_PROFILE_DEBUG) {
-                    Write-Verbose "All fragments succeeded in parallel, re-executing sequentially to merge session state"
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                        Write-Host "  [fragment-parallel-loading.execute] All fragments succeeded in parallel, re-executing sequentially to merge session state" -ForegroundColor DarkGray
+                    }
                 }
                 # Re-execute sequentially to merge into main session properly
                 # This happens silently (no individual messages) since we already showed batch message
                 foreach ($fragment in $FragmentFiles) {
                     try {
-                        if ($ProfileFragmentRoot -and $fragment.DirectoryName) {
-                            $global:ProfileFragmentRoot = $fragment.DirectoryName
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                            # Level 2 already logged above, this is redundant - remove or keep for consistency
+                            # Level 3: Log detailed sequential re-execution
+                            $debugLevel = 0
+                            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                                Write-Host "  [fragment-parallel-loading.execute] Sequential re-execution details - FragmentCount: $($FragmentFiles.Count), SucceededFragments: $($succeededFragments -join ', ')" -ForegroundColor DarkGray
+                            }
                         }
                         $null = . $fragment.FullName
                     }
@@ -369,7 +465,46 @@ function Invoke-FragmentsInParallel {
                 # Some fragments failed in parallel - fall back to sequential
                 $parallelSucceeded = $false
                 if ($env:PS_PROFILE_DEBUG) {
-                    Write-Host "  ⚠ Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential." -ForegroundColor Yellow
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential." -OperationName 'fragment-parallel-loading.execute' -Context @{
+                                    SuccessCount    = $successCount
+                                    FailureCount    = $failureCount
+                                    TotalFragments  = $FragmentFiles.Count
+                                    FailedFragments = $failedFragments
+                                }
+                            }
+                            else {
+                                Write-Warning "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential."
+                            }
+                        }
+                        # Level 3: Log detailed failure information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [fragment-parallel-loading.execute] Failure details - SuccessCount: $successCount, FailureCount: $failureCount, Total: $($FragmentFiles.Count), Failed: $($failedFragments | ForEach-Object { $_.Name } | Select-Object -First 5 -join ', ')" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log warnings even if debug is off
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential." -OperationName 'fragment-parallel-loading.execute' -Context @{
+                                # Technical context
+                                SuccessCount       = $successCount
+                                FailureCount       = $failureCount
+                                TotalFragments     = $FragmentFiles.Count
+                                FailedFragments    = $failedFragments
+                                SucceededFragments = $succeededFragments
+                                # Operation context
+                                ThrottleLimit      = $ThrottleLimit
+                                # Invocation context
+                                FunctionName       = 'Invoke-FragmentsInParallel'
+                            } -Code 'ParallelLoadFailed'
+                        }
+                        else {
+                            Write-Warning "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential."
+                        }
+                    }
                 }
             }
         }
@@ -377,7 +512,25 @@ function Invoke-FragmentsInParallel {
             # Timeout - fall back to sequential
             $parallelSucceeded = $false
             if ($env:PS_PROFILE_DEBUG) {
-                Write-Host "  ⚠ Parallel loading timeout: Not all fragments completed within timeout period" -ForegroundColor Yellow
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Parallel loading timeout: Not all fragments completed within timeout period" -OperationName 'fragment-parallel-loading.execute' -Context @{
+                                CompletedCount = $completedCount
+                                TotalFragments = $FragmentFiles.Count
+                                TimeoutSeconds = $totalTimeoutSeconds
+                            }
+                        }
+                        else {
+                            Write-Warning "Parallel loading timeout: Not all fragments completed within timeout period"
+                        }
+                    }
+                    # Level 3: Log detailed timeout information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [fragment-parallel-loading.execute] Timeout period details - Completed: $completedCount, Total: $($FragmentFiles.Count), Timeout: ${totalTimeoutSeconds}s" -ForegroundColor DarkGray
+                    }
+                }
             }
             foreach ($rs in $runspaces) {
                 try {
@@ -387,9 +540,15 @@ function Invoke-FragmentsInParallel {
                     $rs.PowerShell.Dispose()
                 }
                 catch {
-                    # Ignore cleanup errors
-                    if ($env:PS_PROFILE_DEBUG) {
-                        Write-Verbose "Error cleaning up runspace: $($_.Exception.Message)"
+                    # Ignore cleanup errors but log them at debug level 3
+                    $debugLevel = 0
+                    $hasDebug = $false
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        $hasDebug = $debugLevel -ge 3
+                    }
+                    
+                    if ($hasDebug) {
+                        Write-Host "  [fragment-parallel-loading.execute] Cleanup error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                     }
                 }
             }
@@ -398,8 +557,54 @@ function Invoke-FragmentsInParallel {
     catch {
         # Parallel loading failed - fall back to sequential
         $parallelSucceeded = $false
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "  ✗ Parallel loading exception, falling back to sequential: $($_.Exception.Message)" -ForegroundColor Red
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            $errorMessage = "Parallel loading exception, falling back to sequential"
+            $errorDetails = "Error: $($_.Exception.Message) (Type: $($_.Exception.GetType().Name))"
+            if ($_.InvocationInfo.ScriptLineNumber -gt 0) {
+                $errorDetails += " at line $($_.InvocationInfo.ScriptLineNumber)"
+            }
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-parallel-loading.execute' -Context @{
+                        FragmentFiles = $FragmentFiles.Count
+                        ErrorMessage  = $errorMessage
+                        ErrorDetails  = $errorDetails
+                    }
+                }
+                else {
+                    Write-Error "[fragment-parallel-loading.execute] $errorMessage - $errorDetails"
+                }
+            }
+            else {
+                # Always log critical errors even if debug is off
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-parallel-loading.execute' -Context @{
+                        # Technical context
+                        FragmentFiles         = $FragmentFiles.Count
+                        FragmentNames         = $FragmentFiles | ForEach-Object { $_.BaseName }
+                        # Error context
+                        ErrorMessage          = $errorMessage
+                        ErrorDetails          = $errorDetails
+                        ErrorType             = $_.Exception.GetType().FullName
+                        LineNumber            = $_.InvocationInfo.ScriptLineNumber
+                        # Operation context
+                        ThrottleLimit         = $ThrottleLimit
+                        ProfileFragmentRoot   = $ProfileFragmentRoot
+                        BootstrapFragmentPath = $BootstrapFragmentPath
+                        # Invocation context
+                        FunctionName          = 'Invoke-FragmentsInParallel'
+                    }
+                }
+                else {
+                    Write-Error "[fragment-parallel-loading.execute] $errorMessage - $errorDetails"
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [fragment-parallel-loading.execute] Error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
         }
     }
     finally {
@@ -417,15 +622,23 @@ function Invoke-FragmentsInParallel {
 
     # Fall back to sequential loading if parallel failed or had errors
     if (-not $parallelSucceeded -or $failureCount -gt 0) {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Verbose "Falling back to sequential fragment loading"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Host "  [fragment-parallel-loading.execute] Falling back to sequential fragment loading" -ForegroundColor DarkGray
+                }
+                # Level 3: Log detailed fallback information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [fragment-parallel-loading.execute] Fallback details - FragmentCount: $($FragmentFiles.Count), Reason: Parallel execution failed or timed out" -ForegroundColor DarkGray
+                }
+            }
         }
-        
+
         $successCount = 0
         $failureCount = 0
         $errors.Clear()
-        $succeededFragments.Clear()
-        $failedFragments.Clear()
 
         foreach ($fragment in $FragmentFiles) {
             try {

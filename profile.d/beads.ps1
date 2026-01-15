@@ -121,13 +121,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & bd $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'beads.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & bd $Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run bd: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & bd $Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run bd: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 

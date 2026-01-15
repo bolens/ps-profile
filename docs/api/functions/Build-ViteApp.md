@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\46-vite.ps1
+Defined in: ..\profile.d\vite.ps1

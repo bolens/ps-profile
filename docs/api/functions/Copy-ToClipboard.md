@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\16-clipboard.ps1
+Defined in: ..\profile.d\clipboard.ps1

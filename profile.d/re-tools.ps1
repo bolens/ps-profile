@@ -113,7 +113,17 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $InputFile)) {
-            Write-Error "Input file not found: $InputFile"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Input file not found: $InputFile"),
+                        'InputFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $InputFile
+                    )) -OperationName 're-tools.decompile-java' -Context @{ input_file = $InputFile }
+            }
+            else {
+                Write-Error "Input file not found: $InputFile"
+            }
             return
         }
 
@@ -129,17 +139,32 @@ try {
         
         $arguments += $InputFile
 
-        try {
-            $output = & jadx $arguments 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 're-tools.decompile-java' -Context @{
+                input_file          = $InputFile
+                output_path         = $OutputPath
+                decompile_resources = $DecompileResources.IsPresent
+            } -ScriptBlock {
+                $output = & jadx $arguments 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Decompilation failed. Exit code: $LASTEXITCODE"
+                }
                 return $OutputPath
             }
-            else {
-                Write-Error "Decompilation failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to decompile Java/Dex file: $($_.Exception.Message)"
+        else {
+            try {
+                $output = & jadx $arguments 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    return $OutputPath
+                }
+                else {
+                    Write-Error "Decompilation failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to decompile Java/Dex file: $($_.Exception.Message)"
+            }
         }
     }
 
@@ -214,7 +239,17 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $InputFile)) {
-            Write-Error "Input file not found: $InputFile"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Input file not found: $InputFile"),
+                        'InputFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $InputFile
+                    )) -OperationName 're-tools.decompile-dotnet' -Context @{ input_file = $InputFile }
+            }
+            else {
+                Write-Error "Input file not found: $InputFile"
+            }
             return
         }
 
@@ -224,22 +259,45 @@ try {
 
         $outputFile = Join-Path $OutputPath ([System.IO.Path]::GetFileNameWithoutExtension($InputFile) + ".$OutputFormat")
 
-        try {
-            # dnspy/dnspyex are GUI tools, but can be used via command line
-            # Note: Command-line support may be limited
-            $arguments = @('-o', $outputFile, $InputFile)
-            
-            $output = & $tool $arguments 2>&1
-            if ($LASTEXITCODE -eq 0 -or (Test-Path -LiteralPath $outputFile)) {
-                return $outputFile
-            }
-            else {
-                Write-Warning "Decompilation may have failed. dnspy/dnspyex are primarily GUI tools. Check output file: $outputFile"
-                return $outputFile
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 're-tools.decompile-dotnet' -Context @{
+                input_file    = $InputFile
+                output_path   = $OutputPath
+                output_format = $OutputFormat
+                tool          = $tool
+            } -ScriptBlock {
+                # dnspy/dnspyex are GUI tools, but can be used via command line
+                # Note: Command-line support may be limited
+                $arguments = @('-o', $outputFile, $InputFile)
+                
+                $output = & $tool $arguments 2>&1
+                if ($LASTEXITCODE -eq 0 -or (Test-Path -LiteralPath $outputFile)) {
+                    return $outputFile
+                }
+                else {
+                    Write-Warning "Decompilation may have failed. dnspy/dnspyex are primarily GUI tools. Check output file: $outputFile"
+                    return $outputFile
+                }
             }
         }
-        catch {
-            Write-Error "Failed to decompile .NET assembly: $($_.Exception.Message)"
+        else {
+            try {
+                # dnspy/dnspyex are GUI tools, but can be used via command line
+                # Note: Command-line support may be limited
+                $arguments = @('-o', $outputFile, $InputFile)
+                
+                $output = & $tool $arguments 2>&1
+                if ($LASTEXITCODE -eq 0 -or (Test-Path -LiteralPath $outputFile)) {
+                    return $outputFile
+                }
+                else {
+                    Write-Warning "Decompilation may have failed. dnspy/dnspyex are primarily GUI tools. Check output file: $outputFile"
+                    return $outputFile
+                }
+            }
+            catch {
+                Write-Error "Failed to decompile .NET assembly: $($_.Exception.Message)"
+            }
         }
     }
 
@@ -316,46 +374,99 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $InputFile)) {
-            Write-Error "Input file not found: $InputFile"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Input file not found: $InputFile"),
+                        'InputFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $InputFile
+                    )) -OperationName 're-tools.analyze-pe' -Context @{ input_file = $InputFile }
+            }
+            else {
+                Write-Error "Input file not found: $InputFile"
+            }
             return
         }
 
-        try {
-            if ($tool -eq 'pe-bear') {
-                # pe-bear is primarily a GUI tool
-                if ($OutputPath) {
-                    $arguments = @('-o', $OutputPath, $InputFile)
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 're-tools.analyze-pe' -Context @{
+                input_file  = $InputFile
+                output_path = $OutputPath
+                detailed    = $Detailed.IsPresent
+                tool        = $tool
+            } -ScriptBlock {
+                if ($tool -eq 'pe-bear') {
+                    # pe-bear is primarily a GUI tool
+                    if ($OutputPath) {
+                        $arguments = @('-o', $OutputPath, $InputFile)
+                    }
+                    else {
+                        $arguments = @($InputFile)
+                    }
+                    
+                    $output = & pe-bear $arguments 2>&1
+                    if ($OutputPath -and (Test-Path -LiteralPath $OutputPath)) {
+                        return $OutputPath
+                    }
+                    return "Analysis started. pe-bear is a GUI tool - check the application window."
                 }
-                else {
+                elseif ($tool -eq 'exeinfo-pe') {
                     $arguments = @($InputFile)
+                    if ($OutputPath) {
+                        $arguments += '-o', $OutputPath
+                    }
+                    
+                    $output = & exeinfo-pe $arguments 2>&1
+                    if ($OutputPath -and (Test-Path -LiteralPath $OutputPath)) {
+                        return $OutputPath
+                    }
+                    return $output
                 }
-                
-                $output = & pe-bear $arguments 2>&1
-                if ($OutputPath -and (Test-Path -LiteralPath $OutputPath)) {
-                    return $OutputPath
+                elseif ($tool -eq 'detect-it-easy') {
+                    # detect-it-easy is primarily a GUI tool
+                    $output = & detect-it-easy $InputFile 2>&1
+                    return "Analysis started. detect-it-easy is a GUI tool - check the application window."
                 }
-                return "Analysis started. pe-bear is a GUI tool - check the application window."
-            }
-            elseif ($tool -eq 'exeinfo-pe') {
-                $arguments = @($InputFile)
-                if ($OutputPath) {
-                    $arguments += '-o', $OutputPath
-                }
-                
-                $output = & exeinfo-pe $arguments 2>&1
-                if ($OutputPath -and (Test-Path -LiteralPath $OutputPath)) {
-                    return $OutputPath
-                }
-                return $output
-            }
-            elseif ($tool -eq 'detect-it-easy') {
-                # detect-it-easy is primarily a GUI tool
-                $output = & detect-it-easy $InputFile 2>&1
-                return "Analysis started. detect-it-easy is a GUI tool - check the application window."
             }
         }
-        catch {
-            Write-Error "Failed to analyze PE file: $($_.Exception.Message)"
+        else {
+            try {
+                if ($tool -eq 'pe-bear') {
+                    # pe-bear is primarily a GUI tool
+                    if ($OutputPath) {
+                        $arguments = @('-o', $OutputPath, $InputFile)
+                    }
+                    else {
+                        $arguments = @($InputFile)
+                    }
+                    
+                    $output = & pe-bear $arguments 2>&1
+                    if ($OutputPath -and (Test-Path -LiteralPath $OutputPath)) {
+                        return $OutputPath
+                    }
+                    return "Analysis started. pe-bear is a GUI tool - check the application window."
+                }
+                elseif ($tool -eq 'exeinfo-pe') {
+                    $arguments = @($InputFile)
+                    if ($OutputPath) {
+                        $arguments += '-o', $OutputPath
+                    }
+                    
+                    $output = & exeinfo-pe $arguments 2>&1
+                    if ($OutputPath -and (Test-Path -LiteralPath $OutputPath)) {
+                        return $OutputPath
+                    }
+                    return $output
+                }
+                elseif ($tool -eq 'detect-it-easy') {
+                    # detect-it-easy is primarily a GUI tool
+                    $output = & detect-it-easy $InputFile 2>&1
+                    return "Analysis started. detect-it-easy is a GUI tool - check the application window."
+                }
+            }
+            catch {
+                Write-Error "Failed to analyze PE file: $($_.Exception.Message)"
+            }
         }
     }
 
@@ -430,7 +541,17 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $InputFile)) {
-            Write-Error "Input file not found: $InputFile"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Input file not found: $InputFile"),
+                        'InputFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $InputFile
+                    )) -OperationName 're-tools.extract-apk' -Context @{ input_file = $InputFile }
+            }
+            else {
+                Write-Error "Input file not found: $InputFile"
+            }
             return
         }
 
@@ -453,17 +574,33 @@ try {
         
         $arguments += $InputFile
 
-        try {
-            $output = & apktool $arguments 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 're-tools.extract-apk' -Context @{
+                input_file   = $InputFile
+                output_path  = $OutputPath
+                decompile    = $Decompile.IsPresent
+                no_resources = $NoResources.IsPresent
+            } -ScriptBlock {
+                $output = & apktool $arguments 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "APK extraction failed. Exit code: $LASTEXITCODE"
+                }
                 return $finalOutputPath
             }
-            else {
-                Write-Error "APK extraction failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to extract Android APK: $($_.Exception.Message)"
+        else {
+            try {
+                $output = & apktool $arguments 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    return $finalOutputPath
+                }
+                else {
+                    Write-Error "APK extraction failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to extract Android APK: $($_.Exception.Message)"
+            }
         }
     }
 

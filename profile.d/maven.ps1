@@ -8,7 +8,8 @@
 # Tier: standard
 # Dependencies: bootstrap, env
 
-if (Test-CachedCommand mvn) {
+# Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand mvn)) {
     # Maven dependency updates - check for outdated packages
     <#
     .SYNOPSIS

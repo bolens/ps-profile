@@ -12,7 +12,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common Azure CLI operations.
-    Functions check for az/azd availability using Test-HasCommand for efficient
+    Functions check for az/azd availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES
@@ -44,11 +44,18 @@ function Invoke-Azure {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand az) {
-        az @Arguments
+    # Use base module if available, otherwise fallback to direct execution
+    if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
+        return Invoke-CloudCommand -CommandName 'az' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install azure-cli'
     }
     else {
-        Write-MissingToolWarning -Tool 'az' -InstallHint 'Install with: scoop install azure-cli'
+        # Fallback to original implementation
+        if (Test-CachedCommand az) {
+            az @Arguments
+        }
+        else {
+            Write-MissingToolWarning -Tool 'az' -InstallHint 'Install with: scoop install azure-cli'
+        }
     }
 }
 
@@ -99,11 +106,18 @@ function Connect-AzureAccount {
     [CmdletBinding()]
     param()
     
-    if (Test-CachedCommand az) {
-        az login
+    # Use base module if available
+    if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
+        return Invoke-CloudCommand -CommandName 'az' -Arguments @('login') -OperationName "azure.account.connect" -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install azure-cli'
     }
     else {
-        Write-MissingToolWarning -Tool 'Azure CLI (az)' -InstallHint 'Install with: scoop install azure-cli'
+        # Fallback to original implementation
+        if (Test-CachedCommand az) {
+            az login
+        }
+        else {
+            Write-MissingToolWarning -Tool 'Azure CLI (az)' -InstallHint 'Install with: scoop install azure-cli'
+        }
     }
 }
 

@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\27-minio.ps1
+Defined in: ..\profile.d\minio.ps1

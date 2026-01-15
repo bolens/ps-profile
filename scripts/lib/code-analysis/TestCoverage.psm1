@@ -35,11 +35,43 @@ function Get-TestCoverage {
     [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$CoverageXmlPath
     )
 
     if (-not (Test-Path -Path $CoverageXmlPath)) {
-        Write-Warning "Coverage file not found: $CoverageXmlPath"
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Coverage file not found" -OperationName 'test-coverage.parse' -Context @{
+                coverage_xml_path = $CoverageXmlPath
+            } -Code 'CoverageFileNotFound'
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    Write-Warning "[test-coverage.parse] Coverage file not found: $CoverageXmlPath"
+                }
+                # Level 3: Log detailed file not found information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [test-coverage.parse] Coverage file not found details - CoverageXmlPath: $CoverageXmlPath, FileExists: $false" -ForegroundColor DarkGray
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Coverage file not found" -OperationName 'test-coverage.parse' -Context @{
+                        # Technical context
+                        coverage_xml_path = $CoverageXmlPath
+                        file_exists       = $false
+                        # Invocation context
+                        FunctionName      = 'Get-TestCoverage'
+                    } -Code 'CoverageFileNotFound'
+                }
+                else {
+                    Write-Warning "[test-coverage.parse] Coverage file not found: $CoverageXmlPath"
+                }
+            }
+        }
         return [PSCustomObject]@{
             CoveragePercent = 0
             TotalLines      = 0
@@ -52,6 +84,11 @@ function Get-TestCoverage {
     }
 
     try {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [test-coverage.parse] Parsing coverage XML file: $CoverageXmlPath" -ForegroundColor DarkGray
+        }
+        
         [xml]$coverageXml = Get-Content -Path $CoverageXmlPath -Raw -ErrorAction Stop
 
         $totalLines = 0
@@ -60,6 +97,11 @@ function Get-TestCoverage {
 
         # Pester coverage.xml format varies by version, try to handle both
         $modules = $coverageXml.SelectNodes("//Module") | Where-Object { $_.ModulePath }
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [test-coverage.parse] Found $($modules.Count) modules in coverage XML" -ForegroundColor DarkGray
+        }
 
         foreach ($module in $modules) {
             $modulePath = $module.ModulePath
@@ -103,6 +145,15 @@ function Get-TestCoverage {
         else {
             0
         }
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [test-coverage.parse] Coverage calculation complete: $coveragePercent% ($coveredLines/$totalLines lines)" -ForegroundColor DarkGray
+        }
+        
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [test-coverage.parse] File coverage details: $($fileCoverage.Count) files analyzed" -ForegroundColor DarkGray
+        }
 
         return [PSCustomObject]@{
             CoveragePercent = $coveragePercent
@@ -115,7 +166,41 @@ function Get-TestCoverage {
         }
     }
     catch {
-        Write-Warning "Failed to parse coverage XML: $($_.Exception.Message)"
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to parse coverage XML" -OperationName 'test-coverage.parse' -Context @{
+                coverage_xml_path = $CoverageXmlPath
+                error_message     = $_.Exception.Message
+            } -Code 'CoverageParseFailed'
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    Write-Warning "[test-coverage.parse] Failed to parse coverage XML: $($_.Exception.Message)"
+                }
+                # Level 3: Log detailed parse error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [test-coverage.parse] Parse error details - CoverageXmlPath: $CoverageXmlPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to parse coverage XML" -OperationName 'test-coverage.parse' -Context @{
+                        # Technical context
+                        coverage_xml_path = $CoverageXmlPath
+                        # Error context
+                        error_message     = $_.Exception.Message
+                        ErrorType         = $_.Exception.GetType().FullName
+                        # Invocation context
+                        FunctionName      = 'Get-TestCoverage'
+                    } -Code 'CoverageParseFailed'
+                }
+                else {
+                    Write-Warning "[test-coverage.parse] Failed to parse coverage XML: $($_.Exception.Message)"
+                }
+            }
+        }
         return [PSCustomObject]@{
             CoveragePercent = 0
             TotalLines      = 0

@@ -12,7 +12,12 @@ scripts/lib/FileContent.psm1
 .NOTES
     Module Version: 1.0.0
     PowerShell Version: 3.0+
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 # Import ErrorHandling module if available for consistent error action preference handling
 $errorHandlingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'core' 'ErrorHandling.psm1'
@@ -60,6 +65,7 @@ function Read-FileContent {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path
     )
 
@@ -130,6 +136,7 @@ function Read-FileContentOrNull {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path
     )
 

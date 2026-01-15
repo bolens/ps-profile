@@ -282,18 +282,43 @@ if (Test-CachedCommand npm) {
         )
         
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Package file not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Package file not found: $Path"),
+                        'PackageFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'npm.packages.import' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "Package file not found: $Path"
+            }
             return
         }
         
         if (Test-CachedCommand npm) {
-            $json = Get-Content -Path $Path -Raw | ConvertFrom-Json
-            if ($json.dependencies) {
-                foreach ($package in $json.dependencies.PSObject.Properties) {
-                    $packageName = $package.Name
-                    $packageVersion = $package.Value
-                    Write-Verbose "Installing $packageName@$packageVersion"
-                    & npm install -g "${packageName}@${packageVersion}"
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Invoke-WithWideEvent -OperationName 'npm.packages.import' -Context @{ path = $Path } -ScriptBlock {
+                    $json = Get-Content -Path $Path -Raw | ConvertFrom-Json
+                    if ($json.dependencies) {
+                        foreach ($package in $json.dependencies.PSObject.Properties) {
+                            $packageName = $package.Name
+                            $packageVersion = $package.Value
+                            Write-Verbose "Installing $packageName@$packageVersion"
+                            & npm install -g "${packageName}@${packageVersion}"
+                        }
+                    }
+                } | Out-Null
+            }
+            else {
+                $json = Get-Content -Path $Path -Raw | ConvertFrom-Json
+                if ($json.dependencies) {
+                    foreach ($package in $json.dependencies.PSObject.Properties) {
+                        $packageName = $package.Name
+                        $packageVersion = $package.Value
+                        Write-Verbose "Installing $packageName@$packageVersion"
+                        & npm install -g "${packageName}@${packageVersion}"
+                    }
                 }
             }
         }

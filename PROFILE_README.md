@@ -378,12 +378,12 @@ $VerbosePreference = 'Continue'
 
 In CI, helpers write to stdout for GitHub Actions logs.
 
-### PS_PROFILE_DEBUG_TIMINGS
+### Timing and Performance Output
 
-Enable micro-instrumentation CSV output:
+Timing information is automatically enabled at debug level 2 or higher:
 
 ```powershell
-$env:PS_PROFILE_DEBUG_TIMINGS = '1'
+$env:PS_PROFILE_DEBUG = '2'  # Level 2+ includes timing information
 . $PROFILE
 ```
 
@@ -428,9 +428,10 @@ PS_PROFILE_BATCH_LOAD=1
 - `PS_PROFILE_PARALLEL_DEPENDENCIES` - Enable parallel dependency parsing (`0` or `1`, default: `1`). Speeds up dependency parsing for profiles with 5+ fragments
 - `PS_PROFILE_PARALLEL_LOADING` - **EXPERIMENTAL**: Enable parallel fragment loading (`0` or `1`, default: `0`). Attempts to load independent fragments in parallel, falls back to sequential on failure
 - `PS_PROFILE_DEBUG` - Enable debug output (`0` or `1`)
-- `PS_PROFILE_DEBUG_TIMINGS` - Enable performance timing (`0` or `1`)
-- `PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS` - Show individual fragment loading messages instead of batched output (`0` or `1`, default: `0`). When `PS_PROFILE_DEBUG=1`, fragments are shown in batches of 10 by default
+- `PS_PROFILE_DEBUG` - Debug level (`0`, `1`, `2`, or `3`). Level 2+ includes timing information. Level 2+ shows individual fragment messages (Level 1 shows batched output)
 - `PS_PROFILE_ENABLE_LOCAL_OVERRIDES` - Enable local-overrides.ps1 loading (`0` or `1`, default: `0`) - **WARNING**: Disabled by default due to performance issues (100+ second delays on some filesystems when file doesn't exist)
+- `PS_PROFILE_DEV_MODE` - Development mode (`0` or `1`, default: `0`). Enables optimizations for faster profile loading during development. Skips expensive operations like update checks, git status, and prompt initialization delays
+- `PS_PROFILE_FAST_RELOAD` - Fast reload mode (`0` or `1`, default: `0`). Automatically enables fast reload in `Reload-Profile`, skipping expensive operations. Also automatically enabled if `PS_PROFILE_DEV_MODE` is set
 
 **Features:**
 
@@ -513,7 +514,18 @@ if (Test-Path $utilitiesModulesDir) {
 Function and alias documentation is auto-generated from comment-based help:
 
 ```powershell
-pwsh -NoProfile -File scripts/utils/generate-docs.ps1
+# Generate API documentation
+task generate-docs
+# or
+pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1
+
+# Generate fragment documentation
+task generate-fragment-readmes
+# or
+pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1
+
+# Generate all documentation
+task all-docs
 ```
 
 Outputs to `docs/*.md`. See [docs/README.md](docs/README.md) for the generated index.

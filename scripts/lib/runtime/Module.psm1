@@ -9,9 +9,17 @@ scripts/lib/Module.psm1
     with automatic PSGallery registration and trust configuration.
 
 .NOTES
-    Module Version: 1.0.0
-    PowerShell Version: 3.0+
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe scope handling.
 #>
+
+# Import CommonEnums for ModuleScope enum
+$commonEnumsPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 <#
 .SYNOPSIS
@@ -42,10 +50,10 @@ function Install-RequiredModule {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ModuleName,
 
-        [ValidateSet('CurrentUser', 'AllUsers')]
-        [string]$Scope = 'CurrentUser',
+        [ModuleScope]$Scope = [ModuleScope]::CurrentUser,
 
         [switch]$Force
     )
@@ -53,26 +61,42 @@ function Install-RequiredModule {
     # Check if module is already available
     $moduleAvailable = Get-Module -ListAvailable -Name $ModuleName -ErrorAction SilentlyContinue
     if ($moduleAvailable -and -not $Force) {
-        Write-Verbose "$ModuleName is already installed (version $($moduleAvailable.Version))"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[module.install] $ModuleName is already installed (version $($moduleAvailable.Version))"
+        }
+        # Level 3: Log detailed module information
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [module.install] Module details - Name: $ModuleName, Version: $($moduleAvailable.Version), Path: $($moduleAvailable.Path)" -ForegroundColor DarkGray
+        }
         return
     }
 
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[module.install] $ModuleName not found. Installing to $Scope scope..."
+    }
     Write-Output "$ModuleName not found. Installing to $Scope scope..."
 
     try {
         # Ensure PSGallery is registered and trusted
         $psGallery = Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue
         if (-not $psGallery) {
-            Write-Verbose "Registering PSGallery repository..."
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[module.install] Registering PSGallery repository..."
+            }
             Register-PSRepository -Default -ErrorAction Stop
         }
-
         # Set PSGallery as trusted if not already
         if ($psGallery.InstallationPolicy -ne 'Trusted') {
-            Write-Verbose "Setting PSGallery as trusted..."
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[module.install] Setting PSGallery as trusted..."
+            }
             Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction Stop
         }
-
+        
         # Install the module
         $installParams = @{
             Name         = $ModuleName
@@ -82,14 +106,56 @@ function Install-RequiredModule {
             ErrorAction  = 'Stop'
             AllowClobber = $true
         }
+        
+        # Level 3: Log detailed installation parameters
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [module.install] Installation parameters - Name: $ModuleName, Scope: $Scope, Force: $true" -ForegroundColor DarkGray
+        }
 
         Install-Module @installParams
 
-        Write-Verbose "$ModuleName installed successfully"
+        # Level 2: Log successful installation
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[module.install] $ModuleName installed successfully"
+        }
     }
     catch {
-        $errorMessage = "Failed to install $ModuleName`: $($_.Exception.Message). Ensure PowerShell Gallery is accessible and you have permission to install modules."
-        Write-Error $errorMessage
+        $debugLevel = 0
+        $hasDebug = $false
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            $hasDebug = $debugLevel -ge 1
+        }
+        
+        if ($hasDebug) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'module.install' -Context @{
+                    ModuleName = $ModuleName
+                    Scope      = $Scope
+                    Force      = $Force
+                }
+            }
+            else {
+                Write-Error "Failed to install module $ModuleName`: $($_.Exception.Message)"
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [module.install] Installation error details - ModuleName: $ModuleName, Scope: $Scope, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log critical errors even if debug is off
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'module.install' -Context @{
+                    ModuleName = $ModuleName
+                    Scope      = $Scope
+                    Force      = $Force
+                    ErrorType  = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to install module $ModuleName`: $($_.Exception.Message)"
+            }
+        }
         throw
     }
 }
@@ -121,13 +187,59 @@ function Import-RequiredModule {
         [switch]$Force
     )
 
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [module.import] Importing module: $ModuleName, Force: $Force" -ForegroundColor DarkGray
+    }
     try {
         Import-Module -Name $ModuleName -Force:$Force -ErrorAction Stop
-        Write-Verbose "$ModuleName imported successfully"
+        # Level 2: Log successful import
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[module.import] $ModuleName imported successfully"
+        }
+        # Level 3: Log detailed import information
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            $importedModule = Get-Module -Name $ModuleName
+            if ($importedModule) {
+                Write-Host "  [module.import] Imported module details - Version: $($importedModule.Version), Path: $($importedModule.Path)" -ForegroundColor DarkGray
+            }
+        }
     }
     catch {
-        $errorMessage = "Failed to import $ModuleName`: $($_.Exception.Message). Ensure the module is installed and accessible."
-        Write-Error $errorMessage
+        $debugLevel = 0
+        $hasDebug = $false
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            $hasDebug = $debugLevel -ge 1
+        }
+        
+        if ($hasDebug) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'module.import' -Context @{
+                    ModuleName = $ModuleName
+                    Force      = $Force
+                }
+            }
+            else {
+                Write-Error "Failed to import module $ModuleName`: $($_.Exception.Message)"
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [module.import] Import error details - ModuleName: $ModuleName, Force: $Force, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log critical errors even if debug is off
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'module.import' -Context @{
+                    ModuleName = $ModuleName
+                    Force      = $Force
+                    ErrorType  = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to import module $ModuleName`: $($_.Exception.Message)"
+            }
+        }
         throw
     }
 }
@@ -157,10 +269,10 @@ function Ensure-ModuleAvailable {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ModuleName,
 
-        [ValidateSet('CurrentUser', 'AllUsers')]
-        [string]$Scope = 'CurrentUser',
+        [ModuleScope]$Scope = [ModuleScope]::CurrentUser,
 
         [switch]$Force
     )

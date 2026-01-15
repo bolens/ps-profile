@@ -55,6 +55,15 @@ function Get-UserLocale {
     else {
         $null
     }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [locale.get-user-locale] Detected locale: Culture=$($culture.Name), UICulture=$($uiCulture.Name), EnglishVariant=$englishVariant" -ForegroundColor DarkGray
+    }
+    
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [locale.get-user-locale] Detailed locale info: LanguageCode=$($culture.TwoLetterISOLanguageName), RegionCode=$(if ($culture.Name -match '-(\w+)$') { $matches[1] } else { 'N/A' }), DisplayName=$($culture.DisplayName)" -ForegroundColor DarkGray
+    }
 
     return [PSCustomObject]@{
         Culture         = $culture
@@ -156,6 +165,12 @@ function Format-LocaleDate {
 
     $locale = Get-UserLocale
 
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        $formatStr = if ($Format) { $Format } else { 'default' }
+        Write-Host "  [locale.format-date] Formatting date with locale $($locale.Name), format: $formatStr" -ForegroundColor DarkGray
+    }
+
     if ($Format) {
         return $Date.ToString($Format, $locale.Culture)
     }
@@ -199,6 +214,12 @@ function Format-LocaleNumber {
 
     $locale = Get-UserLocale
 
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        $formatStr = if ($Format) { $Format } else { 'default' }
+        Write-Host "  [locale.format-number] Formatting number with locale $($locale.Name), format: $formatStr" -ForegroundColor DarkGray
+    }
+
     if ($Format) {
         return $Number.ToString($Format, $locale.Culture)
     }
@@ -233,6 +254,12 @@ function Format-LocaleCurrency {
     )
 
     $locale = Get-UserLocale
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [locale.format-currency] Formatting currency with locale $($locale.Name)" -ForegroundColor DarkGray
+    }
+    
     return $Amount.ToString('C', $locale.Culture)
 }
 
@@ -278,18 +305,32 @@ function Get-LocalizedMessage {
 
     $locale = Get-UserLocale
 
+    $selectedMessage = $null
+    $selectedVariant = $null
+    
     if ($locale.IsUKEnglish -and $UKMessage) {
-        return $UKMessage
+        $selectedMessage = $UKMessage
+        $selectedVariant = 'UK'
     }
     elseif ($locale.IsUSEnglish) {
-        return $USMessage
+        $selectedMessage = $USMessage
+        $selectedVariant = 'US'
     }
     elseif ($DefaultMessage) {
-        return $DefaultMessage
+        $selectedMessage = $DefaultMessage
+        $selectedVariant = 'Default'
     }
     else {
-        return $USMessage
+        $selectedMessage = $USMessage
+        $selectedVariant = 'US (fallback)'
     }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [locale.get-localized-message] Selected message variant: $selectedVariant (Locale: $($locale.Name))" -ForegroundColor DarkGray
+    }
+    
+    return $selectedMessage
 }
 
 <#
@@ -339,6 +380,15 @@ function Format-LocaleOutput {
 
     $locale = Get-UserLocale
     $result = @{}
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        $formats = @()
+        if ($PSBoundParameters.ContainsKey('Date')) { $formats += "Date" }
+        if ($PSBoundParameters.ContainsKey('Number')) { $formats += "Number" }
+        if ($PSBoundParameters.ContainsKey('Currency')) { $formats += "Currency" }
+        Write-Host "  [locale.format-output] Formatting with locale $($locale.Name): $($formats -join ', ')" -ForegroundColor DarkGray
+    }
 
     if ($PSBoundParameters.ContainsKey('Date')) {
         if ($DateFormat) {
@@ -376,4 +426,5 @@ Export-ModuleMember -Function @(
     'Get-LocalizedMessage',
     'Format-LocaleOutput'
 )
+
 

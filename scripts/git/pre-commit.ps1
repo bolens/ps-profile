@@ -40,7 +40,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Run formatting first
@@ -50,7 +50,7 @@ if ($formatScript -and -not [string]::IsNullOrWhiteSpace($formatScript) -and (Te
     $psExe = Get-PowerShellExecutable
     & $psExe -NoProfile -File $formatScript
     if ($LASTEXITCODE -ne 0) {
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Code formatting failed"
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Code formatting failed"
     }
 
     # Add any files that were formatted
@@ -67,7 +67,7 @@ else {
 # Run validation
 $validateScript = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 if ($validateScript -and -not [string]::IsNullOrWhiteSpace($validateScript) -and -not (Test-Path -LiteralPath $validateScript)) {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Validation script not found: $validateScript"
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Validation script not found: $validateScript"
 }
 
 Write-ScriptMessage -Message "Running validation..."

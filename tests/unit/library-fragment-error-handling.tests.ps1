@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+﻿. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
@@ -163,6 +163,25 @@ Describe 'FragmentErrorHandling Module Functions' {
 
         It 'Uses Write-ProfileError if available' {
             # Mock Write-ProfileError
+            <#
+            .SYNOPSIS
+                Performs operations related to Mock-Write-ProfileError.
+            
+            .DESCRIPTION
+                Performs operations related to Mock-Write-ProfileError.
+            
+            .PARAMETER ErrorRecord
+                The ErrorRecord parameter.
+            
+            .PARAMETER Context
+                The Context parameter.
+            
+            .PARAMETER Category
+                The Category parameter.
+            
+            .OUTPUTS
+                object
+            #>
             function Mock-Write-ProfileError {
                 param($ErrorRecord, $Context, $Category)
             }

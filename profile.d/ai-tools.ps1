@@ -117,13 +117,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & ollama $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'ai.ollama.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & ollama $Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run ollama: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & ollama $Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run ollama: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -216,14 +225,24 @@ try {
             return $null
         }
 
-        try {
-            $result = & $lmsCmd $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'ai.lmstudio.invoke' -Context @{
+                arguments = $Arguments
+                command   = $lmsCmd
+            } -ScriptBlock {
+                & $lmsCmd $Arguments 2>&1
+            }
         }
-        catch {
-            $cmdName = $lmsCmd
-            Write-Error "Failed to run ${cmdName}: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & $lmsCmd $Arguments 2>&1
+                return $result
+            }
+            catch {
+                $cmdName = $lmsCmd
+                Write-Error "Failed to run ${cmdName}: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -302,13 +321,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & koboldcpp $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'ai.koboldcpp.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & koboldcpp $Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run koboldcpp: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & koboldcpp $Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run koboldcpp: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -399,23 +427,44 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @()
-            if (-not [string]::IsNullOrWhiteSpace($Model)) {
-                $cmdArgs += $Model
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'ai.llamafile.invoke' -Context @{
+                arguments  = $Arguments
+                model      = $Model
+                has_prompt = (-not [string]::IsNullOrWhiteSpace($Prompt))
+            } -ScriptBlock {
+                $cmdArgs = @()
+                if (-not [string]::IsNullOrWhiteSpace($Model)) {
+                    $cmdArgs += $Model
+                }
+                if (-not [string]::IsNullOrWhiteSpace($Prompt)) {
+                    $cmdArgs += '--prompt', $Prompt
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & llamafile $cmdArgs 2>&1
             }
-            if (-not [string]::IsNullOrWhiteSpace($Prompt)) {
-                $cmdArgs += '--prompt', $Prompt
-            }
-            if ($Arguments) {
-                $cmdArgs += $Arguments
-            }
-            $result = & llamafile $cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run llamafile: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @()
+                if (-not [string]::IsNullOrWhiteSpace($Model)) {
+                    $cmdArgs += $Model
+                }
+                if (-not [string]::IsNullOrWhiteSpace($Prompt)) {
+                    $cmdArgs += '--prompt', $Prompt
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & llamafile $cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run llamafile: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -502,14 +551,24 @@ try {
             return $null
         }
 
-        try {
-            $result = & $llamaCmd $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'ai.llamacpp.invoke' -Context @{
+                arguments = $Arguments
+                command   = $llamaCmd
+            } -ScriptBlock {
+                & $llamaCmd $Arguments 2>&1
+            }
         }
-        catch {
-            $cmdName = $llamaCmd
-            Write-Error "Failed to run ${cmdName}: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & $llamaCmd $Arguments 2>&1
+                return $result
+            }
+            catch {
+                $cmdName = $llamaCmd
+                Write-Error "Failed to run ${cmdName}: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -595,13 +654,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & comfy $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'ai.comfyui.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & comfy $Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run comfy: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & comfy $Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run comfy: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 

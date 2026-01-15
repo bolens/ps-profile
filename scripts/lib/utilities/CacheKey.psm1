@@ -11,7 +11,12 @@ scripts/lib/utilities/CacheKey.psm1
 .NOTES
     Module Version: 1.0.0
     PowerShell Version: 3.0+
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 # Import Validation module if available for path validation
 # Use safe path resolution that handles cases where $PSScriptRoot might not be set
@@ -74,6 +79,7 @@ function New-CacheKey {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Prefix,
 
         [Parameter(Mandatory = $false)]
@@ -84,6 +90,22 @@ function New-CacheKey {
 
     # Validate prefix
     if ([string]::IsNullOrWhiteSpace($Prefix)) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.ArgumentException]::new("Prefix cannot be null or empty"),
+                        'CacheKey.InvalidPrefix',
+                        [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                        $Prefix
+                    )) -OperationName 'cache-key.new' -Context @{
+                    Prefix = $Prefix
+                }
+            }
+            else {
+                Write-Error "Prefix cannot be null or empty"
+            }
+        }
         throw "Prefix cannot be null or empty"
     }
 
@@ -124,17 +146,25 @@ function New-CacheKey {
             return $result
         }
         
-        # Debug logging
-        $debugEnabled = $env:PS_PROFILE_DEBUG -eq '1' -or $env:PS_PROFILE_DEBUG_CACHEKEY -eq '1'
+        # Debug logging (level 3 for very verbose cache key debugging, or use special flag)
+        $debugLevel = 0
+        $hasDebug = $false
+        if ($env:PS_PROFILE_DEBUG_CACHEKEY -eq '1') {
+            $hasDebug = $true
+        }
+        elseif ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            $hasDebug = $true
+        }
+        $debugEnabled = $hasDebug
         if ($debugEnabled) {
             $itemType = $Item.GetType()
-            Write-Host "[CacheKey Debug] Processing item: Type=$($itemType.FullName), IsArray=$($itemType.IsArray), IsString=$($Item -is [string]), Value=[$Item]" -ForegroundColor Cyan
+            Write-Host "  [cache-key.process] Processing item: Type=$($itemType.FullName), IsArray=$($itemType.IsArray), IsString=$($Item -is [string]), Value=[$Item]" -ForegroundColor DarkGray
         }
         
         # If it's a string, sanitize it directly (strings implement IEnumerable but we treat them as primitives)
         if ($Item -is [string]) {
             if ($debugEnabled) {
-                Write-Host "[CacheKey Debug] Item is a string, sanitizing directly" -ForegroundColor Green
+                Write-Host "  [cache-key.process] Item is a string, sanitizing directly" -ForegroundColor DarkGray
             }
             $sanitized = Sanitize-ComponentString -Value $Item
             if ($null -ne $sanitized) {
@@ -150,13 +180,13 @@ function New-CacheKey {
         $itemType = $Item.GetType()
         
         if ($debugEnabled) {
-            Write-Host "[CacheKey Debug] Item is not a string. Checking if it's a collection..." -ForegroundColor Yellow
-            Write-Host "[CacheKey Debug]   - IsArray: $($itemType.IsArray)" -ForegroundColor Yellow
-            Write-Host "[CacheKey Debug]   - Is [Array]: $($Item -is [Array])" -ForegroundColor Yellow
-            Write-Host "[CacheKey Debug]   - Is ICollection: $($Item -is [System.Collections.ICollection])" -ForegroundColor Yellow
-            Write-Host "[CacheKey Debug]   - Is IEnumerable: $($Item -is [System.Collections.IEnumerable])" -ForegroundColor Yellow
+            Write-Host "  [cache-key.process] Item is not a string. Checking if it's a collection..." -ForegroundColor DarkGray
+            Write-Host "  [cache-key.process]   - IsArray: $($itemType.IsArray)" -ForegroundColor DarkGray
+            Write-Host "  [cache-key.process]   - Is [Array]: $($Item -is [Array])" -ForegroundColor DarkGray
+            Write-Host "  [cache-key.process]   - Is ICollection: $($Item -is [System.Collections.ICollection])" -ForegroundColor DarkGray
+            Write-Host "  [cache-key.process]   - Is IEnumerable: $($Item -is [System.Collections.IEnumerable])" -ForegroundColor DarkGray
             if ($null -ne $Item.Count) {
-                Write-Host "[CacheKey Debug]   - Count: $($Item.Count)" -ForegroundColor Yellow
+                Write-Host "  [cache-key.process]   - Count: $($Item.Count)" -ForegroundColor DarkGray
             }
         }
         
@@ -170,9 +200,9 @@ function New-CacheKey {
                 }
                 
                 if ($debugEnabled) {
-                    Write-Host "[CacheKey Debug] Iteration attempted. Results count: $($iterationResults.Count)" -ForegroundColor Yellow
+                    Write-Host "  [cache-key.process] Iteration attempted. Results count: $($iterationResults.Count)" -ForegroundColor DarkGray
                     if ($iterationResults.Count -gt 0) {
-                        Write-Host "[CacheKey Debug] First result type: $($iterationResults[0].GetType().FullName), Value: [$($iterationResults[0])]" -ForegroundColor Yellow
+                        Write-Host "  [cache-key.process] First result type: $($iterationResults[0].GetType().FullName), Value: [$($iterationResults[0])]" -ForegroundColor DarkGray
                     }
                 }
                 
@@ -184,7 +214,7 @@ function New-CacheKey {
                     if ($iterationResults.Count -gt 1) {
                         $isCollection = $true
                         if ($debugEnabled) {
-                            Write-Host "[CacheKey Debug] Multiple items found, treating as collection" -ForegroundColor Green
+                            Write-Host "  [cache-key.process] Multiple items found, treating as collection" -ForegroundColor DarkGray
                         }
                     }
                     elseif ($iterationResults.Count -eq 1) {
@@ -194,15 +224,15 @@ function New-CacheKey {
                         $isDifferentType = $firstResultType -ne $itemType
                         
                         if ($debugEnabled) {
-                            Write-Host "[CacheKey Debug] Single item. Different value: $isDifferent, Different type: $isDifferentType" -ForegroundColor Yellow
-                            Write-Host "[CacheKey Debug]   Original type: $($itemType.FullName)" -ForegroundColor Yellow
-                            Write-Host "[CacheKey Debug]   Result type: $($firstResultType.FullName)" -ForegroundColor Yellow
+                            Write-Host "  [cache-key.process] Single item. Different value: $isDifferent, Different type: $isDifferentType" -ForegroundColor DarkGray
+                            Write-Host "  [cache-key.process]   Original type: $($itemType.FullName)" -ForegroundColor DarkGray
+                            Write-Host "  [cache-key.process]   Result type: $($firstResultType.FullName)" -ForegroundColor DarkGray
                         }
                         
                         if ($isDifferent -or $isDifferentType) {
                             $isCollection = $true
                             if ($debugEnabled) {
-                                Write-Host "[CacheKey Debug] Item is different, treating as collection" -ForegroundColor Green
+                                Write-Host "  [cache-key.process] Item is different, treating as collection" -ForegroundColor DarkGray
                             }
                         }
                     }
@@ -210,7 +240,7 @@ function New-CacheKey {
                     if ($isCollection) {
                         $iterationSucceeded = $true
                         if ($debugEnabled) {
-                            Write-Host "[CacheKey Debug] Recursively processing collection elements..." -ForegroundColor Green
+                            Write-Host "  [cache-key.process] Recursively processing collection elements..." -ForegroundColor DarkGray
                         }
                         # Recursively process each element
                         foreach ($element in $Item) {
@@ -222,7 +252,7 @@ function New-CacheKey {
                     }
                     else {
                         if ($debugEnabled) {
-                            Write-Host "[CacheKey Debug] Single item same as original, treating as primitive" -ForegroundColor Yellow
+                            Write-Host "  [cache-key.process] Single item same as original, treating as primitive" -ForegroundColor DarkGray
                         }
                     }
                 }
@@ -231,7 +261,7 @@ function New-CacheKey {
                 # Iteration failed, will treat as primitive below
                 $triedIteration = $true
                 if ($debugEnabled) {
-                    Write-Host "[CacheKey Debug] Iteration failed: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host "  [cache-key.process] Iteration failed: $($_.Exception.Message)" -ForegroundColor DarkGray
                 }
             }
         }
@@ -240,7 +270,7 @@ function New-CacheKey {
         if (-not $triedIteration -or -not $iterationSucceeded) {
             $str = $Item.ToString()
             if ($debugEnabled) {
-                Write-Host "[CacheKey Debug] Treating as primitive. ToString() result: [$str]" -ForegroundColor Yellow
+                Write-Host "  [cache-key.process] Treating as primitive. ToString() result: [$str]" -ForegroundColor DarkGray
             }
             # Skip array string representations
             if ($str -ne 'System.Object[]' -and $str -ne 'System.Array' -and -not [string]::IsNullOrWhiteSpace($str)) {
@@ -248,38 +278,55 @@ function New-CacheKey {
                 if ($null -ne $sanitized) {
                     $result += $sanitized
                     if ($debugEnabled) {
-                        Write-Host "[CacheKey Debug] Sanitized result: [$sanitized]" -ForegroundColor Green
+                        Write-Host "  [cache-key.process] Sanitized result: [$sanitized]" -ForegroundColor DarkGray
                     }
                 }
             }
             else {
                 if ($debugEnabled) {
-                    Write-Host "[CacheKey Debug] Skipping array string representation" -ForegroundColor Red
+                    Write-Host "  [cache-key.process] Skipping array string representation" -ForegroundColor DarkGray
                 }
             }
         }
         
         if ($debugEnabled) {
-            Write-Host "[CacheKey Debug] Final result count: $($result.Count), Values: [$($result -join ', ')]" -ForegroundColor Cyan
+            Write-Host "  [cache-key.process] Final result count: $($result.Count), Values: [$($result -join ', ')]" -ForegroundColor DarkGray
         }
         
         return $result
     }
     
-    # Debug logging
-    $debugEnabled = $env:PS_PROFILE_DEBUG -eq '1' -or $env:PS_PROFILE_DEBUG_CACHEKEY -eq '1'
+    # Debug logging (level 3 for very verbose cache key debugging, or use special flag)
+    $debugLevel = 0
+    $hasDebug = $false
+    if ($env:PS_PROFILE_DEBUG_CACHEKEY -eq '1') {
+        $hasDebug = $true
+        $debugLevel = 3
+    }
+    elseif ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        if ($debugLevel -ge 3) {
+            $hasDebug = $true
+        }
+    }
+    $debugEnabled = $hasDebug
+    
+    # Level 2: Log successful cache key generation
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[cache-key.new] Generating cache key with prefix: $Prefix, components count: $($Components.Count)"
+    }
+    
     if ($debugEnabled) {
         if ($null -eq $Components) {
-            Write-Host "[CacheKey Debug] New-CacheKey called with Prefix=[$Prefix], Components=null" -ForegroundColor Magenta
+            Write-Host "  [cache-key.new] New-CacheKey called with Prefix=[$Prefix], Components=null" -ForegroundColor DarkGray
         }
         else {
-            Write-Host "[CacheKey Debug] New-CacheKey called with Prefix=[$Prefix], Components count=$($Components.Count)" -ForegroundColor Magenta
+            Write-Host "  [cache-key.new] New-CacheKey called with Prefix=[$Prefix], Components count=$($Components.Count)" -ForegroundColor DarkGray
             $componentsType = $Components.GetType()
-            Write-Host "[CacheKey Debug] Components type: $($componentsType.FullName), IsArray=$($componentsType.IsArray)" -ForegroundColor Magenta
+            Write-Host "  [cache-key.new] Components type: $($componentsType.FullName), IsArray=$($componentsType.IsArray)" -ForegroundColor DarkGray
             for ($i = 0; $i -lt $Components.Count; $i++) {
                 $comp = $Components[$i]
                 $compType = if ($null -ne $comp) { $comp.GetType().FullName } else { 'null' }
-                Write-Host "[CacheKey Debug]   Component[$i]: Type=$compType, Value=[$comp]" -ForegroundColor Magenta
+                Write-Host "  [cache-key.new]   Component[$i]: Type=$compType, Value=[$comp]" -ForegroundColor DarkGray
             }
         }
     }
@@ -295,16 +342,16 @@ function New-CacheKey {
         # Components is already an array parameter - iterate directly
         # Don't wrap in @() as that would create nested arrays
         if ($debugEnabled) {
-            Write-Host "[CacheKey Debug] Processing $($Components.Count) component(s)..." -ForegroundColor Magenta
+            Write-Host "  [cache-key.new] Processing $($Components.Count) component(s)..." -ForegroundColor DarkGray
         }
         foreach ($component in $Components) {
             if ($debugEnabled) {
                 $compType = if ($null -ne $component) { $component.GetType().FullName } else { 'null' }
-                Write-Host "[CacheKey Debug] Processing component: Type=$compType, Value=[$component]" -ForegroundColor Magenta
+                Write-Host "  [cache-key.new] Processing component: Type=$compType, Value=[$component]" -ForegroundColor DarkGray
             }
             $processed = Process-Component -Item $component
             if ($debugEnabled) {
-                Write-Host "[CacheKey Debug] Processed result count: $($processed.Count), Values: [$($processed -join ', ')]" -ForegroundColor Magenta
+                Write-Host "  [cache-key.new] Processed result count: $($processed.Count), Values: [$($processed -join ', ')]" -ForegroundColor DarkGray
             }
             if ($processed.Count -gt 0) {
                 $sanitizedComponents += $processed
@@ -313,14 +360,19 @@ function New-CacheKey {
     }
     
     if ($debugEnabled) {
-        Write-Host "[CacheKey Debug] Final sanitizedComponents count: $($sanitizedComponents.Count), Values: [$($sanitizedComponents -join ', ')]" -ForegroundColor Magenta
-        Write-Host "[CacheKey Debug] Final key will be: $sanitizedPrefix$Separator$($sanitizedComponents -join $Separator)" -ForegroundColor Magenta
+        Write-Host "  [cache-key.new] Final sanitizedComponents count: $($sanitizedComponents.Count), Values: [$($sanitizedComponents -join ', ')]" -ForegroundColor DarkGray
+        Write-Host "  [cache-key.new] Final key will be: $sanitizedPrefix$Separator$($sanitizedComponents -join $Separator)" -ForegroundColor DarkGray
     }
 
     # Combine prefix and components
     if ($sanitizedComponents.Count -eq 0) {
         if ($debugEnabled) {
-            Write-Host "[CacheKey Debug] No components, returning prefix only: $sanitizedPrefix" -ForegroundColor Magenta
+            Write-Host "  [cache-key.new] No components, returning prefix only: $sanitizedPrefix" -ForegroundColor DarkGray
+        }
+        # Level 2: Log successful cache key generation
+        $debugLevel2 = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel2) -and $debugLevel2 -ge 2) {
+            Write-Verbose "[cache-key.new] Generated cache key (prefix only): $sanitizedPrefix"
         }
         return $sanitizedPrefix
     }
@@ -330,12 +382,18 @@ function New-CacheKey {
     $allParts = @($sanitizedPrefix) + $sanitizedComponents
     $finalKey = $allParts -join $Separator
     if ($debugEnabled) {
-        Write-Host "[CacheKey Debug] Joining prefix and components:" -ForegroundColor Magenta
-        Write-Host "[CacheKey Debug]   Prefix: [$sanitizedPrefix]" -ForegroundColor Magenta
-        Write-Host "[CacheKey Debug]   Components: [$($sanitizedComponents -join ', ')]" -ForegroundColor Magenta
-        Write-Host "[CacheKey Debug]   Separator: [$Separator]" -ForegroundColor Magenta
-        Write-Host "[CacheKey Debug]   Final key: [$finalKey]" -ForegroundColor Magenta
-        Write-Host "[CacheKey Debug]   Final key type: $($finalKey.GetType().FullName)" -ForegroundColor Magenta
+        Write-Host "  [cache-key.new] Joining prefix and components:" -ForegroundColor DarkGray
+        Write-Host "  [cache-key.new]   Prefix: [$sanitizedPrefix]" -ForegroundColor DarkGray
+        Write-Host "  [cache-key.new]   Components: [$($sanitizedComponents -join ', ')]" -ForegroundColor DarkGray
+        Write-Host "  [cache-key.new]   Separator: [$Separator]" -ForegroundColor DarkGray
+        Write-Host "  [cache-key.new]   Final key: [$finalKey]" -ForegroundColor DarkGray
+        Write-Host "  [cache-key.new]   Final key type: $($finalKey.GetType().FullName)" -ForegroundColor DarkGray
+    }
+    
+    # Level 2: Log successful cache key generation
+    $debugLevel2 = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel2) -and $debugLevel2 -ge 2) {
+        Write-Verbose "[cache-key.new] Generated cache key: $finalKey"
     }
     
     return $finalKey
@@ -378,6 +436,7 @@ function New-FileCacheKey {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FilePath,
 
         [string]$Prefix = 'File',
@@ -389,6 +448,23 @@ function New-FileCacheKey {
 
     # Validate file path
     if ([string]::IsNullOrWhiteSpace($FilePath)) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.ArgumentException]::new("FilePath cannot be null or empty"),
+                        'CacheKey.InvalidFilePath',
+                        [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                        $FilePath
+                    )) -OperationName 'cache-key.file' -Context @{
+                    FilePath = $FilePath
+                    Prefix   = $Prefix
+                }
+            }
+            else {
+                Write-Error "FilePath cannot be null or empty"
+            }
+        }
         throw "FilePath cannot be null or empty"
     }
 
@@ -396,12 +472,46 @@ function New-FileCacheKey {
     $useValidation = Get-Command Test-ValidPath -ErrorAction SilentlyContinue
     if ($useValidation) {
         if (-not (Test-ValidPath -Path $FilePath -PathType File)) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("File not found: $FilePath"),
+                            'CacheKey.FileNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $FilePath
+                        )) -OperationName 'cache-key.file' -Context @{
+                        FilePath = $FilePath
+                        Prefix   = $Prefix
+                    }
+                }
+                else {
+                    Write-Error "File not found: $FilePath"
+                }
+            }
             throw "File not found: $FilePath"
         }
     }
     else {
         # Fallback to manual validation
         if (-not (Test-Path -LiteralPath $FilePath -PathType Leaf)) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("File not found: $FilePath"),
+                            'CacheKey.FileNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $FilePath
+                        )) -OperationName 'cache-key.file' -Context @{
+                        FilePath = $FilePath
+                        Prefix   = $Prefix
+                    }
+                }
+                else {
+                    Write-Error "File not found: $FilePath"
+                }
+            }
             throw "File not found: $FilePath"
         }
     }
@@ -410,13 +520,37 @@ function New-FileCacheKey {
     $fileInfo = Get-Item -LiteralPath $FilePath -ErrorAction Stop
 
     # Generate file identifier (hash or modification time)
+    $debugLevel = 0
     if ($UseHash) {
         try {
             $fileHash = Get-FileHash -LiteralPath $FilePath -Algorithm $HashAlgorithm -ErrorAction Stop
             $fileIdentifier = $fileHash.Hash
+            # Level 2: Log successful hash generation
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[cache-key.file] Generated file hash using $HashAlgorithm algorithm"
+            }
         }
         catch {
             # Fallback to modification time if hash fails
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to generate file hash, using modification time" -OperationName 'cache-key.file' -Context @{
+                            FilePath  = $FilePath
+                            Algorithm = $HashAlgorithm
+                            Error     = $_.Exception.Message
+                        }
+                    }
+                    else {
+                        Write-Warning "Failed to generate file hash, using modification time: $($_.Exception.Message)"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[cache-key.file] Hash generation error details - FilePath: $FilePath, Algorithm: $HashAlgorithm, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)"
+                }
+            }
             $fileIdentifier = $fileInfo.LastWriteTimeUtc.Ticks.ToString()
         }
     }
@@ -426,7 +560,16 @@ function New-FileCacheKey {
 
     # Generate cache key using just the filename (not full path) for consistency with test expectations
     $fileName = $fileInfo.Name
-    return New-CacheKey -Prefix $Prefix -Components $fileName, $fileIdentifier
+    $cacheKey = New-CacheKey -Prefix $Prefix -Components $fileName, $fileIdentifier
+    # Level 2: Log successful cache key generation
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[cache-key.file] Generated file cache key: $cacheKey"
+    }
+    # Level 3: Log detailed file information
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [cache-key.file] File details - Name: $fileName, Identifier: $fileIdentifier, UseHash: $UseHash" -ForegroundColor DarkGray
+    }
+    return $cacheKey
 }
 
 <#
@@ -459,6 +602,7 @@ function New-DirectoryCacheKey {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$DirectoryPath,
 
         [string]$Prefix = 'Directory'
@@ -466,6 +610,23 @@ function New-DirectoryCacheKey {
 
     # Validate directory path
     if ([string]::IsNullOrWhiteSpace($DirectoryPath)) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.ArgumentException]::new("DirectoryPath cannot be null or empty"),
+                        'CacheKey.InvalidDirectoryPath',
+                        [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                        $DirectoryPath
+                    )) -OperationName 'cache-key.directory' -Context @{
+                    DirectoryPath = $DirectoryPath
+                    Prefix        = $Prefix
+                }
+            }
+            else {
+                Write-Error "DirectoryPath cannot be null or empty"
+            }
+        }
         throw "DirectoryPath cannot be null or empty"
     }
 
@@ -501,7 +662,17 @@ function New-DirectoryCacheKey {
     # Get the directory name from the path
     $directoryName = Split-Path -Leaf $DirectoryPath
     # New-CacheKey expects Components to be an array, wrap single string in array
-    return New-CacheKey -Prefix $Prefix -Components @($directoryName)
+    $cacheKey = New-CacheKey -Prefix $Prefix -Components @($directoryName)
+    # Level 2: Log successful cache key generation
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[cache-key.directory] Generated directory cache key: $cacheKey"
+    }
+    # Level 3: Log detailed directory information
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [cache-key.directory] Directory details - Name: $directoryName, FullPath: $DirectoryPath" -ForegroundColor DarkGray
+    }
+    return $cacheKey
 }
 
 # Export functions
@@ -510,6 +681,3 @@ Export-ModuleMember -Function @(
     'New-FileCacheKey',
     'New-DirectoryCacheKey'
 )
-
-
-

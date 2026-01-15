@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\38-firebase.ps1
+Defined in: ..\profile.d\firebase.ps1

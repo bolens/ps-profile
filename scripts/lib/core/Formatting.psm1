@@ -53,6 +53,7 @@ function Format-DateWithFallback {
         [DateTime]$Date,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Format,
 
         [string]$FallbackFormat,
@@ -196,6 +197,8 @@ function Invoke-CommandWithFallback {
 
         [hashtable]$Arguments,
 
+        # Note: Uses [object] intentionally to accept any fallback value type
+        # (strings, numbers, hashtables, etc.) for maximum flexibility
         [object]$FallbackValue,
 
         [scriptblock]$FallbackScriptBlock
@@ -258,7 +261,10 @@ function Get-CommandWithFallback {
     param(
         [Parameter(Mandatory)]
         [string]$CommandName,
+        [ValidateNotNullOrEmpty()]
 
+        # Note: Uses [object] intentionally to accept any fallback value type
+        # (strings, numbers, hashtables, etc.) for maximum flexibility
         [object]$FallbackValue = $null
     )
 
@@ -278,4 +284,3 @@ Export-ModuleMember -Function @(
     'Invoke-CommandWithFallback',
     'Get-CommandWithFallback'
 )
-

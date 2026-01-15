@@ -2,6 +2,10 @@
 # QR code generation utilities - Specialized modules
 # WiFi, Contact, Calendar, Location, Crypto, and TOTP QR codes
 # ===============================================
+# PSScriptAnalyzer suppressions:
+# - PSAvoidUsingPlainTextForPassword: WiFi $Password parameters use String type because
+#   they are network credentials for QR code encoding (not user authentication).
+#   The password is encoded into a QR code string format, requiring String type.
 
 <#
 .SYNOPSIS
@@ -15,12 +19,17 @@
 #>
 function Initialize-DevTools-QrCode-Specialized {
     # WiFi QR Code Generator
+    # PSScriptAnalyzer Warning Suppression: $Password parameter uses String type (not SecureString/PSCredential)
+    # Rationale: This is a WiFi network password for QR code encoding, not user authentication.
+    # The password is encoded into a QR code string format (WIFI:T:WPA;S:SSID;P:Password;H:false;;),
+    # which requires String type. Using SecureString/PSCredential would be inappropriate here as
+    # the password must be converted to plain text for QR code generation.
     Set-Item -Path Function:Global:_New-QrCodeWiFi -Value {
         param(
             [Parameter(Mandatory)]
             [string]$Ssid,
             [Parameter(Mandatory)]
-            [string]$Password,
+            [string]$Password,  # PSScriptAnalyzer: String type required for QR code encoding
             [ValidateSet('WPA', 'WEP', 'nopass')]
             [string]$Security = 'WPA',
             [string]$Hidden = 'false',
@@ -80,7 +89,12 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate WiFi QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.wifi' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate WiFi QR code: $_"
+            }
         }
     } -Force
 
@@ -159,7 +173,12 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate contact QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.contact' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate contact QR code: $_"
+            }
         }
     } -Force
 
@@ -250,7 +269,12 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate calendar QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.calendar' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate calendar QR code: $_"
+            }
         }
     } -Force
 
@@ -289,7 +313,12 @@ try {
             _New-QrCode @params
         }
         catch {
-            Write-Error "Failed to generate location QR code: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.qrcode.location' -Context @{}
+            }
+            else {
+                Write-Error "Failed to generate location QR code: $_"
+            }
         }
     } -Force
 
@@ -421,7 +450,13 @@ try {
     New-QrCodeWiFi -Ssid "MyNetwork" -Password "MyPassword123"
     Generates a WiFi QR code that can be scanned to connect to the network.
 #>
+# PSScriptAnalyzer Warning Suppression: $Password parameter uses String type (not SecureString/PSCredential)
+# Rationale: This is a WiFi network password for QR code encoding, not user authentication.
+# The password is encoded into a QR code string format (WIFI:T:WPA;S:SSID;P:Password;H:false;;),
+# which requires String type. Using SecureString/PSCredential would be inappropriate here as
+# the password must be converted to plain text for QR code generation.
 function New-QrCodeWiFi {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUsePSCredentialType', 'Password', Justification = 'WiFi network password for QR code encoding, not user authentication. String type required for QR code string format.')]
     param(
         [Parameter(Mandatory)]
         [string]$Ssid,

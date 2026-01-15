@@ -302,5 +302,5 @@ After implementing optimizations:
 ## Related Documents
 
 - `PROFILE_PERFORMANCE_OPTIMIZATION.md` - Detailed code-level optimizations
-- `PROFILE_PERFORMANCE_SUMMARY.md` - Quick reference
+- See `PROFILE_LOAD_TIME_OPTIMIZATION.md` for current optimization strategies
 - `ARCHITECTURE.md` - System architecture and design decisions

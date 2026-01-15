@@ -97,11 +97,20 @@ try {
             return
         }
 
-        try {
-            terragrunt @Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'iac.terragrunt.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                terragrunt @Arguments
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to run terragrunt: $_"
+        else {
+            try {
+                terragrunt @Arguments
+            }
+            catch {
+                Write-Error "Failed to run terragrunt: $_"
+            }
         }
     }
 
@@ -156,11 +165,20 @@ try {
             return
         }
 
-        try {
-            tofu @Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'iac.opentofu.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                tofu @Arguments
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to run opentofu: $_"
+        else {
+            try {
+                tofu @Arguments
+            }
+            catch {
+                Write-Error "Failed to run opentofu: $_"
+            }
         }
     }
 
@@ -254,17 +272,32 @@ try {
             $planArgs += $Arguments
         }
 
-        try {
-            $output = & $command $planArgs 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'iac.terraform.plan' -Context @{
+                tool                = $Tool
+                output_file         = $OutputFile
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $output = & $command $planArgs 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Plan failed. Exit code: $LASTEXITCODE"
+                }
                 return $output
             }
-            else {
-                Write-Error "Plan failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run plan: $_"
+        else {
+            try {
+                $output = & $command $planArgs 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    return $output
+                }
+                else {
+                    Write-Error "Plan failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run plan: $_"
+            }
         }
     }
 
@@ -371,17 +404,33 @@ try {
             $applyArgs += $Arguments
         }
 
-        try {
-            $output = & $command $applyArgs 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'iac.terraform.apply' -Context @{
+                tool                = $Tool
+                plan_file           = $PlanFile
+                auto_approve        = $AutoApprove.IsPresent
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $output = & $command $applyArgs 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Apply failed. Exit code: $LASTEXITCODE"
+                }
                 return $output
             }
-            else {
-                Write-Error "Apply failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run apply: $_"
+        else {
+            try {
+                $output = & $command $applyArgs 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    return $output
+                }
+                else {
+                    Write-Error "Apply failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run apply: $_"
+            }
         }
     }
 
@@ -484,17 +533,33 @@ try {
             $stateArgs += $ResourceAddress
         }
 
-        try {
-            $output = & $command $stateArgs 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'iac.terraform.state.query' -Context @{
+                tool             = $Tool
+                resource_address = $ResourceAddress
+                output_format    = $OutputFormat
+                state_file       = $StateFile
+            } -ScriptBlock {
+                $output = & $command $stateArgs 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "State query failed. Exit code: $LASTEXITCODE"
+                }
                 return $output
             }
-            else {
-                Write-Error "State query failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to query state: $_"
+        else {
+            try {
+                $output = & $command $stateArgs 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    return $output
+                }
+                else {
+                    Write-Error "State query failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to query state: $_"
+            }
         }
     }
 
@@ -549,11 +614,20 @@ try {
             return
         }
 
-        try {
-            pulumi @Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'iac.pulumi.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                pulumi @Arguments
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to run pulumi: $_"
+        else {
+            try {
+                pulumi @Arguments
+            }
+            catch {
+                Write-Error "Failed to run pulumi: $_"
+            }
         }
     }
 

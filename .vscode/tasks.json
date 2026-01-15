@@ -52,6 +52,21 @@
       "problemMatcher": []
     },
     {
+      "label": "Run Pester Tests (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "-Coverage",
+        "-Parallel",
+        "-DryRun"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Run Pester Unit Tests",
       "type": "shell",
       "command": "pwsh",
@@ -161,6 +176,20 @@
       "problemMatcher": []
     },
     {
+      "label": "Optimize Git Performance (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\performance\\optimize-git-performance.ps1",
+        "-DryRun"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Check Module Updates",
       "type": "shell",
       "command": "pwsh",
@@ -168,6 +197,19 @@
         "-NoProfile",
         "-File",
         "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check Module Updates (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1",
+        "-DryRun"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -211,6 +253,20 @@
       "problemMatcher": []
     },
     {
+      "label": "Generate Metrics Dashboard (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\generate-dashboard.ps1",
+        "-DryRun"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Create Release (Dry Run)",
       "type": "shell",
       "command": "pwsh",
@@ -236,6 +292,19 @@
       "problemMatcher": []
     },
     {
+      "label": "Generate API Documentation (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\docs\\generate-docs.ps1",
+        "-DryRun"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Run Spellcheck",
       "type": "shell",
       "command": "pwsh",
@@ -244,6 +313,180 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\spellcheck.ps1"
       ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Database Health Check",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "-Action",
+        "health"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Database Statistics",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "-Action",
+        "statistics"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Optimize Databases",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "-Action",
+        "optimize"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backup Databases",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "-Action",
+        "backup"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Repair Databases",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "-Action",
+        "repair"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate Databases",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\validate-databases.ps1"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate Databases (Full)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\validate-databases.ps1",
+        "-TestOperations"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Initialize Databases",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\database\\initialize-databases.ps1"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Clear Fragment Cache",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\clear-fragment-cache.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Clear Fragment Cache (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\clear-fragment-cache.ps1",
+        "-WhatIf"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Fragment Cache",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\build-fragment-cache.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Fragment Cache (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\build-fragment-cache.ps1",
+        "-WhatIf"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Validate Fragment Cache",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\verify-cache-cleared.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
       "problemMatcher": []
     },
@@ -286,6 +529,20 @@
       "problemMatcher": []
     },
     {
+      "label": "Install Git hooks (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\git\\install-githooks.ps1",
+        "-DryRun"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Install Pre-commit Hook",
       "type": "shell",
       "command": "pwsh",
@@ -312,6 +569,20 @@
       "problemMatcher": []
     },
     {
+      "label": "Format Code (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-format.ps1",
+        "-DryRun"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
       "label": "Find Duplicate Functions",
       "type": "shell",
       "command": "pwsh",
@@ -332,6 +603,20 @@
         "-NoProfile",
         "-File",
         "${workspaceFolder}\\scripts\\utils\\docs\\generate-fragment-readmes.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Fragment READMEs (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\docs\\generate-fragment-readmes.ps1",
+        "-DryRun"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },
@@ -372,6 +657,20 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1",
         "-UpdateBaseline"
+      ],
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Update Performance Baseline (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1",
+        "-UpdateBaseline",
+        "-DryRun"
       ],
       "presentation": { "reveal": "always" },
       "problemMatcher": []
@@ -602,6 +901,20 @@
         "-NoProfile",
         "-File",
         "${workspaceFolder}\\scripts\\utils\\setup\\init-wrangler-config.ps1"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Initialize Wrangler Config (Dry Run)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}\\scripts\\utils\\setup\\init-wrangler-config.ps1",
+        "-DryRun"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "presentation": { "reveal": "always" },

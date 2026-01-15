@@ -532,4 +532,185 @@ function global:Initialize-SmartPrompt {
     }
 }
 
-
+# Track command execution time using PostCommandLookupAction
+# This fires AFTER command lookup/resolution but BEFORE actual execution begins
+# This is more accurate than PreCommandLookupAction which fires too early (during parsing)
+# PreCommandLookupAction would include time between commands, not just execution time
+if (-not $global:SmartPromptCommandTrackingSetup) {
+    $ExecutionContext.SessionState.InvokeCommand.PostCommandLookupAction = {
+        param($command, $eventArgs)
+        
+        # CRITICAL: Use recursion guard to prevent infinite loops
+        # This flag is set when we're already processing inside the handler
+        if ($global:SmartPromptPostCommandLookupInProgress) {
+            return
+        }
+        $global:SmartPromptPostCommandLookupInProgress = $true
+        try {
+            # Normalize command to string (handle both string and CommandInfo objects)
+            $commandName = if ($command -is [string]) {
+                $command
+            }
+            elseif ($command -is [System.Management.Automation.CommandInfo]) {
+                $command.Name
+            }
+            else {
+                $command.ToString()
+            }
+            
+            # CRITICAL: Exclude output/logging commands FIRST to prevent infinite loops
+            # These commands would trigger PostCommandLookupAction recursively
+            $excludedCommands = @(
+                'Write-Host', 'Write-Verbose', 'Write-Error', 'Write-Warning', 'Write-Output',
+                'Write-Debug', 'Write-Information', 'Write-Progress',
+                'Out-Host', 'Out-String', 'Out-Default',
+                'Test-Path', 'Get-PSCallStack', 'Get-Command'
+            )
+            if ($commandName -in $excludedCommands) {
+                return
+            }
+            
+            # Skip timing for internal calls (commands called from within prompt/profile code)
+            # Check call stack depth - if > 3, it's likely an internal call
+            # Do this BEFORE any logging to avoid recursive calls
+            # Use recursion guard when calling Get-PSCallStack to prevent re-entry
+            $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+            $global:SmartPromptPostCommandLookupInProgress = $false
+            try {
+                $stackDepth = (Get-PSCallStack).Count
+            }
+            finally {
+                $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+            }
+            if ($stackDepth -gt 3) {
+                return
+            }
+            
+            # Also skip if we're currently in the prompt function (internal prompt calls)
+            $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+            $global:SmartPromptPostCommandLookupInProgress = $false
+            try {
+                $callStack = Get-PSCallStack
+                $isInPrompt = $callStack | Where-Object { $_.FunctionName -eq 'prompt' -or $_.ScriptName -like '*prompt*' -or $_.ScriptName -like '*SmartPrompt*' }
+            }
+            finally {
+                $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+            }
+            if ($isInPrompt) {
+                return
+            }
+        
+            # Now safe to do debug logging (after exclusions)
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 3) {
+                    # Temporarily disable guard for Write-Host (it's excluded, but be safe)
+                    $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                    $global:SmartPromptPostCommandLookupInProgress = $false
+                    try {
+                        Write-Host "  [prompt.timing] PostCommandLookupAction fired for command: $commandName" -ForegroundColor DarkGray
+                    }
+                    finally {
+                        $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+                    }
+                }
+            }
+                    
+            # Only start timer if one isn't already running (prevents multiple starts for aliases)
+            if (-not $global:CommandStartTime) {
+                try {
+                    $global:CommandStartTime = [DateTime]::Now
+                            
+                    # Level 2: Log timer start
+                    if ($debugLevel -ge 2) {
+                        $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                        $global:SmartPromptPostCommandLookupInProgress = $false
+                        try {
+                            Write-Verbose "[prompt.timing] Started timer for command: $commandName"
+                        }
+                        finally {
+                            $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+                        }
+                    }
+                            
+                    # Level 3: Detailed timer start information
+                    if ($debugLevel -ge 3) {
+                        $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                        $global:SmartPromptPostCommandLookupInProgress = $false
+                        try {
+                            Write-Host "  [prompt.timing] Timer started for '$commandName' at $($global:CommandStartTime.ToString('HH:mm:ss.fff'))" -ForegroundColor DarkGray
+                        }
+                        finally {
+                            $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+                        }
+                    }
+                }
+                catch {
+                    # Level 1: Log error
+                    if ($debugLevel -ge 1) {
+                        $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                        $global:SmartPromptPostCommandLookupInProgress = $false
+                        try {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'prompt.timing' -Context @{
+                                    operation = 'start_timer'
+                                    command   = $commandName
+                                }
+                            }
+                            else {
+                                Write-Error "Failed to start command timer: $($_.Exception.Message)"
+                            }
+                        }
+                        finally {
+                            $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+                        }
+                    }
+                            
+                    # Level 2: More details
+                    if ($debugLevel -ge 2) {
+                        $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                        $global:SmartPromptPostCommandLookupInProgress = $false
+                        try {
+                            Write-Verbose "[prompt.timing] Error starting timer: $($_.Exception.Message)"
+                        }
+                        finally {
+                            $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+                        }
+                    }
+                            
+                    # Level 3: Full error details
+                    if ($debugLevel -ge 3) {
+                        $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                        $global:SmartPromptPostCommandLookupInProgress = $false
+                        try {
+                            Write-Host "  [prompt.timing] Timer start error - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Command: $commandName" -ForegroundColor DarkGray
+                        }
+                        finally {
+                            $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+                        }
+                    }
+                }
+            }
+            elseif ($debugLevel -ge 2) {
+                $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                $global:SmartPromptPostCommandLookupInProgress = $false
+                try {
+                    Write-Verbose "[prompt.timing] Timer already running, skipping start for command: $commandName"
+                }
+                finally {
+                    $global:SmartPromptPostCommandLookupInProgress = $tempGuard
+                }
+            }
+        }
+        finally {
+            $global:SmartPromptPostCommandLookupInProgress = $false
+        }
+    }
+    $global:SmartPromptCommandTrackingSetup = $true
+            
+    # Level 1: Log setup completion
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+        Write-Verbose "[prompt.timing] Command tracking initialized using PostCommandLookupAction"
+    }
+}

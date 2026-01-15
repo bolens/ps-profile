@@ -53,12 +53,61 @@ if (`$global:PSProfileFragmentTimes) {
 $tempScript = [System.IO.Path]::GetTempFileName() + '.ps1'
 $testScript | Out-File -FilePath $tempScript -Encoding UTF8
 
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[diagnose-profile-performance] Starting profile performance diagnosis"
+    }
+}
+
 try {
+    $diagnosisStartTime = [DateTime]::Now
     $result = pwsh -NoProfile -File $tempScript 2>&1
     Write-Host $result
+    
+    $diagnosisDuration = ([DateTime]::Now - $diagnosisStartTime).TotalMilliseconds
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[diagnose-profile-performance] Diagnosis completed in ${diagnosisDuration}ms"
+    }
+}
+catch {
+    if ($debugLevel -ge 1) {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'diagnose-profile-performance' -Context @{
+                script_path = $tempScript
+            }
+        }
+        else {
+            Write-Error "Failed to run profile performance diagnosis: $($_.Exception.Message)"
+        }
+    }
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[diagnose-profile-performance] Diagnosis error: $($_.Exception.Message)"
+    }
+    if ($debugLevel -ge 3) {
+        Write-Host "  [diagnose-profile-performance] Error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+    }
 }
 finally {
-    Remove-Item $tempScript -Force -ErrorAction SilentlyContinue
+    try {
+        Remove-Item $tempScript -Force -ErrorAction SilentlyContinue
+        if ($debugLevel -ge 3) {
+            Write-Host "  [diagnose-profile-performance] Cleaned up temporary script: $tempScript" -ForegroundColor DarkGray
+        }
+    }
+    catch {
+        if ($debugLevel -ge 1) {
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to clean up temporary script" -OperationName 'diagnose-profile-performance.cleanup' -Context @{
+                    script_path = $tempScript
+                    error       = $_.Exception.Message
+                } -Code 'CLEANUP_FAILED'
+            }
+            else {
+                Write-Warning "Failed to remove temporary script: $($_.Exception.Message)"
+            }
+        }
+    }
 }
 
 Write-Host "`n💡 Optimization Recommendations:" -ForegroundColor Green
@@ -103,5 +152,4 @@ Write-Host @"
 Write-Host "`n📊 For detailed benchmark:" -ForegroundColor Cyan
 Write-Host "   pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1" -ForegroundColor White
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS
-
+Exit-WithCode -ExitCode [ExitCode]::Success

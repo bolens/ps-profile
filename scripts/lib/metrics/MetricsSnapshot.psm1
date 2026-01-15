@@ -149,7 +149,45 @@ function Save-MetricsSnapshot {
                 }
             }
             catch {
-                Write-Warning "Failed to load code metrics: $($_.Exception.Message)"
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to load code metrics" -OperationName 'metrics-snapshot.save' -Context @{
+                        code_metrics_file = $codeMetricsFile
+                        error_message     = $_.Exception.Message
+                    } -Code 'CodeMetricsLoadFailed'
+                }
+                else {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            Write-Warning "[metrics-snapshot.save] Failed to load code metrics: $($_.Exception.Message)"
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [metrics-snapshot.save] Code metrics load error details - CodeMetricsFile: $codeMetricsFile, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log warnings even if debug is off
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Failed to load code metrics" -OperationName 'metrics-snapshot.save' -Context @{
+                                # Technical context
+                                code_metrics_file    = $codeMetricsFile
+                                repo_root            = $RepoRoot
+                                output_path          = $OutputPath
+                                # Error context
+                                error_message        = $_.Exception.Message
+                                ErrorType            = $_.Exception.GetType().FullName
+                                # Operation context
+                                include_code_metrics = $IncludeCodeMetrics.IsPresent
+                                # Invocation context
+                                FunctionName         = 'Save-MetricsSnapshot'
+                            } -Code 'CodeMetricsLoadFailed'
+                        }
+                        else {
+                            Write-Warning "[metrics-snapshot.save] Failed to load code metrics: $($_.Exception.Message)"
+                        }
+                    }
+                }
             }
         }
     }
@@ -161,7 +199,18 @@ function Save-MetricsSnapshot {
                 $snapshot.PerformanceMetrics = Get-Content -Path $performanceFile -Raw | ConvertFrom-Json
             }
             catch {
-                Write-Warning "Failed to load performance metrics: $($_.Exception.Message)"
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to load performance metrics" -OperationName 'metrics-snapshot.save' -Context @{
+                        performance_file = $performanceFile
+                        error_message    = $_.Exception.Message
+                    } -Code 'PerformanceMetricsLoadFailed'
+                }
+                else {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                        Write-Warning "[metrics-snapshot.save] Failed to load performance metrics: $($_.Exception.Message)"
+                    }
+                }
             }
         }
     }
@@ -174,11 +223,81 @@ function Save-MetricsSnapshot {
     # Save snapshot
     try {
         $snapshot | ConvertTo-Json -Depth 10 | Set-Content -Path $snapshotPath -Encoding UTF8
-        Write-Verbose "Metrics snapshot saved to: $snapshotPath"
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[metrics-snapshot.save] Metrics snapshot saved to: $snapshotPath"
+        }
+        
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            $snapshotInfo = "Timestamp=$($snapshot.Timestamp)"
+            if ($snapshot.ContainsKey('CodeMetrics')) { $snapshotInfo += ", CodeMetrics=included" }
+            if ($snapshot.ContainsKey('PerformanceMetrics')) { $snapshotInfo += ", PerformanceMetrics=included" }
+            Write-Verbose "[metrics-snapshot.save] Snapshot details: $snapshotInfo"
+        }
+        
         return $snapshotPath
     }
     catch {
-        throw "Failed to save metrics snapshot: $($_.Exception.Message)"
+        $errorMsg = "Failed to save metrics snapshot: $($_.Exception.Message)"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'metrics-snapshot.save' -Context @{
+                snapshot_path = $snapshotPath
+                error_message = $errorMsg
+            }
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'metrics-snapshot.save' -Context @{
+                                # Technical context
+                                snapshot_path               = $snapshotPath
+                                output_path                 = $OutputPath
+                                repo_root                   = $RepoRoot
+                                # Error context
+                                error_message               = $errorMsg
+                                ErrorType                   = $_.Exception.GetType().FullName
+                                # Operation context
+                                include_code_metrics        = $IncludeCodeMetrics.IsPresent
+                                include_performance_metrics = $IncludePerformanceMetrics.IsPresent
+                                # Invocation context
+                                FunctionName                = 'Save-MetricsSnapshot'
+                            }
+                        }
+                        else {
+                            Write-Error "[metrics-snapshot.save] $errorMsg" -ErrorAction Continue
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [metrics-snapshot.save] Save error details - SnapshotPath: $snapshotPath, OutputPath: $OutputPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                    }
+                }
+                else {
+                    # Always log critical errors even if debug is off
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'metrics-snapshot.save' -Context @{
+                            snapshot_path               = $snapshotPath
+                            output_path                 = $OutputPath
+                            repo_root                   = $RepoRoot
+                            error_message               = $errorMsg
+                            ErrorType                   = $_.Exception.GetType().FullName
+                            include_code_metrics        = $IncludeCodeMetrics.IsPresent
+                            include_performance_metrics = $IncludePerformanceMetrics.IsPresent
+                            FunctionName                = 'Save-MetricsSnapshot'
+                        }
+                    }
+                    else {
+                        Write-Error "[metrics-snapshot.save] $errorMsg" -ErrorAction Continue
+                    }
+                }
+            }
+        }
+        throw $errorMsg
     }
 }
 

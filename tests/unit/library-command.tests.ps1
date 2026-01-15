@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+﻿. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
@@ -215,6 +215,16 @@ Describe 'Command Module Functions' {
         }
 
         It 'Handles command execution errors gracefully' {
+            <#
+            .SYNOPSIS
+                Performs operations related to Test-FailingCommand.
+            
+            .DESCRIPTION
+                Performs operations related to Test-FailingCommand.
+            
+            .OUTPUTS
+                object
+            #>
             function Test-FailingCommand {
                 throw 'Command failed'
             }

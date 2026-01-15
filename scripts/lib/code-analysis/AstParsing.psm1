@@ -37,6 +37,7 @@ function Get-PowerShellAst {
     [OutputType([System.Management.Automation.Language.ScriptBlockAst])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path
     )
 
@@ -241,6 +242,7 @@ function Get-TextBeforeFunction {
         [System.Management.Automation.Language.FunctionDefinitionAst]$FuncAst,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Content
     )
 

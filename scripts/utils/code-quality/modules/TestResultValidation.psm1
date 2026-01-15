@@ -6,7 +6,19 @@ scripts/utils/code-quality/modules/TestResultValidation.psm1
 
 .DESCRIPTION
     Provides functions for validating test results for consistency and detecting anomalies.
+
+.NOTES
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe severity handling.
 #>
+
+# Import CommonEnums for SeverityLevel enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 <#
 .SYNOPSIS
@@ -78,7 +90,8 @@ function Test-TestResultIntegrity {
             }
             
             # Categorize rule violations by severity
-            if ($ruleResult.Severity -eq 'Error') {
+            $severity = $ruleResult.Severity
+            if ($severity -eq [SeverityLevel]::Error.ToString() -or $severity -eq [SeverityLevel]::Error) {
                 $validation.Issues += "$($rule.Key): $($ruleResult.Message)"
                 $validation.IsValid = $false
             }

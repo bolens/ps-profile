@@ -85,6 +85,7 @@ function Get-CodeSimilarity {
     [OutputType([PSCustomObject[]])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
 
         [switch]$Recurse,
@@ -110,9 +111,48 @@ function Get-CodeSimilarity {
     }
 
     $scripts = Get-PowerShellScripts -Path $Path -Recurse:$Recurse
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [code-similarity.compare] Found $($scripts.Count) scripts for similarity analysis" -ForegroundColor DarkGray
+    }
 
     if ($null -eq $scripts -or $scripts.Count -lt 2) {
-        Write-Warning "Need at least 2 scripts to compare similarity"
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Need at least 2 scripts to compare similarity" -OperationName 'code-similarity.compare' -Context @{
+                script_count = if ($scripts) { $scripts.Count } else { 0 }
+                path         = $Path
+            } -Code 'InsufficientScripts'
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    Write-Warning "[code-similarity.compare] Need at least 2 scripts to compare similarity"
+                }
+                # Level 3: Log detailed insufficient scripts information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[code-similarity.compare] Insufficient scripts details - ScriptCount: $(if ($scripts) { $scripts.Count } else { 0 }), Path: $Path, Recurse: $Recurse"
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Need at least 2 scripts to compare similarity" -OperationName 'code-similarity.compare' -Context @{
+                        # Technical context
+                        script_count = if ($scripts) { $scripts.Count } else { 0 }
+                        path         = $Path
+                        # Operation context
+                        recurse      = $Recurse
+                        # Invocation context
+                        FunctionName = 'Get-CodeSimilarity'
+                    } -Code 'InsufficientScripts'
+                }
+                else {
+                    Write-Warning "[code-similarity.compare] Need at least 2 scripts to compare similarity"
+                }
+            }
+        }
         return [object[]]::new(0)
     }
 
@@ -139,6 +179,11 @@ function Get-CodeSimilarity {
     $scriptBlocks = [System.Collections.Generic.Dictionary[string, object[]]]::new()
 
     foreach ($script in $scripts) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [code-similarity.extract-blocks] Extracting blocks from: $($script.FullName)" -ForegroundColor DarkGray
+        }
+        
         try {
             # Use FileContent module if available
             $content = if (Get-Command Read-FileContent -ErrorAction SilentlyContinue) {
@@ -196,7 +241,39 @@ function Get-CodeSimilarity {
             }
             foreach ($func in $functions) {
                 if ($null -eq $func -or $null -eq $func.Body -or $null -eq $func.Body.Extent) {
-                    Write-Warning "Failed to analyze $($script.FullName): Invalid function AST structure"
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Invalid function AST structure" -OperationName 'code-similarity.extract-blocks' -Context @{
+                            script_path = $script.FullName
+                        } -Code 'InvalidAstStructure'
+                    }
+                    else {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                            if ($debugLevel -ge 2) {
+                                Write-Warning "[code-similarity.extract-blocks] Failed to analyze $($script.FullName): Invalid function AST structure"
+                            }
+                            # Level 3: Log detailed invalid AST structure information
+                            if ($debugLevel -ge 3) {
+                                Write-Host "  [code-similarity.extract-blocks] Invalid AST structure details - ScriptPath: $($script.FullName), FunctionName: $(if ($func) { $func.Name } else { 'unknown' })" -ForegroundColor DarkGray
+                            }
+                        }
+                        else {
+                            # Always log warnings even if debug is off
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Invalid function AST structure" -OperationName 'code-similarity.extract-blocks' -Context @{
+                                    # Technical context
+                                    script_path   = $script.FullName
+                                    script_name   = $script.Name
+                                    function_name = if ($func) { $func.Name } else { 'unknown' }
+                                    # Invocation context
+                                    FunctionName  = 'Get-CodeSimilarity'
+                                } -Code 'InvalidAstStructure'
+                            }
+                            else {
+                                Write-Warning "[code-similarity.extract-blocks] Failed to analyze $($script.FullName): Invalid function AST structure"
+                            }
+                        }
+                    }
                     continue
                 }
                 
@@ -263,6 +340,10 @@ function Get-CodeSimilarity {
 
             if ($blocks.Count -gt 0) {
                 $scriptBlocks[$script.FullName] = $blocks.ToArray()
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [code-similarity.extract-blocks] Extracted $($blocks.Count) blocks from $($script.Name)" -ForegroundColor DarkGray
+                }
             }
             else {
                 $lineCount = ($content -split "`n").Count
@@ -286,17 +367,37 @@ function Get-CodeSimilarity {
             }
         }
         catch {
-            Write-Warning "Failed to analyze $($script.FullName): $($_.Exception.Message)"
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-similarity.extract-blocks' -Context @{
+                    script_path   = $script.FullName
+                    error_message = $_.Exception.Message
+                } -Code 'ScriptAnalysisFailed'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[code-similarity.extract-blocks] Failed to analyze $($script.FullName): $($_.Exception.Message)"
+                }
+            }
         }
     }
 
     # Compare blocks for similarity
     if ($scriptBlocks.Count -lt 2) {
-        Write-Verbose "Need at least 2 scripts with blocks to compare similarity"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [code-similarity.compare] Need at least 2 scripts with blocks to compare similarity" -ForegroundColor DarkGray
+        }
         return [object[]]::new(0)
     }
     
     $scriptPaths = $scriptBlocks.Keys | Sort-Object
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [code-similarity.compare] Comparing $($scriptPaths.Count) scripts for similarity" -ForegroundColor DarkGray
+    }
+    
     for ($i = 0; $i -lt $scriptPaths.Count; $i++) {
         for ($j = $i + 1; $j -lt $scriptPaths.Count; $j++) {
             $file1 = $scriptPaths[$i]
@@ -328,7 +429,49 @@ function Get-CodeSimilarity {
                             $similarity = Get-StringSimilarity -String1 $block1.Normalized -String2 $block2.Normalized
                         }
                         catch {
-                            Write-Warning "Failed to calculate similarity: $($_.Exception.Message)"
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Failed to calculate similarity" -OperationName 'code-similarity.calculate' -Context @{
+                                    file1         = $file1
+                                    file2         = $file2
+                                    block1_name   = $block1.Name
+                                    block2_name   = $block2.Name
+                                    error_message = $_.Exception.Message
+                                } -Code 'SimilarityCalculationFailed'
+                            }
+                            else {
+                                $debugLevel = 0
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                                    if ($debugLevel -ge 2) {
+                                        Write-Warning "[code-similarity.calculate] Failed to calculate similarity: $($_.Exception.Message)"
+                                    }
+                                    # Level 3: Log detailed similarity calculation error information
+                                    if ($debugLevel -ge 3) {
+                                        Write-Host "  [code-similarity.calculate] Similarity calculation error details - File1: $file1, File2: $file2, Block1Name: $($block1.Name), Block2Name: $($block2.Name), Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                                    }
+                                }
+                                else {
+                                    # Always log warnings even if debug is off
+                                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                        Write-StructuredWarning -Message "Failed to calculate similarity" -OperationName 'code-similarity.calculate' -Context @{
+                                            # Technical context
+                                            file1          = $file1
+                                            file2          = $file2
+                                            block1_name    = $block1.Name
+                                            block2_name    = $block2.Name
+                                            # Error context
+                                            error_message  = $_.Exception.Message
+                                            ErrorType      = $_.Exception.GetType().FullName
+                                            # Operation context
+                                            min_similarity = $MinSimilarity
+                                            # Invocation context
+                                            FunctionName   = 'Get-CodeSimilarity'
+                                        } -Code 'SimilarityCalculationFailed'
+                                    }
+                                    else {
+                                        Write-Warning "[code-similarity.calculate] Failed to calculate similarity: $($_.Exception.Message)"
+                                    }
+                                }
+                            }
                             # Fall back to simple string comparison
                             if ($block1.Normalized -eq $block2.Normalized) {
                                 $similarity = 1.0

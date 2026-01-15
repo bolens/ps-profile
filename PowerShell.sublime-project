@@ -26,6 +26,11 @@
       "working_dir": "${project_path}"
     },
     {
+      "name": "Task: test (Dry Run)",
+      "cmd": ["task", "test", "-DryRun"],
+      "working_dir": "${project_path}"
+    },
+    {
       "name": "Task: test-unit",
       "cmd": ["task", "test-unit"],
       "working_dir": "${project_path}"
@@ -66,8 +71,18 @@
       "working_dir": "${project_path}"
     },
     {
+      "name": "Task: optimize-git-performance (Dry Run)",
+      "cmd": ["task", "optimize-git-performance", "-DryRun"],
+      "working_dir": "${project_path}"
+    },
+    {
       "name": "Task: check-module-updates",
       "cmd": ["task", "check-module-updates"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: check-module-updates (Dry Run)",
+      "cmd": ["task", "check-module-updates", "-DryRun"],
       "working_dir": "${project_path}"
     },
     {
@@ -86,6 +101,11 @@
       "working_dir": "${project_path}"
     },
     {
+      "name": "Task: generate-dashboard (Dry Run)",
+      "cmd": ["task", "generate-dashboard", "-DryRun"],
+      "working_dir": "${project_path}"
+    },
+    {
       "name": "Task: create-release",
       "cmd": ["task", "create-release"],
       "working_dir": "${project_path}"
@@ -93,6 +113,11 @@
     {
       "name": "Task: generate-docs",
       "cmd": ["task", "generate-docs"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: generate-docs (Dry Run)",
+      "cmd": ["task", "generate-docs", "-DryRun"],
       "working_dir": "${project_path}"
     },
     {
@@ -116,6 +141,11 @@
       "working_dir": "${project_path}"
     },
     {
+      "name": "Task: install-githooks (Dry Run)",
+      "cmd": ["task", "install-githooks", "-DryRun"],
+      "working_dir": "${project_path}"
+    },
+    {
       "name": "Task: install-pre-commit-hook",
       "cmd": ["task", "install-pre-commit-hook"],
       "working_dir": "${project_path}"
@@ -126,6 +156,11 @@
       "working_dir": "${project_path}"
     },
     {
+      "name": "Task: format (Dry Run)",
+      "cmd": ["task", "format", "-DryRun"],
+      "working_dir": "${project_path}"
+    },
+    {
       "name": "Task: find-duplicates",
       "cmd": ["task", "find-duplicates"],
       "working_dir": "${project_path}"
@@ -133,6 +168,11 @@
     {
       "name": "Task: generate-fragment-readmes",
       "cmd": ["task", "generate-fragment-readmes"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: generate-fragment-readmes (Dry Run)",
+      "cmd": ["task", "generate-fragment-readmes", "-DryRun"],
       "working_dir": "${project_path}"
     },
     {
@@ -148,6 +188,11 @@
     {
       "name": "Task: update-baseline",
       "cmd": ["task", "update-baseline"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: update-baseline (Dry Run)",
+      "cmd": ["task", "update-baseline", "-DryRun"],
       "working_dir": "${project_path}"
     },
     {
@@ -223,6 +268,11 @@
     {
       "name": "Task: init-wrangler-config",
       "cmd": ["task", "init-wrangler-config"],
+      "working_dir": "${project_path}"
+    },
+    {
+      "name": "Task: init-wrangler-config (Dry Run)",
+      "cmd": ["task", "init-wrangler-config", "-DryRun"],
       "working_dir": "${project_path}"
     },
     {

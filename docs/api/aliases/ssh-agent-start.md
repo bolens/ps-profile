@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\14-ssh.ps1
+Defined in: ..\profile.d\ssh.ps1

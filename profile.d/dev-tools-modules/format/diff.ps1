@@ -48,7 +48,15 @@ function Initialize-DevTools-Diff {
             }
         }
         catch {
-            Write-Error "Failed to compare files: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.diff.compare' -Context @{
+                    file1 = $File1
+                    file2 = $File2
+                }
+            }
+            else {
+                Write-Error "Failed to compare files: $_"
+            }
         }
     } -Force
 }

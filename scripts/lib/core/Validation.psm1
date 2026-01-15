@@ -10,9 +10,29 @@ scripts/lib/core/Validation.psm1
     path existence validation in a single, reusable pattern.
 
 .NOTES
-    Module Version: 1.0.0
-    PowerShell Version: 3.0+
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe path type handling.
 #>
+
+# Import CommonEnums for FileSystemPathType enum
+# Must be imported before this module is parsed since FileSystemPathType is used in function signatures
+# Use -Force to ensure it's loaded even if already imported, and -Global to make types available globally
+$commonEnumsPath = Join-Path $PSScriptRoot 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    try {
+        Import-Module $commonEnumsPath -DisableNameChecking -Force -Global -ErrorAction Stop
+    }
+    catch {
+        # If CommonEnums import fails, this module cannot function properly
+        # Log error but don't throw - let calling code handle the failure
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            Write-Warning "[validation.init] Failed to import CommonEnums: $($_.Exception.Message). FileSystemPathType will not be available."
+        }
+    }
+}
 
 <#
 .SYNOPSIS
@@ -23,7 +43,9 @@ scripts/lib/core/Validation.psm1
     This is a common pattern used throughout the codebase.
 
 .PARAMETER Value
-    The string value to validate.
+    The value to validate. Accepts any type (uses `[object]` for flexibility) -
+    will be converted to string for validation. This allows the function to
+    handle strings, paths, and other types that can be converted to strings.
 
 .OUTPUTS
     System.Boolean. Returns $true if the string is valid, $false otherwise.
@@ -47,6 +69,8 @@ function Test-ValidString {
     param(
         [Parameter(Mandatory)]
         [AllowNull()]
+        # Note: Uses [object] intentionally to accept any type (strings, paths, etc.)
+        # The function converts non-string values to strings for validation
         [object]$Value
     )
 
@@ -104,10 +128,11 @@ function Test-ValidPath {
     param(
         [Parameter(Mandatory)]
         [AllowNull()]
+        # Note: Uses [object] intentionally to accept any path-like type (strings, PathInfo, etc.)
+        # The function converts non-string values to strings for path validation
         [object]$Path,
 
-        [ValidateSet('Any', 'File', 'Directory')]
-        [string]$PathType = 'Any',
+        [FileSystemPathType]$PathType = [FileSystemPathType]::Any,
 
         [bool]$MustExist = $true
     )
@@ -138,11 +163,14 @@ function Test-ValidPath {
         return $false
     }
 
+    # Convert enum to string
+    $pathTypeString = $PathType.ToString()
+    
     # Validate path type if specified
-    if ($PathType -eq 'File') {
+    if ($pathTypeString -eq 'File') {
         return (Test-Path -LiteralPath $pathString -PathType Leaf -ErrorAction SilentlyContinue)
     }
-    elseif ($PathType -eq 'Directory') {
+    elseif ($pathTypeString -eq 'Directory') {
         return (Test-Path -LiteralPath $pathString -PathType Container -ErrorAction SilentlyContinue)
     }
 
@@ -184,8 +212,7 @@ function Assert-ValidPath {
         [AllowNull()]
         [object]$Path,
 
-        [ValidateSet('Any', 'File', 'Directory')]
-        [string]$PathType = 'Any',
+        [FileSystemPathType]$PathType = [FileSystemPathType]::Any,
 
         [string]$ParameterName,
 
@@ -208,8 +235,10 @@ function Assert-ValidPath {
             'null'
         }
 
-        $typeText = if ($PathType -ne 'Any') {
-            " ($PathType)"
+        # Convert enum to string
+        $pathTypeString = $PathType.ToString()
+        $typeText = if ($pathTypeString -ne 'Any') {
+            " ($pathTypeString)"
         }
         else {
             ''
@@ -291,4 +320,3 @@ Export-ModuleMember -Function @(
     'Assert-ValidPath',
     'Assert-ValidString'
 )
-

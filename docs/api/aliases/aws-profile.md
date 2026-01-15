@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\31-aws.ps1
+Defined in: ..\profile.d\aws.ps1

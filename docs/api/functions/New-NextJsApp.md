@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\45-nextjs.ps1
+Defined in: ..\profile.d\nextjs.ps1

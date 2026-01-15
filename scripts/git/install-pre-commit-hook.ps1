@@ -49,13 +49,13 @@ if (-not $RepoRoot) {
         $RepoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
 }
 
 $hookPath = Join-Path $RepoRoot '.git' 'hooks' 'pre-commit'
 if (-not (Test-Path -Path (Join-Path $RepoRoot '.git') -PathType Container -ErrorAction SilentlyContinue)) {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'No .git directory found. Run this from the repository root.'
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message 'No .git directory found. Run this from the repository root.'
 }
 
 if ($hookPath -and -not [string]::IsNullOrWhiteSpace($hookPath) -and (Test-Path -LiteralPath $hookPath)) {

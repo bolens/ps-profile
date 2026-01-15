@@ -11,16 +11,26 @@
     Displays active network connections and listening ports using netstat.
 #>
 function Get-NetworkPorts {
-    try {
-        if (-not (Get-Command netstat -ErrorAction SilentlyContinue)) {
-            Write-Error "netstat command not found. This command is typically available on Windows and Unix systems."
-            return
+    if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+        Invoke-WithWideEvent -OperationName 'network.ports.get' -Context @{} -ScriptBlock {
+            if (-not (Get-Command netstat -ErrorAction SilentlyContinue)) {
+                throw "netstat command not found. This command is typically available on Windows and Unix systems."
+            }
+            & netstat -an
         }
-        & netstat -an
     }
-    catch {
-        Write-Error "Failed to get network ports: $($_.Exception.Message)"
-        throw
+    else {
+        try {
+            if (-not (Get-Command netstat -ErrorAction SilentlyContinue)) {
+                Write-Error "netstat command not found. This command is typically available on Windows and Unix systems."
+                return
+            }
+            & netstat -an
+        }
+        catch {
+            Write-Error "Failed to get network ports: $($_.Exception.Message)"
+            throw
+        }
     }
 }
 Set-Alias -Name ports -Value Get-NetworkPorts -ErrorAction SilentlyContinue

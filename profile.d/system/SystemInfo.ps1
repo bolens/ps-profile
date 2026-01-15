@@ -34,12 +34,19 @@ Set-Alias -Name which -Value Get-CommandInfo -ErrorAction SilentlyContinue
     Displays disk space usage (used, free, total) for all file system drives in GB.
 #>
 function Get-DiskUsage {
-    try {
-        Get-PSDrive -PSProvider FileSystem -ErrorAction Stop | Select-Object Name, @{ Name = "Used(GB)"; Expression = { [math]::Round(($_.Used / 1GB), 2) } }, @{ Name = "Free(GB)"; Expression = { [math]::Round(($_.Free / 1GB), 2) } }, @{ Name = "Total(GB)"; Expression = { [math]::Round((($_.Used + $_.Free) / 1GB), 2) } }, Root
+    if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+        Invoke-WithWideEvent -OperationName 'systeminfo.disk-usage.get' -Context @{} -ScriptBlock {
+            Get-PSDrive -PSProvider FileSystem -ErrorAction Stop | Select-Object Name, @{ Name = "Used(GB)"; Expression = { [math]::Round(($_.Used / 1GB), 2) } }, @{ Name = "Free(GB)"; Expression = { [math]::Round(($_.Free / 1GB), 2) } }, @{ Name = "Total(GB)"; Expression = { [math]::Round((($_.Used + $_.Free) / 1GB), 2) } }, Root
+        }
     }
-    catch {
-        Write-Error "Failed to get disk usage information: $($_.Exception.Message)"
-        throw
+    else {
+        try {
+            Get-PSDrive -PSProvider FileSystem -ErrorAction Stop | Select-Object Name, @{ Name = "Used(GB)"; Expression = { [math]::Round(($_.Used / 1GB), 2) } }, @{ Name = "Free(GB)"; Expression = { [math]::Round(($_.Free / 1GB), 2) } }, @{ Name = "Total(GB)"; Expression = { [math]::Round((($_.Used + $_.Free) / 1GB), 2) } }, Root
+        }
+        catch {
+            Write-Error "Failed to get disk usage information: $($_.Exception.Message)"
+            throw
+        }
     }
 }
 Set-Alias -Name df -Value Get-DiskUsage -ErrorAction SilentlyContinue
@@ -52,12 +59,19 @@ Set-Alias -Name df -Value Get-DiskUsage -ErrorAction SilentlyContinue
     Displays the top 10 processes sorted by CPU usage.
 #>
 function Get-TopProcesses {
-    try {
-        Get-Process -ErrorAction Stop | Sort-Object CPU -Descending | Select-Object -First 10
+    if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+        Invoke-WithWideEvent -OperationName 'systeminfo.top-processes.get' -Context @{} -ScriptBlock {
+            Get-Process -ErrorAction Stop | Sort-Object CPU -Descending | Select-Object -First 10
+        }
     }
-    catch {
-        Write-Error "Failed to get process information: $($_.Exception.Message)"
-        throw
+    else {
+        try {
+            Get-Process -ErrorAction Stop | Sort-Object CPU -Descending | Select-Object -First 10
+        }
+        catch {
+            Write-Error "Failed to get process information: $($_.Exception.Message)"
+            throw
+        }
     }
 }
 Set-Alias -Name htop -Value Get-TopProcesses -ErrorAction SilentlyContinue

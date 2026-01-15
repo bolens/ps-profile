@@ -123,13 +123,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & goreleaser @Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'go.goreleaser.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & goreleaser @Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run goreleaser: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & goreleaser @Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run goreleaser: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -218,20 +227,37 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @()
-            if ($Target) {
-                $cmdArgs += $Target
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'go.mage.invoke' -Context @{
+                target              = $Target
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @()
+                if ($Target) {
+                    $cmdArgs += $Target
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & mage @cmdArgs 2>&1
             }
-            if ($Arguments) {
-                $cmdArgs += $Arguments
-            }
-            $result = & mage @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run mage: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @()
+                if ($Target) {
+                    $cmdArgs += $Target
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & mage @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run mage: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -314,13 +340,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & golangci-lint @Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'go.golangci-lint.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & golangci-lint @Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run golangci-lint: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & golangci-lint @Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run golangci-lint: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -409,20 +444,37 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @('build')
-            if ($Output) {
-                $cmdArgs += '-o', $Output
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'go.build' -Context @{
+                output              = $Output
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @('build')
+                if ($Output) {
+                    $cmdArgs += '-o', $Output
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & go @cmdArgs 2>&1
             }
-            if ($Arguments) {
-                $cmdArgs += $Arguments
-            }
-            $result = & go @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run go build: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @('build')
+                if ($Output) {
+                    $cmdArgs += '-o', $Output
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & go @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run go build: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -517,23 +569,44 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @('test')
-            if ($VerboseOutput) {
-                $cmdArgs += '-v'
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'go.test' -Context @{
+                verbose_output      = $VerboseOutput.IsPresent
+                coverage            = $Coverage.IsPresent
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @('test')
+                if ($VerboseOutput) {
+                    $cmdArgs += '-v'
+                }
+                if ($Coverage) {
+                    $cmdArgs += '-cover'
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & go @cmdArgs 2>&1
             }
-            if ($Coverage) {
-                $cmdArgs += '-cover'
-            }
-            if ($Arguments) {
-                $cmdArgs += $Arguments
-            }
-            $result = & go @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run go test: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @('test')
+                if ($VerboseOutput) {
+                    $cmdArgs += '-v'
+                }
+                if ($Coverage) {
+                    $cmdArgs += '-cover'
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & go @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run go test: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 

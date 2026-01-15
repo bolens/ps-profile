@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\36-ngrok.ps1
+Defined in: ..\profile.d\ngrok.ps1

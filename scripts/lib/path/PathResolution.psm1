@@ -6,7 +6,13 @@ scripts/lib/PathResolution.psm1
 
 .DESCRIPTION
     Provides functions for resolving repository paths and directory paths.
+
+.NOTES
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
@@ -65,6 +71,7 @@ function Get-RepoRoot {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ScriptPath
     )
 
@@ -186,6 +193,7 @@ function Get-ProfileDirectory {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ScriptPath
     )
 
@@ -249,7 +257,30 @@ function Get-ProfileDirectory {
     # Continue on error (returns $null)
     $repoRoot = Get-RepoRootSafe -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
     if (-not $repoRoot) {
-        Write-Warning "Could not determine repository root"
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Could not determine repository root" -OperationName 'path-resolution.repo-root' -Context @{
+                script_path = $PSScriptRoot
+            } -Code 'RepositoryRootNotFound'
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Could not determine repository root" -OperationName 'path-resolution.repo-root' -Context @{
+                            script_path = $PSScriptRoot
+                        } -Code 'RepositoryRootNotFound'
+                    }
+                    else {
+                        Write-Warning "[path-resolution.repo-root] Could not determine repository root (script_path: $PSScriptRoot)"
+                    }
+                }
+                # Level 3: Log detailed warning information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [path-resolution.repo-root] Repository root resolution warning details - ScriptPath: $PSScriptRoot, CurrentLocation: $((Get-Location).Path)" -ForegroundColor DarkGray
+                }
+            }
+        }
     }
 #>
 function Get-RepoRootSafe {
@@ -257,6 +288,7 @@ function Get-RepoRootSafe {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ScriptPath,
 
         [switch]$ExitOnError
@@ -294,7 +326,36 @@ function Get-RepoRootSafe {
             }
             else {
                 # ExitCodes module not available yet; surface a terminating error
-                Write-Error $errorMessage -ErrorAction Stop
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
+                                script_path   = $ScriptPath
+                                exit_on_error = $true
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction Stop
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [path-resolution.repo-root] Exit on error details - ScriptPath: $ScriptPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                    }
+                }
+                else {
+                    # Always log critical errors even if debug is off
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
+                            script_path   = $ScriptPath
+                            exit_on_error = $true
+                        }
+                    }
+                    else {
+                        Write-Error $errorMessage -ErrorAction Stop
+                    }
+                }
             }
         }
         else {
@@ -307,11 +368,69 @@ function Get-RepoRootSafe {
                     return $null
                 }
                 'Continue' {
-                    Write-Error $errorMessage -ErrorAction Continue
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
+                                    script_path  = $ScriptPath
+                                    error_action = 'Continue'
+                                }
+                            }
+                            else {
+                                Write-Error $errorMessage -ErrorAction Continue
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Verbose "[path-resolution.repo-root] Continue error details - ScriptPath: $ScriptPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)"
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
+                                script_path  = $ScriptPath
+                                error_action = 'Continue'
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction Continue
+                        }
+                    }
                     return $null
                 }
                 default {
-                    Write-Error $errorMessage -ErrorAction $errorActionPreference
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
+                                    script_path  = $ScriptPath
+                                    error_action = $errorActionPreference
+                                }
+                            }
+                            else {
+                                Write-Error $errorMessage -ErrorAction $errorActionPreference
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [path-resolution.repo-root] Default error action details - ScriptPath: $ScriptPath, ErrorAction: $errorActionPreference, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
+                                script_path  = $ScriptPath
+                                error_action = $errorActionPreference
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction $errorActionPreference
+                        }
+                    }
                     return $null
                 }
             }
@@ -324,4 +443,3 @@ Export-ModuleMember -Function @(
     'Get-ProfileDirectory',
     'Get-RepoRootSafe'
 )
-

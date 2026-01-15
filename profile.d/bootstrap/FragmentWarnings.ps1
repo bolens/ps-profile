@@ -1,10 +1,20 @@
-# ===============================================
+﻿# ===============================================
 # FragmentWarnings.ps1
 # Fragment warning suppression utilities
 # ===============================================
 
 # Initializes fragment warning suppression from PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS environment variable.
 # Supports comma/semicolon/space-separated fragment names or 'all'/'*'/'1'/'true' to suppress all warnings.
+<#
+.SYNOPSIS
+    Performs operations related to Initialize-FragmentWarningSuppression.
+
+.DESCRIPTION
+    Performs operations related to Initialize-FragmentWarningSuppression.
+
+.OUTPUTS
+    object
+#>
 function Initialize-FragmentWarningSuppression {
     if (-not (Get-Variable -Name 'FragmentWarningPatternSet' -Scope Global -ErrorAction SilentlyContinue)) {
         $global:FragmentWarningPatternSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)

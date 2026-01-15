@@ -42,4 +42,4 @@ try {
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: ..\profile.d\files.ps1

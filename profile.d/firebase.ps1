@@ -12,7 +12,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common Firebase operations.
-    Functions check for firebase availability using Test-HasCommand for efficient
+    Functions check for firebase availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

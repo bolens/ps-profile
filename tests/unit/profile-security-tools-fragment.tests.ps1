@@ -1,4 +1,4 @@
-# ===============================================
+﻿# ===============================================
 # profile-security-tools-fragment.tests.ps1
 # Unit tests for fragment loading, registration, and requirements
 # ===============================================
@@ -147,6 +147,19 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
         
         It 'Tests idempotency check with Test-FragmentLoaded' {
             # Create a function mock for Test-FragmentLoaded so Get-Command can find it
+            <#
+            .SYNOPSIS
+                Performs operations related to Test-FragmentLoaded.
+            
+            .DESCRIPTION
+                Performs operations related to Test-FragmentLoaded.
+            
+            .PARAMETER FragmentName
+                The FragmentName parameter.
+            
+            .OUTPUTS
+                object
+            #>
             function Test-FragmentLoaded {
                 param([string]$FragmentName)
                 return $true

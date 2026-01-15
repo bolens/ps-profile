@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\19-fzf.ps1
+Defined in: ..\profile.d\fzf.ps1

@@ -6,7 +6,26 @@ scripts/utils/dependencies/modules/ModuleUpdateScheduler.psm1
 
 .DESCRIPTION
     Provides functions for managing Windows Scheduled Tasks for automatic module updates.
+
+.NOTES
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe schedule frequency handling.
 #>
+
+# Import CommonEnums for UpdateFrequency enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+
+# Import ExitCodes for ExitCode enum
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
+if ($moduleImportPath -and (Test-Path -LiteralPath $moduleImportPath)) {
+    Import-Module $moduleImportPath -DisableNameChecking -ErrorAction SilentlyContinue
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+}
 
 <#
 .SYNOPSIS
@@ -22,7 +41,7 @@ scripts/utils/dependencies/modules/ModuleUpdateScheduler.psm1
     Repository root directory path.
 
 .PARAMETER ScheduleFrequency
-    Frequency for scheduled updates: Daily, Weekly, or Monthly.
+    Frequency for scheduled updates. Must be an UpdateFrequency enum value.
 
 .PARAMETER ScheduleTime
     Time to run scheduled updates (HH:mm format, 24-hour).
@@ -56,19 +75,22 @@ function Register-UpdateSchedule {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ScheduledTaskName,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$RepoRoot,
 
         [Parameter(Mandatory)]
-        [ValidateSet('Daily', 'Weekly', 'Monthly')]
-        [string]$ScheduleFrequency,
+        [UpdateFrequency]$ScheduleFrequency,
 
+        [ValidatePattern('^\d{2}:\d{2}$')]
         [string]$ScheduleTime = "02:00",
 
         [string[]]$ScheduleDays = @(),
 
+        [ValidateRange(1, 31)]
         [int]$ScheduleDayOfMonth = 1,
 
         [switch]$TrackHistory,
@@ -84,19 +106,17 @@ function Register-UpdateSchedule {
         [switch]$EmailOnlyOnUpdates
     )
 
-    # Validate schedule time format
-    if ($ScheduleTime -notmatch '^\d{2}:\d{2}$') {
-        Write-ScriptMessage -Message "ScheduleTime must be in HH:mm format (e.g., 02:00)" -IsError
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
-    }
+    # Convert enum to string
+    $scheduleFrequencyString = $ScheduleFrequency.ToString()
 
+    # Validate schedule time format (ValidatePattern handles basic format, but check ranges)
     $timeParts = $ScheduleTime -split ':'
     $hour = [int]$timeParts[0]
     $minute = [int]$timeParts[1]
 
     if ($hour -lt 0 -or $hour -gt 23 -or $minute -lt 0 -or $minute -gt 59) {
         Write-ScriptMessage -Message "Invalid time: $ScheduleTime. Hour must be 0-23, minute must be 0-59" -IsError
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
+        Exit-WithCode -ExitCode [ExitCode]::SetupError
     }
 
     try {
@@ -105,14 +125,14 @@ function Register-UpdateSchedule {
     }
     catch {
         Write-ScriptMessage -Message "PowerShell (pwsh) not found. Cannot create scheduled task." -IsError
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
+        Exit-WithCode -ExitCode [ExitCode]::SetupError
     }
 
     # Build script path
     $scriptPath = Join-Path $RepoRoot 'scripts' 'utils' 'dependencies' 'check-module-updates.ps1'
     if (-not (Test-Path $scriptPath)) {
         Write-ScriptMessage -Message "Script not found at: $scriptPath" -IsError
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
+        Exit-WithCode -ExitCode [ExitCode]::SetupError
     }
 
     # Build arguments
@@ -149,14 +169,14 @@ function Register-UpdateSchedule {
 
     # Create trigger based on frequency
     $trigger = $null
-    switch ($ScheduleFrequency) {
+    switch ($scheduleFrequencyString) {
         'Daily' {
             $trigger = New-ScheduledTaskTrigger -Daily -At $ScheduleTime
         }
         'Weekly' {
             if ($ScheduleDays.Count -eq 0) {
                 Write-ScriptMessage -Message "ScheduleDays is required for Weekly frequency" -IsError
-                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
+                Exit-WithCode -ExitCode [ExitCode]::SetupError
             }
             $daysOfWeek = $ScheduleDays | ForEach-Object {
                 [System.DayOfWeek]::Parse($_, $true)
@@ -166,7 +186,7 @@ function Register-UpdateSchedule {
         'Monthly' {
             if ($ScheduleDayOfMonth -lt 1 -or $ScheduleDayOfMonth -gt 31) {
                 Write-ScriptMessage -Message "ScheduleDayOfMonth must be between 1 and 31" -IsError
-                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
+                Exit-WithCode -ExitCode [ExitCode]::SetupError
             }
             $trigger = New-ScheduledTaskTrigger -Weekly -WeeksInterval 4 -DaysOfWeek ([System.DayOfWeek]::Sunday) -At $ScheduleTime
             # Note: Monthly triggers are complex in Task Scheduler. This is a simplified approach.
@@ -189,7 +209,7 @@ function Register-UpdateSchedule {
         Register-ScheduledTask -TaskName $ScheduledTaskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "Automatically checks and updates PowerShell modules" | Out-Null
     }
 
-    Write-ScriptMessage -Message "Scheduled task configured: $ScheduleFrequency at $ScheduleTime" -LogLevel Info
+        Write-ScriptMessage -Message "Scheduled task configured: $scheduleFrequencyString at $ScheduleTime" -LogLevel Info
 }
 
 <#

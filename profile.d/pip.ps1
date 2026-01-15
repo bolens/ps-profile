@@ -235,16 +235,40 @@ if (Test-CachedCommand pip) {
         )
         
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Requirements file not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Requirements file not found: $Path"),
+                        'RequirementsFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'pip.packages.import' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "Requirements file not found: $Path"
+            }
             return
         }
         
         if (Test-CachedCommand pip) {
-            $args = @('install', '-r', $Path)
-            if ($User) {
-                $args += '--user'
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Invoke-WithWideEvent -OperationName 'pip.packages.import' -Context @{
+                    path = $Path
+                    user = $User.IsPresent
+                } -ScriptBlock {
+                    $args = @('install', '-r', $Path)
+                    if ($User) {
+                        $args += '--user'
+                    }
+                    & pip @args
+                } | Out-Null
             }
-            & pip @args
+            else {
+                $args = @('install', '-r', $Path)
+                if ($User) {
+                    $args += '--user'
+                }
+                & pip @args
+            }
         }
         else {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'

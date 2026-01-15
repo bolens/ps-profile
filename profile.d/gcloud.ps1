@@ -12,7 +12,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common Google Cloud CLI operations.
-    Functions check for gcloud availability using Test-HasCommand for efficient
+    Functions check for gcloud availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES
@@ -44,11 +44,18 @@ function Invoke-GCloud {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand gcloud) {
-        gcloud @Arguments
+    # Use base module if available, otherwise fallback to direct execution
+    if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
     }
     else {
-        Write-MissingToolWarning -Tool 'gcloud' -InstallHint 'Install with: scoop install gcloud'
+        # Fallback to original implementation
+        if (Test-CachedCommand gcloud) {
+            gcloud @Arguments
+        }
+        else {
+            Write-MissingToolWarning -Tool 'gcloud' -InstallHint 'Install with: scoop install gcloud'
+        }
     }
 }
 
@@ -76,11 +83,19 @@ function Set-GCloudAuth {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand gcloud) {
-        gcloud auth @Arguments
+    # Use base module if available
+    if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
+        $allArgs = @('auth') + $Arguments
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.auth" -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
     }
     else {
-        Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+        # Fallback to original implementation
+        if (Test-CachedCommand gcloud) {
+            gcloud auth @Arguments
+        }
+        else {
+            Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+        }
     }
 }
 
@@ -108,11 +123,19 @@ function Set-GCloudConfig {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand gcloud) {
-        gcloud config @Arguments
+    # Use base module if available
+    if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
+        $allArgs = @('config') + $Arguments
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.config" -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
     }
     else {
-        Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+        # Fallback to original implementation
+        if (Test-CachedCommand gcloud) {
+            gcloud config @Arguments
+        }
+        else {
+            Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+        }
     }
 }
 
@@ -140,11 +163,23 @@ function Get-GCloudProjects {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand gcloud) {
-        gcloud projects @Arguments
+    # Use base module if available
+    if (Get-Command Get-CloudResources -ErrorAction SilentlyContinue) {
+        $allArgs = @('projects') + $Arguments
+        return Get-CloudResources -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.projects" -Context @{}
+    }
+    elseif (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
+        $allArgs = @('projects') + $Arguments
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.projects" -ParseJson $true -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
     }
     else {
-        Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+        # Fallback to original implementation
+        if (Test-CachedCommand gcloud) {
+            gcloud projects @Arguments
+        }
+        else {
+            Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+        }
     }
 }
 

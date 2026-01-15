@@ -124,18 +124,33 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @('install')
-            if ($Arguments) {
-                $cmdArgs += $Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'python.pipx.install' -Context @{
+                packages            = $Packages
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @('install')
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $cmdArgs += $Packages
+                & pipx @cmdArgs 2>&1
             }
-            $cmdArgs += $Packages
-            $result = & pipx @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run pipx install: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @('install')
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $cmdArgs += $Packages
+                $result = & pipx @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run pipx install: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -216,17 +231,31 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @('run', $Package)
-            if ($Arguments) {
-                $cmdArgs += $Arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'python.pipx.run' -Context @{
+                package             = $Package
+                has_additional_args = ($null -ne $Arguments)
+            } -ScriptBlock {
+                $cmdArgs = @('run', $Package)
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & pipx @cmdArgs 2>&1
             }
-            $result = & pipx @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run pipx: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @('run', $Package)
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & pipx @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run pipx: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -320,20 +349,38 @@ try {
             return $null
         }
 
-        try {
-            $cmdArgs = @()
-            if ($Script) {
-                $cmdArgs += $Script
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'python.script.invoke' -Context @{
+                script              = $Script
+                has_additional_args = ($null -ne $Arguments)
+                python_command      = $pythonCmd
+            } -ScriptBlock {
+                $cmdArgs = @()
+                if ($Script) {
+                    $cmdArgs += $Script
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                & $pythonCmd @cmdArgs 2>&1
             }
-            if ($Arguments) {
-                $cmdArgs += $Arguments
-            }
-            $result = & $pythonCmd @cmdArgs 2>&1
-            return $result
         }
-        catch {
-            Write-Error "Failed to run python: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $cmdArgs = @()
+                if ($Script) {
+                    $cmdArgs += $Script
+                }
+                if ($Arguments) {
+                    $cmdArgs += $Arguments
+                }
+                $result = & $pythonCmd @cmdArgs 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run python: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -409,13 +456,24 @@ try {
         }
 
         if ($pythonCmd) {
-            try {
-                $result = & $pythonCmd -m venv $Path 2>&1
-                return $result
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'python.venv.create' -Context @{
+                    path           = $Path
+                    python_version = $PythonVersion
+                    python_command = $pythonCmd
+                } -ScriptBlock {
+                    & $pythonCmd -m venv $Path 2>&1
+                }
             }
-            catch {
-                Write-Error "Failed to create venv with python: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $result = & $pythonCmd -m venv $Path 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to create venv with python: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
 
@@ -642,7 +700,15 @@ if __name__ == "__main__":
             return $projectPath
         }
         catch {
-            Write-Error "Failed to create Python project: $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'python.project.create' -Context @{
+                    project_name = $ProjectName
+                    project_path = $projectPath
+                }
+            }
+            else {
+                Write-Error "Failed to create Python project: $($_.Exception.Message)"
+            }
             return $null
         }
     }
@@ -713,18 +779,33 @@ if __name__ == "__main__":
 
         # Fallback to pip
         if (Test-CachedCommand 'pip') {
-            try {
-                $cmdArgs = @('install')
-                if ($Arguments) {
-                    $cmdArgs += $Arguments
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'python.pip.install' -Context @{
+                    packages            = $Packages
+                    has_additional_args = ($null -ne $Arguments)
+                } -ScriptBlock {
+                    $cmdArgs = @('install')
+                    if ($Arguments) {
+                        $cmdArgs += $Arguments
+                    }
+                    $cmdArgs += $Packages
+                    & pip @cmdArgs 2>&1
                 }
-                $cmdArgs += $Packages
-                $result = & pip @cmdArgs 2>&1
-                return $result
             }
-            catch {
-                Write-Error "Failed to install with pip: $($_.Exception.Message)"
-                return $null
+            else {
+                try {
+                    $cmdArgs = @('install')
+                    if ($Arguments) {
+                        $cmdArgs += $Arguments
+                    }
+                    $cmdArgs += $Packages
+                    $result = & pip @cmdArgs 2>&1
+                    return $result
+                }
+                catch {
+                    Write-Error "Failed to install with pip: $($_.Exception.Message)"
+                    return $null
+                }
             }
         }
 

@@ -160,7 +160,16 @@ function Get-PnpmGlobalPath {
         }
         catch {
             # Fall through to try common location
-            Write-Verbose "pnpm root -g command failed: $($_.Exception.Message)"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[nodejs.get-pnpm-global-path] pnpm root -g command failed: $($_.Exception.Message)"
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [nodejs.get-pnpm-global-path] Error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
+            }
         }
     }
     
@@ -169,6 +178,22 @@ function Get-PnpmGlobalPath {
         $commonPnpmPath = "$env:LOCALAPPDATA\pnpm\global\5\node_modules"
         if ($commonPnpmPath -and -not [string]::IsNullOrWhiteSpace($commonPnpmPath) -and (Test-Path -LiteralPath $commonPnpmPath)) {
             $pnpmGlobalPath = $commonPnpmPath
+            # Level 3: Log common location found
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[nodejs.get-pnpm-global-path] Found pnpm global path at common location: $commonPnpmPath"
+            }
+        }
+    }
+    
+    # Level 3: Log final result
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        if ($pnpmGlobalPath) {
+            Write-Host "  [nodejs.get-pnpm-global-path] Final pnpm global path: $pnpmGlobalPath" -ForegroundColor DarkGray
+        }
+        else {
+            Write-Host "  [nodejs.get-pnpm-global-path] No pnpm global path found" -ForegroundColor DarkGray
         }
     }
     
@@ -240,7 +265,23 @@ function Invoke-NodeScript {
                 }
             }
             catch {
-                Write-Warning "Failed to set NODE_PATH: $($_.Exception.Message). Continuing without pnpm global path."
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to set NODE_PATH: $($_.Exception.Message). Continuing without pnpm global path." -OperationName 'nodejs.invoke-script' -Context @{
+                            ScriptPath = $ScriptPath
+                            PnpmGlobalPath = $pnpmGlobalPath
+                            Error = $_.Exception.Message
+                        }
+                    }
+                    else {
+                        Write-Warning "[nodejs.invoke-script] Failed to set NODE_PATH: $($_.Exception.Message). Continuing without pnpm global path."
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [nodejs.invoke-script] NODE_PATH error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
             }
         }
         
@@ -282,7 +323,38 @@ function Invoke-NodeScript {
             if ($Arguments -and $Arguments.Count -gt 0) {
                 $errorContext += " with arguments: $($Arguments -join ' ')"
             }
-            Write-Error "$errorContext`: $($_.Exception.Message)"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'nodejs.invoke-script' -Context @{
+                            ScriptPath = $ScriptPath
+                            Arguments = $Arguments
+                            ErrorContext = $errorContext
+                        }
+                    }
+                    else {
+                        Write-Error "$errorContext`: $($_.Exception.Message)" -ErrorAction Continue
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[nodejs.invoke-script] Execution error details - ScriptPath: $ScriptPath, Arguments: $($Arguments -join ', '), Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
+                }
+            }
+            else {
+                # Always log critical errors even if debug is off
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'nodejs.invoke-script' -Context @{
+                        ScriptPath = $ScriptPath
+                        Arguments = $Arguments
+                        ErrorContext = $errorContext
+                    }
+                }
+                else {
+                    Write-Error "$errorContext`: $($_.Exception.Message)" -ErrorAction Continue
+                }
+            }
             throw
         }
     }
@@ -297,7 +369,26 @@ function Invoke-NodeScript {
             }
         }
         catch {
-            Write-Warning "Failed to restore NODE_PATH: $($_.Exception.Message)"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to restore NODE_PATH: $($_.Exception.Message)" -OperationName 'nodejs.invoke-script' -Context @{
+                            ScriptPath = $ScriptPath
+                            OriginalNodePath = $originalNodePath
+                            PnpmGlobalPath = $pnpmGlobalPath
+                            Error = $_.Exception.Message
+                        }
+                    }
+                    else {
+                        Write-Warning "[nodejs.invoke-script] Failed to restore NODE_PATH: $($_.Exception.Message)"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [nodejs.invoke-script] NODE_PATH restore error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
+            }
         }
     }
 }

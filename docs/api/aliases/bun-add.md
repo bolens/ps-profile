@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\32-bun.ps1
+Defined in: ..\profile.d\bun.ps1

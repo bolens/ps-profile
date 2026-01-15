@@ -35,4 +35,4 @@ Load-EnsureModules -EnsureFunctionName 'Ensure-FileConversion-Data' -BaseDir $PS
 
 ## Source
 
-Defined in: ..\profile.d\02-files-module-registry.ps1
+Defined in: ..\profile.d\files-module-registry.ps1

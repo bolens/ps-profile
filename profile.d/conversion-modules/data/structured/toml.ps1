@@ -27,78 +27,270 @@ function Initialize-FileConversion-Toml {
     # TOML to JSON
     Set-Item -Path Function:Global:_ConvertFrom-TomlToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.to-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toml$', '.json'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-json] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $json | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.toml.to-json] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.toml.to-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+                }
             }
             else {
-                throw "yq command failed"
+                throw "yq command failed with exit code $LASTEXITCODE"
             }
         }
         catch {
-            Write-Error "Failed to convert TOML to JSON: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert TOML to JSON: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # JSON to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.from-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.json$', '.toml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-json] Output path: $OutputPath"
+            }
+            
             if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
                 throw "PSToml module is not available. Install it with: Install-Module PSToml"
             }
+            
+            $convStartTime = Get-Date
             $jsonObj = Get-Content -LiteralPath $InputPath -Raw | ConvertFrom-Json
             $toml = $jsonObj | ConvertTo-Toml -Depth 100
             if (-not $toml) {
                 throw "PSToml conversion failed"
             }
             Set-Content -LiteralPath $OutputPath -Value $toml -Encoding UTF8
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-json] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.toml.from-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert JSON to TOML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    pstoml_available = $pstomlAvailable
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSON to TOML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.from-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # TOML to YAML
     Set-Item -Path Function:Global:_ConvertFrom-TomlToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.to-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toml$', '.yaml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-yaml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $yaml = & yq eval -P -p toml -o yaml '.' $InputPath 2>$null
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
             if ($LASTEXITCODE -eq 0 -and $yaml) {
                 $yaml | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.toml.to-yaml] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.toml.to-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+                }
             }
             else {
-                throw "yq command failed"
+                throw "yq command failed with exit code $LASTEXITCODE"
             }
         }
         catch {
-            Write-Error "Failed to convert TOML to YAML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert TOML to YAML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.to-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # YAML to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.from-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ya?ml$', '.toml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-yaml] Output path: $OutputPath"
+            }
+            
             if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
                 throw "PSToml module is not available. Install it with: Install-Module PSToml"
             }
+            
+            $convStartTime = Get-Date
             $json = & yq eval -o=json $InputPath 2>$null
             if ($LASTEXITCODE -ne 0 -or -not $json) {
-                throw "yq command failed"
+                throw "yq command failed with exit code $LASTEXITCODE"
             }
             $jsonObj = $json | ConvertFrom-Json
             $toml = $jsonObj | ConvertTo-Toml -Depth 100
@@ -106,44 +298,159 @@ function Initialize-FileConversion-Toml {
                 throw "PSToml conversion failed"
             }
             Set-Content -LiteralPath $OutputPath -Value $toml -Encoding UTF8
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-yaml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.toml.from-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert YAML to TOML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                    pstoml_available = $pstomlAvailable
+                }
+            }
+            else {
+                Write-Error "Failed to convert YAML to TOML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.from-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # TOML to TOON
     Set-Item -Path Function:Global:_ConvertFrom-TomlToToon -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.to-toon] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toml$', '.toon'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-toon] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $jsonObj = $json | ConvertFrom-Json
                 $toon = Convert-JsonToToon -JsonObject $jsonObj
                 Set-Content -LiteralPath $OutputPath -Value $toon -Encoding UTF8
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.toml.to-toon] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.toml.to-toon] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+                }
             }
             else {
-                throw "yq command failed"
+                throw "yq command failed with exit code $LASTEXITCODE"
             }
         }
         catch {
-            Write-Error "Failed to convert TOML to TOON: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-toon' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert TOML to TOON: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-toon] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.to-toon] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # TOON to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromToon -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.from-toon] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toon$', '.toml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-toon] Output path: $OutputPath"
+            }
+            
             if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
                 throw "PSToml module is not available. Install it with: Install-Module PSToml"
             }
+            
+            $convStartTime = Get-Date
             $toon = Get-Content -LiteralPath $InputPath -Raw
             $jsonObj = Convert-ToonToJson -ToonString $toon
             $toml = $jsonObj | ConvertTo-Toml -Depth 100
@@ -151,44 +458,158 @@ function Initialize-FileConversion-Toml {
                 throw "PSToml conversion failed"
             }
             Set-Content -LiteralPath $OutputPath -Value $toml -Encoding UTF8
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-toon] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.toml.from-toon] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert TOON to TOML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-toon' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    pstoml_available = $pstomlAvailable
+                }
+            }
+            else {
+                Write-Error "Failed to convert TOON to TOML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-toon] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.from-toon] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # TOML to XML
     Set-Item -Path Function:Global:_ConvertFrom-TomlToXml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.to-xml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toml$', '.xml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-xml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $jsonObj = $json | ConvertFrom-Json
                 $xml = Convert-JsonToXml -JsonObject $jsonObj
                 $xml.Save($OutputPath)
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.toml.to-xml] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.toml.to-xml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+                }
             }
             else {
-                throw "yq command failed"
+                throw "yq command failed with exit code $LASTEXITCODE"
             }
         }
         catch {
-            Write-Error "Failed to convert TOML to XML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-xml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert TOML to XML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.to-xml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.to-xml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # XML to TOML
     Set-Item -Path Function:Global:_ConvertTo-TomlFromXml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.toml.from-xml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.xml$', '.toml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-xml] Output path: $OutputPath"
+            }
+            
             if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
                 throw "PSToml module is not available. Install it with: Install-Module PSToml"
             }
+            
+            $convStartTime = Get-Date
             $xml = [xml](Get-Content -LiteralPath $InputPath -Raw)
             $result = @{}
             $result[$xml.DocumentElement.Name] = Convert-XmlToJsonObject $xml.DocumentElement
@@ -198,9 +619,48 @@ function Initialize-FileConversion-Toml {
                 throw "PSToml conversion failed"
             }
             Set-Content -LiteralPath $OutputPath -Value $toml -Encoding UTF8
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-xml] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.toml.from-xml] Root element: $($xml.DocumentElement.Name)"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.toml.from-xml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Root element: $($xml.DocumentElement.Name)" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert XML to TOML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-xml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    pstoml_available = $pstomlAvailable
+                }
+            }
+            else {
+                Write-Error "Failed to convert XML to TOML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.toml.from-xml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.toml.from-xml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 }

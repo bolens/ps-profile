@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Installs project dependencies.
+Adds packages to project dependencies.
 
 ## Description
 
-Wrapper for yarn install command.
+Wrapper for yarn add command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\41-yarn.ps1
+Defined in: ..\profile.d\yarn.ps1

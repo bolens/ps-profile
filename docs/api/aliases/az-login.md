@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\50-azure.ps1
+Defined in: ..\profile.d\azure.ps1

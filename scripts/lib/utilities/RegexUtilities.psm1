@@ -48,6 +48,7 @@ function New-CompiledRegex {
     [OutputType([System.Text.RegularExpressions.Regex])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Pattern,
 
         [System.Text.RegularExpressions.RegexOptions]$Options = [System.Text.RegularExpressions.RegexOptions]::None,

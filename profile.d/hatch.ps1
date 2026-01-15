@@ -8,7 +8,8 @@
 # Tier: standard
 # Dependencies: bootstrap, env
 
-if (Test-CachedCommand hatch) {
+# Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand hatch)) {
     # Hatch env create - create virtual environment
     <#
     .SYNOPSIS

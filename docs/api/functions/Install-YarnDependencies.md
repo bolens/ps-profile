@@ -35,4 +35,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\41-yarn.ps1
+Defined in: ..\profile.d\yarn.ps1

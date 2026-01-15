@@ -49,6 +49,22 @@ Describe 'kubernetes-enhanced.ps1 - Function Registration' {
     It 'Registers Start-K9s function' {
         Get-Command -Name 'Start-K9s' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
+    
+    It 'Registers Exec-KubePod function' {
+        Get-Command -Name 'Exec-KubePod' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    }
+    
+    It 'Registers PortForward-KubeService function' {
+        Get-Command -Name 'PortForward-KubeService' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    }
+    
+    It 'Registers Describe-KubeResource function' {
+        Get-Command -Name 'Describe-KubeResource' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    }
+    
+    It 'Registers Apply-KubeManifests function' {
+        Get-Command -Name 'Apply-KubeManifests' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    }
 }
 
 Describe 'kubernetes-enhanced.ps1 - Graceful Degradation' {
@@ -74,6 +90,23 @@ Describe 'kubernetes-enhanced.ps1 - Graceful Degradation' {
     
     It 'Start-K9s handles missing tool gracefully' {
         { Start-K9s -ErrorAction SilentlyContinue } | Should -Not -Throw
+    }
+    
+    It 'Exec-KubePod handles missing tool gracefully' {
+        { Exec-KubePod -Pod 'test-pod' -Command 'ls' -ErrorAction SilentlyContinue } | Should -Not -Throw
+    }
+    
+    It 'PortForward-KubeService handles missing tool gracefully' {
+        { PortForward-KubeService -Resource 'test-pod' -LocalPort 8080 -RemotePort 80 -ErrorAction SilentlyContinue } | Should -Not -Throw
+    }
+    
+    It 'Describe-KubeResource handles missing tool gracefully' {
+        { Describe-KubeResource -ResourceType 'pods' -ErrorAction SilentlyContinue } | Should -Not -Throw
+    }
+    
+    It 'Apply-KubeManifests handles missing tool gracefully' {
+        Mock Test-Path -MockWith { return $true }
+        { Apply-KubeManifests -Path 'manifests/' -ErrorAction SilentlyContinue } | Should -Not -Throw
     }
 }
 

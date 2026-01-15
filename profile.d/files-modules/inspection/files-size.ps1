@@ -17,7 +17,17 @@ function Initialize-FileUtilities-Size {
     Set-Item -Path Function:Global:_Get-FileSize -Value {
         param([string]$Path)
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "File not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("File not found: $Path"),
+                        'FileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'files.size.get' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "File not found: $Path"
+            }
             return
         }
         $len = (Get-Item -LiteralPath $Path).Length

@@ -1,4 +1,4 @@
-# Load TestSupport.ps1 - ensure it's loaded before using its functions
+﻿# Load TestSupport.ps1 - ensure it's loaded before using its functions
 $testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
 if (Test-Path $testSupportPath) {
     . $testSupportPath
@@ -816,6 +816,16 @@ function global:Test-FlakyFunction {
     Context 'Import-FragmentModule - Dependency Checking' {
         It 'Checks for module dependencies' {
             $moduleName = "TestModuleDep_$(Get-Random)"
+            <#
+            .SYNOPSIS
+                Performs operations related to Test-ModuleFunction.
+            
+            .DESCRIPTION
+                Performs operations related to Test-ModuleFunction.
+            
+            .OUTPUTS
+                object
+            #>
             $module = New-Module -Name $moduleName -ScriptBlock { function Test-ModuleFunction { 'module' } }
             Import-Module $module -Force
             

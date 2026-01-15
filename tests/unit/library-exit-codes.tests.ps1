@@ -199,6 +199,67 @@ Exit-WithCode -ExitCode `$EXIT_SUCCESS -Message ''
             & pwsh -NoProfile -File $testScript 2>&1 | Out-Null
             $LASTEXITCODE | Should -Be 0
         }
+
+        It 'Accepts ExitCode enum value' {
+            $testScript = Join-Path $TestDrive "test-exit-enum-$(Get-Random).ps1"
+            $scriptContent = @"
+Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
+Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+"@
+            Set-Content -Path $testScript -Value $scriptContent
+            
+            & pwsh -NoProfile -File $testScript 2>&1 | Out-Null
+            $LASTEXITCODE | Should -Be 1
+        }
+
+        It 'Accepts ExitCode enum for all values' {
+            $testCases = @(
+                @{ EnumValue = '[ExitCode]::Success'; ExpectedCode = 0 }
+                @{ EnumValue = '[ExitCode]::ValidationFailure'; ExpectedCode = 1 }
+                @{ EnumValue = '[ExitCode]::SetupError'; ExpectedCode = 2 }
+                @{ EnumValue = '[ExitCode]::OtherError'; ExpectedCode = 3 }
+                @{ EnumValue = '[ExitCode]::TestFailure'; ExpectedCode = 4 }
+                @{ EnumValue = '[ExitCode]::TestTimeout'; ExpectedCode = 5 }
+                @{ EnumValue = '[ExitCode]::CoverageFailure'; ExpectedCode = 6 }
+                @{ EnumValue = '[ExitCode]::NoTestsFound'; ExpectedCode = 7 }
+                @{ EnumValue = '[ExitCode]::WatchModeCanceled'; ExpectedCode = 8 }
+            )
+
+            foreach ($testCase in $testCases) {
+                $testScript = Join-Path $TestDrive "test-exit-enum-$($testCase.ExpectedCode)-$(Get-Random).ps1"
+                $scriptContent = @"
+Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
+Exit-WithCode -ExitCode $($testCase.EnumValue)
+"@
+                Set-Content -Path $testScript -Value $scriptContent
+                
+                & pwsh -NoProfile -File $testScript 2>&1 | Out-Null
+                $LASTEXITCODE | Should -Be $testCase.ExpectedCode -Because "ExitCode enum $($testCase.EnumValue) should exit with code $($testCase.ExpectedCode)"
+            }
+        }
+    }
+
+    Context 'ExitCode Enum' {
+        It 'ExitCode enum is available' {
+            $exitCodeType = [ExitCode]
+            $exitCodeType | Should -Not -BeNullOrEmpty
+        }
+
+        It 'ExitCode enum has all expected values' {
+            $expectedValues = @('Success', 'ValidationFailure', 'SetupError', 'OtherError', 'TestFailure', 'TestTimeout', 'CoverageFailure', 'NoTestsFound', 'WatchModeCanceled')
+            $enumValues = [Enum]::GetNames([ExitCode])
+            
+            foreach ($expected in $expectedValues) {
+                $enumValues | Should -Contain $expected -Because "ExitCode enum should contain $expected"
+            }
+        }
+
+        It 'ExitCode enum values match constant values' {
+            [int][ExitCode]::Success | Should -Be $EXIT_SUCCESS
+            [int][ExitCode]::ValidationFailure | Should -Be $EXIT_VALIDATION_FAILURE
+            [int][ExitCode]::SetupError | Should -Be $EXIT_SETUP_ERROR
+            [int][ExitCode]::OtherError | Should -Be $EXIT_OTHER_ERROR
+        }
     }
 }
 

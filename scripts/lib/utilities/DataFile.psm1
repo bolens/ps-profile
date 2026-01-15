@@ -11,7 +11,12 @@ scripts/lib/DataFile.psm1
 .NOTES
     Module Version: 1.0.0
     PowerShell Version: 3.0+
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
@@ -62,6 +67,7 @@ function Import-CachedPowerShellDataFile {
     [OutputType([hashtable])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
 
         [int]$ExpirationSeconds = 300
@@ -100,39 +106,68 @@ function Import-CachedPowerShellDataFile {
         # Check if cached result exists (including empty hashtables)
         # Note: Empty hashtable @{} is not null, so we need to check if it's actually a hashtable
         if ($null -ne $cachedResult) {
-            Write-Verbose "Using cached data for $Path"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [data-file.import] Using cached data for $Path" -ForegroundColor DarkGray
+            }
             # Ensure cached result is a hashtable
             if ($cachedResult -is [hashtable]) {
                 return $cachedResult
             }
             # If cache returned something unexpected (not a hashtable), fall through to re-import
-            Write-Verbose "Cached value is not a hashtable (type: $($cachedResult.GetType().FullName)), re-importing"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[data-file.import] Cached value is not a hashtable (type: $($cachedResult.GetType().FullName)), re-importing"
+            }
         }
     }
 
     # Import and cache
     try {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[data-file.import] Importing PowerShell data file: $Path"
+        }
+        
         $result = Import-PowerShellDataFile -Path $Path -ErrorAction Stop
-        Write-Verbose "Import-PowerShellDataFile returned: $($null -eq $result), Type: $(if ($result) { $result.GetType().FullName } else { 'null' })"
+        
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Verbose "[data-file.import] Import-PowerShellDataFile returned: $($null -eq $result), Type: $(if ($result) { $result.GetType().FullName } else { 'null' })"
+        }
+        
         # Ensure we return a hashtable even if Import-PowerShellDataFile returns null for empty hashtables
         # This can happen with empty hashtables or whitespace-only files
         if ($null -eq $result) {
-            Write-Verbose "Import-PowerShellDataFile returned null, creating empty hashtable"
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [data-file.import] Import-PowerShellDataFile returned null, creating empty hashtable" -ForegroundColor DarkGray
+            }
             $result = @{}
         }
         # Also ensure result is a hashtable (not PSCustomObject or other type)
         if ($result -isnot [hashtable]) {
-            Write-Verbose "Import-PowerShellDataFile returned non-hashtable, creating empty hashtable"
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[data-file.import] Import-PowerShellDataFile returned non-hashtable, creating empty hashtable"
+            }
             $result = @{}
         }
-        Write-Verbose "Final result: $($null -eq $result), Type: $(if ($result) { $result.GetType().FullName } else { 'null' }), Count: $(if ($result) { $result.Count } else { 'N/A' })"
+        
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [data-file.import] Final result: $($null -eq $result), Type: $(if ($result) { $result.GetType().FullName } else { 'null' }), Count: $(if ($result) { $result.Count } else { 'N/A' })" -ForegroundColor DarkGray
+        }
+        
         # Double-check: ensure we always return a hashtable (defensive programming)
         if ($null -eq $result -or $result -isnot [hashtable]) {
-            Write-Verbose "Result is null or not a hashtable, forcing empty hashtable"
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[data-file.import] Result is null or not a hashtable, forcing empty hashtable"
+            }
             $result = @{}
         }
         if (Get-Command Set-CachedValue -ErrorAction SilentlyContinue) {
             Set-CachedValue -Key $cacheKey -Value $result -ExpirationSeconds $ExpirationSeconds
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [data-file.import] Cached imported data with key: $cacheKey" -ForegroundColor DarkGray
+            }
         }
     }
     catch {
@@ -162,14 +197,35 @@ function Import-CachedPowerShellDataFile {
             }
         }
         else {
-            throw "Failed to import PowerShell data file $Path`: $($_.Exception.Message)"
+            $errorMsg = "Failed to import PowerShell data file $Path`: $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'data-file.import' -Context @{
+                    data_file_path = $Path
+                    error_message  = $errorMsg
+                }
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Error "[data-file.import] $errorMsg" -ErrorAction Continue
+                }
+            }
+            throw $errorMsg
         }
     }
     
     # Final safety check - ensure we always return a hashtable
     if ($null -eq $result -or $result -isnot [hashtable]) {
-        Write-Verbose "Final safety check: forcing empty hashtable return"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[data-file.import] Final safety check: forcing empty hashtable return"
+        }
         $result = @{}
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[data-file.import] Successfully imported PowerShell data file: $Path (Count: $($result.Count))"
     }
     
     return $result

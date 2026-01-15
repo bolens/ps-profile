@@ -12,7 +12,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common Yarn operations.
-    Functions check for yarn availability using Test-HasCommand for efficient
+    Functions check for yarn availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

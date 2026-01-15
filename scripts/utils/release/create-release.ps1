@@ -126,7 +126,7 @@ $newVersion = "$major.$minor.$patch"
 Write-ScriptMessage -Message "New version would be: $newVersion"
 
 if ($DryRun) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "`nDRY RUN - No changes made"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "`nDRY RUN - No changes made"
 }
 
 # Generate changelog
@@ -134,11 +134,11 @@ Write-ScriptMessage -Message "`nGenerating changelog..."
 try {
     & (Join-Path $PSScriptRoot 'generate-changelog.ps1') -Unreleased
     if ($LASTEXITCODE -ne 0) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog"
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to generate changelog"
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Create git tag
@@ -146,11 +146,11 @@ Write-ScriptMessage -Message "Creating git tag v$newVersion..."
 try {
     git tag -a "v$newVersion" -m "Release v$newVersion"
     if ($LASTEXITCODE -ne 0) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to create git tag"
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to create git tag"
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Push tag
@@ -158,11 +158,11 @@ Write-ScriptMessage -Message "Pushing tag to remote..."
 try {
     git push origin "v$newVersion"
     if ($LASTEXITCODE -ne 0) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to push tag to remote"
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to push tag to remote"
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "`nRelease v$newVersion created successfully!`nGitHub Actions will automatically create the GitHub release."
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "`nRelease v$newVersion created successfully!`nGitHub Actions will automatically create the GitHub release."

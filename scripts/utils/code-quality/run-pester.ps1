@@ -681,7 +681,13 @@ try {
 }
 catch {
     Write-Host "Failed to import test runner modules: $_" -ForegroundColor Red
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+}
+
+# Parse debug level once at script start (after modules are loaded)
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
 }
 
 # Helper function to exit while ensuring cleanup
@@ -711,6 +717,11 @@ function Exit-WithCleanup {
     }
 }
 
+# Level 1: Repository root resolution start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[test.run-pester] Resolving repository paths"
+}
+
 # Get repository root (use scriptRoot we already calculated, similar to analyze-coverage.ps1)
 Write-Host "Resolving repository paths..." -ForegroundColor Yellow
 try {
@@ -728,18 +739,32 @@ try {
     $testsDir = Join-Path $repoRoot 'tests'
     $profileDir = Join-Path $repoRoot 'profile.d'
     $testSupportPath = Join-Path $testsDir 'TestSupport.ps1'
+    
+    # Level 2: Repository paths resolved
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[test.run-pester] Repository root: $repoRoot"
+        Write-Verbose "[test.run-pester] Tests directory: $testsDir, Profile directory: $profileDir"
+    }
+    
     Write-Host "Repository root: $repoRoot" -ForegroundColor Green
 }
 catch {
     Write-Host "Failed to resolve repository root: $_" -ForegroundColor Red
-    Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCleanup -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Load configuration file if specified (before processing other parameters)
 if ($ConfigFile) {
+    # Level 1: Configuration file loading start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.run-pester] Loading configuration from: $ConfigFile"
+    }
+    
     try {
         Write-Host "Loading configuration from: $ConfigFile" -ForegroundColor Yellow
+        $configLoadStartTime = Get-Date
         $configParams = Load-TestConfig -ConfigPath $ConfigFile
+        $configLoadDuration = ((Get-Date) - $configLoadStartTime).TotalMilliseconds
         
         # Apply config file parameters, but command-line parameters take precedence
         foreach ($key in $configParams.Keys) {
@@ -748,16 +773,22 @@ if ($ConfigFile) {
                 Set-Variable -Name $key -Value $configParams[$key] -Scope Script
             }
         }
+        
+        # Level 2: Configuration loading timing
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Configuration loaded in ${configLoadDuration}ms - Parameters: $($configParams.Keys.Count)"
+        }
+        
         Write-Host "Configuration loaded successfully" -ForegroundColor Green
     }
     catch {
         Write-Host "Failed to load configuration file: $_" -ForegroundColor Red
-        Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCleanup -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
 }
 
 if (-not (Test-Path -LiteralPath $testSupportPath)) {
-    Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -Message "Test support script not found at $testSupportPath"
+    Exit-WithCleanup -ExitCode [ExitCode]::SetupError -Message "Test support script not found at $testSupportPath"
 }
 
 # Ensure confirmation suppression is active before loading TestSupport (tests may run during load)
@@ -795,7 +826,7 @@ try {
 }
 catch {
     Write-Host "Failed to ensure Pester is available: $_" -ForegroundColor Red
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 $installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
@@ -806,43 +837,60 @@ if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersio
         $installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
     }
     catch {
-        Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCleanup -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
 }
 
 if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
     $message = "Pester $requiredPesterVersion or newer is required but could not be installed."
-    Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -Message $message
+    Exit-WithCleanup -ExitCode [ExitCode]::SetupError -Message $message
 }
 
 try {
     Import-Module -Name 'Pester' -MinimumVersion $requiredPesterVersion -Force -ErrorAction Stop
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 Write-Host "Using Pester v$($installedPester.Version)" -ForegroundColor Cyan
 
 # Perform health check if requested
 if ($HealthCheck) {
+    # Level 1: Health check start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.run-pester] Performing environment health check"
+    }
+    
     Write-ScriptMessage -Message "Performing environment health check..."
+    $healthCheckStartTime = Get-Date
     $healthResults = Test-TestEnvironmentHealth -CheckModules -CheckPaths -CheckTools
+    $healthCheckDuration = ((Get-Date) - $healthCheckStartTime).TotalMilliseconds
 
     if (-not $healthResults.Passed) {
         Write-ScriptMessage -Message "Health check failed:" -LogLevel 'Error'
         foreach ($check in $healthResults.Checks | Where-Object { -not $_.Passed }) {
             Write-ScriptMessage -Message "  - $($check.Name): $($check.Message)" -LogLevel 'Error'
         }
+        
+        # Level 2: Health check failure details
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Health check failed in ${healthCheckDuration}ms - Failed checks: $(($healthResults.Checks | Where-Object { -not $_.Passed }).Count)"
+        }
 
         if ($StrictMode) {
-            Exit-WithCleanup -ExitCode $EXIT_VALIDATION_FAILURE -Message "Environment health check failed"
+            Exit-WithCleanup -ExitCode [ExitCode]::ValidationFailure -Message "Environment health check failed"
         }
         else {
             Write-ScriptMessage -Message "Continuing despite health check failures..." -LogLevel 'Warning'
         }
     }
     else {
+        # Level 2: Health check success timing
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Health check passed in ${healthCheckDuration}ms"
+        }
+        
         Write-ScriptMessage -Message "Environment health check passed"
     }
 }
@@ -868,13 +916,19 @@ if (Get-Command 'Initialize-TestMocks' -ErrorAction SilentlyContinue) {
 # Prevent recursive execution - if we're already running tests, don't run again
 if ($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
     Write-ScriptMessage -Message "Test runner is already active. Skipping recursive execution to prevent infinite loops." -LogLevel 'Warning'
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Recursive test execution detected and prevented"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Recursive test execution detected and prevented"
 }
 
 # Mark that we're running tests
 $env:PS_PROFILE_TEST_RUNNER_ACTIVE = '1'
 
+# Level 1: Main execution start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[test.run-pester] Starting main test execution"
+}
+
 # Wrap main execution in try-finally to ensure we always clear the flag
+$executionStartTime = Get-Date
 try {
 
     # Create Pester configuration using modular function
@@ -943,17 +997,29 @@ try {
 
     # Handle special modes before test discovery
     if ($FailedOnly) {
+        # Level 1: Failed only mode start
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[test.run-pester] Failed-only mode - reading failed tests from last run"
+        }
+        
         Write-Host "Reading failed tests from last run..." -ForegroundColor Yellow
+        $failedOnlyStartTime = Get-Date
         $failedTestInfo = Get-FailedTestsFromLastRun -TestResultPath $TestResultPath -RepoRoot $repoRoot
+        $failedOnlyDuration = ((Get-Date) - $failedOnlyStartTime).TotalMilliseconds
+        
+        # Level 2: Failed tests reading timing
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Failed tests read in ${failedOnlyDuration}ms - Found: $($failedTestInfo.FailedTests.Count)"
+        }
     
         if (-not $failedTestInfo.Success) {
             Write-Host "ERROR: $($failedTestInfo.Message)" -ForegroundColor Red
-            Exit-WithCleanup -ExitCode $EXIT_VALIDATION_FAILURE -Message $failedTestInfo.Message
+            Exit-WithCleanup -ExitCode [ExitCode]::ValidationFailure -Message $failedTestInfo.Message
         }
     
         if ($failedTestInfo.FailedTests.Count -eq 0) {
             Write-Host "No failed tests found in last run. All tests passed!" -ForegroundColor Green
-            Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "No failed tests to re-run"
+            Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "No failed tests to re-run"
         }
     
         Write-Host "Found $($failedTestInfo.FailedTests.Count) failed test(s)" -ForegroundColor Yellow
@@ -979,7 +1045,13 @@ try {
 
     # Handle git integration
     if ($ChangedFiles -or $ChangedSince) {
+        # Level 1: Git integration start
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[test.run-pester] Git integration - Changed files: $ChangedFiles, Changed since: $ChangedSince"
+        }
+        
         Write-Host "Detecting changed files in git..." -ForegroundColor Yellow
+        $gitStartTime = Get-Date
     
         if ($ChangedSince) {
             $changedSourceFiles = Get-GitChangedFilesSince -Since $ChangedSince -RepoRoot $repoRoot
@@ -987,18 +1059,37 @@ try {
         else {
             $changedSourceFiles = Get-GitChangedFiles -IncludeUntracked:$IncludeUntracked -RepoRoot $repoRoot
         }
+        
+        $gitDuration = ((Get-Date) - $gitStartTime).TotalMilliseconds
+        
+        # Level 2: Git integration timing
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Git changed files detection completed in ${gitDuration}ms - Found: $($changedSourceFiles.Count)"
+        }
     
         if ($changedSourceFiles.Count -eq 0) {
             Write-Host "No changed files found." -ForegroundColor Yellow
             if (-not $ListTests) {
-                Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "No changed files to test"
+                Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "No changed files to test"
             }
         }
         else {
             Write-Host "Found $($changedSourceFiles.Count) changed file(s)" -ForegroundColor Green
         
+            # Level 1: Test file mapping start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Mapping changed files to test files"
+            }
+            
             # Map changed files to test files
+            $mappingStartTime = Get-Date
             $changedTestFiles = Get-TestFilesForSourceFiles -SourceFiles $changedSourceFiles -RepoRoot $repoRoot
+            $mappingDuration = ((Get-Date) - $mappingStartTime).TotalMilliseconds
+            
+            # Level 2: Test file mapping timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[test.run-pester] Test file mapping completed in ${mappingDuration}ms - Mapped: $($changedTestFiles.Count)"
+            }
         
             if ($changedTestFiles.Count -eq 0) {
                 Write-Host "Warning: Could not map changed files to test files." -ForegroundColor Yellow
@@ -1018,12 +1109,32 @@ try {
         }
     }
 
+    # Level 1: Test discovery start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.run-pester] Discovering test files"
+        Write-Verbose "[test.run-pester] Suite: $Suite, Test file: $TestFile"
+    }
+    
     # Get test paths first (before creating config to avoid read-only issues)
     Write-Host "Discovering test files..." -ForegroundColor Yellow
+    $discoveryStartTime = Get-Date
     $testPaths = Get-TestPaths -Suite $Suite -TestFile $TestFile -RepoRoot $repoRoot
+    $discoveryDuration = ((Get-Date) - $discoveryStartTime).TotalMilliseconds
+    
+    # Level 2: Test discovery timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[test.run-pester] Test discovery completed in ${discoveryDuration}ms - Found: $($testPaths.Count) path(s)"
+    }
 
     # Filter test paths to exclude test-runner test files
+    $filterStartTime = Get-Date
     $filteredTestPaths = Filter-TestPaths -TestPaths $testPaths -TestRunnerScriptPath $PSCommandPath
+    $filterDuration = ((Get-Date) - $filterStartTime).TotalMilliseconds
+    
+    # Level 2: Test path filtering timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[test.run-pester] Test path filtering completed in ${filterDuration}ms - Filtered: $($filteredTestPaths.Count) path(s)"
+    }
 
     # Apply test file pattern filter if specified
     if ($TestFilePattern -and $filteredTestPaths.Count -gt 0) {
@@ -1035,7 +1146,7 @@ try {
     
         if ($filteredTestPaths.Count -eq 0) {
             Write-Host "ERROR: No test files match pattern: $TestFilePattern" -ForegroundColor Red
-            Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No test files match pattern: $TestFilePattern"
+            Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No test files match pattern: $TestFilePattern"
         }
     
         Write-Host "Filtered to $($filteredTestPaths.Count) test file(s) matching pattern: $TestFilePattern" -ForegroundColor Green
@@ -1043,7 +1154,7 @@ try {
 
     if ($filteredTestPaths.Count -eq 0) {
         Write-Host "ERROR: No valid test paths found after filtering" -ForegroundColor Red
-        Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No valid test paths found after filtering"
+        Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No valid test paths found after filtering"
     }
 
     # Handle Interactive mode
@@ -1053,7 +1164,7 @@ try {
     
         if ($testList.Tests.Count -eq 0) {
             Write-Host "No tests found to select." -ForegroundColor Yellow
-            Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No tests found for interactive selection"
+            Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No tests found for interactive selection"
         }
     
         $selection = Select-TestsInteractively -TestList $testList -RepoRoot $repoRoot
@@ -1072,7 +1183,7 @@ try {
                 "Interactive test selection canceled"
             }
             Write-Host $cancelMsg -ForegroundColor Yellow
-            Exit-WithCleanup -ExitCode $EXIT_WATCH_MODE_CANCELED -Message $exitMsg
+            Exit-WithCleanup -ExitCode [ExitCode]::WatchModeCanceled -Message $exitMsg
         }
     
         # Update filtered paths to only selected files
@@ -1081,7 +1192,7 @@ try {
         
             if ($filteredTestPaths.Count -eq 0) {
                 Write-Host "No test files selected." -ForegroundColor Yellow
-                Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No test files selected"
+                Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No test files selected"
             }
         
             Write-Host "Running $($selection.SelectedTests.Count) selected test(s) from $($filteredTestPaths.Count) file(s)" -ForegroundColor Green
@@ -1090,20 +1201,46 @@ try {
 
     # Handle ListTests mode
     if ($ListTests) {
+        # Level 1: List tests mode start
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[test.run-pester] List tests mode - showing test list without running"
+        }
+        
         Write-Host "`n=== Listing Tests (Not Running) ===" -ForegroundColor Cyan
+        $listStartTime = Get-Date
         $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
+        $listDuration = ((Get-Date) - $listStartTime).TotalMilliseconds
+        
+        # Level 2: Test listing timing
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Test list generated in ${listDuration}ms - Tests: $($testList.TestCount)"
+        }
+        
         Show-TestList -TestList $testList -ShowDetails:$ShowDetails
-        Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "Test listing completed"
+        Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "Test listing completed"
     }
 
+    # Level 1: Test count summary
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.run-pester] Generating test count summary"
+    }
+    
     # Enhanced test count summary
     Write-Host "Found $($filteredTestPaths.Count) test file(s) to run" -ForegroundColor Green
     if ($Verbose) {
         Write-Host "Test files: $($filteredTestPaths -join ', ')" -ForegroundColor Cyan
     
         # Try to get test count estimate
+        $countStartTime = Get-Date
         try {
             $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
+            $countDuration = ((Get-Date) - $countStartTime).TotalMilliseconds
+            
+            # Level 2: Test count timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[test.run-pester] Test count estimation completed in ${countDuration}ms - Count: $($testList.TestCount)"
+            }
+            
             Write-Host "Estimated test count: $($testList.TestCount) test(s)" -ForegroundColor Cyan
         }
         catch {
@@ -1112,8 +1249,16 @@ try {
     }
     else {
         # Even in non-verbose mode, try to show test count
+        $countStartTime = Get-Date
         try {
             $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
+            $countDuration = ((Get-Date) - $countStartTime).TotalMilliseconds
+            
+            # Level 2: Test count timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[test.run-pester] Test count estimation completed in ${countDuration}ms - Count: $($testList.TestCount)"
+            }
+            
             if ($testList.TestCount -gt 0) {
                 Write-Host "Estimated test count: $($testList.TestCount) test(s)" -ForegroundColor Cyan
             }
@@ -1151,16 +1296,34 @@ try {
 
     $config = Set-PesterTestFilters -Config $config @filterParams
 
+    # Level 1: Configuration validation start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.run-pester] Validating test configuration"
+    }
+    
     # Validate configuration after setting paths
+    $validationStartTime = Get-Date
     try {
         # Validate that at least some test paths exist
         $existingPaths = $filteredTestPaths | Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) }
+        $validationDuration = ((Get-Date) - $validationStartTime).TotalMilliseconds
+        
+        # Level 2: Validation timing
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Configuration validation completed in ${validationDuration}ms - Existing paths: $($existingPaths.Count)"
+        }
+        
         if ($existingPaths.Count -eq 0) {
             Write-ScriptMessage -Message "Warning: None of the configured test paths exist: $($filteredTestPaths -join ', ')" -LogLevel 'Warning'
         }
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -ErrorRecord $_
+        # Level 2: Validation error details
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Configuration validation failed: $($_.Exception.Message)"
+        }
+        
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -ErrorRecord $_
     }
 
 
@@ -1190,12 +1353,30 @@ try {
                 }
             }
         
+            # Level 1: Test execution start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Starting test execution"
+            }
+            
             Write-Host "Running tests..." -ForegroundColor Yellow
+            $testExecStartTime = Get-Date
             $testResult = & $execScript $testConfig 1 1
+            $testExecDuration = ((Get-Date) - $testExecStartTime).TotalMilliseconds
         
             if ($trackPerf -and $testResult.Result) {
                 $script:watchPerformanceData = $testResult.Performance
                 $testResult = $testResult.Result
+            }
+        
+            # Level 2: Test execution timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[test.run-pester] Test execution completed in ${testExecDuration}ms"
+                Write-Verbose "[test.run-pester] Results - Passed: $($testResult.PassedCount), Failed: $($testResult.FailedCount), Skipped: $($testResult.SkippedCount)"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                Write-Host "  [test.run-pester] Performance - Execution: ${testExecDuration}ms, Total: $($testResult.TotalCount), Passed: $($testResult.PassedCount)" -ForegroundColor DarkGray
             }
         
             Write-Host "Tests completed: Passed=$($testResult.PassedCount), Failed=$($testResult.FailedCount), Skipped=$($testResult.SkippedCount)" -ForegroundColor $(if ($testResult.FailedCount -eq 0) { 'Green' } else { 'Red' })
@@ -1266,22 +1447,32 @@ try {
                 "Watch mode canceled"
             }
             Write-Host $cancelMsg -ForegroundColor Yellow
-            Exit-WithCleanup -ExitCode $EXIT_WATCH_MODE_CANCELED -Message $exitMsg
+            Exit-WithCleanup -ExitCode [ExitCode]::WatchModeCanceled -Message $exitMsg
         }
     
         # Should not reach here, but just in case
-        Exit-WithCleanup -ExitCode $EXIT_SUCCESS
+        Exit-WithCleanup -ExitCode [ExitCode]::Success
     }
 
+    # Level 1: Output interception start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.run-pester] Starting output interception"
+    }
+    
     # Start output interception using modular function
     Write-Host "Starting test execution..." -ForegroundColor Cyan
     Start-TestOutputInterceptor
 
     try {
         if ($DryRun) {
+            # Level 1: Dry run mode
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Dry run mode - no tests will be executed"
+            }
+            
             Write-Host "DRY RUN MODE - No tests will be executed" -ForegroundColor Yellow
             Invoke-TestDryRun -Config $config -TestPaths $filteredTestPaths
-            Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "Dry run completed"
+            Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "Dry run completed"
         }
 
         # Ensure confirmation suppression is active before test execution
@@ -1324,7 +1515,18 @@ try {
             Write-ScriptMessage -Message "Warning: Repeat value ($Repeat) is high. Use -CI flag or reduce Repeat value to prevent long execution times." -LogLevel 'Warning'
         }
 
+        # Level 1: Test execution preparation
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[test.run-pester] Preparing test execution"
+            Write-Verbose "[test.run-pester] Repeat: $Repeat, Max retries: $MaxRetries, Track performance: $TrackPerformance"
+        }
+
         if ($MaxRetries -gt 0) {
+            # Level 1: Retry logic enabled
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Retry logic enabled - Max retries: $MaxRetries, Delay: $RetryDelaySeconds seconds"
+            }
+            
             $retryScript = {
                 param($config, $runNumber, $totalRuns)
                 Invoke-TestWithRetry -ScriptBlock {
@@ -1333,6 +1535,11 @@ try {
             }
 
             for ($run = 1; $run -le $Repeat; $run++) {
+                # Level 1: Individual test run start
+                if ($debugLevel -ge 1) {
+                    Write-Verbose "[test.run-pester] Starting test run $run of $Repeat (with retries)"
+                }
+                
                 Write-Host "`n=== Test Run $run of $Repeat ===" -ForegroundColor Cyan
                 if ($Verbose) {
                     Write-ScriptMessage -Message "Test run $run of $Repeat" -LogLevel 'Info'
@@ -1382,12 +1589,30 @@ try {
 
         # Show enhanced summary statistics if requested
         if ($ShowSummaryStats) {
+            # Level 1: Summary statistics generation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Generating summary statistics"
+            }
+            
+            $statsStartTime = Get-Date
             $summaryStats = Get-TestSummaryStatistics -TestResult $result -PerformanceData $performanceData -ShowSlowest 5
+            $statsDuration = ((Get-Date) - $statsStartTime).TotalMilliseconds
+            
+            # Level 2: Summary statistics timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[test.run-pester] Summary statistics generated in ${statsDuration}ms"
+            }
+            
             Show-TestSummaryStatistics -Statistics $summaryStats -ShowSlowest -ShowFailurePatterns
         }
 
         # Display TestName filter summary if filter was applied
         if (-not [string]::IsNullOrWhiteSpace($TestName)) {
+            # Level 1: TestName filter summary
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Generating TestName filter summary"
+            }
+            
             # Parse the patterns to show what was filtered (same logic as Set-PesterTestFilters)
             # Use __SEP__ as delimiter to avoid regex issues with pipe characters
             $normalized = $TestName -replace '\s+or\s+', '__SEP__' -replace '[;,]', '__SEP__'
@@ -1410,6 +1635,11 @@ try {
                 "$($namePatterns.Count) patterns"
             }
         
+            # Level 2: Filter summary details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[test.run-pester] TestName filter - Patterns: $($namePatterns.Count), Matched: $matchedCount"
+            }
+        
             # Build message showing filter was applied and how many tests matched
             $message = "TestName filter ($patternSummary) matched $matchedCount test(s)"
             Write-ScriptMessage -Message $message -LogLevel 'Info'
@@ -1418,9 +1648,24 @@ try {
         # Generate analysis report if requested
         $analysis = $null
         if ($AnalyzeResults) {
+            # Level 1: Analysis report generation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Generating test analysis report"
+            }
+            
             Write-ScriptMessage -Message "Generating test analysis report..."
+            $analysisStartTime = Get-Date
             try {
                 $analysis = Get-TestAnalysisReport -TestResult $result -IncludePerformance:$TrackPerformance
+                $analysisDuration = ((Get-Date) - $analysisStartTime).TotalMilliseconds
+                
+                # Level 2: Analysis generation timing
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[test.run-pester] Analysis report generated in ${analysisDuration}ms"
+                    if ($analysis.Recommendations) {
+                        Write-Verbose "[test.run-pester] Analysis recommendations: $($analysis.Recommendations.Count)"
+                    }
+                }
 
                 # Display key insights
                 if ($analysis.Recommendations -and $analysis.Recommendations.Count -gt 0) {
@@ -1438,9 +1683,23 @@ try {
 
         # Generate custom report if requested
         if ($ReportFormat) {
+            # Level 1: Custom report generation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Generating $ReportFormat test report"
+                Write-Verbose "[test.run-pester] Report path: $ReportPath, Include details: $IncludeReportDetails"
+            }
+            
             Write-ScriptMessage -Message "Generating $ReportFormat test report..."
+            $reportStartTime = Get-Date
             try {
                 $reportContent = New-CustomTestReport -TestResult $result -Analysis $analysis -Format $ReportFormat -OutputPath $ReportPath -IncludeDetails:$IncludeReportDetails
+                $reportDuration = ((Get-Date) - $reportStartTime).TotalMilliseconds
+                
+                # Level 2: Report generation timing
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[test.run-pester] Custom report generated in ${reportDuration}ms"
+                }
+                
                 if (-not $ReportPath) {
                     Write-ScriptMessage -Message "Report generated (not saved to file)"
                 }
@@ -1453,7 +1712,13 @@ try {
 
         # Generate performance baseline if requested
         if ($GenerateBaseline) {
+            # Level 1: Baseline generation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Generating performance baseline"
+            }
+            
             Write-ScriptMessage -Message "Generating performance baseline..."
+            $baselineStartTime = Get-Date
             try {
                 $baselinePath = $BaselinePath
                 if (-not $baselinePath) {
@@ -1461,6 +1726,12 @@ try {
                 }
 
                 $baseline = New-PerformanceBaseline -TestResult $result -PerformanceData $performanceData -OutputPath $baselinePath
+                $baselineDuration = ((Get-Date) - $baselineStartTime).TotalMilliseconds
+                
+                # Level 2: Baseline generation timing
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[test.run-pester] Performance baseline generated in ${baselineDuration}ms - Path: $baselinePath"
+                }
             }
             catch {
                 Write-ScriptMessage -Message "Failed to generate performance baseline: $($_.Exception.Message)" -LogLevel 'Warning'
@@ -1470,6 +1741,12 @@ try {
 
         # Save configuration if requested
         if ($SaveConfig) {
+            # Level 1: Configuration save start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Saving configuration to: $SaveConfig"
+            }
+            
+            $saveConfigStartTime = Get-Date
             try {
                 Write-ScriptMessage -Message "Saving configuration to: $SaveConfig"
             
@@ -1504,6 +1781,12 @@ try {
                 }
             
                 Save-TestConfig -ConfigPath $SaveConfig -Parameters $configParams
+                $saveConfigDuration = ((Get-Date) - $saveConfigStartTime).TotalMilliseconds
+                
+                # Level 2: Configuration save timing
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[test.run-pester] Configuration saved in ${saveConfigDuration}ms - Parameters: $($configParams.Keys.Count)"
+                }
             }
             catch {
                 Write-ScriptMessage -Message "Failed to save configuration: $($_.Exception.Message)" -LogLevel 'Warning'
@@ -1513,7 +1796,13 @@ try {
 
         # Compare against baseline if requested
         if ($CompareBaseline) {
+            # Level 1: Baseline comparison start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[test.run-pester] Comparing performance against baseline"
+            }
+            
             Write-ScriptMessage -Message "Comparing performance against baseline..."
+            $compareStartTime = Get-Date
             try {
                 $baselinePath = $BaselinePath
                 if (-not $baselinePath) {
@@ -1521,6 +1810,15 @@ try {
                 }
 
                 $comparison = Compare-PerformanceBaseline -TestResult $result -PerformanceData $performanceData -BaselinePath $baselinePath -Threshold $BaselineThreshold
+                $compareDuration = ((Get-Date) - $compareStartTime).TotalMilliseconds
+                
+                # Level 2: Baseline comparison timing
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[test.run-pester] Baseline comparison completed in ${compareDuration}ms"
+                    if ($comparison.Success) {
+                        Write-Verbose "[test.run-pester] Regressions: $($comparison.Regressions.Count), Improvements: $($comparison.Improvements.Count)"
+                    }
+                }
 
                 if ($comparison.Success) {
                     # Display comparison results
@@ -1596,20 +1894,20 @@ try {
         }
 
         # Determine exit code based on results
-        $exitCode = $EXIT_SUCCESS
+        $exitCode = [ExitCode]::Success
     
         if ($result.FailedCount -gt 0) {
-            $exitCode = $EXIT_TEST_FAILURE
+            $exitCode = [ExitCode]::TestFailure
         }
         elseif ($result.TotalCount -eq 0) {
-            $exitCode = $EXIT_NO_TESTS_FOUND
+            $exitCode = [ExitCode]::NoTestsFound
         }
         elseif ($MinimumCoverage -and $enableCoverage) {
             # Check coverage threshold if specified
             if ($result.Coverage) {
                 $coveragePercent = [Math]::Round($result.Coverage.NumberOfCommandsExecuted / $result.Coverage.NumberOfCommandsAnalyzed * 100, 2)
                 if ($coveragePercent -lt $MinimumCoverage) {
-                    $exitCode = $EXIT_COVERAGE_FAILURE
+                    $exitCode = [ExitCode]::CoverageFailure
                     $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                         Format-LocaleNumber $coveragePercent -Format 'N2'
                     }
@@ -1629,12 +1927,23 @@ try {
     
         # Exit with appropriate code (unless in watch mode or interactive mode where we return result)
         if (-not $Watch -and -not $Interactive) {
-            if ($exitCode -ne $EXIT_SUCCESS) {
+            if ($exitCode -ne [ExitCode]::Success) {
                 Exit-WithCleanup -ExitCode $exitCode -Message "Test execution completed with failures or issues"
             }
         }
     }
     catch {
+        # Level 2: Error details in catch block
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.run-pester] Error during test execution: $($_.Exception.Message)"
+            Write-Verbose "[test.run-pester] Error type: $($_.Exception.GetType().FullName)"
+        }
+        
+        # Level 3: Stack trace
+        if ($debugLevel -ge 3) {
+            Write-Host "  [test.run-pester] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+        }
+        
         # Re-throw after cleanup
         throw
     }
@@ -1643,6 +1952,18 @@ finally {
     # Stop output interception using modular function (if available)
     if (Get-Command -Name 'Stop-TestOutputInterceptor' -ErrorAction SilentlyContinue) {
         Stop-TestOutputInterceptor
+    }
+    
+    $executionDuration = ((Get-Date) - $executionStartTime).TotalMilliseconds
+    
+    # Level 2: Overall execution timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[test.run-pester] Total execution time: ${executionDuration}ms"
+    }
+    
+    # Level 3: Overall performance breakdown
+    if ($debugLevel -ge 3) {
+        Write-Host "  [test.run-pester] Overall Performance - Total execution: ${executionDuration}ms" -ForegroundColor DarkGray
     }
     
     # Clear the active flag

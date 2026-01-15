@@ -39,9 +39,9 @@ Invoke-Yarn install
 
 This function has the following aliases:
 
-- `yarn` - Installs project dependencies.
+- `yarn` - Executes Yarn commands.
 
 
 ## Source
 
-Defined in: ..\profile.d\41-yarn.ps1
+Defined in: ..\profile.d\yarn.ps1

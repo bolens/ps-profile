@@ -1,4 +1,4 @@
-
+﻿
 
 Describe 'File Utility Functions Edge Cases' {
     BeforeAll {
@@ -9,6 +9,16 @@ Describe 'File Utility Functions Edge Cases' {
             # If YAML core initializer is missing, provide a no-op stub so that
             # Ensure-FileConversion-Data doesn't fail when exercising JSON/Base64.
             if (-not (Get-Command Initialize-FileConversion-CoreBasicYaml -ErrorAction SilentlyContinue)) {
+                <#
+                .SYNOPSIS
+                    Performs operations related to Initialize-FileConversion-CoreBasicYaml.
+                
+                .DESCRIPTION
+                    Performs operations related to Initialize-FileConversion-CoreBasicYaml.
+                
+                .OUTPUTS
+                    object
+                #>
                 function Initialize-FileConversion-CoreBasicYaml { }
             }
 

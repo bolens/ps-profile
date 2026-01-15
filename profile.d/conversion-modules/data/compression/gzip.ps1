@@ -20,12 +20,37 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$InputPath,
             [string]$OutputPath
         )
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.gzip.compress] Starting compression: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath + '.gz'
             }
             
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.compress] Output path: $OutputPath"
+            }
+            
             $inputFile = Get-Item -LiteralPath $InputPath
+            $inputSize = $inputFile.Length
+            
+            # Level 2: File context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.compress] Input file size: ${inputSize} bytes"
+            }
+            
+            $compressStartTime = Get-Date
             $inputStream = [System.IO.File]::OpenRead($inputFile.FullName)
             $outputStream = [System.IO.File]::Create($OutputPath)
             $gzipStream = New-Object System.IO.Compression.GZipStream($outputStream, [System.IO.Compression.CompressionMode]::Compress)
@@ -38,9 +63,46 @@ function Initialize-FileConversion-CoreCompressionGzip {
                 $outputStream.Close()
                 $inputStream.Close()
             }
+            
+            $compressDuration = ((Get-Date) - $compressStartTime).TotalMilliseconds
+            $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+            $compressionRatio = if ($inputSize -gt 0) { [math]::Round(($outputSize / $inputSize) * 100, 2) } else { 0 }
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.compress] Compression completed in ${compressDuration}ms"
+                Write-Verbose "[conversion.gzip.compress] Output size: ${outputSize} bytes, Compression ratio: ${compressionRatio}%"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.gzip.compress] Performance - Duration: ${compressDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Ratio: ${compressionRatio}%" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to compress file with Gzip: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.gzip.compress' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to compress file with Gzip: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.compress] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.gzip.compress] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -52,7 +114,19 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$InputPath,
             [string]$OutputPath
         )
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.gzip.decompress] Starting decompression: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 # Remove .gz extension if present
                 if ($InputPath.EndsWith('.gz')) {
@@ -63,6 +137,19 @@ function Initialize-FileConversion-CoreCompressionGzip {
                 }
             }
             
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.decompress] Output path: $OutputPath"
+            }
+            
+            $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            
+            # Level 2: File context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.decompress] Input file size: ${inputSize} bytes"
+            }
+            
+            $decompressStartTime = Get-Date
             $inputStream = [System.IO.File]::OpenRead($InputPath)
             $gzipStream = New-Object System.IO.Compression.GZipStream($inputStream, [System.IO.Compression.CompressionMode]::Decompress)
             $outputStream = [System.IO.File]::Create($OutputPath)
@@ -75,9 +162,46 @@ function Initialize-FileConversion-CoreCompressionGzip {
                 $gzipStream.Close()
                 $inputStream.Close()
             }
+            
+            $decompressDuration = ((Get-Date) - $decompressStartTime).TotalMilliseconds
+            $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+            $expansionRatio = if ($inputSize -gt 0) { [math]::Round(($outputSize / $inputSize) * 100, 2) } else { 0 }
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.decompress] Decompression completed in ${decompressDuration}ms"
+                Write-Verbose "[conversion.gzip.decompress] Output size: ${outputSize} bytes, Expansion ratio: ${expansionRatio}%"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.gzip.decompress] Performance - Duration: ${decompressDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Ratio: ${expansionRatio}%" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to decompress Gzip file: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.gzip.decompress' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to decompress Gzip file: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.gzip.decompress] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.gzip.decompress] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -89,12 +213,37 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$InputPath,
             [string]$OutputPath
         )
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.zlib.compress] Starting compression: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath + '.zlib'
             }
             
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.compress] Output path: $OutputPath"
+            }
+            
             $inputFile = Get-Item -LiteralPath $InputPath
+            $inputSize = $inputFile.Length
+            
+            # Level 2: File context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.compress] Input file size: ${inputSize} bytes"
+            }
+            
+            $compressStartTime = Get-Date
             $inputStream = [System.IO.File]::OpenRead($inputFile.FullName)
             $outputStream = [System.IO.File]::Create($OutputPath)
             $deflateStream = New-Object System.IO.Compression.DeflateStream($outputStream, [System.IO.Compression.CompressionMode]::Compress)
@@ -107,9 +256,46 @@ function Initialize-FileConversion-CoreCompressionGzip {
                 $outputStream.Close()
                 $inputStream.Close()
             }
+            
+            $compressDuration = ((Get-Date) - $compressStartTime).TotalMilliseconds
+            $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+            $compressionRatio = if ($inputSize -gt 0) { [math]::Round(($outputSize / $inputSize) * 100, 2) } else { 0 }
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.compress] Compression completed in ${compressDuration}ms"
+                Write-Verbose "[conversion.zlib.compress] Output size: ${outputSize} bytes, Compression ratio: ${compressionRatio}%"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.zlib.compress] Performance - Duration: ${compressDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Ratio: ${compressionRatio}%" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to compress file with Zlib: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.zlib.compress' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to compress file with Zlib: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.compress] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.zlib.compress] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force
@@ -121,7 +307,19 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$InputPath,
             [string]$OutputPath
         )
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.zlib.decompress] Starting decompression: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 # Remove .zlib extension if present
                 if ($InputPath.EndsWith('.zlib')) {
@@ -132,6 +330,19 @@ function Initialize-FileConversion-CoreCompressionGzip {
                 }
             }
             
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.decompress] Output path: $OutputPath"
+            }
+            
+            $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            
+            # Level 2: File context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.decompress] Input file size: ${inputSize} bytes"
+            }
+            
+            $decompressStartTime = Get-Date
             $inputStream = [System.IO.File]::OpenRead($InputPath)
             $deflateStream = New-Object System.IO.Compression.DeflateStream($inputStream, [System.IO.Compression.CompressionMode]::Decompress)
             $outputStream = [System.IO.File]::Create($OutputPath)
@@ -144,9 +355,46 @@ function Initialize-FileConversion-CoreCompressionGzip {
                 $deflateStream.Close()
                 $inputStream.Close()
             }
+            
+            $decompressDuration = ((Get-Date) - $decompressStartTime).TotalMilliseconds
+            $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+            $expansionRatio = if ($inputSize -gt 0) { [math]::Round(($outputSize / $inputSize) * 100, 2) } else { 0 }
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.decompress] Decompression completed in ${decompressDuration}ms"
+                Write-Verbose "[conversion.zlib.decompress] Output size: ${outputSize} bytes, Expansion ratio: ${expansionRatio}%"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.zlib.decompress] Performance - Duration: ${decompressDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Ratio: ${expansionRatio}%" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to decompress Zlib file: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.zlib.decompress' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to decompress Zlib file: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.zlib.decompress] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.zlib.decompress] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
             throw
         }
     } -Force

@@ -1,13 +1,8 @@
 <#
-
-<#
+# oh-my-posh.ps1
 
 # Tier: essential
 # Dependencies: bootstrap, env
-<#
-
-<#
-# oh-my-posh.ps1
 
 Idempotent initialization for oh-my-posh prompt framework.
 
@@ -105,7 +100,12 @@ try {
     # If Starship is available, let it handle prompt initialization (loaded by 23-starship.ps1)
     # Starship and oh-my-posh are mutually exclusive prompt frameworks
     if (Test-CachedCommand starship) {
-        if ($env:PS_PROFILE_DEBUG) { Write-Host "Starship detected, skipping oh-my-posh proxy prompt" -ForegroundColor Cyan }
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[oh-my-posh] Starship detected, skipping oh-my-posh proxy prompt"
+            }
+        }
         return
     }
 
@@ -239,7 +239,6 @@ try {
         $cwd = $executionContext.SessionState.Path.CurrentLocation.Path
         return "$user@$hostName $cwd > "
     }
-
 }
 catch {
     if ($env:PS_PROFILE_DEBUG) { Write-Verbose "oh-my-posh fragment failed: $($_.Exception.Message)" }

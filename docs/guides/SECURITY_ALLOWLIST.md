@@ -184,4 +184,3 @@ Two template files are available:
 
 - [Security Scanning Workflow](../.github/workflows/security.yml)
 - [Security Scan Script](../scripts/utils/security/run-security-scan.ps1)
-- [CODEBASE_IMPROVEMENTS.md](../CODEBASE_IMPROVEMENTS.md)

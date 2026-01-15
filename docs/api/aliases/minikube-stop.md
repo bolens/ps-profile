@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\21-kube.ps1
+Defined in: ..\profile.d\kube.ps1

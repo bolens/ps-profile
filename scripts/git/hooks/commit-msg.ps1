@@ -47,7 +47,7 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameC
 Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $hookScriptPath -DisableNameChecking
 
 if (-not $CommitMsgFile -or [string]::IsNullOrWhiteSpace($CommitMsgFile) -or -not (Test-Path -LiteralPath $CommitMsgFile)) {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "commit-msg: commit message file not provided or not found"
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "commit-msg: commit message file not provided or not found"
 }
 
 $msg = Get-Content -Path $CommitMsgFile -Raw
@@ -55,7 +55,7 @@ $lines = $msg -split "`n"
 $subject = $lines[0].Trim()
 
 if (-not $subject) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "commit-msg: empty commit message"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "commit-msg: empty commit message"
 }
 
 # Create compiled regex patterns using RegexUtilities module
@@ -65,7 +65,7 @@ $autoMergeRegex = New-CompiledRegex -Pattern '^Auto-merge'
 
 # Allow merge/revert commits and automated PR title formats
 if ($mergeRegex.IsMatch($subject) -or $revertRegex.IsMatch($subject) -or $autoMergeRegex.IsMatch($subject)) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "commit-msg: merge/revert/auto-merge message allowed"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "commit-msg: merge/revert/auto-merge message allowed"
 }
 
 # Conventional Commit regex: type(scope?)?: subject
@@ -75,14 +75,14 @@ $convRegex = "^(?:($typeRegex))(?:\([a-z0-9_\-]+\))?:\s.+$"
 $convRegexCompiled = [regex]::new($convRegex, [System.Text.RegularExpressions.RegexOptions]::Compiled)
 
 if (-not $convRegexCompiled.IsMatch($subject)) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "commit-msg: commit subject does not match Conventional Commits pattern (type(scope?): subject). Example: 'feat(cli): add foo'"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "commit-msg: commit subject does not match Conventional Commits pattern (type(scope?): subject). Example: 'feat(cli): add foo'"
 }
 
 # Enforce subject length
 $max = 72
 if ($subject.Length -gt $max) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "commit-msg: subject length ($($subject.Length)) exceeds $max characters"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "commit-msg: subject length ($($subject.Length)) exceeds $max characters"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "commit-msg: OK (Conventional Commit)"
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "commit-msg: OK (Conventional Commit)"
 

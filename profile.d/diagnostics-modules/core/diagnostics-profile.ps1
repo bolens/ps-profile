@@ -70,30 +70,97 @@ try {
             Only available when PS_PROFILE_DEBUG environment variable is set.
         #>
         function Show-ProfileStartupTime {
-            $startupTime = [DateTime]::Now - $global:PSProfileStartTime
-            
-            # Use locale-aware number formatting if available
-            $startupTimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
-                Format-LocaleNumber $startupTime.TotalSeconds -Format 'N2'
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[diagnostics.profile.startup] Calculating profile startup time"
+                }
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [diagnostics.profile.startup] Profile start time: $($global:PSProfileStartTime.ToString('o'))" -ForegroundColor DarkGray
+                }
             }
-            else {
-                $startupTime.TotalSeconds.ToString("N2")
-            }
-            
-            Write-Host "-- Profile startup time --"
-            Write-Host ("Total startup time: {0} seconds" -f $startupTimeStr)
 
-            # Show fragment load times if available
-            if ($global:PSProfileFragmentTimes -and $global:PSProfileFragmentTimes.Count -gt 0) {
-                Write-Host "Fragment load times (slowest first):"
-                $global:PSProfileFragmentTimes | Sort-Object -Property Duration -Descending | Select-Object -First 10 | ForEach-Object {
-                    $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
-                        Format-LocaleNumber $_.Duration -Format 'N2'
+            try {
+                if (-not $global:PSProfileStartTime) {
+                    Write-Warning "Profile start time not available. Startup time cannot be calculated."
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Profile start time not available" -OperationName 'diagnostics.profile.startup' -Code 'START_TIME_MISSING'
+                        }
+                    }
+                    return
+                }
+
+                $startupTime = [DateTime]::Now - $global:PSProfileStartTime
+                
+                # Use locale-aware number formatting if available
+                $startupTimeStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                    Format-LocaleNumber $startupTime.TotalSeconds -Format 'N2'
+                }
+                else {
+                    $startupTime.TotalSeconds.ToString("N2")
+                }
+                
+                Write-Host "-- Profile startup time --"
+                Write-Host ("Total startup time: {0} seconds" -f $startupTimeStr)
+
+                # Level 2: Log timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[diagnostics.profile.startup] Total startup time: $($startupTime.TotalSeconds) seconds"
+                }
+                
+                # Level 3: Detailed timing breakdown
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [diagnostics.profile.startup] Startup time breakdown - Total: $($startupTime.TotalSeconds)s, Start: $($global:PSProfileStartTime.ToString('HH:mm:ss.fff')), End: $([DateTime]::Now.ToString('HH:mm:ss.fff'))" -ForegroundColor DarkGray
+                }
+            }
+            catch {
+                # Level 1: Log error
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile.startup' -Context @{
+                            operation = 'calculate_startup_time'
+                        }
                     }
                     else {
-                        $_.Duration.ToString("N2")
+                        Write-Error "Failed to calculate profile startup time: $($_.Exception.Message)"
                     }
-                    Write-Host ("  {0}: {1}ms" -f $_.Fragment, $durationStr)
+                }
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[diagnostics.profile.startup] Error calculating startup time: $($_.Exception.Message)"
+                }
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [diagnostics.profile.startup] Error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                }
+            }
+
+            # Show fragment load times if available
+            try {
+                if ($global:PSProfileFragmentTimes -and $global:PSProfileFragmentTimes.Count -gt 0) {
+                    Write-Host "Fragment load times (slowest first):"
+                    $global:PSProfileFragmentTimes | Sort-Object -Property Duration -Descending | Select-Object -First 10 | ForEach-Object {
+                        $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                            Format-LocaleNumber $_.Duration -Format 'N2'
+                        }
+                        else {
+                            $_.Duration.ToString("N2")
+                        }
+                        Write-Host ("  {0}: {1}ms" -f $_.Fragment, $durationStr)
+                            
+                        # Level 3: Log slow fragment details
+                        if ($debugLevel -ge 3) {
+                            Write-Host "    [diagnostics.profile.startup] Fragment: $($_.Fragment), Duration: $($_.Duration)ms" -ForegroundColor DarkGray
+                        }
+                    }
+                }
+                elseif ($debugLevel -ge 2) {
+                    Write-Verbose "[diagnostics.profile.startup] No fragment timing data available"
+                }
+            }
+            catch {
+                # Level 2: Log error in fragment timing display
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[diagnostics.profile.startup] Error displaying fragment times: $($_.Exception.Message)"
                 }
             }
         }
@@ -175,6 +242,24 @@ try {
                 catch {
                     Write-Host ("✗ {0}: Error during check - {1}" -f $check.Name, $_.Exception.Message)
                     $allHealthy = $false
+                    
+                    # Level 1: Log error
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile.health' -Context @{
+                                    check_name = $check.Name
+                                }
+                            }
+                        }
+                        if ($debugLevel -ge 2) {
+                            Write-Verbose "[diagnostics.profile.health] Check error: $($check.Name) - $($_.Exception.Message)"
+                        }
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [diagnostics.profile.health] Check error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                        }
+                    }
                 }
             }
 
@@ -242,6 +327,36 @@ try {
     }
 }
 catch {
-    if ($env:PS_PROFILE_DEBUG) { Write-Verbose "Diagnostics fragment failed: $($_.Exception.Message)" }
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        if ($debugLevel -ge 1) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile' -Context @{
+                    fragment = 'diagnostics-profile'
+                }
+            }
+            else {
+                Write-Error "Diagnostics fragment failed: $($_.Exception.Message)"
+            }
+        }
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[diagnostics.profile] Fragment load error: $($_.Exception.Message)"
+        }
+        if ($debugLevel -ge 3) {
+            Write-Host "  [diagnostics.profile] Fragment error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+        }
+    }
+    else {
+        # Always log errors even if debug is off
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile' -Context @{
+                fragment = 'diagnostics-profile'
+            }
+        }
+        else {
+            Write-Error "Diagnostics fragment failed: $($_.Exception.Message)"
+        }
+    }
 }
+
 

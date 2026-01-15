@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\30-open.ps1
+Defined in: ..\profile.d\open.ps1

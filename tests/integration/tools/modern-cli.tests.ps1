@@ -184,4 +184,44 @@ Describe "Modern CLI Tools" {
             Get-Command dust -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
+    
+    Context "Enhanced Functions" {
+        BeforeEach {
+            # Mock external commands to avoid hanging
+            Mock-CommandAvailabilityPester -CommandName 'fd' -Available $false -CommandType 'Application' -Scope 'It'
+            Mock-CommandAvailabilityPester -CommandName 'rg' -Available $false -CommandType 'Application' -Scope 'It'
+            Mock-CommandAvailabilityPester -CommandName 'zoxide' -Available $false -CommandType 'Application' -Scope 'It'
+            Mock-CommandAvailabilityPester -CommandName 'bat' -Available $false -CommandType 'Application' -Scope 'It'
+        }
+        
+        It "Find-WithFd function is defined" {
+            Get-Command Find-WithFd -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+        
+        It "Grep-WithRipgrep function is defined" {
+            Get-Command Grep-WithRipgrep -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+        
+        It "Navigate-WithZoxide function is defined" {
+            Get-Command Navigate-WithZoxide -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+        
+        It "View-WithBat function is defined" {
+            Get-Command View-WithBat -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+        
+        It "Enhanced functions handle missing tools gracefully" {
+            { Find-WithFd -Pattern "test" -ErrorAction SilentlyContinue } | Should -Not -Throw
+            { Grep-WithRipgrep -Pattern "test" -ErrorAction SilentlyContinue } | Should -Not -Throw
+            { Navigate-WithZoxide -Query "test" -ErrorAction SilentlyContinue } | Should -Not -Throw
+            { View-WithBat -Path "test.txt" -ErrorAction SilentlyContinue } | Should -Not -Throw
+        }
+        
+        It "Aliases are registered" {
+            Get-Alias -Name 'ffd' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Get-Alias -Name 'grg' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Get-Alias -Name 'z' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Get-Alias -Name 'vbat' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
 }

@@ -12,7 +12,12 @@ scripts/lib/PathUtilities.psm1
 .NOTES
     Module Version: 1.0.0
     PowerShell Version: 3.0+
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 <#
 .SYNOPSIS
@@ -45,9 +50,11 @@ function Get-RelativePath {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$From,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$To
     )
 
@@ -156,6 +163,7 @@ function ConvertTo-RepoRelativePath {
         [string]$Path,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$RepoRoot
     )
 

@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-profile.d/44-git.ps1
+Alias for `Get-GitStatusShort`
 
 ## Description
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\44-git.ps1
+Defined in: ..\profile.d\git.ps1

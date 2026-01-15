@@ -48,4 +48,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\27-minio.ps1
+Defined in: ..\profile.d\minio.ps1

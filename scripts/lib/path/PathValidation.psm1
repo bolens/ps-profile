@@ -6,7 +6,19 @@ scripts/lib/PathValidation.psm1
 
 .DESCRIPTION
     Provides functions for validating and resolving paths with defaults.
+
+.NOTES
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe path type handling.
 #>
+
+# Import CommonEnums for FileSystemPathType enum
+$commonEnumsPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 <#
 .SYNOPSIS
@@ -24,7 +36,7 @@ scripts/lib/PathValidation.psm1
     The default path to use if Path is not provided.
 
 .PARAMETER PathType
-    The type of path to validate. 'Any' (default), 'File', or 'Directory'.
+    The type of path to validate. Must be a FileSystemPathType enum value. Defaults to Any.
 
 .OUTPUTS
     System.String. The resolved path.
@@ -39,10 +51,10 @@ function Resolve-DefaultPath {
         [string]$Path,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$DefaultPath,
 
-        [ValidateSet('Any', 'File', 'Directory')]
-        [string]$PathType = 'Any'
+        [FileSystemPathType]$PathType = [FileSystemPathType]::Any
     )
 
     if ([string]::IsNullOrWhiteSpace($Path)) {
@@ -60,11 +72,12 @@ function Resolve-DefaultPath {
         }
         
         # Validate path type if specified
-        if ($PathType -eq 'File' -and -not (Test-Path -Path $Path -PathType Leaf)) {
+        $pathTypeString = $PathType.ToString()
+        if ($pathTypeString -eq 'File' -and -not (Test-Path -Path $Path -PathType Leaf)) {
             throw "Path exists but is not a file: $Path"
         }
         
-        if ($PathType -eq 'Directory' -and -not (Test-Path -Path $Path -PathType Container)) {
+        if ($pathTypeString -eq 'Directory' -and -not (Test-Path -Path $Path -PathType Container)) {
             throw "Path exists but is not a directory: $Path"
         }
     }

@@ -44,4 +44,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\47-angular.ps1
+Defined in: ..\profile.d\angular.ps1

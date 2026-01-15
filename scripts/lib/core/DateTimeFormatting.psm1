@@ -69,6 +69,7 @@ function Format-DateTime {
         [DateTime]$DateTime,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Format,
 
         [System.Globalization.CultureInfo]$Culture

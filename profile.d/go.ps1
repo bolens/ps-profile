@@ -43,7 +43,8 @@ function Invoke-GoRun {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         & go run @Arguments
     }
     else {
@@ -81,7 +82,8 @@ function Build-GoProgram {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         & go build @Arguments
     }
     else {
@@ -119,7 +121,8 @@ function Invoke-GoModule {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         & go mod @Arguments
     }
     else {
@@ -157,7 +160,8 @@ function Test-GoPackage {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         & go test @Arguments
     }
     else {
@@ -200,7 +204,8 @@ function Update-GoTools {
     [CmdletBinding()]
     param()
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         & go install golang.org/x/tools/cmd/...@latest
     }
     else {
@@ -249,7 +254,8 @@ function Remove-GoDependency {
         [string[]]$Packages
     )
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         foreach ($package in $Packages) {
             & go mod edit -droprequire $package
         }
@@ -285,7 +291,8 @@ function Install-GoPackage {
         [string[]]$Packages
     )
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         & go install @Packages
     }
     else {
@@ -314,7 +321,8 @@ function Update-GoTools {
     [CmdletBinding()]
     param()
     
-    if (Test-CachedCommand go) {
+    # Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+    if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
         & go install golang.org/x/tools/cmd/...@latest
     }
     else {

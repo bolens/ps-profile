@@ -132,6 +132,10 @@ function Invoke-Parallel {
             }
 
             # Start all items in parallel
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[parallel.execute] Starting $($itemList.Count) items in parallel with throttle limit: $ThrottleLimit"
+            }
             foreach ($item in $itemList) {
                 $powershell = [PowerShell]::Create()
                 $powershell.RunspacePool = $runspacePool
@@ -144,6 +148,10 @@ function Invoke-Parallel {
                     Handle     = $handle
                     Item       = $item
                 }
+            }
+            # Level 2: Log parallel execution start
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[parallel.execute] Started $($runspaces.Count) parallel tasks"
             }
 
             # Wait for all to complete using polling (STA-compatible)
@@ -170,7 +178,53 @@ function Invoke-Parallel {
             }
 
             if (-not $allCompleted) {
-                Write-Warning "Not all parallel tasks completed within ${TimeoutSeconds}s timeout"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Not all parallel tasks completed within ${TimeoutSeconds}s timeout" -OperationName 'parallel.execute' -Context @{
+                                CompletedCount = $completedCount
+                                TotalTasks     = $runspaces.Count
+                                TimeoutSeconds = $TimeoutSeconds
+                            }
+                        }
+                        else {
+                            Write-Warning "[parallel.execute] Not all parallel tasks completed within ${TimeoutSeconds}s timeout"
+                        }
+                    }
+                    # Level 3: Log detailed timeout information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [parallel.execute] Timeout details - Completed: $completedCount, Total: $($runspaces.Count), Timeout: ${TimeoutSeconds}s, Elapsed: ${elapsedMs}ms" -ForegroundColor DarkGray
+                    }
+                }
+                else {
+                    # Always log warnings even if debug is off
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Not all parallel tasks completed within ${TimeoutSeconds}s timeout" -OperationName 'parallel.execute' -Context @{
+                            # Technical context
+                            CompletedCount = $completedCount
+                            TotalTasks     = $runspaces.Count
+                            TimeoutSeconds = $TimeoutSeconds
+                            ElapsedMs      = $elapsedMs
+                            PollIntervalMs = $pollIntervalMs
+                            # Operation context
+                            ThrottleLimit  = $ThrottleLimit
+                            # Invocation context
+                            FunctionName   = 'Invoke-Parallel'
+                        } -Code 'Timeout'
+                    }
+                    else {
+                        Write-Warning "[parallel.execute] Not all parallel tasks completed within ${TimeoutSeconds}s timeout"
+                    }
+                }
+            }
+            
+            # Level 2: Log successful completion
+            if ($allCompleted) {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                    Write-Verbose "[parallel.execute] All $($runspaces.Count) parallel tasks completed successfully"
+                }
             }
 
             # Collect results
@@ -185,13 +239,113 @@ function Invoke-Parallel {
                         elseif ($null -ne $result) {
                             $results += $result
                         }
+                        # Level 3: Log successful task completion
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            $resultType = if ($result) { $result.GetType().FullName } else { 'null' }
+                            Write-Verbose "[parallel.execute] Task completed - Index: $($runspaces.IndexOf($rs)), ResultType: $resultType"
+                        }
                     }
                     else {
-                        Write-Warning "Task timed out for item at index $($runspaces.IndexOf($rs))"
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                            if ($debugLevel -ge 1) {
+                                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                    Write-StructuredWarning -Message "Task timed out for item at index $($runspaces.IndexOf($rs))" -OperationName 'parallel.execute' -Context @{
+                                        ItemIndex      = $runspaces.IndexOf($rs)
+                                        TimeoutSeconds = $TimeoutSeconds
+                                    }
+                                }
+                                else {
+                                    $debugLevel = 0
+                                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                                        if ($debugLevel -ge 1) {
+                                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                                Write-StructuredWarning -Message "Task timed out" -OperationName 'parallel.execute' -Context @{
+                                                    # Technical context
+                                                    ItemIndex      = $runspaces.IndexOf($rs)
+                                                    Item           = if ($rs.Item) { $rs.Item.ToString() } else { 'unknown' }
+                                                    TimeoutSeconds = $TimeoutSeconds
+                                                    ElapsedMs      = $elapsedMs
+                                                    # Operation context
+                                                    ThrottleLimit  = $ThrottleLimit
+                                                    # Invocation context
+                                                    FunctionName   = 'Invoke-Parallel'
+                                                } -Code 'TaskTimeout'
+                                            }
+                                            else {
+                                                Write-Warning "[parallel.execute] Task timed out for item at index $($runspaces.IndexOf($rs))"
+                                            }
+                                        }
+                                        # Level 3: Log detailed timeout information
+                                        if ($debugLevel -ge 3) {
+                                            Write-Host "  [parallel.execute] Task timeout details - Index: $($runspaces.IndexOf($rs)), Item: $(if ($rs.Item) { $rs.Item.ToString() } else { 'unknown' }), Timeout: ${TimeoutSeconds}s, Elapsed: ${elapsedMs}ms" -ForegroundColor DarkGray
+                                        }
+                                    }
+                                    else {
+                                        # Always log warnings even if debug is off
+                                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                            Write-StructuredWarning -Message "Task timed out" -OperationName 'parallel.execute' -Context @{
+                                                ItemIndex      = $runspaces.IndexOf($rs)
+                                                Item           = if ($rs.Item) { $rs.Item.ToString() } else { 'unknown' }
+                                                TimeoutSeconds = $TimeoutSeconds
+                                                ElapsedMs      = $elapsedMs
+                                                ThrottleLimit  = $ThrottleLimit
+                                                FunctionName   = 'Invoke-Parallel'
+                                            } -Code 'TaskTimeout'
+                                        }
+                                        else {
+                                            Write-Warning "[parallel.execute] Task timed out for item at index $($runspaces.IndexOf($rs))"
+                                        }
+                                    }
+                                }
+                            }
+                            # Level 3: Log detailed timeout information
+                            if ($debugLevel -ge 3) {
+                                Write-Verbose "[parallel.execute] Task timeout details - Index: $($runspaces.IndexOf($rs)), Item: $($rs.Item), Timeout: ${TimeoutSeconds}s"
+                            }
+                        }
                     }
                 }
                 catch {
-                    Write-Warning "Task failed: $($_.Exception.Message)"
+                    $debugLevel = 0
+                    $hasDebug = $false
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        $hasDebug = $debugLevel -ge 1
+                    }
+                    if ($hasDebug) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'parallel.execute' -Context @{
+                                ItemIndex     = $runspaces.IndexOf($rs)
+                                Item          = if ($rs.Item) { $rs.Item.ToString() } else { 'unknown' }
+                                ErrorType     = $_.Exception.GetType().FullName
+                                ThrottleLimit = $ThrottleLimit
+                                FunctionName  = 'Invoke-Parallel'
+                            }
+                        }
+                        else {
+                            Write-Error "[parallel.execute] Task failed: $($_.Exception.Message)" -ErrorAction Continue
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'parallel.execute' -Context @{
+                                ItemIndex     = $runspaces.IndexOf($rs)
+                                Item          = if ($rs.Item) { $rs.Item.ToString() } else { 'unknown' }
+                                ErrorType     = $_.Exception.GetType().FullName
+                                ThrottleLimit = $ThrottleLimit
+                                FunctionName  = 'Invoke-Parallel'
+                            }
+                        }
+                        else {
+                            Write-Error "[parallel.execute] Task failed: $($_.Exception.Message)" -ErrorAction Continue
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [parallel.execute] Task failure details - Index: $($runspaces.IndexOf($rs)), Item: $(if ($rs.Item) { $rs.Item.ToString() } else { 'unknown' }), Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                    }
                 }
                 finally {
                     if ($rs.PowerShell) {
@@ -201,7 +355,47 @@ function Invoke-Parallel {
             }
         }
         catch {
-            Write-Warning "Error in parallel processing: $($_.Exception.Message)"
+            $debugLevel = 0
+            $hasDebug = $false
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                $hasDebug = $debugLevel -ge 1
+            }
+            if ($hasDebug) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'parallel.execute' -Context @{
+                        TotalItems     = $itemList.Count
+                        CompletedTasks = $results.Count
+                        ErrorType      = $_.Exception.GetType().FullName
+                        ThrottleLimit  = $ThrottleLimit
+                        TimeoutSeconds = $TimeoutSeconds
+                        FunctionName   = 'Invoke-Parallel'
+                    }
+                }
+                else {
+                    Write-Error "[parallel.execute] Error in parallel processing: $($_.Exception.Message)" -ErrorAction Continue
+                }
+            }
+            else {
+                # Always log critical errors even if debug is off
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'parallel.execute' -Context @{
+                        TotalItems     = $itemList.Count
+                        CompletedTasks = $results.Count
+                        ErrorType      = $_.Exception.GetType().FullName
+                        ThrottleLimit  = $ThrottleLimit
+                        TimeoutSeconds = $TimeoutSeconds
+                        FunctionName   = 'Invoke-Parallel'
+                    }
+                }
+                else {
+                    Write-Error "[parallel.execute] Error in parallel processing: $($_.Exception.Message)" -ErrorAction Continue
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [parallel.execute] Parallel processing error details - TotalItems: $($itemList.Count), CompletedTasks: $($results.Count), ThrottleLimit: $ThrottleLimit, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            throw
         }
         finally {
             # Cleanup runspace pool

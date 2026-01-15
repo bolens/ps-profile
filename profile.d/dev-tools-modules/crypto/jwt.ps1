@@ -45,7 +45,12 @@ function Initialize-DevTools-Jwt {
             }
         }
         catch {
-            Write-Error "Failed to decode JWT: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.crypto.jwt.decode' -Context @{}
+            }
+            else {
+                Write-Error "Failed to decode JWT: $_"
+            }
         }
     } -Force
 
@@ -93,7 +98,12 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to encode JWT: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.crypto.jwt.encode' -Context @{}
+            }
+            else {
+                Write-Error "Failed to encode JWT: $_"
+            }
         }
     } -Force
 }

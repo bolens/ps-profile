@@ -38,6 +38,12 @@ $repoRootForLib = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PS
 $moduleImportPath = Join-Path $repoRootForLib 'scripts' 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
@@ -47,11 +53,11 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
     if (-not $repoRoot) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to determine repository root from script path: $PSScriptRoot"
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to determine repository root from script path: $PSScriptRoot"
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Source TestSupport to get Test-NpmPackageAvailable
@@ -187,22 +193,58 @@ $missingPython = @()
 $missingScoop = @()
 
 Write-ScriptMessage -Message "Checking npm/pnpm packages..." -LogLevel Info
+$npmCheckErrors = [System.Collections.Generic.List[string]]::new()
 foreach ($pkg in $npmPackages) {
-    if (Get-Command Test-NpmPackageAvailable -ErrorAction SilentlyContinue) {
-        if (Test-NpmPackageAvailable -PackageName $pkg) {
-            Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
+    try {
+        if (Get-Command Test-NpmPackageAvailable -ErrorAction SilentlyContinue) {
+            if (Test-NpmPackageAvailable -PackageName $pkg -ErrorAction Stop) {
+                Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
+            }
+            else {
+                Write-ScriptMessage -Message "  ✗ $pkg" -ForegroundColor Red
+                $missingNpm += $pkg
+            }
         }
         else {
-            Write-ScriptMessage -Message "  ✗ $pkg" -ForegroundColor Red
-            $missingNpm += $pkg
+            Write-ScriptMessage -Message "  ? $pkg (cannot check - Test-NpmPackageAvailable not available)" -IsWarning
         }
     }
-    else {
-        Write-ScriptMessage -Message "  ? $pkg (cannot check - Test-NpmPackageAvailable not available)" -IsWarning
+    catch {
+        $npmCheckErrors.Add($pkg)
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to check npm package" -OperationName 'dependencies.check-npm' -Context @{
+                package_name = $pkg
+            } -Code 'NpmPackageCheckFailed'
+        }
+        else {
+            Write-ScriptMessage -Message "  ✗ $pkg (error checking)" -IsWarning
+        }
+        $missingNpm += $pkg
+    }
+}
+$npmCheckDuration = ((Get-Date) - $npmCheckStartTime).TotalMilliseconds
+
+# Level 2: npm check timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[dependencies.check-packages] npm check completed in ${npmCheckDuration}ms"
+    Write-Verbose "[dependencies.check-packages] npm missing: $($missingNpm.Count), Errors: $($npmCheckErrors.Count)"
+}
+
+if ($npmCheckErrors.Count -gt 0) {
+    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+        Write-StructuredWarning -Message "Some npm package checks failed" -OperationName 'dependencies.check-npm' -Context @{
+            failed_packages = $npmCheckErrors -join ','
+            failed_count = $npmCheckErrors.Count
+        } -Code 'NpmPackageCheckPartialFailure'
     }
 }
 
 Write-ScriptMessage -Message "Checking Python/uv packages..." -LogLevel Info
+
+# Level 1: Python check start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[dependencies.check-packages] Starting Python package check"
+}
 
 # Check for virtual environment in project root
 $venvPython = $null
@@ -224,6 +266,7 @@ if ($venvPath -and -not [string]::IsNullOrWhiteSpace($venvPath) -and (Test-Path 
     }
 }
 
+$pythonCheckStartTime = Get-Date
 foreach ($pkg in $pythonPackages) {
     # Check if Python is available
     $pythonCmd = $null
@@ -258,15 +301,34 @@ foreach ($pkg in $pythonPackages) {
         }
     }
     catch {
-        Write-ScriptMessage -Message "  ✗ $pkg (error checking)" -IsError
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to check Python package" -OperationName 'dependencies.check-python' -Context @{
+                package_name = $pkg
+            } -Code 'PythonPackageCheckFailed'
+        }
+        else {
+            Write-ScriptMessage -Message "  ✗ $pkg (error checking)" -IsError
+        }
         $missingPython += $pkg
     }
     finally {
         Remove-Item -Path $tempCheck -ErrorAction SilentlyContinue
     }
 }
+$pythonCheckDuration = ((Get-Date) - $pythonCheckStartTime).TotalMilliseconds
+
+# Level 2: Python check timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[dependencies.check-packages] Python check completed in ${pythonCheckDuration}ms"
+    Write-Verbose "[dependencies.check-packages] Python missing: $($missingPython.Count)"
+}
 
 Write-ScriptMessage -Message "Checking Scoop packages..." -LogLevel Info
+
+# Level 1: Scoop check start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[dependencies.check-packages] Starting Scoop package check"
+}
 
 # Check if Scoop is available
 if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
@@ -288,21 +350,11 @@ else {
         . $testSupportPath
     }
     
+    $scoopCheckErrors = [System.Collections.Generic.List[string]]::new()
     foreach ($pkg in $scoopPackages) {
-        if (Get-Command Test-ScoopPackageAvailable -ErrorAction SilentlyContinue) {
-            if (Test-ScoopPackageAvailable -PackageName $pkg) {
-                Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
-            }
-            else {
-                Write-ScriptMessage -Message "  ✗ $pkg" -ForegroundColor Red
-                $missingScoop += $pkg
-            }
-        }
-        else {
-            # Fallback: use scoop list directly
-            try {
-                $scoopList = & scoop list $pkg 2>&1
-                if ($LASTEXITCODE -eq 0 -and $scoopList -match $pkg) {
+        try {
+            if (Get-Command Test-ScoopPackageAvailable -ErrorAction SilentlyContinue) {
+                if (Test-ScoopPackageAvailable -PackageName $pkg -ErrorAction Stop) {
                     Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
                 }
                 else {
@@ -310,18 +362,77 @@ else {
                     $missingScoop += $pkg
                 }
             }
-            catch {
-                Write-ScriptMessage -Message "  ? $pkg (error checking)" -IsWarning
-                $missingScoop += $pkg
+            else {
+                # Fallback: use scoop list directly
+                try {
+                    $scoopList = & scoop list $pkg 2>&1 -ErrorAction Stop
+                    if ($LASTEXITCODE -eq 0 -and $scoopList -match $pkg) {
+                        Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
+                    }
+                    else {
+                        Write-ScriptMessage -Message "  ✗ $pkg" -ForegroundColor Red
+                        $missingScoop += $pkg
+                    }
+                }
+                catch {
+                    $scoopCheckErrors.Add($pkg)
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to check Scoop package" -OperationName 'dependencies.check-scoop' -Context @{
+                            package_name = $pkg
+                        } -Code 'ScoopPackageCheckFailed'
+                    }
+                    else {
+                        Write-ScriptMessage -Message "  ? $pkg (error checking)" -IsWarning
+                    }
+                    $missingScoop += $pkg
+                }
             }
         }
+        catch {
+            $scoopCheckErrors.Add($pkg)
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dependencies.check-scoop' -Context @{
+                    package_name = $pkg
+                }
+            }
+            else {
+                Write-ScriptMessage -Message "  ✗ $pkg (error checking)" -IsWarning
+            }
+            $missingScoop += $pkg
+        }
     }
+    if ($scoopCheckErrors.Count -gt 0) {
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Some Scoop package checks failed" -OperationName 'dependencies.check-scoop' -Context @{
+                failed_packages = $scoopCheckErrors -join ','
+                failed_count = $scoopCheckErrors.Count
+            } -Code 'ScoopPackageCheckPartialFailure'
+        }
+    }
+    $scoopCheckDuration = ((Get-Date) - $scoopCheckStartTime).TotalMilliseconds
+    
+    # Level 2: Scoop check timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[dependencies.check-packages] Scoop check completed in ${scoopCheckDuration}ms"
+        Write-Verbose "[dependencies.check-packages] Scoop missing: $($missingScoop.Count), Errors: $($scoopCheckErrors.Count)"
+    }
+}
+
+# Level 1: Summary generation
+if ($debugLevel -ge 1) {
+    Write-Verbose "[dependencies.check-packages] Generating package check summary"
+}
+
+# Level 3: Performance breakdown
+if ($debugLevel -ge 3) {
+    $totalCheckDuration = $npmCheckDuration + $pythonCheckDuration + $scoopCheckDuration
+    Write-Host "  [dependencies.check-packages] Performance - npm: ${npmCheckDuration}ms, Python: ${pythonCheckDuration}ms, Scoop: ${scoopCheckDuration}ms, Total: ${totalCheckDuration}ms" -ForegroundColor DarkGray
 }
 
 Write-ScriptMessage -Message ("=" * 60) -LogLevel Info
 if ($missingNpm.Count -eq 0 -and $missingPython.Count -eq 0 -and $missingScoop.Count -eq 0) {
     Write-ScriptMessage -Message "All packages are installed!" -ForegroundColor Green
-    Exit-WithCode -ExitCode $EXIT_SUCCESS
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 else {
     if ($missingNpm.Count -gt 0) {
@@ -422,6 +533,6 @@ else {
         Write-ScriptMessage -Message "Install with: $installHint" -LogLevel Info
         Write-ScriptMessage -Message "Or install individually: <package-manager> install <package-name>" -LogLevel Info
     }
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Some packages are missing"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Some packages are missing"
 }
 

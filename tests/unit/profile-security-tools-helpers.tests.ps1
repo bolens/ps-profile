@@ -1,4 +1,4 @@
-# ===============================================
+﻿# ===============================================
 # profile-security-tools-helpers.tests.ps1
 # Unit tests for helper functions (Get-ToolInstallHint, Write-MissingToolWarning)
 # ===============================================
@@ -36,6 +36,22 @@ Describe 'security-tools.ps1 - Helper Functions' {
     Context 'Get-ToolInstallHint Helper' {
         BeforeEach {
             # Create a function mock for Import-Requirements so Get-Command can find it
+            <#
+            .SYNOPSIS
+                Performs operations related to Import-Requirements.
+            
+            .DESCRIPTION
+                Performs operations related to Import-Requirements.
+            
+            .PARAMETER RepoRoot
+                The RepoRoot parameter.
+            
+            .PARAMETER UseCache
+                The UseCache parameter.
+            
+            .OUTPUTS
+                object
+            #>
             function Import-Requirements {
                 param([string]$RepoRoot, [switch]$UseCache)
                 return $null

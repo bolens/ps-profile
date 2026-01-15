@@ -48,10 +48,47 @@ function Get-AggregatedMetrics {
 
     # Validate Metrics array contains objects with expected properties
     $validatedMetrics = [System.Collections.Generic.List[object]]::new()
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [performance-aggregation.aggregate] Starting aggregation for operation '$OperationName' with $($Metrics.Count) metrics" -ForegroundColor DarkGray
+    }
 
     foreach ($metric in $Metrics) {
         if ($null -eq $metric) {
-            Write-Warning "Metrics array contains null value. Skipping."
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Metrics array contains null value" -OperationName 'performance-aggregation.aggregate' -Context @{
+                    operation_name = $OperationName
+                    metrics_count = $Metrics.Count
+                } -Code 'NullMetricValue'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        Write-Warning "[performance-aggregation.aggregate] Metrics array contains null value. Skipping."
+                    }
+                    # Level 3: Log detailed null value information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [performance-aggregation.aggregate] Null metric details - OperationName: $OperationName, MetricsCount: $($Metrics.Count), Index: $($Metrics.IndexOf($metric))" -ForegroundColor DarkGray
+                    }
+                }
+                else {
+                    # Always log warnings even if debug is off
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Metrics array contains null value" -OperationName 'performance-aggregation.aggregate' -Context @{
+                            # Technical context
+                            operation_name = $OperationName
+                            metrics_count = $Metrics.Count
+                            # Invocation context
+                            FunctionName = 'Get-AggregatedMetrics'
+                        } -Code 'NullMetricValue'
+                    }
+                    else {
+                        Write-Warning "[performance-aggregation.aggregate] Metrics array contains null value. Skipping."
+                    }
+                }
+            }
             continue
         }
 
@@ -66,7 +103,39 @@ function Get-AggregatedMetrics {
         }
 
         if (-not $hasDuration) {
-            Write-Warning "Metric object missing DurationMs property. Skipping."
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Metric object missing DurationMs property" -OperationName 'performance-aggregation.aggregate' -Context @{
+                    operation_name = $OperationName
+                    metric_type = $metric.GetType().Name
+                } -Code 'MissingDurationProperty'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        Write-Warning "[performance-aggregation.aggregate] Metric object missing DurationMs property. Skipping."
+                    }
+                    # Level 3: Log detailed missing property information
+                    if ($debugLevel -ge 3) {
+                        Write-Verbose "[performance-aggregation.aggregate] Missing property details - OperationName: $OperationName, MetricType: $($metric.GetType().Name), AvailableProperties: $($metric.PSObject.Properties.Name -join ', ')"
+                    }
+                }
+                else {
+                    # Always log warnings even if debug is off
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Metric object missing DurationMs property" -OperationName 'performance-aggregation.aggregate' -Context @{
+                            # Technical context
+                            operation_name = $OperationName
+                            metric_type = $metric.GetType().Name
+                            # Invocation context
+                            FunctionName = 'Get-AggregatedMetrics'
+                        } -Code 'MissingDurationProperty'
+                    }
+                    else {
+                        Write-Warning "[performance-aggregation.aggregate] Metric object missing DurationMs property. Skipping."
+                    }
+                }
+            }
             continue
         }
 
@@ -74,6 +143,42 @@ function Get-AggregatedMetrics {
     }
 
     if ($validatedMetrics.Count -eq 0) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "No valid metrics found for operation" -OperationName 'performance-aggregation.aggregate' -Context @{
+                        # Technical context
+                        operation_name = $OperationName
+                        metrics_count = $Metrics.Count
+                        validated_count = $validatedMetrics.Count
+                        # Invocation context
+                        FunctionName = 'Get-AggregatedMetrics'
+                    } -Code 'NoValidMetrics'
+                }
+                else {
+                    Write-Warning "[performance-aggregation.aggregate] No valid metrics found for operation '$OperationName'"
+                }
+            }
+            # Level 3: Log detailed no valid metrics information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [performance-aggregation.aggregate] No valid metrics details - OperationName: $OperationName, TotalMetrics: $($Metrics.Count), ValidatedMetrics: $($validatedMetrics.Count)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log warnings even if debug is off
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "No valid metrics found for operation" -OperationName 'performance-aggregation.aggregate' -Context @{
+                    operation_name = $OperationName
+                    metrics_count = $Metrics.Count
+                    validated_count = $validatedMetrics.Count
+                    FunctionName = 'Get-AggregatedMetrics'
+                } -Code 'NoValidMetrics'
+            }
+            else {
+                Write-Warning "[performance-aggregation.aggregate] No valid metrics found for operation '$OperationName'"
+            }
+        }
         return [PSCustomObject]@{
             OperationName     = $OperationName
             Count             = 0
@@ -85,6 +190,11 @@ function Get-AggregatedMetrics {
             FailureCount      = 0
             SuccessRate       = 0
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [performance-aggregation.aggregate] Validated $($validatedMetrics.Count) metrics, calculating statistics" -ForegroundColor DarkGray
     }
 
     # Extract duration values (supports both dictionary and object formats)
@@ -128,6 +238,15 @@ function Get-AggregatedMetrics {
     }
     $sortedDurations = $durationList | Sort-Object
     $count = $sortedDurations.Count
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [performance-aggregation.aggregate] Aggregation complete: Count=$count, SuccessRate=$([math]::Round(($successCount / $Metrics.Count) * 100, 2))%" -ForegroundColor DarkGray
+    }
+    
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [performance-aggregation.aggregate] Detailed stats: Min=$([math]::Round(($sortedDurations | Measure-Object -Minimum).Minimum, 2))ms, Max=$([math]::Round(($sortedDurations | Measure-Object -Maximum).Maximum, 2))ms, Avg=$([math]::Round(($durationList | Measure-Object -Average).Average, 2))ms" -ForegroundColor DarkGray
+    }
 
     return [PSCustomObject]@{
         OperationName     = $OperationName

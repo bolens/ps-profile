@@ -12,6 +12,11 @@ $ErrorActionPreference = 'Stop'
 $ConfirmPreference = 'None'
 $global:ConfirmPreference = 'None'
 
+# Enable strict mode for enhanced error checking in tests
+# This catches uninitialized variables, typos, and other common errors
+# Scoped to script to avoid affecting parent scopes
+Set-StrictMode -Version Latest
+
 # Set default parameter values to suppress prompts for Remove-Item and other operations
 # This ensures tests can clean up Function:\ paths without prompting
 if (-not $PSDefaultParameterValues) {

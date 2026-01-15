@@ -115,7 +115,17 @@ try {
         )
 
         if (-not (Test-Path -LiteralPath $InputPath)) {
-            Write-Error "Input file not found: $InputPath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Input file not found: $InputPath"),
+                        'InputFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $InputPath
+                    )) -OperationName 'media.video.convert' -Context @{ input_path = $InputPath }
+            }
+            else {
+                Write-Error "Input file not found: $InputPath"
+            }
             return
         }
 
@@ -157,17 +167,34 @@ try {
                 }
             }
 
-            try {
-                & $handbrakeCmd $arguments
-                if ($LASTEXITCODE -eq 0) {
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'media.video.convert.handbrake' -Context @{
+                    input_path  = $InputPath
+                    output_path = $OutputPath
+                    codec       = $Codec
+                    preset      = $Preset
+                    quality     = $Quality
+                } -ScriptBlock {
+                    & $handbrakeCmd $arguments
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Handbrake conversion failed. Exit code: $LASTEXITCODE"
+                    }
                     return $OutputPath
                 }
-                else {
-                    Write-Error "Handbrake conversion failed. Exit code: $LASTEXITCODE"
-                }
             }
-            catch {
-                Write-Error "Failed to run handbrake: $_"
+            else {
+                try {
+                    & $handbrakeCmd $arguments
+                    if ($LASTEXITCODE -eq 0) {
+                        return $OutputPath
+                    }
+                    else {
+                        Write-Error "Handbrake conversion failed. Exit code: $LASTEXITCODE"
+                    }
+                }
+                catch {
+                    Write-Error "Failed to run handbrake: $_"
+                }
             }
         }
         else {
@@ -196,17 +223,33 @@ try {
 
             $arguments = @('-i', $InputPath, '-c:v', $Codec, '-crf', $Quality, '-c:a', 'copy', '-y', $OutputPath)
 
-            try {
-                & ffmpeg $arguments 2>&1 | Out-Null
-                if ($LASTEXITCODE -eq 0) {
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'media.video.convert.ffmpeg' -Context @{
+                    input_path  = $InputPath
+                    output_path = $OutputPath
+                    codec       = $Codec
+                    quality     = $Quality
+                } -ScriptBlock {
+                    & ffmpeg $arguments 2>&1 | Out-Null
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "FFmpeg conversion failed. Exit code: $LASTEXITCODE"
+                    }
                     return $OutputPath
                 }
-                else {
-                    Write-Error "FFmpeg conversion failed. Exit code: $LASTEXITCODE"
-                }
             }
-            catch {
-                Write-Error "Failed to run ffmpeg: $_"
+            else {
+                try {
+                    & ffmpeg $arguments 2>&1 | Out-Null
+                    if ($LASTEXITCODE -eq 0) {
+                        return $OutputPath
+                    }
+                    else {
+                        Write-Error "FFmpeg conversion failed. Exit code: $LASTEXITCODE"
+                    }
+                }
+                catch {
+                    Write-Error "Failed to run ffmpeg: $_"
+                }
             }
         }
     }
@@ -284,7 +327,17 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath $InputPath)) {
-            Write-Error "Input file not found: $InputPath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Input file not found: $InputPath"),
+                        'InputFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $InputPath
+                    )) -OperationName 'media.audio.extract' -Context @{ input_path = $InputPath }
+            }
+            else {
+                Write-Error "Input file not found: $InputPath"
+            }
             return
         }
 
@@ -300,17 +353,33 @@ try {
         
         $arguments += '-y', $OutputPath
 
-        try {
-            & ffmpeg $arguments 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'media.audio.extract' -Context @{
+                input_path  = $InputPath
+                output_path = $OutputPath
+                audio_codec = $AudioCodec
+                bitrate     = $Bitrate
+            } -ScriptBlock {
+                & ffmpeg $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Audio extraction failed. Exit code: $LASTEXITCODE"
+                }
                 return $OutputPath
             }
-            else {
-                Write-Error "Audio extraction failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run ffmpeg: $_"
+        else {
+            try {
+                & ffmpeg $arguments 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    return $OutputPath
+                }
+                else {
+                    Write-Error "Audio extraction failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run ffmpeg: $_"
+            }
         }
     }
 
@@ -353,7 +422,17 @@ try {
         )
 
         if (-not (Test-Path -LiteralPath $AudioPath)) {
-            Write-Error "Path not found: $AudioPath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Path not found: $AudioPath"),
+                        'AudioPathNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $AudioPath
+                    )) -OperationName 'media.audio.tag' -Context @{ audio_path = $AudioPath; tool = $Tool }
+            }
+            else {
+                Write-Error "Path not found: $AudioPath"
+            }
             return
         }
 
@@ -382,11 +461,21 @@ try {
             return
         }
 
-        try {
-            Start-Process -FilePath $toolName -ArgumentList $AudioPath -ErrorAction Stop
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'media.audio.tag' -Context @{
+                audio_path = $AudioPath
+                tool       = $Tool
+            } -ScriptBlock {
+                Start-Process -FilePath $toolName -ArgumentList $AudioPath -ErrorAction Stop
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to launch $toolName : $_"
+        else {
+            try {
+                Start-Process -FilePath $toolName -ArgumentList $AudioPath -ErrorAction Stop
+            }
+            catch {
+                Write-Error "Failed to launch $toolName : $_"
+            }
         }
     }
 
@@ -470,17 +559,32 @@ try {
             $arguments += '-q', $Quality
         }
 
-        try {
-            & cyanrip $arguments
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'media.cd.rip' -Context @{
+                output_path = $OutputPath
+                format      = $Format
+                quality     = $Quality
+            } -ScriptBlock {
+                & cyanrip $arguments
+                if ($LASTEXITCODE -ne 0) {
+                    throw "CD ripping failed. Exit code: $LASTEXITCODE"
+                }
                 return $OutputPath
             }
-            else {
-                Write-Error "CD ripping failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run cyanrip: $_"
+        else {
+            try {
+                & cyanrip $arguments
+                if ($LASTEXITCODE -eq 0) {
+                    return $OutputPath
+                }
+                else {
+                    Write-Error "CD ripping failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run cyanrip: $_"
+            }
         }
     }
 
@@ -532,7 +636,17 @@ try {
         )
 
         if (-not (Test-Path -LiteralPath $MediaPath)) {
-            Write-Error "Media file not found: $MediaPath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Media file not found: $MediaPath"),
+                        'MediaFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $MediaPath
+                    )) -OperationName 'media.info.get' -Context @{ media_path = $MediaPath }
+            }
+            else {
+                Write-Error "Media file not found: $MediaPath"
+            }
             return
         }
 
@@ -574,9 +688,16 @@ try {
         
         $arguments += $MediaPath
 
-        try {
-            $output = & $mediainfoCmd $arguments
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'media.info.get' -Context @{
+                media_path    = $MediaPath
+                output_format = $OutputFormat
+                output_path   = $OutputPath
+            } -ScriptBlock {
+                $output = & $mediainfoCmd $arguments
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Failed to get media info. Exit code: $LASTEXITCODE"
+                }
                 if ($OutputPath) {
                     $output | Out-File -FilePath $OutputPath -Encoding utf8
                     return $OutputPath
@@ -585,12 +706,26 @@ try {
                     return $output
                 }
             }
-            else {
-                Write-Error "Failed to get media info. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run mediainfo: $_"
+        else {
+            try {
+                $output = & $mediainfoCmd $arguments
+                if ($LASTEXITCODE -eq 0) {
+                    if ($OutputPath) {
+                        $output | Out-File -FilePath $OutputPath -Encoding utf8
+                        return $OutputPath
+                    }
+                    else {
+                        return $output
+                    }
+                }
+                else {
+                    Write-Error "Failed to get media info. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run mediainfo: $_"
+            }
         }
     }
 
@@ -652,7 +787,17 @@ try {
 
         foreach ($inputPath in $InputPaths) {
             if (-not (Test-Path -LiteralPath $inputPath)) {
-                Write-Error "Input file not found: $inputPath"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("Input file not found: $inputPath"),
+                            'InputFileNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $inputPath
+                        )) -OperationName 'media.mkv.merge' -Context @{ input_path = $inputPath }
+                }
+                else {
+                    Write-Error "Input file not found: $inputPath"
+                }
                 return
             }
         }
@@ -663,17 +808,31 @@ try {
 
         $arguments = @('-o', $OutputPath) + $InputPaths
 
-        try {
-            & mkvmerge $arguments
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'media.mkv.merge' -Context @{
+                input_paths = $InputPaths
+                output_path = $OutputPath
+            } -ScriptBlock {
+                & mkvmerge $arguments
+                if ($LASTEXITCODE -ne 0) {
+                    throw "MKV merge failed. Exit code: $LASTEXITCODE"
+                }
                 return $OutputPath
             }
-            else {
-                Write-Error "MKV merge failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to run mkvmerge: $_"
+        else {
+            try {
+                & mkvmerge $arguments
+                if ($LASTEXITCODE -eq 0) {
+                    return $OutputPath
+                }
+                else {
+                    Write-Error "MKV merge failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run mkvmerge: $_"
+            }
         }
     }
 

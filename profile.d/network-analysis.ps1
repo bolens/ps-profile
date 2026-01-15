@@ -113,7 +113,17 @@ try {
         
         if ($CaptureFile) {
             if (-not (Test-Path -LiteralPath $CaptureFile)) {
-                Write-Error "Capture file not found: $CaptureFile"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new("Capture file not found: $CaptureFile"),
+                            'CaptureFileNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $CaptureFile
+                        )) -OperationName 'network.wireshark.start' -Context @{ capture_file = $CaptureFile }
+                }
+                else {
+                    Write-Error "Capture file not found: $CaptureFile"
+                }
                 return
             }
             $arguments += $CaptureFile
@@ -123,11 +133,21 @@ try {
             $arguments += '-i', $Interface
         }
 
-        try {
-            Start-Process -FilePath 'wireshark' -ArgumentList $arguments -ErrorAction Stop
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'network.wireshark.start' -Context @{
+                capture_file = $CaptureFile
+                interface    = $Interface
+            } -ScriptBlock {
+                Start-Process -FilePath 'wireshark' -ArgumentList $arguments -ErrorAction Stop
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to launch wireshark: $_"
+        else {
+            try {
+                Start-Process -FilePath 'wireshark' -ArgumentList $arguments -ErrorAction Stop
+            }
+            catch {
+                Write-Error "Failed to launch wireshark: $_"
+            }
         }
     }
 
@@ -196,12 +216,23 @@ try {
                 return
             }
 
-            try {
-                # Sniffnet is primarily a GUI tool, but can be launched
-                Start-Process -FilePath 'sniffnet' -ErrorAction Stop
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Invoke-WithWideEvent -OperationName 'network.scan.sniffnet' -Context @{
+                    target        = $Target
+                    output_format = $OutputFormat
+                } -ScriptBlock {
+                    # Sniffnet is primarily a GUI tool, but can be launched
+                    Start-Process -FilePath 'sniffnet' -ErrorAction Stop
+                } | Out-Null
             }
-            catch {
-                Write-Error "Failed to launch sniffnet: $_"
+            else {
+                try {
+                    # Sniffnet is primarily a GUI tool, but can be launched
+                    Start-Process -FilePath 'sniffnet' -ErrorAction Stop
+                }
+                catch {
+                    Write-Error "Failed to launch sniffnet: $_"
+                }
             }
         }
         elseif ($Tool -eq 'trippy') {
@@ -230,17 +261,31 @@ try {
                 $arguments += '--json'
             }
 
-            try {
-                $output = & trippy $arguments 2>&1
-                if ($LASTEXITCODE -eq 0) {
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'network.scan.trippy' -Context @{
+                    target        = $Target
+                    output_format = $OutputFormat
+                } -ScriptBlock {
+                    $output = & trippy $arguments 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Trippy scan failed. Exit code: $LASTEXITCODE"
+                    }
                     return $output
                 }
-                else {
-                    Write-Error "Trippy scan failed. Exit code: $LASTEXITCODE"
-                }
             }
-            catch {
-                Write-Error "Failed to run trippy: $_"
+            else {
+                try {
+                    $output = & trippy $arguments 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        return $output
+                    }
+                    else {
+                        Write-Error "Trippy scan failed. Exit code: $LASTEXITCODE"
+                    }
+                }
+                catch {
+                    Write-Error "Failed to run trippy: $_"
+                }
             }
         }
     }
@@ -328,20 +373,44 @@ try {
                         $output = & nali $publicIp.Trim() 2>&1
                     }
                     else {
-                        Write-Error "Failed to get public IP address"
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                                    [System.Exception]::new("Failed to get public IP address"),
+                                    'PublicIpLookupFailed',
+                                    [System.Management.Automation.ErrorCategory]::OperationStopped,
+                                    $null
+                                )) -OperationName 'network.ipinfo.nali' -Context @{ tool = 'nali' }
+                        }
+                        else {
+                            Write-Error "Failed to get public IP address"
+                        }
                         return
                     }
                 }
                 
-                if ($LASTEXITCODE -eq 0) {
-                    return $output
+                if ($LASTEXITCODE -ne 0) {
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                                [System.Exception]::new("Nali query failed. Exit code: $LASTEXITCODE"),
+                                'NaliQueryFailed',
+                                [System.Management.Automation.ErrorCategory]::OperationStopped,
+                                $LASTEXITCODE
+                            )) -OperationName 'network.ipinfo.nali' -Context @{ tool = 'nali'; exit_code = $LASTEXITCODE }
+                    }
+                    else {
+                        Write-Error "Nali query failed. Exit code: $LASTEXITCODE"
+                    }
+                    return
                 }
-                else {
-                    Write-Error "Nali query failed. Exit code: $LASTEXITCODE"
-                }
+                return $output
             }
             catch {
-                Write-Error "Failed to run nali: $_"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'network.ipinfo.nali' -Context @{ tool = 'nali' }
+                }
+                else {
+                    Write-Error "Failed to run nali: $_"
+                }
             }
         }
         elseif ($Tool -eq 'ipinfo') {
@@ -374,17 +443,32 @@ try {
                 $arguments += $IpAddress
             }
 
-            try {
-                $output = & ipinfo $arguments 2>&1
-                if ($LASTEXITCODE -eq 0) {
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                return Invoke-WithWideEvent -OperationName 'network.ipinfo.query' -Context @{
+                    tool          = 'ipinfo'
+                    ip_address    = $IpAddress
+                    output_format = $OutputFormat
+                } -ScriptBlock {
+                    $output = & ipinfo $arguments 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Ipinfo query failed. Exit code: $LASTEXITCODE"
+                    }
                     return $output
                 }
-                else {
-                    Write-Error "Ipinfo query failed. Exit code: $LASTEXITCODE"
-                }
             }
-            catch {
-                Write-Error "Failed to run ipinfo: $_"
+            else {
+                try {
+                    $output = & ipinfo $arguments 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        return $output
+                    }
+                    else {
+                        Write-Error "Ipinfo query failed. Exit code: $LASTEXITCODE"
+                    }
+                }
+                catch {
+                    Write-Error "Failed to run ipinfo: $_"
+                }
             }
         }
     }
@@ -465,11 +549,22 @@ try {
             $arguments += '--protocol', $Protocol
         }
 
-        try {
-            & cloudflared $arguments
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'network.cloudflare.tunnel.start' -Context @{
+                url      = $Url
+                hostname = $Hostname
+                protocol = $Protocol
+            } -ScriptBlock {
+                & cloudflared $arguments
+            } | Out-Null
         }
-        catch {
-            Write-Error "Failed to start Cloudflare tunnel: $_"
+        else {
+            try {
+                & cloudflared $arguments
+            }
+            catch {
+                Write-Error "Failed to start Cloudflare tunnel: $_"
+            }
         }
     }
 
@@ -574,17 +669,32 @@ try {
         
         $arguments += $Message
 
-        try {
-            $output = & ntfy $arguments 2>&1
-            if ($LASTEXITCODE -eq 0) {
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'network.ntfy.send' -Context @{
+                topic    = $Topic
+                priority = $Priority
+                server   = $Server
+            } -ScriptBlock {
+                $output = & ntfy $arguments 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Ntfy notification failed. Exit code: $LASTEXITCODE"
+                }
                 return $output
             }
-            else {
-                Write-Error "Ntfy notification failed. Exit code: $LASTEXITCODE"
-            }
         }
-        catch {
-            Write-Error "Failed to send ntfy notification: $_"
+        else {
+            try {
+                $output = & ntfy $arguments 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    return $output
+                }
+                else {
+                    Write-Error "Ntfy notification failed. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to send ntfy notification: $_"
+            }
         }
     }
 

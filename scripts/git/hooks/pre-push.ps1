@@ -35,8 +35,8 @@ Write-ScriptMessage -Message "pre-push: running validate-profile (format + secur
 $psExe = Get-PowerShellExecutable
 & $psExe -NoProfile -File $validate
 if ($LASTEXITCODE -ne 0) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "pre-push: validate-profile failed"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "pre-push: validate-profile failed"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "pre-push: all checks passed"
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "pre-push: all checks passed"
 

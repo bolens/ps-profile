@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\09-package-managers.ps1
+Defined in: ..\profile.d\scoop.ps1

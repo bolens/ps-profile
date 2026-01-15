@@ -42,7 +42,7 @@ if (-not (Test-Path Function:Get-FromClipboard -ErrorAction SilentlyContinue)) {
     #>
     function Get-FromClipboard {
         try {
-            # Use Test-HasCommand which handles caching and fallback internally
+            # Use Test-CachedCommand which handles caching and fallback internally
             if (Test-CachedCommand Get-Clipboard) { Get-Clipboard } else { cmd /c paste }
         }
         catch {

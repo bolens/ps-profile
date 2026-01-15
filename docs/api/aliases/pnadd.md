@@ -6,7 +6,7 @@ Installs packages using pnpm.
 
 ## Description
 
-Adds packages as dependencies to the project using pnpm.
+Adds packages as dependencies to the project using pnpm. Supports -D (dev) and -g (global) flags.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\69-pnpm.ps1
+Defined in: ..\profile.d\pnpm.ps1

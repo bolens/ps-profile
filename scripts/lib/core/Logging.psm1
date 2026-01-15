@@ -9,9 +9,22 @@ scripts/lib/Logging.psm1
     including structured logging, log file rotation, and multiple log levels.
 
 .NOTES
-    Module Version: 1.0.0
-    PowerShell Version: 3.0+
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe log level handling.
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
+
+# Import CommonEnums for LogLevel enum
+$commonEnumsPath = Join-Path $PSScriptRoot 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 # Import Locale module for locale-aware date formatting
 # Use SafeImport module if available, otherwise fall back to manual check
@@ -96,6 +109,7 @@ function Write-ScriptMessage {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Message,
 
         [System.ConsoleColor]$ForegroundColor,
@@ -104,8 +118,7 @@ function Write-ScriptMessage {
 
         [switch]$IsError,
 
-        [ValidateSet('Debug', 'Info', 'Warning', 'Error')]
-        [string]$LogLevel,
+        [LogLevel]$LogLevel,
 
         [switch]$StructuredOutput,
 
@@ -120,7 +133,7 @@ function Write-ScriptMessage {
 
     # Determine log level
     $level = if ($LogLevel) {
-        $LogLevel
+        $LogLevel.ToString()
     }
     elseif ($IsError) {
         'Error'
@@ -218,7 +231,53 @@ function Write-ScriptMessage {
             }
         }
         catch {
-            Write-Warning "Failed to write to log file '$LogFile': $($_.Exception.Message)"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to write to log file" -OperationName 'logging.write-log-file' -Context @{
+                            # Technical context
+                            log_file             = $LogFile
+                            log_dir              = if ($LogFile) { Split-Path -Parent $LogFile } else { $null }
+                            append_log           = $AppendLog
+                            max_log_file_size_mb = $MaxLogFileSizeMB
+                            max_log_files        = $MaxLogFiles
+                            # Error context
+                            error_message        = $_.Exception.Message
+                            error_type           = $_.Exception.GetType().FullName
+                            # Operation context
+                            log_level            = $level
+                            message_length       = if ($Message) { $Message.Length } else { 0 }
+                        } -Code 'LogFileWriteFailed'
+                    }
+                    else {
+                        Write-Warning "[logging.write-log-file] Failed to write to log file '$LogFile': $($_.Exception.Message)"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [logging.write-log-file] Log file write error details - LogFile: $LogFile, AppendLog: $AppendLog, MaxSizeMB: $MaxLogFileSizeMB, MaxFiles: $MaxLogFiles, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to write to log file" -OperationName 'logging.write-log-file' -Context @{
+                        log_file             = $LogFile
+                        log_dir              = if ($LogFile) { Split-Path -Parent $LogFile } else { $null }
+                        append_log           = $AppendLog
+                        max_log_file_size_mb = $MaxLogFileSizeMB
+                        max_log_files        = $MaxLogFiles
+                        error_message        = $_.Exception.Message
+                        error_type           = $_.Exception.GetType().FullName
+                        log_level            = $level
+                        message_length       = if ($Message) { $Message.Length } else { 0 }
+                    } -Code 'LogFileWriteFailed'
+                }
+                else {
+                    Write-Warning "[logging.write-log-file] Failed to write to log file '$LogFile': $($_.Exception.Message)"
+                }
+            }
         }
     }
 
@@ -231,9 +290,15 @@ function Write-ScriptMessage {
     # Standard output based on level
     switch ($level) {
         'Error' {
+            # For error level, try to use structured error logging if available
+            # Note: Write-ScriptMessage doesn't receive ErrorRecord, so we can't use Write-StructuredError here
+            # This is intentional - Write-ScriptMessage is a formatting function, not an error handler
             Write-Error $Message -ErrorAction Continue
         }
         'Warning' {
+            # For warning level, use standard Write-Warning
+            # Note: Write-ScriptMessage is a formatting function, not a warning handler
+            # Structured warnings should be handled at the call site
             Write-Warning $Message
         }
         'Debug' {

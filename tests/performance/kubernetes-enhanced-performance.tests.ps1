@@ -49,7 +49,11 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
                 'Tail-KubeLogs',
                 'Get-KubeResources',
                 'Start-Minikube',
-                'Start-K9s'
+                'Start-K9s',
+                'Exec-KubePod',
+                'PortForward-KubeService',
+                'Describe-KubeResource',
+                'Apply-KubeManifests'
             )
             
             foreach ($func in $functions) {
@@ -58,6 +62,43 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
             
             $sw.Stop()
             $sw.ElapsedMilliseconds | Should -BeLessThan 100
+        }
+    }
+    
+    Context 'Function Execution Performance' {
+        BeforeAll {
+            . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
+        }
+        
+        It 'Exec-KubePod executes quickly when tools not available' {
+            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
+            
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+            Exec-KubePod -Pod 'test-pod' -Command 'ls' -ErrorAction SilentlyContinue
+            $stopwatch.Stop()
+            
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+        }
+        
+        It 'Describe-KubeResource executes quickly when tools not available' {
+            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
+            
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+            Describe-KubeResource -ResourceType 'pods' -ErrorAction SilentlyContinue
+            $stopwatch.Stop()
+            
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+        }
+        
+        It 'Apply-KubeManifests executes quickly when tools not available' {
+            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
+            Mock Test-Path -MockWith { return $true }
+            
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+            Apply-KubeManifests -Path 'manifests/' -ErrorAction SilentlyContinue
+            $stopwatch.Stop()
+            
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
         }
     }
     

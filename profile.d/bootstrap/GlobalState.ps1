@@ -126,3 +126,44 @@ function global:Test-EnvBool {
     return $false
 }
 
+# ===============================================
+# DEBUG MODE: ENABLE VERBOSE OUTPUT
+# ===============================================
+# When PS_PROFILE_DEBUG is enabled (level 1+), automatically enable verbose output
+# so that Write-Verbose messages appear without requiring manual VerbosePreference setting
+# This applies globally to all profile code that uses Write-Verbose for debug output
+#
+# NOTE: Setting $VerbosePreference = 'Continue' globally affects ALL PowerShell operations,
+# including external tools (like Scoop, Git, etc.). This means you'll see PowerShell's
+# built-in verbose messages for module imports from external tools, such as:
+#   "VERBOSE: Import of lib 'Helpers' initiated from..."
+#   "VERBOSE: Exporting function 'Load-Assembly'."
+#
+# These are PowerShell's built-in verbose messages, not profile fragment loading messages.
+# To suppress verbose output for external tools while keeping it for profile code, you can:
+#   1. Use profile wrapper functions (e.g., scleanup instead of scoop cleanup *)
+#   2. Temporarily suppress: $VerbosePreference = 'SilentlyContinue'; scoop ...; $VerbosePreference = 'Continue'
+#   3. Set PS_PROFILE_VERBOSE_EXTERNAL_TOOLS=0 to suppress verbose for external tool invocations
+if ($env:PS_PROFILE_DEBUG) {
+    $debugLevel = 0
+    if ([int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+        # Store original value for potential restoration (though typically we want verbose during debug)
+        if (-not (Get-Variable -Name 'PSProfileOriginalVerbosePreference' -Scope Global -ErrorAction SilentlyContinue)) {
+            $global:PSProfileOriginalVerbosePreference = $VerbosePreference
+        }
+        # Enable verbose output globally for all Write-Verbose calls
+        # Note: This affects all PowerShell operations, including external tools
+        $global:VerbosePreference = 'Continue'
+        $VerbosePreference = 'Continue'  # Also set in script scope for immediate use
+        
+        # Optionally suppress verbose for external tools if PS_PROFILE_VERBOSE_EXTERNAL_TOOLS=0
+        # This is a hint for wrapper functions to suppress verbose when calling external tools
+        if ($env:PS_PROFILE_VERBOSE_EXTERNAL_TOOLS -eq '0') {
+            $global:PSProfileSuppressVerboseForExternalTools = $true
+        }
+        else {
+            $global:PSProfileSuppressVerboseForExternalTools = $false
+        }
+    }
+}
+

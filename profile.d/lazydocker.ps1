@@ -11,7 +11,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for lazydocker operations.
-    Functions check for lazydocker availability using Test-HasCommand for efficient
+    Functions check for lazydocker availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

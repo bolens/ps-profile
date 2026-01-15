@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\53-go.ps1
+Defined in: ..\profile.d\go.ps1

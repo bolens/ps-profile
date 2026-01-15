@@ -13,7 +13,12 @@ scripts/lib/ModuleImport.psm1
 .NOTES
     Module Version: 1.0.0
     PowerShell Version: 3.0+
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 # Import dependencies (PathResolution for Get-RepoRoot, Cache for caching support)
 # Note: These are now in subdirectories (path/ and utilities/)
@@ -87,6 +92,7 @@ function Get-LibPath {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ScriptPath
     )
 
@@ -205,6 +211,7 @@ function Import-LibModule {
     [OutputType([System.Management.Automation.PSModuleInfo])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ModuleName,
 
         [string]$ScriptPath,
@@ -379,7 +386,51 @@ function Import-LibModule {
             throw "Module '$ModuleName' not found at: $modulePath"
         }
         if ($errorActionPreference -ne 'SilentlyContinue') {
-            Write-Warning "Module '$ModuleName' not found at: $modulePath"
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Module not found" -OperationName 'module-import.load' -Context @{
+                            # Technical context
+                            module_name           = $ModuleName
+                            module_path           = $modulePath
+                            lib_path              = $libPath
+                            script_path           = $ScriptPath
+                            # Operation context
+                            required              = $false
+                            disable_name_checking = $DisableNameChecking
+                            error_action          = $errorActionPreference
+                            # Invocation context
+                            function_name         = 'Import-LibModule'
+                        } -Code 'ModuleNotFound'
+                    }
+                    else {
+                        Write-Warning "[module-import.load] Module '$ModuleName' not found at: $modulePath"
+                    }
+                }
+                # Level 3: Log detailed module not found information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[module-import.load] Module not found details - ModuleName: $ModuleName, ModulePath: $modulePath, LibPath: $libPath, ScriptPath: $ScriptPath, Required: $false"
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Module not found" -OperationName 'module-import.load' -Context @{
+                        module_name           = $ModuleName
+                        module_path           = $modulePath
+                        lib_path              = $libPath
+                        script_path           = $ScriptPath
+                        required              = $false
+                        disable_name_checking = $DisableNameChecking
+                        error_action          = $errorActionPreference
+                        function_name         = 'Import-LibModule'
+                    } -Code 'ModuleNotFound'
+                }
+                else {
+                    Write-Warning "[module-import.load] Module '$ModuleName' not found at: $modulePath"
+                }
+            }
         }
         return $null
     }
@@ -669,7 +720,44 @@ function Initialize-ScriptEnvironment {
                 }
                 else {
                     # ExitCodes/Exit-WithCode not available yet; surface a terminating error
-                    Write-Error $errorMessage -ErrorAction Stop
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.script-path' -Context @{
+                                    # Technical context
+                                    script_path   = $ScriptPath
+                                    # Operation context
+                                    exit_on_error = $true
+                                    # Error context
+                                    error_message = $errorMessage
+                                    # Invocation context
+                                    function_name = 'Import-LibModule'
+                                }
+                            }
+                            else {
+                                Write-Error $errorMessage -ErrorAction Stop
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [module-import.script-path] Script path error details - ScriptPath: $ScriptPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.script-path' -Context @{
+                                script_path   = $ScriptPath
+                                exit_on_error = $true
+                                error_message = $errorMessage
+                                function_name = 'Import-LibModule'
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction Stop
+                        }
+                    }
                 }
             }
             throw $errorMessage
@@ -711,7 +799,44 @@ function Initialize-ScriptEnvironment {
             }
             else {
                 # ExitCodes/Exit-WithCode not available yet; surface a terminating error
-                Write-Error $errorMessage -ErrorAction Stop
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.script-path-resolve' -Context @{
+                                # Technical context
+                                script_path   = $ScriptPath
+                                # Operation context
+                                exit_on_error = $true
+                                # Error context
+                                error_message = $errorMessage
+                                # Invocation context
+                                function_name = 'Import-LibModule'
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction Stop
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($debugLevel -ge 3) {
+                        Write-Verbose "[module-import.script-path-resolve] Script path resolve error details - ScriptPath: $ScriptPath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
+                    }
+                }
+                else {
+                    # Always log critical errors even if debug is off
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.script-path-resolve' -Context @{
+                            script_path   = $ScriptPath
+                            exit_on_error = $true
+                            error_message = $errorMessage
+                            function_name = 'Import-LibModule'
+                        }
+                    }
+                    else {
+                        Write-Error $errorMessage -ErrorAction Stop
+                    }
+                }
             }
         }
         throw $errorMessage
@@ -743,6 +868,12 @@ function Initialize-ScriptEnvironment {
             }
             else {
                 # ExitCodes/Exit-WithCode not available yet; surface a terminating error
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.lib-path' -Context @{
+                        script_path   = $ScriptPath
+                        exit_on_error = $true
+                    }
+                }
                 Write-Error $errorMessage -ErrorAction Stop
             }
         }
@@ -785,7 +916,52 @@ function Initialize-ScriptEnvironment {
                 }
                 else {
                     # ExitCodes/Exit-WithCode not available yet; surface a terminating error
-                    Write-Error $errorMessage -ErrorAction Stop
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.import-modules' -Context @{
+                                    # Technical context
+                                    script_path           = $ScriptPath
+                                    module_names          = $ImportModules
+                                    module_count          = if ($ImportModules) { $ImportModules.Count } else { 0 }
+                                    # Operation context
+                                    exit_on_error         = $true
+                                    disable_name_checking = $DisableNameChecking
+                                    required              = $Required
+                                    # Error context
+                                    error_message         = $errorMessage
+                                    # Invocation context
+                                    function_name         = 'Import-LibModules'
+                                }
+                            }
+                            else {
+                                Write-Error $errorMessage -ErrorAction Stop
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [module-import.import-modules] Import modules error details - ScriptPath: $ScriptPath, ModuleNames: $($ImportModules -join ', '), Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.import-modules' -Context @{
+                                script_path           = $ScriptPath
+                                module_names          = $ImportModules
+                                module_count          = if ($ImportModules) { $ImportModules.Count } else { 0 }
+                                exit_on_error         = $true
+                                disable_name_checking = $DisableNameChecking
+                                required              = $Required
+                                error_message         = $errorMessage
+                                function_name         = 'Import-LibModules'
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction Stop
+                        }
+                    }
                 }
             }
             throw $errorMessage
@@ -833,7 +1009,46 @@ function Initialize-ScriptEnvironment {
                 }
                 else {
                     # ExitCodes/Exit-WithCode not available yet; surface a terminating error
-                    Write-Error $errorMessage -ErrorAction Stop
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.repo-root' -Context @{
+                                    # Technical context
+                                    script_path   = $ScriptPath
+                                    # Operation context
+                                    exit_on_error = $true
+                                    get_repo_root = $GetRepoRoot
+                                    # Error context
+                                    error_message = $errorMessage
+                                    # Invocation context
+                                    function_name = 'Import-LibModule'
+                                }
+                            }
+                            else {
+                                Write-Error $errorMessage -ErrorAction Stop
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [module-import.repo-root] Repo root error details - ScriptPath: $ScriptPath, GetRepoRoot: $GetRepoRoot, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.repo-root' -Context @{
+                                script_path   = $ScriptPath
+                                exit_on_error = $true
+                                get_repo_root = $GetRepoRoot
+                                error_message = $errorMessage
+                                function_name = 'Import-LibModule'
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction Stop
+                        }
+                    }
                 }
             }
             throw $errorMessage
@@ -889,7 +1104,48 @@ function Initialize-ScriptEnvironment {
                 }
                 else {
                     # ExitCodes/Exit-WithCode not available yet; surface a terminating error
-                    Write-Error $errorMessage -ErrorAction Stop
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.profile-dir' -Context @{
+                                    # Technical context
+                                    script_path     = $ScriptPath
+                                    repo_root       = $repoRoot
+                                    # Operation context
+                                    exit_on_error   = $true
+                                    get_profile_dir = $GetProfileDir
+                                    # Error context
+                                    error_message   = $errorMessage
+                                    # Invocation context
+                                    function_name   = 'Import-LibModule'
+                                }
+                            }
+                            else {
+                                Write-Error $errorMessage -ErrorAction Stop
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [module-import.profile-dir] Profile directory error details - ScriptPath: $ScriptPath, RepoRoot: $repoRoot, GetProfileDir: $GetProfileDir, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'module-import.profile-dir' -Context @{
+                                script_path     = $ScriptPath
+                                repo_root       = $repoRoot
+                                exit_on_error   = $true
+                                get_profile_dir = $GetProfileDir
+                                error_message   = $errorMessage
+                                function_name   = 'Import-LibModule'
+                            }
+                        }
+                        else {
+                            Write-Error $errorMessage -ErrorAction Stop
+                        }
+                    }
                 }
             }
             throw $errorMessage

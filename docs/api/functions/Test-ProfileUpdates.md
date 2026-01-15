@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\70-profile-updates.ps1
+Defined in: ..\profile.d\profile-updates.ps1

@@ -33,11 +33,9 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('All', 'Phase1', 'Phase2', 'Phase3', 'Phase4', 'Phase5', 'Phase6')]
-    [string]$Phase = 'All',
+    [TestPhase]$Phase = [TestPhase]::All,
 
-    [ValidateSet('All', 'Unit', 'Integration', 'Performance')]
-    [string]$Suite = 'All',
+    [TestSuite]$Suite = [TestSuite]::All,
 
     [string]$Category,
 
@@ -48,10 +46,20 @@ param(
 $moduleImportPath = Join-Path (Split-Path $PSScriptRoot -Parent -Parent) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
+# Import CommonEnums for TestPhase and TestSuite enums
+$commonEnumsPath = Join-Path (Split-Path $PSScriptRoot -Parent -Parent) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'Locale' -ScriptPath $PSScriptRoot -DisableNameChecking
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+
+# Convert enums to strings
+$phaseString = $Phase.ToString()
+$suiteString = $Suite.ToString()
 
 $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 $runPesterPath = Join-Path $repoRoot 'scripts/utils/code-quality/run-pester.ps1'
@@ -75,10 +83,10 @@ function Invoke-Phase1 {
     Write-VerificationMessage "=== Phase 1: Initial Test Execution and Analysis ===" -Level 'Info'
 
     Write-VerificationMessage "Running full test suite..." -Level 'Info'
-    $testResults = & $runPesterPath -Suite $Suite -OutputFormat Detailed -AnalyzeResults
+    $testResults = & $runPesterPath -Suite $suiteString -OutputFormat Detailed -AnalyzeResults
 
     Write-VerificationMessage "Generating coverage report..." -Level 'Info'
-    $coverageResults = & $runPesterPath -Suite $Suite -Coverage -MinimumCoverage 0 -OutputFormat Minimal
+    $coverageResults = & $runPesterPath -Suite $suiteString -Coverage -MinimumCoverage 0 -OutputFormat Minimal
 
     Write-VerificationMessage "Phase 1 complete. Results saved." -Level 'Info'
     return @{
@@ -134,7 +142,7 @@ function Invoke-Phase5 {
     Write-VerificationMessage "=== Phase 5: Fix Execution ===" -Level 'Info'
 
     Write-VerificationMessage "Running tests to identify failures..." -Level 'Info'
-    $results = & $runPesterPath -Suite $Suite -OutputFormat Detailed
+    $results = & $runPesterPath -Suite $suiteString -OutputFormat Detailed
 
     Write-VerificationMessage "Phase 5 complete." -Level 'Info'
     return $results
@@ -182,11 +190,11 @@ This report contains the results of the test verification plan execution.
 # Main execution
 try {
     Write-VerificationMessage "Starting test verification plan execution..." -Level 'Info'
-    Write-VerificationMessage "Phase: $Phase, Suite: $Suite" -Level 'Info'
+    Write-VerificationMessage "Phase: $phaseString, Suite: $suiteString" -Level 'Info'
 
     $results = @{}
 
-    switch ($Phase) {
+    switch ($phaseString) {
         'All' {
             $results.Phase1 = Invoke-Phase1
             Invoke-Phase2
@@ -204,10 +212,10 @@ try {
     }
 
     Write-VerificationMessage "Test verification plan execution complete." -Level 'Info'
-    Exit-WithCode -ExitCode $EXIT_SUCCESS
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 catch {
     Write-VerificationMessage "Error during test verification: $_" -Level 'Error'
-    Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::OtherError -ErrorRecord $_
 }
 

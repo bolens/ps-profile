@@ -65,7 +65,16 @@ function Initialize-DevTools-Units {
             }
         }
         catch {
-            Write-Error "Failed to convert units: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.data.units.convert' -Context @{
+                    from_unit = $FromUnit
+                    to_unit   = $ToUnit
+                    value     = $Value
+                }
+            }
+            else {
+                Write-Error "Failed to convert units: $_"
+            }
         }
     } -Force
 }

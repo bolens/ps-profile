@@ -88,6 +88,10 @@ function Get-ScoopRoot {
             $candidate -and -not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path -LiteralPath $candidate -PathType Container -ErrorAction SilentlyContinue)
         }
         if ($exists) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [scoop-detection.get-root] Found Scoop root via SCOOP_GLOBAL env var: $candidate" -ForegroundColor DarkGray
+            }
             return $candidate
         }
     }
@@ -102,6 +106,10 @@ function Get-ScoopRoot {
             $candidate -and -not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path -LiteralPath $candidate -PathType Container -ErrorAction SilentlyContinue)
         }
         if ($exists) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [scoop-detection.get-root] Found Scoop root via SCOOP env var: $candidate" -ForegroundColor DarkGray
+            }
             return $candidate
         }
     }
@@ -156,8 +164,17 @@ function Get-ScoopRoot {
             $defaultScoop -and -not [string]::IsNullOrWhiteSpace($defaultScoop) -and (Test-Path -LiteralPath $defaultScoop -PathType Container -ErrorAction SilentlyContinue)
         }
         if ($exists) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [scoop-detection.get-root] Found Scoop root at default location: $defaultScoop" -ForegroundColor DarkGray
+            }
             return $defaultScoop
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[scoop-detection.get-root] Scoop root not found"
     }
 
     return $null
@@ -201,14 +218,27 @@ function Get-ScoopCompletionPath {
     # Use Validation module if available
     if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
         if (Test-ValidPath -Path $completionPath -PathType File) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.get-completion-path] Found Scoop completion path: $completionPath"
+            }
             return $completionPath
         }
     }
     else {
         # Fallback to manual validation
         if ($completionPath -and -not [string]::IsNullOrWhiteSpace($completionPath) -and (Test-Path -LiteralPath $completionPath -PathType Leaf -ErrorAction SilentlyContinue)) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.get-completion-path] Found Scoop completion path: $completionPath"
+            }
             return $completionPath
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[scoop-detection.get-completion-path] Scoop completion path not found for root: $ScoopRoot"
     }
 
     return $null
@@ -253,14 +283,27 @@ function Get-ScoopShimsPath {
     # Use Validation module if available
     if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
         if (Test-ValidPath -Path $shimsPath -PathType Directory) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.get-shims-path] Found Scoop shims path: $shimsPath"
+            }
             return $shimsPath
         }
     }
     else {
         # Fallback to manual validation
         if ($shimsPath -and -not [string]::IsNullOrWhiteSpace($shimsPath) -and (Test-Path -LiteralPath $shimsPath -PathType Container -ErrorAction SilentlyContinue)) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.get-shims-path] Found Scoop shims path: $shimsPath"
+            }
             return $shimsPath
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[scoop-detection.get-shims-path] Scoop shims path not found for root: $ScoopRoot"
     }
 
     return $null
@@ -305,14 +348,27 @@ function Get-ScoopBinPath {
     # Use Validation module if available
     if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
         if (Test-ValidPath -Path $binPath -PathType Directory) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.get-bin-path] Found Scoop bin path: $binPath"
+            }
             return $binPath
         }
     }
     else {
         # Fallback to manual validation
         if ($binPath -and -not [string]::IsNullOrWhiteSpace($binPath) -and (Test-Path -LiteralPath $binPath -PathType Container -ErrorAction SilentlyContinue)) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.get-bin-path] Found Scoop bin path: $binPath"
+            }
             return $binPath
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[scoop-detection.get-bin-path] Scoop bin path not found for root: $ScoopRoot"
     }
 
     return $null
@@ -370,6 +426,16 @@ function Add-ScoopToPath {
         if ($shimsPath -and $env:PATH -notlike "*$([regex]::Escape($shimsPath))*") {
             $env:PATH = "$shimsPath$pathSeparator$env:PATH"
             $added = $true
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[scoop-detection.add-to-path] Added Scoop shims to PATH: $shimsPath"
+            }
+        }
+        elseif ($shimsPath) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.add-to-path] Scoop shims already in PATH: $shimsPath"
+            }
         }
     }
 
@@ -379,6 +445,26 @@ function Add-ScoopToPath {
         if ($binPath -and $env:PATH -notlike "*$([regex]::Escape($binPath))*") {
             $env:PATH = "$binPath$pathSeparator$env:PATH"
             $added = $true
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[scoop-detection.add-to-path] Added Scoop bin to PATH: $binPath"
+            }
+        }
+        elseif ($binPath) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[scoop-detection.add-to-path] Scoop bin already in PATH: $binPath"
+            }
+        }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        if ($added) {
+            Write-Verbose "[scoop-detection.add-to-path] Successfully added Scoop paths to PATH"
+        }
+        else {
+            Write-Verbose "[scoop-detection.add-to-path] No Scoop paths added to PATH (already present or not found)"
         }
     }
 
@@ -406,7 +492,19 @@ function Test-ScoopInstalled {
     param()
 
     $scoopRoot = Get-ScoopRoot
-    return ($null -ne $scoopRoot)
+    $installed = ($null -ne $scoopRoot)
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        if ($installed) {
+            Write-Verbose "[scoop-detection.test-installed] Scoop is installed at: $scoopRoot"
+        }
+        else {
+            Write-Verbose "[scoop-detection.test-installed] Scoop is not installed"
+        }
+    }
+    
+    return $installed
 }
 
 Export-ModuleMember -Function @(

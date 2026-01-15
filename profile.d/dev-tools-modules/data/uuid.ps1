@@ -86,7 +86,15 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to generate UUID v5: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.data.uuid.generate-v5' -Context @{
+                    namespace = $Namespace
+                    name      = $Name
+                }
+            }
+            else {
+                Write-Error "Failed to generate UUID v5: $_"
+            }
         }
     } -Force
 }

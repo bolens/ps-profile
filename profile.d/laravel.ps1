@@ -12,7 +12,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common Laravel operations.
-    Functions check for artisan/composer availability using Test-HasCommand for efficient
+    Functions check for artisan/composer availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

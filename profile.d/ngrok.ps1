@@ -12,7 +12,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common Ngrok operations.
-    Functions check for ngrok availability using Test-HasCommand for efficient
+    Functions check for ngrok availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

@@ -43,8 +43,27 @@ function Initialize-ProfileScoop {
                                 }
                             }
                             catch {
-                                if ($env:PS_PROFILE_DEBUG) {
-                                    Write-Verbose "Failed to get Scoop completion path: $($_.Exception.Message)"
+                                $debugLevel = 0
+                                $hasDebug = $false
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                                    $hasDebug = $debugLevel -ge 1
+                                }
+                                
+                                if ($hasDebug -and $debugLevel -ge 2) {
+                                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                        Write-StructuredWarning -Message "Failed to get Scoop completion path" -OperationName 'profile-scoop.init' -Context @{
+                                            ScoopRoot = $scoopRoot
+                                            Error     = $_.Exception.Message
+                                            ErrorType = $_.Exception.GetType().FullName
+                                        } -Code 'CompletionPathFailed'
+                                    }
+                                    else {
+                                        Write-Verbose "[profile-scoop.init] Failed to get Scoop completion path: $($_.Exception.Message)"
+                                    }
+                                }
+                                # Level 3: Log detailed error information
+                                if ($hasDebug -and $debugLevel -ge 3) {
+                                    Write-Host "  [profile-scoop.init] Completion path error details - ScoopRoot: $scoopRoot, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                                 }
                             }
                         }
@@ -54,16 +73,36 @@ function Initialize-ProfileScoop {
                                 Add-ScoopToPath -ScoopRoot $scoopRoot | Out-Null
                             }
                             catch {
-                                if ($env:PS_PROFILE_DEBUG) {
-                                    Write-Verbose "Failed to add Scoop to PATH: $($_.Exception.Message)"
+                                $debugLevel = 0
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                                    Write-Verbose "[profile-scoop.init] Failed to add Scoop to PATH: $($_.Exception.Message)"
                                 }
                             }
                         }
                     }
                 }
                 catch {
-                    if ($env:PS_PROFILE_DEBUG) {
-                        Write-Verbose "Failed to get Scoop root: $($_.Exception.Message)"
+                    $debugLevel = 0
+                    $hasDebug = $false
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        $hasDebug = $debugLevel -ge 1
+                    }
+                    
+                    if ($hasDebug -and $debugLevel -ge 2) {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Failed to get Scoop root" -OperationName 'profile-scoop.init' -Context @{
+                                ScoopDetectionModule = $scoopDetectionModule
+                                Error                = $_.Exception.Message
+                                ErrorType            = $_.Exception.GetType().FullName
+                            } -Code 'ScoopRootFailed'
+                        }
+                        else {
+                            Write-Verbose "[profile-scoop.init] Failed to get Scoop root: $($_.Exception.Message)"
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($hasDebug -and $debugLevel -ge 3) {
+                        Write-Host "  [profile-scoop.init] Scoop root error details - ScoopDetectionModule: $scoopDetectionModule, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                     }
                     # Re-throw to trigger fallback to legacy detection
                     throw
@@ -75,8 +114,27 @@ function Initialize-ProfileScoop {
         }
         catch {
             # Fallback to legacy detection if module fails (checks common Scoop installation paths)
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Verbose "ScoopDetection module failed, using legacy detection: $($_.Exception.Message)"
+            $debugLevel = 0
+            $hasDebug = $false
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                $hasDebug = $debugLevel -ge 1
+            }
+            
+            if ($hasDebug -and $debugLevel -ge 2) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "ScoopDetection module failed, using legacy detection" -OperationName 'profile-scoop.init' -Context @{
+                        ScoopDetectionModule = $scoopDetectionModule
+                        Error                = $_.Exception.Message
+                        ErrorType            = $_.Exception.GetType().FullName
+                    } -Code 'ModuleFailed'
+                }
+                else {
+                    Write-Verbose "[profile-scoop.init] ScoopDetection module failed, using legacy detection: $($_.Exception.Message)"
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($hasDebug -and $debugLevel -ge 3) {
+                Write-Host "  [profile-scoop.init] Module failure details - ScoopDetectionModule: $scoopDetectionModule, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
             }
             Initialize-ProfileScoopLegacy
         }
@@ -163,8 +221,29 @@ function Initialize-ProfileScoopLegacy {
         }
     }
     catch {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Verbose "Legacy Scoop detection also failed: $($_.Exception.Message)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            $debugLevel = 0
+            $hasDebug = $false
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                $hasDebug = $debugLevel -ge 1
+            }
+            
+            if ($hasDebug -and $debugLevel -ge 2) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Legacy Scoop detection also failed" -OperationName 'profile-scoop.legacy' -Context @{
+                        Error     = $_.Exception.Message
+                        ErrorType = $_.Exception.GetType().FullName
+                    } -Code 'LegacyDetectionFailed'
+                }
+                else {
+                    Write-Verbose "[profile-scoop.legacy] Legacy Scoop detection also failed: $($_.Exception.Message)"
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($hasDebug -and $debugLevel -ge 3) {
+                Write-Host "  [profile-scoop.legacy] Legacy detection error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+            }
         }
     }
 }

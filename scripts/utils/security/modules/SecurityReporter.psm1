@@ -6,7 +6,19 @@ scripts/utils/security/modules/SecurityReporter.psm1
 
 .DESCRIPTION
     Provides functions for processing and reporting security scan results.
+
+.NOTES
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe severity handling.
 #>
+
+# Import CommonEnums for SeverityLevel enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 <#
 .SYNOPSIS
@@ -50,8 +62,14 @@ function Get-SecurityScanResults {
         }
     }
 
-    $blockingIssues = $SecurityIssues | Where-Object { $_.Severity -eq 'Error' }
-    $warningIssues = $SecurityIssues | Where-Object { $_.Severity -ne 'Error' }
+    $blockingIssues = $SecurityIssues | Where-Object {
+        $severity = $_.Severity
+        $severity -eq [SeverityLevel]::Error.ToString() -or $severity -eq [SeverityLevel]::Error
+    }
+    $warningIssues = $SecurityIssues | Where-Object {
+        $severity = $_.Severity
+        $severity -ne [SeverityLevel]::Error.ToString() -and $severity -ne [SeverityLevel]::Error
+    }
 
     return @{
         BlockingIssues = $blockingIssues

@@ -19,10 +19,29 @@ function Initialize-FileConversion-Ini {
     # INI to JSON
     Set-Item -Path Function:Global:_ConvertFrom-IniToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.to-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ini$', '.json'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-json] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $iniContent = Get-Content -LiteralPath $InputPath -Raw
             $result = @{}
             $currentSection = $null
@@ -75,23 +94,77 @@ function Initialize-FileConversion-Ini {
             $jsonObj = [PSCustomObject]$result
             $json = $jsonObj | ConvertTo-Json -Depth 100
             Set-Content -LiteralPath $OutputPath -Value $json -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-json] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.ini.to-json] Sections found: $($result.Keys.Count)"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path $InputPath) { (Get-Item $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path $OutputPath) { (Get-Item $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.to-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Sections: $($result.Keys.Count)" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert INI to JSON: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                }
+            }
+            else {
+                Write-Error "Failed to convert INI to JSON: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
         }
     } -Force
 
     # JSON to INI
     Set-Item -Path Function:Global:_ConvertTo-IniFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.from-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.json$', '.ini'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-json] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $jsonContent = Get-Content -LiteralPath $InputPath -Raw
             $jsonObj = $jsonContent | ConvertFrom-Json
             
             $iniLines = @()
+            $sectionCount = 0
+            $keyCount = 0
             
             # Process each section
             $jsonObj.PSObject.Properties | ForEach-Object {
@@ -104,6 +177,7 @@ function Initialize-FileConversion-Ini {
                 }
                 else {
                     $iniLines += "[$sectionName]"
+                    $sectionCount++
                 }
                 
                 # Write key-value pairs
@@ -118,6 +192,7 @@ function Initialize-FileConversion-Ini {
                         }
                         
                         $iniLines += "$key=$value"
+                        $keyCount++
                     }
                 }
                 
@@ -127,19 +202,76 @@ function Initialize-FileConversion-Ini {
             
             $iniContent = $iniLines -join "`r`n"
             Set-Content -LiteralPath $OutputPath -Value $iniContent -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-json] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.ini.from-json] Sections: $sectionCount, Keys: $keyCount"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.from-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Sections: $sectionCount, Keys: $keyCount" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert JSON to INI: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSON to INI: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.from-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # INI to YAML
     Set-Item -Path Function:Global:_ConvertFrom-IniToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.to-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ini$', '.yaml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-yaml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert INI to JSON first, then JSON to YAML
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
@@ -158,19 +290,76 @@ function Initialize-FileConversion-Ini {
                     Remove-Item $tempJson -Force -ErrorAction SilentlyContinue
                 }
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-yaml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.to-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert INI to YAML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert INI to YAML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.to-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # YAML to INI
     Set-Item -Path Function:Global:_ConvertTo-IniFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.from-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ya?ml$', '.ini'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-yaml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert YAML to JSON first, then JSON to INI
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
@@ -188,19 +377,76 @@ function Initialize-FileConversion-Ini {
                     Remove-Item $tempJson -Force -ErrorAction SilentlyContinue
                 }
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-yaml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.from-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert YAML to INI: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert YAML to INI: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.from-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # INI to XML
     Set-Item -Path Function:Global:_ConvertFrom-IniToXml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.to-xml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ini$', '.xml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-xml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert INI to JSON first, then JSON to XML
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
@@ -214,19 +460,75 @@ function Initialize-FileConversion-Ini {
                     Remove-Item $tempJson -Force -ErrorAction SilentlyContinue
                 }
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-xml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.to-xml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert INI to XML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-xml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert INI to XML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-xml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.to-xml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # XML to INI
     Set-Item -Path Function:Global:_ConvertTo-IniFromXml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.from-xml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.xml$', '.ini'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-xml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert XML to JSON first, then JSON to INI
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
@@ -243,19 +545,75 @@ function Initialize-FileConversion-Ini {
                     Remove-Item $tempJson -Force -ErrorAction SilentlyContinue
                 }
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-xml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.from-xml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert XML to INI: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-xml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert XML to INI: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-xml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.from-xml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # INI to TOML
     Set-Item -Path Function:Global:_ConvertFrom-IniToToml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.to-toml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ini$', '.toml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-toml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert INI to JSON first, then JSON to TOML
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
@@ -275,19 +633,76 @@ function Initialize-FileConversion-Ini {
                     Remove-Item $tempJson -Force -ErrorAction SilentlyContinue
                 }
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-toml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.to-toml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert INI to TOML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-toml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    pstoml_available = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+                }
+            }
+            else {
+                Write-Error "Failed to convert INI to TOML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.to-toml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.to-toml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # TOML to INI
     Set-Item -Path Function:Global:_ConvertTo-IniFromToml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.ini.from-toml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toml$', '.ini'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-toml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # Convert TOML to JSON first, then JSON to INI
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
@@ -305,9 +720,47 @@ function Initialize-FileConversion-Ini {
                     Remove-Item $tempJson -Force -ErrorAction SilentlyContinue
                 }
             }
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-toml] Conversion completed in ${convDuration}ms"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.ini.from-toml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert TOML to INI: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-toml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert TOML to INI: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.ini.from-toml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.ini.from-toml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 }

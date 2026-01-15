@@ -56,7 +56,7 @@ try {
     $fragDir = Join-Path $repoRoot 'profile.d'
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
@@ -135,9 +135,9 @@ foreach ($ps in $psFiles) {
 }
 
 if ($issueCount -gt 0) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $issueCount fragments with functions missing comment-based help."
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Found $issueCount fragments with functions missing comment-based help."
 }
 else {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All functions have comment-based help."
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "All functions have comment-based help."
 }
 

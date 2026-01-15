@@ -35,13 +35,32 @@ function Initialize-FileConversion-CoreJsonExtended {
     # JSON5 to JSON
     Set-Item -Path Function:Global:_ConvertFrom-Json5ToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.json5.to-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.json5$', '.json'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.json5.to-json] Output path: $OutputPath"
+            }
+            
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 throw "Node.js is not available. Install Node.js to use JSON5 conversions."
             }
+            
             $nodeScript = @"
 try {
     const JSON5 = require('json5');
@@ -61,10 +80,31 @@ try {
 "@
             $tempScript = Join-Path $env:TEMP "json5-parse-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
+            
+            # Level 1: Conversion execution
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.json5.to-json] Executing Node.js conversion script"
+            }
+            
+            $convStartTime = Get-Date
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
                 if ($LASTEXITCODE -ne 0) {
-                    throw "Node.js script failed: $result"
+                    throw "Node.js script failed with exit code $LASTEXITCODE: $result"
+                }
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.json5.to-json] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.json5.to-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
                 }
             }
             finally {
@@ -72,20 +112,65 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert JSON5 to JSON: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $nodeAvailable = (Get-Command node -ErrorAction SilentlyContinue) -ne $null
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    node_available = $nodeAvailable
+                    node_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSON5 to JSON: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.json5.to-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.json5.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # JSON to JSON5
     Set-Item -Path Function:Global:_ConvertTo-Json5FromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.json5.from-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.json$', '.json5'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.json5.from-json] Output path: $OutputPath"
+            }
+            
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 throw "Node.js is not available. Install Node.js to use JSON5 conversions."
             }
+            
             $nodeScript = @"
 try {
     const JSON5 = require('json5');
@@ -105,10 +190,31 @@ try {
 "@
             $tempScript = Join-Path $env:TEMP "json5-stringify-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
+            
+            # Level 1: Conversion execution
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.json5.from-json] Executing Node.js conversion script"
+            }
+            
+            $convStartTime = Get-Date
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
+                $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+                
                 if ($LASTEXITCODE -ne 0) {
-                    throw "Node.js script failed: $result"
+                    throw "Node.js script failed with exit code $LASTEXITCODE: $result"
+                }
+                
+                # Level 2: Timing information
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[conversion.json5.from-json] Conversion completed in ${convDuration}ms"
+                }
+                
+                # Level 3: Performance breakdown
+                if ($debugLevel -ge 3) {
+                    $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                    $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                    Write-Host "  [conversion.json5.from-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes" -ForegroundColor DarkGray
                 }
             }
             finally {
@@ -116,18 +222,64 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert JSON to JSON5: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $nodeAvailable = (Get-Command node -ErrorAction SilentlyContinue) -ne $null
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.from-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    node_available = $nodeAvailable
+                    node_exit_code = $LASTEXITCODE
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSON to JSON5: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.json5.from-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.json5.from-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # JSONL to JSON
     Set-Item -Path Function:Global:_ConvertFrom-JsonLToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.jsonl.to-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.jsonl$', '.json'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.jsonl.to-json] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $lines = Get-Content -LiteralPath $InputPath
+            $lineCount = $lines.Count
             $objects = @()
             foreach ($line in $lines) {
                 if (-not [string]::IsNullOrWhiteSpace($line)) {
@@ -135,33 +287,129 @@ try {
                 }
             }
             $objects | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.jsonl.to-json] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.jsonl.to-json] Lines processed: $lineCount, Objects created: $($objects.Count)"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.jsonl.to-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Lines: $lineCount, Objects: $($objects.Count)" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert JSONL to JSON: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonl.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSONL to JSON: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.jsonl.to-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.jsonl.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # JSON to JSONL
     Set-Item -Path Function:Global:_ConvertTo-JsonLFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.jsonl.from-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.json$', '.jsonl'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.jsonl.from-json] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $data = Get-Content -LiteralPath $InputPath -Raw | ConvertFrom-Json
             $output = @()
+            $objectCount = 0
             if ($data -is [array]) {
                 foreach ($item in $data) {
                     $output += ($item | ConvertTo-Json -Compress -Depth 100)
+                    $objectCount++
                 }
             }
             else {
                 $output += ($data | ConvertTo-Json -Compress -Depth 100)
+                $objectCount = 1
             }
             $output | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.jsonl.from-json] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.jsonl.from-json] Objects converted: $objectCount"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.jsonl.from-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Objects: $objectCount" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert JSON to JSONL: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonl.from-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSON to JSONL: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.jsonl.from-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.jsonl.from-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 }
@@ -180,6 +428,13 @@ try {
 #>
 function ConvertFrom-Json5ToJson {
     param([string]$InputPath, [string]$OutputPath)
+    
+    # Parse debug level once at function start
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+        # Debug is enabled
+    }
+    
     if (-not $global:FileConversionDataInitialized) {
         Ensure-FileConversion-Data
     }
@@ -187,7 +442,32 @@ function ConvertFrom-Json5ToJson {
         _ConvertFrom-Json5ToJson @PSBoundParameters
     }
     catch {
-        Write-Error "Failed to convert JSON5 to JSON: $($_.Exception.Message)"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            $nodeAvailable = (Get-Command node -ErrorAction SilentlyContinue) -ne $null
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                node_available = $nodeAvailable
+                node_exit_code = $LASTEXITCODE
+            }
+        }
+        else {
+            Write-Error "Failed to convert JSON5 to JSON: $($_.Exception.Message)"
+        }
+        
+        # Level 2: Error details
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[conversion.json5.to-json] Error type: $($_.Exception.GetType().FullName)"
+        }
+        
+        # Level 3: Stack trace
+        if ($debugLevel -ge 3) {
+            Write-Host "  [conversion.json5.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+        }
+        
         throw
     }
 }

@@ -78,7 +78,7 @@ try {
     $changelogPath = Join-Path $repoRoot $OutputFile
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 Write-ScriptMessage -Message "Generating changelog..."
@@ -98,7 +98,7 @@ if (-not $hasGitCliff) {
             Write-ScriptMessage -Message "Installing git-cliff via cargo..."
             & cargo install git-cliff
             if ($LASTEXITCODE -ne 0) {
-                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to install git-cliff via cargo"
+                Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to install git-cliff via cargo"
             }
         }
         else {
@@ -108,11 +108,11 @@ if (-not $hasGitCliff) {
             Write-ScriptMessage -Message "  Via scoop: scoop install git-cliff"
             Write-ScriptMessage -Message "  Via winget: winget install git-cliff"
             Write-ScriptMessage -Message "  Download from: https://github.com/orhun/git-cliff/releases"
-            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "git-cliff is required but not installed"
+            Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "git-cliff is required but not installed"
         }
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
 }
 
@@ -131,31 +131,12 @@ try {
     & git-cliff @args
 
     if ($LASTEXITCODE -eq 0) {
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Changelog generated successfully: $changelogPath"
+        Exit-WithCode -ExitCode [ExitCode]::Success -Message "Changelog generated successfully: $changelogPath"
     }
     else {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog (exit code: $LASTEXITCODE)"
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to generate changelog (exit code: $LASTEXITCODE)"
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
-
-    $args += '--unreleased'
-}
-
-Write-ScriptMessage -Message "Running: git-cliff $($args -join ' ')"
-try {
-    & git-cliff @args
-
-    if ($LASTEXITCODE -eq 0) {
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Changelog generated successfully: $changelogPath"
-    }
-    else {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog (exit code: $LASTEXITCODE)"
-    }
-}
-catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
-}
-

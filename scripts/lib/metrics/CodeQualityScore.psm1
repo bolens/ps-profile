@@ -85,8 +85,50 @@ function Get-CodeQualityScore {
     $requiredProperties = @('TotalLines', 'TotalComplexity', 'TotalFunctions', 'DuplicateFunctions')
     foreach ($prop in $requiredProperties) {
         if (-not $CodeMetrics.PSObject.Properties.Name -contains $prop) {
-            throw "CodeMetrics object missing required property: $prop"
+            $errorMsg = "CodeMetrics object missing required property: $prop"
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Missing required property" -OperationName 'code-quality-score.calculate' -Context @{
+                    missing_property = $prop
+                    error_message    = $errorMsg
+                } -Code 'MissingRequiredProperty'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        Write-Warning "[code-quality-score.calculate] $errorMsg"
+                    }
+                    # Level 3: Log detailed missing property information
+                    if ($debugLevel -ge 3) {
+                        Write-Verbose "[code-quality-score.calculate] Missing property details - Property: $prop, CodeMetricsType: $($CodeMetrics.GetType().Name), AvailableProperties: $($CodeMetrics.PSObject.Properties.Name -join ', ')"
+                    }
+                }
+                else {
+                    # Always log warnings even if debug is off
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Missing required property" -OperationName 'code-quality-score.calculate' -Context @{
+                            # Technical context
+                            missing_property     = $prop
+                            code_metrics_type    = $CodeMetrics.GetType().Name
+                            available_properties = $CodeMetrics.PSObject.Properties.Name
+                            # Error context
+                            error_message        = $errorMsg
+                            # Invocation context
+                            FunctionName         = 'Get-CodeQualityScore'
+                        } -Code 'MissingRequiredProperty'
+                    }
+                    else {
+                        Write-Warning "[code-quality-score.calculate] $errorMsg"
+                    }
+                }
+            }
+            throw $errorMsg
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [code-quality-score.calculate] Starting quality score calculation" -ForegroundColor DarkGray
     }
 
     # Normalize coverage input if provided
@@ -103,7 +145,38 @@ function Get-CodeQualityScore {
         }
 
         if (-not ($TestCoverage.PSObject.Properties.Name -contains 'CoveragePercent')) {
-            Write-Warning "TestCoverage object missing CoveragePercent property. Coverage score will be 0."
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "TestCoverage object missing CoveragePercent property" -OperationName 'code-quality-score.calculate' -Context @{
+                    test_coverage_type = $TestCoverage.GetType().Name
+                } -Code 'MissingCoveragePercent'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 2) {
+                        Write-Warning "[code-quality-score.calculate] TestCoverage object missing CoveragePercent property. Coverage score will be 0."
+                    }
+                    # Level 3: Log detailed missing property information
+                    if ($debugLevel -ge 3) {
+                        Write-Verbose "[code-quality-score.calculate] Missing CoveragePercent details - TestCoverageType: $($TestCoverage.GetType().Name), AvailableProperties: $($TestCoverage.PSObject.Properties.Name -join ', ')"
+                    }
+                }
+                else {
+                    # Always log warnings even if debug is off
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "TestCoverage object missing CoveragePercent property" -OperationName 'code-quality-score.calculate' -Context @{
+                            # Technical context
+                            test_coverage_type   = $TestCoverage.GetType().Name
+                            available_properties = $TestCoverage.PSObject.Properties.Name
+                            # Invocation context
+                            FunctionName         = 'Get-CodeQualityScore'
+                        } -Code 'MissingCoveragePercent'
+                    }
+                    else {
+                        Write-Warning "[code-quality-score.calculate] TestCoverage object missing CoveragePercent property. Coverage score will be 0."
+                    }
+                }
+            }
         }
     }
 
@@ -228,6 +301,15 @@ function Get-CodeQualityScore {
     $compositeScore = [math]::Min(100, [math]::Max(0, $compositeScore))
     # Ensure Score is explicitly a double
     $compositeScore = [double]$compositeScore
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Host "  [code-quality-score.calculate] Quality score calculation complete: $compositeScore/100" -ForegroundColor DarkGray
+    }
+    
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [code-quality-score.calculate] Component scores: Complexity=$([math]::Round($complexityScore, 2)), Duplicates=$([math]::Round($duplicatesScore, 2)), Coverage=$([math]::Round($coverageScore, 2)), FileSize=$([math]::Round($fileSizeScore, 2)), FunctionDensity=$([math]::Round($densityScore, 2))" -ForegroundColor DarkGray
+    }
 
     return [PSCustomObject]@{
         Score           = $compositeScore

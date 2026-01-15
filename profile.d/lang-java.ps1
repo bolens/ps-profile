@@ -123,13 +123,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & mvn @Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'java.maven.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & mvn @Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run mvn: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & mvn @Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run mvn: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -214,13 +223,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & gradle @Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'java.gradle.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & gradle @Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run gradle: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & gradle @Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run gradle: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -302,13 +320,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & ant @Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'java.ant.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & ant @Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run ant: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & ant @Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run ant: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -386,13 +413,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & kotlinc @Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'java.kotlin.compile' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & kotlinc @Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run kotlinc: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & kotlinc @Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run kotlinc: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -470,13 +506,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & scalac @Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'java.scala.compile' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & scalac @Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run scalac: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & scalac @Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run scalac: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -572,7 +617,17 @@ try {
                 return "JAVA_HOME set to: $JavaHome"
             }
             else {
-                Write-Error "Java installation not found at: $JavaHome"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.DirectoryNotFoundException]::new("Java installation not found at: $JavaHome"),
+                        'JavaHomeNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $JavaHome
+                    )) -OperationName 'java.version.set' -Context @{ java_home = $JavaHome }
+                }
+                else {
+                    Write-Error "Java installation not found at: $JavaHome"
+                }
                 return $null
             }
         }

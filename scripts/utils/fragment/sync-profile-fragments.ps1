@@ -45,6 +45,12 @@ param(
     [switch]$PreserveManual
 )
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 # Resolve repo root (PSScriptRoot is scripts/utils/fragment, so go up 3 levels)
 $repoRoot = $PSScriptRoot
 for ($i = 1; $i -le 3; $i++) {
@@ -134,11 +140,28 @@ $fragmentFiles = Get-ChildItem -Path $profileDDir -Filter '*.ps1' -File -ErrorAc
 Where-Object { $_.BaseName -notmatch '-test-' } |
 Sort-Object BaseName
 
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[fragment.sync] Starting profile fragment synchronization"
+    Write-Verbose "[fragment.sync] Profile dir: $ProfileDir, Config path: $ConfigPath"
+    Write-Verbose "[fragment.sync] Dry run: $DryRun, Preserve manual: $PreserveManual"
+}
+
 Write-Host "Discovered $($fragmentFiles.Count) fragments" -ForegroundColor Cyan
+
+# Level 2: Fragment list details
+if ($debugLevel -ge 2) {
+    Write-Verbose "[fragment.sync] Discovered $($fragmentFiles.Count) fragment file(s)"
+}
 
 # Parse fragment metadata
 $fragmentMetadata = @{}
+$parseStartTime = Get-Date
 foreach ($file in $fragmentFiles) {
+    # Level 1: Individual fragment parsing
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[fragment.sync] Parsing metadata for fragment: $($file.BaseName)"
+    }
     $baseName = $file.BaseName
     $metadata = @{
         Name         = $baseName
@@ -195,10 +218,31 @@ foreach ($file in $fragmentFiles) {
         $metadata.Keywords = $keywords
     }
     catch {
-        Write-Warning "Failed to parse metadata for $baseName : $($_.Exception.Message)"
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to parse fragment metadata" -OperationName 'fragment.sync.metadata' -Context @{
+                fragment_name = $baseName
+                fragment_path = $file.FullName
+            } -Code 'FragmentMetadataParseFailed'
+        }
+        else {
+            Write-Warning "Failed to parse metadata for $baseName : $($_.Exception.Message)"
+        }
     }
 
     $fragmentMetadata[$baseName] = $metadata
+}
+
+$parseDuration = ((Get-Date) - $parseStartTime).TotalMilliseconds
+
+# Level 2: Metadata parsing timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[fragment.sync] Metadata parsing completed in ${parseDuration}ms"
+    Write-Verbose "[fragment.sync] Fragments parsed: $($fragmentMetadata.Keys.Count)"
+}
+
+# Level 1: Environment assignment start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[fragment.sync] Starting environment assignment"
 }
 
 # Define environment assignment rules
@@ -309,8 +353,27 @@ function Get-EnvironmentAssignments {
     return $result
 }
 
+# Level 1: Environment assignment execution
+if ($debugLevel -ge 1) {
+    Write-Verbose "[fragment.sync] Generating environment assignments"
+}
+
 # Generate new environment assignments
+$assignStartTime = Get-Date
 $newEnvironments = Get-EnvironmentAssignments -Metadata $fragmentMetadata -ExistingEnvironments $existingConfig.environments
+$assignDuration = ((Get-Date) - $assignStartTime).TotalMilliseconds
+
+# Level 2: Environment assignment timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[fragment.sync] Environment assignment completed in ${assignDuration}ms"
+    $totalFragments = ($newEnvironments.Values | ForEach-Object { $_.Count } | Measure-Object -Sum).Sum
+    Write-Verbose "[fragment.sync] Total fragment assignments: $totalFragments"
+}
+
+# Level 1: Config building start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[fragment.sync] Building new configuration"
+}
 
 # Build new config
 $newConfig = @{
@@ -359,9 +422,28 @@ if ($DryRun) {
 
 # Write updated config
 try {
+    # Level 1: Config save start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[fragment.sync] Saving updated configuration to: $ConfigPath"
+    }
+    
     # Format JSON nicely
+    $saveStartTime = Get-Date
     $formattedJson = ($jsonContent | ConvertFrom-Json | ConvertTo-Json -Depth 10)
     Set-Content -Path $ConfigPath -Value $formattedJson -Encoding UTF8 -ErrorAction Stop
+    $saveDuration = ((Get-Date) - $saveStartTime).TotalMilliseconds
+    
+    # Level 2: Config save timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[fragment.sync] Configuration saved in ${saveDuration}ms"
+    }
+    
+    # Level 3: Performance breakdown
+    if ($debugLevel -ge 3) {
+        $totalDuration = $parseDuration + $assignDuration + $saveDuration
+        Write-Host "  [fragment.sync] Performance - Parse: ${parseDuration}ms, Assign: ${assignDuration}ms, Save: ${saveDuration}ms, Total: ${totalDuration}ms" -ForegroundColor DarkGray
+    }
+    
     Write-Host "`n✓ Updated $ConfigPath" -ForegroundColor Green
     exit 0
 }

@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\17-kubectl.ps1
+Defined in: ..\profile.d\kubectl.ps1

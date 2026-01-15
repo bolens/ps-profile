@@ -40,7 +40,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Build paths to validation scripts
@@ -74,9 +74,9 @@ foreach ($check in $checks) {
     Write-ScriptMessage -Message "Running $($check.Name): $($check.Path)"
     & $psExe -NoProfile -File $check.Path
     if ($LASTEXITCODE -ne 0) {
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "$($check.Name) failed with exit code $LASTEXITCODE"
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "$($check.Name) failed with exit code $LASTEXITCODE"
     }
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: security + lint + spellcheck + comment help + idempotency + duplicate functions passed"
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "Validation: security + lint + spellcheck + comment help + idempotency + duplicate functions passed"
 

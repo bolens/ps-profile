@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\48-vue.ps1
+Defined in: ..\profile.d\vue.ps1

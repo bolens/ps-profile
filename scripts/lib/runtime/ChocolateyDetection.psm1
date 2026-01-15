@@ -89,6 +89,10 @@ function Get-ChocolateyRoot {
             $candidate -and -not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path -LiteralPath $candidate -PathType Container -ErrorAction SilentlyContinue)
         }
         if ($exists) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [chocolatey-detection.get-root] Found Chocolatey root via ChocolateyInstall env var: $candidate" -ForegroundColor DarkGray
+            }
             return $candidate
         }
     }
@@ -136,6 +140,10 @@ function Get-ChocolateyRoot {
             $defaultChoco -and -not [string]::IsNullOrWhiteSpace($defaultChoco) -and (Test-Path -LiteralPath $defaultChoco -PathType Container -ErrorAction SilentlyContinue)
         }
         if ($exists) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [chocolatey-detection.get-root] Found Chocolatey root at default location: $defaultChoco" -ForegroundColor DarkGray
+            }
             return $defaultChoco
         }
     }
@@ -149,7 +157,16 @@ function Get-ChocolateyRoot {
         $fallbackChoco -and -not [string]::IsNullOrWhiteSpace($fallbackChoco) -and (Test-Path -LiteralPath $fallbackChoco -PathType Container -ErrorAction SilentlyContinue)
     }
     if ($exists) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [chocolatey-detection.get-root] Found Chocolatey root at fallback location: $fallbackChoco" -ForegroundColor DarkGray
+        }
         return $fallbackChoco
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[chocolatey-detection.get-root] Chocolatey root not found"
     }
 
     return $null
@@ -193,14 +210,27 @@ function Get-ChocolateyLibPath {
     # Use Validation module if available
     if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
         if (Test-ValidPath -Path $libPath -PathType Directory) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [chocolatey-detection.get-lib-path] Found Chocolatey lib path: $libPath" -ForegroundColor DarkGray
+            }
             return $libPath
         }
     }
     else {
         # Fallback to manual validation
         if ($libPath -and -not [string]::IsNullOrWhiteSpace($libPath) -and (Test-Path -LiteralPath $libPath -PathType Container -ErrorAction SilentlyContinue)) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [chocolatey-detection.get-lib-path] Found Chocolatey lib path: $libPath" -ForegroundColor DarkGray
+            }
             return $libPath
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[chocolatey-detection.get-lib-path] Chocolatey lib path not found for root: $ChocolateyRoot"
     }
 
     return $null
@@ -245,14 +275,27 @@ function Get-ChocolateyBinPath {
     # Use Validation module if available
     if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
         if (Test-ValidPath -Path $binPath -PathType Directory) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[chocolatey-detection.get-bin-path] Found Chocolatey bin path: $binPath"
+            }
             return $binPath
         }
     }
     else {
         # Fallback to manual validation
         if ($binPath -and -not [string]::IsNullOrWhiteSpace($binPath) -and (Test-Path -LiteralPath $binPath -PathType Container -ErrorAction SilentlyContinue)) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Verbose "[chocolatey-detection.get-bin-path] Found Chocolatey bin path: $binPath"
+            }
             return $binPath
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[chocolatey-detection.get-bin-path] Chocolatey bin path not found for root: $ChocolateyRoot"
     }
 
     return $null
@@ -291,14 +334,38 @@ function Test-ChocolateyInstalled {
 
     $chocoRoot = Get-ChocolateyRoot
     if (-not $chocoRoot) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[chocolatey-detection.test-installed] Chocolatey not installed (root not found)"
+        }
         return $false
     }
 
     # If CheckCommand is specified, also verify choco command is available
     if ($CheckCommand) {
         if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+            $debugLevel = 0
+            $hasDebug = $false
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                $hasDebug = $debugLevel -ge 1
+            }
+            if ($hasDebug) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Chocolatey root found but 'choco' command not available" -OperationName 'chocolatey-detection.test-installed' -Context @{
+                        choco_root = $chocoRoot
+                    } -Code 'ChocoCommandNotFound'
+                }
+                else {
+                    Write-Warning "[chocolatey-detection.test-installed] Chocolatey root found but 'choco' command not available"
+                }
+            }
             return $false
         }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[chocolatey-detection.test-installed] Chocolatey is installed at: $chocoRoot"
     }
 
     return $true

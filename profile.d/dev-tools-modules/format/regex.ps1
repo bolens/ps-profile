@@ -57,7 +57,14 @@ function Initialize-DevTools-Regex {
             }
         }
         catch {
-            Write-Error "Invalid regex pattern: $_" -ErrorAction Continue
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.format.regex.match' -Context @{
+                    pattern = $Pattern
+                }
+            }
+            else {
+                Write-Error "Invalid regex pattern: $_" -ErrorAction Continue
+            }
             return [PSCustomObject]@{
                 Success = $false
                 Value   = $null

@@ -17,6 +17,12 @@
 
 $ErrorActionPreference = 'Stop'
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 # Resolve repo root
 $repoRoot = $PSScriptRoot
 for ($i = 1; $i -le 3; $i++) {
@@ -39,18 +45,63 @@ Where-Object {
     $_.Name -ne 'files-module-registry.ps1' 
 }
 
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[fragment.validate-dependencies] Starting dependency validation"
+    Write-Verbose "[fragment.validate-dependencies] Fragment count: $($fragments.Count)"
+}
+
 Write-Host "Validating dependencies for $($fragments.Count) fragments..." -ForegroundColor Cyan
 Write-Host ""
 
 # Validate dependencies
-$result = Test-FragmentDependencies -FragmentFiles $fragments
+$validationStartTime = Get-Date
+try {
+    $result = Test-FragmentDependencies -FragmentFiles $fragments -ErrorAction Stop
+    $validationDuration = ((Get-Date) - $validationStartTime).TotalMilliseconds
+    
+    # Level 2: Validation timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[fragment.validate-dependencies] Validation completed in ${validationDuration}ms"
+        Write-Verbose "[fragment.validate-dependencies] Valid: $($result.Valid)"
+    }
+}
+catch {
+    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+        Write-StructuredError -ErrorRecord $_ -OperationName 'fragment.validate-dependencies' -Context @{
+            fragment_count = $fragments.Count
+        }
+    }
+    else {
+        Write-Error "Failed to validate fragment dependencies: $($_.Exception.Message)"
+    }
+    exit 1
+}
 
 if ($result.Valid) {
     Write-Host "✅ All dependencies are valid!" -ForegroundColor Green
     Write-Host ""
     
+    # Level 1: Load order generation
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[fragment.validate-dependencies] Generating fragment load order"
+    }
+    
     # Show load order
+    $loadOrderStartTime = Get-Date
     $sorted = Get-FragmentLoadOrder -FragmentFiles $fragments
+    $loadOrderDuration = ((Get-Date) - $loadOrderStartTime).TotalMilliseconds
+    
+    # Level 2: Load order timing
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[fragment.validate-dependencies] Load order generated in ${loadOrderDuration}ms"
+        Write-Verbose "[fragment.validate-dependencies] Total fragments in order: $($sorted.Count)"
+    }
+    
+    # Level 3: Performance breakdown
+    if ($debugLevel -ge 3) {
+        Write-Host "  [fragment.validate-dependencies] Performance - Validation: ${validationDuration}ms, Load order: ${loadOrderDuration}ms, Total: $($validationDuration + $loadOrderDuration)ms" -ForegroundColor DarkGray
+    }
     Write-Host "Fragment load order (first 20):" -ForegroundColor Cyan
     $sorted | Select-Object -First 20 | ForEach-Object {
         $deps = Get-FragmentDependencies -FragmentFile $_

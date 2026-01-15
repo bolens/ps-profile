@@ -19,7 +19,17 @@ if (-not (Test-Path Function:Open-Item -ErrorAction SilentlyContinue)) {
         param($p)
         
         if (-not $p) {
-            Write-Error "No path or URL provided to open"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.ArgumentException]::new("No path or URL provided to open"),
+                        'NoPathProvided',
+                        [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                        $null
+                    )) -OperationName 'open.item' -Context @{}
+            }
+            else {
+                Write-Error "No path or URL provided to open"
+            }
             return
         }
         
@@ -73,15 +83,38 @@ if (-not (Test-Path Function:Open-Item -ErrorAction SilentlyContinue)) {
             }
         }
         catch [System.ComponentModel.Win32Exception] {
-            Write-Error "Failed to open '$p': The system cannot find the file or application. $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'open.item' -Context @{
+                    path       = $p
+                    error_type = 'Win32Exception'
+                }
+            }
+            else {
+                Write-Error "Failed to open '$p': The system cannot find the file or application. $($_.Exception.Message)"
+            }
             throw
         }
         catch [System.Management.Automation.ItemNotFoundException] {
-            Write-Error "Failed to open '$p': File or path not found. $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'open.item' -Context @{
+                    path       = $p
+                    error_type = 'ItemNotFoundException'
+                }
+            }
+            else {
+                Write-Error "Failed to open '$p': File or path not found. $($_.Exception.Message)"
+            }
             throw
         }
         catch {
-            Write-Error "Failed to open '$p': $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'open.item' -Context @{
+                    path = $p
+                }
+            }
+            else {
+                Write-Error "Failed to open '$p': $($_.Exception.Message)"
+            }
             throw
         }
     }

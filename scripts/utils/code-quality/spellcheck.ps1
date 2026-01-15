@@ -64,17 +64,17 @@ if ($hasCSpell) {
   try {
     & cspell @Paths --no-progress --no-summary
     if ($LASTEXITCODE -ne 0) {
-      Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "cspell found spelling errors"
+      Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "cspell found spelling errors"
     }
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "cspell passed"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "cspell passed"
   }
   catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
   }
 }
 else {
   Write-ScriptMessage -Message "cspell not found on PATH. Install with: npm install -g cspell@9" -IsWarning
   Write-ScriptMessage -Message "Skipping local spellcheck (CI workflow will run cspell on push/PR)."
-  Exit-WithCode -ExitCode $EXIT_SUCCESS
+  Exit-WithCode -ExitCode [ExitCode]::Success
 }
 

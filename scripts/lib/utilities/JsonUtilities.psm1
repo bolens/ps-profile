@@ -12,7 +12,12 @@ scripts/lib/JsonUtilities.psm1
 .NOTES
     Module Version: 1.0.0
     PowerShell Version: 3.0+
+    
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
@@ -57,9 +62,10 @@ else {
 #>
 function Read-JsonFile {
     [CmdletBinding()]
-    [OutputType([object])]
+    [OutputType([hashtable], [PSCustomObject])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path
     )
 
@@ -79,29 +85,120 @@ function Read-JsonFile {
 
     if (-not (Test-Path -Path $Path)) {
         $errorMessage = "JSON file not found: $Path"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                            [System.IO.FileNotFoundException]::new($errorMessage),
+                            'JsonFileNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $Path
+                        )) -OperationName 'json-utilities.read' -Context @{
+                        json_file_path = $Path
+                        error_action   = $errorActionPreference
+                    }
+                }
+                else {
+                    Write-Error -Message $errorMessage -ErrorAction $errorActionPreference
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [json-utilities.read] File not found details - Path: $Path, ErrorAction: $errorActionPreference" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log critical errors even if debug is off
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new($errorMessage),
+                        'JsonFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'json-utilities.read' -Context @{
+                    json_file_path = $Path
+                    error_action   = $errorActionPreference
+                }
+            }
+            else {
+                Write-Error -Message $errorMessage -ErrorAction $errorActionPreference
+            }
+        }
         if ($errorActionPreference -eq 'Stop') {
             throw $errorMessage
         }
-        Write-Error -Message $errorMessage -ErrorAction $errorActionPreference
         return $null
     }
 
     try {
         $content = Get-Content -Path $Path -Raw -Encoding UTF8 -ErrorAction Stop
         if ([string]::IsNullOrWhiteSpace($content)) {
-            Write-Warning "JSON file is empty: $Path"
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "JSON file is empty" -OperationName 'json-utilities.read' -Context @{
+                    json_file_path = $Path
+                } -Code 'EmptyJsonFile'
+            }
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Warning "[json-utilities.read] JSON file is empty: $Path"
+                }
+            }
             return $null
+        }
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [json-utilities.read] Reading JSON file: $Path (Size: $($content.Length) bytes)" -ForegroundColor DarkGray
         }
 
         $result = $content | ConvertFrom-Json -ErrorAction Stop
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [json-utilities.read] Successfully parsed JSON file: $Path" -ForegroundColor DarkGray
+        }
+        
         return $result
     }
     catch {
         $errorMessage = "Failed to read JSON file '$Path': $($_.Exception.Message)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'json-utilities.read' -Context @{
+                        json_file_path = $Path
+                        error_message  = $errorMessage
+                        error_action   = $errorActionPreference
+                    }
+                }
+                else {
+                    Write-Error -Message "[json-utilities.read] $errorMessage" -ErrorAction $errorActionPreference -Exception $_.Exception
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [json-utilities.read] Read error details - Path: $Path, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log critical errors even if debug is off
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'json-utilities.read' -Context @{
+                    json_file_path = $Path
+                    error_message  = $errorMessage
+                    error_action   = $errorActionPreference
+                }
+            }
+            else {
+                Write-Error -Message "[json-utilities.read] $errorMessage" -ErrorAction $errorActionPreference -Exception $_.Exception
+            }
+        }
         if ($errorActionPreference -eq 'Stop') {
             throw $errorMessage
         }
-        Write-Error -Message $errorMessage -ErrorAction $errorActionPreference -Exception $_.Exception
         return $null
     }
 }
@@ -142,6 +239,7 @@ function Write-JsonFile {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$Path,
 
         [Parameter(Mandatory, ValueFromPipeline)]
@@ -182,10 +280,43 @@ function Write-JsonFile {
             }
             catch {
                 $errorMessage = "Failed to create directory for JSON file: $($_.Exception.Message)"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'json-utilities.write' -Context @{
+                                json_file_path = $Path
+                                directory      = $directory
+                                error_message  = $errorMessage
+                                error_action   = $errorActionPreference
+                            }
+                        }
+                        else {
+                            Write-Error -Message $errorMessage -ErrorAction $errorActionPreference -Exception $_.Exception
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [json-utilities.write] Directory creation error details - Path: $Path, Directory: $directory, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
+                    }
+                }
+                else {
+                    # Always log critical errors even if debug is off
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'json-utilities.write' -Context @{
+                            json_file_path = $Path
+                            directory      = $directory
+                            error_message  = $errorMessage
+                            error_action   = $errorActionPreference
+                        }
+                    }
+                    else {
+                        Write-Error -Message $errorMessage -ErrorAction $errorActionPreference -Exception $_.Exception
+                    }
+                }
                 if ($errorActionPreference -eq 'Stop') {
                     throw $errorMessage
                 }
-                Write-Error -Message $errorMessage -ErrorAction $errorActionPreference -Exception $_.Exception
                 return
             }
         }
@@ -204,14 +335,57 @@ function Write-JsonFile {
         }
 
         Set-Content -Path $Path -Value $jsonContent @encodingParam -ErrorAction Stop
-        Write-Verbose "JSON file written: $Path"
+        
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [json-utilities.write] JSON file written: $Path" -ForegroundColor DarkGray
+        }
+        
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [json-utilities.write] JSON content size: $($jsonContent.Length) bytes, Depth: $Depth" -ForegroundColor DarkGray
+        }
     }
     catch {
         $errorMessage = "Failed to write JSON file '$Path': $($_.Exception.Message)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'json-utilities.write' -Context @{
+                        json_file_path = $Path
+                        error_message  = $errorMessage
+                        error_action   = $errorActionPreference
+                        depth          = $Depth
+                        encoding       = $Encoding
+                    }
+                }
+                else {
+                    Write-Error -Message "[json-utilities.write] $errorMessage" -ErrorAction $errorActionPreference -Exception $_.Exception
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [json-utilities.write] Write error details - Path: $Path, Depth: $Depth, Encoding: $Encoding, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            # Always log critical errors even if debug is off
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'json-utilities.write' -Context @{
+                    json_file_path = $Path
+                    error_message  = $errorMessage
+                    error_action   = $errorActionPreference
+                    depth          = $Depth
+                    encoding       = $Encoding
+                }
+            }
+            else {
+                Write-Error -Message "[json-utilities.write] $errorMessage" -ErrorAction $errorActionPreference -Exception $_.Exception
+            }
+        }
         if ($errorActionPreference -eq 'Stop') {
             throw $errorMessage
         }
-        Write-Error -Message $errorMessage -ErrorAction $errorActionPreference -Exception $_.Exception
     }
 }
 

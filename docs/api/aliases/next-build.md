@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\45-nextjs.ps1
+Defined in: ..\profile.d\nextjs.ps1

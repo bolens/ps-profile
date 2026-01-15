@@ -40,6 +40,12 @@ param(
     [switch]$GenerateReport
 )
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 # Import required modules
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 try {
@@ -53,7 +59,7 @@ try {
 catch {
     Write-Host "Failed to import required modules: $_" -ForegroundColor Red
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
     else {
         Write-Error "Failed to import required modules: $($_.Exception.Message)" -ErrorAction Stop
@@ -69,7 +75,7 @@ try {
 catch {
     Write-Host "Failed to get repository root: $_" -ForegroundColor Red
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
     else {
         Write-Error "Failed to get repository root: $($_.Exception.Message)" -ErrorAction Stop
@@ -136,7 +142,7 @@ if ($Category) {
     $categories = $categories | Where-Object { $_.Name -eq $Category }
     if (-not $categories) {
         Write-CategoryMessage "Category '$Category' not found. Available categories: $($categories.Name -join ', ')" -Level 'Error'
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
 }
 
@@ -150,11 +156,25 @@ Write-CategoryMessage "=== Systematic Test Execution ===" -Level 'Info'
 Write-CategoryMessage "Categories to run: $($categories.Count)" -Level 'Info'
 Write-CategoryMessage "Priority level: Up to $Priority" -Level 'Info'
 
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[test.systematic] Starting systematic test execution"
+    Write-Verbose "[test.systematic] Categories: $($categories.Count), Priority: Up to $Priority"
+    if ($Category) {
+        Write-Verbose "[test.systematic] Filtered to category: $Category"
+    }
+}
+
 $allResults = @()
 $failureSummary = @()
 
 foreach ($cat in $categories) {
     Write-CategoryMessage "`n=== Running $($cat.Name) Tests (Priority $($cat.Priority)) ===" -Level 'Info'
+    
+    # Level 1: Category start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.systematic] Starting category: $($cat.Name) (Priority $($cat.Priority))"
+    }
     
     $resultPath = Join-Path $reportDir "$($cat.Name)-results.xml"
     $startTime = Get-Date
@@ -175,16 +195,45 @@ if (Test-Path '$($testSupportPath.Replace("'", "''"))') {
 "@
         
         # Execute in separate process
-        $process = Start-Process -FilePath 'pwsh' `
-            -ArgumentList @('-NoProfile', '-Command', $testScript) `
-            -Wait `
-            -PassThru `
-            -NoNewWindow `
-            -RedirectStandardOutput (Join-Path $reportDir "$($cat.Name)-stdout.txt") `
-            -RedirectStandardError (Join-Path $reportDir "$($cat.Name)-stderr.txt")
+        $stdoutPath = Join-Path $reportDir "$($cat.Name)-stdout.txt"
+        $stderrPath = Join-Path $reportDir "$($cat.Name)-stderr.txt"
+        try {
+            $process = Start-Process -FilePath 'pwsh' `
+                -ArgumentList @('-NoProfile', '-Command', $testScript) `
+                -Wait `
+                -PassThru `
+                -NoNewWindow `
+                -RedirectStandardOutput $stdoutPath `
+                -RedirectStandardError $stderrPath `
+                -ErrorAction Stop
+        }
+        catch {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'test.systematic.start-process' -Context @{
+                    category_name = $cat.Name
+                    stdout_path   = $stdoutPath
+                    stderr_path   = $stderrPath
+                }
+            }
+            else {
+                Write-CategoryMessage "Failed to start test process for $($cat.Name): $_" -Level 'Error'
+            }
+            throw
+        }
         
         $endTime = Get-Date
         $duration = ($endTime - $startTime).TotalSeconds
+        $durationMs = $duration * 1000
+        
+        # Level 2: Timing information
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[test.systematic] Category $($cat.Name) completed in ${durationMs}ms"
+        }
+        
+        # Level 3: Performance breakdown
+        if ($debugLevel -ge 3) {
+            Write-Host "  [test.systematic] Category $($cat.Name) - Duration: ${durationMs}ms, Path: $($cat.Path)" -ForegroundColor DarkGray
+        }
         
         # Parse results from XML file (most reliable)
         $passed = 0
@@ -203,14 +252,30 @@ if (Test-Path '$($testSupportPath.Replace("'", "''"))') {
                 }
             }
             catch {
-                Write-CategoryMessage "Warning: Failed to parse XML results for $($cat.Name): $_" -Level 'Warning'
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to parse XML test results" -OperationName 'test.systematic.parse-results' -Context @{
+                        category_name = $cat.Name
+                        result_path   = $resultPath
+                    } -Code 'XmlParseFailed'
+                }
+                else {
+                    Write-CategoryMessage "Warning: Failed to parse XML results for $($cat.Name): $_" -Level 'Warning'
+                }
                 # If XML parsing fails, mark as error
                 $failed = 1
                 $total = 1
             }
         }
         else {
-            Write-CategoryMessage "Warning: Result XML file not found for $($cat.Name): $resultPath" -Level 'Warning'
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Result XML file not found" -OperationName 'test.systematic.missing-results' -Context @{
+                    category_name = $cat.Name
+                    result_path   = $resultPath
+                } -Code 'ResultFileNotFound'
+            }
+            else {
+                Write-CategoryMessage "Warning: Result XML file not found for $($cat.Name): $resultPath" -Level 'Warning'
+            }
             $failed = 1
             $total = 1
         }
@@ -251,7 +316,16 @@ if (Test-Path '$($testSupportPath.Replace("'", "''"))') {
         }
     }
     catch {
-        Write-CategoryMessage "❌ Error running $($cat.Name): $_" -Level 'Error'
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'test.systematic.run-category' -Context @{
+                category_name     = $cat.Name
+                category_path     = $cat.Path
+                category_priority = $cat.Priority
+            }
+        }
+        else {
+            Write-CategoryMessage "❌ Error running $($cat.Name): $_" -Level 'Error'
+        }
         $cat.Error = $_.Exception.Message
         $allResults += $cat
         $failureSummary += $cat
@@ -262,6 +336,11 @@ if (Test-Path '$($testSupportPath.Replace("'", "''"))') {
     }
 }
 
+# Level 1: Summary generation
+if ($debugLevel -ge 1) {
+    Write-Verbose "[test.systematic] Generating execution summary"
+}
+
 # Generate summary
 Write-CategoryMessage "`n=== Execution Summary ===" -Level 'Info'
 $totalTests = ($allResults | Measure-Object -Property Total -Sum).Sum
@@ -269,6 +348,19 @@ $totalPassed = ($allResults | Measure-Object -Property Passed -Sum).Sum
 $totalFailed = ($allResults | Measure-Object -Property Failed -Sum).Sum
 $totalSkipped = ($allResults | Measure-Object -Property Skipped -Sum).Sum
 $totalDuration = ($allResults | Measure-Object -Property Duration -Sum).Sum
+
+# Level 2: Summary details
+if ($debugLevel -ge 2) {
+    Write-Verbose "[test.systematic] Summary - Tests: $totalTests, Passed: $totalPassed, Failed: $totalFailed, Skipped: $totalSkipped"
+    Write-Verbose "[test.systematic] Total duration: ${totalDuration}s"
+}
+
+# Level 3: Performance breakdown
+if ($debugLevel -ge 3) {
+    $avgDuration = if ($allResults.Count -gt 0) { ($allResults | Measure-Object -Property Duration -Average).Average } else { 0 }
+    $maxDuration = if ($allResults.Count -gt 0) { ($allResults | Measure-Object -Property Duration -Maximum).Maximum } else { 0 }
+    Write-Host "  [test.systematic] Performance - Avg category: ${avgDuration}s, Max: ${maxDuration}s, Categories: $($allResults.Count)" -ForegroundColor DarkGray
+}
 
 Write-CategoryMessage "Total Tests: $totalTests" -Level 'Info'
 Write-CategoryMessage "Passed: $totalPassed" -Level 'Info'
@@ -291,6 +383,11 @@ if ($failureSummary.Count -gt 0) {
 
 # Generate detailed report if requested
 if ($GenerateReport) {
+    # Level 1: Report generation start
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[test.systematic] Generating detailed report"
+    }
+    
     $reportPath = Join-Path $reportDir "systematic-test-report-$(Get-Date -Format 'yyyyMMdd-HHmmss').md"
     
     # Use locale-aware date formatting for user-facing report
@@ -364,13 +461,25 @@ $($failureSummary | ForEach-Object { @"
 4. Re-run affected categories to verify fixes
 "@
 
-    Set-Content -Path $reportPath -Value $report -Encoding UTF8
-    Write-CategoryMessage "`nDetailed report generated: $reportPath" -Level 'Info'
+    try {
+        Set-Content -Path $reportPath -Value $report -Encoding UTF8 -ErrorAction Stop
+        Write-CategoryMessage "`nDetailed report generated: $reportPath" -Level 'Info'
+    }
+    catch {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'test.systematic.generate-report' -Context @{
+                report_path = $reportPath
+            }
+        }
+        else {
+            Write-CategoryMessage "Failed to generate report: $($_.Exception.Message)" -Level 'Error'
+        }
+    }
 }
 
 if ($totalFailed -gt 0) {
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Test execution completed with $totalFailed failures"
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Test execution completed with $totalFailed failures"
     }
     else {
         Write-Host "Test execution completed with $totalFailed failures" -ForegroundColor Yellow

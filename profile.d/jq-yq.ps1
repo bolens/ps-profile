@@ -11,7 +11,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for converting JSON and YAML formats.
-    Functions check for jq/yq availability using Test-HasCommand for efficient
+    Functions check for jq/yq availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

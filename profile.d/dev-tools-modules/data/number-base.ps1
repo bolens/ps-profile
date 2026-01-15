@@ -42,7 +42,16 @@ function Initialize-DevTools-NumberBase {
             }
         }
         catch {
-            Write-Error "Failed to convert number base: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.data.number-base.convert' -Context @{
+                    from_base = $FromBase
+                    to_base   = $ToBase
+                    number    = $Number
+                }
+            }
+            else {
+                Write-Error "Failed to convert number base: $_"
+            }
         }
     } -Force
 }

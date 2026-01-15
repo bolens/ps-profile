@@ -57,21 +57,52 @@ function New-EmptyFile {
             $fileStream.Dispose()
         }
         catch [System.UnauthorizedAccessException] {
-            Write-Error "Access denied creating file '$path': $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.touch' -Context @{
+                    path       = $path
+                    error_type = 'UnauthorizedAccessException'
+                }
+            }
+            else {
+                Write-Error "Access denied creating file '$path': $($_.Exception.Message)"
+            }
             throw
         }
         catch [System.IO.DirectoryNotFoundException] {
-            Write-Error "Directory not found for path '$path': $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.touch' -Context @{
+                    path       = $path
+                    error_type = 'DirectoryNotFoundException'
+                }
+            }
+            else {
+                Write-Error "Directory not found for path '$path': $($_.Exception.Message)"
+            }
             throw
         }
         catch [System.IO.IOException] {
             if ($_.Exception.Message -notmatch 'already exists') {
-                Write-Error "IO error creating file '$path': $($_.Exception.Message)"
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.touch' -Context @{
+                        path       = $path
+                        error_type = 'IOException'
+                    }
+                }
+                else {
+                    Write-Error "IO error creating file '$path': $($_.Exception.Message)"
+                }
                 throw
             }
         }
         catch {
-            Write-Error "Unexpected error creating file '$path': $($_.Exception.Message)"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.touch' -Context @{
+                    path = $path
+                }
+            }
+            else {
+                Write-Error "Unexpected error creating file '$path': $($_.Exception.Message)"
+            }
             throw
         }
     }
@@ -129,7 +160,17 @@ function New-Directory {
     }
 
     if ($dirPaths.Count -eq 0) {
-        Write-Error "mkdir: missing operand"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                    [System.ArgumentException]::new("mkdir: missing operand"),
+                    'MissingOperand',
+                    [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                    $null
+                )) -OperationName 'fileoperations.mkdir' -Context @{}
+        }
+        else {
+            Write-Error "mkdir: missing operand"
+        }
         return
     }
 
@@ -149,7 +190,14 @@ function New-Directory {
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                     $dirPath
                 )
-                Write-Error $errorRecord -ErrorAction Continue
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $errorRecord -OperationName 'fileoperations.mkdir' -Context @{
+                        dir_path = $dirPath
+                    }
+                }
+                else {
+                    Write-Error $errorRecord -ErrorAction Continue
+                }
                 throw $errorRecord
             }
         }
@@ -166,12 +214,28 @@ function New-Directory {
         }
         catch [System.IO.DirectoryNotFoundException] {
             $errorMessage = "mkdir: cannot create directory '$dirPath': No such file or directory"
-            Write-Error $errorMessage -ErrorAction Continue
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.mkdir' -Context @{
+                    dir_path   = $dirPath
+                    error_type = 'DirectoryNotFoundException'
+                }
+            }
+            else {
+                Write-Error $errorMessage -ErrorAction Continue
+            }
             throw
         }
         catch [System.UnauthorizedAccessException] {
             $errorMessage = "mkdir: cannot create directory '$dirPath': Permission denied"
-            Write-Error $errorMessage -ErrorAction Continue
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.mkdir' -Context @{
+                    dir_path   = $dirPath
+                    error_type = 'UnauthorizedAccessException'
+                }
+            }
+            else {
+                Write-Error $errorMessage -ErrorAction Continue
+            }
             throw
         }
         catch [System.IO.IOException] {
@@ -180,12 +244,27 @@ function New-Directory {
                 continue
             }
             $errorMessage = "mkdir: cannot create directory '$dirPath': $($_.Exception.Message)"
-            Write-Error $errorMessage -ErrorAction Continue
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.mkdir' -Context @{
+                    dir_path   = $dirPath
+                    error_type = 'IOException'
+                }
+            }
+            else {
+                Write-Error $errorMessage -ErrorAction Continue
+            }
             throw
         }
         catch {
             $errorMessage = "mkdir: cannot create directory '$dirPath': $($_.Exception.Message)"
-            Write-Error $errorMessage -ErrorAction Continue
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fileoperations.mkdir' -Context @{
+                    dir_path = $dirPath
+                }
+            }
+            else {
+                Write-Error $errorMessage -ErrorAction Continue
+            }
             throw
         }
     }
@@ -242,21 +321,40 @@ function Find-File {
     param([Parameter(ValueFromRemainingArguments = $true)] $FilterArgs)
 
     if (-not $FilterArgs -or $FilterArgs.Count -eq 0) {
-        Write-Error "Find-File requires a filter pattern"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                    [System.ArgumentException]::new("Find-File requires a filter pattern"),
+                    'FilterPatternRequired',
+                    [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                    $null
+                )) -OperationName 'fileoperations.find-file' -Context @{}
+        }
+        else {
+            Write-Error "Find-File requires a filter pattern"
+        }
         return
     }
 
-    try {
-        Get-ChildItem -Recurse -Name -Filter $FilterArgs[0] -ErrorAction Stop
+    if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+        Invoke-WithWideEvent -OperationName 'fileoperations.find-file' -Context @{
+            filter = $FilterArgs[0]
+        } -ScriptBlock {
+            Get-ChildItem -Recurse -Name -Filter $FilterArgs[0] -ErrorAction Stop
+        }
     }
-    catch [System.UnauthorizedAccessException] {
-        Write-Warning "Access denied to some directories. Results may be incomplete."
-        # Try with ErrorAction SilentlyContinue to get partial results
-        Get-ChildItem -Recurse -Name -Filter $FilterArgs[0] -ErrorAction SilentlyContinue
-    }
-    catch {
-        Write-Error "Failed to search for files: $($_.Exception.Message)"
-        throw
+    else {
+        try {
+            Get-ChildItem -Recurse -Name -Filter $FilterArgs[0] -ErrorAction Stop
+        }
+        catch [System.UnauthorizedAccessException] {
+            Write-Warning "Access denied to some directories. Results may be incomplete."
+            # Try with ErrorAction SilentlyContinue to get partial results
+            Get-ChildItem -Recurse -Name -Filter $FilterArgs[0] -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Error "Failed to search for files: $($_.Exception.Message)"
+            throw
+        }
     }
 }
 Set-Alias -Name search -Value Find-File -ErrorAction SilentlyContinue

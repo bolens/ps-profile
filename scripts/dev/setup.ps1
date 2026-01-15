@@ -53,10 +53,10 @@ Write-ScriptMessage -Message "  Installed: $installedCount/$($requiredModules.Co
 
 if ($failedModules.Count -gt 0) {
     Write-ScriptMessage -Message "  Failed: $($failedModules -join ', ')" -IsWarning
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Some modules failed to install"
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Some modules failed to install"
 }
 
 Write-ScriptMessage -Message "`nDevelopment environment setup complete!" -LogLevel Info
-Exit-WithCode -ExitCode $EXIT_SUCCESS
+Exit-WithCode -ExitCode [ExitCode]::Success
 
 

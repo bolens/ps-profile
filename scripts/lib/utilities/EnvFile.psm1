@@ -7,7 +7,13 @@ scripts/lib/utilities/EnvFile.psm1
 .DESCRIPTION
     Provides functions for loading environment variables from .env files.
     Supports standard .env file format with comments, quoted values, and variable expansion.
+
+.NOTES
+    This module uses strict mode for enhanced error checking.
 #>
+
+# Enable strict mode for enhanced error checking
+Set-StrictMode -Version Latest
 
 <#
 .SYNOPSIS
@@ -42,6 +48,7 @@ function Load-EnvFile {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$EnvFilePath,
         
         [switch]$Overwrite
@@ -136,22 +143,49 @@ function Load-EnvFile {
             # Set environment variable (only if not exists or Overwrite is specified)
             if ($Overwrite -or -not (Get-Item -Path "env:$key" -ErrorAction SilentlyContinue)) {
                 Set-Item -Path "env:$key" -Value $value
-                if ($env:PS_PROFILE_DEBUG) {
-                    Write-Verbose "Loaded env var: $key = $value"
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [env-file.load] Loaded env var: $key = $value" -ForegroundColor DarkGray
                 }
             }
-            elseif ($env:PS_PROFILE_DEBUG) {
-                Write-Verbose "Skipped env var (already set): $key"
+            else {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Host "  [env-file.load] Skipped env var (already set): $key" -ForegroundColor DarkGray
+                }
             }
         }
     }
     catch {
         $errorMessage = "Failed to load environment file '$EnvFilePath': $($_.Exception.Message)"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'env-file.load' -Context @{
+                env_file_path = $EnvFilePath
+                error_message = $errorMessage
+            }
+        }
         if ($errorActionPreference -eq 'Stop') {
             throw $errorMessage
         }
         elseif ($errorActionPreference -eq 'Continue') {
-            Write-Warning $errorMessage
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message $errorMessage -OperationName 'env-file.load' -Context @{
+                            env_file_path = $EnvFilePath
+                            error_action  = $errorActionPreference
+                        }
+                    }
+                    else {
+                        Write-Warning "[env-file.load] $errorMessage"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [env-file.load] Load error details - EnvFilePath: $EnvFilePath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+                }
+            }
         }
     }
 }
@@ -281,8 +315,9 @@ function Initialize-EnvFiles {
     }
     
     if (-not $repoRootValid) {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Verbose "Could not determine repository root for .env file loading"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [env-file.initialize] Could not determine repository root for .env file loading" -ForegroundColor DarkGray
         }
         return
     }
@@ -296,7 +331,17 @@ function Initialize-EnvFiles {
         $envFile -and -not [string]::IsNullOrWhiteSpace($envFile) -and (Test-Path -LiteralPath $envFile)
     }
     if ($envFileExists) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [env-file.initialize] Loading base .env file: $envFile" -ForegroundColor DarkGray
+        }
         Load-EnvFile -EnvFilePath $envFile -Overwrite:$Overwrite -ErrorAction SilentlyContinue
+    }
+    else {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [env-file.initialize] Base .env file not found: $envFile" -ForegroundColor DarkGray
+        }
     }
     
     # Load .env.local second (local overrides, can override .env)
@@ -308,7 +353,27 @@ function Initialize-EnvFiles {
         $envLocalFile -and -not [string]::IsNullOrWhiteSpace($envLocalFile) -and (Test-Path -LiteralPath $envLocalFile)
     }
     if ($envLocalFileExists) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Host "  [env-file.initialize] Loading local .env.local file: $envLocalFile" -ForegroundColor DarkGray
+        }
         Load-EnvFile -EnvFilePath $envLocalFile -Overwrite -ErrorAction SilentlyContinue
+    }
+    else {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [env-file.initialize] Local .env.local file not found: $envLocalFile" -ForegroundColor DarkGray
+        }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        $loadedFiles = @()
+        if ($envFileExists) { $loadedFiles += '.env' }
+        if ($envLocalFileExists) { $loadedFiles += '.env.local' }
+        if ($loadedFiles.Count -gt 0) {
+            Write-Host "  [env-file.initialize] Successfully initialized environment files: $($loadedFiles -join ', ')" -ForegroundColor DarkGray
+        }
     }
 }
 

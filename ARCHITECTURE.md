@@ -234,7 +234,7 @@ try {
 
     # Fragment implementation
     # Use Set-AgentModeFunction or Set-AgentModeAlias for collision-safe registration
-    # Use Test-CachedCommand or Test-HasCommand for command availability checks
+    # Use Test-CachedCommand for command availability checks
 
     # Mark as loaded using FragmentIdempotency module if available
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
@@ -389,21 +389,7 @@ if (Test-CachedCommand 'docker') {
 - 5-minute TTL (configurable) to handle commands installed after profile load
 - Avoids repeated `Get-Command` calls
 
-### Test-HasCommand
-
-Provider-first command check to avoid module autoload:
-
-```powershell
-if (Test-HasCommand 'git') {
-    # git is available
-}
-```
-
-**Features:**
-
-- Fast provider checks first (Function:, Alias:)
-- Falls back to cached or direct command testing
-- Avoids triggering module autoload/discovery
+**Note:** `Test-HasCommand` has been deprecated and replaced by `Test-CachedCommand`. All new code should use `Test-CachedCommand`.
 
 ### Register-LazyFunction
 

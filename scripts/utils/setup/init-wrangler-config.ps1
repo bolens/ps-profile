@@ -24,6 +24,9 @@ scripts/utils/init-wrangler-config.ps1
 .PARAMETER Force
     Overwrite an existing file without prompting.
 
+.PARAMETER DryRun
+    If specified, shows what config file would be created without actually creating it.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\init-wrangler-config.ps1
 
@@ -33,6 +36,11 @@ scripts/utils/init-wrangler-config.ps1
     pwsh -NoProfile -File scripts\utils\init-wrangler-config.ps1 -ApiToken 'xxxxxxxx' -AccountId 'abcd-1234' -Force
 
     Creates the config file non-interactively with the provided token and account ID.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\init-wrangler-config.ps1 -DryRun
+
+    Shows what config file would be created without actually creating it.
 #>
 
 param(
@@ -42,7 +50,9 @@ param(
     [Parameter(Mandatory = $false)]
     [string]$AccountId,
 
-    [switch]$Force
+    [switch]$Force,
+
+    [switch]$DryRun
 )
 
 # Import shared utilities using ModuleImport pattern
@@ -154,14 +164,27 @@ try {
     Write-Host "Directory ready: $dir"
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to create directory: $($_.Exception.Message)" -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to create directory: $($_.Exception.Message)" -ErrorRecord $_
+}
+
+if ($DryRun) {
+    Write-Host "`n[DRY RUN] Would create config file at: $file" -ForegroundColor Yellow
+    Write-Host "[DRY RUN] Would include:" -ForegroundColor Yellow
+    if ($ApiToken) {
+        Write-Host "  - API token: [REDACTED]" -ForegroundColor Yellow
+    }
+    if ($AccountId) {
+        Write-Host "  - Account ID: $AccountId" -ForegroundColor Yellow
+    }
+    Write-Host "Run without -DryRun to create the config file." -ForegroundColor Yellow
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "DRY RUN: Would create config file at $file"
 }
 
 if (Test-Path -Path $file -and -not $Force) {
     $ok = Read-Host "File already exists at $file. Overwrite? (y/N)"
     if ($ok -notin @('y', 'Y', 'yes', 'YES')) {
         Write-Host 'Aborting; existing file retained.'
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Operation canceled by user"
+        Exit-WithCode -ExitCode [ExitCode]::Success -Message "Operation canceled by user"
     }
 }
 

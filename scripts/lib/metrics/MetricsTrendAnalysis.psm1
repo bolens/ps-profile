@@ -50,6 +50,7 @@ function Get-MetricsTrend {
         [object[]]$HistoricalData,
 
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$MetricName,
 
         [int]$Days = 0
@@ -59,7 +60,38 @@ function Get-MetricsTrend {
     if ($HistoricalData.Count -gt 0) {
         foreach ($data in $HistoricalData) {
             if ($null -eq $data) {
-                Write-Warning "HistoricalData array contains null value. Skipping."
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "HistoricalData array contains null value" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+                        data_count = $HistoricalData.Count
+                    } -Code 'NullDataValue'
+                }
+                else {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 2) {
+                            Write-Warning "[metrics-trend-analysis.analyze] HistoricalData array contains null value. Skipping."
+                        }
+                        # Level 3: Log detailed null value information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [metrics-trend-analysis.analyze] Null data value details - DataCount: $($HistoricalData.Count), MetricName: $MetricName, Index: $($HistoricalData.IndexOf($data))" -ForegroundColor DarkGray
+                        }
+                    }
+                    else {
+                        # Always log warnings even if debug is off
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "HistoricalData array contains null value" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+                                # Technical context
+                                data_count = $HistoricalData.Count
+                                metric_name = $MetricName
+                                # Invocation context
+                                FunctionName = 'Get-MetricsTrend'
+                            } -Code 'NullDataValue'
+                        }
+                        else {
+                            Write-Warning "[metrics-trend-analysis.analyze] HistoricalData array contains null value. Skipping."
+                        }
+                    }
+                }
                 continue
             }
             # Note: Timestamp is optional, but recommended for proper sorting
@@ -68,6 +100,41 @@ function Get-MetricsTrend {
     }
 
     if ($HistoricalData.Count -lt 2) {
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Insufficient data for trend analysis" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+                data_points = $HistoricalData.Count
+                metric_name = $MetricName
+            } -Code 'InsufficientData'
+        }
+        else {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    Write-Warning "[metrics-trend-analysis.analyze] Need at least 2 data points for trend analysis. Found: $($HistoricalData.Count)"
+                }
+                # Level 3: Log detailed insufficient data information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[metrics-trend-analysis.analyze] Insufficient data details - DataPoints: $($HistoricalData.Count), MetricName: $MetricName, Days: $Days"
+                }
+            }
+            else {
+                # Always log warnings even if debug is off
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Insufficient data for trend analysis" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+                        # Technical context
+                        data_points = $HistoricalData.Count
+                        metric_name = $MetricName
+                        # Operation context
+                        days = $Days
+                        # Invocation context
+                        FunctionName = 'Get-MetricsTrend'
+                    } -Code 'InsufficientData'
+                }
+                else {
+                    Write-Warning "[metrics-trend-analysis.analyze] Need at least 2 data points for trend analysis. Found: $($HistoricalData.Count)"
+                }
+            }
+        }
         return [PSCustomObject]@{
             TrendDirection = "InsufficientData"
             GrowthRate     = 0
@@ -82,6 +149,10 @@ function Get-MetricsTrend {
     # Optimized: Use foreach loop instead of Where-Object
     $filteredData = if ($Days -gt 0) {
         $cutoffDate = [DateTime]::UtcNow.AddDays(-$Days)
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [metrics-trend-analysis.analyze] Filtering data to last $Days days (cutoff: $cutoffDate)" -ForegroundColor DarkGray
+        }
         $filtered = [System.Collections.Generic.List[object]]::new()
         foreach ($item in $HistoricalData) {
             $timestamp = if ($item.Timestamp) { [DateTime]::Parse($item.Timestamp) } else { [DateTime]::MinValue }
@@ -93,6 +164,11 @@ function Get-MetricsTrend {
     }
     else {
         $HistoricalData | Sort-Object { if ($_.Timestamp) { [DateTime]::Parse($_.Timestamp) } else { [DateTime]::MinValue } }
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        Write-Verbose "[metrics-trend-analysis.analyze] Analyzing trend for metric '$MetricName' with $($filteredData.Count) data points"
     }
 
     if ($filteredData.Count -lt 2) {
@@ -173,6 +249,11 @@ function Get-MetricsTrend {
     }
     else {
         "Stable"
+    }
+    
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        Write-Host "  [metrics-trend-analysis.analyze] Trend calculation complete: Direction=$trendDirection, GrowthRate=$growthRate%, AverageChange=$averageChange" -ForegroundColor DarkGray
     }
 
     return [PSCustomObject]@{

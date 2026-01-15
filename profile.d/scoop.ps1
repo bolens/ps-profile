@@ -105,7 +105,16 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Installs one or more packages using the Scoop package manager.
     #>
-    function Install-ScoopPackage { scoop install @args }
+    function Install-ScoopPackage {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop install @args
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name sinstall -Value Install-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop search
@@ -115,7 +124,16 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Searches for available packages in Scoop repositories.
     #>
-    function Find-ScoopPackage { scoop search @args }
+    function Find-ScoopPackage {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop search @args
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name ss -Value Find-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop update
@@ -125,7 +143,16 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
     #>
-    function Update-ScoopPackage { scoop update @args }
+    function Update-ScoopPackage {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop update @args
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name su -Value Update-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop update all
@@ -135,7 +162,16 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Updates all installed packages and Scoop itself.
     #>
-    function Update-ScoopAll { scoop update * }
+    function Update-ScoopAll {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop update *
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name suu -Value Update-ScoopAll -ErrorAction SilentlyContinue
 
     # Scoop uninstall
@@ -145,7 +181,16 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Removes installed packages from the system.
     #>
-    function Uninstall-ScoopPackage { scoop uninstall @args }
+    function Uninstall-ScoopPackage {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop uninstall @args
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name sr -Value Uninstall-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop list
@@ -155,7 +200,16 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Shows all packages currently installed via Scoop.
     #>
-    function Get-ScoopPackage { scoop list @args }
+    function Get-ScoopPackage {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop list @args
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name slist -Value Get-ScoopPackage -ErrorAction SilentlyContinue
 
     # Scoop info
@@ -165,7 +219,16 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Displays detailed information about specified packages.
     #>
-    function Get-ScoopPackageInfo { scoop info @args }
+    function Get-ScoopPackageInfo {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop info @args
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name sh -Value Get-ScoopPackageInfo -ErrorAction SilentlyContinue
 
     # Scoop cleanup
@@ -175,7 +238,17 @@ if (Test-CachedCommand scoop) {
     .DESCRIPTION
         Removes old package versions and cleans the download cache.
     #>
-    function Clear-ScoopCache { scoop cleanup *; scoop cache rm * }
+    function Clear-ScoopCache {
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            scoop cleanup *
+            scoop cache rm *
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
+    }
     Set-Alias -Name scleanup -Value Clear-ScoopCache -ErrorAction SilentlyContinue
 
     # Scoop export - backup installed packages
@@ -200,7 +273,14 @@ if (Test-CachedCommand scoop) {
             [string]$Path = 'scoopfile.json'
         )
         
-        & scoop export | Out-File -FilePath $Path -Encoding UTF8
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            & scoop export | Out-File -FilePath $Path -Encoding UTF8
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
     }
     Set-Alias -Name scoopexport -Value Export-ScoopPackages -ErrorAction SilentlyContinue
     Set-Alias -Name scoopbackup -Value Export-ScoopPackages -ErrorAction SilentlyContinue
@@ -228,11 +308,35 @@ if (Test-CachedCommand scoop) {
         )
         
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Package file not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Package file not found: $Path"),
+                        'PackageFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'scoop.packages.import' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "Package file not found: $Path"
+            }
             return
         }
         
-        & scoop import $Path
+        $originalVerbose = $VerbosePreference
+        try {
+            $VerbosePreference = 'SilentlyContinue'
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Invoke-WithWideEvent -OperationName 'scoop.packages.import' -Context @{ path = $Path } -ScriptBlock {
+                    & scoop import $Path
+                } | Out-Null
+            }
+            else {
+                & scoop import $Path
+            }
+        }
+        finally {
+            $VerbosePreference = $originalVerbose
+        }
     }
     Set-Alias -Name scoopimport -Value Import-ScoopPackages -ErrorAction SilentlyContinue
     Set-Alias -Name scooprestore -Value Import-ScoopPackages -ErrorAction SilentlyContinue
@@ -297,7 +401,17 @@ if (Test-CachedCommand scoop) {
         }
 
         if ($scoopRoots.Count -eq 0) {
-            Write-Error "Scoop root directory not found. Is Scoop installed?"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.DirectoryNotFoundException]::new("Scoop root directory not found. Is Scoop installed?"),
+                        'ScoopRootNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $null
+                    )) -OperationName 'scoop.buckets.repair' -Context @{ bucket_name = $BucketName }
+            }
+            else {
+                Write-Error "Scoop root directory not found. Is Scoop installed?"
+            }
             return
         }
 

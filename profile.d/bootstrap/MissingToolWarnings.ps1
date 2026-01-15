@@ -291,8 +291,65 @@ function global:Get-PreferenceAwareInstallHint {
     )
     
     # Check tool-specific installation method registry first
+    # If found, generate a fallback chain from all available methods
     $toolSpecificMethod = Get-ToolSpecificInstallMethod -ToolName $ToolName
     if ($toolSpecificMethod) {
+        # Get all available methods for this tool to build a fallback chain
+        $registry = Get-ToolInstallMethodRegistry
+        $toolLower = $ToolName.ToLower()
+        
+        if ($registry.ContainsKey($toolLower)) {
+            $toolMethods = $registry[$toolLower]
+            
+            # Detect platform
+            $platform = if (Get-Command Get-Platform -ErrorAction SilentlyContinue) {
+                try { (Get-Platform).Name } catch { 'Windows' }
+            }
+            else {
+                if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
+                elseif ($IsLinux) { 'Linux' }
+                elseif ($IsMacOS) { 'macOS' }
+                else { 'Windows' }
+            }
+            
+            if ($toolMethods.ContainsKey($Platform)) {
+                $platformMethods = $toolMethods[$Platform]
+                $availableMethods = @()
+                
+                # Collect all available methods for this platform
+                foreach ($methodName in $platformMethods.Keys) {
+                    $method = $platformMethods[$methodName]
+                    if ($methodName -eq 'curl' -or $methodName -eq 'powershell' -or (Test-CommandAvailable -CommandName $methodName)) {
+                        # For powershell, verify we're on Windows
+                        if ($methodName -eq 'powershell' -and $Platform -ne 'Windows' -and -not ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6)) {
+                            continue
+                        }
+                        $availableMethods += $method
+                    }
+                }
+                
+                # Use preference to determine preferred method
+                $systemPm = if ($env:PS_SYSTEM_PACKAGE_MANAGER) { $env:PS_SYSTEM_PACKAGE_MANAGER.ToLower() } else { 'auto' }
+                $preferredMethod = $toolSpecificMethod
+                
+                # If a preferred system package manager is set and available, prioritize it
+                if ($systemPm -ne 'auto' -and $platformMethods.ContainsKey($systemPm)) {
+                    $preferredMethodFromRegistry = $platformMethods[$systemPm]
+                    if (Test-CommandAvailable -CommandName $systemPm) {
+                        $preferredMethod = $preferredMethodFromRegistry
+                    }
+                }
+                
+                # Generate fallback chain with preferred method first
+                $fallbackChain = Get-InstallMethodFallbackChain -PreferredMethod $preferredMethod -FallbackMethods $availableMethods -MaxFallbacks 3
+                
+                if ($fallbackChain) {
+                    return "Install with: $fallbackChain"
+                }
+            }
+        }
+        
+        # Fallback: just return the single method
         return "Install with: $toolSpecificMethod"
     }
     
@@ -1384,6 +1441,22 @@ function global:Get-ToolInstallMethodRegistry {
                 'npm'      = 'npm install -g @beads/bd'
             }
         }
+        'sqlite3'        = @{
+            'Windows' = @{
+                'scoop'      = 'scoop install sqlite'
+                'winget'     = 'winget install sqlite'
+                'chocolatey' = 'choco install sqlite -y'
+            }
+            'Linux'   = @{
+                'apt'    = 'sudo apt install sqlite3'
+                'dnf'    = 'sudo dnf install sqlite'
+                'yum'    = 'sudo yum install sqlite'
+                'pacman' = 'sudo pacman -S sqlite'
+            }
+            'macOS'   = @{
+                'homebrew' = 'brew install sqlite'
+            }
+        }
     }
 }
 
@@ -2098,8 +2171,22 @@ function global:Show-MissingToolWarningsTable {
         }
     }
 
-    # Display table
-    $tableData | Format-Table -AutoSize -Property Tool, InstallHint | Out-String | Write-Host
+    # Display table - use direct Write-Host to avoid Out-String hang
+    # Format-Table | Out-String can hang in some scenarios, so we format manually
+    if ($tableData.Count -gt 0) {
+        # Calculate column widths
+        $toolWidth = [Math]::Max(4, ($tableData | ForEach-Object { $_.Tool.Length } | Measure-Object -Maximum).Maximum)
+        $hintWidth = [Math]::Max(11, ($tableData | ForEach-Object { $_.InstallHint.Length } | Measure-Object -Maximum).Maximum)
+        
+        # Write header
+        Write-Host ("{0,-$toolWidth} {1}" -f 'Tool', 'InstallHint') -ForegroundColor Cyan
+        Write-Host ("{0,-$toolWidth} {1}" -f ('-' * $toolWidth), ('-' * $hintWidth)) -ForegroundColor Cyan
+        
+        # Write rows
+        foreach ($row in $tableData) {
+            Write-Host ("{0,-$toolWidth} {1}" -f $row.Tool, $row.InstallHint)
+        }
+    }
 
     # Clear collected warnings after display
     $global:CollectedMissingToolWarnings.Clear()

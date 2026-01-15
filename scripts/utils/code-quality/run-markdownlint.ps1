@@ -67,12 +67,12 @@ if (-not $markdownlint -and -not $npx) {
     try {
         npm install -g "markdownlint-cli@$markdownlintVersion"
         if ($LASTEXITCODE -ne 0) {
-            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to install markdownlint-cli@$markdownlintVersion"
+            Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to install markdownlint-cli@$markdownlintVersion"
         }
         $markdownlint = Get-Command markdownlint -ErrorAction SilentlyContinue
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
     }
 }
 
@@ -86,32 +86,11 @@ try {
     }
 
     if ($LASTEXITCODE -ne 0) {
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "markdownlint found errors"
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "markdownlint found errors"
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "markdownlint passed!"
-
-
-try {
-    if ($markdownlint) {
-        markdownlint '**/*.md' --ignore node_modules --ignore '**/Modules/**'
-    }
-    else {
-        npx --yes "markdownlint-cli@$markdownlintVersion" '**/*.md' --ignore node_modules --ignore '**/Modules/**'
-    }
-
-    if ($LASTEXITCODE -ne 0) {
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "markdownlint found errors"
-    }
-}
-catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
-}
-
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "markdownlint passed!"
-
-
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "markdownlint passed!"

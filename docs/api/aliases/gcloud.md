@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\51-gcloud.ps1
+Defined in: ..\profile.d\gcloud.ps1

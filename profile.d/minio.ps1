@@ -11,7 +11,7 @@
 
 .DESCRIPTION
     Provides PowerShell functions and aliases for common MinIO client operations.
-    Functions check for mc availability using Test-HasCommand for efficient
+    Functions check for mc availability using Test-CachedCommand for efficient
     command detection without triggering module autoload.
 
 .NOTES

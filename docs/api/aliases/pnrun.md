@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\69-pnpm.ps1
+Defined in: ..\profile.d\pnpm.ps1

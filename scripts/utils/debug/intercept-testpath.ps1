@@ -3,6 +3,12 @@
 # Intercepts Test-Path calls to log null/empty paths
 # ===============================================
 
+# Import CommonEnums for PathType enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
+
 <#
 .SYNOPSIS
     Creates a wrapper function that intercepts Test-Path calls and logs null/empty paths.
@@ -31,8 +37,7 @@ function global:Test-Path {
         
         [Parameter(ParameterSetName = 'Path')]
         [Parameter(ParameterSetName = 'LiteralPath')]
-        [ValidateSet('Container', 'Leaf', 'Any')]
-        [string]$PathType
+        [PathType]$PathType
     )
     
     # Handle ErrorAction via $PSBoundParameters or common parameter
@@ -96,7 +101,8 @@ function global:Test-Path {
     }
     
     if ($PathType) {
-        $testPathParams['PathType'] = $PathType
+        # Convert enum to string
+        $testPathParams['PathType'] = $PathType.ToString()
     }
     
     $testPathParams['ErrorAction'] = $ErrorAction

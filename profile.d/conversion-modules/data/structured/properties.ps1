@@ -169,33 +169,110 @@ function Initialize-FileConversion-Properties {
     # Properties to JSON
     Set-Item -Path Function:Global:_ConvertFrom-PropertiesToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.properties.to-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.properties$', '.json'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-json] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $propertiesContent = Get-Content -LiteralPath $InputPath -Raw
             $propertiesData = _Parse-PropertiesFile -PropertiesContent $propertiesContent
             
             $jsonObj = [PSCustomObject]$propertiesData
             $json = $jsonObj | ConvertTo-Json -Depth 100
             Set-Content -LiteralPath $OutputPath -Value $json -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-json] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.properties.to-json] Properties found: $($propertiesData.Keys.Count)"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.properties.to-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Properties: $($propertiesData.Keys.Count)" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert Properties to JSON: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert Properties to JSON: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.properties.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # JSON to Properties
     Set-Item -Path Function:Global:_ConvertTo-PropertiesFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.properties.from-json] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.json$', '.properties'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-json] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $jsonContent = Get-Content -LiteralPath $InputPath -Raw
             $jsonObj = $jsonContent | ConvertFrom-Json
             
             $propertiesLines = @()
+            $propertyCount = 0
             $jsonObj.PSObject.Properties | ForEach-Object {
                 $key = $_.Name
                 $value = $_.Value
@@ -205,23 +282,81 @@ function Initialize-FileConversion-Properties {
                 $escapedValue = _Escape-PropertiesValue -Value ([string]$value)
                 
                 $propertiesLines += "$escapedKey=$escapedValue"
+                $propertyCount++
             }
             
             $propertiesContent = $propertiesLines -join "`r`n"
             Set-Content -LiteralPath $OutputPath -Value $propertiesContent -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-json] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.properties.from-json] Properties created: $propertyCount"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.properties.from-json] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Properties: $propertyCount" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert JSON to Properties: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert JSON to Properties: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-json] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.properties.from-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # Properties to YAML
     Set-Item -Path Function:Global:_ConvertFrom-PropertiesToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.properties.to-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.properties$', '.yaml'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-yaml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $propertiesContent = Get-Content -LiteralPath $InputPath -Raw
             $propertiesData = _Parse-PropertiesFile -PropertiesContent $propertiesContent
             
@@ -234,24 +369,82 @@ function Initialize-FileConversion-Properties {
             
             $yamlContent = $yamlLines -join "`r`n"
             Set-Content -LiteralPath $OutputPath -Value $yamlContent -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-yaml] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.properties.to-yaml] Properties converted: $($propertiesData.Keys.Count)"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.properties.to-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Properties: $($propertiesData.Keys.Count)" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert Properties to YAML: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert Properties to YAML: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.properties.to-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # YAML to Properties
     Set-Item -Path Function:Global:_ConvertTo-PropertiesFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.properties.from-yaml] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ya?ml$', '.properties'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-yaml] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             # For simple YAML, parse as key-value pairs
             $yamlContent = Get-Content -LiteralPath $InputPath -Raw
             $propertiesData = @{}
             
             $lines = $yamlContent -split "`r?`n"
+            $lineCount = $lines.Count
             foreach ($line in $lines) {
                 $trimmedLine = $line.Trim()
                 if ([string]::IsNullOrWhiteSpace($trimmedLine) -or $trimmedLine.StartsWith('#')) {
@@ -274,19 +467,76 @@ function Initialize-FileConversion-Properties {
             
             $propertiesContent = $propertiesLines -join "`r`n"
             Set-Content -LiteralPath $OutputPath -Value $propertiesContent -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-yaml] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.properties.from-yaml] Properties created: $($propertiesData.Keys.Count), YAML lines processed: $lineCount"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.properties.from-yaml] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Properties: $($propertiesData.Keys.Count), Lines: $lineCount" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert YAML to Properties: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert YAML to Properties: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-yaml] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.properties.from-yaml] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # Properties to INI
     Set-Item -Path Function:Global:_ConvertFrom-PropertiesToIni -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.properties.to-ini] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.properties$', '.ini'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-ini] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $propertiesContent = Get-Content -LiteralPath $InputPath -Raw
             $propertiesData = _Parse-PropertiesFile -PropertiesContent $propertiesContent
             
@@ -300,23 +550,81 @@ function Initialize-FileConversion-Properties {
             
             $iniContent = $iniLines -join "`r`n"
             Set-Content -LiteralPath $OutputPath -Value $iniContent -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-ini] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.properties.to-ini] Properties converted: $($propertiesData.Keys.Count)"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.properties.to-ini] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Properties: $($propertiesData.Keys.Count)" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert Properties to INI: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-ini' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert Properties to INI: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.to-ini] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.properties.to-ini] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 
     # INI to Properties
     Set-Item -Path Function:Global:_ConvertTo-PropertiesFromIni -Value {
         param([string]$InputPath, [string]$OutputPath)
+        
+        # Parse debug level once at function start
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Debug is enabled
+        }
+        
         try {
+            # Level 1: Basic operation start
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[conversion.properties.from-ini] Starting conversion: $InputPath"
+            }
+            
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ini$', '.properties'
             }
+            
+            # Level 2: Operation context
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-ini] Output path: $OutputPath"
+            }
+            
+            $convStartTime = Get-Date
             $iniContent = Get-Content -LiteralPath $InputPath -Raw
             $propertiesData = @{}
             
             $lines = $iniContent -split "`r?`n"
+            $lineCount = $lines.Count
             foreach ($line in $lines) {
                 $trimmedLine = $line.Trim()
                 if ([string]::IsNullOrWhiteSpace($trimmedLine) -or $trimmedLine.StartsWith(';') -or $trimmedLine.StartsWith('#')) {
@@ -343,9 +651,47 @@ function Initialize-FileConversion-Properties {
             
             $propertiesContent = $propertiesLines -join "`r`n"
             Set-Content -LiteralPath $OutputPath -Value $propertiesContent -Encoding UTF8
+            
+            $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
+            
+            # Level 2: Timing information
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-ini] Conversion completed in ${convDuration}ms"
+                Write-Verbose "[conversion.properties.from-ini] Properties created: $($propertiesData.Keys.Count), INI lines processed: $lineCount"
+            }
+            
+            # Level 3: Performance breakdown
+            if ($debugLevel -ge 3) {
+                $inputSize = if (Test-Path -LiteralPath $InputPath) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                $outputSize = if (Test-Path -LiteralPath $OutputPath) { (Get-Item -LiteralPath $OutputPath).Length } else { 0 }
+                Write-Host "  [conversion.properties.from-ini] Performance - Duration: ${convDuration}ms, Input: ${inputSize} bytes, Output: ${outputSize} bytes, Properties: $($propertiesData.Keys.Count), Lines: $lineCount" -ForegroundColor DarkGray
+            }
         }
         catch {
-            Write-Error "Failed to convert INI to Properties: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-ini' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
+            }
+            else {
+                Write-Error "Failed to convert INI to Properties: $_"
+            }
+            
+            # Level 2: Error details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[conversion.properties.from-ini] Error type: $($_.Exception.GetType().FullName)"
+            }
+            
+            # Level 3: Stack trace
+            if ($debugLevel -ge 3) {
+                Write-Host "  [conversion.properties.from-ini] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
+            }
+            
+            throw
         }
     } -Force
 }

@@ -69,13 +69,28 @@ Import-Module (Join-Path $modulesPath 'SecurityPatterns.psm1') -ErrorAction Stop
 Import-Module (Join-Path $modulesPath 'SecurityScanner.psm1') -ErrorAction Stop
 Import-Module (Join-Path $modulesPath 'SecurityReporter.psm1') -ErrorAction Stop
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 # Default to profile.d relative to the repository root
 try {
     $defaultPath = Get-ProfileDirectory -ScriptPath $PSScriptRoot
     $Path = Resolve-DefaultPath -Path $Path -DefaultPath $defaultPath -PathType 'Directory'
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+}
+
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[security.scan] Starting security scan"
+    Write-Verbose "[security.scan] Target path: $Path"
+    if ($AllowlistFile) {
+        Write-Verbose "[security.scan] Using allowlist file: $AllowlistFile"
+    }
 }
 
 Write-ScriptMessage -Message "Running security scan on: $Path"
@@ -85,7 +100,7 @@ try {
     Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
 }
 
 # Load allowlist
@@ -106,6 +121,11 @@ $falsePositivePatterns = Get-FalsePositivePatterns
 # Get PowerShell scripts using helper function
 $scripts = Get-PowerShellScripts -Path $Path
 
+# Level 2: File list details
+if ($debugLevel -ge 2) {
+    Write-Verbose "[security.scan] Found $($scripts.Count) PowerShell script(s) to scan"
+}
+
 # Process files sequentially for reliability
 Write-ScriptMessage -Message "Scanning $($scripts.Count) file(s) for security issues..."
 
@@ -113,20 +133,93 @@ Write-ScriptMessage -Message "Scanning $($scripts.Count) file(s) for security is
 $securityIssues = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 # Scan each file
+$failedFiles = [System.Collections.Generic.List[string]]::new()
+$scanStartTime = Get-Date
 foreach ($script in $scripts) {
-    $fileIssues = Invoke-SecurityScan -FilePath $script.FullName -SecurityRules $securityRules -ExternalCommandPatterns $externalCommandPatterns -SecretPatterns $secretPatterns -FalsePositivePatterns $falsePositivePatterns -Allowlist $allowlist
-    
-    foreach ($issue in $fileIssues) {
-        $securityIssues.Add($issue)
+    # Level 1: Individual file scanning
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[security.scan] Scanning file: $($script.Name)"
     }
+    
+    $fileStartTime = Get-Date
+    try {
+        $fileIssues = Invoke-SecurityScan -FilePath $script.FullName -SecurityRules $securityRules -ExternalCommandPatterns $externalCommandPatterns -SecretPatterns $secretPatterns -FalsePositivePatterns $falsePositivePatterns -Allowlist $allowlist -ErrorAction Stop
+        
+        $fileDuration = ((Get-Date) - $fileStartTime).TotalMilliseconds
+        
+        if ($fileIssues) {
+            foreach ($issue in $fileIssues) {
+                $securityIssues.Add($issue)
+            }
+            
+            # Level 2: File scan timing and results
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[security.scan] File $($script.Name) scanned in ${fileDuration}ms - Found $($fileIssues.Count) issue(s)"
+            }
+        }
+        else {
+            # Level 2: File scan timing (no issues)
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[security.scan] File $($script.Name) scanned in ${fileDuration}ms - No issues found"
+            }
+        }
+    }
+    catch {
+        $failedFiles.Add($script.FullName)
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'security.scan.file' -Context @{
+                file_path = $script.FullName
+            }
+        }
+        else {
+            Write-ScriptMessage -Message "Failed to scan file $($script.FullName): $($_.Exception.Message)" -IsWarning
+        }
+    }
+}
+
+if ($failedFiles.Count -gt 0) {
+    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+        Write-StructuredWarning -Message "Some files failed during security scan" -OperationName 'security.scan' -Context @{
+            failed_files = $failedFiles -join ','
+            failed_count = $failedFiles.Count
+            total_files = $scripts.Count
+        } -Code 'SecurityScanPartialFailure'
+    }
+    else {
+        Write-ScriptMessage -Message "Warning: Failed to scan $($failedFiles.Count) file(s): $($failedFiles -join ', ')" -IsWarning
+    }
+    
+    # If all files failed, exit with error
+    if ($failedFiles.Count -eq $scripts.Count) {
+        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "All files failed during security scan"
+    }
+}
+
+$scanDuration = ((Get-Date) - $scanStartTime).TotalMilliseconds
+
+# Level 2: Overall scan timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[security.scan] Scan completed in ${scanDuration}ms"
+    Write-Verbose "[security.scan] Total issues found: $($securityIssues.Count), Failed files: $($failedFiles.Count)"
+}
+
+# Level 3: Performance breakdown
+if ($debugLevel -ge 3) {
+    $avgFileTime = if ($scripts.Count -gt 0) { $scanDuration / $scripts.Count } else { 0 }
+    Write-Host "  [security.scan] Performance - Duration: ${scanDuration}ms, Avg per file: ${avgFileTime}ms, Files: $($scripts.Count), Issues: $($securityIssues.Count)" -ForegroundColor DarkGray
 }
 
 # Process results
 $results = Get-SecurityScanResults -SecurityIssues $securityIssues.ToArray()
 
+# Level 1: Results processing
+if ($debugLevel -ge 1) {
+    Write-Verbose "[security.scan] Processing scan results"
+}
+
 # Check for scan errors that should cause failure
 if ($results.ScanErrors.Count -gt 0) {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to scan $($results.ScanErrors.Count) file(s). Check warnings above for details."
+    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to scan $($results.ScanErrors.Count) file(s). Check warnings above for details."
 }
 
 # Display results
@@ -134,11 +227,11 @@ Write-SecurityReport -Results $results
 
 # Exit with appropriate code
 if ($results.BlockingIssues.Count -gt 0) {
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($results.BlockingIssues.Count) security-related error(s)"
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Found $($results.BlockingIssues.Count) security-related error(s)"
 }
 
 if ($results.WarningIssues.Count -gt 0) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Security scan completed with $($results.WarningIssues.Count) warning(s)"
+    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Security scan completed with $($results.WarningIssues.Count) warning(s)"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Security scan completed: no issues found"
+Exit-WithCode -ExitCode [ExitCode]::Success -Message "Security scan completed: no issues found"

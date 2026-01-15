@@ -201,7 +201,7 @@ function global:Test-CachedCommand {
                                     foreach ($userGemBase in $userGemPaths) {
                                         if (Test-Path -LiteralPath $userGemBase -PathType Container) {
                                             $versionDirs = Get-ChildItem -LiteralPath $userGemBase -Directory -ErrorAction SilentlyContinue | 
-                                                Select-Object -First 5
+                                            Select-Object -First 5
                                             foreach ($versionDir in $versionDirs) {
                                                 $userGemBin = Join-Path $versionDir.FullName 'bin'
                                                 if (Test-Path -LiteralPath $userGemBin -PathType Container) {

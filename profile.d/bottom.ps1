@@ -9,10 +9,11 @@
 # Dependencies: bootstrap, env
 
 $bottomCmd = $null
-if (Test-CachedCommand btm) {
+# Defensive check: ensure Test-CachedCommand is available (bootstrap must load first)
+if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand btm)) {
     $bottomCmd = 'btm'
 }
-elseif (Test-CachedCommand bottom) {
+elseif ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand bottom)) {
     $bottomCmd = 'bottom'
 }
 

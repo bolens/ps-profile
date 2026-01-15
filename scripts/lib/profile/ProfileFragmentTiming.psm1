@@ -56,9 +56,23 @@ function Measure-FragmentLoadTime {
         & $Action
         return
     }
+    
+    # Level 1: basic debug without timing
+    if ($debugLevel -eq 1) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            Write-Verbose "[fragment-timing.measure] Loading fragment: $FragmentName"
+        }
+        & $Action
+        return
+    }
 
     # Level 2+: measure and track execution time
     if ($debugLevel -ge 2) {
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[fragment-timing.measure] Measuring load time for fragment: $FragmentName"
+        }
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
         try {
             & $Action
@@ -75,9 +89,14 @@ function Measure-FragmentLoadTime {
                 $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
             }
             $global:PSProfileFragmentTimes.Add($timing)
+            
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[fragment-timing.measure] Fragment '$FragmentName' loaded in $([math]::Round($timing.Duration, 2))ms"
+            }
 
             # Level 3: display timing information immediately
-            if ($debugLevel -ge 3) {
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
                 # Use locale-aware number formatting if available
                 $durationStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                     Format-LocaleNumber $timing.Duration -Format 'N0'
@@ -85,13 +104,9 @@ function Measure-FragmentLoadTime {
                 else {
                     $timing.Duration.ToString("N0")
                 }
-                Write-Host "Fragment '$FragmentName' loaded in ${durationStr}ms" -ForegroundColor Cyan
+                Write-Host "  [fragment-timing.measure] Fragment '$FragmentName' loaded in ${durationStr}ms" -ForegroundColor DarkGray
             }
         }
-    }
-    else {
-        # Level 1: basic debug without timing
-        & $Action
     }
 }
 

@@ -10,9 +10,42 @@ scripts/lib/FragmentLoading.psm1
     resolution and tier-based batch loading.
 
 .NOTES
-    Module Version: 1.0.0
-    PowerShell Version: 3.0+
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum and class support)
+    
+    This module now uses classes for type-safe return values.
 #>
+
+# Fragment dependency test result class
+class FragmentDependencyTestResult {
+    [bool]$Valid
+    [string[]]$MissingDependencies
+    [string[]]$CircularDependencies
+
+    FragmentDependencyTestResult() {
+        $this.Valid = $false
+        $this.MissingDependencies = @()
+        $this.CircularDependencies = @()
+    }
+
+    [bool]HasIssues() {
+        return $this.MissingDependencies.Count -gt 0 -or $this.CircularDependencies.Count -gt 0
+    }
+
+    [string]ToString() {
+        if ($this.Valid) {
+            return "All dependencies valid"
+        }
+        $issues = @()
+        if ($this.MissingDependencies.Count -gt 0) {
+            $issues += "Missing: $($this.MissingDependencies -join ', ')"
+        }
+        if ($this.CircularDependencies.Count -gt 0) {
+            $issues += "Circular: $($this.CircularDependencies -join ', ')"
+        }
+        return $issues -join '; '
+    }
+}
 
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
@@ -232,8 +265,21 @@ function Invoke-ParallelDependencyParsing {
             try {
                 $powershell = [PowerShell]::Create()
                 if (-not $powershell) {
-                    if ($env:PS_PROFILE_DEBUG) {
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Failed to create PowerShell instance for: ${filePath}" -ForegroundColor Red
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                                    [System.InvalidOperationException]::new("Failed to create PowerShell instance"),
+                                    'FragmentLoading.PowerShellCreateFailed',
+                                    [System.Management.Automation.ErrorCategory]::InvalidOperation,
+                                    $filePath
+                                )) -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                FilePath = $filePath
+                            }
+                        }
+                        else {
+                            Write-Error "[Invoke-ParallelDependencyParsing] Failed to create PowerShell instance for: ${filePath}"
+                        }
                     }
                     continue
                 }
@@ -244,9 +290,23 @@ function Invoke-ParallelDependencyParsing {
                     $null = $powershell.AddScript($scriptBlock)
                 }
                 catch {
-                    if ($env:PS_PROFILE_DEBUG) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                         $typeName = $_.Exception.GetType().FullName
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Error adding script for ${filePath}: $($_.Exception.Message) | Type: $typeName" -ForegroundColor Red
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                FilePath  = $filePath
+                                Operation = 'AddScript'
+                            }
+                        }
+                        else {
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding script for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        $typeName = $_.Exception.GetType().FullName
+                        Write-Host "  [fragment-loading.parallel-parsing] AddScript error details - FilePath: $filePath, Exception: $typeName, Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                     }
                     $powershell.Dispose()
                     continue
@@ -256,9 +316,23 @@ function Invoke-ParallelDependencyParsing {
                     $null = $powershell.AddArgument($filePath)
                 }
                 catch {
-                    if ($env:PS_PROFILE_DEBUG) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                         $typeName = $_.Exception.GetType().FullName
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Error adding argument for ${filePath}: $($_.Exception.Message) | Type: $typeName" -ForegroundColor Red
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                FilePath  = $filePath
+                                Operation = 'AddArgument'
+                            }
+                        }
+                        else {
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding argument for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        $typeName = $_.Exception.GetType().FullName
+                        Write-Host "  [fragment-loading.parallel-parsing] AddArgument error details - FilePath: $filePath, Exception: $typeName, Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                     }
                     $powershell.Dispose()
                     continue
@@ -267,17 +341,44 @@ function Invoke-ParallelDependencyParsing {
                 try {
                     $handle = $powershell.BeginInvoke()
                     if (-not $handle) {
-                        if ($env:PS_PROFILE_DEBUG) {
-                            Write-Host "    [Invoke-ParallelDependencyParsing] BeginInvoke returned null for: ${filePath}" -ForegroundColor Red
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                                        [System.InvalidOperationException]::new("BeginInvoke returned null"),
+                                        'FragmentLoading.BeginInvokeNull',
+                                        [System.Management.Automation.ErrorCategory]::InvalidOperation,
+                                        $filePath
+                                    )) -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                    FilePath = $filePath
+                                }
+                            }
+                            else {
+                                Write-Error "[Invoke-ParallelDependencyParsing] BeginInvoke returned null for: ${filePath}"
+                            }
                         }
                         $powershell.Dispose()
                         continue
                     }
                 }
                 catch {
-                    if ($env:PS_PROFILE_DEBUG) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                         $typeName = $_.Exception.GetType().FullName
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Error in BeginInvoke for ${filePath}`: $($_.Exception.Message) | Type: $typeName | Stack: $($_.ScriptStackTrace)" -ForegroundColor Red
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                FilePath  = $filePath
+                                Operation = 'BeginInvoke'
+                            }
+                        }
+                        else {
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error in BeginInvoke for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        $typeName = $_.Exception.GetType().FullName
+                        Write-Verbose "[fragment-loading.parallel-parsing] BeginInvoke error details - FilePath: $filePath, Exception: $typeName, Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
                     }
                     $powershell.Dispose()
                     continue
@@ -292,17 +393,45 @@ function Invoke-ParallelDependencyParsing {
                         })
                 }
                 catch {
-                    if ($env:PS_PROFILE_DEBUG) {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                         $typeName = $_.Exception.GetType().FullName
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Error adding to runspaces list: $($_.Exception.Message) | Type: $typeName" -ForegroundColor Red
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                FilePath  = $filePath
+                                Operation = 'AddToRunspacesList'
+                            }
+                        }
+                        else {
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding to runspaces list: $($_.Exception.Message) | Type: $typeName"
+                        }
+                    }
+                    # Level 3: Log detailed error information
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        $typeName = $_.Exception.GetType().FullName
+                        Write-Host "  [fragment-loading.parallel-parsing] AddToRunspacesList error details - FilePath: $filePath, Exception: $typeName, Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                     }
                     $powershell.Dispose()
                 }
             }
             catch {
-                if ($env:PS_PROFILE_DEBUG) {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                     $typeName = $_.Exception.GetType().FullName
-                    Write-Host "    [Invoke-ParallelDependencyParsing] Unexpected error setting up runspace for ${filePath}`: $($_.Exception.Message) | Type: $typeName | Stack: $($_.ScriptStackTrace)" -ForegroundColor Red
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                            FilePath  = $filePath
+                            Operation = 'SetupRunspace'
+                        }
+                    }
+                    else {
+                        Write-Error "[Invoke-ParallelDependencyParsing] Unexpected error setting up runspace for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    $typeName = $_.Exception.GetType().FullName
+                    Write-Verbose "[fragment-loading.parallel-parsing] SetupRunspace error details - FilePath: $filePath, Exception: $typeName, Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
                 }
             }
         }
@@ -331,8 +460,43 @@ function Invoke-ParallelDependencyParsing {
         }
 
         if (-not $allCompleted) {
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Host "    [Invoke-ParallelDependencyParsing] Warning: Not all dependency parsing tasks completed within timeout" -ForegroundColor Yellow
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Not all dependency parsing tasks completed within timeout" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                            TotalTasks     = $runspaces.Count
+                            CompletedTasks = $completedCount
+                            TimeoutMs      = $timeoutMs
+                        }
+                    }
+                    else {
+                        Write-Warning "[Invoke-ParallelDependencyParsing] Not all dependency parsing tasks completed within timeout"
+                    }
+                }
+                else {
+                    # Always log warnings even if debug is off
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Not all dependency parsing tasks completed within timeout" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                            # Technical context
+                            TotalTasks     = $runspaces.Count
+                            CompletedTasks = $completedCount
+                            TimeoutMs      = $timeoutMs
+                            ElapsedMs      = $elapsedMs
+                            # Operation context
+                            PollIntervalMs = $pollIntervalMs
+                            # Invocation context
+                            FunctionName   = 'Invoke-ParallelDependencyParsing'
+                        } -Code 'Timeout'
+                    }
+                    else {
+                        Write-Warning "[Invoke-ParallelDependencyParsing] Not all dependency parsing tasks completed within timeout"
+                    }
+                }
+                # Level 3: Log detailed timeout information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [fragment-loading.parallel-parsing] Timeout details - Total: $($runspaces.Count), Completed: $completedCount, Timeout: ${timeoutMs}ms" -ForegroundColor DarkGray
+                }
             }
         }
 
@@ -345,8 +509,23 @@ function Invoke-ParallelDependencyParsing {
                         
                         # Check for errors in the result
                         if ($result -and $result.Error) {
-                            if ($env:PS_PROFILE_DEBUG) {
-                                Write-Host "    [Invoke-ParallelDependencyParsing] Scriptblock error for $($rs.FilePath): $($result.Error)" -ForegroundColor Yellow
+                            $debugLevel = 0
+                            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                                if ($debugLevel -ge 1) {
+                                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                        Write-StructuredWarning -Message "Scriptblock error for $($rs.FilePath): $($result.Error)" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                            FilePath = $rs.FilePath
+                                            Error    = $result.Error
+                                        }
+                                    }
+                                    else {
+                                        Write-Warning "[Invoke-ParallelDependencyParsing] Scriptblock error for $($rs.FilePath): $($result.Error)"
+                                    }
+                                }
+                                # Level 3: Log detailed scriptblock error information
+                                if ($debugLevel -ge 3) {
+                                    Write-Verbose "[fragment-loading.parallel-parsing] Scriptblock error details - FilePath: $($rs.FilePath), Error: $($result.Error)"
+                                }
                             }
                         }
                         
@@ -354,11 +533,44 @@ function Invoke-ParallelDependencyParsing {
                         if ($rs.PowerShell.HadErrors) {
                             $errors = $rs.PowerShell.Streams.Error
                             foreach ($error in $errors) {
-                                if ($env:PS_PROFILE_DEBUG) {
-                                    $errorType = $error.Exception.GetType().FullName
-                                    Write-Host "    [Invoke-ParallelDependencyParsing] PowerShell error for $($rs.FilePath): $($error.Exception.Message) | Type: $errorType | Category: $($error.CategoryInfo.Category)" -ForegroundColor Red
-                                    if ($error.ScriptStackTrace) {
-                                        Write-Host "      Stack: $($error.ScriptStackTrace)" -ForegroundColor Red
+                                $debugLevel = 0
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                                    if ($debugLevel -ge 1) {
+                                        $errorType = $error.Exception.GetType().FullName
+                                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                            Write-StructuredError -ErrorRecord $error -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                                FilePath = $rs.FilePath
+                                                Category = $error.CategoryInfo.Category
+                                            }
+                                        }
+                                        else {
+                                            Write-Error "[Invoke-ParallelDependencyParsing] PowerShell error for $($rs.FilePath): $($error.Exception.Message) | Type: $errorType | Category: $($error.CategoryInfo.Category)"
+                                        }
+                                    }
+                                    else {
+                                        # Always log critical errors even if debug is off
+                                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                            Write-StructuredError -ErrorRecord $error -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                                # Technical context
+                                                FilePath     = $rs.FilePath
+                                                # Error context
+                                                Category     = $error.CategoryInfo.Category
+                                                ErrorType    = $error.Exception.GetType().FullName
+                                                # Invocation context
+                                                FunctionName = 'Invoke-ParallelDependencyParsing'
+                                            }
+                                        }
+                                        else {
+                                            Write-Error "[Invoke-ParallelDependencyParsing] PowerShell error for $($rs.FilePath): $($error.Exception.Message) | Type: $errorType | Category: $($error.CategoryInfo.Category)"
+                                        }
+                                    }
+                                    # Level 3: Log detailed PowerShell error information
+                                    if ($debugLevel -ge 3) {
+                                        $errorType = $error.Exception.GetType().FullName
+                                        Write-Host "  [fragment-loading.parallel-parsing] PowerShell error details - FilePath: $($rs.FilePath), Exception: $errorType, Message: $($error.Exception.Message), Category: $($error.CategoryInfo.Category)" -ForegroundColor DarkGray
+                                        if ($error.ScriptStackTrace) {
+                                            Write-Host "  [fragment-loading.parallel-parsing] Stack trace: $($error.ScriptStackTrace)" -ForegroundColor DarkGray
+                                        }
                                     }
                                 }
                             }
@@ -380,54 +592,195 @@ function Invoke-ParallelDependencyParsing {
                                 $results.Add($resultHashtable)
                             }
                             catch {
-                                if ($env:PS_PROFILE_DEBUG) {
+                                $debugLevel = 0
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                                     $typeName = $_.Exception.GetType().FullName
                                     $resultType = if ($result) { $result.GetType().FullName } else { 'null' }
-                                    Write-Host "    [Invoke-ParallelDependencyParsing] Error adding result to list: $($_.Exception.Message) | Type: $typeName | Result type: $resultType" -ForegroundColor Red
+                                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                        Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                            FilePath   = $rs.FilePath
+                                            Operation  = 'AddResultToList'
+                                            ResultType = $resultType
+                                        }
+                                    }
+                                    else {
+                                        Write-Error "[Invoke-ParallelDependencyParsing] Error adding result to list: $($_.Exception.Message) | Type: $typeName | Result type: $resultType"
+                                    }
+                                }
+                                # Level 3: Log detailed error information
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                                    $typeName = $_.Exception.GetType().FullName
+                                    $resultType = if ($result) { $result.GetType().FullName } else { 'null' }
+                                    Write-Verbose "[fragment-loading.parallel-parsing] AddResultToList error details - FilePath: $($rs.FilePath), Exception: $typeName, ResultType: $resultType, Message: $($_.Exception.Message)"
                                 }
                             }
                         }
                         elseif ($result) {
-                            if ($env:PS_PROFILE_DEBUG) {
-                                Write-Host "    [Invoke-ParallelDependencyParsing] Invalid result for $($rs.FilePath): FragmentName is null or empty" -ForegroundColor Yellow
+                            $debugLevel = 0
+                            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                                if ($debugLevel -ge 1) {
+                                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                        Write-StructuredWarning -Message "Invalid result for $($rs.FilePath): FragmentName is null or empty" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                            FilePath = $rs.FilePath
+                                        }
+                                    }
+                                    else {
+                                        Write-Warning "[Invoke-ParallelDependencyParsing] Invalid result for $($rs.FilePath): FragmentName is null or empty"
+                                    }
+                                }
+                                else {
+                                    # Always log warnings even if debug is off
+                                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                        Write-StructuredWarning -Message "Invalid result from dependency parsing" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                            # Technical context
+                                            FilePath        = $rs.FilePath
+                                            ResultType      = if ($result) { $result.GetType().FullName } else { 'null' }
+                                            HasDependencies = if ($result -and $result.Dependencies) { $true } else { $false }
+                                            # Invocation context
+                                            FunctionName    = 'Invoke-ParallelDependencyParsing'
+                                        } -Code 'InvalidResult'
+                                    }
+                                    else {
+                                        Write-Warning "[Invoke-ParallelDependencyParsing] Invalid result for $($rs.FilePath): FragmentName is null or empty"
+                                    }
+                                }
+                                # Level 3: Log detailed invalid result information
+                                if ($debugLevel -ge 3) {
+                                    Write-Verbose "[fragment-loading.parallel-parsing] Invalid result details - FilePath: $($rs.FilePath), Result: $($result | ConvertTo-Json -Compress)"
+                                }
                             }
                             $results.Add(@{ FragmentName = $null; Dependencies = ''; Error = 'Invalid result' })
                         }
                     }
                     catch {
-                        if ($env:PS_PROFILE_DEBUG) {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                             $typeName = $_.Exception.GetType().FullName
-                            Write-Host "    [Invoke-ParallelDependencyParsing] Error in EndInvoke for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName | Stack: $($_.ScriptStackTrace)" -ForegroundColor Red
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                    FilePath  = $rs.FilePath
+                                    Operation = 'EndInvoke'
+                                }
+                            }
+                            else {
+                                Write-Error "[Invoke-ParallelDependencyParsing] Error in EndInvoke for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName"
+                            }
+                        }
+                        # Level 3: Log detailed error information
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            $typeName = $_.Exception.GetType().FullName
+                            Write-Verbose "[fragment-loading.parallel-parsing] EndInvoke error details - FilePath: $($rs.FilePath), Exception: $typeName, Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
                         }
                         $results.Add(@{ FragmentName = $null; Dependencies = ''; Error = $_.Exception.Message })
                     }
                 }
                 else {
                     # Timeout - return empty result for this file
-                    if ($env:PS_PROFILE_DEBUG) {
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Timeout parsing: $($rs.FilePath)" -ForegroundColor Yellow
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Timeout parsing: $($rs.FilePath)" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                    FilePath  = $rs.FilePath
+                                    TimeoutMs = $timeoutMs
+                                }
+                            }
+                            else {
+                                Write-Warning "[Invoke-ParallelDependencyParsing] Timeout parsing: $($rs.FilePath)"
+                            }
+                        }
+                        else {
+                            # Always log warnings even if debug is off
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Timeout parsing dependency" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                    # Technical context
+                                    FilePath     = $rs.FilePath
+                                    TimeoutMs    = $timeoutMs
+                                    ElapsedMs    = $elapsedMs
+                                    # Invocation context
+                                    FunctionName = 'Invoke-ParallelDependencyParsing'
+                                } -Code 'Timeout'
+                            }
+                            else {
+                                Write-Warning "[Invoke-ParallelDependencyParsing] Timeout parsing: $($rs.FilePath)"
+                            }
+                        }
+                        # Level 3: Log detailed timeout information
+                        if ($debugLevel -ge 3) {
+                            Write-Host "  [fragment-loading.parallel-parsing] Timeout details - FilePath: $($rs.FilePath), Timeout: ${timeoutMs}ms" -ForegroundColor DarkGray
+                        }
                     }
                     try {
                         $results.Add(@{ FragmentName = $null; Dependencies = ''; Error = 'Timeout' })
                     }
                     catch {
-                        if ($env:PS_PROFILE_DEBUG) {
-                            Write-Host "    [Invoke-ParallelDependencyParsing] Error adding timeout result: $($_.Exception.Message)" -ForegroundColor Red
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                                Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                    FilePath  = $rs.FilePath
+                                    Operation = 'AddTimeoutResult'
+                                }
+                            }
+                            else {
+                                Write-Error "[Invoke-ParallelDependencyParsing] Error adding timeout result: $($_.Exception.Message)"
+                            }
                         }
                     }
                 }
             }
             catch {
-                if ($env:PS_PROFILE_DEBUG) {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                     $typeName = $_.Exception.GetType().FullName
-                    Write-Host "    [Invoke-ParallelDependencyParsing] Error processing runspace for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName | Stack: $($_.ScriptStackTrace)" -ForegroundColor Red
+                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                            FilePath  = $rs.FilePath
+                            Operation = 'ProcessRunspace'
+                        }
+                    }
+                    else {
+                        Write-Error "[Invoke-ParallelDependencyParsing] Error processing runspace for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    $typeName = $_.Exception.GetType().FullName
+                    Write-Verbose "[fragment-loading.parallel-parsing] ProcessRunspace error details - FilePath: $($rs.FilePath), Exception: $typeName, Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
                 }
                 try {
                     $results.Add(@{ FragmentName = $null; Dependencies = ''; Error = $_.Exception.Message })
                 }
                 catch {
-                    if ($env:PS_PROFILE_DEBUG) {
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Error adding error result: $($_.Exception.Message)" -ForegroundColor Red
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                FilePath  = $rs.FilePath
+                                Operation = 'AddErrorResult'
+                            }
+                        }
+                        else {
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding error result: $($_.Exception.Message)"
+                        }
+                    }
+                    else {
+                        # Always log critical errors even if debug is off
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                # Technical context
+                                FilePath     = $rs.FilePath
+                                # Operation context
+                                Operation    = 'AddErrorResult'
+                                # Error context
+                                ErrorType    = $_.Exception.GetType().FullName
+                                # Invocation context
+                                FunctionName = 'Invoke-ParallelDependencyParsing'
+                            }
+                        }
+                        else {
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding error result: $($_.Exception.Message)"
+                        }
                     }
                 }
             }
@@ -438,16 +791,43 @@ function Invoke-ParallelDependencyParsing {
                     }
                 }
                 catch {
-                    if ($env:PS_PROFILE_DEBUG) {
-                        Write-Host "    [Invoke-ParallelDependencyParsing] Error disposing PowerShell: $($_.Exception.Message)" -ForegroundColor Yellow
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Error disposing PowerShell: $($_.Exception.Message)" -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                                    FilePath  = $rs.FilePath
+                                    Operation = 'DisposePowerShell'
+                                }
+                            }
+                            else {
+                                Write-Warning "[Invoke-ParallelDependencyParsing] Error disposing PowerShell: $($_.Exception.Message)"
+                            }
+                        }
+                        # Level 3: Log detailed disposal error information
+                        if ($debugLevel -ge 3) {
+                            Write-Verbose "[fragment-loading.parallel-parsing] DisposePowerShell error details - FilePath: $($rs.FilePath), Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)"
+                        }
                     }
                 }
             }
         }
     }
     catch {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "    [Invoke-ParallelDependencyParsing] Error in parallel parsing: $($_.Exception.Message)" -ForegroundColor Red
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                    TotalFiles = $FilePaths.Count
+                }
+            }
+            else {
+                Write-Error "[Invoke-ParallelDependencyParsing] Error in parallel parsing: $($_.Exception.Message)"
+            }
+        }
+        # Level 3: Log detailed error information
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            Write-Host "  [fragment-loading.parallel-parsing] Parallel parsing error details - TotalFiles: $($FilePaths.Count), Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
         }
         # Fallback: return empty results
         return @()
@@ -480,17 +860,19 @@ function Invoke-ParallelDependencyParsing {
                                 }
                             }
                             catch {
-                                if ($env:PS_PROFILE_DEBUG) {
-                                    Write-Host "    [Invoke-ParallelDependencyParsing] Error processing dependency '$dep': $($_.Exception.Message)" -ForegroundColor Yellow
+                                $debugLevel = 0
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                                    Write-Verbose "[fragment-loading.parallel-parsing] Error processing dependency '$dep': $($_.Exception.Message)"
                                 }
                             }
                         }
                         $result.Dependencies = [string[]]$depSet
                     }
                     catch {
-                        if ($env:PS_PROFILE_DEBUG) {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                             $typeName = $_.Exception.GetType().FullName
-                            Write-Host "    [Invoke-ParallelDependencyParsing] Error processing dependencies for $($result.FragmentName): $($_.Exception.Message) | Type: $typeName" -ForegroundColor Yellow
+                            Write-Verbose "[fragment-loading.parallel-parsing] Error processing dependencies for $($result.FragmentName): $($_.Exception.Message) | Type: $typeName"
                         }
                         $result.Dependencies = @()
                     }
@@ -509,9 +891,23 @@ function Invoke-ParallelDependencyParsing {
             }
         }
         catch {
-            if ($env:PS_PROFILE_DEBUG) {
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                 $typeName = $_.Exception.GetType().FullName
-                Write-Host "    [Invoke-ParallelDependencyParsing] Error processing result: $($_.Exception.Message) | Type: $typeName" -ForegroundColor Red
+                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-loading.parallel-parsing' -Context @{
+                        FragmentName = if ($result) { $result.FragmentName } else { 'unknown' }
+                        Operation    = 'ProcessResult'
+                    }
+                }
+                else {
+                    Write-Error "[Invoke-ParallelDependencyParsing] Error processing result: $($_.Exception.Message) | Type: $typeName"
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                $typeName = $_.Exception.GetType().FullName
+                Write-Verbose "[fragment-loading.parallel-parsing] ProcessResult error details - FragmentName: $(if ($result) { $result.FragmentName } else { 'unknown' }), Exception: $typeName, Message: $($_.Exception.Message)"
             }
             if (-not $result.Dependencies) {
                 $result.Dependencies = @()
@@ -657,12 +1053,25 @@ function Get-FragmentDependencies {
         return $result
     }
     catch {
-        if ($env:PS_PROFILE_DEBUG) {
-            if (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
-                Write-ScriptMessage -Message "Failed to parse dependencies from '$filePath': $($_.Exception.Message)" -IsWarning
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to parse dependencies from '$filePath': $($_.Exception.Message)" -OperationName 'fragment-loading.dependencies' -Context @{
+                        FilePath = $filePath
+                        Error    = $_.Exception.Message
+                    }
+                }
+                elseif (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
+                    Write-ScriptMessage -Message "Failed to parse dependencies from '$filePath': $($_.Exception.Message)" -IsWarning
+                }
+                else {
+                    Write-Warning "Failed to parse dependencies from '$filePath': $($_.Exception.Message)"
+                }
             }
-            else {
-                Write-Warning "Failed to parse dependencies from '$filePath': $($_.Exception.Message)"
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [fragment-loading.dependencies] Parse error details - FilePath: $filePath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
             }
         }
         $result = @()
@@ -700,7 +1109,34 @@ function Get-FragmentDependencies {
 .EXAMPLE
     $result = Test-FragmentDependencies -FragmentFiles $fragments -DisabledFragments $disabled
     if (-not $result.Valid) {
-        Write-Warning "Missing dependencies: $($result.MissingDependencies -join ', ')"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Missing dependencies: $($result.MissingDependencies -join ', ')" -OperationName 'fragment-loading.test-dependencies' -Context @{
+                        MissingDependencies = $result.MissingDependencies
+                        CircularDependencies = $result.CircularDependencies
+                    }
+                }
+                else {
+                    Write-Warning "Missing dependencies: $($result.MissingDependencies -join ', ')"
+                }
+            }
+            # Level 3: Log detailed dependency validation information
+            if ($debugLevel -ge 3) {
+                Write-Host "  [fragment-loading.test-dependencies] Validation details - Missing: $($result.MissingDependencies.Count), Circular: $($result.CircularDependencies.Count), Valid: $($result.Valid)" -ForegroundColor DarkGray
+            }
+        }
+        else {
+            Write-Warning "Missing dependencies: $($result.MissingDependencies -join ', ')"
+        }
+    }
+    else {
+        # Level 2: Log successful validation
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[fragment-loading.test-dependencies] All fragment dependencies are satisfied"
+        }
     }
 #>
 function Test-FragmentDependencies {
@@ -758,7 +1194,10 @@ function Test-FragmentDependencies {
     $recursionStack = [System.Collections.Generic.HashSet[string]]::new()
 
     function Test-CircularDependency {
-        param([string]$FragmentName)
+        param(
+            [ValidateNotNullOrEmpty()]
+            [string]$FragmentName
+        )
 
         if ($recursionStack.Contains($FragmentName)) {
             # Found a cycle - recursionStack already contains the fragment name
@@ -791,11 +1230,13 @@ function Test-FragmentDependencies {
         }
     }
 
-    return @{
+    $result = [FragmentDependencyTestResult]@{
         Valid                = ($missingDependencies.Count -eq 0 -and $circularDependencies.Count -eq 0)
         MissingDependencies  = $missingDependencies.ToArray()
         CircularDependencies = $circularDependencies.ToArray()
     }
+
+    return $result
 }
 
 <#
@@ -896,7 +1337,23 @@ function Get-FragmentLoadOrder {
             # Skip null or invalid results
             if ($null -eq $result -or $null -eq $result.FragmentName -or [string]::IsNullOrWhiteSpace($result.FragmentName)) {
                 if ($env:PS_PROFILE_DEBUG) {
-                    Write-Host "  [Get-FragmentLoadOrder] Skipping invalid result: $($result | ConvertTo-Json -Compress)" -ForegroundColor DarkYellow
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Skipping invalid result in load order calculation" -OperationName 'fragment-loading.load-order' -Context @{
+                                    Result = $result
+                                }
+                            }
+                            else {
+                                Write-Warning "[Get-FragmentLoadOrder] Skipping invalid result: $($result | ConvertTo-Json -Compress)"
+                            }
+                        }
+                        # Level 3: Log detailed invalid result information
+                        if ($debugLevel -ge 3) {
+                            Write-Verbose "[fragment-loading.load-order] Invalid result details - Result: $($result | ConvertTo-Json -Compress)"
+                        }
+                    }
                 }
                 continue
             }
@@ -923,13 +1380,25 @@ function Get-FragmentLoadOrder {
         }
         $graphTime = (Get-Date) - $graphStart
         if ($env:PS_PROFILE_DEBUG -and $graphTime.TotalMilliseconds -gt 50) {
-            Write-Host "  [Get-FragmentLoadOrder] Dependency graph built in $([Math]::Round($graphTime.TotalMilliseconds))ms" -ForegroundColor DarkGray
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[fragment-loading.load-order] Dependency graph built in $([Math]::Round($graphTime.TotalMilliseconds))ms"
+                }
+                # Level 3: Log detailed graph building information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[fragment-loading.load-order] Graph building details - Duration: $([Math]::Round($graphTime.TotalMilliseconds))ms, Dependencies: $($dependencies.Count), Dependents: $($dependents.Count)"
+                }
+            }
         }
     }
     else {
         # Sequential parsing (fallback)
         if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "  [Get-FragmentLoadOrder] Parsing $($fragmentsToProcess.Count) fragment dependencies sequentially..." -ForegroundColor DarkGray
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[fragment-loading.load-order] Parsing $($fragmentsToProcess.Count) fragment dependencies sequentially..."
+            }
         }
         $parseStart = Get-Date
         foreach ($file in $fragmentsToProcess) {
@@ -955,7 +1424,16 @@ function Get-FragmentLoadOrder {
         }
         $parseTime = (Get-Date) - $parseStart
         if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "  [Get-FragmentLoadOrder] Sequential parsing completed in $([Math]::Round($parseTime.TotalMilliseconds))ms" -ForegroundColor DarkGray
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[fragment-loading.load-order] Sequential parsing completed in $([Math]::Round($parseTime.TotalMilliseconds))ms"
+                }
+                # Level 3: Log detailed sequential parsing information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[fragment-loading.load-order] Sequential parsing details - Fragments: $($fragmentsToProcess.Count), Duration: $([Math]::Round($parseTime.TotalMilliseconds))ms"
+                }
+            }
         }
     }
 
@@ -1156,8 +1634,29 @@ function Get-FragmentTier {
     }
     catch {
         # On error, default to optional
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Warning "Failed to parse tier from fragment '$filePath': $($_.Exception.Message)"
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 1) {
+                $errorMessage = "Failed to parse tier from fragment: $filePath"
+                $errorDetails = "Error: $($_.Exception.Message) (Type: $($_.Exception.GetType().Name))"
+                if ($_.InvocationInfo.ScriptLineNumber -gt 0) {
+                    $errorDetails += " at line $($_.InvocationInfo.ScriptLineNumber)"
+                }
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "$errorMessage - $errorDetails" -OperationName 'fragment-loading.get-tier' -Context @{
+                        FilePath   = $filePath
+                        Error      = $_.Exception.Message
+                        LineNumber = $_.InvocationInfo.ScriptLineNumber
+                    }
+                }
+                else {
+                    Write-Warning "[fragment-loading.get-tier] $errorMessage - $errorDetails"
+                }
+            }
+            # Level 3: Log detailed error information
+            if ($debugLevel -ge 3) {
+                Write-Verbose "[fragment-loading.get-tier] Tier parse error details - FilePath: $filePath, Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), Line: $($_.InvocationInfo.ScriptLineNumber)"
+            }
         }
         return 'optional'
     }
@@ -1344,7 +1843,23 @@ function Get-FragmentDependencyLevels {
             # Skip null or invalid results
             if ($null -eq $result -or $null -eq $result.FragmentName -or [string]::IsNullOrWhiteSpace($result.FragmentName)) {
                 if ($env:PS_PROFILE_DEBUG) {
-                    Write-Host "  [Get-FragmentDependencyLevels] Skipping invalid result: $($result | ConvertTo-Json -Compress)" -ForegroundColor DarkYellow
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                        if ($debugLevel -ge 1) {
+                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                Write-StructuredWarning -Message "Skipping invalid result in dependency levels calculation" -OperationName 'fragment-loading.dependency-levels' -Context @{
+                                    Result = $result
+                                }
+                            }
+                            else {
+                                Write-Warning "[Get-FragmentDependencyLevels] Skipping invalid result: $($result | ConvertTo-Json -Compress)"
+                            }
+                        }
+                        # Level 3: Log detailed invalid result information
+                        if ($debugLevel -ge 3) {
+                            Write-Verbose "[fragment-loading.dependency-levels] Invalid result details - Result: $($result | ConvertTo-Json -Compress)"
+                        }
+                    }
                 }
                 continue
             }
@@ -1371,13 +1886,25 @@ function Get-FragmentDependencyLevels {
         }
         $graphTime = (Get-Date) - $graphStart
         if ($env:PS_PROFILE_DEBUG -and $graphTime.TotalMilliseconds -gt 50) {
-            Write-Host "  [Get-FragmentDependencyLevels] Dependency graph built in $([Math]::Round($graphTime.TotalMilliseconds))ms" -ForegroundColor DarkGray
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[fragment-loading.dependency-levels] Dependency graph built in $([Math]::Round($graphTime.TotalMilliseconds))ms"
+                }
+                # Level 3: Log detailed graph building information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[fragment-loading.dependency-levels] Graph building details - Duration: $([Math]::Round($graphTime.TotalMilliseconds))ms, Dependencies: $($dependencies.Count), Dependents: $($dependents.Count)"
+                }
+            }
         }
     }
     else {
         # Sequential parsing (fallback)
         if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "  [Get-FragmentDependencyLevels] Parsing $($fragmentsToProcess.Count) fragment dependencies sequentially..." -ForegroundColor DarkGray
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[fragment-loading.dependency-levels] Parsing $($fragmentsToProcess.Count) fragment dependencies sequentially..."
+            }
         }
         $parseStart = Get-Date
         foreach ($file in $fragmentsToProcess) {
@@ -1403,13 +1930,25 @@ function Get-FragmentDependencyLevels {
         }
         $parseTime = (Get-Date) - $parseStart
         if ($env:PS_PROFILE_DEBUG -and -not $env:PS_PROFILE_DEBUG_SUPPRESS_DEPENDENCY_OUTPUT) {
-            Write-Host "  [Get-FragmentDependencyLevels] Sequential parsing completed in $([Math]::Round($parseTime.TotalMilliseconds))ms" -ForegroundColor DarkGray
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[fragment-loading.dependency-levels] Sequential parsing completed in $([Math]::Round($parseTime.TotalMilliseconds))ms"
+                }
+                # Level 3: Log detailed sequential parsing information
+                if ($debugLevel -ge 3) {
+                    Write-Verbose "[fragment-loading.dependency-levels] Sequential parsing details - Fragments: $($fragmentsToProcess.Count), Duration: $([Math]::Round($parseTime.TotalMilliseconds))ms"
+                }
+            }
         }
     }
 
     # Group by dependency level using BFS
     if ($env:PS_PROFILE_DEBUG -and -not $env:PS_PROFILE_DEBUG_SUPPRESS_DEPENDENCY_OUTPUT) {
-        Write-Host "  [Get-FragmentDependencyLevels] Grouping fragments by dependency level (BFS)..." -ForegroundColor DarkGray
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[fragment-loading.dependency-levels] Grouping fragments by dependency level (BFS)..."
+        }
     }
     $bfsStart = Get-Date
     $levels = @{}
@@ -1493,7 +2032,17 @@ function Get-FragmentDependencyLevels {
     
     $bfsTime = (Get-Date) - $bfsStart
     if ($env:PS_PROFILE_DEBUG -and -not $env:PS_PROFILE_DEBUG_SUPPRESS_DEPENDENCY_OUTPUT) {
-        Write-Host "  [Get-FragmentDependencyLevels] BFS grouping completed in $([Math]::Round($bfsTime.TotalMilliseconds))ms ($($levels.Keys.Count) levels)" -ForegroundColor DarkGray
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[fragment-loading.dependency-levels] BFS grouping completed in $([Math]::Round($bfsTime.TotalMilliseconds))ms ($($levels.Keys.Count) levels)"
+            }
+            # Level 3: Log detailed BFS grouping information
+            if ($debugLevel -ge 3) {
+                $totalFragments = ($levels.Values | Measure-Object -Property Count -Sum).Sum
+                Write-Verbose "[fragment-loading.dependency-levels] BFS grouping details - Duration: $([Math]::Round($bfsTime.TotalMilliseconds))ms, Levels: $($levels.Keys.Count), Total fragments: $totalFragments"
+            }
+        }
     }
 
     return $levels
@@ -1507,4 +2056,3 @@ Export-ModuleMember -Function @(
     'Get-FragmentTiers',
     'Get-FragmentDependencyLevels'
 )
-

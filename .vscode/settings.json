@@ -71,5 +71,20 @@
   // Workspace settings
   "workspace.trusted": true,
   "kiroAgent.configureMCP": "Disabled",
-  "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "dbcode.connections": [
+    {
+      "connectionId": "D7NTCf1t9pqD_Fm1MlsUo",
+      "name": "fragment-cache",
+      "driver": "sqlite",
+      "connectionType": "socket",
+      "socket": "PowerShell/.cache/fragment-cache.db",
+      "readOnly": false,
+      "postConnectionSqlType": "inline",
+      "driverOptions": {
+        "extensions": []
+      },
+      "idleTimeout": 0
+    }
+  ]
 }

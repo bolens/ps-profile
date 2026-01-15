@@ -103,17 +103,30 @@ try {
             return $null
         }
 
-        try {
-            $args = @()
-            if (-not [string]::IsNullOrWhiteSpace($ConnectionString)) {
-                $args += $ConnectionString
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'database-clients.mongodb-compass.start' -Context @{
+                has_connection_string = (-not [string]::IsNullOrWhiteSpace($ConnectionString))
+            } -ScriptBlock {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($ConnectionString)) {
+                    $args += $ConnectionString
+                }
+                Start-Process -FilePath 'mongodb-compass' -ArgumentList $args -PassThru -NoNewWindow
             }
-            $process = Start-Process -FilePath 'mongodb-compass' -ArgumentList $args -PassThru -NoNewWindow
-            return $process
         }
-        catch {
-            Write-Error "Failed to start mongodb-compass: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($ConnectionString)) {
+                    $args += $ConnectionString
+                }
+                $process = Start-Process -FilePath 'mongodb-compass' -ArgumentList $args -PassThru -NoNewWindow
+                return $process
+            }
+            catch {
+                Write-Error "Failed to start mongodb-compass: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -178,21 +191,37 @@ try {
             return $null
         }
 
-        try {
-            $args = @()
-            if (-not [string]::IsNullOrWhiteSpace($Workspace)) {
-                if (-not (Test-Path -LiteralPath $Workspace)) {
-                    Write-Error "Workspace file not found: $Workspace"
-                    return $null
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'database-clients.sql-workbench.start' -Context @{
+                workspace = $Workspace
+            } -ScriptBlock {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($Workspace)) {
+                    if (-not (Test-Path -LiteralPath $Workspace)) {
+                        throw "Workspace file not found: $Workspace"
+                    }
+                    $args += $Workspace
                 }
-                $args += $Workspace
+                Start-Process -FilePath 'sql-workbench' -ArgumentList $args -PassThru -NoNewWindow
             }
-            $process = Start-Process -FilePath 'sql-workbench' -ArgumentList $args -PassThru -NoNewWindow
-            return $process
         }
-        catch {
-            Write-Error "Failed to start sql-workbench: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($Workspace)) {
+                    if (-not (Test-Path -LiteralPath $Workspace)) {
+                        Write-Error "Workspace file not found: $Workspace"
+                        return $null
+                    }
+                    $args += $Workspace
+                }
+                $process = Start-Process -FilePath 'sql-workbench' -ArgumentList $args -PassThru -NoNewWindow
+                return $process
+            }
+            catch {
+                Write-Error "Failed to start sql-workbench: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -257,21 +286,37 @@ try {
             return $null
         }
 
-        try {
-            $args = @()
-            if (-not [string]::IsNullOrWhiteSpace($Workspace)) {
-                if (-not (Test-Path -LiteralPath $Workspace -PathType Container)) {
-                    Write-Error "Workspace directory not found: $Workspace"
-                    return $null
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'database-clients.dbeaver.start' -Context @{
+                workspace = $Workspace
+            } -ScriptBlock {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($Workspace)) {
+                    if (-not (Test-Path -LiteralPath $Workspace -PathType Container)) {
+                        throw "Workspace directory not found: $Workspace"
+                    }
+                    $args += @('-data', $Workspace)
                 }
-                $args += @('-data', $Workspace)
+                Start-Process -FilePath 'dbeaver' -ArgumentList $args -PassThru -NoNewWindow
             }
-            $process = Start-Process -FilePath 'dbeaver' -ArgumentList $args -PassThru -NoNewWindow
-            return $process
         }
-        catch {
-            Write-Error "Failed to start dbeaver: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($Workspace)) {
+                    if (-not (Test-Path -LiteralPath $Workspace -PathType Container)) {
+                        Write-Error "Workspace directory not found: $Workspace"
+                        return $null
+                    }
+                    $args += @('-data', $Workspace)
+                }
+                $process = Start-Process -FilePath 'dbeaver' -ArgumentList $args -PassThru -NoNewWindow
+                return $process
+            }
+            catch {
+                Write-Error "Failed to start dbeaver: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -336,17 +381,30 @@ try {
             return $null
         }
 
-        try {
-            $args = @()
-            if (-not [string]::IsNullOrWhiteSpace($Connection)) {
-                $args += $Connection
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'database-clients.tableplus.start' -Context @{
+                connection = $Connection
+            } -ScriptBlock {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($Connection)) {
+                    $args += $Connection
+                }
+                Start-Process -FilePath 'tableplus' -ArgumentList $args -PassThru -NoNewWindow
             }
-            $process = Start-Process -FilePath 'tableplus' -ArgumentList $args -PassThru -NoNewWindow
-            return $process
         }
-        catch {
-            Write-Error "Failed to start tableplus: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $args = @()
+                if (-not [string]::IsNullOrWhiteSpace($Connection)) {
+                    $args += $Connection
+                }
+                $process = Start-Process -FilePath 'tableplus' -ArgumentList $args -PassThru -NoNewWindow
+                return $process
+            }
+            catch {
+                Write-Error "Failed to start tableplus: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -416,13 +474,22 @@ try {
             return $null
         }
 
-        try {
-            $result = & hasura-cli $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'database-clients.hasura.invoke' -Context @{
+                arguments = $Arguments
+            } -ScriptBlock {
+                & hasura-cli $Arguments 2>&1
+            }
         }
-        catch {
-            Write-Error "Failed to run hasura-cli: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & hasura-cli $Arguments 2>&1
+                return $result
+            }
+            catch {
+                Write-Error "Failed to run hasura-cli: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 
@@ -500,14 +567,24 @@ try {
             return $null
         }
 
-        try {
-            $result = & $supabaseCmd $Arguments 2>&1
-            return $result
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName 'database-clients.supabase.invoke' -Context @{
+                arguments = $Arguments
+                command   = $supabaseCmd
+            } -ScriptBlock {
+                & $supabaseCmd $Arguments 2>&1
+            }
         }
-        catch {
-            $cmdName = $supabaseCmd
-            Write-Error "Failed to run ${cmdName}: $($_.Exception.Message)"
-            return $null
+        else {
+            try {
+                $result = & $supabaseCmd $Arguments 2>&1
+                return $result
+            }
+            catch {
+                $cmdName = $supabaseCmd
+                Write-Error "Failed to run ${cmdName}: $($_.Exception.Message)"
+                return $null
+            }
         }
     }
 

@@ -7,7 +7,19 @@ scripts/utils/code-quality/modules/TestReportFormats.psm1
 .DESCRIPTION
     Provides functions for generating test reports in various formats including
     HTML, Markdown, and JSON.
+
+.NOTES
+    Module Version: 2.0.0
+    PowerShell Version: 5.0+ (for enum support)
+    
+    This module now uses enums for type-safe configuration values.
 #>
+
+# Import CommonEnums for TestReportFormat enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 # Import Logging module for Write-ScriptMessage
 $loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
@@ -54,8 +66,7 @@ function New-CustomTestReport {
 
         $Analysis,
 
-        [ValidateSet('JSON', 'HTML', 'Markdown')]
-        [string]$Format = 'JSON',
+        [TestReportFormat]$Format = [TestReportFormat]::JSON,
 
         [string]$OutputPath,
 
@@ -98,7 +109,10 @@ function New-CustomTestReport {
         }
     }
 
-    $content = switch ($Format) {
+    # Convert enum to string
+    $formatString = $Format.ToString()
+    
+    $content = switch ($formatString) {
         'JSON' {
             $reportData | ConvertTo-Json -Depth 10
         }

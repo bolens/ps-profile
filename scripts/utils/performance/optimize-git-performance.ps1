@@ -7,13 +7,30 @@
     This fixes slow prompt performance while keeping all git features enabled.
 #>
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 $starshipConfig = "$env:USERPROFILE\.config\starship.toml"
+
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[git.optimize] Starting git performance optimization"
+    Write-Verbose "[git.optimize] Starship config path: $starshipConfig"
+}
 
 Write-Host "`n🔧 Optimizing Git Performance for Prompts" -ForegroundColor Cyan
 Write-Host "==========================================`n" -ForegroundColor Cyan
 
 # 1. Configure git to use faster operations
 Write-Host "1. Configuring git for faster operations..." -ForegroundColor Yellow
+
+# Level 1: Git config start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[git.optimize] Configuring git settings"
+}
 
 # Set git config to use faster operations
 $gitConfigs = @{
@@ -30,7 +47,15 @@ foreach ($key in $gitConfigs.Keys) {
         Write-Host "   ✓ Set git config: $key = $value" -ForegroundColor Green
     }
     catch {
-        Write-Host "   ⚠ Failed to set git config ${key}: $($_.Exception.Message)" -ForegroundColor Yellow
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to set git config" -OperationName 'git.optimize.config' -Context @{
+                config_key = $key
+                config_value = $value
+            } -Code 'GitConfigSetFailed'
+        }
+        else {
+            Write-Host "   ⚠ Failed to set git config ${key}: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
     }
 }
 
@@ -41,7 +66,19 @@ if (-not (Test-Path $starshipConfig)) {
     Write-Host "   Creating optimized Starship config..." -ForegroundColor Gray
     $configDir = Split-Path $starshipConfig
     if (-not (Test-Path $configDir)) {
-        New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+        try {
+            New-Item -ItemType Directory -Path $configDir -Force -ErrorAction Stop | Out-Null
+        }
+        catch {
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'git.optimize.starship.create-dir' -Context @{
+                    config_dir = $configDir
+                }
+            }
+            else {
+                Write-Host "   ⚠ Failed to create config directory: $($_.Exception.Message)" -ForegroundColor Yellow
+            }
+        }
     }
     
     # Read existing config if it exists, otherwise create new
@@ -78,12 +115,25 @@ disabled = false
 format = '[\(`$state( `$progress_current/`$progress_total)\)](`$style) '
 
 "@
-    $content | Out-File -FilePath $starshipConfig -Encoding UTF8
-    Write-Host "   ✓ Created optimized Starship config" -ForegroundColor Green
+    try {
+        $content | Out-File -FilePath $starshipConfig -Encoding UTF8 -ErrorAction Stop
+        Write-Host "   ✓ Created optimized Starship config" -ForegroundColor Green
+    }
+    catch {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'git.optimize.starship.create' -Context @{
+                config_path = $starshipConfig
+            }
+        }
+        else {
+            Write-Host "   ⚠ Failed to create Starship config: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
 }
 else {
     Write-Host "   Updating existing Starship config..." -ForegroundColor Gray
-    $content = Get-Content $starshipConfig -Raw
+    try {
+        $content = Get-Content $starshipConfig -Raw -ErrorAction Stop
     
     # Add performance optimizations to git_branch if not present
     if ($content -notmatch '\[git_branch\]') {
@@ -106,8 +156,19 @@ else {
         $content += "`n`n# Git status - optimized for performance`n[git_status]`nformat = `"[`$all_status`$ahead_behind ](`$style)`"`ndisabled = false`n"
     }
     
-    $content | Out-File -FilePath $starshipConfig -Encoding UTF8 -NoNewline
-    Write-Host "   ✓ Updated Starship config with performance optimizations" -ForegroundColor Green
+        $content | Out-File -FilePath $starshipConfig -Encoding UTF8 -NoNewline -ErrorAction Stop
+        Write-Host "   ✓ Updated Starship config with performance optimizations" -ForegroundColor Green
+    }
+    catch {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'git.optimize.starship.update' -Context @{
+                config_path = $starshipConfig
+            }
+        }
+        else {
+            Write-Host "   ⚠ Failed to update Starship config: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
 }
 
 # 3. Set environment variables for Starship performance
@@ -118,10 +179,33 @@ $envVars = @{
     'GIT_OPTIONAL_LOCKS' = '0'  # Disable optional locks for faster operations
 }
 
+$envVarErrors = [System.Collections.Generic.List[string]]::new()
 foreach ($key in $envVars.Keys) {
     $value = $envVars[$key]
-    [Environment]::SetEnvironmentVariable($key, $value, 'User')
-    Write-Host "   ✓ Set $key = $value" -ForegroundColor Green
+    try {
+        [Environment]::SetEnvironmentVariable($key, $value, 'User') -ErrorAction Stop
+        Write-Host "   ✓ Set $key = $value" -ForegroundColor Green
+    }
+    catch {
+        $envVarErrors.Add($key)
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to set environment variable" -OperationName 'git.optimize.env-var' -Context @{
+                env_var_name = $key
+                env_var_value = $value
+            } -Code 'EnvVarSetFailed'
+        }
+        else {
+            Write-Host "   ⚠ Failed to set $key: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
+}
+if ($envVarErrors.Count -gt 0) {
+    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+        Write-StructuredWarning -Message "Some environment variables failed to set" -OperationName 'git.optimize.env-var' -Context @{
+            failed_vars = $envVarErrors -join ','
+            failed_count = $envVarErrors.Count
+        } -Code 'EnvVarSetPartialFailure'
+    }
 }
 
 # 4. Create git wrapper with timeout (if needed)
@@ -189,8 +273,20 @@ $profileDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $gitWrapperPath = Join-Path $profileDir 'profile.d' 'git-fast-wrapper.ps1'
 
 if (-not (Test-Path $gitWrapperPath)) {
-    $gitWrapperScript | Out-File -FilePath $gitWrapperPath -Encoding UTF8
-    Write-Host "   ✓ Created git wrapper with timeout protection" -ForegroundColor Green
+    try {
+        $gitWrapperScript | Out-File -FilePath $gitWrapperPath -Encoding UTF8 -ErrorAction Stop
+        Write-Host "   ✓ Created git wrapper with timeout protection" -ForegroundColor Green
+    }
+    catch {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'git.optimize.wrapper.create' -Context @{
+                wrapper_path = $gitWrapperPath
+            }
+        }
+        else {
+            Write-Host "   ⚠ Failed to create git wrapper: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
 }
 else {
     Write-Host "   ℹ Git wrapper already exists" -ForegroundColor Gray

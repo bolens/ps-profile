@@ -21,27 +21,27 @@ tasks:
   test:
     desc: Run Pester Tests
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{.CLI_ARGS}}
 
   test-unit:
     desc: Run Unit Test Suite
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel {{.CLI_ARGS}}
 
   test-integration:
     desc: Run Integration Test Suite
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel {{.CLI_ARGS}}
 
   test-performance:
     desc: Run Performance Test Suite
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance -Parallel
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance -Parallel {{.CLI_ARGS}}
 
   test-coverage:
     desc: Run Pester Tests with Coverage
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{.CLI_ARGS}}
 
   benchmark:
     desc: Run Performance Benchmark
@@ -61,27 +61,27 @@ tasks:
   optimize-git-performance:
     desc: Optimize Git performance
     cmds:
-      - pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1
+      - pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1 {{.CLI_ARGS}}
 
   check-module-updates:
     desc: Check Module Updates
     cmds:
-      - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1
+      - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 {{.CLI_ARGS}}
 
   install-module-updates:
     desc: Install Module Updates
     cmds:
-      - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update
+      - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update {{.CLI_ARGS}}
 
   generate-changelog:
     desc: Generate Changelog
     cmds:
-      - pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1
+      - pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1 {{.CLI_ARGS}}
 
   generate-dashboard:
     desc: Generate metrics dashboard
     cmds:
-      - pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1
+      - pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1 {{.CLI_ARGS}}
 
   create-release:
     desc: Create Release (Dry Run)
@@ -91,12 +91,67 @@ tasks:
   generate-docs:
     desc: Generate API Documentation
     cmds:
-      - pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1
+      - pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 {{.CLI_ARGS}}
 
   spellcheck:
     desc: Run Spellcheck
     cmds:
       - pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1
+
+  db-health:
+    desc: Check health of all SQLite databases
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action health
+
+  db-statistics:
+    desc: Get statistics for all SQLite databases
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action statistics
+
+  db-optimize:
+    desc: Optimize all SQLite databases
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action optimize
+
+  db-backup:
+    desc: Backup all SQLite databases
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action backup
+
+  db-repair:
+    desc: Repair corrupted SQLite databases
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action repair
+
+  db-validate:
+    desc: Validate SQLite database implementation and configuration
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/validate-databases.ps1
+
+  db-validate-full:
+    desc: Validate SQLite databases with operation testing
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/validate-databases.ps1 -TestOperations
+
+  db-init:
+    desc: Initialize all SQLite databases
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/database/initialize-databases.ps1
+
+  clear-fragment-cache:
+    desc: Clear fragment cache (in-memory and SQLite database)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/clear-fragment-cache.ps1 {{.CLI_ARGS}}
+
+  build-fragment-cache:
+    desc: Build/warm fragment cache by parsing all fragments
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/build-fragment-cache.ps1 {{.CLI_ARGS}}
+
+  validate-fragment-cache:
+    desc: Validate fragment cache (verify cache state)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/verify-cache-cleared.ps1 {{.CLI_ARGS}}
 
   check-script-standards:
     desc: Check script standards and best practices
@@ -111,7 +166,7 @@ tasks:
   install-githooks:
     desc: Install Git hooks
     cmds:
-      - pwsh -NoProfile -File scripts/git/install-githooks.ps1
+      - pwsh -NoProfile -File scripts/git/install-githooks.ps1 {{.CLI_ARGS}}
 
   install-pre-commit-hook:
     desc: Install pre-commit hook only
@@ -121,7 +176,7 @@ tasks:
   format:
     desc: Format Code
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1 {{.CLI_ARGS}}
 
   find-duplicates:
     desc: Find Duplicate Functions
@@ -131,12 +186,17 @@ tasks:
   generate-fragment-readmes:
     desc: Generate Fragment READMEs
     cmds:
-      - pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1
+      - pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1 {{.CLI_ARGS}}
 
   new-fragment:
     desc: Create a new profile fragment from template
     cmds:
-      - pwsh -NoProfile -File scripts/utils/fragment/new-fragment.ps1
+      - pwsh -NoProfile -File scripts/utils/fragment/new-fragment.ps1 {{.CLI_ARGS}}
+
+  generate-command-wrappers:
+    desc: Generate standalone script wrappers for fragment commands
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/fragment/generate-command-wrappers.ps1 {{.CLI_ARGS}}
 
   check-commit-messages:
     desc: Check Commit Messages
@@ -146,7 +206,7 @@ tasks:
   update-baseline:
     desc: Update Performance Baseline
     cmds:
-      - pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline
+      - pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline {{.CLI_ARGS}}
 
   collect-code-metrics:
     desc: Collect code metrics
@@ -224,12 +284,22 @@ tasks:
   init-wrangler-config:
     desc: Initialize wrangler configuration
     cmds:
-      - pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1
+      - pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1 {{.CLI_ARGS}}
 
   dev-setup:
     desc: Run development environment setup
     cmds:
       - pwsh -NoProfile -File scripts/dev/setup.ps1
+
+  check-task-parity:
+    desc: Check task parity across all task runner files
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 {{.CLI_ARGS}}
+
+  generate-task-parity:
+    desc: Generate missing tasks to achieve parity across all task runner files
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{.CLI_ARGS}}
 
   default:
     desc: Run default task

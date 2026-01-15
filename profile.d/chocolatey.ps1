@@ -365,7 +365,17 @@ if (Test-CachedCommand choco) {
         )
         
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Package file not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Package file not found: $Path"),
+                        'PackageFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'chocolatey.packages.import' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "Package file not found: $Path"
+            }
             return
         }
         
@@ -373,7 +383,18 @@ if (Test-CachedCommand choco) {
         if ($Yes) {
             $args += '-y'
         }
-        & choco @args
+        
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'chocolatey.packages.import' -Context @{
+                path         = $Path
+                auto_confirm = $Yes.IsPresent
+            } -ScriptBlock {
+                & choco @args
+            } | Out-Null
+        }
+        else {
+            & choco @args
+        }
     }
     Set-Alias -Name choimport -Value Import-ChocoPackages -ErrorAction SilentlyContinue
     Set-Alias -Name chorestore -Value Import-ChocoPackages -ErrorAction SilentlyContinue

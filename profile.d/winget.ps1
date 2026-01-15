@@ -302,7 +302,17 @@ if (Test-CachedCommand winget) {
         )
         
         if (-not (Test-Path -LiteralPath $Path)) {
-            Write-Error "Package file not found: $Path"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                        [System.IO.FileNotFoundException]::new("Package file not found: $Path"),
+                        'PackageFileNotFound',
+                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                        $Path
+                    )) -OperationName 'winget.packages.import' -Context @{ path = $Path }
+            }
+            else {
+                Write-Error "Package file not found: $Path"
+            }
             return
         }
         
@@ -313,7 +323,19 @@ if (Test-CachedCommand winget) {
         if ($IgnoreVersions) {
             $args += '--ignore-versions'
         }
-        & winget @args
+        
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            Invoke-WithWideEvent -OperationName 'winget.packages.import' -Context @{
+                path               = $Path
+                ignore_unavailable = $IgnoreUnavailable.IsPresent
+                ignore_versions    = $IgnoreVersions.IsPresent
+            } -ScriptBlock {
+                & winget @args
+            } | Out-Null
+        }
+        else {
+            & winget @args
+        }
     }
     Set-Alias -Name winget-import -Value Import-WingetPackages -ErrorAction SilentlyContinue
     Set-Alias -Name winget-restore -Value Import-WingetPackages -ErrorAction SilentlyContinue

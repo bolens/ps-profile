@@ -40,6 +40,12 @@ param(
     [string]$OutputPath = 'scripts/data/coverage'
 )
 
+# Parse debug level once at script start
+$debugLevel = 0
+if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+}
+
 $ErrorActionPreference = 'Stop'
 
 # Suppress all confirmation prompts for non-interactive execution
@@ -73,12 +79,20 @@ if (-not (Test-Path $scriptRoot)) {
     $scriptRoot = $PWD
 }
 
+# Level 1: Basic operation start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[coverage.analyze] Starting coverage analysis"
+    Write-Verbose "[coverage.analyze] Paths to analyze: $($Path -join ', ')"
+    Write-Verbose "[coverage.analyze] Output path: $OutputPath"
+}
+
 # Find source files and test files to analyze
 # Optimized: Use List for better performance with Add() instead of +=
 $sourceFiles = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
 $testFiles = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
 $testsRoot = Join-Path $scriptRoot 'tests'
 
+$discoveryStartTime = Get-Date
 foreach ($p in $Path) {
     # Resolve relative paths
     $resolvedPath = if ([System.IO.Path]::IsPathRooted($p)) {
@@ -96,6 +110,11 @@ foreach ($p in $Path) {
             # This is a test file - add it directly
             $testFiles.Add($item)
             Write-Host "Detected test file: $($item.Name)" -ForegroundColor Cyan
+            
+            # Level 2: File discovery details
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[coverage.analyze] Found test file: $($item.FullName)"
+            }
             
             # Try to find corresponding source file for coverage
             # Extract potential source file name from test file name
@@ -144,18 +163,29 @@ foreach ($p in $Path) {
             if ($mappedSources) {
                 # Use direct mappings
                 foreach ($sourceName in $mappedSources) {
-                    # Optimized: Filter in foreach loop instead of Where-Object
-                    $allFound = Get-ChildItem -Path $profileDir -Filter $sourceName -Recurse -File -ErrorAction SilentlyContinue
-                    foreach ($item in $allFound) {
-                        if ($item.Name -notlike '*.tests.ps1') {
-                            $sourceFiles += $item
+                    try {
+                        # Optimized: Filter in foreach loop instead of Where-Object
+                        $allFound = Get-ChildItem -Path $profileDir -Filter $sourceName -Recurse -File -ErrorAction SilentlyContinue
+                        foreach ($item in $allFound) {
+                            if ($item.Name -notlike '*.tests.ps1') {
+                                $sourceFiles.Add($item)
+                            }
+                        }
+                        # Also check scripts/lib
+                        $allFound = Get-ChildItem -Path $scriptsLibDir -Filter $sourceName -Recurse -File -ErrorAction SilentlyContinue
+                        foreach ($item in $allFound) {
+                            if ($item.Name -notlike '*.tests.ps1') {
+                                $sourceFiles.Add($item)
+                            }
                         }
                     }
-                    # Also check scripts/lib
-                    $allFound = Get-ChildItem -Path $scriptsLibDir -Filter $sourceName -Recurse -File -ErrorAction SilentlyContinue
-                    foreach ($item in $allFound) {
-                        if ($item.Name -notlike '*.tests.ps1') {
-                            $sourceFiles += $item
+                    catch {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Failed to find source file" -OperationName 'coverage.analyze.find-source' -Context @{
+                                source_name = $sourceName
+                                profile_dir = $profileDir
+                                scripts_lib_dir = $scriptsLibDir
+                            } -Code 'SourceFileSearchFailed'
                         }
                     }
                 }
@@ -179,17 +209,28 @@ foreach ($p in $Path) {
                 )
                 
                 foreach ($pattern in $sourcePatterns) {
-                    # Optimized: Filter in foreach loop instead of Where-Object
-                    $allFound = Get-ChildItem -Path $profileDir -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue
-                    foreach ($item in $allFound) {
-                        if ($item.Name -notlike '*.tests.ps1') {
-                            $sourceFiles += $item
+                    try {
+                        # Optimized: Filter in foreach loop instead of Where-Object
+                        $allFound = Get-ChildItem -Path $profileDir -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue
+                        foreach ($item in $allFound) {
+                            if ($item.Name -notlike '*.tests.ps1') {
+                                $sourceFiles.Add($item)
+                            }
+                        }
+                        $allFound = Get-ChildItem -Path $scriptsLibDir -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue
+                        foreach ($item in $allFound) {
+                            if ($item.Name -notlike '*.tests.ps1') {
+                                $sourceFiles.Add($item)
+                            }
                         }
                     }
-                    $allFound = Get-ChildItem -Path $scriptsLibDir -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue
-                    foreach ($item in $allFound) {
-                        if ($item.Name -notlike '*.tests.ps1') {
-                            $sourceFiles += $item
+                    catch {
+                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                            Write-StructuredWarning -Message "Failed to search for source files with pattern" -OperationName 'coverage.analyze.find-source-pattern' -Context @{
+                                pattern = $pattern
+                                profile_dir = $profileDir
+                                scripts_lib_dir = $scriptsLibDir
+                            } -Code 'SourceFilePatternSearchFailed'
                         }
                     }
                 }
@@ -197,16 +238,28 @@ foreach ($p in $Path) {
         }
         elseif ($item -and $item.PSIsContainer) {
             # Directory - find source files and test files
-            # Optimized: Filter in foreach loop instead of Where-Object
-            $allFiles = Get-ChildItem -Path $resolvedPath -Filter '*.ps1' -Recurse -File -ErrorAction SilentlyContinue
-            foreach ($file in $allFiles) {
-                if ($file.Name -notlike '*.tests.ps1') {
-                    $sourceFiles.Add($file)
+            try {
+                # Optimized: Filter in foreach loop instead of Where-Object
+                $allFiles = Get-ChildItem -Path $resolvedPath -Filter '*.ps1' -Recurse -File -ErrorAction SilentlyContinue
+                foreach ($file in $allFiles) {
+                    if ($file.Name -notlike '*.tests.ps1') {
+                        $sourceFiles.Add($file)
+                    }
+                }
+                $testFilesFound = Get-ChildItem -Path $resolvedPath -Filter '*.tests.ps1' -Recurse -File -ErrorAction SilentlyContinue
+                foreach ($testFile in $testFilesFound) {
+                    $testFiles.Add($testFile)
                 }
             }
-            $testFilesFound = Get-ChildItem -Path $resolvedPath -Filter '*.tests.ps1' -Recurse -File -ErrorAction SilentlyContinue
-            foreach ($testFile in $testFilesFound) {
-                $testFiles.Add($testFile)
+            catch {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to enumerate files in directory" -OperationName 'coverage.analyze.enumerate-dir' -Context @{
+                        directory_path = $resolvedPath
+                    } -Code 'DirectoryEnumerationFailed'
+                }
+                else {
+                    Write-Warning "Failed to enumerate files in directory: $resolvedPath - $($_.Exception.Message)"
+                }
             }
         }
         elseif ($item -and -not $item.PSIsContainer) {
@@ -215,7 +268,15 @@ foreach ($p in $Path) {
         }
     }
     else {
-        Write-Warning "Path not found: $p (resolved: $resolvedPath)"
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Path not found for coverage analysis" -OperationName 'coverage.analyze.path' -Context @{
+                original_path = $p
+                resolved_path = $resolvedPath
+            } -Code 'PathNotFound'
+        }
+        else {
+            Write-Warning "Path not found: $p (resolved: $resolvedPath)"
+        }
     }
 }
 
@@ -251,11 +312,22 @@ if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
         }
         
         foreach ($pattern in $patterns) {
-            $found = Get-ChildItem -Path $testsRoot -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue
-            if ($found) {
-                # Optimized: Use Add() instead of +=
-                foreach ($testFile in $found) {
-                    $testFiles.Add($testFile)
+            try {
+                $found = Get-ChildItem -Path $testsRoot -Filter $pattern -Recurse -File -ErrorAction SilentlyContinue
+                if ($found) {
+                    # Optimized: Use Add() instead of +=
+                    foreach ($testFile in $found) {
+                        $testFiles.Add($testFile)
+                    }
+                }
+            }
+            catch {
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to find test files with pattern" -OperationName 'coverage.analyze.find-test-pattern' -Context @{
+                        pattern = $pattern
+                        tests_root = $testsRoot
+                        source_file = $sourceFile.Name
+                    } -Code 'TestFilePatternSearchFailed'
                 }
             }
         }
@@ -265,6 +337,19 @@ if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
 # Remove duplicates
 $testFiles = $testFiles | Select-Object -Unique
 $sourceFiles = $sourceFiles | Select-Object -Unique
+
+$discoveryDuration = ((Get-Date) - $discoveryStartTime).TotalMilliseconds
+
+# Level 2: Discovery timing and details
+if ($debugLevel -ge 2) {
+    Write-Verbose "[coverage.analyze] File discovery completed in ${discoveryDuration}ms"
+    Write-Verbose "[coverage.analyze] Found $($sourceFiles.Count) source files, $($testFiles.Count) test files"
+}
+
+# Level 3: Performance breakdown
+if ($debugLevel -ge 3) {
+    Write-Host "  [coverage.analyze] Discovery performance - Duration: ${discoveryDuration}ms, Source files: $($sourceFiles.Count), Test files: $($testFiles.Count)" -ForegroundColor DarkGray
+}
 
 Write-Host "Analyzing coverage for $($sourceFiles.Count) source file(s)..." -ForegroundColor Cyan
 Write-Host "Source files:" -ForegroundColor Cyan
@@ -312,11 +397,26 @@ else {
 $config.Output.Verbosity = 'Minimal'  # Reduce output noise
 $config.Run.PassThru = $true
 
+# Level 1: Test execution start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[coverage.analyze] Preparing Pester configuration"
+    Write-Verbose "[coverage.analyze] Coverage enabled: $($config.CodeCoverage.Enabled)"
+    if ($config.CodeCoverage.Enabled) {
+        Write-Verbose "[coverage.analyze] Coverage paths: $($config.CodeCoverage.Path.Count) file(s)"
+    }
+}
+
 # Load TestSupport.ps1 to ensure test helper functions are available
 # This must be done BEFORE creating the Pester config so functions are available during test discovery
 $testSupportPath = Join-Path $testsRoot 'TestSupport.ps1'
 if (Test-Path -LiteralPath $testSupportPath) {
     Write-Host "Loading TestSupport.ps1..." -ForegroundColor Cyan
+    
+    # Level 2: TestSupport loading
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[coverage.analyze] Loading TestSupport from: $testSupportPath"
+    }
+    
     . $testSupportPath
     $availableFunctions = Get-Command -Name 'Get-TestRepoRoot', 'Get-TestPath', 'Initialize-TestProfile' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
     if ($availableFunctions) {
@@ -349,7 +449,14 @@ $env:PS_PROFILE_FORCE = '1'
 
 # Run tests with coverage (wrapped to suppress prompts)
 Write-Host "`nRunning tests with coverage analysis..." -ForegroundColor Cyan
+
+# Level 1: Test execution start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[coverage.analyze] Starting Pester test execution with coverage"
+}
+
 $originalConfirmPreference = $ConfirmPreference
+$testStartTime = Get-Date
 try {
     $ConfirmPreference = 'None'
     $global:ConfirmPreference = 'None'
@@ -371,6 +478,20 @@ finally {
     $global:ConfirmPreference = $originalConfirmPreference
 }
 
+$testDuration = ((Get-Date) - $testStartTime).TotalMilliseconds
+
+# Level 2: Test execution timing
+if ($debugLevel -ge 2) {
+    Write-Verbose "[coverage.analyze] Test execution completed in ${testDuration}ms"
+    Write-Verbose "[coverage.analyze] Tests: $($result.TotalCount), Passed: $($result.PassedCount), Failed: $($result.FailedCount), Skipped: $($result.SkippedCount)"
+}
+
+# Level 3: Performance breakdown
+if ($debugLevel -ge 3) {
+    $avgTestTime = if ($result.TotalCount -gt 0) { $testDuration / $result.TotalCount } else { 0 }
+    Write-Host "  [coverage.analyze] Test performance - Duration: ${testDuration}ms, Avg per test: ${avgTestTime}ms, Total: $($result.TotalCount) tests" -ForegroundColor DarkGray
+}
+
 # Display summary
 Write-Host ""
 Write-Host ("=" * 60) -ForegroundColor Cyan
@@ -380,6 +501,11 @@ Write-Host ("=" * 60) -ForegroundColor Cyan
 # Check if coverage data exists - Pester 5.x uses CodeCoverage property, not Coverage
 $hasCoverage = $false
 $coverageObj = $null
+
+# Level 1: Coverage analysis start
+if ($debugLevel -ge 1) {
+    Write-Verbose "[coverage.analyze] Analyzing coverage results"
+}
 
 # Pester 5.x stores coverage in CodeCoverage property
 if ($result.CodeCoverage) {
@@ -391,6 +517,11 @@ if ($result.CodeCoverage) {
         ($coverageObj.CoverageReport -and $coverageObj.CoverageReport.Count -gt 0) -or
         ($coverageObj.CommandsMissedCount -and $coverageObj.CommandsMissedCount -ge 0)
     )
+    
+    # Level 2: Coverage details
+    if ($debugLevel -ge 2 -and $hasCoverage) {
+        Write-Verbose "[coverage.analyze] Coverage found - Commands analyzed: $($coverageObj.CommandsAnalyzedCount), Executed: $($coverageObj.CommandsExecutedCount), Missed: $($coverageObj.CommandsMissedCount)"
+    }
 }
 # Fallback: Check for Coverage property (older Pester versions or different structure)
 elseif ($result.Coverage) {

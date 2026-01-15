@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\68-pixi.ps1
+Defined in: ..\profile.d\pixi.ps1

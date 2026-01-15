@@ -26,10 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `uvi` - Installs Python tools using UV.
 - `uvtool` - Installs Python tools globally using uv.
 
 
 ## Source
 
-Defined in: ..\profile.d\67-uv.ps1
+Defined in: ..\profile.d\uv.ps1

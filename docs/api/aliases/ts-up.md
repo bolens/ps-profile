@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\40-tailscale.ps1
+Defined in: ..\profile.d\tailscale.ps1

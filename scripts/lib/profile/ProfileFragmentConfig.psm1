@@ -20,9 +20,11 @@ function Initialize-FragmentConfiguration {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$ProfileDir,
         
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [string]$FragmentConfigModule
     )
 
@@ -44,19 +46,57 @@ function Initialize-FragmentConfiguration {
         $false 
     }
     
+    $debugLevel = 0
     if ($fragmentConfigModuleExists) {
+        # Level 2: Log config module loading
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            Write-Verbose "[profile-fragment-config.init] Loading fragment configuration module: $FragmentConfigModule"
+        }
         try {
-            Import-Module $FragmentConfigModule -ErrorAction SilentlyContinue -DisableNameChecking
+            Import-Module $FragmentConfigModule -ErrorAction Stop -DisableNameChecking
+            # Verify the function is available after import
+            if (-not (Get-Command Get-FragmentConfig -ErrorAction SilentlyContinue)) {
+                throw "Get-FragmentConfig function not found after importing FragmentConfig module"
+            }
             $config = Get-FragmentConfig -ProfileDir $ProfileDir
             $disabledFragments = $config.DisabledFragments
             $loadOrderOverride = $config.LoadOrder
             $environmentSets = $config.Environments
             $featureFlags = $config.FeatureFlags
             $performanceConfig = $config.Performance
+            # Level 2: Log successful config load
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                Write-Verbose "[profile-fragment-config.init] Successfully loaded fragment configuration"
+            }
+            # Level 3: Log detailed configuration
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                Write-Host "  [profile-fragment-config.init] Configuration details - DisabledFragments: $($disabledFragments.Count), LoadOrder: $($loadOrderOverride.Count), Environments: $($environmentSets.Keys.Count), FeatureFlags: $($featureFlags.Keys.Count)" -ForegroundColor DarkGray
+            }
         }
         catch {
-            if ($env:PS_PROFILE_DEBUG) {
-                Write-Host "Warning: Failed to load fragment config module: $($_.Exception.Message)" -ForegroundColor Yellow
+            $debugLevel = 0
+            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                if ($debugLevel -ge 1) {
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to load fragment config module: $($_.Exception.Message)" -OperationName 'profile-fragment-config.init' -Context @{
+                            # Technical context
+                            ProfileDir           = $ProfileDir
+                            FragmentConfigModule = $FragmentConfigModule
+                            # Error context
+                            Error                = $_.Exception.Message
+                            ErrorType            = $_.Exception.GetType().FullName
+                            # Invocation context
+                            FunctionName         = 'Initialize-FragmentConfiguration'
+                        }
+                    }
+                    else {
+                        Write-Warning "[profile-fragment-config.init] Failed to load fragment config module: $($_.Exception.Message)"
+                    }
+                }
+                # Level 3: Log detailed error information
+                if ($debugLevel -ge 3) {
+                    Write-Host "  [profile-fragment-config.init] Config module load error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message), ModulePath: $FragmentConfigModule" -ForegroundColor DarkGray
+                }
             }
         }
     }
@@ -68,6 +108,16 @@ function Initialize-FragmentConfiguration {
     } 
     else { 
         $false 
+    }
+    
+    # Level 3: Log profile.d directory check
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[profile-fragment-config.init] Profile.d directory check - Path: $profileD, Exists: $profileDExists"
+        }
+        if ($debugLevel -ge 3) {
+            Write-Host "  [profile-fragment-config.init] Profile.d directory check - Path: $profileD, Exists: $profileDExists" -ForegroundColor DarkGray
+        }
     }
 
     # Cache fragment file list to avoid multiple Get-ChildItem calls
@@ -83,6 +133,18 @@ function Initialize-FragmentConfiguration {
                 return $true
             }
             $_.BaseName -notmatch '-test-'
+        }
+        # Level 2: Log fragment discovery
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+            $fragmentCount = if ($allFragments) { $allFragments.Count } else { 0 }
+            Write-Verbose "[profile-fragment-config.init] Discovered $fragmentCount fragment(s) in profile.d directory"
+        }
+        # Level 3: Log detailed fragment list
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+            if ($allFragments) {
+                $fragmentNames = $allFragments.BaseName -join ', '
+                Write-Verbose "[profile-fragment-config.init] Fragment list: $fragmentNames"
+            }
         }
     }
 
@@ -135,8 +197,20 @@ function Initialize-FragmentConfiguration {
             }
         }
 
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "Environment '$currentEnvironment' active. Enabled fragments: $($enabledFragments -join ', ')" -ForegroundColor Cyan
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Level 1: Basic environment info
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[profile-fragment-config.environment] Environment '$currentEnvironment' active. Enabled fragments: $($enabledFragments -join ', ')"
+            }
+            # Level 2: Log environment configuration summary
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[profile-fragment-config.environment] Environment configuration - Name: $currentEnvironment, Enabled: $($enabledFragments.Count), Disabled: $($disabledFragments.Count)"
+            }
+            # Level 3: Log detailed environment filtering
+            if ($debugLevel -ge 3) {
+                Write-Host "  [profile-fragment-config.environment] Environment filtering details - Enabled fragments: $($enabledFragments -join ', '), Disabled fragments: $($disabledFragments -join ', ')" -ForegroundColor DarkGray
+            }
         }
         else {
             # Even without debug, show a brief message to indicate we're starting fragment loading
@@ -146,11 +220,32 @@ function Initialize-FragmentConfiguration {
 
     # Override disabled fragments if PS_PROFILE_LOAD_ALL is set
     if ($loadAllFragments) {
-        if ($env:PS_PROFILE_DEBUG) {
-            Write-Host "PS_PROFILE_LOAD_ALL enabled: Loading all fragments (overriding disabled fragments and environment restrictions)" -ForegroundColor Yellow
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+            # Level 1: Basic load all override info
+            if ($debugLevel -ge 1) {
+                Write-Verbose "[profile-fragment-config.load-all] PS_PROFILE_LOAD_ALL enabled: Loading all fragments (overriding disabled fragments and environment restrictions)"
+            }
+            # Level 2: Log load all override
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[profile-fragment-config.load-all] Load all override active - All fragments will be loaded"
+            }
+            # Level 3: Log detailed override information
+            if ($debugLevel -ge 3) {
+                $originalDisabledCount = $disabledFragments.Count
+                Write-Host "  [profile-fragment-config.load-all] Override details - Original disabled count: $originalDisabledCount, All fragments: $($allFragments.Count)" -ForegroundColor DarkGray
+            }
         }
         # Clear disabled fragments to load everything
         $disabledFragments = @()
+    }
+    
+    # Level 2: Log final configuration summary
+    $debugLevel = 0
+    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+        $totalFragments = if ($allFragments) { $allFragments.Count } else { 0 }
+        $enabledCount = $totalFragments - $disabledFragments.Count
+        Write-Verbose "[profile-fragment-config.init] Final configuration - Total: $totalFragments, Enabled: $enabledCount, Disabled: $($disabledFragments.Count)"
     }
 
     $scriptsLibDir = Join-Path $ProfileDir 'scripts' 'lib'
@@ -183,7 +278,9 @@ function Initialize-FragmentConfiguration {
 function Test-EnvBool {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $false)]
+        [AllowEmptyString()]
+        [AllowNull()]
         [string]$Value
     )
     if ([string]::IsNullOrWhiteSpace($Value)) {

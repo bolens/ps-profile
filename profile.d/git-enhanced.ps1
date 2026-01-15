@@ -133,17 +133,37 @@ try {
         
         $arguments += '--output', $OutputPath
 
-        try {
-            & git-cliff $arguments
-            if ($LASTEXITCODE -eq 0) {
-                return $OutputPath
-            }
-            else {
-                Write-Error "Failed to generate changelog. Exit code: $LASTEXITCODE"
+        # Use standardized error handling if available
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "git.changelog.generate" -Context @{
+                output_path = $OutputPath
+                config_path = $ConfigPath
+                tag         = $Tag
+                latest      = $Latest.IsPresent
+            } -ScriptBlock {
+                & git-cliff $arguments
+                if ($LASTEXITCODE -eq 0) {
+                    return $OutputPath
+                }
+                else {
+                    throw "Failed to generate changelog. Exit code: $LASTEXITCODE"
+                }
             }
         }
-        catch {
-            Write-Error "Failed to run git-cliff: $_"
+        else {
+            # Fallback to original implementation
+            try {
+                & git-cliff $arguments
+                if ($LASTEXITCODE -eq 0) {
+                    return $OutputPath
+                }
+                else {
+                    Write-Error "Failed to generate changelog. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to run git-cliff: $_"
+            }
         }
     }
 
@@ -197,11 +217,22 @@ try {
             return
         }
 
-        try {
-            Start-Process -FilePath 'git-tower' -ArgumentList $RepositoryPath -ErrorAction Stop
+        # Use standardized error handling if available
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "git.tower.launch" -Context @{
+                repository_path = $RepositoryPath
+            } -ScriptBlock {
+                Start-Process -FilePath 'git-tower' -ArgumentList $RepositoryPath -ErrorAction Stop
+            }
         }
-        catch {
-            Write-Error "Failed to launch Git Tower: $_"
+        else {
+            # Fallback to original implementation
+            try {
+                Start-Process -FilePath 'git-tower' -ArgumentList $RepositoryPath -ErrorAction Stop
+            }
+            catch {
+                Write-Error "Failed to launch Git Tower: $_"
+            }
         }
     }
 
@@ -255,11 +286,22 @@ try {
             return
         }
 
-        try {
-            Start-Process -FilePath 'gitkraken' -ArgumentList $RepositoryPath -ErrorAction Stop
+        # Use standardized error handling if available
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "git.gitkraken.launch" -Context @{
+                repository_path = $RepositoryPath
+            } -ScriptBlock {
+                Start-Process -FilePath 'gitkraken' -ArgumentList $RepositoryPath -ErrorAction Stop
+            }
         }
-        catch {
-            Write-Error "Failed to launch GitKraken: $_"
+        else {
+            # Fallback to original implementation
+            try {
+                Start-Process -FilePath 'gitkraken' -ArgumentList $RepositoryPath -ErrorAction Stop
+            }
+            catch {
+                Write-Error "Failed to launch GitKraken: $_"
+            }
         }
     }
 
@@ -318,16 +360,32 @@ try {
             return
         }
 
-        try {
-            if ($Arguments) {
-                & gitbutler $Arguments
-            }
-            else {
-                & gitbutler
+        # Use standardized error handling if available
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "git.gitbutler.invoke" -Context @{
+                arguments = $Arguments -join ' '
+            } -ScriptBlock {
+                if ($Arguments) {
+                    & gitbutler $Arguments
+                }
+                else {
+                    & gitbutler
+                }
             }
         }
-        catch {
-            Write-Error "Failed to run gitbutler: $_"
+        else {
+            # Fallback to original implementation
+            try {
+                if ($Arguments) {
+                    & gitbutler $Arguments
+                }
+                else {
+                    & gitbutler
+                }
+            }
+            catch {
+                Write-Error "Failed to run gitbutler: $_"
+            }
         }
     }
 
@@ -386,16 +444,32 @@ try {
             return
         }
 
-        try {
-            if ($Arguments) {
-                & jj $Arguments
-            }
-            else {
-                & jj
+        # Use standardized error handling if available
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "git.jujutsu.invoke" -Context @{
+                arguments = $Arguments -join ' '
+            } -ScriptBlock {
+                if ($Arguments) {
+                    & jj $Arguments
+                }
+                else {
+                    & jj
+                }
             }
         }
-        catch {
-            Write-Error "Failed to run jj: $_"
+        else {
+            # Fallback to original implementation
+            try {
+                if ($Arguments) {
+                    & jj $Arguments
+                }
+                else {
+                    & jj
+                }
+            }
+            catch {
+                Write-Error "Failed to run jj: $_"
+            }
         }
     }
 
@@ -476,21 +550,47 @@ try {
         
         $arguments += $Path
 
-        try {
-            Push-Location $RepositoryPath
-            & git $arguments
-            if ($LASTEXITCODE -eq 0) {
-                return $Path
-            }
-            else {
-                Write-Error "Failed to create worktree. Exit code: $LASTEXITCODE"
+        # Use standardized error handling if available
+        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+            return Invoke-WithWideEvent -OperationName "git.worktree.create" -Context @{
+                repository_path = $RepositoryPath
+                path            = $Path
+                branch          = $Branch
+                create_branch   = $CreateBranch.IsPresent
+            } -ScriptBlock {
+                Push-Location $RepositoryPath
+                try {
+                    & git $arguments
+                    if ($LASTEXITCODE -eq 0) {
+                        return $Path
+                    }
+                    else {
+                        throw "Failed to create worktree. Exit code: $LASTEXITCODE"
+                    }
+                }
+                finally {
+                    Pop-Location
+                }
             }
         }
-        catch {
-            Write-Error "Failed to create Git worktree: $_"
-        }
-        finally {
-            Pop-Location
+        else {
+            # Fallback to original implementation
+            try {
+                Push-Location $RepositoryPath
+                & git $arguments
+                if ($LASTEXITCODE -eq 0) {
+                    return $Path
+                }
+                else {
+                    Write-Error "Failed to create worktree. Exit code: $LASTEXITCODE"
+                }
+            }
+            catch {
+                Write-Error "Failed to create Git worktree: $_"
+            }
+            finally {
+                Pop-Location
+            }
         }
     }
 
@@ -551,8 +651,8 @@ try {
                 $currentPath = (Get-Location).Path
                 $depth = 0
                 $RepositoryPaths = Get-ChildItem -Path $currentPath -Directory -Recurse -Depth $MaxDepth | 
-                    Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName '.git') } | 
-                    Select-Object -ExpandProperty FullName
+                Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName '.git') } | 
+                Select-Object -ExpandProperty FullName
             }
             else {
                 $currentPath = (Get-Location).Path
@@ -646,7 +746,20 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath '.git')) {
-            Write-Error "Not a Git repository"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                    [System.ArgumentException]::new("Not a Git repository"),
+                    "NotGitRepository",
+                    [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                    (Get-Location).Path
+                )
+                Write-StructuredError -ErrorRecord $errorRecord -OperationName "git.branches.clean" -Context @{
+                    target_branch = $TargetBranch
+                }
+            }
+            else {
+                Write-Error "Not a Git repository"
+            }
             return @()
         }
 
@@ -655,12 +768,12 @@ try {
         }
 
         $mergedBranches = & git branch --merged $TargetBranch | 
-            ForEach-Object { $_.Trim().TrimStart('*', ' ') } | 
-            Where-Object { 
-                $_ -and 
-                $_ -ne $TargetBranch -and 
-                $_ -notin $ExcludeBranches 
-            }
+        ForEach-Object { $_.Trim().TrimStart('*', ' ') } | 
+        Where-Object { 
+            $_ -and 
+            $_ -ne $TargetBranch -and 
+            $_ -notin $ExcludeBranches 
+        }
 
         if (-not $mergedBranches) {
             Write-Verbose "No merged branches to clean"
@@ -687,7 +800,15 @@ try {
                     }
                 }
                 catch {
-                    Write-Warning "Failed to delete branch $branch : $_"
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to delete branch $branch : $_" -OperationName "git.branches.clean" -Context @{
+                            branch        = $branch
+                            target_branch = $TargetBranch
+                        }
+                    }
+                    else {
+                        Write-Warning "Failed to delete branch $branch : $_"
+                    }
                 }
             }
         }
@@ -781,7 +902,16 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to get Git statistics: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName "git.stats.get" -Context @{
+                    repository_path = $RepositoryPath
+                    since           = $Since
+                    until           = $Until
+                }
+            }
+            else {
+                Write-Error "Failed to get Git statistics: $_"
+            }
         }
         finally {
             Pop-Location
@@ -915,7 +1045,22 @@ try {
         }
 
         if (-not (Test-Path -LiteralPath (Join-Path $RepositoryPath '.git'))) {
-            Write-Error "Not a Git repository: $RepositoryPath"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                    [System.ArgumentException]::new("Not a Git repository: $RepositoryPath"),
+                    "NotGitRepository",
+                    [System.Management.Automation.ErrorCategory]::InvalidArgument,
+                    $RepositoryPath
+                )
+                Write-StructuredError -ErrorRecord $errorRecord -OperationName "git.largefiles.get" -Context @{
+                    repository_path = $RepositoryPath
+                    min_size        = $MinSize
+                    limit           = $Limit
+                }
+            }
+            else {
+                Write-Error "Not a Git repository: $RepositoryPath"
+            }
             return @()
         }
 
@@ -923,26 +1068,35 @@ try {
             Push-Location $RepositoryPath
 
             $largeFiles = & git rev-list --objects --all | 
-                & git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | 
-                Where-Object { $_ -match '^blob' } | 
-                ForEach-Object {
-                    $parts = $_ -split '\s+', 4
-                    if ($parts.Length -ge 4) {
-                        [PSCustomObject]@{
-                            ObjectName = $parts[1]
-                            Size       = [long]$parts[2]
-                            Path       = $parts[3]
-                        }
+            & git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | 
+            Where-Object { $_ -match '^blob' } | 
+            ForEach-Object {
+                $parts = $_ -split '\s+', 4
+                if ($parts.Length -ge 4) {
+                    [PSCustomObject]@{
+                        ObjectName = $parts[1]
+                        Size       = [long]$parts[2]
+                        Path       = $parts[3]
                     }
-                } | 
-                Where-Object { $_.Size -ge $MinSize } | 
-                Sort-Object -Property Size -Descending | 
-                Select-Object -First $Limit
+                }
+            } | 
+            Where-Object { $_.Size -ge $MinSize } | 
+            Sort-Object -Property Size -Descending | 
+            Select-Object -First $Limit
 
             return $largeFiles
         }
         catch {
-            Write-Error "Failed to get large files: $_"
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName "git.largefiles.get" -Context @{
+                    repository_path = $RepositoryPath
+                    min_size        = $MinSize
+                    limit           = $Limit
+                }
+            }
+            else {
+                Write-Error "Failed to get large files: $_"
+            }
             return @()
         }
         finally {

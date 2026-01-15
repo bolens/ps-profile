@@ -46,10 +46,11 @@ Set the variable to `1`, `true`, or `*` to hide all fragment warnings for the cu
 ## Timings / micro-instrumentation
 
 Some fragments include lightweight instrumentation that appends CSV rows to
-`scripts/*.csv` when enabled. To enable per-step timing for development:
+`scripts/*.csv` when enabled. To enable per-step timing for development, use
+debug level 2 or higher:
 
 ```powershell
-$env:PS_PROFILE_DEBUG_TIMINGS = '1'
+$env:PS_PROFILE_DEBUG = '2'  # Level 2 includes timing information
 . $HOME\Documents\PowerShell\profile.d\30-aliases.ps1  # example
 ```
 
@@ -59,7 +60,9 @@ recreate by re-running the instrumented fragment.
 
 ### Fragment Loading Output
 
-When `PS_PROFILE_DEBUG=1` is enabled, fragment loading messages are shown in batches of 10 by default to reduce output verbosity:
+Debug levels control fragment loading output:
+
+**Level 1 (Basic Debug)**: Fragment loading messages are shown in batches of 10 to reduce output verbosity:
 
 ```
 Loading fragments (10 total): bootstrap, env, files-module-registry, ai-tools, aliases, angular, ansible, api-tools, asdf, aws
@@ -68,10 +71,10 @@ Loading fragments (20 total): azure, beads, bottom, build-tools, bun, chocolatey
 Loaded 119 fragments successfully
 ```
 
-To show individual fragment loading messages (one per line), set:
+**Level 2+ (Verbose Debug)**: Individual fragment loading messages (one per line):
 
 ```powershell
-$env:PS_PROFILE_DEBUG_SHOW_INDIVIDUAL_FRAGMENTS = '1'
+$env:PS_PROFILE_DEBUG = '2'  # Level 2+ shows individual messages
 ```
 
 This will display:
