@@ -65,32 +65,11 @@ else {
     }
 }
 
-# Import PathResolution for path operations
+# PathResolution import is deferred - only loaded when Get-ProfileDirectory is actually needed
+# This avoids parse-time errors when FileSystemPathType is not yet available
 # PathResolution is in scripts/lib/path/, not scripts/lib/fragment/
-$pathModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'path' 'PathResolution.psm1'
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
-    $null = Import-ModuleSafely -ModulePath $pathModulePath -ErrorAction SilentlyContinue
-}
-else {
-    # Fallback to manual validation
-    if ($pathModulePath -and -not [string]::IsNullOrWhiteSpace($pathModulePath) -and (Test-Path -LiteralPath $pathModulePath)) {
-        try {
-            Import-Module $pathModulePath -ErrorAction Stop
-        }
-        catch {
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                if ($debugLevel -ge 2) {
-                    Write-Verbose "[fragment-config.init] Failed to import PathResolution module: $($_.Exception.Message). Path resolution features may be limited."
-                }
-                # Level 3: Log detailed error information
-                if ($debugLevel -ge 3) {
-                    Write-Host "  [fragment-config.init] PathResolution import error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
-                }
-            }
-        }
-    }
-}
+# Note: PathResolution uses Validation which requires FileSystemPathType from CommonEnums
+# CommonEnums should be imported early in the profile before this module is loaded
 
 # Import Logging for consistent output
 # Logging is in scripts/lib/core/, not scripts/lib/fragment/
@@ -168,6 +147,29 @@ function Get-FragmentConfig {
     if (-not $ConfigPath) {
         if (-not $ProfileDir) {
             # Try to resolve from current context
+            # Lazy-load PathResolution only when Get-ProfileDirectory is needed
+            if (-not (Get-Command Get-ProfileDirectory -ErrorAction SilentlyContinue)) {
+                # Try to import PathResolution if not already available
+                $pathModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'path' 'PathResolution.psm1'
+                if ($pathModulePath -and -not [string]::IsNullOrWhiteSpace($pathModulePath) -and (Test-Path -LiteralPath $pathModulePath)) {
+                    try {
+                        if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+                            $null = Import-ModuleSafely -ModulePath $pathModulePath -ErrorAction SilentlyContinue
+                        }
+                        else {
+                            Import-Module $pathModulePath -ErrorAction SilentlyContinue -DisableNameChecking
+                        }
+                    }
+                    catch {
+                        # PathResolution import failed - non-fatal, will use fallback
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
+                            Write-Verbose "[fragment-config.get] Failed to import PathResolution module: $($_.Exception.Message). Using fallback path resolution."
+                        }
+                    }
+                }
+            }
+            
             if (Get-Command Get-ProfileDirectory -ErrorAction SilentlyContinue) {
                 try {
                     $ProfileDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot

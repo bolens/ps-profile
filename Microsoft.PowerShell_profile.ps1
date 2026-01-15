@@ -435,6 +435,29 @@ catch {
 # Call Enable-PSReadLine to load PSReadLine with enhanced configuration.
 
 # ===============================================
+# COMMON ENUMS - MUST BE LOADED FIRST
+# ===============================================
+# Import CommonEnums before any module that uses FileSystemPathType or other enums
+# This ensures types are available at parse time for modules like Validation
+if (-not $profileDir) {
+    $profileDir = Split-Path -Parent $PSCommandPath
+}
+$commonEnumsModule = Join-Path $profileDir 'scripts' 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsModule -and -not [string]::IsNullOrWhiteSpace($commonEnumsModule) -and (Test-Path -LiteralPath $commonEnumsModule)) {
+    try {
+        Import-Module $commonEnumsModule -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
+    }
+    catch {
+        if ($env:PS_PROFILE_DEBUG) {
+            $debugLevel = 0
+            if ([int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                Write-Warning "Failed to load CommonEnums module: $($_.Exception.Message). Some modules may fail to load."
+            }
+        }
+    }
+}
+
+# ===============================================
 # PowerShell Profile - Custom Aliases & Functions
 # ===============================================
 # This profile is intentionally small: feature-rich helpers live in `profile.d/`.
