@@ -14,7 +14,24 @@ scripts/lib/core/SafeImport.psm1
     PowerShell Version: 3.0+
 #>
 
+# Import CommonEnums first - Validation requires FileSystemPathType enum
+# Must be imported before Validation since Validation uses FileSystemPathType in function signatures
+$commonEnumsPath = Join-Path $PSScriptRoot 'CommonEnums.psm1'
+if ($commonEnumsPath -and -not [string]::IsNullOrWhiteSpace($commonEnumsPath) -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    try {
+        Import-Module $commonEnumsPath -DisableNameChecking -Force -Global -ErrorAction Stop
+    }
+    catch {
+        # CommonEnums import failed - Validation may fail to parse
+        $debugLevel = 0
+        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+            Write-Warning "[safe-import.init] Failed to import CommonEnums: $($_.Exception.Message). Validation module may fail to load."
+        }
+    }
+}
+
 # Import Validation module for path validation
+# Note: Validation uses FileSystemPathType which must be available from CommonEnums
 $validationModulePath = Join-Path $PSScriptRoot 'Validation.psm1'
 if ($validationModulePath -and -not [string]::IsNullOrWhiteSpace($validationModulePath) -and (Test-Path -LiteralPath $validationModulePath)) {
     Import-Module $validationModulePath -DisableNameChecking -ErrorAction SilentlyContinue
