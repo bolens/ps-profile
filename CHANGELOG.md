@@ -1,3 +1,17 @@
+## [1.3.2](https://github.com/bolens/ps-profile/compare/v1.3.1...v1.3.2) (2026-01-16)
+
+
+### Bug Fixes
+
+* **core:** import CommonEnums in SafeImport before Validation to ensure FileSystemPathType is available ([b28a6ba](https://github.com/bolens/ps-profile/commit/b28a6bab22435851b340ec72405e6512c320dee0))
+* correct module import paths and improve CommonEnums loading ([5ba06e4](https://github.com/bolens/ps-profile/commit/5ba06e433213f98101216cb5fcec51ed2ca83770))
+* **fragment:** defer PathResolution import to avoid parse-time FileSystemPathType error ([6b78b35](https://github.com/bolens/ps-profile/commit/6b78b354835029f8a2e6f94a3d74755f31e7940c))
+
+
+### Performance Improvements
+
+* **profile:** optimize profile loading performance and consolidate fragment output ([4ed4884](https://github.com/bolens/ps-profile/commit/4ed4884f6eb5907b2f9b930340096a603c3ce91d))
+
 ## [1.3.1](https://github.com/bolens/ps-profile/compare/v1.3.0...v1.3.1) (2025-11-25)
 
 
