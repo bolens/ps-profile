@@ -11,7 +11,7 @@ jobs:
   benchmark:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Run Performance Benchmark
         run: pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 3
       - name: Update Performance Baseline
