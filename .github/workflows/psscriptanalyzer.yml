@@ -70,7 +70,7 @@ jobs:
           echo "Running reviewdog with RDJSON input"
           reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -level=error < ./.psa_for_reviewdog.rdjson
       - name: Upload report artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: psscriptanalyzer-report
           path: psscriptanalyzer-report.json
