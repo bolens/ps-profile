@@ -1,34 +1,32 @@
 # ===============================================
-# lang-python.ps1
-# Python development tools (enhanced)
+# lang-python-env.ps1
+# Python runtime, virtual environments, and project scaffolding
 # ===============================================
 # Tier: standard
 # Dependencies: bootstrap, env
 
 <#
 .SYNOPSIS
-    Python development tools fragment for enhanced Python development workflows.
+    Python runtime, virtual environments, and project scaffolding.
 
 .DESCRIPTION
-    Provides wrapper functions for Python development tools that enhance existing
-    Python package manager support (uv.ps1, pixi.ps1, package-managers.ps1):
-    - pipx: Python application installer and runner
-    - python: Python interpreter wrapper
-    - Project creation helpers
-    - Virtual environment management
-    - Script execution helpers
+    Provides wrapper functions for Python development tools:
+    - Invoke-PythonScript: Python interpreter wrapper (python3/python fallback)
+    - New-PythonVirtualEnv: Create virtual environments (uv/venv fallback)
+    - New-PythonProject: Scaffold a new Python project with boilerplate
 
 .NOTES
     All functions gracefully degrade when tools are not installed.
-    This module enhances existing Python tool support (uv, pixi, pip).
 #>
 
 try {
     # Idempotency check: skip if already loaded
     if (Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue) {
-        if (Test-FragmentLoaded -FragmentName 'lang-python') { return }
+        if (Test-FragmentLoaded -FragmentName 'lang-python-env') { return }
     }
 
+    # Import Command module for Get-ToolInstallHint (if not already available)
+    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
     # Import Command module for Get-ToolInstallHint (if not already available)
     if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
         $repoRoot = $null
@@ -53,220 +51,7 @@ try {
             }
         }
     }
-
-    # ===============================================
-    # pipx - Python application installer
-    # ===============================================
-
-    <#
-    .SYNOPSIS
-        Installs Python applications using pipx.
-
-    .DESCRIPTION
-        Wrapper function for pipx, which installs Python applications in isolated
-        environments. pipx is similar to npm's global install or cargo install.
-
-    .PARAMETER Packages
-        Package names to install.
-        Can be used multiple times or as an array.
-
-    .PARAMETER Arguments
-        Additional arguments to pass to pipx install.
-        Can be used multiple times or as an array.
-
-    .EXAMPLE
-        Install-PythonApp black
-        Installs black as a standalone application.
-
-    .EXAMPLE
-        Install-PythonApp pytest --include-deps
-        Installs pytest with additional dependencies.
-
-    .OUTPUTS
-        System.String. Output from pipx install execution.
-    #>
-    function Install-PythonApp {
-        [CmdletBinding()]
-        [OutputType([string])]
-        param(
-            [Parameter(Mandatory, ValueFromRemainingArguments = $true)]
-            [string[]]$Packages,
-
-            [Parameter()]
-            [string[]]$Arguments
-        )
-
-        if (-not (Test-CachedCommand 'pipx')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'pipx' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: pip install pipx (or python -m pip install pipx)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'pipx' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "pipx not found. $installHint"
-            }
-            return $null
-        }
-
-        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-            return Invoke-WithWideEvent -OperationName 'python.pipx.install' -Context @{
-                packages            = $Packages
-                has_additional_args = ($null -ne $Arguments)
-            } -ScriptBlock {
-                $cmdArgs = @('install')
-                if ($Arguments) {
-                    $cmdArgs += $Arguments
-                }
-                $cmdArgs += $Packages
-                & pipx @cmdArgs 2>&1
-            }
-        }
-        else {
-            try {
-                $cmdArgs = @('install')
-                if ($Arguments) {
-                    $cmdArgs += $Arguments
-                }
-                $cmdArgs += $Packages
-                $result = & pipx @cmdArgs 2>&1
-                return $result
-            }
-            catch {
-                Write-Error "Failed to run pipx install: $($_.Exception.Message)"
-                return $null
-            }
-        }
     }
-
-    Set-AgentModeFunction -Name 'Install-PythonApp' -Body ${function:Install-PythonApp}
-    if (-not (Get-Alias pipx-install -ErrorAction SilentlyContinue)) {
-        if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
-            Set-AgentModeAlias -Name 'pipx-install' -Target 'Install-PythonApp'
-        }
-        else {
-            Set-AgentModeAlias -Name 'pipx-install' -Target 'Install-PythonApp'
-        }
-    }
-
-    <#
-    .SYNOPSIS
-        Runs pipx-installed applications.
-
-    .DESCRIPTION
-        Wrapper function for pipx run, which runs Python applications in isolated
-        environments without installing them globally.
-
-    .PARAMETER Package
-        Package name to run.
-
-    .PARAMETER Arguments
-        Arguments to pass to the application.
-        Can be used multiple times or as an array.
-
-    .EXAMPLE
-        Invoke-Pipx black --check .
-        Runs black in an isolated environment to check code formatting.
-
-    .EXAMPLE
-        Invoke-Pipx pytest tests/
-        Runs pytest in an isolated environment.
-
-    .OUTPUTS
-        System.String. Output from pipx run execution.
-    #>
-    function Invoke-Pipx {
-        [CmdletBinding()]
-        [OutputType([string])]
-        param(
-            [Parameter(Mandatory)]
-            [string]$Package,
-
-            [Parameter(ValueFromRemainingArguments = $true)]
-            [string[]]$Arguments
-        )
-
-        if (-not (Test-CachedCommand 'pipx')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'pipx' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: pip install pipx (or python -m pip install pipx)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'pipx' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "pipx not found. $installHint"
-            }
-            return $null
-        }
-
-        if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-            return Invoke-WithWideEvent -OperationName 'python.pipx.run' -Context @{
-                package             = $Package
-                has_additional_args = ($null -ne $Arguments)
-            } -ScriptBlock {
-                $cmdArgs = @('run', $Package)
-                if ($Arguments) {
-                    $cmdArgs += $Arguments
-                }
-                & pipx @cmdArgs 2>&1
-            }
-        }
-        else {
-            try {
-                $cmdArgs = @('run', $Package)
-                if ($Arguments) {
-                    $cmdArgs += $Arguments
-                }
-                $result = & pipx @cmdArgs 2>&1
-                return $result
-            }
-            catch {
-                Write-Error "Failed to run pipx: $($_.Exception.Message)"
-                return $null
-            }
-        }
-    }
-
-    Set-AgentModeFunction -Name 'Invoke-Pipx' -Body ${function:Invoke-Pipx}
-    if (-not (Get-Alias pipx -ErrorAction SilentlyContinue)) {
-        if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
-            Set-AgentModeAlias -Name 'pipx' -Target 'Invoke-Pipx'
-        }
-        else {
-            Set-AgentModeAlias -Name 'pipx' -Target 'Invoke-Pipx'
-        }
-    }
-
     # ===============================================
     # Python - Python interpreter wrapper
     # ===============================================
@@ -705,146 +490,16 @@ if __name__ == "__main__":
     }
 
     Set-AgentModeFunction -Name 'New-PythonProject' -Body ${function:New-PythonProject}
-    # ===============================================
-    # Install Python Package (unified)
-    # ===============================================
-
-    <#
-    .SYNOPSIS
-        Installs Python packages using the best available tool.
-
-    .DESCRIPTION
-        Installs Python packages using the best available tool in order of preference:
-        - uv (if available) - fastest option
-        - pip (if available) - standard option
-        Falls back gracefully if neither is available.
-
-    .PARAMETER Packages
-        Package names to install.
-        Can be used multiple times or as an array.
-
-    .PARAMETER Arguments
-        Additional arguments to pass to the installer.
-        Can be used multiple times or as an array.
-
-    .EXAMPLE
-        Install-PythonPackage requests
-        Installs requests using the best available tool.
-
-    .EXAMPLE
-        Install-PythonPackage pytest --dev
-        Installs pytest as a dev dependency (uv only).
-
-    .OUTPUTS
-        System.String. Output from package installation.
-    #>
-    function Install-PythonPackage {
-        [CmdletBinding()]
-        [OutputType([string])]
-        param(
-            [Parameter(Mandatory, ValueFromRemainingArguments = $true)]
-            [string[]]$Packages,
-
-            [Parameter()]
-            [string[]]$Arguments
-        )
-
-        # Prefer uv if available (fastest)
-        if (Test-CachedCommand 'uv') {
-            try {
-                $cmdArgs = @('pip', 'install')
-                if ($Arguments) {
-                    $cmdArgs += $Arguments
-                }
-                $cmdArgs += $Packages
-                $result = & uv @cmdArgs 2>&1
-                return $result
-            }
-            catch {
-                Write-Warning "Failed to install with uv: $($_.Exception.Message). Trying pip..."
-            }
-        }
-
-        # Fallback to pip
-        if (Test-CachedCommand 'pip') {
-            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-                return Invoke-WithWideEvent -OperationName 'python.pip.install' -Context @{
-                    packages            = $Packages
-                    has_additional_args = ($null -ne $Arguments)
-                } -ScriptBlock {
-                    $cmdArgs = @('install')
-                    if ($Arguments) {
-                        $cmdArgs += $Arguments
-                    }
-                    $cmdArgs += $Packages
-                    & pip @cmdArgs 2>&1
-                }
-            }
-            else {
-                try {
-                    $cmdArgs = @('install')
-                    if ($Arguments) {
-                        $cmdArgs += $Arguments
-                    }
-                    $cmdArgs += $Packages
-                    $result = & pip @cmdArgs 2>&1
-                    return $result
-                }
-                catch {
-                    Write-Error "Failed to install with pip: $($_.Exception.Message)"
-                    return $null
-                }
-            }
-        }
-
-        # No installer available
-        $repoRoot = $null
-        if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            try {
-                $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-            }
-            catch {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-        }
-        else {
-            $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-            Get-ToolInstallHint -ToolName 'pip' -RepoRoot $repoRoot
-        }
-        else {
-            "Install pip or uv: python -m ensurepip --upgrade (or scoop install uv)"
-        }
-        if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint $installHint
-        }
-        else {
-            Write-Warning "Neither uv nor pip found. $installHint"
-        }
-        return $null
-    }
-
-    Set-AgentModeFunction -Name 'Install-PythonPackage' -Body ${function:Install-PythonPackage}
-    if (-not (Get-Alias pyinstall -ErrorAction SilentlyContinue)) {
-        if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
-            Set-AgentModeAlias -Name 'pyinstall' -Target 'Install-PythonPackage'
-        }
-        else {
-            Set-AgentModeAlias -Name 'pyinstall' -Target 'Install-PythonPackage'
-        }
-    }
-
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
-        Set-FragmentLoaded -FragmentName 'lang-python'
+        Set-FragmentLoaded -FragmentName 'lang-python-env'
     }
 }
 catch {
     if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-        Write-ProfileError -FragmentName 'lang-python' -ErrorRecord $_
+        Write-ProfileError -FragmentName 'lang-python-env' -ErrorRecord $_
     }
     else {
-        Write-Error "Failed to load lang-python fragment: $($_.Exception.Message)"
+        Write-Error "Failed to load lang-python-env fragment: $($_.Exception.Message)"
     }
 }
