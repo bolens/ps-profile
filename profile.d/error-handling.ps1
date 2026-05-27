@@ -3,6 +3,14 @@
 # Enhanced error handling and recovery mechanisms
 # ===============================================
 
+<#
+.SYNOPSIS
+    Enhanced error handling and recovery mechanisms.
+.DESCRIPTION
+    Loads the error handling diagnostics module providing structured error
+    recovery helpers and profile error reporting functions.
+#>
+
 # Source error handling diagnostic module
 # Tier: optional
 # Dependencies: bootstrap, env

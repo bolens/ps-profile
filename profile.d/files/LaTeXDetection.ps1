@@ -44,10 +44,11 @@ function Test-DocumentLatexEngineAvailable {
         
         foreach ($binPath in $scoopMiktexBinPaths) {
             if ($binPath -and -not [string]::IsNullOrWhiteSpace($binPath) -and (Test-Path -LiteralPath $binPath)) {
-                # Check for engines in this directory
-                if (Test-Path (Join-Path $binPath 'pdflatex.exe')) { return 'pdflatex' }
-                if (Test-Path (Join-Path $binPath 'xelatex.exe')) { return 'xelatex' }
-                if (Test-Path (Join-Path $binPath 'luatex.exe')) { return 'luatex' }
+                # Check for engines in this directory (exe for Windows, bare name for Unix)
+                $exeExt = if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') { '.exe' } else { '' }
+                if (Test-Path (Join-Path $binPath "pdflatex$exeExt")) { return 'pdflatex' }
+                if (Test-Path (Join-Path $binPath "xelatex$exeExt")) { return 'xelatex' }
+                if (Test-Path (Join-Path $binPath "luatex$exeExt"))   { return 'luatex' }
             }
         }
     }

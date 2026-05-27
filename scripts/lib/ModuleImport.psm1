@@ -45,17 +45,18 @@ $pathResolutionModulePath = Join-Path $PSScriptRoot 'path' 'PathResolution.psm1'
 $cacheModulePath = Join-Path $PSScriptRoot 'utilities' 'Cache.psm1'
 
 # Use Import-ModuleSafely if available, otherwise fall back to manual check
+# -Global ensures PathResolution's Get-RepoRoot is visible in caller's scope
 if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
-    Import-ModuleSafely -ModulePath $pathResolutionModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-    Import-ModuleSafely -ModulePath $cacheModulePath -ErrorAction SilentlyContinue
+    Import-ModuleSafely -ModulePath $pathResolutionModulePath -DisableNameChecking -Global -ErrorAction SilentlyContinue
+    Import-ModuleSafely -ModulePath $cacheModulePath -Global -ErrorAction SilentlyContinue
 }
 else {
     # Fallback to manual validation
     if ($pathResolutionModulePath -and -not [string]::IsNullOrWhiteSpace($pathResolutionModulePath) -and (Test-Path -LiteralPath $pathResolutionModulePath)) {
-        Import-Module $pathResolutionModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+        Import-Module $pathResolutionModulePath -DisableNameChecking -Global -ErrorAction SilentlyContinue
     }
     if ($cacheModulePath -and -not [string]::IsNullOrWhiteSpace($cacheModulePath) -and (Test-Path -LiteralPath $cacheModulePath)) {
-        Import-Module $cacheModulePath -ErrorAction SilentlyContinue
+        Import-Module $cacheModulePath -Global -ErrorAction SilentlyContinue
     }
 }
 

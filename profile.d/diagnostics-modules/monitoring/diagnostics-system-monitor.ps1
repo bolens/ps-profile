@@ -17,7 +17,126 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 try {
     if ($null -ne (Get-Variable -Name 'SystemMonitorLoaded' -Scope Global -ErrorAction SilentlyContinue)) { return }
 
-    # System monitoring dashboard
+    # -----------------------------------------------------------------------
+    # Private cross-platform data helpers — used by all display functions below
+    # -----------------------------------------------------------------------
+    function script:Get-XPlatCpuInfo {
+        if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
+            return Get-CimInstance Win32_Processor -ErrorAction Stop
+        }
+        $cpuinfo = Get-Content '/proc/cpuinfo' -ErrorAction SilentlyContinue
+        if ($IsMacOS) {
+            return [PSCustomObject]@{
+                Name                      = (& sysctl -n machdep.cpu.brand_string 2>/dev/null)
+                Manufacturer              = (& sysctl -n machdep.cpu.vendor      2>/dev/null)
+                MaxClockSpeed             = $null
+                NumberOfCores             = [int](& sysctl -n hw.physicalcpu 2>/dev/null)
+                NumberOfLogicalProcessors = [int](& sysctl -n hw.logicalcpu  2>/dev/null)
+                Architecture              = 'arm64/x86_64'
+            }
+        }
+        if ($cpuinfo) {
+            $modelName   = ($cpuinfo | Select-String '^model name\s*:(.+)' | Select-Object -First 1)?.Matches[0]?.Groups[1]?.Value?.Trim()
+            $vendor      = ($cpuinfo | Select-String '^vendor_id\s*:(.+)'  | Select-Object -First 1)?.Matches[0]?.Groups[1]?.Value?.Trim()
+            $physCores   = ($cpuinfo | Select-String '^cpu cores\s*:(.+)'  | Select-Object -First 1)?.Matches[0]?.Groups[1]?.Value?.Trim()
+            $logicalProc = ($cpuinfo | Select-String '^processor\s*:'      | Measure-Object).Count
+            $maxMHz      = ($cpuinfo | Select-String '^cpu MHz\s*:(.+)'    | ForEach-Object { [double]$_.Matches[0].Groups[1].Value } | Measure-Object -Maximum).Maximum
+            return [PSCustomObject]@{
+                Name                      = $modelName ?? 'Unknown'
+                Manufacturer              = $vendor    ?? 'Unknown'
+                MaxClockSpeed             = if ($maxMHz) { [int]$maxMHz } else { $null }
+                NumberOfCores             = if ($physCores) { [int]$physCores } else { $logicalProc }
+                NumberOfLogicalProcessors = $logicalProc
+                Architecture              = (& uname -m 2>/dev/null)
+            }
+        }
+        return $null
+    }
+
+    function script:Get-XPlatCpuUsage {
+        if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
+            return (Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction Stop).CounterSamples.CookedValue
+        }
+        if (Test-Path '/proc/stat') {
+            # Two-sample delta for accurate idle %
+            $s1 = (Get-Content '/proc/stat')[0] -split '\s+' | Select-Object -Skip 1 | ForEach-Object { [long]$_ }
+            Start-Sleep -Milliseconds 200
+            $s2 = (Get-Content '/proc/stat')[0] -split '\s+' | Select-Object -Skip 1 | ForEach-Object { [long]$_ }
+            $idle1 = $s1[3]; $total1 = ($s1 | Measure-Object -Sum).Sum
+            $idle2 = $s2[3]; $total2 = ($s2 | Measure-Object -Sum).Sum
+            $dTotal = $total2 - $total1; $dIdle  = $idle2  - $idle1
+            if ($dTotal -gt 0) { return [math]::Round((1 - $dIdle / $dTotal) * 100, 1) }
+        }
+        return $null
+    }
+
+    function script:Get-XPlatMemoryInfo {
+        if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
+            return Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
+        }
+        if ($IsMacOS) {
+            $total = [long](& sysctl -n hw.memsize 2>/dev/null)
+            # vm_stat gives pages; page size typically 4096
+            $vmstat = & vm_stat 2>/dev/null
+            $free   = ([long]($vmstat | Select-String 'Pages free:\s+(\d+)' | ForEach-Object { $_.Matches[0].Groups[1].Value }) + 0) * 4096
+            return [PSCustomObject]@{
+                TotalVisibleMemorySize = [long]($total / 1KB)
+                FreePhysicalMemory     = [long]($free  / 1KB)
+                LastBootUpTime         = $null  # macOS: set separately if needed
+            }
+        }
+        if (Test-Path '/proc/meminfo') {
+            $lines   = Get-Content '/proc/meminfo'
+            $total   = [long]($lines | Select-String '^MemTotal:\s+(\d+)'     | ForEach-Object { $_.Matches[0].Groups[1].Value })
+            $avail   = [long]($lines | Select-String '^MemAvailable:\s+(\d+)' | ForEach-Object { $_.Matches[0].Groups[1].Value })
+            # Approximate LastBootUpTime from /proc/uptime
+            $bootTime = $null
+            if (Test-Path '/proc/uptime') {
+                $uptimeSecs = [double](Get-Content '/proc/uptime').Split(' ')[0]
+                $bootTime   = (Get-Date).AddSeconds(-$uptimeSecs)
+            }
+            return [PSCustomObject]@{
+                TotalVisibleMemorySize = $total
+                FreePhysicalMemory     = $avail
+                LastBootUpTime         = $bootTime
+            }
+        }
+        return $null
+    }
+
+    function script:Get-XPlatDiskInfo {
+        if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
+            return Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 }
+        }
+        # Linux/macOS: use df -P for POSIX output (bytes via -k for KB)
+        $dfLines = (& df -Pk 2>/dev/null) | Select-Object -Skip 1
+        $drives = foreach ($line in $dfLines) {
+            $parts = $line -split '\s+'
+            if ($parts.Count -ge 6) {
+                $totalKB = [long]$parts[1]; $usedKB = [long]$parts[2]; $freeKB = [long]$parts[3]
+                $mountPoint = $parts[5]
+                # Skip tmpfs, devtmpfs, overlay etc — only physical/network mounts
+                if ($parts[0] -notmatch '^(tmpfs|devtmpfs|overlay|none|udev|cgroupfs|cgroup|proc|sysfs|devpts)') {
+                    [PSCustomObject]@{
+                        DeviceID   = $mountPoint
+                        FileSystem = 'N/A'
+                        Size       = $totalKB * 1KB
+                        FreeSpace  = $freeKB  * 1KB
+                    }
+                }
+            }
+        }
+        return $drives
+    }
+
+    function script:Get-XPlatRootDisk {
+        # Returns a single disk object for the root/system drive (C: on Windows, / on Linux)
+        if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
+            return Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'" -ErrorAction SilentlyContinue
+        }
+        return Get-XPlatDiskInfo | Where-Object { $_.DeviceID -eq '/' } | Select-Object -First 1
+    }
+    # -----------------------------------------------------------------------
     <#
     .SYNOPSIS
         Shows a comprehensive system status dashboard.
@@ -41,9 +160,9 @@ try {
         Write-Host "`n🧠 CPU Information:" -ForegroundColor Yellow
         try {
             $cpuStartTime = [DateTime]::Now
-            $cpu = Get-CimInstance Win32_Processor -ErrorAction Stop
+            $cpu = Get-XPlatCpuInfo
             try {
-                $cpuUsage = (Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction Stop).CounterSamples.CookedValue
+                $cpuUsage = Get-XPlatCpuUsage
                 $cpuPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                     Format-LocaleNumber $cpuUsage -Format 'N1'
                 }
@@ -102,7 +221,7 @@ try {
         # Memory Information
         Write-Host "`n💾 Memory Information:" -ForegroundColor Green
         try {
-            $memory = Get-CimInstance Win32_OperatingSystem
+            $memory = Get-XPlatMemoryInfo
             $totalMemory = [math]::Round($memory.TotalVisibleMemorySize / 1MB, 1)
             $freeMemory = [math]::Round($memory.FreePhysicalMemory / 1MB, 1)
             $usedMemory = $totalMemory - $freeMemory
@@ -155,7 +274,7 @@ try {
         # Disk Information
         Write-Host "`n💿 Disk Information:" -ForegroundColor Magenta
         try {
-            $drives = Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 } # Fixed drives only
+            $drives = Get-XPlatDiskInfo # Fixed/physical drives only
             foreach ($drive in $drives) {
                 $totalSpace = [math]::Round($drive.Size / 1GB, 1)
                 $freeSpace = [math]::Round($drive.FreeSpace / 1GB, 1)
@@ -244,7 +363,8 @@ try {
         # System Uptime
         Write-Host "`n⏰ System Uptime:" -ForegroundColor White
         try {
-            $uptime = (Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+            $_mem = Get-XPlatMemoryInfo
+            $uptime = if ($_mem?.LastBootUpTime) { (Get-Date) - $_mem.LastBootUpTime } else { $null }
             $daysStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                 Format-LocaleNumber $uptime.Days -Format 'N0'
             }
@@ -313,11 +433,11 @@ try {
     function Show-SystemStatus {
         try {
             # CPU
-            $cpuUsage = (Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction SilentlyContinue).CounterSamples.CookedValue
+            $cpuUsage = try { Get-XPlatCpuUsage } catch { $null }
             $cpuColor = if ($cpuUsage -gt 80) { "Red" } elseif ($cpuUsage -gt 60) { "Yellow" } else { "Green" }
 
             # Memory
-            $memory = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
+            $memory = try { Get-XPlatMemoryInfo } catch { $null }
             if ($memory) {
                 $totalMemory = $memory.TotalVisibleMemorySize / 1MB
                 $freeMemory = $memory.FreePhysicalMemory / 1MB
@@ -326,7 +446,7 @@ try {
             }
 
             # Disk (C: drive)
-            $disk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'" -ErrorAction SilentlyContinue
+            $disk = try { Get-XPlatRootDisk } catch { $null }
             if ($disk -and $disk.Size -gt 0) {
                 $diskUsagePercent = (($disk.Size - $disk.FreeSpace) / $disk.Size) * 100
                 $diskColor = if ($diskUsagePercent -gt 95) { "Red" } elseif ($diskUsagePercent -gt 85) { "Yellow" } else { "Green" }
@@ -377,7 +497,7 @@ try {
         Write-Host "=================" -ForegroundColor Yellow
 
         try {
-            $cpu = Get-CimInstance Win32_Processor
+            $cpu = Get-XPlatCpuInfo
             Write-Host "Processor Details:"
             Write-Host ("  Name: {0}" -f $cpu.Name)
             Write-Host ("  Manufacturer: {0}" -f $cpu.Manufacturer)
@@ -389,7 +509,7 @@ try {
             # Current usage
             Write-Host "`nCurrent Usage:"
             try {
-                $cpuUsage = (Get-Counter '\Processor(_Total)\% Processor Time' -SampleInterval 1 -MaxSamples 1 -ErrorAction Stop).CounterSamples.CookedValue
+                $cpuUsage = Get-XPlatCpuUsage
                 $cpuPercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                     Format-LocaleNumber $cpuUsage -Format 'N1'
                 }
@@ -437,7 +557,7 @@ try {
         Write-Host "====================" -ForegroundColor Green
 
         try {
-            $memory = Get-CimInstance Win32_OperatingSystem
+            $memory = Get-XPlatMemoryInfo
             $totalPhysical = [math]::Round($memory.TotalVisibleMemorySize / 1MB, 1)
             $freePhysical = [math]::Round($memory.FreePhysicalMemory / 1MB, 1)
             $usedPhysical = $totalPhysical - $freePhysical
@@ -542,7 +662,7 @@ try {
         Write-Host "==================" -ForegroundColor Magenta
 
         try {
-            $drives = Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 }
+            $drives = Get-XPlatDiskInfo
             foreach ($drive in $drives) {
                 $totalSpace = [math]::Round($drive.Size / 1GB, 2)
                 $freeSpace = [math]::Round($drive.FreeSpace / 1GB, 2)

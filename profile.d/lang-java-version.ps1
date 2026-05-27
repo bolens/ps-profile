@@ -151,7 +151,8 @@ try {
             # First, check standard environment variables (highest priority)
             # Check if existing JAVA_HOME matches the requested version
             if ($env:JAVA_HOME -and (Test-Path -LiteralPath $env:JAVA_HOME -PathType Container)) {
-                $javaExe = Join-Path $env:JAVA_HOME 'bin' 'java.exe'
+                $javaBin = if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') { 'java.exe' } else { 'java' }
+                $javaExe = Join-Path $env:JAVA_HOME 'bin' $javaBin
                 if (Test-Path -LiteralPath $javaExe) {
                     try {
                         $currentVersion = & $javaExe -version 2>&1 | Select-String -Pattern "version `"(\d+)" | ForEach-Object { $_.Matches[0].Groups[1].Value }
@@ -171,7 +172,7 @@ try {
             foreach ($envVar in $javaEnvVars) {
                 $envValue = (Get-Variable -Name "env:$envVar" -ErrorAction SilentlyContinue).Value
                 if ($envValue -and (Test-Path -LiteralPath $envValue -PathType Container)) {
-                    $javaExe = Join-Path $envValue 'bin' 'java.exe'
+                    $javaExe = Join-Path $envValue 'bin' $javaBin
                     if (Test-Path -LiteralPath $javaExe) {
                         try {
                             $currentVersion = & $javaExe -version 2>&1 | Select-String -Pattern "version `"(\d+)" | ForEach-Object { $_.Matches[0].Groups[1].Value }

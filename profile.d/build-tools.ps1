@@ -3,6 +3,15 @@
 # Build tools and dev servers helpers (guarded)
 # ===============================================
 
+<#
+.SYNOPSIS
+    Build tools and dev servers helpers.
+.DESCRIPTION
+    Loads the dev-tools build module, providing helpers for build systems
+    and development servers (npm, vite, webpack, etc.).
+    All functions are guarded with tool availability checks.
+#>
+
 # Source build tools module
 # Use standardized module loading if available, otherwise fall back to manual loading
 # Tier: standard

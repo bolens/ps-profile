@@ -5,6 +5,15 @@
 # Tier: essential
 # Dependencies: bootstrap, env
 
+<#
+.SYNOPSIS
+    PSReadLine configuration for enhanced command-line editing.
+.DESCRIPTION
+    Configures PSReadLine with key bindings, history settings, prediction,
+    and syntax coloring for an improved interactive shell experience.
+    Gracefully skips if PSReadLine is unavailable.
+#>
+
 # PSReadLine provides enhanced command-line editing experience
 # This fragment configures PSReadLine if available
 

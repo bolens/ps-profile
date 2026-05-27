@@ -187,11 +187,11 @@ try {
         if (Test-CachedCommand 'lms') {
             $lmsCmd = 'lms'
         }
-        # Also check for lms.exe in common locations
-        elseif (Test-Path -LiteralPath "$env:USERPROFILE\.lmstudio\bin\lms.exe") {
+        # Also check for lms.exe in common Windows locations
+        elseif (($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') -and $env:USERPROFILE -and (Test-Path -LiteralPath "$env:USERPROFILE\.lmstudio\bin\lms.exe")) {
             $lmsCmd = "$env:USERPROFILE\.lmstudio\bin\lms.exe"
         }
-        elseif (Test-Path -LiteralPath "$env:USERPROFILE\.cache\lm-studio\bin\lms.exe") {
+        elseif (($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') -and $env:USERPROFILE -and (Test-Path -LiteralPath "$env:USERPROFILE\.cache\lm-studio\bin\lms.exe")) {
             $lmsCmd = "$env:USERPROFILE\.cache\lm-studio\bin\lms.exe"
         }
 

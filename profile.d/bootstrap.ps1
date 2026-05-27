@@ -3,6 +3,17 @@
 # Core bootstrap helpers for profile fragments
 # ===============================================
 
+<#
+.SYNOPSIS
+    Core bootstrap loader for profile fragment helpers.
+.DESCRIPTION
+    Loads all bootstrap modules in dependency order from profile.d/bootstrap/.
+    Initializes global state, error handling, tool detection, and fragment
+    management infrastructure required by all other profile fragments.
+.NOTES
+    Load order: must be first fragment sourced by the profile loader.
+#>
+
 # Load bootstrap modules in dependency order
 # Tier: core
 try {

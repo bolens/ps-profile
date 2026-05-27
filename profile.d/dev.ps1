@@ -3,6 +3,15 @@
 # Development shortcuts (docker, podman, k8s, node, python, cargo)
 # ===============================================
 
+<#
+.SYNOPSIS
+    Development shortcut aliases for common container and language tools.
+.DESCRIPTION
+    Provides one-letter and short aliases for frequently used tools:
+    - d: docker, dc: docker-compose, k: kubectl, n: node, p: python, c: cargo
+    All aliases are guarded with tool availability checks.
+#>
+
 # Docker shortcuts
 # d: docker wrapper
 # Tier: standard

@@ -181,7 +181,8 @@ function Get-AwsCredentials {
     
     try {
         $profiles = @()
-        $credentialsPath = Join-Path $env:USERPROFILE '.aws' 'credentials'
+        $userHome = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { '~' }
+        $credentialsPath = Join-Path $userHome '.aws' 'credentials'
         
         if (Test-Path -LiteralPath $credentialsPath) {
             $content = Get-Content -LiteralPath $credentialsPath

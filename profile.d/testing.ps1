@@ -3,6 +3,15 @@
 # Testing frameworks helpers (guarded)
 # ===============================================
 
+<#
+.SYNOPSIS
+    Testing framework helpers (Pester, pytest, etc.).
+.DESCRIPTION
+    Loads the dev-tools testing module providing helpers for running tests
+    with Pester, pytest, Jest, and other testing frameworks.
+    All functions are guarded with tool availability checks.
+#>
+
 # Source testing framework module
 # Use standardized module loading if available, otherwise fall back to manual loading
 # Tier: standard

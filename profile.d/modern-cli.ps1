@@ -3,6 +3,15 @@
 # Modern CLI tools helpers (guarded)
 # ===============================================
 
+<#
+.SYNOPSIS
+    Modern CLI tool helpers (eza, bat, fd, ripgrep, etc.).
+.DESCRIPTION
+    Loads the CLI tools module providing enhanced alternatives to classic
+    Unix tools: eza (ls), bat (cat), fd (find), rg (grep), delta (diff),
+    zoxide (cd), and others. All helpers are guarded with availability checks.
+#>
+
 # Source modern CLI tools module
 # Tier: standard
 # Dependencies: bootstrap, env

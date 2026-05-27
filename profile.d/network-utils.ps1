@@ -3,6 +3,14 @@
 # Advanced network utilities with error recovery and timeout handling
 # ===============================================
 
+<#
+.SYNOPSIS
+    Advanced network utilities with error recovery and timeout handling.
+.DESCRIPTION
+    Loads the network utilities module providing DNS lookup helpers,
+    HTTP request wrappers, port scanning, and network diagnostics functions.
+#>
+
 # Source advanced network utility module
 # Tier: optional
 # Dependencies: bootstrap, env

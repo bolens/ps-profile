@@ -3,6 +3,14 @@
 # Profile diagnostics and health checks
 # ===============================================
 
+<#
+.SYNOPSIS
+    Profile diagnostics and health checks.
+.DESCRIPTION
+    Loads the diagnostics module providing profile health checks, fragment
+    loading status inspection, and environment diagnostics functions.
+#>
+
 # Source profile diagnostic module
 # Use standardized module loading if available, otherwise fall back to manual loading
 # Tier: standard

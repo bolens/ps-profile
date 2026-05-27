@@ -50,7 +50,8 @@ function global:Initialize-SmartPrompt {
                 $promptParts += "$env:USERNAME@$env:COMPUTERNAME"
                 
                 # Current directory (shortened)
-                $shortPath = $currentPath -replace [regex]::Escape($env:USERPROFILE), "~"
+                $_homeDir = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { $null }
+                $shortPath = if ($_homeDir) { $currentPath -replace [regex]::Escape($_homeDir), "~" } else { $currentPath }
                 if ($shortPath.Length -gt 40) {
                     $shortPath = "..." + $shortPath.Substring($shortPath.Length - 37)
                 }

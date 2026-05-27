@@ -3,6 +3,14 @@
 # System monitoring dashboard
 # ===============================================
 
+<#
+.SYNOPSIS
+    System monitoring dashboard.
+.DESCRIPTION
+    Loads the system monitoring module providing real-time system resource
+    dashboards, CPU/memory/disk/network usage displays, and process monitoring.
+#>
+
 # Source system monitor diagnostic module
 # Tier: optional
 # Dependencies: bootstrap, env

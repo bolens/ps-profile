@@ -3,6 +3,14 @@
 # Enhanced history search and navigation
 # ===============================================
 
+<#
+.SYNOPSIS
+    Enhanced history search and navigation.
+.DESCRIPTION
+    Loads the utilities history module providing fuzzy history search,
+    history deduplication, and interactive history navigation helpers.
+#>
+
 # Source enhanced history utility module
 # Tier: optional
 # Dependencies: bootstrap, env

@@ -3,6 +3,16 @@
 # SSH agent and key helpers
 # ===============================================
 
+<#
+.SYNOPSIS
+    SSH agent and key management helpers.
+.DESCRIPTION
+    Provides functions and aliases for SSH key management:
+    - Get-SSHKeys (ssh-list): list loaded keys
+    - Add-SSHKeyIfNotLoaded (ssh-add-if): idempotent key loader
+    - Start-SSHAgent (ssh-agent-start): start agent if not running
+#>
+
 # Show loaded keys
 # Tier: essential
 # Dependencies: bootstrap, env

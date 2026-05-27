@@ -3,6 +3,14 @@
 # Command timing and performance insights
 # ===============================================
 
+<#
+.SYNOPSIS
+    Command timing and performance insights for the profile.
+.DESCRIPTION
+    Loads the performance insights diagnostics module providing command
+    execution timing, profile load time analysis, and performance reporting.
+#>
+
 # Source performance insights diagnostic module
 # Tier: optional
 # Dependencies: bootstrap, env

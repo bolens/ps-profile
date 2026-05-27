@@ -6,6 +6,16 @@
 # Functions automatically detect available engines and prefer Docker, falling back to Podman.
 # All helpers are idempotent and check for engine availability before executing commands.
 
+<#
+.SYNOPSIS
+    Container engine helpers for Docker and Podman.
+.DESCRIPTION
+    Loads container management modules providing unified helpers that work
+    with either Docker or Podman. Automatically detects available engines
+    and prefers Docker, falling back to Podman.
+    All helpers are idempotent and check engine availability before executing.
+#>
+
 # Load container utility modules (loaded eagerly as they provide commonly-used container helpers)
 # Use standardized module loading if available, otherwise fall back to manual loading
 # Tier: essential
