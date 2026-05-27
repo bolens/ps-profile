@@ -20,7 +20,7 @@
     Depends on ToolInstallRegistry.ps1 for registry data and fallback chains.
 
 .NOTES
-    Split from MissingToolWarnings.ps1 for modularity. Load after ToolInstallRegistry.ps1.
+    Load after ToolInstallRegistry.ps1.
 #>
 
 <#

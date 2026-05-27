@@ -22,7 +22,7 @@
     - Show-MissingToolWarningsTable: display a summary table of all known tools
 
 .NOTES
-    Split from MissingToolWarnings.ps1 for modularity. Load before InstallHintResolver.ps1.
+    Load before InstallHintResolver.ps1.
 #>
 
 <#
