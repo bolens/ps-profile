@@ -7,6 +7,26 @@
 
 <#
 .SYNOPSIS
+    Tool installation method registry and preference-aware fallback chains.
+
+.DESCRIPTION
+    Provides the core registry and resolution functions used by InstallHintResolver.ps1
+    and Write-MissingToolWarning to generate accurate install hints:
+    - Get-ToolInstallMethodRegistry: hashtable of tool -> install method mappings
+    - Get-ToolSpecificInstallMethod: look up a single tool's preferred method
+    - Test-CommandAvailable: thin wrapper around Get-Command with error suppression
+    - Get-InstallMethodFallbackChain: ordered fallback list for a tool type
+    - Get-SystemPackageManagerFallbackChain: platform-aware package manager order
+    - Test-PreferenceAwareInstallPreferences: validate current env-var preferences
+    - Set-PreferenceAwareInstallPreferences: set env-var preferences interactively
+    - Show-MissingToolWarningsTable: display a summary table of all known tools
+
+.NOTES
+    Split from MissingToolWarnings.ps1 for modularity. Load before InstallHintResolver.ps1.
+#>
+
+<#
+.SYNOPSIS
     Tool-specific installation method registry.
 .DESCRIPTION
     Returns a hashtable mapping tool names to their preferred installation methods

@@ -10,6 +10,21 @@
 
 <#
 .SYNOPSIS
+    Preference-aware install hint resolution for missing tool warnings.
+
+.DESCRIPTION
+    Provides Get-PreferenceAwareInstallHint, which generates install hint strings
+    that respect user-configured package manager preferences via environment variables
+    (PS_PYTHON_PACKAGE_MANAGER, PS_NODE_PACKAGE_MANAGER, PS_PYTHON_RUNTIME, etc.).
+    Falls back to sensible platform defaults when preferences are not set.
+    Depends on ToolInstallRegistry.ps1 for registry data and fallback chains.
+
+.NOTES
+    Split from MissingToolWarnings.ps1 for modularity. Load after ToolInstallRegistry.ps1.
+#>
+
+<#
+.SYNOPSIS
     Gets a preference-aware install hint for a tool.
 .DESCRIPTION
     Generates an install hint string that respects user preferences for:
