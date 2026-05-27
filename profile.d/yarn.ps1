@@ -45,7 +45,7 @@ function Invoke-Yarn {
     )
     
     if (Test-CachedCommand yarn) {
-        & rn @Arguments
+        & yarn @Arguments
     }
     else {
         $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
@@ -84,6 +84,44 @@ function Add-YarnPackage {
     
     if (Test-CachedCommand yarn) {
         & yarn add @Arguments
+    }
+    else {
+        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
+        }
+        else {
+            'Install with: scoop install yarn'
+        }
+        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+    }
+}
+
+# Yarn remove - remove packages from dependencies
+<#
+.SYNOPSIS
+    Removes packages from project dependencies.
+
+.DESCRIPTION
+    Wrapper for yarn remove command.
+
+.PARAMETER Arguments
+    Arguments to pass to yarn remove.
+
+.EXAMPLE
+    Remove-YarnPackage express
+
+.EXAMPLE
+    Remove-YarnPackage typescript -D
+#>
+function Remove-YarnPackage {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Arguments
+    )
+    
+    if (Test-CachedCommand yarn) {
+        & yarn remove @Arguments
     }
     else {
         $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
@@ -221,225 +259,6 @@ function Update-YarnGlobalPackages {
     Update-YarnSelf
     Updates Yarn to the latest version.
 #>
-function Update-YarnSelf {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn set version latest
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Create aliases for short forms
-Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-#>
-function Update-YarnPackages {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn upgrade
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Yarn global upgrade - update global packages
-<#
-.SYNOPSIS
-    Updates all globally installed Yarn packages to their latest versions.
-.DESCRIPTION
-    Updates all globally installed packages. This is equivalent to running 'yarn global upgrade'.
-.EXAMPLE
-    Update-YarnGlobalPackages
-    Updates all globally installed Yarn packages.
-#>
-function Update-YarnGlobalPackages {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn global upgrade
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Yarn self-update - update yarn itself
-<#
-.SYNOPSIS
-    Updates Yarn to the latest version.
-.DESCRIPTION
-    Updates Yarn itself to the latest version using 'yarn set version latest'.
-.EXAMPLE
-    Update-YarnSelf
-    Updates Yarn to the latest version.
-#>
-function Update-YarnSelf {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn set version latest
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Create aliases for short forms
-Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-function Update-YarnSelf {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn set version latest
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Create aliases for short forms
-Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-function Update-YarnSelf {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn set version latest
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Create aliases for short forms
-Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-function Update-YarnSelf {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn set version latest
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Create aliases for short forms
-Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-function Update-YarnSelf {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand yarn) {
-        & yarn set version latest
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
-    }
-}
-
-# Create aliases for short forms
-Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
 function Update-YarnSelf {
     [CmdletBinding()]
     param()

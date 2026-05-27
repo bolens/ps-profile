@@ -166,7 +166,6 @@ function Update-BunSelf {
 Set-AgentModeAlias -Name 'bunx' -Target 'Invoke-Bunx'
 Set-AgentModeAlias -Name 'bun-run' -Target 'Invoke-BunRun'
 Set-AgentModeAlias -Name 'bun-add' -Target 'Add-BunPackage'
-Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
 Set-AgentModeAlias -Name 'bun-upgrade' -Target 'Update-BunSelf'
 
 # Bun remove package - remove npm packages
@@ -217,38 +216,3 @@ function Remove-BunPackage {
 
 # Create aliases for Remove-BunPackage
 Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
-
-# Bun upgrade - update Bun itself
-<#
-.SYNOPSIS
-    Updates Bun to the latest version.
-.DESCRIPTION
-    Updates Bun itself to the latest version using 'bun upgrade'.
-.EXAMPLE
-    Update-BunSelf
-    Updates Bun to the latest version.
-#>
-function Update-BunSelf {
-    [CmdletBinding()]
-    param()
-    
-    if (Test-CachedCommand bun) {
-        & bun upgrade
-    }
-    else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'bun' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install bun'
-        }
-        Write-MissingToolWarning -Tool 'bun' -InstallHint $installHint
-    }
-}
-
-# Create aliases for short forms
-Set-AgentModeAlias -Name 'bunx' -Target 'Invoke-Bunx'
-Set-AgentModeAlias -Name 'bun-run' -Target 'Invoke-BunRun'
-Set-AgentModeAlias -Name 'bun-add' -Target 'Add-BunPackage'
-Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
-Set-AgentModeAlias -Name 'bun-upgrade' -Target 'Update-BunSelf'

@@ -331,32 +331,6 @@ function ConvertTo-Iso8601FromRfc3339 {
     _ConvertTo-Iso8601FromRfc3339 @PSBoundParameters
 }
 Set-AgentModeAlias -Name 'rfc3339-to-iso8601' -Target 'ConvertTo-Iso8601FromRfc3339'
-# Convert ISO 8601 to RFC 3339
-<#
-.SYNOPSIS
-    Converts an ISO 8601 date/time string to RFC 3339 format.
-.DESCRIPTION
-    Converts an ISO 8601 formatted date/time string to RFC 3339 format.
-    RFC 3339 is a profile of ISO 8601 with some restrictions.
-.PARAMETER Iso8601String
-    The ISO 8601 formatted date/time string to convert.
-.EXAMPLE
-    '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToRfc3339
-    
-    Converts an ISO 8601 string to RFC 3339 format.
-.OUTPUTS
-    System.String
-    Returns an RFC 3339 formatted date/time string.
-#>
-function ConvertFrom-Iso8601ToRfc3339 {
-    param(
-        [Parameter(Mandatory, ValueFromPipeline = $true)]
-        [string]$Iso8601String
-    )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-Iso8601ToRfc3339 @PSBoundParameters
-}
-Set-AgentModeAlias -Name 'iso8601-to-rfc3339' -Target 'ConvertFrom-Iso8601ToRfc3339'
 # Convert RFC 3339 to Human-readable
 <#
 .SYNOPSIS
