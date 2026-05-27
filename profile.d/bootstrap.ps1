@@ -153,6 +153,42 @@ try {
             }
         }
 
+        # Load ToolInstallRegistry (depends on MissingToolWarnings platform utilities)
+        $toolInstallRegistryPath = Join-Path $bootstrapModulesDir 'ToolInstallRegistry.ps1'
+        if ($toolInstallRegistryPath -and -not [string]::IsNullOrWhiteSpace($toolInstallRegistryPath) -and (Test-Path -LiteralPath $toolInstallRegistryPath)) {
+            try {
+                . $toolInstallRegistryPath
+            }
+            catch {
+                if ($env:PS_PROFILE_DEBUG) {
+                    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                        Write-ProfileError -ErrorRecord $_ -Context "Fragment: bootstrap (ToolInstallRegistry.ps1)" -Category 'Fragment'
+                    }
+                    else {
+                        Write-Warning "Failed to load bootstrap module ToolInstallRegistry.ps1 : $($_.Exception.Message)"
+                    }
+                }
+            }
+        }
+
+        # Load InstallHintResolver (depends on MissingToolWarnings + ToolInstallRegistry)
+        $installHintResolverPath = Join-Path $bootstrapModulesDir 'InstallHintResolver.ps1'
+        if ($installHintResolverPath -and -not [string]::IsNullOrWhiteSpace($installHintResolverPath) -and (Test-Path -LiteralPath $installHintResolverPath)) {
+            try {
+                . $installHintResolverPath
+            }
+            catch {
+                if ($env:PS_PROFILE_DEBUG) {
+                    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                        Write-ProfileError -ErrorRecord $_ -Context "Fragment: bootstrap (InstallHintResolver.ps1)" -Category 'Fragment'
+                    }
+                    else {
+                        Write-Warning "Failed to load bootstrap module InstallHintResolver.ps1 : $($_.Exception.Message)"
+                    }
+                }
+            }
+        }
+
         # Load BatchLoadingSummary (depends on global state)
         $batchLoadingSummaryPath = Join-Path $bootstrapModulesDir 'BatchLoadingSummary.ps1'
         if ($batchLoadingSummaryPath -and -not [string]::IsNullOrWhiteSpace($batchLoadingSummaryPath) -and (Test-Path -LiteralPath $batchLoadingSummaryPath)) {
