@@ -84,11 +84,5 @@ function Convert-YqToJson {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jq2json' -Target 'Convert-JqToJson'
-    Set-AgentModeAlias -Name 'yq2json' -Target 'Convert-YqToJson'
-}
-else {
-    Set-Alias -Name 'jq2json' -Value 'Convert-JqToJson' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yq2json' -Value 'Convert-YqToJson' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jq2json' -Target 'Convert-JqToJson'
+Set-AgentModeAlias -Name 'yq2json' -Target 'Convert-YqToJson'

@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & nimble outdated
     }
-    Set-Alias -Name nimble-outdated -Value Test-NimbleOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'nimble-outdated' -Target 'Test-NimbleOutdated'
     # Nimble update - update packages
     <#
     .SYNOPSIS
@@ -39,8 +38,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & nimble update
     }
-    Set-Alias -Name nimble-update -Value Update-NimblePackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'nimble-update' -Target 'Update-NimblePackages'
     # Nimble install - install packages
     <#
     .SYNOPSIS
@@ -72,9 +70,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         & nimble install @args @Packages
     }
-    Set-Alias -Name nimble-install -Value Install-NimblePackage -ErrorAction SilentlyContinue
-    Set-Alias -Name nimble-add -Value Install-NimblePackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'nimble-install' -Target 'Install-NimblePackage'
+    Set-AgentModeAlias -Name 'nimble-add' -Target 'Install-NimblePackage'
     # Nimble uninstall - remove packages
     <#
     .SYNOPSIS
@@ -106,8 +103,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         & nimble uninstall @args @Packages
     }
-    Set-Alias -Name nimble-uninstall -Value Remove-NimblePackage -ErrorAction SilentlyContinue
-    Set-Alias -Name nimble-remove -Value Remove-NimblePackage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'nimble-uninstall' -Target 'Remove-NimblePackage'
+    Set-AgentModeAlias -Name 'nimble-remove' -Target 'Remove-NimblePackage'
 }
 else {
     Write-MissingToolWarning -Tool 'nimble' -InstallHint 'Install Nim from: https://nim-lang.org/install.html or use: scoop install nim'

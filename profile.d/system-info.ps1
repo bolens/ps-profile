@@ -15,8 +15,7 @@
 function Get-SystemUptime {
     (Get-Date) - (Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime
 }
-Set-Alias -Name uptime -Value Get-SystemUptime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'uptime' -Target 'Get-SystemUptime'
 <#
 .SYNOPSIS
     Shows battery information.
@@ -26,8 +25,7 @@ Set-Alias -Name uptime -Value Get-SystemUptime -ErrorAction SilentlyContinue
 function Get-BatteryInfo {
     Get-CimInstance -ClassName Win32_Battery | Select-Object Name, EstimatedChargeRemaining, BatteryStatus, EstimatedRunTime
 }
-Set-Alias -Name battery -Value Get-BatteryInfo -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'battery' -Target 'Get-BatteryInfo'
 <#
 .SYNOPSIS
     Shows system information.
@@ -37,8 +35,7 @@ Set-Alias -Name battery -Value Get-BatteryInfo -ErrorAction SilentlyContinue
 function Get-SystemInfo {
     Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object Name, Manufacturer, Model, TotalPhysicalMemory
 }
-Set-Alias -Name sysinfo -Value Get-SystemInfo -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sysinfo' -Target 'Get-SystemInfo'
 <#
 .SYNOPSIS
     Shows CPU information.
@@ -48,8 +45,7 @@ Set-Alias -Name sysinfo -Value Get-SystemInfo -ErrorAction SilentlyContinue
 function Get-CpuInfo {
     Get-CimInstance -ClassName Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed
 }
-Set-Alias -Name cpuinfo -Value Get-CpuInfo -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cpuinfo' -Target 'Get-CpuInfo'
 <#
 .SYNOPSIS
     Shows memory information.
@@ -59,4 +55,4 @@ Set-Alias -Name cpuinfo -Value Get-CpuInfo -ErrorAction SilentlyContinue
 function Get-MemoryInfo {
     Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum | Select-Object @{ Name = "TotalMemory(GB)"; Expression = { [math]::Round(($_.Sum / 1GB), 2) } }
 }
-Set-Alias -Name meminfo -Value Get-MemoryInfo -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'meminfo' -Target 'Get-MemoryInfo'

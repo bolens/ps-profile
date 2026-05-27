@@ -25,7 +25,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Get-Command xz -ErrorAction SilentlyContinue
+            $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
                 throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
             }
@@ -62,7 +62,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Get-Command xz -ErrorAction SilentlyContinue
+            $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
                 throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
             }
@@ -103,7 +103,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Get-Command xz -ErrorAction SilentlyContinue
+            $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
                 throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
             }
@@ -139,7 +139,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Get-Command xz -ErrorAction SilentlyContinue
+            $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
                 throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
             }

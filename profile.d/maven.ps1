@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mvn versions:display-dependency-updates
     }
-    Set-Alias -Name maven-outdated -Value Test-MavenOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'maven-outdated' -Target 'Test-MavenOutdated'
     # Maven update dependencies
     <#
     .SYNOPSIS
@@ -40,8 +39,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mvn versions:use-latest-versions
     }
-    Set-Alias -Name maven-update -Value Update-MavenDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'maven-update' -Target 'Update-MavenDependencies'
     # Maven dependency:add - add dependencies
     <#
     .SYNOPSIS
@@ -75,8 +73,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mvn dependency:add -DgroupId=$GroupId -DartifactId=$ArtifactId -Dversion=$Version -Dscope=$Scope
     }
-    Set-Alias -Name maven-add -Value Add-MavenDependency -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'maven-add' -Target 'Add-MavenDependency'
     # Maven dependency:remove - remove dependencies
     <#
     .SYNOPSIS
@@ -102,7 +99,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mvn dependency:remove -DgroupId=$GroupId -DartifactId=$ArtifactId
     }
-    Set-Alias -Name maven-remove -Value Remove-MavenDependency -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'maven-remove' -Target 'Remove-MavenDependency'
 }
 else {
     Write-MissingToolWarning -Tool 'mvn' -InstallHint 'Install Maven from: https://maven.apache.org/download.cgi or use: scoop install maven'

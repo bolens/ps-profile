@@ -163,20 +163,11 @@ function Update-BunSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'bunx' -Target 'Invoke-Bunx'
-    Set-AgentModeAlias -Name 'bun-run' -Target 'Invoke-BunRun'
-    Set-AgentModeAlias -Name 'bun-add' -Target 'Add-BunPackage'
-    Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
-    Set-AgentModeAlias -Name 'bun-upgrade' -Target 'Update-BunSelf'
-}
-else {
-    Set-Alias -Name 'bunx' -Value 'Invoke-Bunx' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-run' -Value 'Invoke-BunRun' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-add' -Value 'Add-BunPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-remove' -Value 'Remove-BunPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-upgrade' -Value 'Update-BunSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'bunx' -Target 'Invoke-Bunx'
+Set-AgentModeAlias -Name 'bun-run' -Target 'Invoke-BunRun'
+Set-AgentModeAlias -Name 'bun-add' -Target 'Add-BunPackage'
+Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
+Set-AgentModeAlias -Name 'bun-upgrade' -Target 'Update-BunSelf'
 
 # Bun remove package - remove npm packages
 <#
@@ -225,12 +216,7 @@ function Remove-BunPackage {
 }
 
 # Create aliases for Remove-BunPackage
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
-}
-else {
-    Set-Alias -Name 'bun-remove' -Value 'Remove-BunPackage' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
 
 # Bun upgrade - update Bun itself
 <#
@@ -261,17 +247,8 @@ function Update-BunSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'bunx' -Target 'Invoke-Bunx'
-    Set-AgentModeAlias -Name 'bun-run' -Target 'Invoke-BunRun'
-    Set-AgentModeAlias -Name 'bun-add' -Target 'Add-BunPackage'
-    Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
-    Set-AgentModeAlias -Name 'bun-upgrade' -Target 'Update-BunSelf'
-}
-else {
-    Set-Alias -Name 'bunx' -Value 'Invoke-Bunx' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-run' -Value 'Invoke-BunRun' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-add' -Value 'Add-BunPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-remove' -Value 'Remove-BunPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'bun-upgrade' -Value 'Update-BunSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'bunx' -Target 'Invoke-Bunx'
+Set-AgentModeAlias -Name 'bun-run' -Target 'Invoke-BunRun'
+Set-AgentModeAlias -Name 'bun-add' -Target 'Add-BunPackage'
+Set-AgentModeAlias -Name 'bun-remove' -Target 'Remove-BunPackage'
+Set-AgentModeAlias -Name 'bun-upgrade' -Target 'Update-BunSelf'

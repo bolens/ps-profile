@@ -335,8 +335,7 @@ function ConvertFrom-SasToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SasToJson @PSBoundParameters
 }
-Set-Alias -Name sas-to-json -Value ConvertFrom-SasToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sas-to-json' -Target 'ConvertFrom-SasToJson'
 # Convert JSON to SAS
 <#
 .SYNOPSIS
@@ -354,8 +353,7 @@ function ConvertTo-SasFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SasFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-sas -Value ConvertTo-SasFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-sas' -Target 'ConvertTo-SasFromJson'
 # Convert SAS to CSV
 <#
 .SYNOPSIS
@@ -373,5 +371,4 @@ function ConvertFrom-SasToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SasToCsv @PSBoundParameters
 }
-Set-Alias -Name sas-to-csv -Value ConvertFrom-SasToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sas-to-csv' -Target 'ConvertFrom-SasToCsv'

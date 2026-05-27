@@ -709,13 +709,12 @@ try {
     }
 
     # Quick aliases
-    Set-Alias -Name sysinfo -Value Show-SystemDashboard -ErrorAction SilentlyContinue
-    Set-Alias -Name sysstat -Value Show-SystemStatus -ErrorAction SilentlyContinue
-    Set-Alias -Name cpuinfo -Value Show-CPUInfo -ErrorAction SilentlyContinue
-    Set-Alias -Name meminfo -Value Show-MemoryInfo -ErrorAction SilentlyContinue
-    Set-Alias -Name diskinfo -Value Show-DiskInfo -ErrorAction SilentlyContinue
-    Set-Alias -Name netinfo -Value Show-NetworkInfo -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'sysinfo' -Target 'Show-SystemDashboard'
+    Set-AgentModeAlias -Name 'sysstat' -Target 'Show-SystemStatus'
+    Set-AgentModeAlias -Name 'cpuinfo' -Target 'Show-CPUInfo'
+    Set-AgentModeAlias -Name 'meminfo' -Target 'Show-MemoryInfo'
+    Set-AgentModeAlias -Name 'diskinfo' -Target 'Show-DiskInfo'
+    Set-AgentModeAlias -Name 'netinfo' -Target 'Show-NetworkInfo'
     Set-Variable -Name 'SystemMonitorLoaded' -Value $true -Scope Global -Force
 }
 catch {

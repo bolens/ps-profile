@@ -11,8 +11,7 @@
     Extracts files from ZIP archives to specified destinations.
 #>
 function Expand-ArchiveCustom { Expand-Archive @args }
-Set-Alias -Name unzip -Value Expand-ArchiveCustom -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'unzip' -Target 'Expand-ArchiveCustom'
 # zip equivalent
 <#
 .SYNOPSIS
@@ -21,5 +20,4 @@ Set-Alias -Name unzip -Value Expand-ArchiveCustom -ErrorAction SilentlyContinue
     Compresses files and directories into ZIP archives.
 #>
 function Compress-ArchiveCustom { & Compress-Archive @args }
-Set-Alias -Name zip -Value Compress-ArchiveCustom -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'zip' -Target 'Compress-ArchiveCustom'

@@ -182,9 +182,8 @@ function ConvertTo-Hdf5FromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-Hdf5FromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-hdf5 -Value ConvertTo-Hdf5FromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-h5 -Value ConvertTo-Hdf5FromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-hdf5' -Target 'ConvertTo-Hdf5FromJson'
+Set-AgentModeAlias -Name 'json-to-h5' -Target 'ConvertTo-Hdf5FromJson'
 # Convert HDF5 to JSON
 <#
 .SYNOPSIS
@@ -202,5 +201,5 @@ function ConvertFrom-Hdf5ToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-Hdf5ToJson @PSBoundParameters
 }
-Set-Alias -Name hdf5-to-json -Value ConvertFrom-Hdf5ToJson -ErrorAction SilentlyContinue
-Set-Alias -Name h5-to-json -Value ConvertFrom-Hdf5ToJson -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'hdf5-to-json' -Target 'ConvertFrom-Hdf5ToJson'
+Set-AgentModeAlias -Name 'h5-to-json' -Target 'ConvertFrom-Hdf5ToJson'

@@ -35,6 +35,21 @@
 #>
 
 [CmdletBinding()]
+
+# Import ExitCodes for standardized exit handling
+$_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
+$_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $_ewcLibPath)) {
+    $_ewcScriptsDir = Split-Path -Parent $_ewcScriptsDir
+    $_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+}
+if (Test-Path $_ewcLibPath) {
+    Import-Module $_ewcLibPath -DisableNameChecking -ErrorAction Stop
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+} else {
+    function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
+    enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
+}
 param(
     [string[]]$Path = @('profile.d/bootstrap'),
     [string]$OutputPath = 'scripts/data/coverage'
@@ -64,7 +79,7 @@ $PSDefaultParameterValues['Remove-Item:Recurse'] = $true
 # Ensure Pester is available
 if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version -ge [version]'5.0.0' })) {
     Write-Error "Pester 5.0+ is required for coverage analysis"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 Import-Module Pester -MinimumVersion 5.0 -ErrorAction Stop
@@ -370,7 +385,7 @@ else {
 # If we have test files but no source files, we can still run the tests (just without coverage)
 if ($testFiles.Count -eq 0 -and $sourceFiles.Count -eq 0) {
     Write-Warning "No source files or test files found to analyze"
-    exit 0
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 
 # Create Pester configuration

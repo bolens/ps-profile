@@ -45,9 +45,8 @@ if (Test-CachedCommand pipenv) {
             & pipenv install @args
         }
     }
-    Set-Alias -Name pipenvinstall -Value Install-PipenvPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name pipenvadd -Value Install-PipenvPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipenvinstall' -Target 'Install-PipenvPackage'
+    Set-AgentModeAlias -Name 'pipenvadd' -Target 'Install-PipenvPackage'
     # Pipenv uninstall - remove packages
     <#
     .SYNOPSIS
@@ -79,9 +78,8 @@ if (Test-CachedCommand pipenv) {
         }
         & pipenv uninstall @args @Packages
     }
-    Set-Alias -Name pipenvuninstall -Value Remove-PipenvPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name pipenvremove -Value Remove-PipenvPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipenvuninstall' -Target 'Remove-PipenvPackage'
+    Set-AgentModeAlias -Name 'pipenvremove' -Target 'Remove-PipenvPackage'
     # Pipenv update - update packages
     <#
     .SYNOPSIS
@@ -111,7 +109,7 @@ if (Test-CachedCommand pipenv) {
             & pipenv update
         }
     }
-    Set-Alias -Name pipenvupdate -Value Update-PipenvPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pipenvupdate' -Target 'Update-PipenvPackages'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

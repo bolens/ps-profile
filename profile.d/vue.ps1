@@ -127,13 +127,6 @@ function Start-VueDev {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'vue' -Target 'Invoke-Vue'
-    Set-AgentModeAlias -Name 'vue-create' -Target 'New-VueApp'
-    Set-AgentModeAlias -Name 'vue-serve' -Target 'Start-VueDev'
-}
-else {
-    Set-Alias -Name 'vue' -Value 'Invoke-Vue' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'vue-create' -Value 'New-VueApp' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'vue-serve' -Value 'Start-VueDev' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'vue' -Target 'Invoke-Vue'
+Set-AgentModeAlias -Name 'vue-create' -Target 'New-VueApp'
+Set-AgentModeAlias -Name 'vue-serve' -Target 'Start-VueDev'

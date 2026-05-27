@@ -89,5 +89,4 @@ function Convert-NumberBase {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _Convert-NumberBase @PSBoundParameters
 }
-Set-Alias -Name base-convert -Value Convert-NumberBase -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'base-convert' -Target 'Convert-NumberBase'

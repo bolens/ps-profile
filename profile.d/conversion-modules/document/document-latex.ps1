@@ -26,7 +26,7 @@ function Initialize-FileConversion-DocumentLaTeX {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -61,7 +61,7 @@ function Initialize-FileConversion-DocumentLaTeX {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -96,7 +96,7 @@ function Initialize-FileConversion-DocumentLaTeX {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -131,7 +131,7 @@ function Initialize-FileConversion-DocumentLaTeX {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -166,7 +166,7 @@ function Initialize-FileConversion-DocumentLaTeX {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -216,8 +216,7 @@ function ConvertFrom-LaTeXToMarkdown {
         Write-Error "Failed to convert LaTeX to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name latex-to-markdown -Value ConvertFrom-LaTeXToMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'latex-to-markdown' -Target 'ConvertFrom-LaTeXToMarkdown'
 # Convert LaTeX to HTML
 <#
 .SYNOPSIS
@@ -244,8 +243,7 @@ function ConvertTo-HtmlFromLaTeX {
         Write-Error "Failed to convert LaTeX to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name latex-to-html -Value ConvertTo-HtmlFromLaTeX -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'latex-to-html' -Target 'ConvertTo-HtmlFromLaTeX'
 # Convert LaTeX to PDF
 <#
 .SYNOPSIS
@@ -272,8 +270,7 @@ function ConvertTo-PdfFromLaTeX {
         Write-Error "Failed to convert LaTeX to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name latex-to-pdf -Value ConvertTo-PdfFromLaTeX -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'latex-to-pdf' -Target 'ConvertTo-PdfFromLaTeX'
 # Convert LaTeX to DOCX
 <#
 .SYNOPSIS
@@ -300,8 +297,7 @@ function ConvertTo-DocxFromLaTeX {
         Write-Error "Failed to convert LaTeX to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name latex-to-docx -Value ConvertTo-DocxFromLaTeX -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'latex-to-docx' -Target 'ConvertTo-DocxFromLaTeX'
 # Convert LaTeX to RST
 <#
 .SYNOPSIS
@@ -328,5 +324,4 @@ function ConvertTo-RstFromLaTeX {
         Write-Error "Failed to convert LaTeX to RST: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name latex-to-rst -Value ConvertTo-RstFromLaTeX -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'latex-to-rst' -Target 'ConvertTo-RstFromLaTeX'

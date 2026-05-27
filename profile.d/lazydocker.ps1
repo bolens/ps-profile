@@ -52,9 +52,4 @@ function Invoke-LazyDocker {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ld' -Target 'Invoke-LazyDocker'
-}
-else {
-    Set-Alias -Name 'ld' -Value 'Invoke-LazyDocker' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ld' -Target 'Invoke-LazyDocker'

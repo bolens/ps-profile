@@ -49,7 +49,7 @@ function Initialize-FileConversion-DocumentOfficePlaintext {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -78,7 +78,7 @@ function Initialize-FileConversion-DocumentOfficePlaintext {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -107,7 +107,7 @@ function Initialize-FileConversion-DocumentOfficePlaintext {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -136,7 +136,7 @@ function Initialize-FileConversion-DocumentOfficePlaintext {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -165,7 +165,7 @@ function Initialize-FileConversion-DocumentOfficePlaintext {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -201,7 +201,7 @@ function Initialize-FileConversion-DocumentOfficePlaintext {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -261,14 +261,8 @@ function ConvertFrom-PlainTextToMarkdown {
         Write-Error "Failed to convert Plain Text to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'text-to-markdown' -Target 'ConvertFrom-PlainTextToMarkdown'
-    Set-AgentModeAlias -Name 'txt-to-markdown' -Target 'ConvertFrom-PlainTextToMarkdown'
-}
-else {
-    Set-Alias -Name text-to-markdown -Value ConvertFrom-PlainTextToMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name txt-to-markdown -Value ConvertFrom-PlainTextToMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'text-to-markdown' -Target 'ConvertFrom-PlainTextToMarkdown'
+Set-AgentModeAlias -Name 'txt-to-markdown' -Target 'ConvertFrom-PlainTextToMarkdown'
 
 <#
 .SYNOPSIS
@@ -299,14 +293,8 @@ function ConvertFrom-PlainTextToHtml {
         Write-Error "Failed to convert Plain Text to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'text-to-html' -Target 'ConvertFrom-PlainTextToHtml'
-    Set-AgentModeAlias -Name 'txt-to-html' -Target 'ConvertFrom-PlainTextToHtml'
-}
-else {
-    Set-Alias -Name text-to-html -Value ConvertFrom-PlainTextToHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name txt-to-html -Value ConvertFrom-PlainTextToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'text-to-html' -Target 'ConvertFrom-PlainTextToHtml'
+Set-AgentModeAlias -Name 'txt-to-html' -Target 'ConvertFrom-PlainTextToHtml'
 
 <#
 .SYNOPSIS
@@ -337,14 +325,8 @@ function ConvertFrom-PlainTextToPdf {
         Write-Error "Failed to convert Plain Text to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'text-to-pdf' -Target 'ConvertFrom-PlainTextToPdf'
-    Set-AgentModeAlias -Name 'txt-to-pdf' -Target 'ConvertFrom-PlainTextToPdf'
-}
-else {
-    Set-Alias -Name text-to-pdf -Value ConvertFrom-PlainTextToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name txt-to-pdf -Value ConvertFrom-PlainTextToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'text-to-pdf' -Target 'ConvertFrom-PlainTextToPdf'
+Set-AgentModeAlias -Name 'txt-to-pdf' -Target 'ConvertFrom-PlainTextToPdf'
 
 <#
 .SYNOPSIS
@@ -375,14 +357,8 @@ function ConvertFrom-PlainTextToDocx {
         Write-Error "Failed to convert Plain Text to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'text-to-docx' -Target 'ConvertFrom-PlainTextToDocx'
-    Set-AgentModeAlias -Name 'txt-to-docx' -Target 'ConvertFrom-PlainTextToDocx'
-}
-else {
-    Set-Alias -Name text-to-docx -Value ConvertFrom-PlainTextToDocx -ErrorAction SilentlyContinue
-    Set-Alias -Name txt-to-docx -Value ConvertFrom-PlainTextToDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'text-to-docx' -Target 'ConvertFrom-PlainTextToDocx'
+Set-AgentModeAlias -Name 'txt-to-docx' -Target 'ConvertFrom-PlainTextToDocx'
 
 <#
 .SYNOPSIS
@@ -413,14 +389,8 @@ function ConvertFrom-PlainTextToRtf {
         Write-Error "Failed to convert Plain Text to RTF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'text-to-rtf' -Target 'ConvertFrom-PlainTextToRtf'
-    Set-AgentModeAlias -Name 'txt-to-rtf' -Target 'ConvertFrom-PlainTextToRtf'
-}
-else {
-    Set-Alias -Name text-to-rtf -Value ConvertFrom-PlainTextToRtf -ErrorAction SilentlyContinue
-    Set-Alias -Name txt-to-rtf -Value ConvertFrom-PlainTextToRtf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'text-to-rtf' -Target 'ConvertFrom-PlainTextToRtf'
+Set-AgentModeAlias -Name 'txt-to-rtf' -Target 'ConvertFrom-PlainTextToRtf'
 
 <#
 .SYNOPSIS
@@ -451,18 +421,10 @@ function ConvertTo-PlainTextFromMarkdown {
         Write-Error "Failed to convert Markdown to Plain Text: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'markdown-to-text' -Target 'ConvertTo-PlainTextFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-text' -Target 'ConvertTo-PlainTextFromMarkdown'
-    Set-AgentModeAlias -Name 'markdown-to-txt' -Target 'ConvertTo-PlainTextFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-txt' -Target 'ConvertTo-PlainTextFromMarkdown'
-}
-else {
-    Set-Alias -Name markdown-to-text -Value ConvertTo-PlainTextFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-text -Value ConvertTo-PlainTextFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name markdown-to-txt -Value ConvertTo-PlainTextFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-txt -Value ConvertTo-PlainTextFromMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'markdown-to-text' -Target 'ConvertTo-PlainTextFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-text' -Target 'ConvertTo-PlainTextFromMarkdown'
+Set-AgentModeAlias -Name 'markdown-to-txt' -Target 'ConvertTo-PlainTextFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-txt' -Target 'ConvertTo-PlainTextFromMarkdown'
 
 <#
 .SYNOPSIS
@@ -493,12 +455,6 @@ function ConvertTo-PlainTextFromHtml {
         Write-Error "Failed to convert HTML to Plain Text: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'html-to-text' -Target 'ConvertTo-PlainTextFromHtml'
-    Set-AgentModeAlias -Name 'html-to-txt' -Target 'ConvertTo-PlainTextFromHtml'
-}
-else {
-    Set-Alias -Name html-to-text -Value ConvertTo-PlainTextFromHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name html-to-txt -Value ConvertTo-PlainTextFromHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'html-to-text' -Target 'ConvertTo-PlainTextFromHtml'
+Set-AgentModeAlias -Name 'html-to-txt' -Target 'ConvertTo-PlainTextFromHtml'
 

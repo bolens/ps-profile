@@ -28,7 +28,7 @@ function Initialize-FileConversion-DocumentTextile {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -63,7 +63,7 @@ function Initialize-FileConversion-DocumentTextile {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -98,7 +98,7 @@ function Initialize-FileConversion-DocumentTextile {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -133,7 +133,7 @@ function Initialize-FileConversion-DocumentTextile {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -168,7 +168,7 @@ function Initialize-FileConversion-DocumentTextile {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -224,8 +224,7 @@ function ConvertFrom-TextileToMarkdown {
         Write-Error "Failed to convert Textile to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name textile-to-markdown -Value ConvertFrom-TextileToMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'textile-to-markdown' -Target 'ConvertFrom-TextileToMarkdown'
 # Convert Textile to HTML
 <#
 .SYNOPSIS
@@ -258,8 +257,7 @@ function ConvertTo-HtmlFromTextile {
         Write-Error "Failed to convert Textile to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name textile-to-html -Value ConvertTo-HtmlFromTextile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'textile-to-html' -Target 'ConvertTo-HtmlFromTextile'
 # Convert Textile to PDF
 <#
 .SYNOPSIS
@@ -292,8 +290,7 @@ function ConvertTo-PdfFromTextile {
         Write-Error "Failed to convert Textile to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name textile-to-pdf -Value ConvertTo-PdfFromTextile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'textile-to-pdf' -Target 'ConvertTo-PdfFromTextile'
 # Convert Textile to DOCX
 <#
 .SYNOPSIS
@@ -326,8 +323,7 @@ function ConvertTo-DocxFromTextile {
         Write-Error "Failed to convert Textile to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name textile-to-docx -Value ConvertTo-DocxFromTextile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'textile-to-docx' -Target 'ConvertTo-DocxFromTextile'
 # Convert Textile to LaTeX
 <#
 .SYNOPSIS
@@ -360,5 +356,4 @@ function ConvertTo-LaTeXFromTextile {
         Write-Error "Failed to convert Textile to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name textile-to-latex -Value ConvertTo-LaTeXFromTextile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'textile-to-latex' -Target 'ConvertTo-LaTeXFromTextile'

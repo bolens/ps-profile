@@ -94,8 +94,8 @@ if (-not (Test-Path Function:vsc)) {
             throw
         }
     }
-    Set-Alias -Name vsc -Value Open-VSCode -ErrorAction SilentlyContinue
-    Set-Alias -Name code -Value Open-VSCode -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'vsc' -Target 'Open-VSCode'
+    Set-AgentModeAlias -Name 'code' -Target 'Open-VSCode'
 }
 
 # Open file in editor quickly
@@ -179,7 +179,7 @@ if (-not (Test-Path Function:Open-Editor)) {
 }
 # Always set the alias, even if Open-Editor already exists (e.g., from mocks)
 if (-not (Get-Alias e -ErrorAction SilentlyContinue)) {
-    Set-Alias -Name e -Value Open-Editor -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'e' -Target 'Open-Editor'
 }
 
 # Jump to project root (uses git if available)
@@ -236,5 +236,5 @@ if (-not (Test-Path Function:project-root)) {
             throw
         }
     }
-    Set-Alias -Name project-root -Value Get-ProjectRoot -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'project-root' -Target 'Get-ProjectRoot'
 }

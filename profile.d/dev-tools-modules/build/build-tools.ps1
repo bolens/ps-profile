@@ -194,18 +194,9 @@ function Invoke-HttpServer {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'turbo' -Target 'Invoke-Turbo'
-    Set-AgentModeAlias -Name 'esbuild' -Target 'Invoke-Esbuild'
-    Set-AgentModeAlias -Name 'rollup' -Target 'Invoke-Rollup'
-    Set-AgentModeAlias -Name 'serve' -Target 'Invoke-Serve'
-    Set-AgentModeAlias -Name 'http-server' -Target 'Invoke-HttpServer'
-}
-else {
-    Set-Alias -Name 'turbo' -Value 'Invoke-Turbo' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'esbuild' -Value 'Invoke-Esbuild' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'rollup' -Value 'Invoke-Rollup' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'serve' -Value 'Invoke-Serve' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'http-server' -Value 'Invoke-HttpServer' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'turbo' -Target 'Invoke-Turbo'
+Set-AgentModeAlias -Name 'esbuild' -Target 'Invoke-Esbuild'
+Set-AgentModeAlias -Name 'rollup' -Target 'Invoke-Rollup'
+Set-AgentModeAlias -Name 'serve' -Target 'Invoke-Serve'
+Set-AgentModeAlias -Name 'http-server' -Target 'Invoke-HttpServer'
 

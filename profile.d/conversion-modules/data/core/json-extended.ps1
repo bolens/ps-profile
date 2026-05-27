@@ -57,7 +57,7 @@ function Initialize-FileConversion-CoreJsonExtended {
                 Write-Verbose "[conversion.json5.to-json] Output path: $OutputPath"
             }
             
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use JSON5 conversions."
             }
             
@@ -114,7 +114,7 @@ try {
         catch {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $nodeAvailable = (Get-Command node -ErrorAction SilentlyContinue) -ne $null
+                $nodeAvailable = Test-CachedCommand 'node'
                 Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
                     input_path = $InputPath
                     output_path = $OutputPath
@@ -167,7 +167,7 @@ try {
                 Write-Verbose "[conversion.json5.from-json] Output path: $OutputPath"
             }
             
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use JSON5 conversions."
             }
             
@@ -224,7 +224,7 @@ try {
         catch {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $nodeAvailable = (Get-Command node -ErrorAction SilentlyContinue) -ne $null
+                $nodeAvailable = Test-CachedCommand 'node'
                 Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.from-json' -Context @{
                     input_path = $InputPath
                     output_path = $OutputPath
@@ -444,7 +444,7 @@ function ConvertFrom-Json5ToJson {
     catch {
         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            $nodeAvailable = (Get-Command node -ErrorAction SilentlyContinue) -ne $null
+            $nodeAvailable = Test-CachedCommand 'node'
             Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
                 input_path = $InputPath
                 output_path = $OutputPath
@@ -471,8 +471,7 @@ function ConvertFrom-Json5ToJson {
         throw
     }
 }
-Set-Alias -Name json5-to-json -Value ConvertFrom-Json5ToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json5-to-json' -Target 'ConvertFrom-Json5ToJson'
 # Convert JSON to JSON5
 <#
 .SYNOPSIS
@@ -492,8 +491,7 @@ function ConvertTo-Json5FromJson {
     }
     _ConvertTo-Json5FromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-json5 -Value ConvertTo-Json5FromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-json5' -Target 'ConvertTo-Json5FromJson'
 # Convert JSONL to JSON
 <#
 .SYNOPSIS
@@ -516,8 +514,7 @@ function ConvertFrom-JsonLToJson {
         throw
     }
 }
-Set-Alias -Name jsonl-to-json -Value ConvertFrom-JsonLToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'jsonl-to-json' -Target 'ConvertFrom-JsonLToJson'
 # Convert JSON to JSONL
 <#
 .SYNOPSIS
@@ -540,8 +537,7 @@ function ConvertTo-JsonLFromJson {
         throw
     }
 }
-Set-Alias -Name json-to-jsonl -Value ConvertTo-JsonLFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-jsonl' -Target 'ConvertTo-JsonLFromJson'
 # Convert XML to YAML
 <#
 .SYNOPSIS
@@ -566,8 +562,7 @@ function ConvertFrom-XmlToYaml {
         throw
     }
 }
-Set-Alias -Name xml-to-yaml -Value ConvertFrom-XmlToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'xml-to-yaml' -Target 'ConvertFrom-XmlToYaml'
 # Convert YAML to XML
 <#
 .SYNOPSIS
@@ -592,4 +587,4 @@ function ConvertFrom-YamlToXml {
         throw
     }
 }
-Set-Alias -Name yaml-to-xml -Value ConvertFrom-YamlToXml -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'yaml-to-xml' -Target 'ConvertFrom-YamlToXml'

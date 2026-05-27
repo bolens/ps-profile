@@ -46,9 +46,8 @@ if (Test-CachedCommand rye) {
         }
         & rye add @args @Packages
     }
-    Set-Alias -Name ryeadd -Value Add-RyePackage -ErrorAction SilentlyContinue
-    Set-Alias -Name ryeinstall -Value Add-RyePackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'ryeadd' -Target 'Add-RyePackage'
+    Set-AgentModeAlias -Name 'ryeinstall' -Target 'Add-RyePackage'
     # Rye remove - remove packages
     <#
     .SYNOPSIS
@@ -80,9 +79,8 @@ if (Test-CachedCommand rye) {
         }
         & rye remove @args @Packages
     }
-    Set-Alias -Name ryeremove -Value Remove-RyePackage -ErrorAction SilentlyContinue
-    Set-Alias -Name ryeuninstall -Value Remove-RyePackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'ryeremove' -Target 'Remove-RyePackage'
+    Set-AgentModeAlias -Name 'ryeuninstall' -Target 'Remove-RyePackage'
     # Rye sync - sync dependencies
     <#
     .SYNOPSIS
@@ -99,8 +97,7 @@ if (Test-CachedCommand rye) {
         
         & rye sync
     }
-    Set-Alias -Name ryesync -Value Sync-RyeDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'ryesync' -Target 'Sync-RyeDependencies'
     # Rye update - update packages
     <#
     .SYNOPSIS
@@ -132,7 +129,7 @@ if (Test-CachedCommand rye) {
             & rye sync --update-all
         }
     }
-    Set-Alias -Name ryeupdate -Value Update-RyePackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'ryeupdate' -Target 'Update-RyePackages'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

@@ -117,13 +117,6 @@ function New-LaravelApp {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'artisan' -Target 'Invoke-LaravelArtisan'
-    Set-AgentModeAlias -Name 'art' -Target 'Invoke-LaravelArt'
-    Set-AgentModeAlias -Name 'laravel-new' -Target 'New-LaravelApp'
-}
-else {
-    Set-Alias -Name 'artisan' -Value 'Invoke-LaravelArtisan' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'art' -Value 'Invoke-LaravelArt' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'laravel-new' -Value 'New-LaravelApp' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'artisan' -Target 'Invoke-LaravelArtisan'
+Set-AgentModeAlias -Name 'art' -Target 'Invoke-LaravelArt'
+Set-AgentModeAlias -Name 'laravel-new' -Target 'New-LaravelApp'

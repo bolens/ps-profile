@@ -84,12 +84,7 @@ function ConvertFrom-AvifToPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'avif-to-png' -Target 'ConvertFrom-AvifToPng'
-}
-else {
-    Set-Alias -Name avif-to-png -Value ConvertFrom-AvifToPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'avif-to-png' -Target 'ConvertFrom-AvifToPng'
 
 <#
 .SYNOPSIS
@@ -121,14 +116,8 @@ function ConvertFrom-AvifToJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'avif-to-jpeg' -Target 'ConvertFrom-AvifToJpeg'
-    Set-AgentModeAlias -Name 'avif-to-jpg' -Target 'ConvertFrom-AvifToJpeg'
-}
-else {
-    Set-Alias -Name avif-to-jpeg -Value ConvertFrom-AvifToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name avif-to-jpg -Value ConvertFrom-AvifToJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'avif-to-jpeg' -Target 'ConvertFrom-AvifToJpeg'
+Set-AgentModeAlias -Name 'avif-to-jpg' -Target 'ConvertFrom-AvifToJpeg'
 
 <#
 .SYNOPSIS
@@ -160,12 +149,7 @@ function ConvertFrom-AvifToWebp {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'avif-to-webp' -Target 'ConvertFrom-AvifToWebp'
-}
-else {
-    Set-Alias -Name avif-to-webp -Value ConvertFrom-AvifToWebp -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'avif-to-webp' -Target 'ConvertFrom-AvifToWebp'
 
 <#
 .SYNOPSIS
@@ -197,12 +181,7 @@ function ConvertTo-AvifFromPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'png-to-avif' -Target 'ConvertTo-AvifFromPng'
-}
-else {
-    Set-Alias -Name png-to-avif -Value ConvertTo-AvifFromPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'png-to-avif' -Target 'ConvertTo-AvifFromPng'
 
 <#
 .SYNOPSIS
@@ -234,14 +213,8 @@ function ConvertTo-AvifFromJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jpeg-to-avif' -Target 'ConvertTo-AvifFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-avif' -Target 'ConvertTo-AvifFromJpeg'
-}
-else {
-    Set-Alias -Name jpeg-to-avif -Value ConvertTo-AvifFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-avif -Value ConvertTo-AvifFromJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jpeg-to-avif' -Target 'ConvertTo-AvifFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-avif' -Target 'ConvertTo-AvifFromJpeg'
 
 <#
 .SYNOPSIS
@@ -273,10 +246,5 @@ function ConvertTo-AvifFromWebp {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'webp-to-avif' -Target 'ConvertTo-AvifFromWebp'
-}
-else {
-    Set-Alias -Name webp-to-avif -Value ConvertTo-AvifFromWebp -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'webp-to-avif' -Target 'ConvertTo-AvifFromWebp'
 

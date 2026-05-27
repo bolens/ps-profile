@@ -27,7 +27,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             }
             
             # Try pandoc first
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc -f asciidoc -t markdown $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -36,7 +36,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             }
             
             # Fallback to asciidoc command (if available)
-            if (Get-Command asciidoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'asciidoc') {
                 # asciidoc doesn't directly convert to markdown, so we'd need an intermediate step
                 # For now, just indicate that pandoc is preferred
                 throw "pandoc is required for AsciiDoc to Markdown conversion. Please install pandoc."
@@ -62,7 +62,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             }
             
             # Try pandoc first
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc -f asciidoc -t html $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -71,7 +71,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             }
             
             # Fallback to asciidoc command
-            if (Get-Command asciidoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'asciidoc') {
                 $errorOutput = & asciidoc -b html5 -o $OutputPath $InputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -99,7 +99,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             }
             
             # Try pandoc first
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -108,7 +108,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             }
             
             # Fallback to asciidoctor-pdf (if available)
-            if (Get-Command asciidoctor-pdf -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'asciidoctor-pdf') {
                 $errorOutput = & asciidoctor-pdf -o $OutputPath $InputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -131,7 +131,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -160,7 +160,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -189,7 +189,7 @@ function Initialize-FileConversion-DocumentOfficeAsciidoc {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -240,14 +240,8 @@ function ConvertFrom-AsciidocToMarkdown {
         Write-Error "Failed to convert AsciiDoc to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'asciidoc-to-markdown' -Target 'ConvertFrom-AsciidocToMarkdown'
-    Set-AgentModeAlias -Name 'adoc-to-markdown' -Target 'ConvertFrom-AsciidocToMarkdown'
-}
-else {
-    Set-Alias -Name asciidoc-to-markdown -Value ConvertFrom-AsciidocToMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name adoc-to-markdown -Value ConvertFrom-AsciidocToMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'asciidoc-to-markdown' -Target 'ConvertFrom-AsciidocToMarkdown'
+Set-AgentModeAlias -Name 'adoc-to-markdown' -Target 'ConvertFrom-AsciidocToMarkdown'
 
 <#
 .SYNOPSIS
@@ -276,14 +270,8 @@ function ConvertFrom-AsciidocToHtml {
         Write-Error "Failed to convert AsciiDoc to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'asciidoc-to-html' -Target 'ConvertFrom-AsciidocToHtml'
-    Set-AgentModeAlias -Name 'adoc-to-html' -Target 'ConvertFrom-AsciidocToHtml'
-}
-else {
-    Set-Alias -Name asciidoc-to-html -Value ConvertFrom-AsciidocToHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name adoc-to-html -Value ConvertFrom-AsciidocToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'asciidoc-to-html' -Target 'ConvertFrom-AsciidocToHtml'
+Set-AgentModeAlias -Name 'adoc-to-html' -Target 'ConvertFrom-AsciidocToHtml'
 
 <#
 .SYNOPSIS
@@ -312,14 +300,8 @@ function ConvertFrom-AsciidocToPdf {
         Write-Error "Failed to convert AsciiDoc to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'asciidoc-to-pdf' -Target 'ConvertFrom-AsciidocToPdf'
-    Set-AgentModeAlias -Name 'adoc-to-pdf' -Target 'ConvertFrom-AsciidocToPdf'
-}
-else {
-    Set-Alias -Name asciidoc-to-pdf -Value ConvertFrom-AsciidocToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name adoc-to-pdf -Value ConvertFrom-AsciidocToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'asciidoc-to-pdf' -Target 'ConvertFrom-AsciidocToPdf'
+Set-AgentModeAlias -Name 'adoc-to-pdf' -Target 'ConvertFrom-AsciidocToPdf'
 
 <#
 .SYNOPSIS
@@ -348,14 +330,8 @@ function ConvertFrom-AsciidocToDocx {
         Write-Error "Failed to convert AsciiDoc to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'asciidoc-to-docx' -Target 'ConvertFrom-AsciidocToDocx'
-    Set-AgentModeAlias -Name 'adoc-to-docx' -Target 'ConvertFrom-AsciidocToDocx'
-}
-else {
-    Set-Alias -Name asciidoc-to-docx -Value ConvertFrom-AsciidocToDocx -ErrorAction SilentlyContinue
-    Set-Alias -Name adoc-to-docx -Value ConvertFrom-AsciidocToDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'asciidoc-to-docx' -Target 'ConvertFrom-AsciidocToDocx'
+Set-AgentModeAlias -Name 'adoc-to-docx' -Target 'ConvertFrom-AsciidocToDocx'
 
 <#
 .SYNOPSIS
@@ -384,14 +360,8 @@ function ConvertFrom-AsciidocToLatex {
         Write-Error "Failed to convert AsciiDoc to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'asciidoc-to-latex' -Target 'ConvertFrom-AsciidocToLatex'
-    Set-AgentModeAlias -Name 'adoc-to-latex' -Target 'ConvertFrom-AsciidocToLatex'
-}
-else {
-    Set-Alias -Name asciidoc-to-latex -Value ConvertFrom-AsciidocToLatex -ErrorAction SilentlyContinue
-    Set-Alias -Name adoc-to-latex -Value ConvertFrom-AsciidocToLatex -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'asciidoc-to-latex' -Target 'ConvertFrom-AsciidocToLatex'
+Set-AgentModeAlias -Name 'adoc-to-latex' -Target 'ConvertFrom-AsciidocToLatex'
 
 <#
 .SYNOPSIS
@@ -420,16 +390,8 @@ function ConvertTo-AsciidocFromMarkdown {
         Write-Error "Failed to convert Markdown to AsciiDoc: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'markdown-to-asciidoc' -Target 'ConvertTo-AsciidocFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-asciidoc' -Target 'ConvertTo-AsciidocFromMarkdown'
-    Set-AgentModeAlias -Name 'markdown-to-adoc' -Target 'ConvertTo-AsciidocFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-adoc' -Target 'ConvertTo-AsciidocFromMarkdown'
-}
-else {
-    Set-Alias -Name markdown-to-asciidoc -Value ConvertTo-AsciidocFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-asciidoc -Value ConvertTo-AsciidocFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name markdown-to-adoc -Value ConvertTo-AsciidocFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-adoc -Value ConvertTo-AsciidocFromMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'markdown-to-asciidoc' -Target 'ConvertTo-AsciidocFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-asciidoc' -Target 'ConvertTo-AsciidocFromMarkdown'
+Set-AgentModeAlias -Name 'markdown-to-adoc' -Target 'ConvertTo-AsciidocFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-adoc' -Target 'ConvertTo-AsciidocFromMarkdown'
 

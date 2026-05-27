@@ -782,8 +782,7 @@ function ConvertFrom-IniToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-IniToJson @PSBoundParameters
 }
-Set-Alias -Name ini-to-json -Value ConvertFrom-IniToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ini-to-json' -Target 'ConvertFrom-IniToJson'
 # Convert JSON to INI
 <#
 .SYNOPSIS
@@ -800,8 +799,7 @@ function ConvertTo-IniFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-IniFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-ini -Value ConvertTo-IniFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-ini' -Target 'ConvertTo-IniFromJson'
 # Convert INI to YAML
 <#
 .SYNOPSIS
@@ -818,8 +816,7 @@ function ConvertFrom-IniToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-IniToYaml @PSBoundParameters
 }
-Set-Alias -Name ini-to-yaml -Value ConvertFrom-IniToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ini-to-yaml' -Target 'ConvertFrom-IniToYaml'
 # Convert YAML to INI
 <#
 .SYNOPSIS
@@ -836,8 +833,7 @@ function ConvertTo-IniFromYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-IniFromYaml @PSBoundParameters
 }
-Set-Alias -Name yaml-to-ini -Value ConvertTo-IniFromYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-ini' -Target 'ConvertTo-IniFromYaml'
 # Convert INI to XML
 <#
 .SYNOPSIS
@@ -854,8 +850,7 @@ function ConvertFrom-IniToXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-IniToXml @PSBoundParameters
 }
-Set-Alias -Name ini-to-xml -Value ConvertFrom-IniToXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ini-to-xml' -Target 'ConvertFrom-IniToXml'
 # Convert XML to INI
 <#
 .SYNOPSIS
@@ -872,8 +867,7 @@ function ConvertTo-IniFromXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-IniFromXml @PSBoundParameters
 }
-Set-Alias -Name xml-to-ini -Value ConvertTo-IniFromXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'xml-to-ini' -Target 'ConvertTo-IniFromXml'
 # Convert INI to TOML
 <#
 .SYNOPSIS
@@ -890,8 +884,7 @@ function ConvertFrom-IniToToml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-IniToToml @PSBoundParameters
 }
-Set-Alias -Name ini-to-toml -Value ConvertFrom-IniToToml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ini-to-toml' -Target 'ConvertFrom-IniToToml'
 # Convert TOML to INI
 <#
 .SYNOPSIS
@@ -908,5 +901,4 @@ function ConvertTo-IniFromToml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-IniFromToml @PSBoundParameters
 }
-Set-Alias -Name toml-to-ini -Value ConvertTo-IniFromToml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toml-to-ini' -Target 'ConvertTo-IniFromToml'

@@ -186,20 +186,13 @@ function Get-AnsibleInventory {
     wsl bash -lc "export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 && ansible-inventory $($Arguments -join ' ')"
 }
 
+# Only register aliases when WSL is available (ansible runs via WSL)
+if (-not (Test-CachedCommand 'wsl')) { return }
+
 # Create aliases for ansible commands
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ansible' -Target 'Invoke-Ansible'
-    Set-AgentModeAlias -Name 'ansible-playbook' -Target 'Invoke-AnsiblePlaybook'
-    Set-AgentModeAlias -Name 'ansible-galaxy' -Target 'Invoke-AnsibleGalaxy'
-    Set-AgentModeAlias -Name 'ansible-vault' -Target 'Invoke-AnsibleVault'
-    Set-AgentModeAlias -Name 'ansible-doc' -Target 'Get-AnsibleDoc'
-    Set-AgentModeAlias -Name 'ansible-inventory' -Target 'Get-AnsibleInventory'
-}
-else {
-    Set-Alias -Name 'ansible' -Value 'Invoke-Ansible' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ansible-playbook' -Value 'Invoke-AnsiblePlaybook' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ansible-galaxy' -Value 'Invoke-AnsibleGalaxy' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ansible-vault' -Value 'Invoke-AnsibleVault' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ansible-doc' -Value 'Get-AnsibleDoc' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ansible-inventory' -Value 'Get-AnsibleInventory' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ansible' -Target 'Invoke-Ansible'
+Set-AgentModeAlias -Name 'ansible-playbook' -Target 'Invoke-AnsiblePlaybook'
+Set-AgentModeAlias -Name 'ansible-galaxy' -Target 'Invoke-AnsibleGalaxy'
+Set-AgentModeAlias -Name 'ansible-vault' -Target 'Invoke-AnsibleVault'
+Set-AgentModeAlias -Name 'ansible-doc' -Target 'Get-AnsibleDoc'
+Set-AgentModeAlias -Name 'ansible-inventory' -Target 'Get-AnsibleInventory'

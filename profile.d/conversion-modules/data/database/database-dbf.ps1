@@ -293,8 +293,7 @@ function ConvertFrom-DbfToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-DbfToJson @PSBoundParameters
 }
-Set-Alias -Name dbf-to-json -Value ConvertFrom-DbfToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'dbf-to-json' -Target 'ConvertFrom-DbfToJson'
 # Convert JSON to DBF
 <#
 .SYNOPSIS
@@ -312,8 +311,7 @@ function ConvertTo-DbfFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-DbfFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-dbf -Value ConvertTo-DbfFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-dbf' -Target 'ConvertTo-DbfFromJson'
 # Convert DBF to CSV
 <#
 .SYNOPSIS
@@ -331,5 +329,4 @@ function ConvertFrom-DbfToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-DbfToCsv @PSBoundParameters
 }
-Set-Alias -Name dbf-to-csv -Value ConvertFrom-DbfToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'dbf-to-csv' -Target 'ConvertFrom-DbfToCsv'

@@ -149,8 +149,7 @@ function ConvertTo-JwtFromJson {
         Write-Error "Failed to convert JSON to JWT: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-jwt -Value ConvertTo-JwtFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-jwt' -Target 'ConvertTo-JwtFromJson'
 # Convert JWT to JSON
 <#
 .SYNOPSIS
@@ -184,5 +183,4 @@ function ConvertFrom-JwtToJson {
         Write-Error "Failed to convert JWT to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name jwt-to-json -Value ConvertFrom-JwtToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'jwt-to-json' -Target 'ConvertFrom-JwtToJson'

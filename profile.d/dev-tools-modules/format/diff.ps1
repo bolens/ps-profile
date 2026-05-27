@@ -27,7 +27,7 @@ function Initialize-DevTools-Diff {
             else {
                 Write-Host "Files are different." -ForegroundColor Yellow
                 # Use diff if available, otherwise show basic comparison
-                if (Get-Command diff -ErrorAction SilentlyContinue) {
+                if (Test-CachedCommand 'diff') {
                     & diff $File1 $File2
                 }
                 else {
@@ -84,6 +84,5 @@ function Compare-TextFiles {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _Compare-TextFiles @PSBoundParameters
 }
-Set-Alias -Name diff-files -Value Compare-TextFiles -ErrorAction SilentlyContinue
-Set-Alias -Name compare-files -Value Compare-TextFiles -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'diff-files' -Target 'Compare-TextFiles'
+Set-AgentModeAlias -Name 'compare-files' -Target 'Compare-TextFiles'

@@ -11,8 +11,7 @@
     Encodes a string for use in URLs.
 #>
 function ConvertTo-UrlEncoded { param([string]$text) [uri]::EscapeDataString($text) }
-Set-Alias -Name url-encode -Value ConvertTo-UrlEncoded -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'url-encode' -Target 'ConvertTo-UrlEncoded'
 # URL decode
 <#
 .SYNOPSIS
@@ -21,5 +20,4 @@ Set-Alias -Name url-encode -Value ConvertTo-UrlEncoded -ErrorAction SilentlyCont
     Decodes a URL-encoded string.
 #>
 function ConvertFrom-UrlEncoded { param([string]$text) [uri]::UnescapeDataString($text) }
-Set-Alias -Name url-decode -Value ConvertFrom-UrlEncoded -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'url-decode' -Target 'ConvertFrom-UrlEncoded'

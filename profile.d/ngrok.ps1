@@ -117,13 +117,6 @@ function Start-NgrokTcpTunnel {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ngrok' -Target 'Invoke-Ngrok'
-    Set-AgentModeAlias -Name 'ngrok-http' -Target 'Start-NgrokHttpTunnel'
-    Set-AgentModeAlias -Name 'ngrok-tcp' -Target 'Start-NgrokTcpTunnel'
-}
-else {
-    Set-Alias -Name 'ngrok' -Value 'Invoke-Ngrok' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ngrok-http' -Value 'Start-NgrokHttpTunnel' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ngrok-tcp' -Value 'Start-NgrokTcpTunnel' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ngrok' -Target 'Invoke-Ngrok'
+Set-AgentModeAlias -Name 'ngrok-http' -Target 'Start-NgrokHttpTunnel'
+Set-AgentModeAlias -Name 'ngrok-tcp' -Target 'Start-NgrokTcpTunnel'

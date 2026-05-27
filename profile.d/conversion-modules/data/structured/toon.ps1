@@ -176,8 +176,7 @@ function ConvertTo-ToonFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ToonFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-toon -Value ConvertTo-ToonFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-toon' -Target 'ConvertTo-ToonFromJson'
 # Convert TOON to JSON
 <#
 .SYNOPSIS
@@ -194,8 +193,7 @@ function ConvertFrom-ToonToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ToonToJson @PSBoundParameters
 }
-Set-Alias -Name toon-to-json -Value ConvertFrom-ToonToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toon-to-json' -Target 'ConvertFrom-ToonToJson'
 # Convert TOON to YAML
 <#
 .SYNOPSIS
@@ -212,8 +210,7 @@ function ConvertFrom-ToonToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ToonToYaml @PSBoundParameters
 }
-Set-Alias -Name toon-to-yaml -Value ConvertFrom-ToonToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toon-to-yaml' -Target 'ConvertFrom-ToonToYaml'
 # Convert YAML to TOON
 <#
 .SYNOPSIS
@@ -230,8 +227,7 @@ function ConvertTo-ToonFromYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ToonFromYaml @PSBoundParameters
 }
-Set-Alias -Name yaml-to-toon -Value ConvertTo-ToonFromYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-toon' -Target 'ConvertTo-ToonFromYaml'
 # Convert TOON to CSV
 <#
 .SYNOPSIS
@@ -248,8 +244,7 @@ function ConvertFrom-ToonToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ToonToCsv @PSBoundParameters
 }
-Set-Alias -Name toon-to-csv -Value ConvertFrom-ToonToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toon-to-csv' -Target 'ConvertFrom-ToonToCsv'
 # Convert CSV to TOON
 <#
 .SYNOPSIS
@@ -266,8 +261,7 @@ function ConvertTo-ToonFromCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ToonFromCsv @PSBoundParameters
 }
-Set-Alias -Name csv-to-toon -Value ConvertTo-ToonFromCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'csv-to-toon' -Target 'ConvertTo-ToonFromCsv'
 # Convert TOON to XML
 <#
 .SYNOPSIS
@@ -284,8 +278,7 @@ function ConvertFrom-ToonToXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ToonToXml @PSBoundParameters
 }
-Set-Alias -Name toon-to-xml -Value ConvertFrom-ToonToXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toon-to-xml' -Target 'ConvertFrom-ToonToXml'
 # Convert XML to TOON
 <#
 .SYNOPSIS
@@ -302,5 +295,4 @@ function ConvertTo-ToonFromXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ToonFromXml @PSBoundParameters
 }
-Set-Alias -Name xml-to-toon -Value ConvertTo-ToonFromXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'xml-to-toon' -Target 'ConvertTo-ToonFromXml'

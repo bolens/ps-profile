@@ -51,8 +51,7 @@ if (Test-CachedCommand conan) {
         }
         & conan @args
     }
-    Set-Alias -Name conaninstall -Value Install-ConanPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'conaninstall' -Target 'Install-ConanPackages'
     # Conan create - create package
     <#
     .SYNOPSIS
@@ -81,8 +80,7 @@ if (Test-CachedCommand conan) {
         }
         & conan @args
     }
-    Set-Alias -Name conancreate -Value New-ConanPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'conancreate' -Target 'New-ConanPackage'
     # Conan search - search packages
     <#
     .SYNOPSIS
@@ -111,8 +109,7 @@ if (Test-CachedCommand conan) {
         }
         & conan @args
     }
-    Set-Alias -Name conansearch -Value Find-ConanPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'conansearch' -Target 'Find-ConanPackage'
     # Conan update - update packages
     <#
     .SYNOPSIS
@@ -163,7 +160,7 @@ if (Test-CachedCommand conan) {
         }
         & conan @args
     }
-    Set-Alias -Name conanupdate -Value Update-ConanPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'conanupdate' -Target 'Update-ConanPackages'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

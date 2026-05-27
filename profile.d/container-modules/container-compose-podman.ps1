@@ -31,7 +31,7 @@ if (-not (Test-Path Function:Start-ContainerComposePodman)) {
             }
         }
     }
-    Set-Alias -Name pcu -Value Start-ContainerComposePodman -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pcu' -Target 'Start-ContainerComposePodman'
 }
 
 if (-not (Test-Path Function:Stop-ContainerComposePodman)) {
@@ -61,7 +61,7 @@ if (-not (Test-Path Function:Stop-ContainerComposePodman)) {
             }
         }
     }
-    Set-Alias -Name pcd -Value Stop-ContainerComposePodman -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pcd' -Target 'Stop-ContainerComposePodman'
 }
 
 if (-not (Test-Path Function:Get-ContainerComposeLogsPodman)) {
@@ -91,7 +91,7 @@ if (-not (Test-Path Function:Get-ContainerComposeLogsPodman)) {
             }
         }
     }
-    Set-Alias -Name pcl -Value Get-ContainerComposeLogsPodman -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pcl' -Target 'Get-ContainerComposeLogsPodman'
 }
 
 if (-not (Test-Path Function:Clear-ContainerSystemPodman)) {
@@ -117,6 +117,6 @@ if (-not (Test-Path Function:Clear-ContainerSystemPodman)) {
             }
         }
     }
-    Set-Alias -Name pprune -Value Clear-ContainerSystemPodman -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pprune' -Target 'Clear-ContainerSystemPodman'
 }
 

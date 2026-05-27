@@ -53,7 +53,7 @@ function Initialize-DevTools-Uuid {
     Set-Item -Path Function:Global:_New-UuidV5 -Value {
         param([string]$Namespace, [string]$Name)
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use UUID v5 generation."
             }
             $nodeScript = @"
@@ -126,9 +126,8 @@ function New-Uuid {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _New-Uuid @PSBoundParameters
 }
-Set-Alias -Name uuid -Value New-Uuid -ErrorAction SilentlyContinue
-Set-Alias -Name guid -Value New-Uuid -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'uuid' -Target 'New-Uuid'
+Set-AgentModeAlias -Name 'guid' -Target 'New-Uuid'
 <#
 .SYNOPSIS
     Generates a UUID v5 (name-based).
@@ -151,5 +150,4 @@ function New-UuidV5 {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _New-UuidV5 @PSBoundParameters
 }
-Set-Alias -Name uuid-v5 -Value New-UuidV5 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'uuid-v5' -Target 'New-UuidV5'

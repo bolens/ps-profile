@@ -136,15 +136,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-OllamaEnhanced -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-OllamaEnhanced' -Body ${function:Invoke-OllamaEnhanced}
-    }
+    Set-AgentModeFunction -Name 'Invoke-OllamaEnhanced' -Body ${function:Invoke-OllamaEnhanced}
     if (-not (Get-Alias ollama-enhanced -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'ollama-enhanced' -Target 'Invoke-OllamaEnhanced'
         }
         else {
-            Set-Alias -Name 'ollama-enhanced' -Value 'Invoke-OllamaEnhanced' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'ollama-enhanced' -Target 'Invoke-OllamaEnhanced'
         }
     }
 
@@ -246,15 +244,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-LMStudio -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-LMStudio' -Body ${function:Invoke-LMStudio}
-    }
+    Set-AgentModeFunction -Name 'Invoke-LMStudio' -Body ${function:Invoke-LMStudio}
     if (-not (Get-Alias lms -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'lms' -Target 'Invoke-LMStudio'
         }
         else {
-            Set-Alias -Name 'lms' -Value 'Invoke-LMStudio' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'lms' -Target 'Invoke-LMStudio'
         }
     }
 
@@ -340,15 +336,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-KoboldCpp -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-KoboldCpp' -Body ${function:Invoke-KoboldCpp}
-    }
+    Set-AgentModeFunction -Name 'Invoke-KoboldCpp' -Body ${function:Invoke-KoboldCpp}
     if (-not (Get-Alias koboldcpp -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'koboldcpp' -Target 'Invoke-KoboldCpp'
         }
         else {
-            Set-Alias -Name 'koboldcpp' -Value 'Invoke-KoboldCpp' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'koboldcpp' -Target 'Invoke-KoboldCpp'
         }
     }
 
@@ -468,15 +462,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Llamafile -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Llamafile' -Body ${function:Invoke-Llamafile}
-    }
+    Set-AgentModeFunction -Name 'Invoke-Llamafile' -Body ${function:Invoke-Llamafile}
     if (-not (Get-Alias llamafile -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'llamafile' -Target 'Invoke-Llamafile'
         }
         else {
-            Set-Alias -Name 'llamafile' -Value 'Invoke-Llamafile' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'llamafile' -Target 'Invoke-Llamafile'
         }
     }
 
@@ -572,15 +564,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-LlamaCpp -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-LlamaCpp' -Body ${function:Invoke-LlamaCpp}
-    }
+    Set-AgentModeFunction -Name 'Invoke-LlamaCpp' -Body ${function:Invoke-LlamaCpp}
     if (-not (Get-Alias llama-cpp -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'llama-cpp' -Target 'Invoke-LlamaCpp'
         }
         else {
-            Set-Alias -Name 'llama-cpp' -Value 'Invoke-LlamaCpp' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'llama-cpp' -Target 'Invoke-LlamaCpp'
         }
     }
 
@@ -673,15 +663,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-ComfyUI -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-ComfyUI' -Body ${function:Invoke-ComfyUI}
-    }
+    Set-AgentModeFunction -Name 'Invoke-ComfyUI' -Body ${function:Invoke-ComfyUI}
     if (-not (Get-Alias comfy -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'comfy' -Target 'Invoke-ComfyUI'
         }
         else {
-            Set-Alias -Name 'comfy' -Value 'Invoke-ComfyUI' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'comfy' -Target 'Invoke-ComfyUI'
         }
     }
 

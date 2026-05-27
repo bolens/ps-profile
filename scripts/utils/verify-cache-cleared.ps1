@@ -15,6 +15,21 @@
 [CmdletBinding()]
 param()
 
+
+# Import ExitCodes for standardized exit handling
+$_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
+$_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $_ewcLibPath)) {
+    $_ewcScriptsDir = Split-Path -Parent $_ewcScriptsDir
+    $_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+}
+if (Test-Path $_ewcLibPath) {
+    Import-Module $_ewcLibPath -DisableNameChecking -ErrorAction Stop
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+} else {
+    function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
+    enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
+}
 Write-Host ""
 Write-Host "=" * 70 -ForegroundColor Cyan
 Write-Host "Fragment Cache Verification" -ForegroundColor Cyan
@@ -32,12 +47,12 @@ $cacheSqliteModule = Join-Path $fragmentLibDir 'FragmentCacheSqlite.psm1'
 
 if (-not (Test-Path -LiteralPath $cachePathModule)) {
     Write-Host "✗ FragmentCachePath module not found: $cachePathModule" -ForegroundColor Red
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 if (-not (Test-Path -LiteralPath $cacheSqliteModule)) {
     Write-Host "✗ FragmentCacheSqlite module not found: $cacheSqliteModule" -ForegroundColor Red
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 try {
@@ -46,7 +61,7 @@ try {
 }
 catch {
     Write-Host "✗ Failed to import modules: $($_.Exception.Message)" -ForegroundColor Red
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 # Get database path
@@ -58,12 +73,12 @@ if (Get-Command Get-FragmentCacheDbPath -ErrorAction SilentlyContinue) {
     }
     catch {
         Write-Host "✗ Failed to get database path: $($_.Exception.Message)" -ForegroundColor Red
-        exit 1
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
 }
 else {
     Write-Host "✗ Get-FragmentCacheDbPath not available" -ForegroundColor Red
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 # Check if database exists
@@ -76,19 +91,19 @@ if ($dbPath -and (Test-Path -LiteralPath $dbPath)) {
     # Check SQLite availability
     if (-not (Get-Command Test-SqliteAvailable -ErrorAction SilentlyContinue)) {
         Write-Host "✗ Test-SqliteAvailable not available" -ForegroundColor Red
-        exit 1
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
     
     $sqliteAvailable = Test-SqliteAvailable
     if (-not $sqliteAvailable) {
         Write-Host "✗ SQLite not available - cannot query database" -ForegroundColor Red
-        exit 1
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
     
     $sqliteCmd = Get-SqliteCommandName
     if (-not $sqliteCmd) {
         Write-Host "✗ SQLite command not found" -ForegroundColor Red
-        exit 1
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
     
     Write-Host ""
@@ -177,4 +192,4 @@ else {
 }
 
 Write-Host ""
-exit 0
+Exit-WithCode -ExitCode [ExitCode]::Success

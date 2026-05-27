@@ -696,19 +696,9 @@ else {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'aws' -Target 'Invoke-Aws'
-    Set-AgentModeAlias -Name 'aws-profile' -Target 'Set-AwsProfile'
-    Set-AgentModeAlias -Name 'aws-region' -Target 'Set-AwsRegion'
-    Set-AgentModeAlias -Name 'aws-credentials' -Target 'Get-AwsCredentials'
-    Set-AgentModeAlias -Name 'aws-test' -Target 'Test-AwsConnection'
-    Set-AgentModeAlias -Name 'aws-switch' -Target 'Switch-AwsAccount'
-}
-else {
-    Set-Alias -Name 'aws' -Value 'Invoke-Aws' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'aws-profile' -Value 'Set-AwsProfile' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'aws-region' -Value 'Set-AwsRegion' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'aws-credentials' -Value 'Get-AwsCredentials' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'aws-test' -Value 'Test-AwsConnection' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'aws-switch' -Value 'Switch-AwsAccount' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'aws' -Target 'Invoke-Aws'
+Set-AgentModeAlias -Name 'aws-profile' -Target 'Set-AwsProfile'
+Set-AgentModeAlias -Name 'aws-region' -Target 'Set-AwsRegion'
+Set-AgentModeAlias -Name 'aws-credentials' -Target 'Get-AwsCredentials'
+Set-AgentModeAlias -Name 'aws-test' -Target 'Test-AwsConnection'
+Set-AgentModeAlias -Name 'aws-switch' -Target 'Switch-AwsAccount'

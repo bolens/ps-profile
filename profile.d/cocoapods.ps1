@@ -26,8 +26,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & pod install
     }
-    Set-Alias -Name podinstall -Value Install-CocoaPodsDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'podinstall' -Target 'Install-CocoaPodsDependencies'
     # CocoaPods update - update dependencies
     <#
     .SYNOPSIS
@@ -57,8 +56,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
             & pod update
         }
     }
-    Set-Alias -Name podupdate -Value Update-CocoaPodsDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'podupdate' -Target 'Update-CocoaPodsDependencies'
     # CocoaPods deintegrate - remove CocoaPods
     <#
     .SYNOPSIS
@@ -75,7 +73,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & pod deintegrate
     }
-    Set-Alias -Name poddeintegrate -Value Remove-CocoaPodsIntegration -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'poddeintegrate' -Target 'Remove-CocoaPodsIntegration'
 }
 else {
     # Check if gem is available - if not, suggest installing ruby first

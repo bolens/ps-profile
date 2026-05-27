@@ -26,7 +26,7 @@ function Initialize-FileConversion-DocumentCommonEpub {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -61,7 +61,7 @@ function Initialize-FileConversion-DocumentCommonEpub {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -96,7 +96,7 @@ function Initialize-FileConversion-DocumentCommonEpub {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -131,7 +131,7 @@ function Initialize-FileConversion-DocumentCommonEpub {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -161,7 +161,7 @@ function Initialize-FileConversion-DocumentCommonEpub {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -190,7 +190,7 @@ function Initialize-FileConversion-DocumentCommonEpub {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -219,7 +219,7 @@ function Initialize-FileConversion-DocumentCommonEpub {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -269,12 +269,7 @@ function ConvertFrom-EpubToMarkdown {
         Write-Error "Failed to convert EPUB to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'epub-to-markdown' -Target 'ConvertFrom-EpubToMarkdown'
-}
-else {
-    Set-Alias -Name epub-to-markdown -Value ConvertFrom-EpubToMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'epub-to-markdown' -Target 'ConvertFrom-EpubToMarkdown'
 
 # Convert EPUB to HTML
 <#
@@ -302,12 +297,7 @@ function ConvertFrom-EpubToHtml {
         Write-Error "Failed to convert EPUB to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'epub-to-html' -Target 'ConvertFrom-EpubToHtml'
-}
-else {
-    Set-Alias -Name epub-to-html -Value ConvertFrom-EpubToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'epub-to-html' -Target 'ConvertFrom-EpubToHtml'
 
 # Convert EPUB to PDF
 <#
@@ -335,12 +325,7 @@ function ConvertFrom-EpubToPdf {
         Write-Error "Failed to convert EPUB to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'epub-to-pdf' -Target 'ConvertFrom-EpubToPdf'
-}
-else {
-    Set-Alias -Name epub-to-pdf -Value ConvertFrom-EpubToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'epub-to-pdf' -Target 'ConvertFrom-EpubToPdf'
 
 # Convert EPUB to LaTeX
 <#
@@ -368,12 +353,7 @@ function ConvertFrom-EpubToLatex {
         Write-Error "Failed to convert EPUB to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'epub-to-latex' -Target 'ConvertFrom-EpubToLatex'
-}
-else {
-    Set-Alias -Name epub-to-latex -Value ConvertFrom-EpubToLatex -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'epub-to-latex' -Target 'ConvertFrom-EpubToLatex'
 
 # Convert EPUB to DOCX
 <#
@@ -403,12 +383,7 @@ function ConvertFrom-EpubToDocx {
         Write-Error "Failed to convert EPUB to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'epub-to-docx' -Target 'ConvertFrom-EpubToDocx'
-}
-else {
-    Set-Alias -Name epub-to-docx -Value ConvertFrom-EpubToDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'epub-to-docx' -Target 'ConvertFrom-EpubToDocx'
 
 # Convert Markdown to EPUB
 <#
@@ -438,14 +413,8 @@ function ConvertTo-EpubFromMarkdown {
         Write-Error "Failed to convert Markdown to EPUB: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'markdown-to-epub' -Target 'ConvertTo-EpubFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-epub' -Target 'ConvertTo-EpubFromMarkdown'
-}
-else {
-    Set-Alias -Name markdown-to-epub -Value ConvertTo-EpubFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-epub -Value ConvertTo-EpubFromMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'markdown-to-epub' -Target 'ConvertTo-EpubFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-epub' -Target 'ConvertTo-EpubFromMarkdown'
 
 # Convert HTML to EPUB
 <#
@@ -475,10 +444,5 @@ function ConvertTo-EpubFromHtml {
         Write-Error "Failed to convert HTML to EPUB: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'html-to-epub' -Target 'ConvertTo-EpubFromHtml'
-}
-else {
-    Set-Alias -Name html-to-epub -Value ConvertTo-EpubFromHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'html-to-epub' -Target 'ConvertTo-EpubFromHtml'
 

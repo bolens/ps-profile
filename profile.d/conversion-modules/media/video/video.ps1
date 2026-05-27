@@ -42,5 +42,4 @@ function ConvertFrom-VideoToGif {
     if (-not $global:FileConversionMediaInitialized) { Ensure-FileConversion-Media }
     _ConvertFrom-VideoToGif @PSBoundParameters
 }
-Set-Alias -Name video-to-gif -Value ConvertFrom-VideoToGif -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'video-to-gif' -Target 'ConvertFrom-VideoToGif'

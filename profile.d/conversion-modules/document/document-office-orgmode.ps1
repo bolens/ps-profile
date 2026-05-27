@@ -22,7 +22,7 @@ function Initialize-FileConversion-DocumentOfficeOrgmode {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -51,7 +51,7 @@ function Initialize-FileConversion-DocumentOfficeOrgmode {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -80,7 +80,7 @@ function Initialize-FileConversion-DocumentOfficeOrgmode {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -109,7 +109,7 @@ function Initialize-FileConversion-DocumentOfficeOrgmode {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -138,7 +138,7 @@ function Initialize-FileConversion-DocumentOfficeOrgmode {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -167,7 +167,7 @@ function Initialize-FileConversion-DocumentOfficeOrgmode {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -218,14 +218,8 @@ function ConvertFrom-OrgmodeToMarkdown {
         Write-Error "Failed to convert Org-mode to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'org-to-markdown' -Target 'ConvertFrom-OrgmodeToMarkdown'
-    Set-AgentModeAlias -Name 'orgmode-to-markdown' -Target 'ConvertFrom-OrgmodeToMarkdown'
-}
-else {
-    Set-Alias -Name org-to-markdown -Value ConvertFrom-OrgmodeToMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name orgmode-to-markdown -Value ConvertFrom-OrgmodeToMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'org-to-markdown' -Target 'ConvertFrom-OrgmodeToMarkdown'
+Set-AgentModeAlias -Name 'orgmode-to-markdown' -Target 'ConvertFrom-OrgmodeToMarkdown'
 
 <#
 .SYNOPSIS
@@ -254,14 +248,8 @@ function ConvertFrom-OrgmodeToHtml {
         Write-Error "Failed to convert Org-mode to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'org-to-html' -Target 'ConvertFrom-OrgmodeToHtml'
-    Set-AgentModeAlias -Name 'orgmode-to-html' -Target 'ConvertFrom-OrgmodeToHtml'
-}
-else {
-    Set-Alias -Name org-to-html -Value ConvertFrom-OrgmodeToHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name orgmode-to-html -Value ConvertFrom-OrgmodeToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'org-to-html' -Target 'ConvertFrom-OrgmodeToHtml'
+Set-AgentModeAlias -Name 'orgmode-to-html' -Target 'ConvertFrom-OrgmodeToHtml'
 
 <#
 .SYNOPSIS
@@ -290,14 +278,8 @@ function ConvertFrom-OrgmodeToPdf {
         Write-Error "Failed to convert Org-mode to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'org-to-pdf' -Target 'ConvertFrom-OrgmodeToPdf'
-    Set-AgentModeAlias -Name 'orgmode-to-pdf' -Target 'ConvertFrom-OrgmodeToPdf'
-}
-else {
-    Set-Alias -Name org-to-pdf -Value ConvertFrom-OrgmodeToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name orgmode-to-pdf -Value ConvertFrom-OrgmodeToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'org-to-pdf' -Target 'ConvertFrom-OrgmodeToPdf'
+Set-AgentModeAlias -Name 'orgmode-to-pdf' -Target 'ConvertFrom-OrgmodeToPdf'
 
 <#
 .SYNOPSIS
@@ -326,14 +308,8 @@ function ConvertFrom-OrgmodeToDocx {
         Write-Error "Failed to convert Org-mode to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'org-to-docx' -Target 'ConvertFrom-OrgmodeToDocx'
-    Set-AgentModeAlias -Name 'orgmode-to-docx' -Target 'ConvertFrom-OrgmodeToDocx'
-}
-else {
-    Set-Alias -Name org-to-docx -Value ConvertFrom-OrgmodeToDocx -ErrorAction SilentlyContinue
-    Set-Alias -Name orgmode-to-docx -Value ConvertFrom-OrgmodeToDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'org-to-docx' -Target 'ConvertFrom-OrgmodeToDocx'
+Set-AgentModeAlias -Name 'orgmode-to-docx' -Target 'ConvertFrom-OrgmodeToDocx'
 
 <#
 .SYNOPSIS
@@ -362,14 +338,8 @@ function ConvertFrom-OrgmodeToLatex {
         Write-Error "Failed to convert Org-mode to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'org-to-latex' -Target 'ConvertFrom-OrgmodeToLatex'
-    Set-AgentModeAlias -Name 'orgmode-to-latex' -Target 'ConvertFrom-OrgmodeToLatex'
-}
-else {
-    Set-Alias -Name org-to-latex -Value ConvertFrom-OrgmodeToLatex -ErrorAction SilentlyContinue
-    Set-Alias -Name orgmode-to-latex -Value ConvertFrom-OrgmodeToLatex -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'org-to-latex' -Target 'ConvertFrom-OrgmodeToLatex'
+Set-AgentModeAlias -Name 'orgmode-to-latex' -Target 'ConvertFrom-OrgmodeToLatex'
 
 <#
 .SYNOPSIS
@@ -398,16 +368,8 @@ function ConvertTo-OrgmodeFromMarkdown {
         Write-Error "Failed to convert Markdown to Org-mode: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'markdown-to-org' -Target 'ConvertTo-OrgmodeFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-org' -Target 'ConvertTo-OrgmodeFromMarkdown'
-    Set-AgentModeAlias -Name 'markdown-to-orgmode' -Target 'ConvertTo-OrgmodeFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-orgmode' -Target 'ConvertTo-OrgmodeFromMarkdown'
-}
-else {
-    Set-Alias -Name markdown-to-org -Value ConvertTo-OrgmodeFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-org -Value ConvertTo-OrgmodeFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name markdown-to-orgmode -Value ConvertTo-OrgmodeFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-orgmode -Value ConvertTo-OrgmodeFromMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'markdown-to-org' -Target 'ConvertTo-OrgmodeFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-org' -Target 'ConvertTo-OrgmodeFromMarkdown'
+Set-AgentModeAlias -Name 'markdown-to-orgmode' -Target 'ConvertTo-OrgmodeFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-orgmode' -Target 'ConvertTo-OrgmodeFromMarkdown'
 

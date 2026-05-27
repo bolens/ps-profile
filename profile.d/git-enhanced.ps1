@@ -1144,19 +1144,19 @@ try {
     else {
         # Fallback: direct alias registration
         if (-not (Get-Alias -Name 'git-cliff' -ErrorAction SilentlyContinue)) {
-            Set-Alias -Name 'git-cliff' -Value 'New-GitChangelog' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'git-cliff' -Target 'New-GitChangelog'
         }
         if (-not (Get-Alias -Name 'git-tower' -ErrorAction SilentlyContinue)) {
-            Set-Alias -Name 'git-tower' -Value 'Invoke-GitTower' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'git-tower' -Target 'Invoke-GitTower'
         }
         if (-not (Get-Alias -Name 'gitkraken' -ErrorAction SilentlyContinue)) {
-            Set-Alias -Name 'gitkraken' -Value 'Invoke-GitKraken' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'gitkraken' -Target 'Invoke-GitKraken'
         }
         if (-not (Get-Alias -Name 'gitbutler' -ErrorAction SilentlyContinue)) {
-            Set-Alias -Name 'gitbutler' -Value 'Invoke-GitButler' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'gitbutler' -Target 'Invoke-GitButler'
         }
         if (-not (Get-Alias -Name 'jj' -ErrorAction SilentlyContinue)) {
-            Set-Alias -Name 'jj' -Value 'Invoke-Jujutsu' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'jj' -Target 'Invoke-Jujutsu'
         }
     }
 

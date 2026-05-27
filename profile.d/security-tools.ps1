@@ -170,11 +170,8 @@ try {
     }
 
     # Register function and alias
-    if (-not (Test-Path Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-GitLeaksScan' -Body ${function:Invoke-GitLeaksScan}
-        Set-AgentModeAlias -Name 'gitleaks-scan' -Target 'Invoke-GitLeaksScan'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-GitLeaksScan' -Body ${function:Invoke-GitLeaksScan}
+    Set-AgentModeAlias -Name 'gitleaks-scan' -Target 'Invoke-GitLeaksScan'
     # ===============================================
     # TruffleHog - Secret scanning with pattern detection
     # ===============================================
@@ -277,11 +274,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-TruffleHogScan -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-TruffleHogScan' -Body ${function:Invoke-TruffleHogScan}
-        Set-AgentModeAlias -Name 'trufflehog-scan' -Target 'Invoke-TruffleHogScan'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-TruffleHogScan' -Body ${function:Invoke-TruffleHogScan}
+    Set-AgentModeAlias -Name 'trufflehog-scan' -Target 'Invoke-TruffleHogScan'
     # ===============================================
     # OSV-Scanner - Vulnerability scanning
     # ===============================================
@@ -384,11 +378,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-OSVScan -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-OSVScan' -Body ${function:Invoke-OSVScan}
-        Set-AgentModeAlias -Name 'osv-scan' -Target 'Invoke-OSVScan'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-OSVScan' -Body ${function:Invoke-OSVScan}
+    Set-AgentModeAlias -Name 'osv-scan' -Target 'Invoke-OSVScan'
     # ===============================================
     # YARA - Pattern matching for malware detection
     # ===============================================
@@ -511,11 +502,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-YaraScan -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-YaraScan' -Body ${function:Invoke-YaraScan}
-        Set-AgentModeAlias -Name 'yara-scan' -Target 'Invoke-YaraScan'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-YaraScan' -Body ${function:Invoke-YaraScan}
+    Set-AgentModeAlias -Name 'yara-scan' -Target 'Invoke-YaraScan'
     # ===============================================
     # ClamAV - Antivirus scanning
     # ===============================================
@@ -633,11 +621,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-ClamAVScan -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-ClamAVScan' -Body ${function:Invoke-ClamAVScan}
-        Set-AgentModeAlias -Name 'clamav-scan' -Target 'Invoke-ClamAVScan'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-ClamAVScan' -Body ${function:Invoke-ClamAVScan}
+    Set-AgentModeAlias -Name 'clamav-scan' -Target 'Invoke-ClamAVScan'
     # ===============================================
     # Dangerzone - Safe document viewing
     # ===============================================
@@ -749,11 +734,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-DangerzoneConvert -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-DangerzoneConvert' -Body ${function:Invoke-DangerzoneConvert}
-        Set-AgentModeAlias -Name 'dangerzone-convert' -Target 'Invoke-DangerzoneConvert'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-DangerzoneConvert' -Body ${function:Invoke-DangerzoneConvert}
+    Set-AgentModeAlias -Name 'dangerzone-convert' -Target 'Invoke-DangerzoneConvert'
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'security-tools'

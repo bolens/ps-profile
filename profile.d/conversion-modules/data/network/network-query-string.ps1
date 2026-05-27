@@ -203,8 +203,7 @@ function Parse-QueryString {
         }
     }
 }
-Set-Alias -Name parse-query -Value Parse-QueryString -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parse-query' -Target 'Parse-QueryString'
 # Build query string
 <#
 .SYNOPSIS
@@ -244,8 +243,7 @@ function Build-QueryString {
         Write-Error "Failed to build query string: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name build-query -Value Build-QueryString -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'build-query' -Target 'Build-QueryString'
 # Convert query string to JSON
 <#
 .SYNOPSIS
@@ -278,8 +276,7 @@ function ConvertFrom-QueryStringToJson {
         Write-Error "Failed to convert query string to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name query-to-json -Value ConvertFrom-QueryStringToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'query-to-json' -Target 'ConvertFrom-QueryStringToJson'
 # Convert JSON to query string
 <#
 .SYNOPSIS
@@ -312,5 +309,4 @@ function ConvertTo-QueryStringFromJson {
         Write-Error "Failed to convert JSON to query string: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-query -Value ConvertTo-QueryStringFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-query' -Target 'ConvertTo-QueryStringFromJson'

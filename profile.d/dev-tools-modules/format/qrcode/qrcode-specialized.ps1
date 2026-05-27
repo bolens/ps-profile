@@ -39,7 +39,7 @@ function Initialize-DevTools-QrCode-Specialized {
             [string]$ErrorCorrectionLevel = 'M'
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use QR code generation."
             }
             $nodeScript = @"
@@ -114,7 +114,7 @@ try {
             [string]$ErrorCorrectionLevel = 'M'
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use QR code generation."
             }
             $nodeScript = @"
@@ -198,7 +198,7 @@ try {
             [string]$ErrorCorrectionLevel = 'M'
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use QR code generation."
             }
             $nodeScript = @"
@@ -699,10 +699,9 @@ function New-QrCodeTotp {
 }
 
 # Aliases
-Set-Alias -Name qrcode-wifi -Value New-QrCodeWiFi -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-contact -Value New-QrCodeContact -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-calendar -Value New-QrCodeCalendar -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-location -Value New-QrCodeLocation -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-crypto -Value New-QrCodeCrypto -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-totp -Value New-QrCodeTotp -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'qrcode-wifi' -Target 'New-QrCodeWiFi'
+Set-AgentModeAlias -Name 'qrcode-contact' -Target 'New-QrCodeContact'
+Set-AgentModeAlias -Name 'qrcode-calendar' -Target 'New-QrCodeCalendar'
+Set-AgentModeAlias -Name 'qrcode-location' -Target 'New-QrCodeLocation'
+Set-AgentModeAlias -Name 'qrcode-crypto' -Target 'New-QrCodeCrypto'
+Set-AgentModeAlias -Name 'qrcode-totp' -Target 'New-QrCodeTotp'

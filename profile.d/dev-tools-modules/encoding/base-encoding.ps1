@@ -35,7 +35,7 @@ function Initialize-DevTools-BaseEncoding {
         process {
             if ([string]::IsNullOrWhiteSpace($Text)) { return }
             try {
-                if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                if (-not (Test-CachedCommand 'node')) {
                     throw "Node.js is not available. Install Node.js to use Base32 encoding."
                 }
                 $nodeScript = @"
@@ -84,7 +84,7 @@ try {
         process {
             if ([string]::IsNullOrWhiteSpace($Text)) { return }
             try {
-                if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+                if (-not (Test-CachedCommand 'node')) {
                     throw "Node.js is not available. Install Node.js to use Base32 decoding."
                 }
                 $nodeScript = @"
@@ -148,8 +148,7 @@ function ConvertTo-Base32 {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertTo-Base32 @PSBoundParameters
 }
-Set-Alias -Name base32-encode -Value ConvertTo-Base32 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'base32-encode' -Target 'ConvertTo-Base32'
 <#
 .SYNOPSIS
     Decodes Base32-encoded text.
@@ -169,5 +168,4 @@ function ConvertFrom-Base32 {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertFrom-Base32 @PSBoundParameters
 }
-Set-Alias -Name base32-decode -Value ConvertFrom-Base32 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'base32-decode' -Target 'ConvertFrom-Base32'

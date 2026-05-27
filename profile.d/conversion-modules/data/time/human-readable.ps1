@@ -337,8 +337,7 @@ function ConvertFrom-HumanReadableToDateTime {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-HumanReadableToDateTime @PSBoundParameters
 }
-Set-Alias -Name human-to-datetime -Value ConvertFrom-HumanReadableToDateTime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'human-to-datetime' -Target 'ConvertFrom-HumanReadableToDateTime'
 # Convert DateTime to Human-readable
 <#
 .SYNOPSIS
@@ -374,16 +373,14 @@ function ConvertTo-HumanReadableFromDateTime {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-HumanReadableFromDateTime @PSBoundParameters
 }
-Set-Alias -Name datetime-to-human -Value ConvertTo-HumanReadableFromDateTime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'datetime-to-human' -Target 'ConvertTo-HumanReadableFromDateTime'
 # Additional conversion aliases
-Set-Alias -Name human-to-unix -Value ConvertFrom-HumanReadableToUnixTimestamp -ErrorAction SilentlyContinue
-Set-Alias -Name unix-to-human -Value ConvertTo-HumanReadableFromUnixTimestamp -ErrorAction SilentlyContinue
-Set-Alias -Name human-to-iso8601 -Value ConvertFrom-HumanReadableToIso8601 -ErrorAction SilentlyContinue
-Set-Alias -Name iso8601-to-human -Value ConvertTo-HumanReadableFromIso8601 -ErrorAction SilentlyContinue
-Set-Alias -Name human-to-rfc3339 -Value ConvertFrom-HumanReadableToRfc3339 -ErrorAction SilentlyContinue
-Set-Alias -Name rfc3339-to-human -Value ConvertTo-HumanReadableFromRfc3339 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'human-to-unix' -Target 'ConvertFrom-HumanReadableToUnixTimestamp'
+Set-AgentModeAlias -Name 'unix-to-human' -Target 'ConvertTo-HumanReadableFromUnixTimestamp'
+Set-AgentModeAlias -Name 'human-to-iso8601' -Target 'ConvertFrom-HumanReadableToIso8601'
+Set-AgentModeAlias -Name 'iso8601-to-human' -Target 'ConvertTo-HumanReadableFromIso8601'
+Set-AgentModeAlias -Name 'human-to-rfc3339' -Target 'ConvertFrom-HumanReadableToRfc3339'
+Set-AgentModeAlias -Name 'rfc3339-to-human' -Target 'ConvertTo-HumanReadableFromRfc3339'
 # Helper functions for public API
 function ConvertFrom-HumanReadableToUnixTimestamp {
     param(

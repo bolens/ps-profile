@@ -371,8 +371,7 @@ function ConvertFrom-Asn1ToJson {
         Write-Error "Failed to convert ASN.1 to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name asn1-to-json -Value ConvertFrom-Asn1ToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'asn1-to-json' -Target 'ConvertFrom-Asn1ToJson'
 # Convert JSON to ASN.1
 <#
 .SYNOPSIS
@@ -406,8 +405,7 @@ function ConvertTo-Asn1FromJson {
         Write-Error "Failed to convert JSON to ASN.1: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-asn1 -Value ConvertTo-Asn1FromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-asn1' -Target 'ConvertTo-Asn1FromJson'
 # Convert ASN.1 to XML
 <#
 .SYNOPSIS
@@ -441,5 +439,4 @@ function ConvertFrom-Asn1ToXml {
         Write-Error "Failed to convert ASN.1 to XML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name asn1-to-xml -Value ConvertFrom-Asn1ToXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'asn1-to-xml' -Target 'ConvertFrom-Asn1ToXml'

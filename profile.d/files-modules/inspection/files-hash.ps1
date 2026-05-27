@@ -93,5 +93,4 @@ function Get-FileHashValue {
     if (-not $global:FileUtilitiesInitialized) { Ensure-FileUtilities }
     & "Global:_Get-FileHashValue" @PSBoundParameters
 }
-Set-Alias -Name file-hash -Value Get-FileHashValue -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'file-hash' -Target 'Get-FileHashValue'

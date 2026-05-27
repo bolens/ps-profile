@@ -439,8 +439,7 @@ function ConvertFrom-EdnToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-EdnToJson @PSBoundParameters
 }
-Set-Alias -Name edn-to-json -Value ConvertFrom-EdnToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'edn-to-json' -Target 'ConvertFrom-EdnToJson'
 # Convert JSON to EDN
 <#
 .SYNOPSIS
@@ -458,8 +457,7 @@ function ConvertTo-EdnFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-EdnFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-edn -Value ConvertTo-EdnFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-edn' -Target 'ConvertTo-EdnFromJson'
 # Convert EDN to YAML
 <#
 .SYNOPSIS
@@ -477,4 +475,4 @@ function ConvertFrom-EdnToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-EdnToYaml @PSBoundParameters
 }
-Set-Alias -Name edn-to-yaml -Value ConvertFrom-EdnToYaml -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'edn-to-yaml' -Target 'ConvertFrom-EdnToYaml'

@@ -307,7 +307,7 @@ param(
 # Check if fragment exists
 if (-not (Test-Path -LiteralPath `$fragmentPath)) {
     Write-Error "Fragment file not found: `$fragmentPath"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 # Load fragment dependencies if FragmentLoader is available
@@ -342,12 +342,12 @@ if (Get-Command '$cmdName' -ErrorAction SilentlyContinue) {
     }
     catch {
         Write-Error "Failed to execute command '$cmdName': `$(`$_.Exception.Message)"
-        exit 1
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
 }
 else {
     Write-Error "Command '$cmdName' not found after loading fragment '$fragmentName'"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 "@
 

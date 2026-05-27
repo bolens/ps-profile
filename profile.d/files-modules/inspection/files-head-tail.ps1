@@ -222,8 +222,7 @@ function Get-FileHead {
         }
     }
 }
-Set-Alias -Name head -Value Get-FileHead -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'head' -Target 'Get-FileHead'
 # Tail (last 10 lines) of a file
 <#
 .SYNOPSIS
@@ -358,5 +357,4 @@ function Get-FileTail {
         }
     }
 }
-Set-Alias -Name tail -Value Get-FileTail -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'tail' -Target 'Get-FileTail'

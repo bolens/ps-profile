@@ -68,5 +68,4 @@ function Find-String {
         }
     }
 }
-Set-Alias -Name pgrep -Value Find-String -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'pgrep' -Target 'Find-String'

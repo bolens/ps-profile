@@ -49,9 +49,8 @@ function ConvertTo-MessagePackFromBson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-MessagePackFromBson @PSBoundParameters
 }
-Set-Alias -Name bson-to-msgpack -Value ConvertTo-MessagePackFromBson -ErrorAction SilentlyContinue
-Set-Alias -Name bson-to-messagepack -Value ConvertTo-MessagePackFromBson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'bson-to-msgpack' -Target 'ConvertTo-MessagePackFromBson'
+Set-AgentModeAlias -Name 'bson-to-messagepack' -Target 'ConvertTo-MessagePackFromBson'
 # Convert MessagePack to BSON
 <#
 .SYNOPSIS
@@ -70,9 +69,8 @@ function ConvertTo-BsonFromMessagePack {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-BsonFromMessagePack @PSBoundParameters
 }
-Set-Alias -Name msgpack-to-bson -Value ConvertTo-BsonFromMessagePack -ErrorAction SilentlyContinue
-Set-Alias -Name messagepack-to-bson -Value ConvertTo-BsonFromMessagePack -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'msgpack-to-bson' -Target 'ConvertTo-BsonFromMessagePack'
+Set-AgentModeAlias -Name 'messagepack-to-bson' -Target 'ConvertTo-BsonFromMessagePack'
 # Convert BSON to CBOR
 <#
 .SYNOPSIS
@@ -91,8 +89,7 @@ function ConvertTo-CborFromBson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-CborFromBson @PSBoundParameters
 }
-Set-Alias -Name bson-to-cbor -Value ConvertTo-CborFromBson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'bson-to-cbor' -Target 'ConvertTo-CborFromBson'
 # Convert CBOR to BSON
 <#
 .SYNOPSIS
@@ -111,8 +108,7 @@ function ConvertTo-BsonFromCbor {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-BsonFromCbor @PSBoundParameters
 }
-Set-Alias -Name cbor-to-bson -Value ConvertTo-BsonFromCbor -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cbor-to-bson' -Target 'ConvertTo-BsonFromCbor'
 # Convert MessagePack to CBOR
 <#
 .SYNOPSIS
@@ -131,9 +127,8 @@ function ConvertTo-CborFromMessagePack {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-CborFromMessagePack @PSBoundParameters
 }
-Set-Alias -Name msgpack-to-cbor -Value ConvertTo-CborFromMessagePack -ErrorAction SilentlyContinue
-Set-Alias -Name messagepack-to-cbor -Value ConvertTo-CborFromMessagePack -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'msgpack-to-cbor' -Target 'ConvertTo-CborFromMessagePack'
+Set-AgentModeAlias -Name 'messagepack-to-cbor' -Target 'ConvertTo-CborFromMessagePack'
 # Convert CBOR to MessagePack
 <#
 .SYNOPSIS
@@ -152,9 +147,8 @@ function ConvertTo-MessagePackFromCbor {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-MessagePackFromCbor @PSBoundParameters
 }
-Set-Alias -Name cbor-to-msgpack -Value ConvertTo-MessagePackFromCbor -ErrorAction SilentlyContinue
-Set-Alias -Name cbor-to-messagepack -Value ConvertTo-MessagePackFromCbor -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cbor-to-msgpack' -Target 'ConvertTo-MessagePackFromCbor'
+Set-AgentModeAlias -Name 'cbor-to-messagepack' -Target 'ConvertTo-MessagePackFromCbor'
 # Binary-to-binary direct conversions (more efficient than going through JSON)
     
 # BSON to MessagePack
@@ -162,7 +156,7 @@ Set-Item -Path Function:Global:_ConvertTo-MessagePackFromBson -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.bson$', '.msgpack' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use binary format conversions."
         }
         $nodeScript = @"
@@ -210,7 +204,7 @@ Set-Item -Path Function:Global:_ConvertTo-BsonFromMessagePack -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.msgpack$', '.bson' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use binary format conversions."
         }
         $nodeScript = @"
@@ -255,7 +249,7 @@ Set-Item -Path Function:Global:_ConvertTo-CborFromBson -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.bson$', '.cbor' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use binary format conversions."
         }
         $nodeScript = @"
@@ -302,7 +296,7 @@ Set-Item -Path Function:Global:_ConvertTo-BsonFromCbor -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.cbor$', '.bson' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use binary format conversions."
         }
         $nodeScript = @"
@@ -347,7 +341,7 @@ Set-Item -Path Function:Global:_ConvertTo-CborFromMessagePack -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.msgpack$', '.cbor' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use binary format conversions."
         }
         $nodeScript = @"
@@ -390,7 +384,7 @@ Set-Item -Path Function:Global:_ConvertTo-MessagePackFromCbor -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.cbor$', '.msgpack' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use binary format conversions."
         }
         $nodeScript = @"

@@ -72,5 +72,4 @@ function Test-SafePath {
     Creates a 16-character random password using alphanumeric characters.
 #>
 function New-RandomPassword { -join ((1..16) | ForEach-Object { [char]((65..90) + (97..122) + (48..57) | Get-Random) }) }
-Set-Alias -Name pwgen -Value New-RandomPassword -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'pwgen' -Target 'New-RandomPassword'

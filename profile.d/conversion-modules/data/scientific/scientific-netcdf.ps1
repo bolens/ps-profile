@@ -185,9 +185,8 @@ function ConvertTo-NetCdfFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-NetCdfFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-netcdf -Value ConvertTo-NetCdfFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-nc -Value ConvertTo-NetCdfFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-netcdf' -Target 'ConvertTo-NetCdfFromJson'
+Set-AgentModeAlias -Name 'json-to-nc' -Target 'ConvertTo-NetCdfFromJson'
 # Convert NetCDF to JSON
 <#
 .SYNOPSIS
@@ -205,5 +204,5 @@ function ConvertFrom-NetCdfToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-NetCdfToJson @PSBoundParameters
 }
-Set-Alias -Name netcdf-to-json -Value ConvertFrom-NetCdfToJson -ErrorAction SilentlyContinue
-Set-Alias -Name nc-to-json -Value ConvertFrom-NetCdfToJson -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'netcdf-to-json' -Target 'ConvertFrom-NetCdfToJson'
+Set-AgentModeAlias -Name 'nc-to-json' -Target 'ConvertFrom-NetCdfToJson'

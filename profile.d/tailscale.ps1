@@ -130,15 +130,7 @@ function Get-TailscaleStatus {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'tailscale' -Target 'Invoke-Tailscale'
-    Set-AgentModeAlias -Name 'ts-up' -Target 'Connect-TailscaleNetwork'
-    Set-AgentModeAlias -Name 'ts-down' -Target 'Disconnect-TailscaleNetwork'
-    Set-AgentModeAlias -Name 'ts-status' -Target 'Get-TailscaleStatus'
-}
-else {
-    Set-Alias -Name 'tailscale' -Value 'Invoke-Tailscale' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ts-up' -Value 'Connect-TailscaleNetwork' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ts-down' -Value 'Disconnect-TailscaleNetwork' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ts-status' -Value 'Get-TailscaleStatus' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'tailscale' -Target 'Invoke-Tailscale'
+Set-AgentModeAlias -Name 'ts-up' -Target 'Connect-TailscaleNetwork'
+Set-AgentModeAlias -Name 'ts-down' -Target 'Disconnect-TailscaleNetwork'
+Set-AgentModeAlias -Name 'ts-status' -Target 'Get-TailscaleStatus'

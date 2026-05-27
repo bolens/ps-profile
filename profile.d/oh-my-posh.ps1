@@ -28,7 +28,8 @@ try {
             try {
                 if ($null -ne (Get-Variable -Name 'OhMyPoshInitialized' -Scope Global -ErrorAction SilentlyContinue)) { return }
 
-                $ohCmd = Get-Command oh-my-posh -ErrorAction SilentlyContinue
+                if (-not (Test-CachedCommand 'oh-my-posh')) { return }
+                $ohCmd = Get-Command 'oh-my-posh' -ErrorAction SilentlyContinue
                 if (-not $ohCmd) { return }
 
                 # oh-my-posh generates a shell init script via `init pwsh --print`.
@@ -99,7 +100,7 @@ try {
     
     # If Starship is available, let it handle prompt initialization (loaded by 23-starship.ps1)
     # Starship and oh-my-posh are mutually exclusive prompt frameworks
-    if (Test-CachedCommand starship) {
+    if (Test-CachedCommand 'starship') {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {

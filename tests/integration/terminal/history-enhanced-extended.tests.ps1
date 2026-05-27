@@ -4,7 +4,7 @@ Describe "Enhanced History Module - Additional Tests" {
     BeforeAll {
         try {
             # Load the enhanced history fragment directly
-            $enhancedHistoryFragment = Get-TestPath "profile.d\enhanced-history.ps1" -StartPath $PSScriptRoot -EnsureExists
+            $enhancedHistoryFragment = Get-TestPath "profile.d\history-enhanced.ps1" -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $enhancedHistoryFragment -or [string]::IsNullOrWhiteSpace($enhancedHistoryFragment)) {
                 throw "Get-TestPath returned null or empty value for enhancedHistoryFragment"
             }

@@ -162,15 +162,7 @@ function Update-DenoSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'deno' -Target 'Invoke-Deno'
-    Set-AgentModeAlias -Name 'deno-run' -Target 'Invoke-DenoRun'
-    Set-AgentModeAlias -Name 'deno-task' -Target 'Invoke-DenoTask'
-    Set-AgentModeAlias -Name 'deno-upgrade' -Target 'Update-DenoSelf'
-}
-else {
-    Set-Alias -Name 'deno' -Value 'Invoke-Deno' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'deno-run' -Value 'Invoke-DenoRun' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'deno-task' -Value 'Invoke-DenoTask' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'deno-upgrade' -Value 'Update-DenoSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'deno' -Target 'Invoke-Deno'
+Set-AgentModeAlias -Name 'deno-run' -Target 'Invoke-DenoRun'
+Set-AgentModeAlias -Name 'deno-task' -Target 'Invoke-DenoTask'
+Set-AgentModeAlias -Name 'deno-upgrade' -Target 'Update-DenoSelf'

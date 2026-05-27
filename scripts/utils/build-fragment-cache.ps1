@@ -161,7 +161,7 @@ catch {
             Write-Host "  [build-fragment-cache] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
         }
     }
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 # Level 1: Basic operation start

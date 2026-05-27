@@ -24,8 +24,7 @@ function Get-CommandInfo {
         return $null
     }
 }
-Set-Alias -Name which -Value Get-CommandInfo -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'which' -Target 'Get-CommandInfo'
 # Disk space usage (Unix 'df' equivalent)
 <#
 .SYNOPSIS
@@ -49,8 +48,7 @@ function Get-DiskUsage {
         }
     }
 }
-Set-Alias -Name df -Value Get-DiskUsage -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'df' -Target 'Get-DiskUsage'
 # Top processes by CPU (Unix 'top' equivalent, aliased as 'htop')
 <#
 .SYNOPSIS
@@ -74,5 +72,4 @@ function Get-TopProcesses {
         }
     }
 }
-Set-Alias -Name htop -Value Get-TopProcesses -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'htop' -Target 'Get-TopProcesses'

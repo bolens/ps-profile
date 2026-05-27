@@ -161,11 +161,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Bruno -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Bruno' -Body ${function:Invoke-Bruno}
-        Set-AgentModeAlias -Name 'bruno' -Target 'Invoke-Bruno'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Bruno' -Body ${function:Invoke-Bruno}
+    Set-AgentModeAlias -Name 'bruno' -Target 'Invoke-Bruno'
     # ===============================================
     # Hurl - HTTP testing tool
     # ===============================================
@@ -292,11 +289,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Hurl -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Hurl' -Body ${function:Invoke-Hurl}
-        Set-AgentModeAlias -Name 'hurl' -Target 'Invoke-Hurl'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Hurl' -Body ${function:Invoke-Hurl}
+    Set-AgentModeAlias -Name 'hurl' -Target 'Invoke-Hurl'
     # ===============================================
     # Httpie - Command-line HTTP client
     # ===============================================
@@ -451,11 +445,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Httpie -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Httpie' -Body ${function:Invoke-Httpie}
-        Set-AgentModeAlias -Name 'httpie' -Target 'Invoke-Httpie'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Httpie' -Body ${function:Invoke-Httpie}
+    Set-AgentModeAlias -Name 'httpie' -Target 'Invoke-Httpie'
     # ===============================================
     # HTTP Toolkit - HTTP debugging proxy
     # ===============================================
@@ -547,11 +538,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Start-HttpToolkit -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Start-HttpToolkit' -Body ${function:Start-HttpToolkit}
-        Set-AgentModeAlias -Name 'httptoolkit' -Target 'Start-HttpToolkit'
-    }
-
+    Set-AgentModeFunction -Name 'Start-HttpToolkit' -Body ${function:Start-HttpToolkit}
+    Set-AgentModeAlias -Name 'httptoolkit' -Target 'Start-HttpToolkit'
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'api-tools'

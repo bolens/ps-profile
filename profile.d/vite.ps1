@@ -149,15 +149,7 @@ function Build-ViteApp {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'vite' -Target 'Invoke-Vite'
-    Set-AgentModeAlias -Name 'create-vite' -Target 'New-ViteProject'
-    Set-AgentModeAlias -Name 'vite-dev' -Target 'Start-ViteDev'
-    Set-AgentModeAlias -Name 'vite-build' -Target 'Build-ViteApp'
-}
-else {
-    Set-Alias -Name 'vite' -Value 'Invoke-Vite' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'create-vite' -Value 'New-ViteProject' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'vite-dev' -Value 'Start-ViteDev' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'vite-build' -Value 'Build-ViteApp' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'vite' -Target 'Invoke-Vite'
+Set-AgentModeAlias -Name 'create-vite' -Target 'New-ViteProject'
+Set-AgentModeAlias -Name 'vite-dev' -Target 'Start-ViteDev'
+Set-AgentModeAlias -Name 'vite-build' -Target 'Build-ViteApp'

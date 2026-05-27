@@ -139,15 +139,7 @@ function Get-OllamaModel {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ol' -Target 'Invoke-Ollama'
-    Set-AgentModeAlias -Name 'ol-list' -Target 'Get-OllamaModelList'
-    Set-AgentModeAlias -Name 'ol-run' -Target 'Start-OllamaModel'
-    Set-AgentModeAlias -Name 'ol-pull' -Target 'Get-OllamaModel'
-}
-else {
-    Set-Alias -Name 'ol' -Value 'Invoke-Ollama' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ol-list' -Value 'Get-OllamaModelList' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ol-run' -Value 'Start-OllamaModel' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ol-pull' -Value 'Get-OllamaModel' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ol' -Target 'Invoke-Ollama'
+Set-AgentModeAlias -Name 'ol-list' -Target 'Get-OllamaModelList'
+Set-AgentModeAlias -Name 'ol-run' -Target 'Start-OllamaModel'
+Set-AgentModeAlias -Name 'ol-pull' -Target 'Get-OllamaModel'

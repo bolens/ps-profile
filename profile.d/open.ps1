@@ -118,5 +118,5 @@ if (-not (Test-Path Function:Open-Item -ErrorAction SilentlyContinue)) {
             throw
         }
     }
-    Set-Alias -Name open -Value Open-Item -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'open' -Target 'Open-Item'
 }

@@ -25,7 +25,7 @@ function Initialize-FileConversion-CoreCompressionLz4 {
         )
         try {
             # Check if lz4 command is available
-            $lz4Cmd = Get-Command lz4 -ErrorAction SilentlyContinue
+            $lz4Cmd = Test-CachedCommand 'lz4'
             if (-not $lz4Cmd) {
                 throw "lz4 command is not available. Install lz4: Windows (scoop install lz4), Linux (apt install lz4), macOS (brew install lz4)"
             }
@@ -63,7 +63,7 @@ function Initialize-FileConversion-CoreCompressionLz4 {
         )
         try {
             # Check if lz4 command is available
-            $lz4Cmd = Get-Command lz4 -ErrorAction SilentlyContinue
+            $lz4Cmd = Test-CachedCommand 'lz4'
             if (-not $lz4Cmd) {
                 throw "lz4 command is not available. Install lz4: Windows (scoop install lz4), Linux (apt install lz4), macOS (brew install lz4)"
             }

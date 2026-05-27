@@ -134,7 +134,7 @@ Many fragments have been refactored to use organized subdirectories for better c
 - **`git-modules/`** - Git integration modules (loaded by `git.ps1`)
   - `core/` - Core Git operations (basic, advanced, helpers)
   - `integrations/` - Git service integrations (GitHub)
-- **`utilities-modules/`** - Utility function modules (loaded by `utilities.ps1`, `network-utils.ps1`, `enhanced-history.ps1`)
+- **`utilities-modules/`** - Utility function modules (loaded by `utilities.ps1`, `network-utils.ps1`, `history-enhanced.ps1`)
   - `data/` - Data utilities (datetime, encoding)
   - `filesystem/` - Filesystem utilities
   - `history/` - Command history utilities (basic, enhanced)

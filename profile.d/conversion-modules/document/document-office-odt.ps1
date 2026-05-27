@@ -22,7 +22,7 @@ function Initialize-FileConversion-DocumentOfficeOdt {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -51,7 +51,7 @@ function Initialize-FileConversion-DocumentOfficeOdt {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -80,7 +80,7 @@ function Initialize-FileConversion-DocumentOfficeOdt {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -109,7 +109,7 @@ function Initialize-FileConversion-DocumentOfficeOdt {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -138,7 +138,7 @@ function Initialize-FileConversion-DocumentOfficeOdt {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -167,7 +167,7 @@ function Initialize-FileConversion-DocumentOfficeOdt {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -196,7 +196,7 @@ function Initialize-FileConversion-DocumentOfficeOdt {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -247,12 +247,7 @@ function ConvertFrom-OdtToMarkdown {
         Write-Error "Failed to convert ODT to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odt-to-markdown' -Target 'ConvertFrom-OdtToMarkdown'
-}
-else {
-    Set-Alias -Name odt-to-markdown -Value ConvertFrom-OdtToMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odt-to-markdown' -Target 'ConvertFrom-OdtToMarkdown'
 
 <#
 .SYNOPSIS
@@ -281,12 +276,7 @@ function ConvertFrom-OdtToHtml {
         Write-Error "Failed to convert ODT to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odt-to-html' -Target 'ConvertFrom-OdtToHtml'
-}
-else {
-    Set-Alias -Name odt-to-html -Value ConvertFrom-OdtToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odt-to-html' -Target 'ConvertFrom-OdtToHtml'
 
 <#
 .SYNOPSIS
@@ -315,12 +305,7 @@ function ConvertFrom-OdtToPdf {
         Write-Error "Failed to convert ODT to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odt-to-pdf' -Target 'ConvertFrom-OdtToPdf'
-}
-else {
-    Set-Alias -Name odt-to-pdf -Value ConvertFrom-OdtToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odt-to-pdf' -Target 'ConvertFrom-OdtToPdf'
 
 <#
 .SYNOPSIS
@@ -349,12 +334,7 @@ function ConvertFrom-OdtToDocx {
         Write-Error "Failed to convert ODT to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odt-to-docx' -Target 'ConvertFrom-OdtToDocx'
-}
-else {
-    Set-Alias -Name odt-to-docx -Value ConvertFrom-OdtToDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odt-to-docx' -Target 'ConvertFrom-OdtToDocx'
 
 <#
 .SYNOPSIS
@@ -383,12 +363,7 @@ function ConvertFrom-OdtToLatex {
         Write-Error "Failed to convert ODT to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odt-to-latex' -Target 'ConvertFrom-OdtToLatex'
-}
-else {
-    Set-Alias -Name odt-to-latex -Value ConvertFrom-OdtToLatex -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odt-to-latex' -Target 'ConvertFrom-OdtToLatex'
 
 <#
 .SYNOPSIS
@@ -417,14 +392,8 @@ function ConvertTo-OdtFromMarkdown {
         Write-Error "Failed to convert Markdown to ODT: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'markdown-to-odt' -Target 'ConvertTo-OdtFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-odt' -Target 'ConvertTo-OdtFromMarkdown'
-}
-else {
-    Set-Alias -Name markdown-to-odt -Value ConvertTo-OdtFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-odt -Value ConvertTo-OdtFromMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'markdown-to-odt' -Target 'ConvertTo-OdtFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-odt' -Target 'ConvertTo-OdtFromMarkdown'
 
 <#
 .SYNOPSIS
@@ -453,10 +422,5 @@ function ConvertTo-OdtFromDocx {
         Write-Error "Failed to convert DOCX to ODT: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'docx-to-odt' -Target 'ConvertTo-OdtFromDocx'
-}
-else {
-    Set-Alias -Name docx-to-odt -Value ConvertTo-OdtFromDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'docx-to-odt' -Target 'ConvertTo-OdtFromDocx'
 

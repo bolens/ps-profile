@@ -11,8 +11,7 @@
     Converts a Unix timestamp (seconds since epoch) to a local DateTime.
 #>
 function ConvertFrom-Epoch { param([long]$epoch) [DateTimeOffset]::FromUnixTimeSeconds($epoch).ToLocalTime() }
-Set-Alias -Name from-epoch -Value ConvertFrom-Epoch -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'from-epoch' -Target 'ConvertFrom-Epoch'
 # Convert DateTime to Unix timestamp
 <#
 .SYNOPSIS
@@ -21,8 +20,7 @@ Set-Alias -Name from-epoch -Value ConvertFrom-Epoch -ErrorAction SilentlyContinu
     Converts a DateTime object or string to a Unix timestamp (seconds since epoch).
 #>
 function ConvertTo-Epoch { param([DateTime]$date = (Get-Date)) [DateTimeOffset]::new($date).ToUnixTimeSeconds() }
-Set-Alias -Name to-epoch -Value ConvertTo-Epoch -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'to-epoch' -Target 'ConvertTo-Epoch'
 # Convert DateTime to Unix timestamp
 <#
 .SYNOPSIS
@@ -31,8 +29,7 @@ Set-Alias -Name to-epoch -Value ConvertTo-Epoch -ErrorAction SilentlyContinue
     Returns the current date and time as a Unix timestamp (seconds since epoch).
 #>
 function Get-Epoch { [DateTimeOffset]::Now.ToUnixTimeSeconds() }
-Set-Alias -Name epoch -Value Get-Epoch -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'epoch' -Target 'Get-Epoch'
 # Get current date and time in standard format
 <#
 .SYNOPSIS
@@ -54,5 +51,4 @@ function Get-DateTime {
         Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     }
 }
-Set-Alias -Name now -Value Get-DateTime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'now' -Target 'Get-DateTime'

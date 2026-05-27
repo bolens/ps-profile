@@ -48,8 +48,7 @@ function ConvertFrom-BsonToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-BsonToCsv @PSBoundParameters
 }
-Set-Alias -Name bson-to-csv -Value ConvertFrom-BsonToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'bson-to-csv' -Target 'ConvertFrom-BsonToCsv'
 # Convert MessagePack to CSV
 <#
 .SYNOPSIS
@@ -67,9 +66,8 @@ function ConvertFrom-MessagePackToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-MessagePackToCsv @PSBoundParameters
 }
-Set-Alias -Name msgpack-to-csv -Value ConvertFrom-MessagePackToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name messagepack-to-csv -Value ConvertFrom-MessagePackToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'msgpack-to-csv' -Target 'ConvertFrom-MessagePackToCsv'
+Set-AgentModeAlias -Name 'messagepack-to-csv' -Target 'ConvertFrom-MessagePackToCsv'
 # Convert CBOR to CSV
 <#
 .SYNOPSIS
@@ -87,8 +85,7 @@ function ConvertFrom-CborToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-CborToCsv @PSBoundParameters
 }
-Set-Alias -Name cbor-to-csv -Value ConvertFrom-CborToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cbor-to-csv' -Target 'ConvertFrom-CborToCsv'
 # Convert BSON to YAML
 <#
 .SYNOPSIS
@@ -106,8 +103,7 @@ function ConvertFrom-BsonToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-BsonToYaml @PSBoundParameters
 }
-Set-Alias -Name bson-to-yaml -Value ConvertFrom-BsonToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'bson-to-yaml' -Target 'ConvertFrom-BsonToYaml'
 # Convert MessagePack to YAML
 <#
 .SYNOPSIS
@@ -125,9 +121,8 @@ function ConvertFrom-MessagePackToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-MessagePackToYaml @PSBoundParameters
 }
-Set-Alias -Name msgpack-to-yaml -Value ConvertFrom-MessagePackToYaml -ErrorAction SilentlyContinue
-Set-Alias -Name messagepack-to-yaml -Value ConvertFrom-MessagePackToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'msgpack-to-yaml' -Target 'ConvertFrom-MessagePackToYaml'
+Set-AgentModeAlias -Name 'messagepack-to-yaml' -Target 'ConvertFrom-MessagePackToYaml'
 # Convert CBOR to YAML
 <#
 .SYNOPSIS
@@ -145,8 +140,7 @@ function ConvertFrom-CborToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-CborToYaml @PSBoundParameters
 }
-Set-Alias -Name cbor-to-yaml -Value ConvertFrom-CborToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cbor-to-yaml' -Target 'ConvertFrom-CborToYaml'
 # Binary to text conversions (for inspection/debugging)
 # Binary to text conversions (for inspection/debugging)
     
@@ -155,7 +149,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToCsv -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.bson$', '.csv' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use BSON conversions."
         }
         # Convert BSON to JSON first, then JSON to CSV
@@ -201,7 +195,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToCsv -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.msgpack$', '.csv' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use MessagePack conversions."
         }
         # Convert MessagePack to JSON first, then JSON to CSV
@@ -247,7 +241,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToCsv -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.cbor$', '.csv' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use CBOR conversions."
         }
         # Convert CBOR to JSON first, then JSON to CSV
@@ -293,10 +287,10 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToYaml -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.bson$', '.yaml' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use BSON conversions."
         }
-        if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'yq')) {
             throw "yq is not available. Install yq to use BSON to YAML conversions."
         }
         # Convert BSON to JSON first, then JSON to YAML
@@ -338,10 +332,10 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToYaml -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.msgpack$', '.yaml' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use MessagePack conversions."
         }
-        if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'yq')) {
             throw "yq is not available. Install yq to use MessagePack to YAML conversions."
         }
         # Convert MessagePack to JSON first, then JSON to YAML
@@ -383,10 +377,10 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToYaml -Value {
     param([string]$InputPath, [string]$OutputPath)
     try {
         if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.cbor$', '.yaml' }
-        if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'node')) {
             throw "Node.js is not available. Install Node.js to use CBOR conversions."
         }
-        if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'yq')) {
             throw "yq is not available. Install yq to use CBOR to YAML conversions."
         }
         # Convert CBOR to JSON first, then JSON to YAML

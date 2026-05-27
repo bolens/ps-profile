@@ -178,8 +178,7 @@ function Set-LocationDesktop {
 
     return & __FileNavigation_Desktop @args
 }
-Set-Alias -Name desktop -Value Set-LocationDesktop -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'desktop' -Target 'Set-LocationDesktop'
 # Go to Downloads directory
 <#
 .SYNOPSIS
@@ -198,8 +197,7 @@ function Set-LocationDownloads {
 
     return & __FileNavigation_Downloads @args
 }
-Set-Alias -Name downloads -Value Set-LocationDownloads -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'downloads' -Target 'Set-LocationDownloads'
 # Go to Documents directory
 <#
 .SYNOPSIS
@@ -218,5 +216,4 @@ function Set-LocationDocuments {
 
     return & __FileNavigation_Documents @args
 }
-Set-Alias -Name docs -Value Set-LocationDocuments -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'docs' -Target 'Set-LocationDocuments'

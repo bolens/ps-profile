@@ -27,7 +27,7 @@ function Initialize-FileConversion-DocumentCommonHtml {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -63,7 +63,7 @@ function Initialize-FileConversion-DocumentCommonHtml {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -99,7 +99,7 @@ function Initialize-FileConversion-DocumentCommonHtml {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -150,12 +150,7 @@ function ConvertFrom-HtmlToMarkdown {
         Write-Error "Failed to convert HTML to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'html-to-markdown' -Target 'ConvertFrom-HtmlToMarkdown'
-}
-else {
-    Set-Alias -Name html-to-markdown -Value ConvertFrom-HtmlToMarkdown -ErrorAction SilentlyContinue -Scope Global
-}
+Set-AgentModeAlias -Name 'html-to-markdown' -Target 'ConvertFrom-HtmlToMarkdown'
 
 # Convert HTML to PDF
 <#
@@ -183,12 +178,7 @@ function ConvertTo-PdfFromHtml {
         Write-Error "Failed to convert HTML to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'html-to-pdf' -Target 'ConvertTo-PdfFromHtml'
-}
-else {
-    Set-Alias -Name html-to-pdf -Value ConvertTo-PdfFromHtml -ErrorAction SilentlyContinue -Scope Global
-}
+Set-AgentModeAlias -Name 'html-to-pdf' -Target 'ConvertTo-PdfFromHtml'
 
 # Convert HTML to LaTeX
 <#
@@ -216,10 +206,5 @@ function ConvertTo-LaTeXFromHtml {
         Write-Error "Failed to convert HTML to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'html-to-latex' -Target 'ConvertTo-LaTeXFromHtml'
-}
-else {
-    Set-Alias -Name html-to-latex -Value ConvertTo-LaTeXFromHtml -ErrorAction SilentlyContinue -Scope Global
-}
+Set-AgentModeAlias -Name 'html-to-latex' -Target 'ConvertTo-LaTeXFromHtml'
 

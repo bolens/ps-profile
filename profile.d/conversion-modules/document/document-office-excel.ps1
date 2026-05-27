@@ -43,7 +43,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
             }
             
             # Fallback to pandoc (if available)
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc -f xlsx -t csv $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -100,7 +100,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -134,7 +134,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
             }
             
             # Try pandoc first
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -143,7 +143,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
             }
             
             # Fallback to LibreOffice headless mode
-            if (Get-Command libreoffice -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'libreoffice') {
                 $outputDir = Split-Path -Parent $OutputPath
                 $errorOutput = & libreoffice --headless --convert-to pdf --outdir $outputDir $InputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -175,7 +175,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -219,7 +219,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
             }
             
             # Fallback to pandoc
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc -f csv -t xlsx $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -276,7 +276,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -329,16 +329,9 @@ function ConvertFrom-ExcelToCsv {
         Write-Error "Failed to convert Excel to CSV: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'excel-to-csv' -Target 'ConvertFrom-ExcelToCsv'
-    Set-AgentModeAlias -Name 'xlsx-to-csv' -Target 'ConvertFrom-ExcelToCsv'
-    Set-AgentModeAlias -Name 'xls-to-csv' -Target 'ConvertFrom-ExcelToCsv'
-}
-else {
-    Set-Alias -Name excel-to-csv -Value ConvertFrom-ExcelToCsv -ErrorAction SilentlyContinue
-    Set-Alias -Name xlsx-to-csv -Value ConvertFrom-ExcelToCsv -ErrorAction SilentlyContinue
-    Set-Alias -Name xls-to-csv -Value ConvertFrom-ExcelToCsv -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'excel-to-csv' -Target 'ConvertFrom-ExcelToCsv'
+Set-AgentModeAlias -Name 'xlsx-to-csv' -Target 'ConvertFrom-ExcelToCsv'
+Set-AgentModeAlias -Name 'xls-to-csv' -Target 'ConvertFrom-ExcelToCsv'
 
 <#
 .SYNOPSIS
@@ -369,16 +362,9 @@ function ConvertFrom-ExcelToJson {
         Write-Error "Failed to convert Excel to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'excel-to-json' -Target 'ConvertFrom-ExcelToJson'
-    Set-AgentModeAlias -Name 'xlsx-to-json' -Target 'ConvertFrom-ExcelToJson'
-    Set-AgentModeAlias -Name 'xls-to-json' -Target 'ConvertFrom-ExcelToJson'
-}
-else {
-    Set-Alias -Name excel-to-json -Value ConvertFrom-ExcelToJson -ErrorAction SilentlyContinue
-    Set-Alias -Name xlsx-to-json -Value ConvertFrom-ExcelToJson -ErrorAction SilentlyContinue
-    Set-Alias -Name xls-to-json -Value ConvertFrom-ExcelToJson -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'excel-to-json' -Target 'ConvertFrom-ExcelToJson'
+Set-AgentModeAlias -Name 'xlsx-to-json' -Target 'ConvertFrom-ExcelToJson'
+Set-AgentModeAlias -Name 'xls-to-json' -Target 'ConvertFrom-ExcelToJson'
 
 <#
 .SYNOPSIS
@@ -409,16 +395,9 @@ function ConvertFrom-ExcelToHtml {
         Write-Error "Failed to convert Excel to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'excel-to-html' -Target 'ConvertFrom-ExcelToHtml'
-    Set-AgentModeAlias -Name 'xlsx-to-html' -Target 'ConvertFrom-ExcelToHtml'
-    Set-AgentModeAlias -Name 'xls-to-html' -Target 'ConvertFrom-ExcelToHtml'
-}
-else {
-    Set-Alias -Name excel-to-html -Value ConvertFrom-ExcelToHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name xlsx-to-html -Value ConvertFrom-ExcelToHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name xls-to-html -Value ConvertFrom-ExcelToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'excel-to-html' -Target 'ConvertFrom-ExcelToHtml'
+Set-AgentModeAlias -Name 'xlsx-to-html' -Target 'ConvertFrom-ExcelToHtml'
+Set-AgentModeAlias -Name 'xls-to-html' -Target 'ConvertFrom-ExcelToHtml'
 
 <#
 .SYNOPSIS
@@ -449,16 +428,9 @@ function ConvertFrom-ExcelToPdf {
         Write-Error "Failed to convert Excel to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'excel-to-pdf' -Target 'ConvertFrom-ExcelToPdf'
-    Set-AgentModeAlias -Name 'xlsx-to-pdf' -Target 'ConvertFrom-ExcelToPdf'
-    Set-AgentModeAlias -Name 'xls-to-pdf' -Target 'ConvertFrom-ExcelToPdf'
-}
-else {
-    Set-Alias -Name excel-to-pdf -Value ConvertFrom-ExcelToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name xlsx-to-pdf -Value ConvertFrom-ExcelToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name xls-to-pdf -Value ConvertFrom-ExcelToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'excel-to-pdf' -Target 'ConvertFrom-ExcelToPdf'
+Set-AgentModeAlias -Name 'xlsx-to-pdf' -Target 'ConvertFrom-ExcelToPdf'
+Set-AgentModeAlias -Name 'xls-to-pdf' -Target 'ConvertFrom-ExcelToPdf'
 
 <#
 .SYNOPSIS
@@ -489,16 +461,9 @@ function ConvertFrom-ExcelToOds {
         Write-Error "Failed to convert Excel to ODS: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'excel-to-ods' -Target 'ConvertFrom-ExcelToOds'
-    Set-AgentModeAlias -Name 'xlsx-to-ods' -Target 'ConvertFrom-ExcelToOds'
-    Set-AgentModeAlias -Name 'xls-to-ods' -Target 'ConvertFrom-ExcelToOds'
-}
-else {
-    Set-Alias -Name excel-to-ods -Value ConvertFrom-ExcelToOds -ErrorAction SilentlyContinue
-    Set-Alias -Name xlsx-to-ods -Value ConvertFrom-ExcelToOds -ErrorAction SilentlyContinue
-    Set-Alias -Name xls-to-ods -Value ConvertFrom-ExcelToOds -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'excel-to-ods' -Target 'ConvertFrom-ExcelToOds'
+Set-AgentModeAlias -Name 'xlsx-to-ods' -Target 'ConvertFrom-ExcelToOds'
+Set-AgentModeAlias -Name 'xls-to-ods' -Target 'ConvertFrom-ExcelToOds'
 
 <#
 .SYNOPSIS
@@ -529,14 +494,8 @@ function ConvertTo-ExcelFromCsv {
         Write-Error "Failed to convert CSV to Excel: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'csv-to-excel' -Target 'ConvertTo-ExcelFromCsv'
-    Set-AgentModeAlias -Name 'csv-to-xlsx' -Target 'ConvertTo-ExcelFromCsv'
-}
-else {
-    Set-Alias -Name csv-to-excel -Value ConvertTo-ExcelFromCsv -ErrorAction SilentlyContinue
-    Set-Alias -Name csv-to-xlsx -Value ConvertTo-ExcelFromCsv -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'csv-to-excel' -Target 'ConvertTo-ExcelFromCsv'
+Set-AgentModeAlias -Name 'csv-to-xlsx' -Target 'ConvertTo-ExcelFromCsv'
 
 <#
 .SYNOPSIS
@@ -567,14 +526,8 @@ function ConvertTo-ExcelFromJson {
         Write-Error "Failed to convert JSON to Excel: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'json-to-excel' -Target 'ConvertTo-ExcelFromJson'
-    Set-AgentModeAlias -Name 'json-to-xlsx' -Target 'ConvertTo-ExcelFromJson'
-}
-else {
-    Set-Alias -Name json-to-excel -Value ConvertTo-ExcelFromJson -ErrorAction SilentlyContinue
-    Set-Alias -Name json-to-xlsx -Value ConvertTo-ExcelFromJson -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'json-to-excel' -Target 'ConvertTo-ExcelFromJson'
+Set-AgentModeAlias -Name 'json-to-xlsx' -Target 'ConvertTo-ExcelFromJson'
 
 <#
 .SYNOPSIS
@@ -605,12 +558,6 @@ function ConvertTo-ExcelFromOds {
         Write-Error "Failed to convert ODS to Excel: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ods-to-excel' -Target 'ConvertTo-ExcelFromOds'
-    Set-AgentModeAlias -Name 'ods-to-xlsx' -Target 'ConvertTo-ExcelFromOds'
-}
-else {
-    Set-Alias -Name ods-to-excel -Value ConvertTo-ExcelFromOds -ErrorAction SilentlyContinue
-    Set-Alias -Name ods-to-xlsx -Value ConvertTo-ExcelFromOds -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ods-to-excel' -Target 'ConvertTo-ExcelFromOds'
+Set-AgentModeAlias -Name 'ods-to-xlsx' -Target 'ConvertTo-ExcelFromOds'
 

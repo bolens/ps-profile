@@ -35,7 +35,7 @@ function Initialize-FileConversion-SpecializedBarcode {
                 $OutputPath = $InputPath -replace '\.(txt|text|json)$', '.png'
             }
             
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use barcode generation."
             }
             
@@ -207,8 +207,7 @@ function ConvertTo-BarcodeFromText {
         Write-Error "Failed to convert text to barcode: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name text-to-barcode -Value ConvertTo-BarcodeFromText -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'text-to-barcode' -Target 'ConvertTo-BarcodeFromText'
 # Convert JSON to Barcode
 <#
 .SYNOPSIS
@@ -250,8 +249,7 @@ function ConvertTo-BarcodeFromJson {
         Write-Error "Failed to convert JSON to barcode: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-barcode -Value ConvertTo-BarcodeFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-barcode' -Target 'ConvertTo-BarcodeFromJson'
 # Convert Barcode to text
 <#
 .SYNOPSIS
@@ -287,5 +285,4 @@ function ConvertFrom-BarcodeToText {
         Write-Error "Failed to decode barcode: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name barcode-to-text -Value ConvertFrom-BarcodeToText -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'barcode-to-text' -Target 'ConvertFrom-BarcodeToText'

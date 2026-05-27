@@ -53,8 +53,7 @@ function ConvertFrom-PdfToText {
     if (-not $global:FileConversionMediaInitialized) { Ensure-FileConversion-Media }
     _ConvertFrom-PdfToText @PSBoundParameters
 }
-Set-Alias -Name pdf-to-text -Value ConvertFrom-PdfToText -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'pdf-to-text' -Target 'ConvertFrom-PdfToText'
 # Merge PDF files
 <#
 .SYNOPSIS
@@ -71,5 +70,4 @@ function Merge-Pdf {
     if (-not $global:FileConversionMediaInitialized) { Ensure-FileConversion-Media }
     _Merge-Pdf @PSBoundParameters
 }
-Set-Alias -Name pdf-merge -Value Merge-Pdf -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'pdf-merge' -Target 'Merge-Pdf'

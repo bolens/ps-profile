@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & dotnet list package --outdated
     }
-    Set-Alias -Name dotnet-outdated -Value Test-DotnetOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dotnet-outdated' -Target 'Test-DotnetOutdated'
     # .NET update packages
     <#
     .SYNOPSIS
@@ -40,8 +39,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Write-Warning "Use 'dotnet list package --outdated' to see outdated packages, then update with 'dotnet add package <package>'"
         & dotnet list package --outdated
     }
-    Set-Alias -Name dotnet-update -Value Update-DotnetPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dotnet-update' -Target 'Update-DotnetPackages'
     # .NET update tools
     <#
     .SYNOPSIS
@@ -55,8 +53,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & dotnet tool update --all
     }
-    Set-Alias -Name dotnet-tool-update -Value Update-DotnetTools -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dotnet-tool-update' -Target 'Update-DotnetTools'
     # .NET restore
     <#
     .SYNOPSIS
@@ -70,8 +67,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & dotnet restore
     }
-    Set-Alias -Name dotnet-restore -Value Restore-DotnetPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dotnet-restore' -Target 'Restore-DotnetPackages'
     # .NET add package
     <#
     .SYNOPSIS
@@ -111,8 +107,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
             & dotnet @args
         }
     }
-    Set-Alias -Name dotnet-add -Value Add-DotnetPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dotnet-add' -Target 'Add-DotnetPackage'
     # .NET remove package
     <#
     .SYNOPSIS
@@ -143,7 +138,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
             & dotnet @args
         }
     }
-    Set-Alias -Name dotnet-remove -Value Remove-DotnetPackage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'dotnet-remove' -Target 'Remove-DotnetPackage'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

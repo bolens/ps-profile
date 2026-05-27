@@ -682,8 +682,7 @@ function ConvertFrom-TomlToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-TomlToJson @PSBoundParameters
 }
-Set-Alias -Name toml-to-json -Value ConvertFrom-TomlToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toml-to-json' -Target 'ConvertFrom-TomlToJson'
 # Convert JSON to TOML
 <#
 .SYNOPSIS
@@ -700,8 +699,7 @@ function ConvertTo-TomlFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-TomlFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-toml -Value ConvertTo-TomlFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-toml' -Target 'ConvertTo-TomlFromJson'
 # Convert TOML to YAML
 <#
 .SYNOPSIS
@@ -718,8 +716,7 @@ function ConvertFrom-TomlToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-TomlToYaml @PSBoundParameters
 }
-Set-Alias -Name toml-to-yaml -Value ConvertFrom-TomlToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toml-to-yaml' -Target 'ConvertFrom-TomlToYaml'
 # Convert YAML to TOML
 <#
 .SYNOPSIS
@@ -736,8 +733,7 @@ function ConvertTo-TomlFromYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-TomlFromYaml @PSBoundParameters
 }
-Set-Alias -Name yaml-to-toml -Value ConvertTo-TomlFromYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-toml' -Target 'ConvertTo-TomlFromYaml'
 # Convert TOML to TOON
 <#
 .SYNOPSIS
@@ -754,8 +750,7 @@ function ConvertFrom-TomlToToon {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-TomlToToon @PSBoundParameters
 }
-Set-Alias -Name toml-to-toon -Value ConvertFrom-TomlToToon -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toml-to-toon' -Target 'ConvertFrom-TomlToToon'
 # Convert TOON to TOML
 <#
 .SYNOPSIS
@@ -772,8 +767,7 @@ function ConvertTo-TomlFromToon {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-TomlFromToon @PSBoundParameters
 }
-Set-Alias -Name toon-to-toml -Value ConvertTo-TomlFromToon -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toon-to-toml' -Target 'ConvertTo-TomlFromToon'
 # Convert TOML to XML
 <#
 .SYNOPSIS
@@ -790,8 +784,7 @@ function ConvertFrom-TomlToXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-TomlToXml @PSBoundParameters
 }
-Set-Alias -Name toml-to-xml -Value ConvertFrom-TomlToXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toml-to-xml' -Target 'ConvertFrom-TomlToXml'
 # Convert XML to TOML
 <#
 .SYNOPSIS
@@ -808,5 +801,4 @@ function ConvertTo-TomlFromXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-TomlFromXml @PSBoundParameters
 }
-Set-Alias -Name xml-to-toml -Value ConvertTo-TomlFromXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'xml-to-toml' -Target 'ConvertTo-TomlFromXml'

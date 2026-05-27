@@ -296,9 +296,8 @@ function ConvertFrom-FitsToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-FitsToJson @PSBoundParameters
 }
-Set-Alias -Name fits-to-json -Value ConvertFrom-FitsToJson -ErrorAction SilentlyContinue
-Set-Alias -Name fit-to-json -Value ConvertFrom-FitsToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'fits-to-json' -Target 'ConvertFrom-FitsToJson'
+Set-AgentModeAlias -Name 'fit-to-json' -Target 'ConvertFrom-FitsToJson'
 # Convert JSON to FITS
 <#
 .SYNOPSIS
@@ -316,9 +315,8 @@ function ConvertTo-FitsFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-FitsFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-fits -Value ConvertTo-FitsFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-fit -Value ConvertTo-FitsFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-fits' -Target 'ConvertTo-FitsFromJson'
+Set-AgentModeAlias -Name 'json-to-fit' -Target 'ConvertTo-FitsFromJson'
 # Convert FITS to CSV
 <#
 .SYNOPSIS
@@ -337,6 +335,5 @@ function ConvertFrom-FitsToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-FitsToCsv @PSBoundParameters
 }
-Set-Alias -Name fits-to-csv -Value ConvertFrom-FitsToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name fit-to-csv -Value ConvertFrom-FitsToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'fits-to-csv' -Target 'ConvertFrom-FitsToCsv'
+Set-AgentModeAlias -Name 'fit-to-csv' -Target 'ConvertFrom-FitsToCsv'

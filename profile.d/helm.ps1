@@ -149,15 +149,7 @@ function Get-HelmReleases {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'helm' -Target 'Invoke-Helm'
-    Set-AgentModeAlias -Name 'helm-install' -Target 'Install-HelmChart'
-    Set-AgentModeAlias -Name 'helm-upgrade' -Target 'Update-HelmRelease'
-    Set-AgentModeAlias -Name 'helm-list' -Target 'Get-HelmReleases'
-}
-else {
-    Set-Alias -Name 'helm' -Value 'Invoke-Helm' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'helm-install' -Value 'Install-HelmChart' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'helm-upgrade' -Value 'Update-HelmRelease' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'helm-list' -Value 'Get-HelmReleases' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'helm' -Target 'Invoke-Helm'
+Set-AgentModeAlias -Name 'helm-install' -Target 'Install-HelmChart'
+Set-AgentModeAlias -Name 'helm-upgrade' -Target 'Update-HelmRelease'
+Set-AgentModeAlias -Name 'helm-list' -Target 'Get-HelmReleases'

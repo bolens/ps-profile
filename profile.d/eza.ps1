@@ -18,8 +18,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Replacement for ls command using eza for modern directory listing.
     #>
     function Get-ChildItemEza { eza @args }
-    Set-Alias -Name ls -Value Get-ChildItemEza -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'ls' -Target 'Get-ChildItemEza'
     <#
     .SYNOPSIS
         Lists directory contents using eza (short alias).
@@ -27,8 +26,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Short alias for eza directory listing.
     #>
     function Get-ChildItemEzaShort { eza @args }
-    Set-Alias -Name l -Value Get-ChildItemEzaShort -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'l' -Target 'Get-ChildItemEzaShort'
     # Long listing
     <#
     .SYNOPSIS
@@ -37,8 +35,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows detailed directory listing with permissions, sizes, and dates.
     #>
     function Get-ChildItemEzaLong { eza -l @args }
-    Set-Alias -Name ll -Value Get-ChildItemEzaLong -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'll' -Target 'Get-ChildItemEzaLong'
     <#
     .SYNOPSIS
         Lists all directory contents including hidden files using eza.
@@ -46,8 +43,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows all files including hidden ones in long format.
     #>
     function Get-ChildItemEzaAll { eza -la @args }
-    Set-Alias -Name la -Value Get-ChildItemEzaAll -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'la' -Target 'Get-ChildItemEzaAll'
     <#
     .SYNOPSIS
         Lists all directory contents in long format using eza.
@@ -55,8 +51,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows all files including hidden ones in detailed long format.
     #>
     function Get-ChildItemEzaAllLong { eza -la @args }
-    Set-Alias -Name lla -Value Get-ChildItemEzaAllLong -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'lla' -Target 'Get-ChildItemEzaAllLong'
     # Tree view
     <#
     .SYNOPSIS
@@ -65,8 +60,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows directory structure as a tree view.
     #>
     function Get-ChildItemEzaTree { eza --tree @args }
-    Set-Alias -Name lt -Value Get-ChildItemEzaTree -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'lt' -Target 'Get-ChildItemEzaTree'
     <#
     .SYNOPSIS
         Lists all directory contents in tree format using eza.
@@ -74,8 +68,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows all files including hidden ones in tree format.
     #>
     function Get-ChildItemEzaTreeAll { eza --tree -a @args }
-    Set-Alias -Name lta -Value Get-ChildItemEzaTreeAll -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'lta' -Target 'Get-ChildItemEzaTreeAll'
     # With git status
     <#
     .SYNOPSIS
@@ -84,8 +77,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows files with git status indicators.
     #>
     function Get-ChildItemEzaGit { eza --git @args }
-    Set-Alias -Name lg -Value Get-ChildItemEzaGit -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'lg' -Target 'Get-ChildItemEzaGit'
     <#
     .SYNOPSIS
         Lists directory contents in long format with git status using eza.
@@ -93,8 +85,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows detailed listing with git status indicators.
     #>
     function Get-ChildItemEzaLongGit { eza -l --git @args }
-    Set-Alias -Name llg -Value Get-ChildItemEzaLongGit -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'llg' -Target 'Get-ChildItemEzaLongGit'
     # By size
     <#
     .SYNOPSIS
@@ -103,8 +94,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows files sorted by file size in descending order.
     #>
     function Get-ChildItemEzaBySize { eza -l -s size @args }
-    Set-Alias -Name lS -Value Get-ChildItemEzaBySize -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'lS' -Target 'Get-ChildItemEzaBySize'
     # By time
     <#
     .SYNOPSIS
@@ -113,7 +103,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Shows files sorted by modification time, newest first.
     #>
     function Get-ChildItemEzaByTime { eza -l -s modified @args }
-    Set-Alias -Name ltime -Value Get-ChildItemEzaByTime -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'ltime' -Target 'Get-ChildItemEzaByTime'
 }
 else {
     Write-MissingToolWarning -Tool 'eza' -InstallHint 'Install with: scoop install eza'

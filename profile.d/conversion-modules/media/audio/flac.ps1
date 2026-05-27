@@ -78,12 +78,7 @@ function ConvertFrom-FlacToWav {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'flac-to-wav' -Target 'ConvertFrom-FlacToWav'
-}
-else {
-    Set-Alias -Name flac-to-wav -Value ConvertFrom-FlacToWav -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'flac-to-wav' -Target 'ConvertFrom-FlacToWav'
 
 <#
 .SYNOPSIS
@@ -115,12 +110,7 @@ function ConvertFrom-FlacToMp3 {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'flac-to-mp3' -Target 'ConvertFrom-FlacToMp3'
-}
-else {
-    Set-Alias -Name flac-to-mp3 -Value ConvertFrom-FlacToMp3 -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'flac-to-mp3' -Target 'ConvertFrom-FlacToMp3'
 
 <#
 .SYNOPSIS
@@ -152,12 +142,7 @@ function ConvertFrom-FlacToOgg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'flac-to-ogg' -Target 'ConvertFrom-FlacToOgg'
-}
-else {
-    Set-Alias -Name flac-to-ogg -Value ConvertFrom-FlacToOgg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'flac-to-ogg' -Target 'ConvertFrom-FlacToOgg'
 
 <#
 .SYNOPSIS
@@ -189,12 +174,7 @@ function ConvertFrom-FlacToAac {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'flac-to-aac' -Target 'ConvertFrom-FlacToAac'
-}
-else {
-    Set-Alias -Name flac-to-aac -Value ConvertFrom-FlacToAac -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'flac-to-aac' -Target 'ConvertFrom-FlacToAac'
 
 <#
 .SYNOPSIS
@@ -226,10 +206,5 @@ function ConvertFrom-FlacToOpus {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'flac-to-opus' -Target 'ConvertFrom-FlacToOpus'
-}
-else {
-    Set-Alias -Name flac-to-opus -Value ConvertFrom-FlacToOpus -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'flac-to-opus' -Target 'ConvertFrom-FlacToOpus'
 

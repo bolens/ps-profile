@@ -156,8 +156,7 @@ try {
             Write-Host ("{0,5} {1}" -f $item.Id, $cmd)
         }
     }
-    Set-Alias -Name fh -Value Find-HistoryQuick -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'fh' -Target 'Find-HistoryQuick'
     # History statistics and insights
     <#
     .SYNOPSIS

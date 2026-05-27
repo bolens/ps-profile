@@ -149,15 +149,7 @@ function New-NextJsApp {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'next-dev' -Target 'Start-NextJsDev'
-    Set-AgentModeAlias -Name 'next-build' -Target 'Build-NextJsApp'
-    Set-AgentModeAlias -Name 'next-start' -Target 'Start-NextJsProduction'
-    Set-AgentModeAlias -Name 'create-next-app' -Target 'New-NextJsApp'
-}
-else {
-    Set-Alias -Name 'next-dev' -Value 'Start-NextJsDev' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'next-build' -Value 'Build-NextJsApp' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'next-start' -Value 'Start-NextJsProduction' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'create-next-app' -Value 'New-NextJsApp' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'next-dev' -Target 'Start-NextJsDev'
+Set-AgentModeAlias -Name 'next-build' -Target 'Build-NextJsApp'
+Set-AgentModeAlias -Name 'next-start' -Target 'Start-NextJsProduction'
+Set-AgentModeAlias -Name 'create-next-app' -Target 'New-NextJsApp'

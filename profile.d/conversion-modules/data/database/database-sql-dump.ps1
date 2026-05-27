@@ -332,9 +332,8 @@ function ConvertFrom-SqlDumpToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SqlDumpToJson @PSBoundParameters
 }
-Set-Alias -Name sql-dump-to-json -Value ConvertFrom-SqlDumpToJson -ErrorAction SilentlyContinue
-Set-Alias -Name sql-to-json -Value ConvertFrom-SqlDumpToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sql-dump-to-json' -Target 'ConvertFrom-SqlDumpToJson'
+Set-AgentModeAlias -Name 'sql-to-json' -Target 'ConvertFrom-SqlDumpToJson'
 # Convert JSON to SQL Dump
 <#
 .SYNOPSIS
@@ -353,9 +352,8 @@ function ConvertTo-SqlDumpFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SqlDumpFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-sql-dump -Value ConvertTo-SqlDumpFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-sql -Value ConvertTo-SqlDumpFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-sql-dump' -Target 'ConvertTo-SqlDumpFromJson'
+Set-AgentModeAlias -Name 'json-to-sql' -Target 'ConvertTo-SqlDumpFromJson'
 # Convert SQL Dump to CSV
 <#
 .SYNOPSIS
@@ -376,6 +374,5 @@ function ConvertFrom-SqlDumpToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SqlDumpToCsv @PSBoundParameters
 }
-Set-Alias -Name sql-dump-to-csv -Value ConvertFrom-SqlDumpToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name sql-to-csv -Value ConvertFrom-SqlDumpToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sql-dump-to-csv' -Target 'ConvertFrom-SqlDumpToCsv'
+Set-AgentModeAlias -Name 'sql-to-csv' -Target 'ConvertFrom-SqlDumpToCsv'

@@ -154,15 +154,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Install-PythonApp -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Install-PythonApp' -Body ${function:Install-PythonApp}
-    }
+    Set-AgentModeFunction -Name 'Install-PythonApp' -Body ${function:Install-PythonApp}
     if (-not (Get-Alias pipx-install -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'pipx-install' -Target 'Install-PythonApp'
         }
         else {
-            Set-Alias -Name 'pipx-install' -Value 'Install-PythonApp' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'pipx-install' -Target 'Install-PythonApp'
         }
     }
 
@@ -259,15 +257,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Pipx -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Pipx' -Body ${function:Invoke-Pipx}
-    }
+    Set-AgentModeFunction -Name 'Invoke-Pipx' -Body ${function:Invoke-Pipx}
     if (-not (Get-Alias pipx -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'pipx' -Target 'Invoke-Pipx'
         }
         else {
-            Set-Alias -Name 'pipx' -Value 'Invoke-Pipx' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'pipx' -Target 'Invoke-Pipx'
         }
     }
 
@@ -384,10 +380,7 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-PythonScript -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-PythonScript' -Body ${function:Invoke-PythonScript}
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-PythonScript' -Body ${function:Invoke-PythonScript}
     # ===============================================
     # Create Python Virtual Environment
     # ===============================================
@@ -505,15 +498,13 @@ try {
         return $null
     }
 
-    if (-not (Test-Path Function:\New-PythonVirtualEnv -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'New-PythonVirtualEnv' -Body ${function:New-PythonVirtualEnv}
-    }
+    Set-AgentModeFunction -Name 'New-PythonVirtualEnv' -Body ${function:New-PythonVirtualEnv}
     if (-not (Get-Alias pyvenv -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'pyvenv' -Target 'New-PythonVirtualEnv'
         }
         else {
-            Set-Alias -Name 'pyvenv' -Value 'New-PythonVirtualEnv' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'pyvenv' -Target 'New-PythonVirtualEnv'
         }
     }
 
@@ -713,10 +704,7 @@ if __name__ == "__main__":
         }
     }
 
-    if (-not (Test-Path Function:\New-PythonProject -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'New-PythonProject' -Body ${function:New-PythonProject}
-    }
-
+    Set-AgentModeFunction -Name 'New-PythonProject' -Body ${function:New-PythonProject}
     # ===============================================
     # Install Python Package (unified)
     # ===============================================
@@ -837,15 +825,13 @@ if __name__ == "__main__":
         return $null
     }
 
-    if (-not (Test-Path Function:\Install-PythonPackage -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Install-PythonPackage' -Body ${function:Install-PythonPackage}
-    }
+    Set-AgentModeFunction -Name 'Install-PythonPackage' -Body ${function:Install-PythonPackage}
     if (-not (Get-Alias pyinstall -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'pyinstall' -Target 'Install-PythonPackage'
         }
         else {
-            Set-Alias -Name 'pyinstall' -Value 'Install-PythonPackage' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'pyinstall' -Target 'Install-PythonPackage'
         }
     }
 

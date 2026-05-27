@@ -148,13 +148,6 @@ function Start-AngularDev {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ng' -Target 'Invoke-Angular'
-    Set-AgentModeAlias -Name 'ng-new' -Target 'New-AngularApp'
-    Set-AgentModeAlias -Name 'ng-serve' -Target 'Start-AngularDev'
-}
-else {
-    Set-Alias -Name 'ng' -Value 'Invoke-Angular' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ng-new' -Value 'New-AngularApp' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'ng-serve' -Value 'Start-AngularDev' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ng' -Target 'Invoke-Angular'
+Set-AgentModeAlias -Name 'ng-new' -Target 'New-AngularApp'
+Set-AgentModeAlias -Name 'ng-serve' -Target 'Start-AngularDev'

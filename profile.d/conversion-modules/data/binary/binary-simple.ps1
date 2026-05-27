@@ -31,7 +31,7 @@ function Initialize-FileConversion-BinarySimple {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.bson' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use BSON conversions."
             }
             # Check if Invoke-NodeScript is available (should be loaded during initialization)
@@ -79,7 +79,7 @@ try {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.bson$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use BSON conversions."
             }
             # Check if Invoke-NodeScript is available (should be loaded during initialization)
@@ -128,7 +128,7 @@ try {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.msgpack' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use MessagePack conversions."
             }
             $jsonContent = Get-Content -LiteralPath $InputPath -Raw
@@ -170,7 +170,7 @@ try {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.msgpack$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use MessagePack conversions."
             }
             # Check if Invoke-NodeScript is available (should be loaded during initialization)
@@ -215,7 +215,7 @@ try {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.cbor' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use CBOR conversions."
             }
             $nodeScript = @"
@@ -256,7 +256,7 @@ try {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.cbor$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use CBOR conversions."
             }
             $nodeScript = @"
@@ -311,8 +311,7 @@ function ConvertTo-BsonFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-BsonFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-bson -Value ConvertTo-BsonFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-bson' -Target 'ConvertTo-BsonFromJson'
 # Convert BSON to JSON
 <#
 .SYNOPSIS
@@ -330,7 +329,7 @@ function ConvertFrom-BsonToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-BsonToJson @PSBoundParameters
 }
-Set-Alias -Name bson-to-json -Value ConvertFrom-BsonToJson -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'bson-to-json' -Target 'ConvertFrom-BsonToJson'
 # Convert JSON to MessagePack
 <#
 .SYNOPSIS
@@ -348,9 +347,8 @@ function ConvertTo-MessagePackFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-MessagePackFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-msgpack -Value ConvertTo-MessagePackFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-messagepack -Value ConvertTo-MessagePackFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-msgpack' -Target 'ConvertTo-MessagePackFromJson'
+Set-AgentModeAlias -Name 'json-to-messagepack' -Target 'ConvertTo-MessagePackFromJson'
 # Convert MessagePack to JSON
 <#
 .SYNOPSIS
@@ -368,8 +366,8 @@ function ConvertFrom-MessagePackToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-MessagePackToJson @PSBoundParameters
 }
-Set-Alias -Name msgpack-to-json -Value ConvertFrom-MessagePackToJson -ErrorAction SilentlyContinue
-Set-Alias -Name messagepack-to-json -Value ConvertFrom-MessagePackToJson -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'msgpack-to-json' -Target 'ConvertFrom-MessagePackToJson'
+Set-AgentModeAlias -Name 'messagepack-to-json' -Target 'ConvertFrom-MessagePackToJson'
 # Convert JSON to CBOR
 <#
 .SYNOPSIS
@@ -387,8 +385,7 @@ function ConvertTo-CborFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-CborFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-cbor -Value ConvertTo-CborFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-cbor' -Target 'ConvertTo-CborFromJson'
 # Convert CBOR to JSON
 <#
 .SYNOPSIS
@@ -406,4 +403,4 @@ function ConvertFrom-CborToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-CborToJson @PSBoundParameters
 }
-Set-Alias -Name cbor-to-json -Value ConvertFrom-CborToJson -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'cbor-to-json' -Target 'ConvertFrom-CborToJson'

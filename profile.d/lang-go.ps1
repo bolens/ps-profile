@@ -3,7 +3,7 @@
 # Go development tools (enhanced)
 # ===============================================
 # Tier: standard
-# Dependencies: bootstrap, env
+# Dependencies: bootstrap, env, lang-go-basic
 
 <#
 .SYNOPSIS
@@ -11,14 +11,14 @@
 
 .DESCRIPTION
     Provides wrapper functions for Go development tools that enhance the basic
-    go.ps1 functionality:
+    lang-go-basic.ps1 functionality:
     - goreleaser: Release automation for Go projects
     - mage: Build tool for Go projects
     - golangci-lint: Fast linter for Go code
 
 .NOTES
     All functions gracefully degrade when tools are not installed.
-    This module enhances go.ps1, which provides basic go operations.
+    This module enhances lang-go-basic.ps1, which provides basic go operations.
 #>
 
 try {
@@ -142,15 +142,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Release-GoProject -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Release-GoProject' -Body ${function:Release-GoProject}
-    }
+    Set-AgentModeFunction -Name 'Release-GoProject' -Body ${function:Release-GoProject}
     if (-not (Get-Alias goreleaser -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'goreleaser' -Target 'Release-GoProject'
         }
         else {
-            Set-Alias -Name 'goreleaser' -Value 'Release-GoProject' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'goreleaser' -Target 'Release-GoProject'
         }
     }
 
@@ -261,15 +259,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Mage -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Mage' -Body ${function:Invoke-Mage}
-    }
+    Set-AgentModeFunction -Name 'Invoke-Mage' -Body ${function:Invoke-Mage}
     if (-not (Get-Alias mage -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'mage' -Target 'Invoke-Mage'
         }
         else {
-            Set-Alias -Name 'mage' -Value 'Invoke-Mage' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'mage' -Target 'Invoke-Mage'
         }
     }
 
@@ -359,15 +355,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Lint-GoProject -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Lint-GoProject' -Body ${function:Lint-GoProject}
-    }
+    Set-AgentModeFunction -Name 'Lint-GoProject' -Body ${function:Lint-GoProject}
     if (-not (Get-Alias golangci-lint -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'golangci-lint' -Target 'Lint-GoProject'
         }
         else {
-            Set-Alias -Name 'golangci-lint' -Value 'Lint-GoProject' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'golangci-lint' -Target 'Lint-GoProject'
         }
     }
 
@@ -478,15 +472,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Build-GoProject -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Build-GoProject' -Body ${function:Build-GoProject}
-    }
+    Set-AgentModeFunction -Name 'Build-GoProject' -Body ${function:Build-GoProject}
     if (-not (Get-Alias go-build-project -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'go-build-project' -Target 'Build-GoProject'
         }
         else {
-            Set-Alias -Name 'go-build-project' -Value 'Build-GoProject' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'go-build-project' -Target 'Build-GoProject'
         }
     }
 
@@ -610,15 +602,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Test-GoProject -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Test-GoProject' -Body ${function:Test-GoProject}
-    }
+    Set-AgentModeFunction -Name 'Test-GoProject' -Body ${function:Test-GoProject}
     if (-not (Get-Alias go-test-project -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'go-test-project' -Target 'Test-GoProject'
         }
         else {
-            Set-Alias -Name 'go-test-project' -Value 'Test-GoProject' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'go-test-project' -Target 'Test-GoProject'
         }
     }
 

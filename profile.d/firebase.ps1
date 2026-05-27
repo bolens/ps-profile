@@ -117,13 +117,6 @@ function Start-FirebaseServer {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'fb' -Target 'Invoke-Firebase'
-    Set-AgentModeAlias -Name 'fb-deploy' -Target 'Publish-FirebaseDeployment'
-    Set-AgentModeAlias -Name 'fb-serve' -Target 'Start-FirebaseServer'
-}
-else {
-    Set-Alias -Name 'fb' -Value 'Invoke-Firebase' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'fb-deploy' -Value 'Publish-FirebaseDeployment' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'fb-serve' -Value 'Start-FirebaseServer' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'fb' -Target 'Invoke-Firebase'
+Set-AgentModeAlias -Name 'fb-deploy' -Target 'Publish-FirebaseDeployment'
+Set-AgentModeAlias -Name 'fb-serve' -Target 'Start-FirebaseServer'

@@ -27,7 +27,7 @@ function Initialize-FileConversion-DocumentOfficeOds {
             }
             
             # Try pandoc first (if available)
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc -f ods -t csv $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -36,7 +36,7 @@ function Initialize-FileConversion-DocumentOfficeOds {
             }
             
             # Fallback to LibreOffice headless mode
-            if (Get-Command libreoffice -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'libreoffice') {
                 $outputDir = Split-Path -Parent $OutputPath
                 $errorOutput = & libreoffice --headless --convert-to csv --outdir $outputDir $InputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -68,7 +68,7 @@ function Initialize-FileConversion-DocumentOfficeOds {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -102,7 +102,7 @@ function Initialize-FileConversion-DocumentOfficeOds {
             }
             
             # Try pandoc first (if available)
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -111,7 +111,7 @@ function Initialize-FileConversion-DocumentOfficeOds {
             }
             
             # Fallback to LibreOffice headless mode
-            if (Get-Command libreoffice -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'libreoffice') {
                 $outputDir = Split-Path -Parent $OutputPath
                 $errorOutput = & libreoffice --headless --convert-to pdf --outdir $outputDir $InputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -143,7 +143,7 @@ function Initialize-FileConversion-DocumentOfficeOds {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -194,12 +194,7 @@ function ConvertFrom-OdsToCsv {
         Write-Error "Failed to convert ODS to CSV: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ods-to-csv' -Target 'ConvertFrom-OdsToCsv'
-}
-else {
-    Set-Alias -Name ods-to-csv -Value ConvertFrom-OdsToCsv -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ods-to-csv' -Target 'ConvertFrom-OdsToCsv'
 
 <#
 .SYNOPSIS
@@ -228,12 +223,7 @@ function ConvertFrom-OdsToHtml {
         Write-Error "Failed to convert ODS to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ods-to-html' -Target 'ConvertFrom-OdsToHtml'
-}
-else {
-    Set-Alias -Name ods-to-html -Value ConvertFrom-OdsToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ods-to-html' -Target 'ConvertFrom-OdsToHtml'
 
 <#
 .SYNOPSIS
@@ -262,12 +252,7 @@ function ConvertFrom-OdsToPdf {
         Write-Error "Failed to convert ODS to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ods-to-pdf' -Target 'ConvertFrom-OdsToPdf'
-}
-else {
-    Set-Alias -Name ods-to-pdf -Value ConvertFrom-OdsToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ods-to-pdf' -Target 'ConvertFrom-OdsToPdf'
 
 <#
 .SYNOPSIS
@@ -296,10 +281,5 @@ function ConvertTo-OdsFromCsv {
         Write-Error "Failed to convert CSV to ODS: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'csv-to-ods' -Target 'ConvertTo-OdsFromCsv'
-}
-else {
-    Set-Alias -Name csv-to-ods -Value ConvertTo-OdsFromCsv -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'csv-to-ods' -Target 'ConvertTo-OdsFromCsv'
 

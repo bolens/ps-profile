@@ -46,7 +46,7 @@ function Initialize-FileConversion-CoreBasicYaml {
                 Write-Verbose "[conversion.yaml.to-json] Input file size: ${inputSize} bytes"
             }
             
-            $yqCommand = Get-Command yq -ErrorAction SilentlyContinue
+            $yqCommand = Test-CachedCommand 'yq'
             if (-not $yqCommand) {
                 $errorMessage = "yq command not found. Please install yq to use this conversion function."
                 $errorMessage += "`nSuggestion: Install yq from https://github.com/mikefarah/yq or use a package manager (scoop, choco, winget)"
@@ -204,7 +204,7 @@ function Initialize-FileConversion-CoreBasicYaml {
                 Write-Verbose "[conversion.yaml.from-json] Input file size: ${inputSize} bytes"
             }
             
-            $yqCommand = Get-Command yq -ErrorAction SilentlyContinue
+            $yqCommand = Test-CachedCommand 'yq'
             if (-not $yqCommand) {
                 $errorMessage = "yq command not found. Please install yq to use this conversion function."
                 $errorMessage += "`nSuggestion: Install yq from https://github.com/mikefarah/yq or use a package manager (scoop, choco, winget)"
@@ -349,8 +349,7 @@ function ConvertFrom-Yaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-Yaml @PSBoundParameters
 }
-Set-Alias -Name yaml-to-json -Value ConvertFrom-Yaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-json' -Target 'ConvertFrom-Yaml'
 # Convert JSON to YAML
 <#
 .SYNOPSIS
@@ -400,5 +399,4 @@ function ConvertTo-Yaml {
         throw
     }
 }
-Set-Alias -Name json-to-yaml -Value ConvertTo-Yaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-yaml' -Target 'ConvertTo-Yaml'

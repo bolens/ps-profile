@@ -38,6 +38,21 @@ scripts/utils/fragment/sync-profile-fragments.ps1
     Shows what would be changed without modifying the file.
 #>
 
+# Import ExitCodes for standardized exit handling
+$_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
+$_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $_ewcLibPath)) {
+    $_ewcScriptsDir = Split-Path -Parent $_ewcScriptsDir
+    $_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+}
+if (Test-Path $_ewcLibPath) {
+    Import-Module $_ewcLibPath -DisableNameChecking -ErrorAction Stop
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+} else {
+    function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
+    enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
+}
+
 param(
     [string]$ProfileDir,
     [string]$ConfigPath,
@@ -59,7 +74,7 @@ for ($i = 1; $i -le 3; $i++) {
 
 if (-not (Test-Path (Join-Path $repoRoot 'profile.d'))) {
     Write-Error "Could not resolve repository root. Please run from repository directory."
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 # Import required modules directly
@@ -72,11 +87,11 @@ $fragmentLoadingPath = Join-Path $fragmentLibDir 'FragmentLoading.psm1'
 
 if (-not (Test-Path $fragmentConfigPath)) {
     Write-Error "FragmentConfig module not found at: $fragmentConfigPath"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 if (-not (Test-Path $fragmentLoadingPath)) {
     Write-Error "FragmentLoading module not found at: $fragmentLoadingPath"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 Import-Module $fragmentConfigPath -DisableNameChecking -ErrorAction Stop
@@ -90,7 +105,7 @@ if (-not $ProfileDir) {
 $profileDDir = Join-Path $ProfileDir 'profile.d'
 if (-not (Test-Path -LiteralPath $profileDDir)) {
     Write-Error "profile.d directory not found: $profileDDir"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 if (-not $ConfigPath) {
@@ -417,7 +432,7 @@ if ($DryRun -and $existingConfig.environments.ContainsKey('full')) {
 if ($DryRun) {
     Write-Host "`n[DRY RUN] Would update $ConfigPath" -ForegroundColor Yellow
     Write-Host "Run without -DryRun to apply changes." -ForegroundColor Yellow
-    exit 0
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 
 # Write updated config
@@ -445,9 +460,9 @@ try {
     }
     
     Write-Host "`n✓ Updated $ConfigPath" -ForegroundColor Green
-    exit 0
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 catch {
     Write-Error "Failed to write config: $($_.Exception.Message)"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }

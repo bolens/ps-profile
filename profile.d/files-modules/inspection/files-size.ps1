@@ -100,5 +100,4 @@ function Get-FileSize {
     if (-not $global:FileUtilitiesInitialized) { Ensure-FileUtilities }
     & "Global:_Get-FileSize" @PSBoundParameters
 }
-Set-Alias -Name filesize -Value Get-FileSize -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'filesize' -Target 'Get-FileSize'

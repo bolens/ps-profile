@@ -22,7 +22,7 @@ function Initialize-FileConversion-DocumentOfficeOdp {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -56,7 +56,7 @@ function Initialize-FileConversion-DocumentOfficeOdp {
             }
             
             # Try pandoc first (if available)
-            if (Get-Command pandoc -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'pandoc') {
                 $errorOutput = & pandoc $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -65,7 +65,7 @@ function Initialize-FileConversion-DocumentOfficeOdp {
             }
             
             # Fallback to LibreOffice headless mode
-            if (Get-Command libreoffice -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'libreoffice') {
                 $outputDir = Split-Path -Parent $OutputPath
                 $errorOutput = & libreoffice --headless --convert-to pdf --outdir $outputDir $InputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -97,7 +97,7 @@ function Initialize-FileConversion-DocumentOfficeOdp {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -126,7 +126,7 @@ function Initialize-FileConversion-DocumentOfficeOdp {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -177,12 +177,7 @@ function ConvertFrom-OdpToHtml {
         Write-Error "Failed to convert ODP to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odp-to-html' -Target 'ConvertFrom-OdpToHtml'
-}
-else {
-    Set-Alias -Name odp-to-html -Value ConvertFrom-OdpToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odp-to-html' -Target 'ConvertFrom-OdpToHtml'
 
 <#
 .SYNOPSIS
@@ -211,12 +206,7 @@ function ConvertFrom-OdpToPdf {
         Write-Error "Failed to convert ODP to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odp-to-pdf' -Target 'ConvertFrom-OdpToPdf'
-}
-else {
-    Set-Alias -Name odp-to-pdf -Value ConvertFrom-OdpToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odp-to-pdf' -Target 'ConvertFrom-OdpToPdf'
 
 <#
 .SYNOPSIS
@@ -245,12 +235,7 @@ function ConvertFrom-OdpToPptx {
         Write-Error "Failed to convert ODP to PPTX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'odp-to-pptx' -Target 'ConvertFrom-OdpToPptx'
-}
-else {
-    Set-Alias -Name odp-to-pptx -Value ConvertFrom-OdpToPptx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'odp-to-pptx' -Target 'ConvertFrom-OdpToPptx'
 
 <#
 .SYNOPSIS
@@ -279,10 +264,5 @@ function ConvertTo-OdpFromPptx {
         Write-Error "Failed to convert PPTX to ODP: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'pptx-to-odp' -Target 'ConvertTo-OdpFromPptx'
-}
-else {
-    Set-Alias -Name pptx-to-odp -Value ConvertTo-OdpFromPptx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'pptx-to-odp' -Target 'ConvertTo-OdpFromPptx'
 

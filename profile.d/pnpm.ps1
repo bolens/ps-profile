@@ -219,8 +219,7 @@ if (Test-CachedCommand pnpm) {
         Installs project dependencies defined in package.json.
     #>
     function Install-PnpmPackage { pnpm install @args }
-    Set-Alias -Name pni -Value Install-PnpmPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pni' -Target 'Install-PnpmPackage'
     # PNPM add (alias for Invoke-PnpmInstall)
     <#
     .SYNOPSIS
@@ -229,8 +228,7 @@ if (Test-CachedCommand pnpm) {
         Adds packages as dependencies to the project.
     #>
     function Add-PnpmPackage { pnpm add @args }
-    Set-Alias -Name pna -Value Add-PnpmPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pna' -Target 'Add-PnpmPackage'
     # PNPM add dev (alias for Invoke-PnpmDevInstall)
     <#
     .SYNOPSIS
@@ -239,8 +237,7 @@ if (Test-CachedCommand pnpm) {
         Adds packages as development dependencies to the project.
     #>
     function Add-PnpmDevPackage { pnpm add -D @args }
-    Set-Alias -Name pnd -Value Add-PnpmDevPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pnd' -Target 'Add-PnpmDevPackage'
     # PNPM run (alias for Invoke-PnpmRun)
     <#
     .SYNOPSIS
@@ -249,8 +246,7 @@ if (Test-CachedCommand pnpm) {
         Executes scripts defined in package.json.
     #>
     function Invoke-PnpmScript { pnpm run @args }
-    Set-Alias -Name pnr -Value Invoke-PnpmScript -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pnr' -Target 'Invoke-PnpmScript'
     # PNPM start
     <#
     .SYNOPSIS
@@ -259,8 +255,7 @@ if (Test-CachedCommand pnpm) {
         Runs the start script defined in package.json.
     #>
     function Start-PnpmProject { pnpm start @args }
-    Set-Alias -Name pns -Value Start-PnpmProject -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pns' -Target 'Start-PnpmProject'
     # PNPM build
     <#
     .SYNOPSIS
@@ -269,8 +264,7 @@ if (Test-CachedCommand pnpm) {
         Runs the build script defined in package.json.
     #>
     function Build-PnpmProject { pnpm run build @args }
-    Set-Alias -Name pnb -Value Build-PnpmProject -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pnb' -Target 'Build-PnpmProject'
     # PNPM test
     <#
     .SYNOPSIS
@@ -279,8 +273,7 @@ if (Test-CachedCommand pnpm) {
         Runs the test script defined in package.json.
     #>
     function Test-PnpmProject { pnpm run test @args }
-    Set-Alias -Name pnt -Value Test-PnpmProject -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pnt' -Target 'Test-PnpmProject'
     # PNPM dev - run development server
     <#
     .SYNOPSIS
@@ -290,7 +283,7 @@ if (Test-CachedCommand pnpm) {
     #>
     function Start-PnpmDev { pnpm run dev @args }
     # Note: pndev is already aliased to Invoke-PnpmDevInstall, so we use a different alias
-    Set-Alias -Name pndevserver -Value Start-PnpmDev -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pndevserver' -Target 'Start-PnpmDev'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

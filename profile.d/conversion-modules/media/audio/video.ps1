@@ -106,10 +106,5 @@ function ConvertFrom-VideoToAudio {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'video-to-audio' -Target 'ConvertFrom-VideoToAudio'
-}
-else {
-    Set-Alias -Name video-to-audio -Value ConvertFrom-VideoToAudio -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'video-to-audio' -Target 'ConvertFrom-VideoToAudio'
 

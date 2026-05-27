@@ -275,9 +275,8 @@ function Parse-UrlUri {
         }
     }
 }
-Set-Alias -Name parse-url -Value Parse-UrlUri -ErrorAction SilentlyContinue
-Set-Alias -Name parse-uri -Value Parse-UrlUri -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parse-url' -Target 'Parse-UrlUri'
+Set-AgentModeAlias -Name 'parse-uri' -Target 'Parse-UrlUri'
 # Build URL/URI from components
 <#
 .SYNOPSIS
@@ -318,9 +317,8 @@ function Build-UrlUri {
         Write-Error "Failed to build URL/URI: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name build-url -Value Build-UrlUri -ErrorAction SilentlyContinue
-Set-Alias -Name build-uri -Value Build-UrlUri -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'build-url' -Target 'Build-UrlUri'
+Set-AgentModeAlias -Name 'build-uri' -Target 'Build-UrlUri'
 # Convert URL/URI to JSON
 <#
 .SYNOPSIS
@@ -353,9 +351,8 @@ function ConvertFrom-UrlUriToJson {
         Write-Error "Failed to convert URL/URI to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name url-to-json -Value ConvertFrom-UrlUriToJson -ErrorAction SilentlyContinue
-Set-Alias -Name uri-to-json -Value ConvertFrom-UrlUriToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'url-to-json' -Target 'ConvertFrom-UrlUriToJson'
+Set-AgentModeAlias -Name 'uri-to-json' -Target 'ConvertFrom-UrlUriToJson'
 # Convert JSON to URL/URI
 <#
 .SYNOPSIS
@@ -388,6 +385,5 @@ function ConvertTo-UrlUriFromJson {
         Write-Error "Failed to convert JSON to URL/URI: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-url -Value ConvertTo-UrlUriFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-uri -Value ConvertTo-UrlUriFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-url' -Target 'ConvertTo-UrlUriFromJson'
+Set-AgentModeAlias -Name 'json-to-uri' -Target 'ConvertTo-UrlUriFromJson'

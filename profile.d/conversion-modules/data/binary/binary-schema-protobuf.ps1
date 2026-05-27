@@ -36,7 +36,7 @@ function Initialize-FileConversion-BinarySchemaProtobuf {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.pb' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Protocol Buffers conversions."
             }
             if (-not $SchemaPath) {
@@ -89,7 +89,7 @@ try {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.pb$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Protocol Buffers conversions."
             }
             if (-not $SchemaPath) {
@@ -158,9 +158,8 @@ function ConvertTo-ProtobufFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ProtobufFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-protobuf -Value ConvertTo-ProtobufFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-pb -Value ConvertTo-ProtobufFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-protobuf' -Target 'ConvertTo-ProtobufFromJson'
+Set-AgentModeAlias -Name 'json-to-pb' -Target 'ConvertTo-ProtobufFromJson'
 # Convert Protocol Buffers to JSON
 <#
 .SYNOPSIS
@@ -180,6 +179,5 @@ function ConvertFrom-ProtobufToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ProtobufToJson @PSBoundParameters
 }
-Set-Alias -Name protobuf-to-json -Value ConvertFrom-ProtobufToJson -ErrorAction SilentlyContinue
-Set-Alias -Name pb-to-json -Value ConvertFrom-ProtobufToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'protobuf-to-json' -Target 'ConvertFrom-ProtobufToJson'
+Set-AgentModeAlias -Name 'pb-to-json' -Target 'ConvertFrom-ProtobufToJson'

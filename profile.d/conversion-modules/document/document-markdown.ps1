@@ -26,7 +26,7 @@ function Initialize-FileConversion-DocumentMarkdown {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -61,7 +61,7 @@ function Initialize-FileConversion-DocumentMarkdown {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -96,7 +96,7 @@ function Initialize-FileConversion-DocumentMarkdown {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -131,7 +131,7 @@ function Initialize-FileConversion-DocumentMarkdown {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -166,7 +166,7 @@ function Initialize-FileConversion-DocumentMarkdown {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -216,8 +216,7 @@ function ConvertTo-HtmlFromMarkdown {
         Write-Error "Failed to convert Markdown to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name markdown-to-html -Value ConvertTo-HtmlFromMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'markdown-to-html' -Target 'ConvertTo-HtmlFromMarkdown'
 # Convert Markdown to PDF
 <#
 .SYNOPSIS
@@ -244,8 +243,7 @@ function ConvertTo-PdfFromMarkdown {
         Write-Error "Failed to convert Markdown to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name markdown-to-pdf -Value ConvertTo-PdfFromMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'markdown-to-pdf' -Target 'ConvertTo-PdfFromMarkdown'
 # Convert Markdown to DOCX
 <#
 .SYNOPSIS
@@ -272,8 +270,7 @@ function ConvertTo-DocxFromMarkdown {
         Write-Error "Failed to convert Markdown to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name markdown-to-docx -Value ConvertTo-DocxFromMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'markdown-to-docx' -Target 'ConvertTo-DocxFromMarkdown'
 # Convert Markdown to LaTeX
 <#
 .SYNOPSIS
@@ -300,8 +297,7 @@ function ConvertTo-LaTeXFromMarkdown {
         Write-Error "Failed to convert Markdown to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name markdown-to-latex -Value ConvertTo-LaTeXFromMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'markdown-to-latex' -Target 'ConvertTo-LaTeXFromMarkdown'
 # Convert Markdown to RST
 <#
 .SYNOPSIS
@@ -328,5 +324,4 @@ function ConvertTo-RstFromMarkdown {
         Write-Error "Failed to convert Markdown to RST: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name markdown-to-rst -Value ConvertTo-RstFromMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'markdown-to-rst' -Target 'ConvertTo-RstFromMarkdown'

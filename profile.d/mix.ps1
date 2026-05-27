@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mix deps.outdated
     }
-    Set-Alias -Name mix-outdated -Value Test-MixOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mix-outdated' -Target 'Test-MixOutdated'
     # Mix deps update - update packages
     <#
     .SYNOPSIS
@@ -39,8 +38,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mix deps.update --all
     }
-    Set-Alias -Name mix-update -Value Update-MixDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mix-update' -Target 'Update-MixDependencies'
     # Mix deps.get - install dependencies
     <#
     .SYNOPSIS
@@ -58,8 +56,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mix deps.get
     }
-    Set-Alias -Name mix-install -Value Install-MixDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mix-install' -Target 'Install-MixDependencies'
     # Mix deps.get - add dependencies (requires manual mix.exs editing)
     <#
     .SYNOPSIS
@@ -92,8 +89,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         Write-Output "Then run: mix deps.get"
     }
-    Set-Alias -Name mix-add -Value Add-MixDependency -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mix-add' -Target 'Add-MixDependency'
     # Mix deps.clean - remove dependencies (requires manual mix.exs editing)
     <#
     .SYNOPSIS
@@ -119,7 +115,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Write-Output "Then run: mix deps.clean $Package && mix deps.get"
         & mix deps.clean $Package
     }
-    Set-Alias -Name mix-remove -Value Remove-MixDependency -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'mix-remove' -Target 'Remove-MixDependency'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

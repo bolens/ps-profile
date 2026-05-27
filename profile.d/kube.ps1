@@ -1,6 +1,6 @@
 # ===============================================
 # kube.ps1
-# kubectl / minikube helpers
+# Minikube helpers
 # ===============================================
 # Tier: essential
 # Dependencies: bootstrap, env
@@ -87,11 +87,5 @@ function Stop-MinikubeCluster {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'minikube-start' -Target 'Start-MinikubeCluster'
-    Set-AgentModeAlias -Name 'minikube-stop' -Target 'Stop-MinikubeCluster'
-}
-else {
-    Set-Alias -Name 'minikube-start' -Value 'Start-MinikubeCluster' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'minikube-stop' -Value 'Stop-MinikubeCluster' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'minikube-start' -Target 'Start-MinikubeCluster'
+Set-AgentModeAlias -Name 'minikube-stop' -Target 'Stop-MinikubeCluster'

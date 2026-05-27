@@ -75,18 +75,10 @@ function ConvertFrom-HeicToJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'heic-to-jpeg' -Target 'ConvertFrom-HeicToJpeg'
-    Set-AgentModeAlias -Name 'heic-to-jpg' -Target 'ConvertFrom-HeicToJpeg'
-    Set-AgentModeAlias -Name 'heif-to-jpeg' -Target 'ConvertFrom-HeicToJpeg'
-    Set-AgentModeAlias -Name 'heif-to-jpg' -Target 'ConvertFrom-HeicToJpeg'
-}
-else {
-    Set-Alias -Name heic-to-jpeg -Value ConvertFrom-HeicToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name heic-to-jpg -Value ConvertFrom-HeicToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name heif-to-jpeg -Value ConvertFrom-HeicToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name heif-to-jpg -Value ConvertFrom-HeicToJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'heic-to-jpeg' -Target 'ConvertFrom-HeicToJpeg'
+Set-AgentModeAlias -Name 'heic-to-jpg' -Target 'ConvertFrom-HeicToJpeg'
+Set-AgentModeAlias -Name 'heif-to-jpeg' -Target 'ConvertFrom-HeicToJpeg'
+Set-AgentModeAlias -Name 'heif-to-jpg' -Target 'ConvertFrom-HeicToJpeg'
 
 <#
 .SYNOPSIS
@@ -116,14 +108,8 @@ function ConvertFrom-HeicToPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'heic-to-png' -Target 'ConvertFrom-HeicToPng'
-    Set-AgentModeAlias -Name 'heif-to-png' -Target 'ConvertFrom-HeicToPng'
-}
-else {
-    Set-Alias -Name heic-to-png -Value ConvertFrom-HeicToPng -ErrorAction SilentlyContinue
-    Set-Alias -Name heif-to-png -Value ConvertFrom-HeicToPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'heic-to-png' -Target 'ConvertFrom-HeicToPng'
+Set-AgentModeAlias -Name 'heif-to-png' -Target 'ConvertFrom-HeicToPng'
 
 <#
 .SYNOPSIS
@@ -155,18 +141,10 @@ function ConvertTo-HeicFromJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jpeg-to-heic' -Target 'ConvertTo-HeicFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-heic' -Target 'ConvertTo-HeicFromJpeg'
-    Set-AgentModeAlias -Name 'jpeg-to-heif' -Target 'ConvertTo-HeicFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-heif' -Target 'ConvertTo-HeicFromJpeg'
-}
-else {
-    Set-Alias -Name jpeg-to-heic -Value ConvertTo-HeicFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-heic -Value ConvertTo-HeicFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpeg-to-heif -Value ConvertTo-HeicFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-heif -Value ConvertTo-HeicFromJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jpeg-to-heic' -Target 'ConvertTo-HeicFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-heic' -Target 'ConvertTo-HeicFromJpeg'
+Set-AgentModeAlias -Name 'jpeg-to-heif' -Target 'ConvertTo-HeicFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-heif' -Target 'ConvertTo-HeicFromJpeg'
 
 <#
 .SYNOPSIS
@@ -198,12 +176,6 @@ function ConvertTo-HeicFromPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'png-to-heic' -Target 'ConvertTo-HeicFromPng'
-    Set-AgentModeAlias -Name 'png-to-heif' -Target 'ConvertTo-HeicFromPng'
-}
-else {
-    Set-Alias -Name png-to-heic -Value ConvertTo-HeicFromPng -ErrorAction SilentlyContinue
-    Set-Alias -Name png-to-heif -Value ConvertTo-HeicFromPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'png-to-heic' -Target 'ConvertTo-HeicFromPng'
+Set-AgentModeAlias -Name 'png-to-heif' -Target 'ConvertTo-HeicFromPng'
 

@@ -346,10 +346,9 @@ function ConvertFrom-AccessToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-AccessToJson @PSBoundParameters
 }
-Set-Alias -Name access-to-json -Value ConvertFrom-AccessToJson -ErrorAction SilentlyContinue
-Set-Alias -Name mdb-to-json -Value ConvertFrom-AccessToJson -ErrorAction SilentlyContinue
-Set-Alias -Name accdb-to-json -Value ConvertFrom-AccessToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'access-to-json' -Target 'ConvertFrom-AccessToJson'
+Set-AgentModeAlias -Name 'mdb-to-json' -Target 'ConvertFrom-AccessToJson'
+Set-AgentModeAlias -Name 'accdb-to-json' -Target 'ConvertFrom-AccessToJson'
 # Convert JSON to Access database
 <#
 .SYNOPSIS
@@ -370,10 +369,9 @@ function ConvertTo-AccessFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-AccessFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-access -Value ConvertTo-AccessFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-mdb -Value ConvertTo-AccessFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-accdb -Value ConvertTo-AccessFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-access' -Target 'ConvertTo-AccessFromJson'
+Set-AgentModeAlias -Name 'json-to-mdb' -Target 'ConvertTo-AccessFromJson'
+Set-AgentModeAlias -Name 'json-to-accdb' -Target 'ConvertTo-AccessFromJson'
 # Convert Access database to CSV
 <#
 .SYNOPSIS
@@ -394,7 +392,6 @@ function ConvertFrom-AccessToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-AccessToCsv @PSBoundParameters
 }
-Set-Alias -Name access-to-csv -Value ConvertFrom-AccessToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name mdb-to-csv -Value ConvertFrom-AccessToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name accdb-to-csv -Value ConvertFrom-AccessToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'access-to-csv' -Target 'ConvertFrom-AccessToCsv'
+Set-AgentModeAlias -Name 'mdb-to-csv' -Target 'ConvertFrom-AccessToCsv'
+Set-AgentModeAlias -Name 'accdb-to-csv' -Target 'ConvertFrom-AccessToCsv'

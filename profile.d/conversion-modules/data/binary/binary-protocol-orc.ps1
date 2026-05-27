@@ -282,8 +282,7 @@ function ConvertFrom-OrcToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-OrcToJson @PSBoundParameters
 }
-Set-Alias -Name orc-to-json -Value ConvertFrom-OrcToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'orc-to-json' -Target 'ConvertFrom-OrcToJson'
 # Convert JSON to ORC
 <#
 .SYNOPSIS
@@ -301,8 +300,7 @@ function ConvertTo-OrcFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-OrcFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-orc -Value ConvertTo-OrcFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-orc' -Target 'ConvertTo-OrcFromJson'
 # Convert ORC to CSV
 <#
 .SYNOPSIS
@@ -320,8 +318,7 @@ function ConvertFrom-OrcToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-OrcToCsv @PSBoundParameters
 }
-Set-Alias -Name orc-to-csv -Value ConvertFrom-OrcToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'orc-to-csv' -Target 'ConvertFrom-OrcToCsv'
 # Convert ORC to Parquet
 <#
 .SYNOPSIS
@@ -339,5 +336,4 @@ function ConvertFrom-OrcToParquet {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-OrcToParquet @PSBoundParameters
 }
-Set-Alias -Name orc-to-parquet -Value ConvertFrom-OrcToParquet -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'orc-to-parquet' -Target 'ConvertFrom-OrcToParquet'

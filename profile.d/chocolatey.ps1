@@ -52,9 +52,8 @@ if (Test-CachedCommand choco) {
         }
         & choco install @args @Packages
     }
-    Set-Alias -Name choinstall -Value Install-ChocoPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name choadd -Value Install-ChocoPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'choinstall' -Target 'Install-ChocoPackage'
+    Set-AgentModeAlias -Name 'choadd' -Target 'Install-ChocoPackage'
     # Chocolatey uninstall - remove packages
     <#
     .SYNOPSIS
@@ -98,9 +97,8 @@ if (Test-CachedCommand choco) {
         }
         & choco uninstall @args @Packages
     }
-    Set-Alias -Name chouninstall -Value Remove-ChocoPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name choremove -Value Remove-ChocoPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'chouninstall' -Target 'Remove-ChocoPackage'
+    Set-AgentModeAlias -Name 'choremove' -Target 'Remove-ChocoPackage'
     # Chocolatey outdated - check for outdated packages
     <#
     .SYNOPSIS
@@ -115,8 +113,7 @@ if (Test-CachedCommand choco) {
         
         & choco outdated
     }
-    Set-Alias -Name chooutdated -Value Test-ChocoOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'chooutdated' -Target 'Test-ChocoOutdated'
     # Chocolatey upgrade - update packages
     <#
     .SYNOPSIS
@@ -153,9 +150,8 @@ if (Test-CachedCommand choco) {
             & choco upgrade all @args
         }
     }
-    Set-Alias -Name choupgrade -Value Update-ChocoPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name choupdate -Value Update-ChocoPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'choupgrade' -Target 'Update-ChocoPackages'
+    Set-AgentModeAlias -Name 'choupdate' -Target 'Update-ChocoPackages'
     # Chocolatey self-update - update Chocolatey itself
     <#
     .SYNOPSIS
@@ -169,8 +165,7 @@ if (Test-CachedCommand choco) {
         
         & choco upgrade chocolatey -y
     }
-    Set-Alias -Name choselfupdate -Value Update-ChocoSelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'choselfupdate' -Target 'Update-ChocoSelf'
     # Chocolatey cleanup - clean cache
     <#
     .SYNOPSIS
@@ -200,9 +195,8 @@ if (Test-CachedCommand choco) {
         
         & choco clean @args
     }
-    Set-Alias -Name chocleanup -Value Clear-ChocoCache -ErrorAction SilentlyContinue
-    Set-Alias -Name choclean -Value Clear-ChocoCache -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'chocleanup' -Target 'Clear-ChocoCache'
+    Set-AgentModeAlias -Name 'choclean' -Target 'Clear-ChocoCache'
     # Chocolatey search - search for packages
     <#
     .SYNOPSIS
@@ -234,9 +228,8 @@ if (Test-CachedCommand choco) {
         }
         & choco @args @Query
     }
-    Set-Alias -Name chosearch -Value Find-ChocoPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name chofind -Value Find-ChocoPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'chosearch' -Target 'Find-ChocoPackage'
+    Set-AgentModeAlias -Name 'chofind' -Target 'Find-ChocoPackage'
     # Chocolatey list - list installed packages
     <#
     .SYNOPSIS
@@ -264,8 +257,7 @@ if (Test-CachedCommand choco) {
         }
         & choco @args
     }
-    Set-Alias -Name cholist -Value Get-ChocoPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'cholist' -Target 'Get-ChocoPackage'
     # Chocolatey info - show package information
     <#
     .SYNOPSIS
@@ -297,8 +289,7 @@ if (Test-CachedCommand choco) {
         }
         & choco @args @Packages
     }
-    Set-Alias -Name choinfo -Value Get-ChocoPackageInfo -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'choinfo' -Target 'Get-ChocoPackageInfo'
     # Chocolatey export - backup installed packages
     <#
     .SYNOPSIS
@@ -336,9 +327,8 @@ if (Test-CachedCommand choco) {
         }
         & choco @args
     }
-    Set-Alias -Name choexport -Value Export-ChocoPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name chobackup -Value Export-ChocoPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'choexport' -Target 'Export-ChocoPackages'
+    Set-AgentModeAlias -Name 'chobackup' -Target 'Export-ChocoPackages'
     # Chocolatey import - restore packages from backup
     <#
     .SYNOPSIS
@@ -396,8 +386,8 @@ if (Test-CachedCommand choco) {
             & choco @args
         }
     }
-    Set-Alias -Name choimport -Value Import-ChocoPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name chorestore -Value Import-ChocoPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'choimport' -Target 'Import-ChocoPackages'
+    Set-AgentModeAlias -Name 'chorestore' -Target 'Import-ChocoPackages'
 }
 else {
     Write-MissingToolWarning -Tool 'choco' -InstallHint 'Install from: https://chocolatey.org/install'

@@ -110,5 +110,4 @@ function Convert-Units {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _Convert-Units @PSBoundParameters
 }
-Set-Alias -Name unit-convert -Value Convert-Units -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'unit-convert' -Target 'Convert-Units'

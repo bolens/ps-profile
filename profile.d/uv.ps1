@@ -17,8 +17,7 @@ if (Test-CachedCommand uv) {
         Replacement for pip that uses uv for faster Python package management.
     #>
     function Invoke-Pip { uv pip @args }
-    Set-Alias -Name pip -Value Invoke-Pip -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pip' -Target 'Invoke-Pip'
     # UV run
     <#
     .SYNOPSIS
@@ -122,8 +121,7 @@ if (Test-CachedCommand uv) {
         Executes tools that were installed using uv tool install.
     #>
     function Invoke-UVTool { uv tool run @args }
-    Set-Alias -Name uvx -Value Invoke-UVTool -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'uvx' -Target 'Invoke-UVTool'
     # UV add
     <#
     .SYNOPSIS
@@ -132,8 +130,7 @@ if (Test-CachedCommand uv) {
         Adds packages as dependencies to the current UV project.
     #>
     function Add-UVDependency { uv add @args }
-    Set-Alias -Name uva -Value Add-UVDependency -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'uva' -Target 'Add-UVDependency'
     # UV sync
     <#
     .SYNOPSIS
@@ -142,7 +139,7 @@ if (Test-CachedCommand uv) {
         Installs and synchronizes all project dependencies.
     #>
     function Sync-UVDependencies { uv sync @args }
-    Set-Alias -Name uvs -Value Sync-UVDependencies -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'uvs' -Target 'Sync-UVDependencies'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

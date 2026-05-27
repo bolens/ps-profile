@@ -37,8 +37,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         & hatch @args
     }
-    Set-Alias -Name hatchenv -Value New-HatchEnvironment -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'hatchenv' -Target 'New-HatchEnvironment'
     # Hatch build - build project
     <#
     .SYNOPSIS
@@ -55,8 +54,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & hatch build
     }
-    Set-Alias -Name hatchbuild -Value Build-HatchProject -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'hatchbuild' -Target 'Build-HatchProject'
     # Hatch version - manage version
     <#
     .SYNOPSIS
@@ -87,7 +85,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & hatch version $Version
     }
-    Set-Alias -Name hatchversion -Value Get-HatchVersion -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'hatchversion' -Target 'Get-HatchVersion'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

@@ -97,7 +97,7 @@ if (-not $WorkspaceRoot) {
             else {
                 Write-Error "Failed to resolve workspace root: $($_.Exception.Message)"
             }
-            exit 2
+            Exit-WithCode -ExitCode [ExitCode]::SetupError
         }
     }
 }
@@ -615,7 +615,7 @@ catch {
         else {
             Write-Error "Failed to create data directory: $($_.Exception.Message)"
         }
-        exit 2
+        Exit-WithCode -ExitCode [ExitCode]::SetupError
     }
 }
 
@@ -681,7 +681,7 @@ if ($regressionDetected -and -not $UpdateBaseline) {
         else {
             Write-Error "Performance regression detected. Use -UpdateBaseline to accept new performance baseline."
         }
-        exit 1
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
 }
 
@@ -691,6 +691,6 @@ if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
 }
 else {
     Write-Host "Benchmark completed successfully"
-    exit 0
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 

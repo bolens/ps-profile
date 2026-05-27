@@ -51,8 +51,7 @@ function ConvertFrom-Epoch {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertFrom-Epoch @PSBoundParameters
 }
-Set-Alias -Name epoch-to-date -Value ConvertFrom-Epoch -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'epoch-to-date' -Target 'ConvertFrom-Epoch'
 <#
 .SYNOPSIS
     Converts DateTime to Unix epoch timestamp.
@@ -78,4 +77,4 @@ function ConvertTo-Epoch {
     _ConvertTo-Epoch @PSBoundParameters
 }
 
-Set-Alias -Name date-to-epoch -Value ConvertTo-Epoch -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'date-to-epoch' -Target 'ConvertTo-Epoch'

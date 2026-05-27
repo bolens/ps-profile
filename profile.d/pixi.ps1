@@ -58,8 +58,7 @@ if (Test-CachedCommand pixi) {
         
         & pixi update
     }
-    Set-Alias -Name pixi-update -Value Update-PixiPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pixi-update' -Target 'Update-PixiPackages'
     # Pixi list - list installed packages
     <#
     .SYNOPSIS
@@ -73,8 +72,7 @@ if (Test-CachedCommand pixi) {
         
         & pixi list
     }
-    Set-Alias -Name pixi-list -Value Get-PixiPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pixi-list' -Target 'Get-PixiPackages'
     # Pixi add - add packages
     <#
     .SYNOPSIS
@@ -106,8 +104,7 @@ if (Test-CachedCommand pixi) {
         }
         & pixi add @args @Packages
     }
-    Set-Alias -Name pixi-add -Value Add-PixiPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pixi-add' -Target 'Add-PixiPackage'
     # Pixi remove - remove packages
     <#
     .SYNOPSIS
@@ -129,7 +126,7 @@ if (Test-CachedCommand pixi) {
         
         & pixi remove @Packages
     }
-    Set-Alias -Name pixi-remove -Value Remove-PixiPackage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pixi-remove' -Target 'Remove-PixiPackage'
 }
 else {
     Write-MissingToolWarning -Tool 'pixi' -InstallHint 'Install with: scoop install pixi'

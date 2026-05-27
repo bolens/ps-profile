@@ -129,5 +129,4 @@ function ConvertFrom-XmlToJson {
         throw
     }
 }
-Set-Alias -Name xml-to-json -Value ConvertFrom-XmlToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'xml-to-json' -Target 'ConvertFrom-XmlToJson'

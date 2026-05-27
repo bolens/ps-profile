@@ -52,9 +52,4 @@ function Find-RipgrepText {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rgf' -Target 'Find-RipgrepText'
-}
-else {
-    Set-Alias -Name 'rgf' -Value 'Find-RipgrepText' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rgf' -Target 'Find-RipgrepText'

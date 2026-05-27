@@ -152,8 +152,7 @@ function ConvertTo-QrCodeFromText {
         Write-Error "Failed to convert text to QR code: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name text-to-qrcode -Value ConvertTo-QrCodeFromText -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'text-to-qrcode' -Target 'ConvertTo-QrCodeFromText'
 # Convert JSON to QR Code
 <#
 .SYNOPSIS
@@ -187,8 +186,7 @@ function ConvertTo-QrCodeFromJson {
         Write-Error "Failed to convert JSON to QR code: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-qrcode -Value ConvertTo-QrCodeFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-qrcode' -Target 'ConvertTo-QrCodeFromJson'
 # Convert QR Code to text
 <#
 .SYNOPSIS
@@ -224,5 +222,4 @@ function ConvertFrom-QrCodeToText {
         Write-Error "Failed to decode QR code: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name qrcode-to-text -Value ConvertFrom-QrCodeToText -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'qrcode-to-text' -Target 'ConvertFrom-QrCodeToText'

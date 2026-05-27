@@ -331,8 +331,7 @@ function New-QrCodePhone {
 }
 
 # Aliases
-Set-Alias -Name qrcode-url -Value New-QrCodeUrl -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-sms -Value New-QrCodeSms -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-email -Value New-QrCodeEmail -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-phone -Value New-QrCodePhone -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'qrcode-url' -Target 'New-QrCodeUrl'
+Set-AgentModeAlias -Name 'qrcode-sms' -Target 'New-QrCodeSms'
+Set-AgentModeAlias -Name 'qrcode-email' -Target 'New-QrCodeEmail'
+Set-AgentModeAlias -Name 'qrcode-phone' -Target 'New-QrCodePhone'

@@ -46,9 +46,8 @@ if (Test-CachedCommand pip) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name pipinstall -Value Install-PipPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name pipadd -Value Install-PipPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipinstall' -Target 'Install-PipPackage'
+    Set-AgentModeAlias -Name 'pipadd' -Target 'Install-PipPackage'
     # PIP uninstall - remove packages
     <#
     .SYNOPSIS
@@ -85,9 +84,8 @@ if (Test-CachedCommand pip) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name pipuninstall -Value Remove-PipPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name pipremove -Value Remove-PipPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipuninstall' -Target 'Remove-PipPackage'
+    Set-AgentModeAlias -Name 'pipremove' -Target 'Remove-PipPackage'
     # PIP outdated - check for outdated packages
     <#
     .SYNOPSIS
@@ -107,8 +105,7 @@ if (Test-CachedCommand pip) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name pipoutdated -Value Test-PipOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipoutdated' -Target 'Test-PipOutdated'
     # PIP update - update all packages
     <#
     .SYNOPSIS
@@ -142,8 +139,7 @@ if (Test-CachedCommand pip) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name pipupdate -Value Update-PipPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipupdate' -Target 'Update-PipPackages'
     # PIP self-update - update pip itself
     <#
     .SYNOPSIS
@@ -162,8 +158,7 @@ if (Test-CachedCommand pip) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name pipupgrade -Value Update-PipSelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipupgrade' -Target 'Update-PipSelf'
     # PIP freeze - backup installed packages
     <#
     .SYNOPSIS
@@ -203,9 +198,8 @@ if (Test-CachedCommand pip) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name pipexport -Value Export-PipPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name pipbackup -Value Export-PipPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pipexport' -Target 'Export-PipPackages'
+    Set-AgentModeAlias -Name 'pipbackup' -Target 'Export-PipPackages'
     # PIP install from requirements - restore packages
     <#
     .SYNOPSIS
@@ -274,8 +268,8 @@ if (Test-CachedCommand pip) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name pipimport -Value Import-PipPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name piprestore -Value Import-PipPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pipimport' -Target 'Import-PipPackages'
+    Set-AgentModeAlias -Name 'piprestore' -Target 'Import-PipPackages'
 }
 else {
     Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'

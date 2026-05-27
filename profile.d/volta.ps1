@@ -33,9 +33,8 @@ if (Test-CachedCommand volta) {
         
         & volta install @Tools
     }
-    Set-Alias -Name voltainstall -Value Install-VoltaTool -ErrorAction SilentlyContinue
-    Set-Alias -Name voltaadd -Value Install-VoltaTool -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'voltainstall' -Target 'Install-VoltaTool'
+    Set-AgentModeAlias -Name 'voltaadd' -Target 'Install-VoltaTool'
     # Volta pin - pin tools in project
     <#
     .SYNOPSIS
@@ -57,8 +56,7 @@ if (Test-CachedCommand volta) {
         
         & volta pin @Tools
     }
-    Set-Alias -Name voltapin -Value Pin-VoltaTool -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'voltapin' -Target 'Pin-VoltaTool'
     # Volta list - list installed tools
     <#
     .SYNOPSIS
@@ -72,8 +70,7 @@ if (Test-CachedCommand volta) {
         
         & volta list
     }
-    Set-Alias -Name voltalist -Value Get-VoltaTools -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'voltalist' -Target 'Get-VoltaTools'
     # Volta uninstall - remove tools
     <#
     .SYNOPSIS
@@ -95,9 +92,8 @@ if (Test-CachedCommand volta) {
         
         & volta uninstall @Tools
     }
-    Set-Alias -Name voltauninstall -Value Remove-VoltaTool -ErrorAction SilentlyContinue
-    Set-Alias -Name voltaremove -Value Remove-VoltaTool -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'voltauninstall' -Target 'Remove-VoltaTool'
+    Set-AgentModeAlias -Name 'voltaremove' -Target 'Remove-VoltaTool'
     # Volta upgrade - update Volta itself
     <#
     .SYNOPSIS
@@ -114,7 +110,7 @@ if (Test-CachedCommand volta) {
         
         & volta upgrade
     }
-    Set-Alias -Name voltaselfupdate -Value Update-VoltaSelf -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'voltaselfupdate' -Target 'Update-VoltaSelf'
 }
 else {
     Write-MissingToolWarning -Tool 'volta' -InstallHint 'Install from: https://volta.sh/'

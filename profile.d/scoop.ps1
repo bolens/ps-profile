@@ -115,8 +115,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name sinstall -Value Install-ScoopPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'sinstall' -Target 'Install-ScoopPackage'
     # Scoop search
     <#
     .SYNOPSIS
@@ -134,8 +133,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name ss -Value Find-ScoopPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'ss' -Target 'Find-ScoopPackage'
     # Scoop update
     <#
     .SYNOPSIS
@@ -153,8 +151,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name su -Value Update-ScoopPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'su' -Target 'Update-ScoopPackage'
     # Scoop update all
     <#
     .SYNOPSIS
@@ -172,8 +169,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name suu -Value Update-ScoopAll -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'suu' -Target 'Update-ScoopAll'
     # Scoop uninstall
     <#
     .SYNOPSIS
@@ -191,8 +187,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name sr -Value Uninstall-ScoopPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'sr' -Target 'Uninstall-ScoopPackage'
     # Scoop list
     <#
     .SYNOPSIS
@@ -210,8 +205,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name slist -Value Get-ScoopPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'slist' -Target 'Get-ScoopPackage'
     # Scoop info
     <#
     .SYNOPSIS
@@ -229,8 +223,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name sh -Value Get-ScoopPackageInfo -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'sh' -Target 'Get-ScoopPackageInfo'
     # Scoop cleanup
     <#
     .SYNOPSIS
@@ -249,8 +242,7 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name scleanup -Value Clear-ScoopCache -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'scleanup' -Target 'Clear-ScoopCache'
     # Scoop export - backup installed packages
     <#
     .SYNOPSIS
@@ -282,9 +274,8 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name scoopexport -Value Export-ScoopPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name scoopbackup -Value Export-ScoopPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'scoopexport' -Target 'Export-ScoopPackages'
+    Set-AgentModeAlias -Name 'scoopbackup' -Target 'Export-ScoopPackages'
     # Scoop import - restore packages from backup
     <#
     .SYNOPSIS
@@ -338,9 +329,8 @@ if (Test-CachedCommand scoop) {
             $VerbosePreference = $originalVerbose
         }
     }
-    Set-Alias -Name scoopimport -Value Import-ScoopPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name scooprestore -Value Import-ScoopPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'scoopimport' -Target 'Import-ScoopPackages'
+    Set-AgentModeAlias -Name 'scooprestore' -Target 'Import-ScoopPackages'
     # Scoop repair - fix broken bucket Git references
     Set-AgentModeFunction -Name 'Repair-ScoopBuckets' -Body {
         <#

@@ -15,7 +15,7 @@ if (-not (Test-Path Function:Invoke-GitStatus)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'status' -Arguments $a -CommandName 'git status'
     }
-    Set-Alias -Name gs -Value Invoke-GitStatus -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gs' -Target 'Invoke-GitStatus'
 }
 
 # Git add - stage changes
@@ -30,7 +30,7 @@ if (-not (Test-Path Function:Add-GitChanges)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'add' -Arguments $a -CommandName 'git add'
     }
-    Set-Alias -Name ga -Value Add-GitChanges -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'ga' -Target 'Add-GitChanges'
 }
 
 # Git commit - commit changes
@@ -45,7 +45,7 @@ if (-not (Test-Path Function:Save-GitCommit)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'commit' -Arguments $a -CommandName 'git commit'
     }
-    Set-Alias -Name gc -Value Save-GitCommit -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gc' -Target 'Save-GitCommit'
 }
 
 # Git push - push to remote
@@ -60,7 +60,7 @@ if (-not (Test-Path Function:Publish-GitChanges)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'push' -Arguments $a -CommandName 'git push'
     }
-    Set-Alias -Name gp -Value Publish-GitChanges -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gp' -Target 'Publish-GitChanges'
 }
 
 # Git log - show commit log
@@ -90,7 +90,7 @@ if (-not (Test-Path Function:Compare-GitChanges)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'diff' -Arguments $a -CommandName 'git diff'
     }
-    Set-Alias -Name gd -Value Compare-GitChanges -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gd' -Target 'Compare-GitChanges'
 }
 
 # Git branch - manage branches
@@ -105,7 +105,7 @@ if (-not (Test-Path Function:Get-GitBranch)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'branch' -Arguments $a -CommandName 'git branch'
     }
-    Set-Alias -Name gb -Value Get-GitBranch -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gb' -Target 'Get-GitBranch'
 }
 
 # Git checkout - switch branches
@@ -120,7 +120,7 @@ if (-not (Test-Path Function:Switch-GitBranch)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'checkout' -Arguments $a -CommandName 'git checkout'
     }
-    Set-Alias -Name gco -Value Switch-GitBranch -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gco' -Target 'Switch-GitBranch'
 }
 
 # Git commit with message - commit changes with message
@@ -135,7 +135,7 @@ if (-not (Test-Path Function:Save-GitCommitWithMessage)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Save-GitCommit @a
     }
-    Set-Alias -Name gcm -Value Save-GitCommitWithMessage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gcm' -Target 'Save-GitCommitWithMessage'
 }
 
 # Git pull - pull from remote
@@ -150,7 +150,7 @@ if (-not (Test-Path Function:Get-GitChanges)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'pull' -Arguments $a -CommandName 'git pull'
     }
-    Set-Alias -Name gpl -Value Get-GitChanges -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gpl' -Target 'Get-GitChanges'
 }
 
 # Git fetch - fetch from remote
@@ -165,6 +165,6 @@ if (-not (Test-Path Function:Receive-GitChanges)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $a)
         Invoke-GitCommand -Subcommand 'fetch' -Arguments $a -CommandName 'git fetch'
     }
-    Set-Alias -Name gf -Value Receive-GitChanges -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gf' -Target 'Receive-GitChanges'
 }
 

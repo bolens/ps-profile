@@ -1,5 +1,5 @@
 # ===============================================
-# enhanced-history.ps1
+# history-enhanced.ps1
 # Enhanced history search and navigation
 # ===============================================
 
@@ -19,7 +19,7 @@ try {
                 catch {
                     if ($env:PS_PROFILE_DEBUG) {
                         if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                            Write-ProfileError -ErrorRecord $_ -Context "Fragment: enhanced-history (utilities-history-enhanced.ps1)" -Category 'Fragment'
+                            Write-ProfileError -ErrorRecord $_ -Context "Fragment: history-enhanced (utilities-history-enhanced.ps1)" -Category 'Fragment'
                         }
                         else {
                             Write-Warning "Failed to load enhanced history module utilities-history-enhanced.ps1 : $($_.Exception.Message)"
@@ -33,7 +33,7 @@ try {
 catch {
     if ($env:PS_PROFILE_DEBUG) {
         if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-            Write-ProfileError -ErrorRecord $_ -Context "Fragment: enhanced-history" -Category 'Fragment'
+            Write-ProfileError -ErrorRecord $_ -Context "Fragment: history-enhanced" -Category 'Fragment'
         }
         else {
             Write-Warning "Failed to load enhanced history fragment: $($_.Exception.Message)"

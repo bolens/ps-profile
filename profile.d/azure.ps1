@@ -154,15 +154,7 @@ function Start-AzureDeveloperUp {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'az' -Target 'Invoke-Azure'
-    Set-AgentModeAlias -Name 'azd' -Target 'Invoke-AzureDeveloper'
-    Set-AgentModeAlias -Name 'az-login' -Target 'Connect-AzureAccount'
-    Set-AgentModeAlias -Name 'azd-up' -Target 'Start-AzureDeveloperUp'
-}
-else {
-    Set-Alias -Name 'az' -Value 'Invoke-Azure' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'azd' -Value 'Invoke-AzureDeveloper' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'az-login' -Value 'Connect-AzureAccount' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'azd-up' -Value 'Start-AzureDeveloperUp' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'az' -Target 'Invoke-Azure'
+Set-AgentModeAlias -Name 'azd' -Target 'Invoke-AzureDeveloper'
+Set-AgentModeAlias -Name 'az-login' -Target 'Connect-AzureAccount'
+Set-AgentModeAlias -Name 'azd-up' -Target 'Start-AzureDeveloperUp'

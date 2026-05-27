@@ -168,8 +168,7 @@ function Convert-TimeZone {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _Convert-TimeZone @PSBoundParameters
 }
-Set-Alias -Name convert-timezone -Value Convert-TimeZone -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'convert-timezone' -Target 'Convert-TimeZone'
 # Convert DateTime to specific timezone
 <#
 .SYNOPSIS
@@ -198,8 +197,7 @@ function ConvertTo-TimeZone {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-TimeZone @PSBoundParameters
 }
-Set-Alias -Name datetime-to-timezone -Value ConvertTo-TimeZone -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'datetime-to-timezone' -Target 'ConvertTo-TimeZone'
 # Convert DateTime from specific timezone
 <#
 .SYNOPSIS
@@ -228,8 +226,7 @@ function ConvertFrom-TimeZone {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-TimeZone @PSBoundParameters
 }
-Set-Alias -Name timezone-to-datetime -Value ConvertFrom-TimeZone -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'timezone-to-datetime' -Target 'ConvertFrom-TimeZone'
 # Get available timezones
 <#
 .SYNOPSIS
@@ -248,5 +245,4 @@ function Get-TimeZones {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _Get-TimeZones
 }
-Set-Alias -Name list-timezones -Value Get-TimeZones -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'list-timezones' -Target 'Get-TimeZones'

@@ -338,8 +338,7 @@ function ConvertFrom-EdifactToJson {
         Write-Error "Failed to convert EDIFACT to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name edifact-to-json -Value ConvertFrom-EdifactToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'edifact-to-json' -Target 'ConvertFrom-EdifactToJson'
 # Convert JSON to EDIFACT
 <#
 .SYNOPSIS
@@ -373,8 +372,7 @@ function ConvertTo-EdifactFromJson {
         Write-Error "Failed to convert JSON to EDIFACT: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-edifact -Value ConvertTo-EdifactFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-edifact' -Target 'ConvertTo-EdifactFromJson'
 # Convert EDIFACT to XML
 <#
 .SYNOPSIS
@@ -408,8 +406,7 @@ function ConvertFrom-EdifactToXml {
         Write-Error "Failed to convert EDIFACT to XML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name edifact-to-xml -Value ConvertFrom-EdifactToXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'edifact-to-xml' -Target 'ConvertFrom-EdifactToXml'
 # Convert EDIFACT to CSV
 <#
 .SYNOPSIS
@@ -443,5 +440,4 @@ function ConvertFrom-EdifactToCsv {
         Write-Error "Failed to convert EDIFACT to CSV: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name edifact-to-csv -Value ConvertFrom-EdifactToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'edifact-to-csv' -Target 'ConvertFrom-EdifactToCsv'

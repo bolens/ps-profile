@@ -314,9 +314,8 @@ function ConvertFrom-SpssToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SpssToJson @PSBoundParameters
 }
-Set-Alias -Name spss-to-json -Value ConvertFrom-SpssToJson -ErrorAction SilentlyContinue
-Set-Alias -Name sav-to-json -Value ConvertFrom-SpssToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'spss-to-json' -Target 'ConvertFrom-SpssToJson'
+Set-AgentModeAlias -Name 'sav-to-json' -Target 'ConvertFrom-SpssToJson'
 # Convert JSON to SPSS
 <#
 .SYNOPSIS
@@ -334,9 +333,8 @@ function ConvertTo-SpssFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SpssFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-spss -Value ConvertTo-SpssFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-sav -Value ConvertTo-SpssFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-spss' -Target 'ConvertTo-SpssFromJson'
+Set-AgentModeAlias -Name 'json-to-sav' -Target 'ConvertTo-SpssFromJson'
 # Convert SPSS to CSV
 <#
 .SYNOPSIS
@@ -354,6 +352,5 @@ function ConvertFrom-SpssToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SpssToCsv @PSBoundParameters
 }
-Set-Alias -Name spss-to-csv -Value ConvertFrom-SpssToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name sav-to-csv -Value ConvertFrom-SpssToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'spss-to-csv' -Target 'ConvertFrom-SpssToCsv'
+Set-AgentModeAlias -Name 'sav-to-csv' -Target 'ConvertFrom-SpssToCsv'

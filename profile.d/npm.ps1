@@ -65,9 +65,8 @@ if (Test-CachedCommand npm) {
             Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
         }
     }
-    Set-Alias -Name npminstall -Value Install-NpmPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name npmadd -Value Install-NpmPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'npminstall' -Target 'Install-NpmPackage'
+    Set-AgentModeAlias -Name 'npmadd' -Target 'Install-NpmPackage'
     # NPM uninstall - remove packages
     <#
     .SYNOPSIS
@@ -125,9 +124,8 @@ if (Test-CachedCommand npm) {
             Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
         }
     }
-    Set-Alias -Name npmuninstall -Value Remove-NpmPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name npmremove -Value Remove-NpmPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'npmuninstall' -Target 'Remove-NpmPackage'
+    Set-AgentModeAlias -Name 'npmremove' -Target 'Remove-NpmPackage'
     # NPM outdated - check for outdated packages
     <#
     .SYNOPSIS
@@ -153,8 +151,7 @@ if (Test-CachedCommand npm) {
             Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
         }
     }
-    Set-Alias -Name npmoutdated -Value Test-NpmOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'npmoutdated' -Target 'Test-NpmOutdated'
     # NPM update - update all packages
     <#
     .SYNOPSIS
@@ -180,8 +177,7 @@ if (Test-CachedCommand npm) {
             Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
         }
     }
-    Set-Alias -Name npmupdate -Value Update-NpmPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'npmupdate' -Target 'Update-NpmPackages'
     # NPM self-update - update npm itself
     <#
     .SYNOPSIS
@@ -206,8 +202,7 @@ if (Test-CachedCommand npm) {
             Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
         }
     }
-    Set-Alias -Name npmupgrade -Value Update-NpmSelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'npmupgrade' -Target 'Update-NpmSelf'
     # NPM export global - backup global packages
     <#
     .SYNOPSIS
@@ -256,9 +251,8 @@ if (Test-CachedCommand npm) {
             Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
         }
     }
-    Set-Alias -Name npmexport -Value Export-NpmGlobalPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name npmbackup -Value Export-NpmGlobalPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'npmexport' -Target 'Export-NpmGlobalPackages'
+    Set-AgentModeAlias -Name 'npmbackup' -Target 'Export-NpmGlobalPackages'
     # NPM import global - restore global packages
     <#
     .SYNOPSIS
@@ -332,8 +326,8 @@ if (Test-CachedCommand npm) {
             Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
         }
     }
-    Set-Alias -Name npmimport -Value Import-NpmGlobalPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name npmrestore -Value Import-NpmGlobalPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'npmimport' -Target 'Import-NpmGlobalPackages'
+    Set-AgentModeAlias -Name 'npmrestore' -Target 'Import-NpmGlobalPackages'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

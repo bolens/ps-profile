@@ -78,5 +78,4 @@ function Get-HexDump {
     if (-not $global:FileUtilitiesInitialized) { Ensure-FileUtilities }
     & "Global:_Get-HexDump" @PSBoundParameters
 }
-Set-Alias -Name hex-dump -Value Get-HexDump -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hex-dump' -Target 'Get-HexDump'

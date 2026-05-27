@@ -265,8 +265,7 @@ function Parse-MimeType {
         }
     }
 }
-Set-Alias -Name parse-mime -Value Parse-MimeType -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parse-mime' -Target 'Parse-MimeType'
 # Get MIME type from file extension
 <#
 .SYNOPSIS
@@ -309,8 +308,7 @@ function Get-MimeTypeFromExtension {
         return ''
     }
 }
-Set-Alias -Name mime-from-ext -Value Get-MimeTypeFromExtension -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'mime-from-ext' -Target 'Get-MimeTypeFromExtension'
 # Get file extension from MIME type
 <#
 .SYNOPSIS
@@ -357,8 +355,7 @@ function Get-ExtensionFromMimeType {
         return @()
     }
 }
-Set-Alias -Name ext-from-mime -Value Get-ExtensionFromMimeType -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ext-from-mime' -Target 'Get-ExtensionFromMimeType'
 # Convert MIME type to JSON
 <#
 .SYNOPSIS
@@ -391,8 +388,7 @@ function ConvertFrom-MimeTypeToJson {
         Write-Error "Failed to convert MIME type to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name mime-to-json -Value ConvertFrom-MimeTypeToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'mime-to-json' -Target 'ConvertFrom-MimeTypeToJson'
 # Convert JSON to MIME type
 <#
 .SYNOPSIS
@@ -425,5 +421,4 @@ function ConvertTo-MimeTypeFromJson {
         Write-Error "Failed to convert JSON to MIME type: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-mime -Value ConvertTo-MimeTypeFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-mime' -Target 'ConvertTo-MimeTypeFromJson'

@@ -85,14 +85,8 @@ function ConvertFrom-TiffToPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'tiff-to-png' -Target 'ConvertFrom-TiffToPng'
-    Set-AgentModeAlias -Name 'tif-to-png' -Target 'ConvertFrom-TiffToPng'
-}
-else {
-    Set-Alias -Name tiff-to-png -Value ConvertFrom-TiffToPng -ErrorAction SilentlyContinue
-    Set-Alias -Name tif-to-png -Value ConvertFrom-TiffToPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'tiff-to-png' -Target 'ConvertFrom-TiffToPng'
+Set-AgentModeAlias -Name 'tif-to-png' -Target 'ConvertFrom-TiffToPng'
 
 <#
 .SYNOPSIS
@@ -124,18 +118,10 @@ function ConvertFrom-TiffToJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'tiff-to-jpeg' -Target 'ConvertFrom-TiffToJpeg'
-    Set-AgentModeAlias -Name 'tiff-to-jpg' -Target 'ConvertFrom-TiffToJpeg'
-    Set-AgentModeAlias -Name 'tif-to-jpeg' -Target 'ConvertFrom-TiffToJpeg'
-    Set-AgentModeAlias -Name 'tif-to-jpg' -Target 'ConvertFrom-TiffToJpeg'
-}
-else {
-    Set-Alias -Name tiff-to-jpeg -Value ConvertFrom-TiffToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name tiff-to-jpg -Value ConvertFrom-TiffToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name tif-to-jpeg -Value ConvertFrom-TiffToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name tif-to-jpg -Value ConvertFrom-TiffToJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'tiff-to-jpeg' -Target 'ConvertFrom-TiffToJpeg'
+Set-AgentModeAlias -Name 'tiff-to-jpg' -Target 'ConvertFrom-TiffToJpeg'
+Set-AgentModeAlias -Name 'tif-to-jpeg' -Target 'ConvertFrom-TiffToJpeg'
+Set-AgentModeAlias -Name 'tif-to-jpg' -Target 'ConvertFrom-TiffToJpeg'
 
 <#
 .SYNOPSIS
@@ -165,14 +151,8 @@ function ConvertFrom-TiffToPdf {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'tiff-to-pdf' -Target 'ConvertFrom-TiffToPdf'
-    Set-AgentModeAlias -Name 'tif-to-pdf' -Target 'ConvertFrom-TiffToPdf'
-}
-else {
-    Set-Alias -Name tiff-to-pdf -Value ConvertFrom-TiffToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name tif-to-pdf -Value ConvertFrom-TiffToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'tiff-to-pdf' -Target 'ConvertFrom-TiffToPdf'
+Set-AgentModeAlias -Name 'tif-to-pdf' -Target 'ConvertFrom-TiffToPdf'
 
 <#
 .SYNOPSIS
@@ -204,14 +184,8 @@ function ConvertTo-TiffFromPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'png-to-tiff' -Target 'ConvertTo-TiffFromPng'
-    Set-AgentModeAlias -Name 'png-to-tif' -Target 'ConvertTo-TiffFromPng'
-}
-else {
-    Set-Alias -Name png-to-tiff -Value ConvertTo-TiffFromPng -ErrorAction SilentlyContinue
-    Set-Alias -Name png-to-tif -Value ConvertTo-TiffFromPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'png-to-tiff' -Target 'ConvertTo-TiffFromPng'
+Set-AgentModeAlias -Name 'png-to-tif' -Target 'ConvertTo-TiffFromPng'
 
 <#
 .SYNOPSIS
@@ -243,18 +217,10 @@ function ConvertTo-TiffFromJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jpeg-to-tiff' -Target 'ConvertTo-TiffFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-tiff' -Target 'ConvertTo-TiffFromJpeg'
-    Set-AgentModeAlias -Name 'jpeg-to-tif' -Target 'ConvertTo-TiffFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-tif' -Target 'ConvertTo-TiffFromJpeg'
-}
-else {
-    Set-Alias -Name jpeg-to-tiff -Value ConvertTo-TiffFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-tiff -Value ConvertTo-TiffFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpeg-to-tif -Value ConvertTo-TiffFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-tif -Value ConvertTo-TiffFromJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jpeg-to-tiff' -Target 'ConvertTo-TiffFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-tiff' -Target 'ConvertTo-TiffFromJpeg'
+Set-AgentModeAlias -Name 'jpeg-to-tif' -Target 'ConvertTo-TiffFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-tif' -Target 'ConvertTo-TiffFromJpeg'
 
 <#
 .SYNOPSIS
@@ -286,12 +252,6 @@ function ConvertTo-TiffFromPdf {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'pdf-to-tiff' -Target 'ConvertTo-TiffFromPdf'
-    Set-AgentModeAlias -Name 'pdf-to-tif' -Target 'ConvertTo-TiffFromPdf'
-}
-else {
-    Set-Alias -Name pdf-to-tiff -Value ConvertTo-TiffFromPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name pdf-to-tif -Value ConvertTo-TiffFromPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'pdf-to-tiff' -Target 'ConvertTo-TiffFromPdf'
+Set-AgentModeAlias -Name 'pdf-to-tif' -Target 'ConvertTo-TiffFromPdf'
 

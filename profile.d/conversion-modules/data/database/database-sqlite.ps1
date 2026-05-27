@@ -24,7 +24,7 @@ function Initialize-FileConversion-DatabaseSqlite {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.(db|sqlite|sqlite3)$', '.json' }
             
             # Try sqlite3 command first
-            if (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'sqlite3') {
                 $tempJson = Join-Path $env:TEMP "sqlite-to-json-$(Get-Random).json"
                 try {
                     if ($TableName) {
@@ -164,7 +164,7 @@ function Initialize-FileConversion-DatabaseSqlite {
             $jsonData = Get-Content -LiteralPath $InputPath -Raw -Encoding UTF8 | ConvertFrom-Json
             
             # Try sqlite3 command first
-            if (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'sqlite3') {
                 # Remove existing database if it exists
                 if ($OutputPath -and -not [string]::IsNullOrWhiteSpace($OutputPath) -and (Test-Path -LiteralPath $OutputPath)) {
                     Remove-Item -LiteralPath $OutputPath -Force
@@ -247,7 +247,7 @@ function Initialize-FileConversion-DatabaseSqlite {
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.(db|sqlite|sqlite3)$', '.csv' }
             
-            if (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'sqlite3') {
                 if ($TableName) {
                     & sqlite3 -header -csv $InputPath "SELECT * FROM [$TableName];" | Set-Content -LiteralPath $OutputPath -Encoding UTF8
                 }
@@ -284,7 +284,7 @@ function Initialize-FileConversion-DatabaseSqlite {
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.(db|sqlite|sqlite3)$', '.sql' }
             
-            if (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'sqlite3') {
                 & sqlite3 $InputPath ".dump" | Set-Content -LiteralPath $OutputPath -Encoding UTF8
                 if ($LASTEXITCODE -ne 0) {
                     throw "sqlite3 failed with exit code $LASTEXITCODE"
@@ -322,9 +322,8 @@ function ConvertFrom-SqliteToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SqliteToJson @PSBoundParameters
 }
-Set-Alias -Name sqlite-to-json -Value ConvertFrom-SqliteToJson -ErrorAction SilentlyContinue
-Set-Alias -Name db-to-json -Value ConvertFrom-SqliteToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sqlite-to-json' -Target 'ConvertFrom-SqliteToJson'
+Set-AgentModeAlias -Name 'db-to-json' -Target 'ConvertFrom-SqliteToJson'
 # Convert JSON to SQLite
 <#
 .SYNOPSIS
@@ -345,9 +344,8 @@ function ConvertTo-SqliteFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SqliteFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-sqlite -Value ConvertTo-SqliteFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-db -Value ConvertTo-SqliteFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-sqlite' -Target 'ConvertTo-SqliteFromJson'
+Set-AgentModeAlias -Name 'json-to-db' -Target 'ConvertTo-SqliteFromJson'
 # Convert SQLite to CSV
 <#
 .SYNOPSIS
@@ -368,9 +366,8 @@ function ConvertFrom-SqliteToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SqliteToCsv @PSBoundParameters
 }
-Set-Alias -Name sqlite-to-csv -Value ConvertFrom-SqliteToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name db-to-csv -Value ConvertFrom-SqliteToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sqlite-to-csv' -Target 'ConvertFrom-SqliteToCsv'
+Set-AgentModeAlias -Name 'db-to-csv' -Target 'ConvertFrom-SqliteToCsv'
 # Convert SQLite to SQL Dump
 <#
 .SYNOPSIS
@@ -389,6 +386,5 @@ function ConvertFrom-SqliteToSql {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SqliteToSql @PSBoundParameters
 }
-Set-Alias -Name sqlite-to-sql -Value ConvertFrom-SqliteToSql -ErrorAction SilentlyContinue
-Set-Alias -Name db-to-sql -Value ConvertFrom-SqliteToSql -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'sqlite-to-sql' -Target 'ConvertFrom-SqliteToSql'
+Set-AgentModeAlias -Name 'db-to-sql' -Target 'ConvertFrom-SqliteToSql'

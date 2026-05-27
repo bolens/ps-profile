@@ -254,9 +254,8 @@ function ConvertFrom-DeltaToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-DeltaToJson @PSBoundParameters
 }
-Set-Alias -Name delta-to-json -Value ConvertFrom-DeltaToJson -ErrorAction SilentlyContinue
-Set-Alias -Name deltalake-to-json -Value ConvertFrom-DeltaToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'delta-to-json' -Target 'ConvertFrom-DeltaToJson'
+Set-AgentModeAlias -Name 'deltalake-to-json' -Target 'ConvertFrom-DeltaToJson'
 # Convert JSON to Delta Lake
 <#
 .SYNOPSIS
@@ -275,9 +274,8 @@ function ConvertTo-DeltaFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-DeltaFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-delta -Value ConvertTo-DeltaFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-deltalake -Value ConvertTo-DeltaFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-delta' -Target 'ConvertTo-DeltaFromJson'
+Set-AgentModeAlias -Name 'json-to-deltalake' -Target 'ConvertTo-DeltaFromJson'
 # Convert Delta Lake to Parquet
 <#
 .SYNOPSIS
@@ -295,6 +293,5 @@ function ConvertFrom-DeltaToParquet {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-DeltaToParquet @PSBoundParameters
 }
-Set-Alias -Name delta-to-parquet -Value ConvertFrom-DeltaToParquet -ErrorAction SilentlyContinue
-Set-Alias -Name deltalake-to-parquet -Value ConvertFrom-DeltaToParquet -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'delta-to-parquet' -Target 'ConvertFrom-DeltaToParquet'
+Set-AgentModeAlias -Name 'deltalake-to-parquet' -Target 'ConvertFrom-DeltaToParquet'

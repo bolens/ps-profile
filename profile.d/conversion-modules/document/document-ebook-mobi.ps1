@@ -30,7 +30,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             $attempts = @()
             
             # Try Calibre ebook-convert first (best support for MOBI/AZW)
-            $ebookConvertCmd = Get-Command ebook-convert -ErrorAction SilentlyContinue
+            $ebookConvertCmd = Test-CachedCommand 'ebook-convert'
             if ($ebookConvertCmd) {
                 $errorOutput = & $ebookConvertCmd $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -46,7 +46,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             }
             
             # Fallback to pandoc (if available)
-            $pandocCmd = Get-Command pandoc -ErrorAction SilentlyContinue
+            $pandocCmd = Test-CachedCommand 'pandoc'
             if ($pandocCmd) {
                 $errorOutput = & $pandocCmd -f mobi -t epub $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -84,7 +84,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             $attempts = @()
             
             # Try Calibre ebook-convert first
-            $ebookConvertCmd = Get-Command ebook-convert -ErrorAction SilentlyContinue
+            $ebookConvertCmd = Test-CachedCommand 'ebook-convert'
             if ($ebookConvertCmd) {
                 $errorOutput = & $ebookConvertCmd $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -100,7 +100,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             }
             
             # Fallback to pandoc
-            $pandocCmd = Get-Command pandoc -ErrorAction SilentlyContinue
+            $pandocCmd = Test-CachedCommand 'pandoc'
             if ($pandocCmd) {
                 $errorOutput = & $pandocCmd $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -138,7 +138,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             $attempts = @()
             
             # Try Calibre ebook-convert first
-            $ebookConvertCmd = Get-Command ebook-convert -ErrorAction SilentlyContinue
+            $ebookConvertCmd = Test-CachedCommand 'ebook-convert'
             if ($ebookConvertCmd) {
                 $errorOutput = & $ebookConvertCmd $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -154,7 +154,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             }
             
             # Fallback to pandoc
-            $pandocCmd = Get-Command pandoc -ErrorAction SilentlyContinue
+            $pandocCmd = Test-CachedCommand 'pandoc'
             if ($pandocCmd) {
                 $errorOutput = & $pandocCmd -f mobi -t html $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -185,7 +185,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -222,7 +222,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             $attempts = @()
             
             # Try Calibre ebook-convert first (best support)
-            $ebookConvertCmd = Get-Command ebook-convert -ErrorAction SilentlyContinue
+            $ebookConvertCmd = Test-CachedCommand 'ebook-convert'
             if ($ebookConvertCmd) {
                 $errorOutput = & $ebookConvertCmd $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -238,7 +238,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             }
             
             # Fallback to pandoc (if available)
-            $pandocCmd = Get-Command pandoc -ErrorAction SilentlyContinue
+            $pandocCmd = Test-CachedCommand 'pandoc'
             if ($pandocCmd) {
                 $errorOutput = & $pandocCmd -f epub -t mobi $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -277,7 +277,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             $attempts = @()
             
             # Try Calibre ebook-convert first
-            $ebookConvertCmd = Get-Command ebook-convert -ErrorAction SilentlyContinue
+            $ebookConvertCmd = Test-CachedCommand 'ebook-convert'
             if ($ebookConvertCmd) {
                 $errorOutput = & $ebookConvertCmd $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -293,7 +293,7 @@ function Initialize-FileConversion-DocumentEbookMobi {
             }
             
             # Fallback to pandoc
-            $pandocCmd = Get-Command pandoc -ErrorAction SilentlyContinue
+            $pandocCmd = Test-CachedCommand 'pandoc'
             if ($pandocCmd) {
                 $errorOutput = & $pandocCmd -f markdown -t mobi $InputPath -o $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
@@ -346,16 +346,9 @@ function ConvertFrom-MobiToEpub {
         Write-Error "Failed to convert MOBI/AZW to EPUB: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'mobi-to-epub' -Target 'ConvertFrom-MobiToEpub'
-    Set-AgentModeAlias -Name 'azw-to-epub' -Target 'ConvertFrom-MobiToEpub'
-    Set-AgentModeAlias -Name 'azw3-to-epub' -Target 'ConvertFrom-MobiToEpub'
-}
-else {
-    Set-Alias -Name mobi-to-epub -Value ConvertFrom-MobiToEpub -ErrorAction SilentlyContinue
-    Set-Alias -Name azw-to-epub -Value ConvertFrom-MobiToEpub -ErrorAction SilentlyContinue
-    Set-Alias -Name azw3-to-epub -Value ConvertFrom-MobiToEpub -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'mobi-to-epub' -Target 'ConvertFrom-MobiToEpub'
+Set-AgentModeAlias -Name 'azw-to-epub' -Target 'ConvertFrom-MobiToEpub'
+Set-AgentModeAlias -Name 'azw3-to-epub' -Target 'ConvertFrom-MobiToEpub'
 
 <#
 .SYNOPSIS
@@ -384,16 +377,9 @@ function ConvertFrom-MobiToPdf {
         Write-Error "Failed to convert MOBI/AZW to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'mobi-to-pdf' -Target 'ConvertFrom-MobiToPdf'
-    Set-AgentModeAlias -Name 'azw-to-pdf' -Target 'ConvertFrom-MobiToPdf'
-    Set-AgentModeAlias -Name 'azw3-to-pdf' -Target 'ConvertFrom-MobiToPdf'
-}
-else {
-    Set-Alias -Name mobi-to-pdf -Value ConvertFrom-MobiToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name azw-to-pdf -Value ConvertFrom-MobiToPdf -ErrorAction SilentlyContinue
-    Set-Alias -Name azw3-to-pdf -Value ConvertFrom-MobiToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'mobi-to-pdf' -Target 'ConvertFrom-MobiToPdf'
+Set-AgentModeAlias -Name 'azw-to-pdf' -Target 'ConvertFrom-MobiToPdf'
+Set-AgentModeAlias -Name 'azw3-to-pdf' -Target 'ConvertFrom-MobiToPdf'
 
 <#
 .SYNOPSIS
@@ -422,16 +408,9 @@ function ConvertFrom-MobiToHtml {
         Write-Error "Failed to convert MOBI/AZW to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'mobi-to-html' -Target 'ConvertFrom-MobiToHtml'
-    Set-AgentModeAlias -Name 'azw-to-html' -Target 'ConvertFrom-MobiToHtml'
-    Set-AgentModeAlias -Name 'azw3-to-html' -Target 'ConvertFrom-MobiToHtml'
-}
-else {
-    Set-Alias -Name mobi-to-html -Value ConvertFrom-MobiToHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name azw-to-html -Value ConvertFrom-MobiToHtml -ErrorAction SilentlyContinue
-    Set-Alias -Name azw3-to-html -Value ConvertFrom-MobiToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'mobi-to-html' -Target 'ConvertFrom-MobiToHtml'
+Set-AgentModeAlias -Name 'azw-to-html' -Target 'ConvertFrom-MobiToHtml'
+Set-AgentModeAlias -Name 'azw3-to-html' -Target 'ConvertFrom-MobiToHtml'
 
 <#
 .SYNOPSIS
@@ -460,16 +439,9 @@ function ConvertFrom-MobiToMarkdown {
         Write-Error "Failed to convert MOBI/AZW to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'mobi-to-markdown' -Target 'ConvertFrom-MobiToMarkdown'
-    Set-AgentModeAlias -Name 'azw-to-markdown' -Target 'ConvertFrom-MobiToMarkdown'
-    Set-AgentModeAlias -Name 'azw3-to-markdown' -Target 'ConvertFrom-MobiToMarkdown'
-}
-else {
-    Set-Alias -Name mobi-to-markdown -Value ConvertFrom-MobiToMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name azw-to-markdown -Value ConvertFrom-MobiToMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name azw3-to-markdown -Value ConvertFrom-MobiToMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'mobi-to-markdown' -Target 'ConvertFrom-MobiToMarkdown'
+Set-AgentModeAlias -Name 'azw-to-markdown' -Target 'ConvertFrom-MobiToMarkdown'
+Set-AgentModeAlias -Name 'azw3-to-markdown' -Target 'ConvertFrom-MobiToMarkdown'
 
 <#
 .SYNOPSIS
@@ -500,16 +472,9 @@ function ConvertTo-MobiFromEpub {
         Write-Error "Failed to convert EPUB to MOBI/AZW: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'epub-to-mobi' -Target 'ConvertTo-MobiFromEpub'
-    Set-AgentModeAlias -Name 'epub-to-azw' -Target 'ConvertTo-MobiFromEpub'
-    Set-AgentModeAlias -Name 'epub-to-azw3' -Target 'ConvertTo-MobiFromEpub'
-}
-else {
-    Set-Alias -Name epub-to-mobi -Value ConvertTo-MobiFromEpub -ErrorAction SilentlyContinue
-    Set-Alias -Name epub-to-azw -Value ConvertTo-MobiFromEpub -ErrorAction SilentlyContinue
-    Set-Alias -Name epub-to-azw3 -Value ConvertTo-MobiFromEpub -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'epub-to-mobi' -Target 'ConvertTo-MobiFromEpub'
+Set-AgentModeAlias -Name 'epub-to-azw' -Target 'ConvertTo-MobiFromEpub'
+Set-AgentModeAlias -Name 'epub-to-azw3' -Target 'ConvertTo-MobiFromEpub'
 
 <#
 .SYNOPSIS
@@ -540,20 +505,10 @@ function ConvertTo-MobiFromMarkdown {
         Write-Error "Failed to convert Markdown to MOBI/AZW: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'markdown-to-mobi' -Target 'ConvertTo-MobiFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-mobi' -Target 'ConvertTo-MobiFromMarkdown'
-    Set-AgentModeAlias -Name 'markdown-to-azw' -Target 'ConvertTo-MobiFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-azw' -Target 'ConvertTo-MobiFromMarkdown'
-    Set-AgentModeAlias -Name 'markdown-to-azw3' -Target 'ConvertTo-MobiFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-azw3' -Target 'ConvertTo-MobiFromMarkdown'
-}
-else {
-    Set-Alias -Name markdown-to-mobi -Value ConvertTo-MobiFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-mobi -Value ConvertTo-MobiFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name markdown-to-azw -Value ConvertTo-MobiFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-azw -Value ConvertTo-MobiFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name markdown-to-azw3 -Value ConvertTo-MobiFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-azw3 -Value ConvertTo-MobiFromMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'markdown-to-mobi' -Target 'ConvertTo-MobiFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-mobi' -Target 'ConvertTo-MobiFromMarkdown'
+Set-AgentModeAlias -Name 'markdown-to-azw' -Target 'ConvertTo-MobiFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-azw' -Target 'ConvertTo-MobiFromMarkdown'
+Set-AgentModeAlias -Name 'markdown-to-azw3' -Target 'ConvertTo-MobiFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-azw3' -Target 'ConvertTo-MobiFromMarkdown'
 

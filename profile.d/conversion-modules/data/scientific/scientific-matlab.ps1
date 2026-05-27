@@ -276,9 +276,8 @@ function ConvertFrom-MatlabToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-MatlabToJson @PSBoundParameters
 }
-Set-Alias -Name matlab-to-json -Value ConvertFrom-MatlabToJson -ErrorAction SilentlyContinue
-Set-Alias -Name mat-to-json -Value ConvertFrom-MatlabToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'matlab-to-json' -Target 'ConvertFrom-MatlabToJson'
+Set-AgentModeAlias -Name 'mat-to-json' -Target 'ConvertFrom-MatlabToJson'
 # Convert JSON to MATLAB .mat
 <#
 .SYNOPSIS
@@ -296,9 +295,8 @@ function ConvertTo-MatlabFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-MatlabFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-matlab -Value ConvertTo-MatlabFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-mat -Value ConvertTo-MatlabFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-matlab' -Target 'ConvertTo-MatlabFromJson'
+Set-AgentModeAlias -Name 'json-to-mat' -Target 'ConvertTo-MatlabFromJson'
 # Convert MATLAB .mat to CSV
 <#
 .SYNOPSIS
@@ -319,6 +317,5 @@ function ConvertFrom-MatlabToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-MatlabToCsv @PSBoundParameters
 }
-Set-Alias -Name matlab-to-csv -Value ConvertFrom-MatlabToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name mat-to-csv -Value ConvertFrom-MatlabToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'matlab-to-csv' -Target 'ConvertFrom-MatlabToCsv'
+Set-AgentModeAlias -Name 'mat-to-csv' -Target 'ConvertFrom-MatlabToCsv'

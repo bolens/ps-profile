@@ -78,12 +78,7 @@ function ConvertFrom-OpusToWav {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'opus-to-wav' -Target 'ConvertFrom-OpusToWav'
-}
-else {
-    Set-Alias -Name opus-to-wav -Value ConvertFrom-OpusToWav -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'opus-to-wav' -Target 'ConvertFrom-OpusToWav'
 
 <#
 .SYNOPSIS
@@ -115,12 +110,7 @@ function ConvertFrom-OpusToMp3 {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'opus-to-mp3' -Target 'ConvertFrom-OpusToMp3'
-}
-else {
-    Set-Alias -Name opus-to-mp3 -Value ConvertFrom-OpusToMp3 -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'opus-to-mp3' -Target 'ConvertFrom-OpusToMp3'
 
 <#
 .SYNOPSIS
@@ -150,12 +140,7 @@ function ConvertFrom-OpusToFlac {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'opus-to-flac' -Target 'ConvertFrom-OpusToFlac'
-}
-else {
-    Set-Alias -Name opus-to-flac -Value ConvertFrom-OpusToFlac -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'opus-to-flac' -Target 'ConvertFrom-OpusToFlac'
 
 <#
 .SYNOPSIS
@@ -187,12 +172,7 @@ function ConvertFrom-OpusToOgg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'opus-to-ogg' -Target 'ConvertFrom-OpusToOgg'
-}
-else {
-    Set-Alias -Name opus-to-ogg -Value ConvertFrom-OpusToOgg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'opus-to-ogg' -Target 'ConvertFrom-OpusToOgg'
 
 <#
 .SYNOPSIS
@@ -224,10 +204,5 @@ function ConvertFrom-OpusToAac {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'opus-to-aac' -Target 'ConvertFrom-OpusToAac'
-}
-else {
-    Set-Alias -Name opus-to-aac -Value ConvertFrom-OpusToAac -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'opus-to-aac' -Target 'ConvertFrom-OpusToAac'
 

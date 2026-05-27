@@ -15,6 +15,21 @@
     pwsh -NoProfile -File scripts/utils/fragment/validate-fragment-dependencies.ps1
 #>
 
+# Import ExitCodes for standardized exit handling
+$_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
+$_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $_ewcLibPath)) {
+    $_ewcScriptsDir = Split-Path -Parent $_ewcScriptsDir
+    $_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+}
+if (Test-Path $_ewcLibPath) {
+    Import-Module $_ewcLibPath -DisableNameChecking -ErrorAction Stop
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+} else {
+    function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
+    enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
+}
+
 $ErrorActionPreference = 'Stop'
 
 # Parse debug level once at script start
@@ -33,7 +48,7 @@ for ($i = 1; $i -le 3; $i++) {
 $fragmentLoadingPath = Join-Path $repoRoot 'scripts' 'lib' 'fragment' 'FragmentLoading.psm1'
 if (-not (Test-Path $fragmentLoadingPath)) {
     Write-Error "FragmentLoading module not found at: $fragmentLoadingPath"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 Import-Module $fragmentLoadingPath -DisableNameChecking -ErrorAction Stop
 
@@ -75,7 +90,7 @@ catch {
     else {
         Write-Error "Failed to validate fragment dependencies: $($_.Exception.Message)"
     }
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 if ($result.Valid) {
@@ -112,7 +127,7 @@ if ($result.Valid) {
         Write-Host "  ... and $($sorted.Count - 20) more" -ForegroundColor Gray
     }
     
-    exit 0
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 else {
     Write-Host "❌ Dependency validation failed!" -ForegroundColor Red
@@ -134,6 +149,6 @@ else {
         Write-Host ""
     }
     
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 

@@ -35,7 +35,7 @@ function Initialize-FileConversion-ColumnarParquet {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.parquet' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             $nodeScript = @"
@@ -78,7 +78,7 @@ try {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.parquet$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             $nodeScript = @"
@@ -144,8 +144,7 @@ function ConvertTo-ParquetFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ParquetFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-parquet -Value ConvertTo-ParquetFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-parquet' -Target 'ConvertTo-ParquetFromJson'
 # Convert Parquet to JSON
 <#
 .SYNOPSIS
@@ -163,5 +162,4 @@ function ConvertFrom-ParquetToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ParquetToJson @PSBoundParameters
 }
-Set-Alias -Name parquet-to-json -Value ConvertFrom-ParquetToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parquet-to-json' -Target 'ConvertFrom-ParquetToJson'

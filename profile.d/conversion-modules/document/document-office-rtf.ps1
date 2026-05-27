@@ -22,7 +22,7 @@ function Initialize-FileConversion-DocumentOfficeRtf {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -51,7 +51,7 @@ function Initialize-FileConversion-DocumentOfficeRtf {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -80,7 +80,7 @@ function Initialize-FileConversion-DocumentOfficeRtf {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -109,7 +109,7 @@ function Initialize-FileConversion-DocumentOfficeRtf {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -138,7 +138,7 @@ function Initialize-FileConversion-DocumentOfficeRtf {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -167,7 +167,7 @@ function Initialize-FileConversion-DocumentOfficeRtf {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -196,7 +196,7 @@ function Initialize-FileConversion-DocumentOfficeRtf {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if (-not ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and (Test-Path -LiteralPath $InputPath))) { throw "Input file not found: $InputPath" }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -247,12 +247,7 @@ function ConvertFrom-RtfToMarkdown {
         Write-Error "Failed to convert RTF to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rtf-to-markdown' -Target 'ConvertFrom-RtfToMarkdown'
-}
-else {
-    Set-Alias -Name rtf-to-markdown -Value ConvertFrom-RtfToMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rtf-to-markdown' -Target 'ConvertFrom-RtfToMarkdown'
 
 <#
 .SYNOPSIS
@@ -281,12 +276,7 @@ function ConvertFrom-RtfToHtml {
         Write-Error "Failed to convert RTF to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rtf-to-html' -Target 'ConvertFrom-RtfToHtml'
-}
-else {
-    Set-Alias -Name rtf-to-html -Value ConvertFrom-RtfToHtml -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rtf-to-html' -Target 'ConvertFrom-RtfToHtml'
 
 <#
 .SYNOPSIS
@@ -315,12 +305,7 @@ function ConvertFrom-RtfToPdf {
         Write-Error "Failed to convert RTF to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rtf-to-pdf' -Target 'ConvertFrom-RtfToPdf'
-}
-else {
-    Set-Alias -Name rtf-to-pdf -Value ConvertFrom-RtfToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rtf-to-pdf' -Target 'ConvertFrom-RtfToPdf'
 
 <#
 .SYNOPSIS
@@ -349,12 +334,7 @@ function ConvertFrom-RtfToDocx {
         Write-Error "Failed to convert RTF to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rtf-to-docx' -Target 'ConvertFrom-RtfToDocx'
-}
-else {
-    Set-Alias -Name rtf-to-docx -Value ConvertFrom-RtfToDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rtf-to-docx' -Target 'ConvertFrom-RtfToDocx'
 
 <#
 .SYNOPSIS
@@ -383,14 +363,8 @@ function ConvertFrom-RtfToText {
         Write-Error "Failed to convert RTF to Plain Text: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rtf-to-text' -Target 'ConvertFrom-RtfToText'
-    Set-AgentModeAlias -Name 'rtf-to-txt' -Target 'ConvertFrom-RtfToText'
-}
-else {
-    Set-Alias -Name rtf-to-text -Value ConvertFrom-RtfToText -ErrorAction SilentlyContinue
-    Set-Alias -Name rtf-to-txt -Value ConvertFrom-RtfToText -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rtf-to-text' -Target 'ConvertFrom-RtfToText'
+Set-AgentModeAlias -Name 'rtf-to-txt' -Target 'ConvertFrom-RtfToText'
 
 <#
 .SYNOPSIS
@@ -419,14 +393,8 @@ function ConvertTo-RtfFromMarkdown {
         Write-Error "Failed to convert Markdown to RTF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'markdown-to-rtf' -Target 'ConvertTo-RtfFromMarkdown'
-    Set-AgentModeAlias -Name 'md-to-rtf' -Target 'ConvertTo-RtfFromMarkdown'
-}
-else {
-    Set-Alias -Name markdown-to-rtf -Value ConvertTo-RtfFromMarkdown -ErrorAction SilentlyContinue
-    Set-Alias -Name md-to-rtf -Value ConvertTo-RtfFromMarkdown -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'markdown-to-rtf' -Target 'ConvertTo-RtfFromMarkdown'
+Set-AgentModeAlias -Name 'md-to-rtf' -Target 'ConvertTo-RtfFromMarkdown'
 
 <#
 .SYNOPSIS
@@ -455,10 +423,5 @@ function ConvertTo-RtfFromDocx {
         Write-Error "Failed to convert DOCX to RTF: $_" -ErrorAction SilentlyContinue
     }
 }
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'docx-to-rtf' -Target 'ConvertTo-RtfFromDocx'
-}
-else {
-    Set-Alias -Name docx-to-rtf -Value ConvertTo-RtfFromDocx -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'docx-to-rtf' -Target 'ConvertTo-RtfFromDocx'
 

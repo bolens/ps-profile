@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & dart pub outdated
     }
-    Set-Alias -Name dart-outdated -Value Test-DartOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dart-outdated' -Target 'Test-DartOutdated'
     # Dart pub upgrade - update packages
     <#
     .SYNOPSIS
@@ -39,8 +38,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & dart pub upgrade
     }
-    Set-Alias -Name dart-upgrade -Value Update-DartPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dart-upgrade' -Target 'Update-DartPackages'
     # Dart pub add - add packages
     <#
     .SYNOPSIS
@@ -72,8 +70,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         & dart pub add @args @Packages
     }
-    Set-Alias -Name dart-add -Value Add-DartPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'dart-add' -Target 'Add-DartPackage'
     # Dart pub remove - remove packages
     <#
     .SYNOPSIS
@@ -95,7 +92,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & dart pub remove @Packages
     }
-    Set-Alias -Name dart-remove -Value Remove-DartPackage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'dart-remove' -Target 'Remove-DartPackage'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
@@ -124,8 +121,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & flutter pub outdated
     }
-    Set-Alias -Name flutter-outdated -Value Test-FlutterOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'flutter-outdated' -Target 'Test-FlutterOutdated'
     # Flutter pub upgrade - update packages
     <#
     .SYNOPSIS
@@ -139,8 +135,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & flutter pub upgrade
     }
-    Set-Alias -Name flutter-upgrade -Value Update-FlutterPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'flutter-upgrade' -Target 'Update-FlutterPackages'
     # Flutter pub add - add packages
     <#
     .SYNOPSIS
@@ -172,8 +167,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         & flutter pub add @args @Packages
     }
-    Set-Alias -Name flutter-add -Value Add-FlutterPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'flutter-add' -Target 'Add-FlutterPackage'
     # Flutter pub remove - remove packages
     <#
     .SYNOPSIS
@@ -195,7 +189,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & flutter pub remove @Packages
     }
-    Set-Alias -Name flutter-remove -Value Remove-FlutterPackage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'flutter-remove' -Target 'Remove-FlutterPackage'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

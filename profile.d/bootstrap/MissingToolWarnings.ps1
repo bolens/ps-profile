@@ -535,8 +535,8 @@ function global:Get-PreferenceAwareInstallHint {
             else { 'Windows' }
         }
         
-        $hasScoop = Get-Command scoop -ErrorAction SilentlyContinue
-        $hasBrew = Get-Command brew -ErrorAction SilentlyContinue
+        $hasScoop = Test-CachedCommand 'scoop'
+        $hasBrew = Test-CachedCommand 'brew'
         
         if ($ToolName -eq 'uv') {
             $runtimeInstall = switch ($platform) {
@@ -664,9 +664,9 @@ function global:Get-PreferenceAwareInstallHint {
             else { 'Windows' }
         }
         
-        $hasScoop = Get-Command scoop -ErrorAction SilentlyContinue
-        $hasWinget = Get-Command winget -ErrorAction SilentlyContinue
-        $hasBrew = Get-Command brew -ErrorAction SilentlyContinue
+        $hasScoop = Test-CachedCommand 'scoop'
+        $hasWinget = Test-CachedCommand 'winget'
+        $hasBrew = Test-CachedCommand 'brew'
         
         if ($ToolName -eq 'npm') {
             $runtimeInstall = switch ($platform) {
@@ -814,8 +814,8 @@ function global:Get-PreferenceAwareInstallHint {
             else { 'Windows' }
         }
         
-        $hasScoop = Get-Command scoop -ErrorAction SilentlyContinue
-        $hasBrew = Get-Command brew -ErrorAction SilentlyContinue
+        $hasScoop = Test-CachedCommand 'scoop'
+        $hasBrew = Test-CachedCommand 'brew'
         
         if ($pythonRuntime -ne 'auto' -and $pythonRuntime -in @('python', 'python3', 'py')) {
             $runtimeInstall = switch ($platform) {
@@ -874,8 +874,8 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         # Check for cargo-binstall (faster binary installer)
-        $hasBinstall = Get-Command cargo-binstall -ErrorAction SilentlyContinue
-        $hasCargo = Get-Command cargo -ErrorAction SilentlyContinue
+        $hasBinstall = Test-CachedCommand 'cargo-binstall'
+        $hasCargo = Test-CachedCommand 'cargo'
         
         if ($preference -eq 'cargo-binstall' -and $hasBinstall) {
             return "Install with: cargo-binstall $ToolName"
@@ -917,7 +917,7 @@ function global:Get-PreferenceAwareInstallHint {
             'auto'
         }
         
-        $hasGo = Get-Command go -ErrorAction SilentlyContinue
+        $hasGo = Test-CachedCommand 'go'
         
         if ($hasGo) {
             if ($preference -eq 'go-install') {
@@ -955,9 +955,9 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         # Check availability
-        $hasMaven = Get-Command mvn -ErrorAction SilentlyContinue
-        $hasGradle = Get-Command gradle -ErrorAction SilentlyContinue
-        $hasSbt = Get-Command sbt -ErrorAction SilentlyContinue
+        $hasMaven = Test-CachedCommand 'mvn'
+        $hasGradle = Test-CachedCommand 'gradle'
+        $hasSbt = Test-CachedCommand 'sbt'
         
         if ($preference -eq 'maven' -and $hasMaven) {
             return "Install with: mvn install (or: scoop install maven)"
@@ -1083,9 +1083,9 @@ function global:Get-PreferenceAwareInstallHint {
             'auto'
         }
         
-        $hasComposer = Get-Command composer -ErrorAction SilentlyContinue
-        $hasPecl = Get-Command pecl -ErrorAction SilentlyContinue
-        $hasPear = Get-Command pear -ErrorAction SilentlyContinue
+        $hasComposer = Test-CachedCommand 'composer'
+        $hasPecl = Test-CachedCommand 'pecl'
+        $hasPear = Test-CachedCommand 'pear'
         
         if ($preference -eq 'composer' -and $hasComposer) {
             return "Install with: composer require $ToolName"
@@ -1133,8 +1133,8 @@ function global:Get-PreferenceAwareInstallHint {
             'auto'
         }
         
-        $hasDotnet = Get-Command dotnet -ErrorAction SilentlyContinue
-        $hasNuget = Get-Command nuget -ErrorAction SilentlyContinue
+        $hasDotnet = Test-CachedCommand 'dotnet'
+        $hasNuget = Test-CachedCommand 'nuget'
         
         if ($preference -eq 'dotnet' -and $hasDotnet) {
             return "Install with: dotnet add package $ToolName"
@@ -1176,8 +1176,8 @@ function global:Get-PreferenceAwareInstallHint {
             'auto'
         }
         
-        $hasFlutter = Get-Command flutter -ErrorAction SilentlyContinue
-        $hasDart = Get-Command dart -ErrorAction SilentlyContinue
+        $hasFlutter = Test-CachedCommand 'flutter'
+        $hasDart = Test-CachedCommand 'dart'
         
         if ($preference -eq 'flutter' -and $hasFlutter) {
             return "Install with: flutter pub add $ToolName"
@@ -1219,8 +1219,8 @@ function global:Get-PreferenceAwareInstallHint {
             'auto'
         }
         
-        $hasMix = Get-Command mix -ErrorAction SilentlyContinue
-        $hasHex = Get-Command hex -ErrorAction SilentlyContinue
+        $hasMix = Test-CachedCommand 'mix'
+        $hasHex = Test-CachedCommand 'hex'
         
         if ($preference -eq 'mix' -and $hasMix) {
             return "Install with: mix deps.get (or: mix archive.install hex $ToolName)"
@@ -1269,9 +1269,9 @@ function global:Get-PreferenceAwareInstallHint {
     
     # Fallback if function fails - use simple detection
     $platform = $fallbackInfo.Platform
-    $hasScoop = Get-Command scoop -ErrorAction SilentlyContinue
-    $hasWinget = Get-Command winget -ErrorAction SilentlyContinue
-    $hasChoco = Get-Command choco -ErrorAction SilentlyContinue
+    $hasScoop = Test-CachedCommand 'scoop'
+    $hasWinget = Test-CachedCommand 'winget'
+    $hasChoco = Test-CachedCommand 'choco'
     
     $installCmd = switch ($platform) {
         'Windows' {
@@ -1289,10 +1289,10 @@ function global:Get-PreferenceAwareInstallHint {
             }
         }
         'Linux' {
-            $hasApt = Get-Command apt -ErrorAction SilentlyContinue
-            $hasDnf = Get-Command dnf -ErrorAction SilentlyContinue
-            $hasYum = Get-Command yum -ErrorAction SilentlyContinue
-            $hasPacman = Get-Command pacman -ErrorAction SilentlyContinue
+            $hasApt = Test-CachedCommand 'apt'
+            $hasDnf = Test-CachedCommand 'dnf'
+            $hasYum = Test-CachedCommand 'yum'
+            $hasPacman = Test-CachedCommand 'pacman'
             
             if ($hasApt) {
                 "sudo apt install $ToolName"
@@ -1314,7 +1314,7 @@ function global:Get-PreferenceAwareInstallHint {
             }
         }
         'macOS' {
-            $hasBrew = Get-Command brew -ErrorAction SilentlyContinue
+            $hasBrew = Test-CachedCommand 'brew'
             if ($hasBrew) {
                 "brew install $ToolName"
             }
@@ -1521,22 +1521,22 @@ function global:Get-ToolSpecificInstallMethod {
         if ($platformMethods.ContainsKey($prefLower)) {
             $method = $platformMethods[$prefLower]
             # Check if the method is available
-            if ($prefLower -eq 'scoop' -and (Get-Command scoop -ErrorAction SilentlyContinue)) {
+            if ($prefLower -eq 'scoop' -and (Test-CachedCommand 'scoop')) {
                 return $method
             }
-            elseif ($prefLower -eq 'npm' -and (Get-Command npm -ErrorAction SilentlyContinue)) {
+            elseif ($prefLower -eq 'npm' -and (Test-CachedCommand 'npm')) {
                 return $method
             }
-            elseif ($prefLower -eq 'pip' -and (Get-Command pip -ErrorAction SilentlyContinue)) {
+            elseif ($prefLower -eq 'pip' -and (Test-CachedCommand 'pip')) {
                 return $method
             }
-            elseif ($prefLower -eq 'winget' -and (Get-Command winget -ErrorAction SilentlyContinue)) {
+            elseif ($prefLower -eq 'winget' -and (Test-CachedCommand 'winget')) {
                 return $method
             }
-            elseif ($prefLower -eq 'homebrew' -and (Get-Command brew -ErrorAction SilentlyContinue)) {
+            elseif ($prefLower -eq 'homebrew' -and (Test-CachedCommand 'brew')) {
                 return $method
             }
-            elseif ($prefLower -eq 'cargo' -and (Get-Command cargo -ErrorAction SilentlyContinue)) {
+            elseif ($prefLower -eq 'cargo' -and (Test-CachedCommand 'cargo')) {
                 return $method
             }
             elseif ($prefLower -eq 'curl') {

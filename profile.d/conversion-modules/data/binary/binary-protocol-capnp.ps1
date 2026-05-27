@@ -40,7 +40,7 @@ function Initialize-FileConversion-BinaryProtocolCapnp {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and -not (Test-Path -LiteralPath $InputPath)) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.capnp' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Cap'n Proto conversions."
             }
             if (-not $SchemaPath) {
@@ -101,7 +101,7 @@ try {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and -not (Test-Path -LiteralPath $InputPath)) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.(capnp|cap)$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Cap'n Proto conversions."
             }
             if (-not $SchemaPath) {
@@ -175,9 +175,8 @@ function ConvertTo-CapnpFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-CapnpFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-capnp -Value ConvertTo-CapnpFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-capnproto -Value ConvertTo-CapnpFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-capnp' -Target 'ConvertTo-CapnpFromJson'
+Set-AgentModeAlias -Name 'json-to-capnproto' -Target 'ConvertTo-CapnpFromJson'
 # Convert Cap'n Proto to JSON
 <#
 .SYNOPSIS
@@ -198,6 +197,5 @@ function ConvertFrom-CapnpToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-CapnpToJson @PSBoundParameters
 }
-Set-Alias -Name capnp-to-json -Value ConvertFrom-CapnpToJson -ErrorAction SilentlyContinue
-Set-Alias -Name capnproto-to-json -Value ConvertFrom-CapnpToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'capnp-to-json' -Target 'ConvertFrom-CapnpToJson'
+Set-AgentModeAlias -Name 'capnproto-to-json' -Target 'ConvertFrom-CapnpToJson'

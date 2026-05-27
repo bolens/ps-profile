@@ -26,7 +26,7 @@ function Initialize-FileConversion-DocumentCommonDocx {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -61,7 +61,7 @@ function Initialize-FileConversion-DocumentCommonDocx {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -96,7 +96,7 @@ function Initialize-FileConversion-DocumentCommonDocx {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -131,7 +131,7 @@ function Initialize-FileConversion-DocumentCommonDocx {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -182,8 +182,7 @@ function ConvertFrom-DocxToMarkdown {
         Write-Error "Failed to convert DOCX to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name docx-to-markdown -Value ConvertFrom-DocxToMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'docx-to-markdown' -Target 'ConvertFrom-DocxToMarkdown'
 # Convert DOCX to HTML
 <#
 .SYNOPSIS
@@ -210,8 +209,7 @@ function ConvertTo-HtmlFromDocx {
         Write-Error "Failed to convert DOCX to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name docx-to-html -Value ConvertTo-HtmlFromDocx -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'docx-to-html' -Target 'ConvertTo-HtmlFromDocx'
 # Convert DOCX to PDF
 <#
 .SYNOPSIS
@@ -238,8 +236,7 @@ function ConvertTo-PdfFromDocx {
         Write-Error "Failed to convert DOCX to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name docx-to-pdf -Value ConvertTo-PdfFromDocx -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'docx-to-pdf' -Target 'ConvertTo-PdfFromDocx'
 # Convert DOCX to LaTeX
 <#
 .SYNOPSIS
@@ -266,5 +263,4 @@ function ConvertTo-LaTeXFromDocx {
         Write-Error "Failed to convert DOCX to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name docx-to-latex -Value ConvertTo-LaTeXFromDocx -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'docx-to-latex' -Target 'ConvertTo-LaTeXFromDocx'

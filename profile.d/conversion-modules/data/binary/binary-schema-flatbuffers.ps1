@@ -37,7 +37,7 @@ function Initialize-FileConversion-BinarySchemaFlatBuffers {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.fb' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use FlatBuffers conversions."
             }
             if (-not $SchemaPath) {
@@ -83,7 +83,7 @@ try {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.fb$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use FlatBuffers conversions."
             }
             if (-not $SchemaPath) {
@@ -144,9 +144,8 @@ function ConvertTo-FlatBuffersFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-FlatBuffersFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-flatbuffers -Value ConvertTo-FlatBuffersFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-fb -Value ConvertTo-FlatBuffersFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-flatbuffers' -Target 'ConvertTo-FlatBuffersFromJson'
+Set-AgentModeAlias -Name 'json-to-fb' -Target 'ConvertTo-FlatBuffersFromJson'
 # Convert FlatBuffers to JSON
 <#
 .SYNOPSIS
@@ -167,6 +166,5 @@ function ConvertFrom-FlatBuffersToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-FlatBuffersToJson @PSBoundParameters
 }
-Set-Alias -Name flatbuffers-to-json -Value ConvertFrom-FlatBuffersToJson -ErrorAction SilentlyContinue
-Set-Alias -Name fb-to-json -Value ConvertFrom-FlatBuffersToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'flatbuffers-to-json' -Target 'ConvertFrom-FlatBuffersToJson'
+Set-AgentModeAlias -Name 'fb-to-json' -Target 'ConvertFrom-FlatBuffersToJson'

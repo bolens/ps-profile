@@ -87,7 +87,7 @@ if ($pathResolutionPath -and -not [string]::IsNullOrWhiteSpace($pathResolutionPa
     else {
         Write-Error $errorMsg
     }
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 $pathResolutionImported = $false
@@ -127,7 +127,7 @@ if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) 
     else {
         Write-Error $errorMsg
     }
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 try {
@@ -406,11 +406,11 @@ if (-not $RepoRoot) {
                 Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
             }
             catch {
-                exit 2
+                Exit-WithCode -ExitCode [ExitCode]::SetupError
             }
         }
         else {
-            exit 2
+            Exit-WithCode -ExitCode [ExitCode]::SetupError
         }
     }
 }
@@ -465,11 +465,11 @@ foreach ($moduleFile in ($requiredModules + $optionalModules)) {
                     Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Required module not found: $moduleName"
                 }
                 catch {
-                    exit 2
+                    Exit-WithCode -ExitCode [ExitCode]::SetupError
                 }
             }
             else {
-                exit 2
+                Exit-WithCode -ExitCode [ExitCode]::SetupError
             }
         }
         else {
@@ -510,11 +510,11 @@ foreach ($moduleFile in ($requiredModules + $optionalModules)) {
                     Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
                 }
                 catch {
-                    exit 2
+                    Exit-WithCode -ExitCode [ExitCode]::SetupError
                 }
             }
             else {
-                exit 2
+                Exit-WithCode -ExitCode [ExitCode]::SetupError
             }
         }
         else {
@@ -541,11 +541,11 @@ foreach ($moduleFile in ($requiredModules + $optionalModules)) {
                         Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
                     }
                     catch {
-                        exit 2
+                        Exit-WithCode -ExitCode [ExitCode]::SetupError
                     }
                 }
                 else {
-                    exit 2
+                    Exit-WithCode -ExitCode [ExitCode]::SetupError
                 }
             }
         }
@@ -605,11 +605,11 @@ if ($Generate) {
                 Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
             }
             catch {
-                exit 2
+                Exit-WithCode -ExitCode [ExitCode]::SetupError
             }
         }
         else {
-            exit 2
+            Exit-WithCode -ExitCode [ExitCode]::SetupError
         }
     }
 }
@@ -645,11 +645,11 @@ if (-not (Test-Path -LiteralPath $RepoRoot)) {
             Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
         }
         catch {
-            exit 2
+            Exit-WithCode -ExitCode [ExitCode]::SetupError
         }
     }
     else {
-        exit 2
+        Exit-WithCode -ExitCode [ExitCode]::SetupError
     }
 }
 
@@ -785,11 +785,11 @@ catch {
             Exit-WithCode -ExitCode [ExitCode]::RuntimeError -ErrorRecord $_
         }
         catch {
-            exit 3
+            Exit-WithCode -ExitCode [ExitCode]::OtherError
         }
     }
     else {
-        exit 3
+        Exit-WithCode -ExitCode [ExitCode]::OtherError
     }
 }
 
@@ -919,11 +919,11 @@ if ($Generate) {
                 Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
             }
             catch {
-                exit 2
+                Exit-WithCode -ExitCode [ExitCode]::SetupError
             }
         }
         else {
-            exit 2
+            Exit-WithCode -ExitCode [ExitCode]::SetupError
         }
     }
     Write-Host "Generating missing tasks..." -ForegroundColor Yellow
@@ -1090,11 +1090,11 @@ if ($hasMissingTasks) {
             Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Task parity check found differences"
         }
         catch {
-            exit 1
+            Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
         }
     }
     else {
-        exit 1
+        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
     }
 }
 else {
@@ -1108,10 +1108,10 @@ else {
             Exit-WithCode -ExitCode [ExitCode]::Success
         }
         catch {
-            exit 0
+            Exit-WithCode -ExitCode [ExitCode]::Success
         }
     }
     else {
-        exit 0
+        Exit-WithCode -ExitCode [ExitCode]::Success
     }
 }

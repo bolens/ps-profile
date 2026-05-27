@@ -73,12 +73,7 @@ function ConvertFrom-BmpToPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'bmp-to-png' -Target 'ConvertFrom-BmpToPng'
-}
-else {
-    Set-Alias -Name bmp-to-png -Value ConvertFrom-BmpToPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'bmp-to-png' -Target 'ConvertFrom-BmpToPng'
 
 <#
 .SYNOPSIS
@@ -110,14 +105,8 @@ function ConvertFrom-BmpToJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'bmp-to-jpeg' -Target 'ConvertFrom-BmpToJpeg'
-    Set-AgentModeAlias -Name 'bmp-to-jpg' -Target 'ConvertFrom-BmpToJpeg'
-}
-else {
-    Set-Alias -Name bmp-to-jpeg -Value ConvertFrom-BmpToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name bmp-to-jpg -Value ConvertFrom-BmpToJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'bmp-to-jpeg' -Target 'ConvertFrom-BmpToJpeg'
+Set-AgentModeAlias -Name 'bmp-to-jpg' -Target 'ConvertFrom-BmpToJpeg'
 
 <#
 .SYNOPSIS
@@ -147,12 +136,7 @@ function ConvertTo-BmpFromPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'png-to-bmp' -Target 'ConvertTo-BmpFromPng'
-}
-else {
-    Set-Alias -Name png-to-bmp -Value ConvertTo-BmpFromPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'png-to-bmp' -Target 'ConvertTo-BmpFromPng'
 
 <#
 .SYNOPSIS
@@ -182,12 +166,6 @@ function ConvertTo-BmpFromJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jpeg-to-bmp' -Target 'ConvertTo-BmpFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-bmp' -Target 'ConvertTo-BmpFromJpeg'
-}
-else {
-    Set-Alias -Name jpeg-to-bmp -Value ConvertTo-BmpFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-bmp -Value ConvertTo-BmpFromJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jpeg-to-bmp' -Target 'ConvertTo-BmpFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-bmp' -Target 'ConvertTo-BmpFromJpeg'
 

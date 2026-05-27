@@ -186,8 +186,7 @@ function Get-Crc32 {
         }
     }
 }
-Set-Alias -Name crc32 -Value Get-Crc32 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'crc32' -Target 'Get-Crc32'
 # Calculate Adler32 checksum
 <#
 .SYNOPSIS
@@ -239,8 +238,7 @@ function Get-Adler32 {
         }
     }
 }
-Set-Alias -Name adler32 -Value Get-Adler32 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'adler32' -Target 'Get-Adler32'
 # Calculate checksum (generic)
 <#
 .SYNOPSIS
@@ -295,5 +293,4 @@ function Get-Checksum {
         }
     }
 }
-Set-Alias -Name checksum -Value Get-Checksum -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'checksum' -Target 'Get-Checksum'

@@ -157,15 +157,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Install-RustBinary -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Install-RustBinary' -Body ${function:Install-RustBinary}
-    }
+    Set-AgentModeFunction -Name 'Install-RustBinary' -Body ${function:Install-RustBinary}
     if (-not (Get-Alias cargo-binstall -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'cargo-binstall' -Target 'Install-RustBinary'
         }
         else {
-            Set-Alias -Name 'cargo-binstall' -Value 'Install-RustBinary' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'cargo-binstall' -Target 'Install-RustBinary'
         }
     }
 
@@ -276,15 +274,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Watch-RustProject -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Watch-RustProject' -Body ${function:Watch-RustProject}
-    }
+    Set-AgentModeFunction -Name 'Watch-RustProject' -Body ${function:Watch-RustProject}
     if (-not (Get-Alias cargo-watch -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'cargo-watch' -Target 'Watch-RustProject'
         }
         else {
-            Set-Alias -Name 'cargo-watch' -Value 'Watch-RustProject' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'cargo-watch' -Target 'Watch-RustProject'
         }
     }
 
@@ -373,15 +369,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Audit-RustProject -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Audit-RustProject' -Body ${function:Audit-RustProject}
-    }
+    Set-AgentModeFunction -Name 'Audit-RustProject' -Body ${function:Audit-RustProject}
     if (-not (Get-Alias cargo-audit -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'cargo-audit' -Target 'Audit-RustProject'
         }
         else {
-            Set-Alias -Name 'cargo-audit' -Value 'Audit-RustProject' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'cargo-audit' -Target 'Audit-RustProject'
         }
     }
 
@@ -470,15 +464,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Test-RustOutdated -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Test-RustOutdated' -Body ${function:Test-RustOutdated}
-    }
+    Set-AgentModeFunction -Name 'Test-RustOutdated' -Body ${function:Test-RustOutdated}
     if (-not (Get-Alias cargo-outdated -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'cargo-outdated' -Target 'Test-RustOutdated'
         }
         else {
-            Set-Alias -Name 'cargo-outdated' -Value 'Test-RustOutdated' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'cargo-outdated' -Target 'Test-RustOutdated'
         }
     }
 
@@ -573,15 +565,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Build-RustRelease -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Build-RustRelease' -Body ${function:Build-RustRelease}
-    }
+    Set-AgentModeFunction -Name 'Build-RustRelease' -Body ${function:Build-RustRelease}
     if (-not (Get-Alias cargo-build-release -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'cargo-build-release' -Target 'Build-RustRelease'
         }
         else {
-            Set-Alias -Name 'cargo-build-release' -Value 'Build-RustRelease' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'cargo-build-release' -Target 'Build-RustRelease'
         }
     }
 
@@ -676,15 +666,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Update-RustDependencies -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Update-RustDependencies' -Body ${function:Update-RustDependencies}
-    }
+    Set-AgentModeFunction -Name 'Update-RustDependencies' -Body ${function:Update-RustDependencies}
     if (-not (Get-Alias cargo-update-deps -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'cargo-update-deps' -Target 'Update-RustDependencies'
         }
         else {
-            Set-Alias -Name 'cargo-update-deps' -Value 'Update-RustDependencies' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'cargo-update-deps' -Target 'Update-RustDependencies'
         }
     }
 
@@ -802,17 +790,15 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Clear-CargoCache -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Clear-CargoCache' -Body ${function:Clear-CargoCache}
-    }
+    Set-AgentModeFunction -Name 'Clear-CargoCache' -Body ${function:Clear-CargoCache}
     if (-not (Get-Alias cargo-cleanup -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'cargo-cleanup' -Target 'Clear-CargoCache'
             Set-AgentModeAlias -Name 'cargo-clean' -Target 'Clear-CargoCache'
         }
         else {
-            Set-Alias -Name 'cargo-cleanup' -Value 'Clear-CargoCache' -ErrorAction SilentlyContinue
-            Set-Alias -Name 'cargo-clean' -Value 'Clear-CargoCache' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'cargo-cleanup' -Target 'Clear-CargoCache'
+            Set-AgentModeAlias -Name 'cargo-clean' -Target 'Clear-CargoCache'
         }
     }
 

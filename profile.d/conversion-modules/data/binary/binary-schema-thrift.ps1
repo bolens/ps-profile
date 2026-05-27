@@ -37,7 +37,7 @@ function Initialize-FileConversion-BinarySchemaThrift {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.thrift' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Thrift conversions."
             }
             if (-not $SchemaPath) {
@@ -83,7 +83,7 @@ try {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.thrift$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Thrift conversions."
             }
             if (-not $SchemaPath) {
@@ -144,8 +144,7 @@ function ConvertTo-ThriftFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ThriftFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-thrift -Value ConvertTo-ThriftFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-thrift' -Target 'ConvertTo-ThriftFromJson'
 # Convert Thrift to JSON
 <#
 .SYNOPSIS
@@ -166,5 +165,4 @@ function ConvertFrom-ThriftToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ThriftToJson @PSBoundParameters
 }
-Set-Alias -Name thrift-to-json -Value ConvertFrom-ThriftToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'thrift-to-json' -Target 'ConvertFrom-ThriftToJson'

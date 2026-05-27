@@ -27,7 +27,7 @@ function Initialize-DevTools-QrCode-Formats {
             [int]$Margin = 4
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use QR code generation."
             }
             $nodeScript = @"
@@ -93,7 +93,7 @@ try {
             [switch]$Small
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use QR code generation."
             }
             $nodeScript = @"
@@ -154,7 +154,7 @@ try {
             [int]$Margin = 4
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use QR code generation."
             }
             $nodeScript = @"
@@ -316,7 +316,6 @@ function New-QrCodeDataUri {
 }
 
 # Aliases
-Set-Alias -Name qrcode-svg -Value New-QrCodeSvg -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-term -Value New-QrCodeTerminal -ErrorAction SilentlyContinue
-Set-Alias -Name qrcode-uri -Value New-QrCodeDataUri -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'qrcode-svg' -Target 'New-QrCodeSvg'
+Set-AgentModeAlias -Name 'qrcode-term' -Target 'New-QrCodeTerminal'
+Set-AgentModeAlias -Name 'qrcode-uri' -Target 'New-QrCodeDataUri'

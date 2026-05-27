@@ -31,7 +31,7 @@ if (-not (Test-Path Function:Start-ContainerCompose)) {
             }
         }
     }
-    Set-Alias -Name dcu -Value Start-ContainerCompose -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'dcu' -Target 'Start-ContainerCompose'
 }
 
 # docker-compose down
@@ -62,7 +62,7 @@ if (-not (Test-Path Function:Stop-ContainerCompose)) {
             }
         }
     }
-    Set-Alias -Name dcd -Value Stop-ContainerCompose -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'dcd' -Target 'Stop-ContainerCompose'
 }
 
 # docker-compose logs -f
@@ -93,7 +93,7 @@ if (-not (Test-Path Function:Get-ContainerComposeLogs)) {
             }
         }
     }
-    Set-Alias -Name dcl -Value Get-ContainerComposeLogs -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'dcl' -Target 'Get-ContainerComposeLogs'
 }
 
 # prune system for whichever engine
@@ -120,6 +120,6 @@ if (-not (Test-Path Function:Clear-ContainerSystem)) {
             }
         }
     }
-    Set-Alias -Name dprune -Value Clear-ContainerSystem -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'dprune' -Target 'Clear-ContainerSystem'
 }
 

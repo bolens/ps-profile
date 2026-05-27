@@ -31,7 +31,7 @@ function Initialize-FileConversion-BinarySchemaAvro {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.avro' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Avro conversions."
             }
             if (-not $SchemaPath) {
@@ -81,7 +81,7 @@ try {
         param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.avro$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Avro conversions."
             }
             if (-not $SchemaPath) {
@@ -134,7 +134,7 @@ try {
             if (-not $InputPath) { throw "InputPath parameter is required" }
             if ($InputPath -and -not [string]::IsNullOrWhiteSpace($InputPath) -and -not (Test-Path -LiteralPath $InputPath)) { throw "Input file not found: $InputPath" }
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.avro$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Avro conversions."
             }
             if (-not $WriterSchemaPath -and -not $ReaderSchemaPath) {
@@ -214,7 +214,7 @@ try {
     Set-Item -Path Function:Global:_Test-AvroSchemaCompatibility -Value {
         param([string]$WriterSchemaPath, [string]$ReaderSchemaPath)
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Avro schema compatibility checks."
             }
             if (-not $WriterSchemaPath -or -not $ReaderSchemaPath) {
@@ -305,8 +305,7 @@ function ConvertTo-AvroFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-AvroFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-avro -Value ConvertTo-AvroFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-avro' -Target 'ConvertTo-AvroFromJson'
 # Convert Avro to JSON
 <#
 .SYNOPSIS
@@ -326,8 +325,7 @@ function ConvertFrom-AvroToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-AvroToJson @PSBoundParameters
 }
-Set-Alias -Name avro-to-json -Value ConvertFrom-AvroToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'avro-to-json' -Target 'ConvertFrom-AvroToJson'
 # Convert Avro to JSON with Schema Evolution
 <#
 .SYNOPSIS
@@ -351,8 +349,7 @@ function ConvertFrom-AvroToJsonWithSchemaEvolution {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-AvroToJsonWithSchemaEvolution @PSBoundParameters
 }
-Set-Alias -Name avro-to-json-evolve -Value ConvertFrom-AvroToJsonWithSchemaEvolution -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'avro-to-json-evolve' -Target 'ConvertFrom-AvroToJsonWithSchemaEvolution'
 # Test Avro Schema Compatibility
 <#
 .SYNOPSIS
@@ -377,5 +374,4 @@ function Test-AvroSchemaCompatibility {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _Test-AvroSchemaCompatibility @PSBoundParameters
 }
-Set-Alias -Name avro-schema-compat -Value Test-AvroSchemaCompatibility -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'avro-schema-compat' -Target 'Test-AvroSchemaCompatibility'

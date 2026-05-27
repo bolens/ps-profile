@@ -84,12 +84,7 @@ function ConvertFrom-WebpToPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'webp-to-png' -Target 'ConvertFrom-WebpToPng'
-}
-else {
-    Set-Alias -Name webp-to-png -Value ConvertFrom-WebpToPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'webp-to-png' -Target 'ConvertFrom-WebpToPng'
 
 <#
 .SYNOPSIS
@@ -121,14 +116,8 @@ function ConvertFrom-WebpToJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'webp-to-jpeg' -Target 'ConvertFrom-WebpToJpeg'
-    Set-AgentModeAlias -Name 'webp-to-jpg' -Target 'ConvertFrom-WebpToJpeg'
-}
-else {
-    Set-Alias -Name webp-to-jpeg -Value ConvertFrom-WebpToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name webp-to-jpg -Value ConvertFrom-WebpToJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'webp-to-jpeg' -Target 'ConvertFrom-WebpToJpeg'
+Set-AgentModeAlias -Name 'webp-to-jpg' -Target 'ConvertFrom-WebpToJpeg'
 
 <#
 .SYNOPSIS
@@ -158,12 +147,7 @@ function ConvertFrom-WebpToGif {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'webp-to-gif' -Target 'ConvertFrom-WebpToGif'
-}
-else {
-    Set-Alias -Name webp-to-gif -Value ConvertFrom-WebpToGif -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'webp-to-gif' -Target 'ConvertFrom-WebpToGif'
 
 <#
 .SYNOPSIS
@@ -195,12 +179,7 @@ function ConvertTo-WebpFromPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'png-to-webp' -Target 'ConvertTo-WebpFromPng'
-}
-else {
-    Set-Alias -Name png-to-webp -Value ConvertTo-WebpFromPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'png-to-webp' -Target 'ConvertTo-WebpFromPng'
 
 <#
 .SYNOPSIS
@@ -232,14 +211,8 @@ function ConvertTo-WebpFromJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jpeg-to-webp' -Target 'ConvertTo-WebpFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-webp' -Target 'ConvertTo-WebpFromJpeg'
-}
-else {
-    Set-Alias -Name jpeg-to-webp -Value ConvertTo-WebpFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-webp -Value ConvertTo-WebpFromJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jpeg-to-webp' -Target 'ConvertTo-WebpFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-webp' -Target 'ConvertTo-WebpFromJpeg'
 
 <#
 .SYNOPSIS
@@ -271,10 +244,5 @@ function ConvertTo-WebpFromGif {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'gif-to-webp' -Target 'ConvertTo-WebpFromGif'
-}
-else {
-    Set-Alias -Name gif-to-webp -Value ConvertTo-WebpFromGif -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'gif-to-webp' -Target 'ConvertTo-WebpFromGif'
 

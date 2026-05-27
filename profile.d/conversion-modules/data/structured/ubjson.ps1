@@ -47,7 +47,7 @@ function Initialize-FileConversion-Ubjson {
             }
             
             # Try Node.js with ubjson package
-            if (Get-Command node -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'node') {
                 $nodeScript = @"
 try {
     const fs = require('fs');
@@ -112,7 +112,7 @@ try {
             }
             
             # Try Node.js with ubjson package
-            if (Get-Command node -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'node') {
                 $nodeScript = @"
 try {
     const fs = require('fs');
@@ -189,8 +189,7 @@ Set-Item -Path Function:Global:ConvertFrom-UbjsonToJson -Value {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-UbjsonToJson @PSBoundParameters
 } -Force
-Set-Alias -Name ubjson-to-json -Value ConvertFrom-UbjsonToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ubjson-to-json' -Target 'ConvertFrom-UbjsonToJson'
 # Convert JSON to UBJSON
 <#
 .SYNOPSIS
@@ -216,5 +215,4 @@ Set-Item -Path Function:Global:ConvertTo-UbjsonFromJson -Value {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-UbjsonFromJson @PSBoundParameters
 } -Force
-Set-Alias -Name json-to-ubjson -Value ConvertTo-UbjsonFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-ubjson' -Target 'ConvertTo-UbjsonFromJson'

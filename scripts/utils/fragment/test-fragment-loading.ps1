@@ -15,6 +15,21 @@
     pwsh -NoProfile -File scripts/utils/fragment/test-fragment-loading.ps1
 #>
 
+# Import ExitCodes for standardized exit handling
+$_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
+$_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path $_ewcLibPath)) {
+    $_ewcScriptsDir = Split-Path -Parent $_ewcScriptsDir
+    $_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
+}
+if (Test-Path $_ewcLibPath) {
+    Import-Module $_ewcLibPath -DisableNameChecking -ErrorAction Stop
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+} else {
+    function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
+    enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
+}
+
 $ErrorActionPreference = 'Stop'
 
 # Parse debug level once at script start
@@ -154,11 +169,11 @@ if ($failures.Count -gt 0) {
     foreach ($failure in $failures) {
         Write-Host "  - $failure" -ForegroundColor Red
     }
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 else {
     Write-Host ""
     Write-Host "✅ All fragments loaded successfully!" -ForegroundColor Green
-    exit 0
+    Exit-WithCode -ExitCode [ExitCode]::Success
 }
 

@@ -132,7 +132,7 @@ Review and disable features you rarely use:
   "disabled": [
     "performance-insights", // Only needed for profiling
     "system-monitor", // Only needed for monitoring
-    "enhanced-history", // Can use basic history
+    "history-enhanced", // Can use basic history
     "error-handling", // If you don't need enhanced error handling
     "diagnostics" // Only needed for diagnostics
   ]
@@ -224,7 +224,7 @@ $global:PSProfileFragmentTimes |
   "disabled": [
     "performance-insights",
     "system-monitor",
-    "enhanced-history",
+    "history-enhanced",
     "diagnostics",
     "error-handling"
   ],

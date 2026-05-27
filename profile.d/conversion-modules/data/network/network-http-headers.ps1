@@ -211,8 +211,7 @@ function Parse-HttpHeaders {
         }
     }
 }
-Set-Alias -Name parse-headers -Value Parse-HttpHeaders -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parse-headers' -Target 'Parse-HttpHeaders'
 # Build HTTP headers
 <#
 .SYNOPSIS
@@ -251,8 +250,7 @@ function Build-HttpHeaders {
         Write-Error "Failed to build HTTP headers: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name build-headers -Value Build-HttpHeaders -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'build-headers' -Target 'Build-HttpHeaders'
 # Convert HTTP headers to JSON
 <#
 .SYNOPSIS
@@ -285,8 +283,7 @@ function ConvertFrom-HttpHeadersToJson {
         Write-Error "Failed to convert HTTP headers to JSON: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name headers-to-json -Value ConvertFrom-HttpHeadersToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'headers-to-json' -Target 'ConvertFrom-HttpHeadersToJson'
 # Convert JSON to HTTP headers
 <#
 .SYNOPSIS
@@ -319,5 +316,4 @@ function ConvertTo-HttpHeadersFromJson {
         Write-Error "Failed to convert JSON to HTTP headers: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name json-to-headers -Value ConvertTo-HttpHeadersFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-headers' -Target 'ConvertTo-HttpHeadersFromJson'

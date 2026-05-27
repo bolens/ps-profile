@@ -73,12 +73,7 @@ function ConvertFrom-IcoToPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ico-to-png' -Target 'ConvertFrom-IcoToPng'
-}
-else {
-    Set-Alias -Name ico-to-png -Value ConvertFrom-IcoToPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ico-to-png' -Target 'ConvertFrom-IcoToPng'
 
 <#
 .SYNOPSIS
@@ -110,14 +105,8 @@ function ConvertFrom-IcoToJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ico-to-jpeg' -Target 'ConvertFrom-IcoToJpeg'
-    Set-AgentModeAlias -Name 'ico-to-jpg' -Target 'ConvertFrom-IcoToJpeg'
-}
-else {
-    Set-Alias -Name ico-to-jpeg -Value ConvertFrom-IcoToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name ico-to-jpg -Value ConvertFrom-IcoToJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ico-to-jpeg' -Target 'ConvertFrom-IcoToJpeg'
+Set-AgentModeAlias -Name 'ico-to-jpg' -Target 'ConvertFrom-IcoToJpeg'
 
 <#
 .SYNOPSIS
@@ -147,12 +136,7 @@ function ConvertTo-IcoFromPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'png-to-ico' -Target 'ConvertTo-IcoFromPng'
-}
-else {
-    Set-Alias -Name png-to-ico -Value ConvertTo-IcoFromPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'png-to-ico' -Target 'ConvertTo-IcoFromPng'
 
 <#
 .SYNOPSIS
@@ -182,12 +166,6 @@ function ConvertTo-IcoFromJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jpeg-to-ico' -Target 'ConvertTo-IcoFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-ico' -Target 'ConvertTo-IcoFromJpeg'
-}
-else {
-    Set-Alias -Name jpeg-to-ico -Value ConvertTo-IcoFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-ico -Value ConvertTo-IcoFromJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jpeg-to-ico' -Target 'ConvertTo-IcoFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-ico' -Target 'ConvertTo-IcoFromJpeg'
 

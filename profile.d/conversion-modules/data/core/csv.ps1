@@ -309,8 +309,7 @@ function ConvertFrom-CsvToJson {
         throw
     }
 }
-Set-Alias -Name csv-to-json -Value ConvertFrom-CsvToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'csv-to-json' -Target 'ConvertFrom-CsvToJson'
 # Convert JSON to CSV
 <#
 .SYNOPSIS
@@ -361,8 +360,7 @@ function ConvertTo-CsvFromJson {
         throw
     }
 }
-Set-Alias -Name json-to-csv -Value ConvertTo-CsvFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-csv' -Target 'ConvertTo-CsvFromJson'
 # Convert CSV to YAML
 <#
 .SYNOPSIS
@@ -383,8 +381,7 @@ function ConvertFrom-CsvToYaml {
         throw
     }
 }
-Set-Alias -Name csv-to-yaml -Value ConvertFrom-CsvToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'csv-to-yaml' -Target 'ConvertFrom-CsvToYaml'
 # Convert YAML to CSV
 <#
 .SYNOPSIS
@@ -436,5 +433,4 @@ function ConvertFrom-YamlToCsv {
         throw
     }
 }
-Set-Alias -Name yaml-to-csv -Value ConvertFrom-YamlToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-csv' -Target 'ConvertFrom-YamlToCsv'

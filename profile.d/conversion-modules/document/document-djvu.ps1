@@ -34,7 +34,7 @@ function Initialize-FileConversion-DocumentDjvu {
             }
             
             # Try ImageMagick first (better quality)
-            if (Get-Command magick -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'magick') {
                 $errorOutput = & magick $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -42,7 +42,7 @@ function Initialize-FileConversion-DocumentDjvu {
                 }
             }
             # Fallback to convert (ImageMagick legacy command)
-            elseif (Get-Command convert -ErrorAction SilentlyContinue) {
+            elseif (Test-CachedCommand 'convert') {
                 $errorOutput = & convert $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -50,7 +50,7 @@ function Initialize-FileConversion-DocumentDjvu {
                 }
             }
             # Fallback to djvups + ps2pdf (if available)
-            elseif (Get-Command djvups -ErrorAction SilentlyContinue) {
+            elseif (Test-CachedCommand 'djvups') {
                 $tempPs = $OutputPath -replace '\.pdf$', '.ps'
                 $errorOutput = & djvups $InputPath $tempPs 2>&1
                 $exitCode = $LASTEXITCODE
@@ -58,7 +58,7 @@ function Initialize-FileConversion-DocumentDjvu {
                     $tempPs -and
                     -not [string]::IsNullOrWhiteSpace($tempPs) -and
                     (Test-Path -LiteralPath $tempPs)) {
-                    if (Get-Command ps2pdf -ErrorAction SilentlyContinue) {
+                    if (Test-CachedCommand 'ps2pdf') {
                         & ps2pdf $tempPs $OutputPath 2>&1 | Out-Null
                         Remove-Item $tempPs -ErrorAction SilentlyContinue
                         return
@@ -91,14 +91,14 @@ function Initialize-FileConversion-DocumentDjvu {
             }
             
             # Try ImageMagick first
-            if (Get-Command magick -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'magick') {
                 $errorOutput = & magick $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
                     return
                 }
             }
-            elseif (Get-Command convert -ErrorAction SilentlyContinue) {
+            elseif (Test-CachedCommand 'convert') {
                 $errorOutput = & convert $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -106,7 +106,7 @@ function Initialize-FileConversion-DocumentDjvu {
                 }
             }
             # Fallback to ddjvu (djvulibre)
-            elseif (Get-Command ddjvu -ErrorAction SilentlyContinue) {
+            elseif (Test-CachedCommand 'ddjvu') {
                 $errorOutput = & ddjvu -format=png $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -139,14 +139,14 @@ function Initialize-FileConversion-DocumentDjvu {
             }
             
             # Try ImageMagick first
-            if (Get-Command magick -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'magick') {
                 $errorOutput = & magick $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
                     return
                 }
             }
-            elseif (Get-Command convert -ErrorAction SilentlyContinue) {
+            elseif (Test-CachedCommand 'convert') {
                 $errorOutput = & convert $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -154,7 +154,7 @@ function Initialize-FileConversion-DocumentDjvu {
                 }
             }
             # Fallback to ddjvu (djvulibre)
-            elseif (Get-Command ddjvu -ErrorAction SilentlyContinue) {
+            elseif (Test-CachedCommand 'ddjvu') {
                 $errorOutput = & ddjvu -format=jpeg $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -187,7 +187,7 @@ function Initialize-FileConversion-DocumentDjvu {
             }
             
             # Use djvutxt (djvulibre) for text extraction
-            if (Get-Command djvutxt -ErrorAction SilentlyContinue) {
+            if (Test-CachedCommand 'djvutxt') {
                 $errorOutput = & djvutxt $InputPath $OutputPath 2>&1
                 $exitCode = $LASTEXITCODE
                 if ($exitCode -eq 0) {
@@ -241,8 +241,7 @@ function ConvertFrom-DjvuToPdf {
         Write-Error "Failed to convert DjVu to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name djvu-to-pdf -Value ConvertFrom-DjvuToPdf -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'djvu-to-pdf' -Target 'ConvertFrom-DjvuToPdf'
 # Convert DjVu to PNG
 <#
 .SYNOPSIS
@@ -275,8 +274,7 @@ function ConvertFrom-DjvuToPng {
         Write-Error "Failed to convert DjVu to PNG: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name djvu-to-png -Value ConvertFrom-DjvuToPng -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'djvu-to-png' -Target 'ConvertFrom-DjvuToPng'
 # Convert DjVu to JPEG
 <#
 .SYNOPSIS
@@ -309,9 +307,8 @@ function ConvertFrom-DjvuToJpeg {
         Write-Error "Failed to convert DjVu to JPEG: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name djvu-to-jpeg -Value ConvertFrom-DjvuToJpeg -ErrorAction SilentlyContinue
-Set-Alias -Name djvu-to-jpg -Value ConvertFrom-DjvuToJpeg -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'djvu-to-jpeg' -Target 'ConvertFrom-DjvuToJpeg'
+Set-AgentModeAlias -Name 'djvu-to-jpg' -Target 'ConvertFrom-DjvuToJpeg'
 # Extract text from DjVu
 <#
 .SYNOPSIS
@@ -344,5 +341,4 @@ function ConvertFrom-DjvuToText {
         Write-Error "Failed to extract text from DjVu: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name djvu-to-text -Value ConvertFrom-DjvuToText -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'djvu-to-text' -Target 'ConvertFrom-DjvuToText'

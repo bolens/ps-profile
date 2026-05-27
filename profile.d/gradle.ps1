@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & gradle dependencyUpdates
     }
-    Set-Alias -Name gradle-outdated -Value Test-GradleOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gradle-outdated' -Target 'Test-GradleOutdated'
     # Gradle update dependencies
     <#
     .SYNOPSIS
@@ -39,8 +38,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & gradle wrapper --gradle-version latest
     }
-    Set-Alias -Name gradle-wrapper-update -Value Update-GradleWrapper -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gradle-wrapper-update' -Target 'Update-GradleWrapper'
     # Gradle add dependency - add dependencies (manual build.gradle editing required)
     <#
     .SYNOPSIS
@@ -69,8 +67,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Write-Output "$Configuration '$Dependency'"
         Write-Output "Then run: gradle build --refresh-dependencies"
     }
-    Set-Alias -Name gradle-add -Value Add-GradleDependency -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gradle-add' -Target 'Add-GradleDependency'
     # Gradle remove dependency - remove dependencies (manual build.gradle editing required)
     <#
     .SYNOPSIS
@@ -95,7 +92,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         Write-Output "Remove line containing: $Dependency"
         Write-Output "Then run: gradle build --refresh-dependencies"
     }
-    Set-Alias -Name gradle-remove -Value Remove-GradleDependency -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'gradle-remove' -Target 'Remove-GradleDependency'
 }
 else {
     Write-MissingToolWarning -Tool 'gradle' -InstallHint 'Install Gradle from: https://gradle.org/install/ or use: scoop install gradle'

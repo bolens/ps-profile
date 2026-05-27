@@ -33,7 +33,7 @@ Each fragment provides specific functionality and can be enabled or disabled ind
 - [dev](dev.md) — See fragment source for details.
 - [diagnostics](diagnostics.md) — See fragment source for details.
 - [dust](dust.md) — See fragment source for details.
-- [enhanced-history](enhanced-history.md) — See fragment source for details.
+- [history-enhanced](history-enhanced.md) — See fragment source for details.
 - [env](env.md) — See fragment source for details.
 - [error-handling](error-handling.md) — See fragment source for details.
 - [eza](eza.md) — See fragment source for details.

@@ -84,12 +84,7 @@ function ConvertFrom-SvgToPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'svg-to-png' -Target 'ConvertFrom-SvgToPng'
-}
-else {
-    Set-Alias -Name svg-to-png -Value ConvertFrom-SvgToPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'svg-to-png' -Target 'ConvertFrom-SvgToPng'
 
 <#
 .SYNOPSIS
@@ -126,14 +121,8 @@ function ConvertFrom-SvgToJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'svg-to-jpeg' -Target 'ConvertFrom-SvgToJpeg'
-    Set-AgentModeAlias -Name 'svg-to-jpg' -Target 'ConvertFrom-SvgToJpeg'
-}
-else {
-    Set-Alias -Name svg-to-jpeg -Value ConvertFrom-SvgToJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name svg-to-jpg -Value ConvertFrom-SvgToJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'svg-to-jpeg' -Target 'ConvertFrom-SvgToJpeg'
+Set-AgentModeAlias -Name 'svg-to-jpg' -Target 'ConvertFrom-SvgToJpeg'
 
 <#
 .SYNOPSIS
@@ -163,12 +152,7 @@ function ConvertFrom-SvgToPdf {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'svg-to-pdf' -Target 'ConvertFrom-SvgToPdf'
-}
-else {
-    Set-Alias -Name svg-to-pdf -Value ConvertFrom-SvgToPdf -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'svg-to-pdf' -Target 'ConvertFrom-SvgToPdf'
 
 <#
 .SYNOPSIS
@@ -199,12 +183,7 @@ function ConvertTo-SvgFromPng {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'png-to-svg' -Target 'ConvertTo-SvgFromPng'
-}
-else {
-    Set-Alias -Name png-to-svg -Value ConvertTo-SvgFromPng -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'png-to-svg' -Target 'ConvertTo-SvgFromPng'
 
 <#
 .SYNOPSIS
@@ -235,12 +214,6 @@ function ConvertTo-SvgFromJpeg {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jpeg-to-svg' -Target 'ConvertTo-SvgFromJpeg'
-    Set-AgentModeAlias -Name 'jpg-to-svg' -Target 'ConvertTo-SvgFromJpeg'
-}
-else {
-    Set-Alias -Name jpeg-to-svg -Value ConvertTo-SvgFromJpeg -ErrorAction SilentlyContinue
-    Set-Alias -Name jpg-to-svg -Value ConvertTo-SvgFromJpeg -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jpeg-to-svg' -Target 'ConvertTo-SvgFromJpeg'
+Set-AgentModeAlias -Name 'jpg-to-svg' -Target 'ConvertTo-SvgFromJpeg'
 

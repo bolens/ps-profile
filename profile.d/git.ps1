@@ -20,19 +20,19 @@ try {
     # Git current branch - get current branch name
     if (-not (Test-Path Function:Get-GitCurrentBranch -ErrorAction SilentlyContinue)) {
         Set-Item -Path Function:Get-GitCurrentBranch -Value { git rev-parse --abbrev-ref HEAD 2>$null } -Force | Out-Null
-        Set-Alias -Name Git-CurrentBranch -Value Get-GitCurrentBranch -ErrorAction SilentlyContinue
+        Set-AgentModeAlias -Name 'Git-CurrentBranch' -Target 'Get-GitCurrentBranch'
     }
 
     # Git status short - show concise status
     if (-not (Test-Path Function:Get-GitStatusShort -ErrorAction SilentlyContinue)) {
         Set-Item -Path Function:Get-GitStatusShort -Value { git status --porcelain 2>$null } -Force | Out-Null
-        Set-Alias -Name Git-StatusShort -Value Get-GitStatusShort -ErrorAction SilentlyContinue
+        Set-AgentModeAlias -Name 'Git-StatusShort' -Target 'Get-GitStatusShort'
     }
 
     # Git prompt segment - show current branch in prompt
     if (-not (Test-Path Function:Format-PromptGitSegment -ErrorAction SilentlyContinue)) {
         Set-Item -Path Function:Format-PromptGitSegment -Value { $b = (Get-GitCurrentBranch) -as [string]; if ($b) { return "($b)" }; return '' } -Force | Out-Null
-        Set-Alias -Name Prompt-GitSegment -Value Format-PromptGitSegment -ErrorAction SilentlyContinue
+        Set-AgentModeAlias -Name 'Prompt-GitSegment' -Target 'Format-PromptGitSegment'
     }
 
     # ===============================================

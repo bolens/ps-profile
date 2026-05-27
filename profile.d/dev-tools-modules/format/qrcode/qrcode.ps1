@@ -43,7 +43,7 @@ function Initialize-DevTools-QrCode {
             [int]$Margin = 4
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use QR code generation."
             }
             $nodeScript = @"
@@ -168,5 +168,4 @@ function New-QrCode {
 }
 
 # Core alias
-Set-Alias -Name qrcode -Value New-QrCode -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'qrcode' -Target 'New-QrCode'

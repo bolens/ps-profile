@@ -39,9 +39,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
             & asdf install $Tools[0]
         }
     }
-    Set-Alias -Name asdfinstall -Value Install-AsdfTool -ErrorAction SilentlyContinue
-    Set-Alias -Name asdfadd -Value Install-AsdfTool -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'asdfinstall' -Target 'Install-AsdfTool'
+    Set-AgentModeAlias -Name 'asdfadd' -Target 'Install-AsdfTool'
     # asdf list - list installed tools
     <#
     .SYNOPSIS
@@ -70,8 +69,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
             & asdf list
         }
     }
-    Set-Alias -Name asdflist -Value Get-AsdfTools -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'asdflist' -Target 'Get-AsdfTools'
     # asdf uninstall - remove tools
     <#
     .SYNOPSIS
@@ -97,9 +95,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & asdf uninstall $Tool $Version
     }
-    Set-Alias -Name asdfuninstall -Value Remove-AsdfTool -ErrorAction SilentlyContinue
-    Set-Alias -Name asdfremove -Value Remove-AsdfTool -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'asdfuninstall' -Target 'Remove-AsdfTool'
+    Set-AgentModeAlias -Name 'asdfremove' -Target 'Remove-AsdfTool'
     # asdf update - update asdf
     <#
     .SYNOPSIS
@@ -116,7 +113,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & asdf update
     }
-    Set-Alias -Name asdfselfupdate -Value Update-AsdfSelf -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'asdfselfupdate' -Target 'Update-AsdfSelf'
 }
 else {
     Write-MissingToolWarning -Tool 'asdf' -InstallHint 'Install from: https://asdf-vm.com/guide/getting-started.html'

@@ -56,7 +56,7 @@ function Initialize-FileConversion-ScientificToColumnar {
             if (-not $pythonCmd) {
                 throw "Python is not available. Install Python with h5py package to use HDF5 conversions."
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             # Convert HDF5 to JSON first, then JSON to Parquet
@@ -100,7 +100,7 @@ function Initialize-FileConversion-ScientificToColumnar {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.parquet$', '.h5' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             $pythonCmd = Get-PythonPath
@@ -152,7 +152,7 @@ function Initialize-FileConversion-ScientificToColumnar {
             if (-not $pythonCmd) {
                 throw "Python is not available. Install Python with netCDF4 package to use NetCDF conversions."
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             # Convert NetCDF to JSON first, then JSON to Parquet
@@ -196,7 +196,7 @@ function Initialize-FileConversion-ScientificToColumnar {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.parquet$', '.nc' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             $pythonCmd = Get-PythonPath
@@ -259,9 +259,8 @@ function ConvertTo-ParquetFromHdf5 {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ParquetFromHdf5 @PSBoundParameters
 }
-Set-Alias -Name hdf5-to-parquet -Value ConvertTo-ParquetFromHdf5 -ErrorAction SilentlyContinue
-Set-Alias -Name h5-to-parquet -Value ConvertTo-ParquetFromHdf5 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hdf5-to-parquet' -Target 'ConvertTo-ParquetFromHdf5'
+Set-AgentModeAlias -Name 'h5-to-parquet' -Target 'ConvertTo-ParquetFromHdf5'
 # Convert Parquet to HDF5
 <#
 .SYNOPSIS
@@ -280,9 +279,8 @@ function ConvertTo-Hdf5FromParquet {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-Hdf5FromParquet @PSBoundParameters
 }
-Set-Alias -Name parquet-to-hdf5 -Value ConvertTo-Hdf5FromParquet -ErrorAction SilentlyContinue
-Set-Alias -Name parquet-to-h5 -Value ConvertTo-Hdf5FromParquet -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parquet-to-hdf5' -Target 'ConvertTo-Hdf5FromParquet'
+Set-AgentModeAlias -Name 'parquet-to-h5' -Target 'ConvertTo-Hdf5FromParquet'
 # Convert NetCDF to Parquet
 <#
 .SYNOPSIS
@@ -301,9 +299,8 @@ function ConvertTo-ParquetFromNetCdf {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ParquetFromNetCdf @PSBoundParameters
 }
-Set-Alias -Name netcdf-to-parquet -Value ConvertTo-ParquetFromNetCdf -ErrorAction SilentlyContinue
-Set-Alias -Name nc-to-parquet -Value ConvertTo-ParquetFromNetCdf -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'netcdf-to-parquet' -Target 'ConvertTo-ParquetFromNetCdf'
+Set-AgentModeAlias -Name 'nc-to-parquet' -Target 'ConvertTo-ParquetFromNetCdf'
 # Convert Parquet to NetCDF
 <#
 .SYNOPSIS
@@ -322,5 +319,5 @@ function ConvertTo-NetCdfFromParquet {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-NetCdfFromParquet @PSBoundParameters
 }
-Set-Alias -Name parquet-to-netcdf -Value ConvertTo-NetCdfFromParquet -ErrorAction SilentlyContinue
-Set-Alias -Name parquet-to-nc -Value ConvertTo-NetCdfFromParquet -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'parquet-to-netcdf' -Target 'ConvertTo-NetCdfFromParquet'
+Set-AgentModeAlias -Name 'parquet-to-nc' -Target 'ConvertTo-NetCdfFromParquet'

@@ -89,11 +89,5 @@ function Invoke-GitHubPullRequest {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'gh-open' -Target 'Open-GitHubRepository'
-    Set-AgentModeAlias -Name 'gh-pr' -Target 'Invoke-GitHubPullRequest'
-}
-else {
-    Set-Alias -Name 'gh-open' -Value 'Open-GitHubRepository' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'gh-pr' -Value 'Invoke-GitHubPullRequest' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'gh-open' -Target 'Open-GitHubRepository'
+Set-AgentModeAlias -Name 'gh-pr' -Target 'Invoke-GitHubPullRequest'

@@ -186,7 +186,7 @@ function Import-FragmentModules {
 **Candidates for Lazy Loading:**
 
 - `73-performance-insights.ps1` - Can be loaded on first use
-- `74-enhanced-history.ps1` - Can be loaded when history is accessed
+- `74-history-enhanced.ps1` - Can be loaded when history is accessed
 - `75-system-monitor.ps1` - Can be loaded when monitoring is needed
 - Some conversion modules - Already lazy, but could be more aggressive
 

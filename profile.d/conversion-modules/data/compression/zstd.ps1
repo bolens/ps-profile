@@ -25,7 +25,7 @@ function Initialize-FileConversion-CoreCompressionZstd {
         )
         try {
             # Check if zstd command is available (Get-Command finds it regardless of extension)
-            $zstdCmd = Get-Command zstd -ErrorAction SilentlyContinue
+            $zstdCmd = Test-CachedCommand 'zstd'
             if (-not $zstdCmd) {
                 throw "zstd command is not available. Install zstd: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
             }
@@ -65,7 +65,7 @@ function Initialize-FileConversion-CoreCompressionZstd {
         )
         try {
             # Check if zstd command is available (Get-Command finds it regardless of extension)
-            $zstdCmd = Get-Command zstd -ErrorAction SilentlyContinue
+            $zstdCmd = Test-CachedCommand 'zstd'
             if (-not $zstdCmd) {
                 throw "zstd command is not available. Install zstd: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
             }

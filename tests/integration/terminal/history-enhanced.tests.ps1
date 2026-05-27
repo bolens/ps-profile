@@ -35,7 +35,7 @@ Describe 'Enhanced History Integration Tests' {
             }
 
             # Load the enhanced history fragment directly to ensure functions are available
-            $enhancedHistoryFragment = Join-Path $script:ProfileDir 'enhanced-history.ps1'
+            $enhancedHistoryFragment = Join-Path $script:ProfileDir 'history-enhanced.ps1'
             # Clear the guard variable to allow loading
             Remove-Variable -Name 'EnhancedHistoryLoaded' -Scope Global -ErrorAction SilentlyContinue
             . $enhancedHistoryFragment

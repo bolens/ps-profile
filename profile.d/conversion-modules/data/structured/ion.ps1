@@ -216,8 +216,7 @@ Set-Item -Path Function:Global:ConvertFrom-IonToJson -Value {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-IonToJson @PSBoundParameters
 } -Force
-Set-Alias -Name ion-to-json -Value ConvertFrom-IonToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ion-to-json' -Target 'ConvertFrom-IonToJson'
 # Convert JSON to Ion
 <#
 .SYNOPSIS
@@ -249,5 +248,4 @@ Set-Item -Path Function:Global:ConvertTo-IonFromJson -Value {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-IonFromJson @PSBoundParameters
 } -Force
-Set-Alias -Name json-to-ion -Value ConvertTo-IonFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-ion' -Target 'ConvertTo-IonFromJson'

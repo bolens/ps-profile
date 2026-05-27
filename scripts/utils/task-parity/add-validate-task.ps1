@@ -1,3 +1,4 @@
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
 <#
 .SYNOPSIS
     Adds the validate task to all task runner files using the task-parity utilities.
@@ -46,12 +47,12 @@ $taskGeneratorPath = Join-Path $modulesPath 'TaskGenerator.psm1'
 
 if (-not (Test-Path -LiteralPath $taskParserPath)) {
     Write-Error "TaskParser module not found: $taskParserPath"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 if (-not (Test-Path -LiteralPath $taskGeneratorPath)) {
     Write-Error "TaskGenerator module not found: $taskGeneratorPath"
-    exit 1
+    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 }
 
 Import-Module $taskParserPath -DisableNameChecking -ErrorAction Stop
@@ -132,4 +133,4 @@ else {
     Write-Host "✓ Validate task already exists in all task runner files" -ForegroundColor Green
 }
 
-exit 0
+Exit-WithCode -ExitCode [ExitCode]::Success

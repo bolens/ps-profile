@@ -4,7 +4,7 @@ Enhanced Go development tools fragment.
 
 ## Overview
 
-The `lang-go.ps1` fragment provides wrapper functions for Go development tools that enhance the basic `go.ps1` functionality. This module focuses on advanced Go development workflows including release automation, build tooling, and code quality checks.
+The `lang-lang-go-basic.ps1` fragment provides wrapper functions for Go development tools that enhance the basic `lang-go-basic.ps1` functionality. This module focuses on advanced Go development workflows including release automation, build tooling, and code quality checks.
 
 ## Dependencies
 
@@ -223,7 +223,7 @@ The fragment is idempotent and can be safely loaded multiple times. Functions an
 
 ## Notes
 
-- This fragment enhances `go.ps1` with additional development tools
+- This fragment enhances `lang-go-basic.ps1` with additional development tools
 - All functions follow PowerShell best practices with proper error handling
 - Install hints are provided when tools are missing
 - Functions use `Write-MissingToolWarning` for consistent error messaging

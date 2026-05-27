@@ -711,9 +711,8 @@ function ConvertFrom-CfgToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-CfgToJson @PSBoundParameters
 }
-Set-Alias -Name cfg-to-json -Value ConvertFrom-CfgToJson -ErrorAction SilentlyContinue
-Set-Alias -Name configparser-to-json -Value ConvertFrom-CfgToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cfg-to-json' -Target 'ConvertFrom-CfgToJson'
+Set-AgentModeAlias -Name 'configparser-to-json' -Target 'ConvertFrom-CfgToJson'
 # Convert JSON to CFG
 <#
 .SYNOPSIS
@@ -731,9 +730,8 @@ function ConvertTo-CfgFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-CfgFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-cfg -Value ConvertTo-CfgFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-configparser -Value ConvertTo-CfgFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-cfg' -Target 'ConvertTo-CfgFromJson'
+Set-AgentModeAlias -Name 'json-to-configparser' -Target 'ConvertTo-CfgFromJson'
 # Convert CFG to YAML
 <#
 .SYNOPSIS
@@ -751,8 +749,7 @@ function ConvertFrom-CfgToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-CfgToYaml @PSBoundParameters
 }
-Set-Alias -Name cfg-to-yaml -Value ConvertFrom-CfgToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cfg-to-yaml' -Target 'ConvertFrom-CfgToYaml'
 # Convert YAML to CFG
 <#
 .SYNOPSIS
@@ -770,8 +767,7 @@ function ConvertTo-CfgFromYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-CfgFromYaml @PSBoundParameters
 }
-Set-Alias -Name yaml-to-cfg -Value ConvertTo-CfgFromYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-cfg' -Target 'ConvertTo-CfgFromYaml'
 # Convert CFG to INI
 <#
 .SYNOPSIS
@@ -790,8 +786,7 @@ function ConvertFrom-CfgToIni {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-CfgToIni @PSBoundParameters
 }
-Set-Alias -Name cfg-to-ini -Value ConvertFrom-CfgToIni -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'cfg-to-ini' -Target 'ConvertFrom-CfgToIni'
 # Convert INI to CFG
 <#
 .SYNOPSIS
@@ -810,5 +805,4 @@ function ConvertTo-CfgFromIni {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-CfgFromIni @PSBoundParameters
 }
-Set-Alias -Name ini-to-cfg -Value ConvertTo-CfgFromIni -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ini-to-cfg' -Target 'ConvertTo-CfgFromIni'

@@ -23,8 +23,7 @@ if (Test-CachedCommand swift) {
         
         & swift package update
     }
-    Set-Alias -Name swift-update -Value Update-SwiftPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'swift-update' -Target 'Update-SwiftPackages'
     # Swift package resolve
     <#
     .SYNOPSIS
@@ -38,8 +37,7 @@ if (Test-CachedCommand swift) {
         
         & swift package resolve
     }
-    Set-Alias -Name swift-resolve -Value Resolve-SwiftPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'swift-resolve' -Target 'Resolve-SwiftPackages'
     # Swift package add - add dependencies
     <#
     .SYNOPSIS
@@ -70,8 +68,7 @@ if (Test-CachedCommand swift) {
         }
         Write-Output ")"
     }
-    Set-Alias -Name swift-add -Value Add-SwiftPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'swift-add' -Target 'Add-SwiftPackage'
     # Swift package remove - remove dependencies (manual Package.swift editing required)
     <#
     .SYNOPSIS
@@ -96,7 +93,7 @@ if (Test-CachedCommand swift) {
         Write-Output ".package(url: `"$URL`", ...)"
         Write-Output "Then run: swift package resolve"
     }
-    Set-Alias -Name swift-remove -Value Remove-SwiftPackage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'swift-remove' -Target 'Remove-SwiftPackage'
 }
 else {
     Write-MissingToolWarning -Tool 'swift' -InstallHint 'Install Swift from: https://swift.org/download/ or use: scoop install swift'

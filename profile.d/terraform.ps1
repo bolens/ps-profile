@@ -181,17 +181,8 @@ function Remove-TerraformInfrastructure {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'tf' -Target 'Invoke-Terraform'
-    Set-AgentModeAlias -Name 'tfi' -Target 'Initialize-Terraform'
-    Set-AgentModeAlias -Name 'tfp' -Target 'Get-TerraformPlan'
-    Set-AgentModeAlias -Name 'tfa' -Target 'Invoke-TerraformApply'
-    Set-AgentModeAlias -Name 'tfd' -Target 'Remove-TerraformInfrastructure'
-}
-else {
-    Set-Alias -Name 'tf' -Value 'Invoke-Terraform' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'tfi' -Value 'Initialize-Terraform' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'tfp' -Value 'Get-TerraformPlan' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'tfa' -Value 'Invoke-TerraformApply' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'tfd' -Value 'Remove-TerraformInfrastructure' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'tf' -Target 'Invoke-Terraform'
+Set-AgentModeAlias -Name 'tfi' -Target 'Initialize-Terraform'
+Set-AgentModeAlias -Name 'tfp' -Target 'Get-TerraformPlan'
+Set-AgentModeAlias -Name 'tfa' -Target 'Invoke-TerraformApply'
+Set-AgentModeAlias -Name 'tfd' -Target 'Remove-TerraformInfrastructure'

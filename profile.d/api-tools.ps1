@@ -162,11 +162,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Bruno -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Bruno' -Body ${function:Invoke-Bruno}
-        Set-AgentModeAlias -Name 'bruno' -Target 'Invoke-Bruno'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Bruno' -Body ${function:Invoke-Bruno}
+    Set-AgentModeAlias -Name 'bruno' -Target 'Invoke-Bruno'
     # ===============================================
     # Hurl - HTTP testing tool
     # ===============================================
@@ -293,11 +290,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Hurl -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Hurl' -Body ${function:Invoke-Hurl}
-        Set-AgentModeAlias -Name 'hurl' -Target 'Invoke-Hurl'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Hurl' -Body ${function:Invoke-Hurl}
+    Set-AgentModeAlias -Name 'hurl' -Target 'Invoke-Hurl'
     # ===============================================
     # Httpie - Command-line HTTP client
     # ===============================================
@@ -452,11 +446,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Httpie -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Httpie' -Body ${function:Invoke-Httpie}
-        Set-AgentModeAlias -Name 'httpie' -Target 'Invoke-Httpie'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Httpie' -Body ${function:Invoke-Httpie}
+    Set-AgentModeAlias -Name 'httpie' -Target 'Invoke-Httpie'
     # ===============================================
     # HTTP Toolkit - HTTP debugging proxy
     # ===============================================
@@ -548,11 +539,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Start-HttpToolkit -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Start-HttpToolkit' -Body ${function:Start-HttpToolkit}
-        Set-AgentModeAlias -Name 'httptoolkit' -Target 'Start-HttpToolkit'
-    }
-
+    Set-AgentModeFunction -Name 'Start-HttpToolkit' -Body ${function:Start-HttpToolkit}
+    Set-AgentModeAlias -Name 'httptoolkit' -Target 'Start-HttpToolkit'
     # ===============================================
     # Insomnia - API client
     # ===============================================
@@ -668,11 +656,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Insomnia -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Insomnia' -Body ${function:Invoke-Insomnia}
-        Set-AgentModeAlias -Name 'insomnia' -Target 'Invoke-Insomnia'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Insomnia' -Body ${function:Invoke-Insomnia}
+    Set-AgentModeAlias -Name 'insomnia' -Target 'Invoke-Insomnia'
     # ===============================================
     # Postman - API development platform (via Newman CLI)
     # ===============================================
@@ -851,11 +836,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Postman -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Postman' -Body ${function:Invoke-Postman}
-        Set-AgentModeAlias -Name 'postman' -Target 'Invoke-Postman'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Postman' -Body ${function:Invoke-Postman}
+    Set-AgentModeAlias -Name 'postman' -Target 'Invoke-Postman'
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'api-tools'

@@ -83,12 +83,10 @@ function Reload-Profile {
     }
 }
 
-Set-Alias -Name reload -Value Reload-Profile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'reload' -Target 'Reload-Profile'
 # Fast reload alias
 function Reload-ProfileFast { Reload-Profile -Fast }
-Set-Alias -Name reload-fast -Value Reload-ProfileFast -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'reload-fast' -Target 'Reload-ProfileFast'
 # Edit profile in code editor
 <#
 .SYNOPSIS
@@ -97,8 +95,7 @@ Set-Alias -Name reload-fast -Value Reload-ProfileFast -ErrorAction SilentlyConti
     Launches VS Code to edit the current PowerShell profile file.
 #>
 function Edit-Profile { code $PROFILE }
-Set-Alias -Name edit-profile -Value Edit-Profile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'edit-profile' -Target 'Edit-Profile'
 # Backup current profile to timestamped .bak file
 <#
 .SYNOPSIS
@@ -107,8 +104,7 @@ Set-Alias -Name edit-profile -Value Edit-Profile -ErrorAction SilentlyContinue
     Creates a timestamped backup copy of the current PowerShell profile.
 #>
 function Backup-Profile { Copy-Item $PROFILE ($PROFILE + '.' + (Get-Date -Format 'yyyyMMddHHmmss') + '.bak') }
-Set-Alias -Name backup-profile -Value Backup-Profile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'backup-profile' -Target 'Backup-Profile'
 # List all user-defined functions in current session
 <#
 .SYNOPSIS
@@ -117,8 +113,7 @@ Set-Alias -Name backup-profile -Value Backup-Profile -ErrorAction SilentlyContin
     Displays all user-defined functions in the current PowerShell session.
 #>
 function Get-Functions { @(Get-Command -CommandType Function | Where-Object { $_.Source -eq '' } | Select-Object Name, Definition) }
-Set-Alias -Name list-functions -Value Get-Functions -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'list-functions' -Target 'Get-Functions'
 # Reload a specific fragment
 <#
 .SYNOPSIS

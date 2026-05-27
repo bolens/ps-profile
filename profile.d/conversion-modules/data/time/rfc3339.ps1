@@ -215,8 +215,7 @@ function ConvertFrom-Rfc3339ToDateTime {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-Rfc3339ToDateTime @PSBoundParameters
 }
-Set-Alias -Name rfc3339-to-datetime -Value ConvertFrom-Rfc3339ToDateTime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rfc3339-to-datetime' -Target 'ConvertFrom-Rfc3339ToDateTime'
 # Convert DateTime to RFC 3339
 <#
 .SYNOPSIS
@@ -252,8 +251,7 @@ function ConvertTo-Rfc3339FromDateTime {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-Rfc3339FromDateTime @PSBoundParameters
 }
-Set-Alias -Name datetime-to-rfc3339 -Value ConvertTo-Rfc3339FromDateTime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'datetime-to-rfc3339' -Target 'ConvertTo-Rfc3339FromDateTime'
 # Convert Unix Timestamp to RFC 3339
 <#
 .SYNOPSIS
@@ -281,8 +279,7 @@ function ConvertTo-Rfc3339FromUnixTimestamp {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-Rfc3339FromUnixTimestamp @PSBoundParameters
 }
-Set-Alias -Name unix-to-rfc3339 -Value ConvertTo-Rfc3339FromUnixTimestamp -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'unix-to-rfc3339' -Target 'ConvertTo-Rfc3339FromUnixTimestamp'
 # Convert RFC 3339 to Unix Timestamp
 <#
 .SYNOPSIS
@@ -307,8 +304,7 @@ function ConvertFrom-Rfc3339ToUnixTimestamp {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-Rfc3339ToUnixTimestamp @PSBoundParameters
 }
-Set-Alias -Name rfc3339-to-unix -Value ConvertFrom-Rfc3339ToUnixTimestamp -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rfc3339-to-unix' -Target 'ConvertFrom-Rfc3339ToUnixTimestamp'
 # Convert RFC 3339 to ISO 8601
 <#
 .SYNOPSIS
@@ -334,8 +330,7 @@ function ConvertTo-Iso8601FromRfc3339 {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-Iso8601FromRfc3339 @PSBoundParameters
 }
-Set-Alias -Name rfc3339-to-iso8601 -Value ConvertTo-Iso8601FromRfc3339 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rfc3339-to-iso8601' -Target 'ConvertTo-Iso8601FromRfc3339'
 # Convert ISO 8601 to RFC 3339
 <#
 .SYNOPSIS
@@ -361,8 +356,7 @@ function ConvertFrom-Iso8601ToRfc3339 {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-Iso8601ToRfc3339 @PSBoundParameters
 }
-Set-Alias -Name iso8601-to-rfc3339 -Value ConvertFrom-Iso8601ToRfc3339 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'iso8601-to-rfc3339' -Target 'ConvertFrom-Iso8601ToRfc3339'
 # Convert RFC 3339 to Human-readable
 <#
 .SYNOPSIS
@@ -390,5 +384,4 @@ function ConvertFrom-Rfc3339ToHumanReadable {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-Rfc3339ToHumanReadable @PSBoundParameters
 }
-Set-Alias -Name rfc3339-to-human -Value ConvertFrom-Rfc3339ToHumanReadable -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rfc3339-to-human' -Target 'ConvertFrom-Rfc3339ToHumanReadable'

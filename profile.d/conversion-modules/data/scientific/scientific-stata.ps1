@@ -329,9 +329,8 @@ function ConvertFrom-StataToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-StataToJson @PSBoundParameters
 }
-Set-Alias -Name stata-to-json -Value ConvertFrom-StataToJson -ErrorAction SilentlyContinue
-Set-Alias -Name dta-to-json -Value ConvertFrom-StataToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'stata-to-json' -Target 'ConvertFrom-StataToJson'
+Set-AgentModeAlias -Name 'dta-to-json' -Target 'ConvertFrom-StataToJson'
 # Convert JSON to Stata
 <#
 .SYNOPSIS
@@ -349,9 +348,8 @@ function ConvertTo-StataFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-StataFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-stata -Value ConvertTo-StataFromJson -ErrorAction SilentlyContinue
-Set-Alias -Name json-to-dta -Value ConvertTo-StataFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-stata' -Target 'ConvertTo-StataFromJson'
+Set-AgentModeAlias -Name 'json-to-dta' -Target 'ConvertTo-StataFromJson'
 # Convert Stata to CSV
 <#
 .SYNOPSIS
@@ -369,6 +367,5 @@ function ConvertFrom-StataToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-StataToCsv @PSBoundParameters
 }
-Set-Alias -Name stata-to-csv -Value ConvertFrom-StataToCsv -ErrorAction SilentlyContinue
-Set-Alias -Name dta-to-csv -Value ConvertFrom-StataToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'stata-to-csv' -Target 'ConvertFrom-StataToCsv'
+Set-AgentModeAlias -Name 'dta-to-csv' -Target 'ConvertFrom-StataToCsv'

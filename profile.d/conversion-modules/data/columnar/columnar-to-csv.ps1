@@ -35,7 +35,7 @@ function Initialize-FileConversion-ColumnarToCsv {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.parquet$', '.csv' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             $nodeScript = @"
@@ -101,7 +101,7 @@ const fs = require('fs');
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.csv$', '.parquet' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             # Convert CSV to JSON first, then JSON to Parquet
@@ -136,7 +136,7 @@ const fs = require('fs');
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.arrow$', '.csv' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Arrow conversions."
             }
             # Convert Arrow to JSON first, then JSON to CSV
@@ -182,7 +182,7 @@ const fs = require('fs');
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.csv$', '.arrow' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Arrow conversions."
             }
             # Convert CSV to JSON first, then JSON to Arrow
@@ -231,8 +231,7 @@ function ConvertFrom-ParquetToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ParquetToCsv @PSBoundParameters
 }
-Set-Alias -Name parquet-to-csv -Value ConvertFrom-ParquetToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parquet-to-csv' -Target 'ConvertFrom-ParquetToCsv'
 # Convert CSV to Parquet
 <#
 .SYNOPSIS
@@ -250,8 +249,7 @@ function ConvertTo-ParquetFromCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ParquetFromCsv @PSBoundParameters
 }
-Set-Alias -Name csv-to-parquet -Value ConvertTo-ParquetFromCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'csv-to-parquet' -Target 'ConvertTo-ParquetFromCsv'
 # Convert Arrow to CSV
 <#
 .SYNOPSIS
@@ -269,8 +267,7 @@ function ConvertFrom-ArrowToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ArrowToCsv @PSBoundParameters
 }
-Set-Alias -Name arrow-to-csv -Value ConvertFrom-ArrowToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'arrow-to-csv' -Target 'ConvertFrom-ArrowToCsv'
 # Convert CSV to Arrow
 <#
 .SYNOPSIS
@@ -288,5 +285,4 @@ function ConvertTo-ArrowFromCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ArrowFromCsv @PSBoundParameters
 }
-Set-Alias -Name csv-to-arrow -Value ConvertTo-ArrowFromCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'csv-to-arrow' -Target 'ConvertTo-ArrowFromCsv'

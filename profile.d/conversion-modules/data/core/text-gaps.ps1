@@ -20,7 +20,7 @@ function Initialize-FileConversion-CoreTextGaps {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.xml$', '.yaml' }
-            $yqCommand = Get-Command yq -ErrorAction SilentlyContinue
+            $yqCommand = Test-CachedCommand 'yq'
             if (-not $yqCommand) {
                 $errorMessage = "yq is not available. Install yq to use XML to YAML conversions."
                 $errorMessage += "`nSuggestion: Install yq from https://github.com/mikefarah/yq or use a package manager (scoop, choco, winget)"
@@ -78,7 +78,7 @@ function Initialize-FileConversion-CoreTextGaps {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.yaml$', '.xml' }
-            $yqCommand = Get-Command yq -ErrorAction SilentlyContinue
+            $yqCommand = Test-CachedCommand 'yq'
             if (-not $yqCommand) {
                 $errorMessage = "yq is not available. Install yq to use YAML to XML conversions."
                 $errorMessage += "`nSuggestion: Install yq from https://github.com/mikefarah/yq or use a package manager (scoop, choco, winget)"
@@ -245,7 +245,7 @@ function Initialize-FileConversion-CoreTextGaps {
             try {
                 _ConvertFrom-JsonLToJson -InputPath $InputPath -OutputPath $tempJson
                 # Ensure yq is validated
-                if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+                if (-not (Test-CachedCommand 'yq')) {
                     throw "yq is not available. Install yq to use JSONL to YAML conversions."
                 }
                 
@@ -333,8 +333,7 @@ function ConvertTo-XmlFromYaml {
         throw
     }
 }
-Set-Alias -Name yaml-to-xml -Value ConvertTo-XmlFromYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-xml' -Target 'ConvertTo-XmlFromYaml'
 # Convert JSONL to CSV
 <#
 .SYNOPSIS
@@ -358,8 +357,7 @@ function ConvertFrom-JsonLToCsv {
         throw
     }
 }
-Set-Alias -Name jsonl-to-csv -Value ConvertFrom-JsonLToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'jsonl-to-csv' -Target 'ConvertFrom-JsonLToCsv'
 # Convert CSV to JSONL
 <#
 .SYNOPSIS
@@ -383,8 +381,7 @@ function ConvertTo-JsonLFromCsv {
         throw
     }
 }
-Set-Alias -Name csv-to-jsonl -Value ConvertTo-JsonLFromCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'csv-to-jsonl' -Target 'ConvertTo-JsonLFromCsv'
 # Convert JSONL to YAML
 <#
 .SYNOPSIS
@@ -408,8 +405,7 @@ function ConvertFrom-JsonLToYaml {
         throw
     }
 }
-Set-Alias -Name jsonl-to-yaml -Value ConvertFrom-JsonLToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'jsonl-to-yaml' -Target 'ConvertFrom-JsonLToYaml'
 # Convert YAML to JSONL
 <#
 .SYNOPSIS
@@ -433,5 +429,4 @@ function ConvertTo-JsonLFromYaml {
         throw
     }
 }
-Set-Alias -Name yaml-to-jsonl -Value ConvertTo-JsonLFromYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-jsonl' -Target 'ConvertTo-JsonLFromYaml'

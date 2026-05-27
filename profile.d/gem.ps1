@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & gem outdated
     }
-    Set-Alias -Name gem-outdated -Value Test-GemOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gem-outdated' -Target 'Test-GemOutdated'
     # Gem update packages
     <#
     .SYNOPSIS
@@ -39,8 +38,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & gem update
     }
-    Set-Alias -Name gem-update -Value Update-GemPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gem-update' -Target 'Update-GemPackages'
     # Gem self-update - update gem itself
     <#
     .SYNOPSIS
@@ -54,8 +52,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & gem update --system
     }
-    Set-Alias -Name gem-self-update -Value Update-GemSelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gem-self-update' -Target 'Update-GemSelf'
     # Gem install - install packages
     <#
     .SYNOPSIS
@@ -93,9 +90,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         & gem install @args @Packages
     }
-    Set-Alias -Name gem-install -Value Install-GemPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name gem-add -Value Install-GemPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gem-install' -Target 'Install-GemPackage'
+    Set-AgentModeAlias -Name 'gem-add' -Target 'Install-GemPackage'
     # Gem uninstall - remove packages
     <#
     .SYNOPSIS
@@ -133,9 +129,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         }
         & gem uninstall @args @Packages
     }
-    Set-Alias -Name gem-uninstall -Value Remove-GemPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name gem-remove -Value Remove-GemPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'gem-uninstall' -Target 'Remove-GemPackage'
+    Set-AgentModeAlias -Name 'gem-remove' -Target 'Remove-GemPackage'
     # Ruby Installer Development Kit (ridk) - install MSYS2 development tools
     # ridk comes with Ruby when installed via Scoop on Windows
     if (Test-CachedCommand ridk) {
@@ -174,8 +169,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
                 & ridk install
             }
         }
-        Set-Alias -Name ridk-install -Value Install-RubyDevKit -ErrorAction SilentlyContinue
-        Set-Alias -Name ruby-devkit-install -Value Install-RubyDevKit -ErrorAction SilentlyContinue
+        Set-AgentModeAlias -Name 'ridk-install' -Target 'Install-RubyDevKit'
+        Set-AgentModeAlias -Name 'ruby-devkit-install' -Target 'Install-RubyDevKit'
     }
 }
 else {

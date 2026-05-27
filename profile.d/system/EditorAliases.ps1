@@ -15,7 +15,7 @@ function Open-Neovim {
         Invoke-WithWideEvent -OperationName 'editor.neovim.open' -Context @{
             args = $args
         } -ScriptBlock {
-            if (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'nvim')) {
                 throw "nvim command not found. Please install Neovim to use this function."
             }
             & nvim $args
@@ -23,7 +23,7 @@ function Open-Neovim {
     }
     else {
         try {
-            if (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'nvim')) {
                 throw "nvim command not found. Please install Neovim to use this function."
             }
             & nvim $args
@@ -34,8 +34,7 @@ function Open-Neovim {
         }
     }
 }
-Set-Alias -Name vim -Value Open-Neovim -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'vim' -Target 'Open-Neovim'
 # vi alias for neovim
 <#
 .SYNOPSIS
@@ -48,7 +47,7 @@ function Open-NeovimVi {
         Invoke-WithWideEvent -OperationName 'editor.neovim.open' -Context @{
             args = $args
         } -ScriptBlock {
-            if (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'nvim')) {
                 throw "nvim command not found. Please install Neovim to use this function."
             }
             & nvim $args
@@ -56,7 +55,7 @@ function Open-NeovimVi {
     }
     else {
         try {
-            if (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'nvim')) {
                 throw "nvim command not found. Please install Neovim to use this function."
             }
             & nvim $args
@@ -67,5 +66,4 @@ function Open-NeovimVi {
         }
     }
 }
-Set-Alias -Name vi -Value Open-NeovimVi -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'vi' -Target 'Open-NeovimVi'

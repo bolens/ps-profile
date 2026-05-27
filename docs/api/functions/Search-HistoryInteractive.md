@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\74-enhanced-history.ps1
+Defined in: ..\profile.d\74-history-enhanced.ps1

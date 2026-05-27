@@ -128,9 +128,8 @@ function ConvertTo-NetCdfFromHdf5 {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-NetCdfFromHdf5 @PSBoundParameters
 }
-Set-Alias -Name hdf5-to-netcdf -Value ConvertTo-NetCdfFromHdf5 -ErrorAction SilentlyContinue
-Set-Alias -Name h5-to-nc -Value ConvertTo-NetCdfFromHdf5 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hdf5-to-netcdf' -Target 'ConvertTo-NetCdfFromHdf5'
+Set-AgentModeAlias -Name 'h5-to-nc' -Target 'ConvertTo-NetCdfFromHdf5'
 # Convert NetCDF to HDF5
 <#
 .SYNOPSIS
@@ -149,5 +148,5 @@ function ConvertTo-Hdf5FromNetCdf {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-Hdf5FromNetCdf @PSBoundParameters
 }
-Set-Alias -Name netcdf-to-hdf5 -Value ConvertTo-Hdf5FromNetCdf -ErrorAction SilentlyContinue
-Set-Alias -Name nc-to-h5 -Value ConvertTo-Hdf5FromNetCdf -ErrorAction SilentlyContinue
+Set-AgentModeAlias -Name 'netcdf-to-hdf5' -Target 'ConvertTo-Hdf5FromNetCdf'
+Set-AgentModeAlias -Name 'nc-to-h5' -Target 'ConvertTo-Hdf5FromNetCdf'

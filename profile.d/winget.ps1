@@ -23,8 +23,7 @@ if (Test-CachedCommand winget) {
         
         & winget upgrade
     }
-    Set-Alias -Name winget-outdated -Value Test-WingetOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-outdated' -Target 'Test-WingetOutdated'
     # Winget upgrade all - update all packages
     <#
     .SYNOPSIS
@@ -38,8 +37,7 @@ if (Test-CachedCommand winget) {
         
         & winget upgrade --all
     }
-    Set-Alias -Name winget-update -Value Update-WingetPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-update' -Target 'Update-WingetPackages'
     # Winget install - install packages
     <#
     .SYNOPSIS
@@ -79,9 +77,8 @@ if (Test-CachedCommand winget) {
             & winget @args
         }
     }
-    Set-Alias -Name winget-install -Value Install-WingetPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name winget-add -Value Install-WingetPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-install' -Target 'Install-WingetPackage'
+    Set-AgentModeAlias -Name 'winget-add' -Target 'Install-WingetPackage'
     # Winget uninstall - remove packages
     <#
     .SYNOPSIS
@@ -105,9 +102,8 @@ if (Test-CachedCommand winget) {
             & winget uninstall $package --accept-source-agreements
         }
     }
-    Set-Alias -Name winget-uninstall -Value Remove-WingetPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name winget-remove -Value Remove-WingetPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-uninstall' -Target 'Remove-WingetPackage'
+    Set-AgentModeAlias -Name 'winget-remove' -Target 'Remove-WingetPackage'
     # Winget cleanup - clean cache
     <#
     .SYNOPSIS
@@ -125,9 +121,8 @@ if (Test-CachedCommand winget) {
         
         & winget cache clean
     }
-    Set-Alias -Name winget-cleanup -Value Clear-WingetCache -ErrorAction SilentlyContinue
-    Set-Alias -Name winget-clean -Value Clear-WingetCache -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-cleanup' -Target 'Clear-WingetCache'
+    Set-AgentModeAlias -Name 'winget-clean' -Target 'Clear-WingetCache'
     # Winget search - search for packages
     <#
     .SYNOPSIS
@@ -165,9 +160,8 @@ if (Test-CachedCommand winget) {
         }
         & winget @args @Query
     }
-    Set-Alias -Name winget-search -Value Find-WingetPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name winget-find -Value Find-WingetPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-search' -Target 'Find-WingetPackage'
+    Set-AgentModeAlias -Name 'winget-find' -Target 'Find-WingetPackage'
     # Winget list - list installed packages
     <#
     .SYNOPSIS
@@ -192,8 +186,7 @@ if (Test-CachedCommand winget) {
         }
         & winget @args
     }
-    Set-Alias -Name winget-list -Value Get-WingetPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-list' -Target 'Get-WingetPackage'
     # Winget show - show package information
     <#
     .SYNOPSIS
@@ -233,9 +226,8 @@ if (Test-CachedCommand winget) {
             & winget @args
         }
     }
-    Set-Alias -Name winget-show -Value Get-WingetPackageInfo -ErrorAction SilentlyContinue
-    Set-Alias -Name winget-info -Value Get-WingetPackageInfo -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-show' -Target 'Get-WingetPackageInfo'
+    Set-AgentModeAlias -Name 'winget-info' -Target 'Get-WingetPackageInfo'
     # Winget export - backup installed packages
     <#
     .SYNOPSIS
@@ -267,9 +259,8 @@ if (Test-CachedCommand winget) {
         }
         & winget @args
     }
-    Set-Alias -Name winget-export -Value Export-WingetPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name winget-backup -Value Export-WingetPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'winget-export' -Target 'Export-WingetPackages'
+    Set-AgentModeAlias -Name 'winget-backup' -Target 'Export-WingetPackages'
     # Winget import - restore packages from backup
     <#
     .SYNOPSIS
@@ -337,8 +328,8 @@ if (Test-CachedCommand winget) {
             & winget @args
         }
     }
-    Set-Alias -Name winget-import -Value Import-WingetPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name winget-restore -Value Import-WingetPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'winget-import' -Target 'Import-WingetPackages'
+    Set-AgentModeAlias -Name 'winget-restore' -Target 'Import-WingetPackages'
 }
 else {
     Write-MissingToolWarning -Tool 'winget' -InstallHint 'Winget is included with Windows 10/11. If missing, install from: https://aka.ms/getwinget'

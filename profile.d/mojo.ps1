@@ -23,8 +23,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mojo run @Files
     }
-    Set-Alias -Name mojo-run -Value Invoke-MojoRun -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mojo-run' -Target 'Invoke-MojoRun'
     # Mojo build
     <#
     .SYNOPSIS
@@ -38,8 +37,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mojo build @Files
     }
-    Set-Alias -Name mojo-build -Value Build-MojoProgram -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mojo-build' -Target 'Build-MojoProgram'
     # Mojo self-update - update mojo itself
     <#
     .SYNOPSIS
@@ -53,7 +51,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mojo update
     }
-    Set-Alias -Name mojo-update -Value Update-MojoSelf -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'mojo-update' -Target 'Update-MojoSelf'
 }
 else {
     Write-MissingToolWarning -Tool 'mojo' -InstallHint 'Install with: Follow instructions at https://www.modular.com/mojo'

@@ -15,7 +15,7 @@
 function Initialize-FileConversion-MediaAudioCommon {
     # Helper function to check for FFmpeg
     Set-Item -Path Function:Global:_Ensure-Ffmpeg -Value {
-        if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+        if (-not (Test-CachedCommand 'ffmpeg')) {
             throw "ffmpeg command not found. Please install FFmpeg to use audio conversion functions. " +
             "Install with: scoop install ffmpeg (Windows), apt install ffmpeg (Linux), or brew install ffmpeg (macOS)"
         }

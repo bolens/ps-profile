@@ -169,17 +169,8 @@ function Get-KubectlContext {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'k' -Target 'Invoke-Kubectl'
-    Set-AgentModeAlias -Name 'kn' -Target 'Set-KubectlContext'
-    Set-AgentModeAlias -Name 'kg' -Target 'Get-KubectlResource'
-    Set-AgentModeAlias -Name 'kd' -Target 'Describe-KubectlResource'
-    Set-AgentModeAlias -Name 'kctx' -Target 'Get-KubectlContext'
-}
-else {
-    Set-Alias -Name 'k' -Value 'Invoke-Kubectl' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'kn' -Value 'Set-KubectlContext' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'kg' -Value 'Get-KubectlResource' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'kd' -Value 'Describe-KubectlResource' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'kctx' -Value 'Get-KubectlContext' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'k' -Target 'Invoke-Kubectl'
+Set-AgentModeAlias -Name 'kn' -Target 'Set-KubectlContext'
+Set-AgentModeAlias -Name 'kg' -Target 'Get-KubectlResource'
+Set-AgentModeAlias -Name 'kd' -Target 'Describe-KubectlResource'
+Set-AgentModeAlias -Name 'kctx' -Target 'Get-KubectlContext'

@@ -107,8 +107,7 @@ function New-EmptyFile {
         }
     }
 }
-Set-Alias -Name touch -Value New-EmptyFile -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'touch' -Target 'New-EmptyFile'
 # Directory creation (Unix 'mkdir' equivalent with -p support)
 <#
 .SYNOPSIS
@@ -275,8 +274,7 @@ function New-Directory {
 if (Get-Alias -Name mkdir -ErrorAction SilentlyContinue) {
     Remove-Item -Path Alias:\mkdir -Force -ErrorAction SilentlyContinue
 }
-Set-Alias -Name mkdir -Value New-Directory -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'mkdir' -Target 'New-Directory'
 # File/directory removal (Unix 'rm' equivalent)
 # Note: rm is already a built-in PowerShell alias for Remove-Item
 <#
@@ -357,5 +355,4 @@ function Find-File {
         }
     }
 }
-Set-Alias -Name search -Value Find-File -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'search' -Target 'Find-File'

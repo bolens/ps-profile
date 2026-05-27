@@ -90,8 +90,7 @@ function ConvertTo-UrlEncoded {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertTo-UrlEncoded @PSBoundParameters
 }
-Set-Alias -Name url-encode -Value ConvertTo-UrlEncoded -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'url-encode' -Target 'ConvertTo-UrlEncoded'
 <#
 .SYNOPSIS
     URL-decodes a string.
@@ -111,8 +110,7 @@ function ConvertFrom-UrlEncoded {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertFrom-UrlEncoded @PSBoundParameters
 }
-Set-Alias -Name url-decode -Value ConvertFrom-UrlEncoded -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'url-decode' -Target 'ConvertFrom-UrlEncoded'
 <#
 .SYNOPSIS
     HTML-encodes a string.
@@ -132,8 +130,7 @@ function ConvertTo-HtmlEncoded {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertTo-HtmlEncoded @PSBoundParameters
 }
-Set-Alias -Name html-encode -Value ConvertTo-HtmlEncoded -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'html-encode' -Target 'ConvertTo-HtmlEncoded'
 <#
 .SYNOPSIS
     HTML-decodes a string.
@@ -153,5 +150,4 @@ function ConvertFrom-HtmlEncoded {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _ConvertFrom-HtmlEncoded @PSBoundParameters
 }
-Set-Alias -Name html-decode -Value ConvertFrom-HtmlEncoded -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'html-decode' -Target 'ConvertFrom-HtmlEncoded'

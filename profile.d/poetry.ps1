@@ -22,8 +22,7 @@ if (Test-CachedCommand poetry) {
         
         & poetry install @args
     }
-    Set-Alias -Name poetry-install -Value Install-PoetryDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'poetry-install' -Target 'Install-PoetryDependencies'
     # Poetry add
     <#
     .SYNOPSIS
@@ -76,8 +75,7 @@ if (Test-CachedCommand poetry) {
         }
         & poetry add @args @Packages
     }
-    Set-Alias -Name poetry-add -Value Add-PoetryDependency -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'poetry-add' -Target 'Add-PoetryDependency'
     # Poetry remove
     <#
     .SYNOPSIS
@@ -121,8 +119,7 @@ if (Test-CachedCommand poetry) {
         }
         & poetry remove @args @Packages
     }
-    Set-Alias -Name poetry-remove -Value Remove-PoetryDependency -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'poetry-remove' -Target 'Remove-PoetryDependency'
     # Poetry update
     <#
     .SYNOPSIS
@@ -136,8 +133,7 @@ if (Test-CachedCommand poetry) {
         
         & poetry update @args
     }
-    Set-Alias -Name poetry-update -Value Update-PoetryDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'poetry-update' -Target 'Update-PoetryDependencies'
     # Poetry outdated - check for outdated packages
     <#
     .SYNOPSIS
@@ -152,8 +148,7 @@ if (Test-CachedCommand poetry) {
         
         & poetry show --outdated
     }
-    Set-Alias -Name poetry-outdated -Value Test-PoetryOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'poetry-outdated' -Target 'Test-PoetryOutdated'
     # Poetry self-update - update poetry itself
     <#
     .SYNOPSIS
@@ -167,8 +162,7 @@ if (Test-CachedCommand poetry) {
         
         & poetry self update
     }
-    Set-Alias -Name poetry-self-update -Value Update-PoetrySelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'poetry-self-update' -Target 'Update-PoetrySelf'
     # Poetry export - backup dependencies
     <#
     .SYNOPSIS
@@ -210,9 +204,8 @@ if (Test-CachedCommand poetry) {
         }
         & poetry @args
     }
-    Set-Alias -Name poetryexport -Value Export-PoetryDependencies -ErrorAction SilentlyContinue
-    Set-Alias -Name poetrybackup -Value Export-PoetryDependencies -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'poetryexport' -Target 'Export-PoetryDependencies'
+    Set-AgentModeAlias -Name 'poetrybackup' -Target 'Export-PoetryDependencies'
     # Poetry install from requirements - restore dependencies
     <#
     .SYNOPSIS
@@ -280,8 +273,8 @@ if (Test-CachedCommand poetry) {
             Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
         }
     }
-    Set-Alias -Name poetryimport -Value Import-PoetryDependencies -ErrorAction SilentlyContinue
-    Set-Alias -Name poetryrestore -Value Import-PoetryDependencies -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'poetryimport' -Target 'Import-PoetryDependencies'
+    Set-AgentModeAlias -Name 'poetryrestore' -Target 'Import-PoetryDependencies'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

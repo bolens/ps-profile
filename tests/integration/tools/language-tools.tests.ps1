@@ -39,13 +39,13 @@ Describe 'Language Tools Integration Tests' {
         }
     }
 
-    Context 'Go helpers (go.ps1)' {
+    Context 'Go helpers (lang-go-basic.ps1)' {
         BeforeAll {
             # Mock Get-Command to return null for 'go' so Set-AgentModeAlias creates the aliases
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'go' } -MockWith { $null }
             # Mock go command before loading fragment - make available so functions are created
             Mock-CommandAvailabilityPester -CommandName 'go' -Available $true
-            . (Join-Path $script:ProfileDir 'go.ps1')
+            . (Join-Path $script:ProfileDir 'lang-go-basic.ps1')
         }
 
         It 'Creates Invoke-GoRun function' {

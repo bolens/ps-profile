@@ -77,5 +77,4 @@ function Get-TextHash {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _Get-TextHash @PSBoundParameters
 }
-Set-Alias -Name text-hash -Value Get-TextHash -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'text-hash' -Target 'Get-TextHash'

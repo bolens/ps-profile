@@ -184,15 +184,7 @@ function Get-GCloudProjects {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'gcloud' -Target 'Invoke-GCloud'
-    Set-AgentModeAlias -Name 'gcloud-auth' -Target 'Set-GCloudAuth'
-    Set-AgentModeAlias -Name 'gcloud-config' -Target 'Set-GCloudConfig'
-    Set-AgentModeAlias -Name 'gcloud-projects' -Target 'Get-GCloudProjects'
-}
-else {
-    Set-Alias -Name 'gcloud' -Value 'Invoke-GCloud' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'gcloud-auth' -Value 'Set-GCloudAuth' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'gcloud-config' -Value 'Set-GCloudConfig' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'gcloud-projects' -Value 'Get-GCloudProjects' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'gcloud' -Target 'Invoke-GCloud'
+Set-AgentModeAlias -Name 'gcloud-auth' -Target 'Set-GCloudAuth'
+Set-AgentModeAlias -Name 'gcloud-config' -Target 'Set-GCloudConfig'
+Set-AgentModeAlias -Name 'gcloud-projects' -Target 'Get-GCloudProjects'

@@ -36,7 +36,7 @@ function Invoke-MongoDbCompass {
     [CmdletBinding()]
     param()
     
-    if (Test-CachedCommand mongodb-compass) {
+    if (Test-CachedCommand 'mongodb-compass') {
         mongodb-compass
     }
     else {
@@ -59,7 +59,7 @@ function Invoke-SqlWorkbench {
     [CmdletBinding()]
     param()
     
-    if (Test-CachedCommand sql-workbench) {
+    if (Test-CachedCommand 'sql-workbench') {
         sql-workbench
     }
     else {
@@ -82,7 +82,7 @@ function Invoke-DBeaver {
     [CmdletBinding()]
     param()
     
-    if (Test-CachedCommand dbeaver) {
+    if (Test-CachedCommand 'dbeaver') {
         dbeaver
     }
     else {
@@ -105,7 +105,7 @@ function Invoke-TablePlus {
     [CmdletBinding()]
     param()
     
-    if (Test-CachedCommand tableplus) {
+    if (Test-CachedCommand 'tableplus') {
         tableplus
     }
     else {
@@ -137,7 +137,7 @@ function Invoke-Hasura {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand hasura-cli) {
+    if (Test-CachedCommand 'hasura-cli') {
         hasura-cli @Arguments
     }
     else {
@@ -169,10 +169,10 @@ function Invoke-Supabase {
         [string[]]$Arguments
     )
     
-    if (Test-CachedCommand supabase-beta) {
+    if (Test-CachedCommand 'supabase-beta') {
         supabase-beta @Arguments
     }
-    elseif (Test-CachedCommand supabase) {
+    elseif (Test-CachedCommand 'supabase') {
         supabase @Arguments
     }
     else {
@@ -1071,34 +1071,17 @@ else {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'mongodb-compass' -Target 'Invoke-MongoDbCompass'
-    Set-AgentModeAlias -Name 'sql-workbench' -Target 'Invoke-SqlWorkbench'
-    Set-AgentModeAlias -Name 'dbeaver' -Target 'Invoke-DBeaver'
-    Set-AgentModeAlias -Name 'tableplus' -Target 'Invoke-TablePlus'
-    Set-AgentModeAlias -Name 'hasura' -Target 'Invoke-Hasura'
-    Set-AgentModeAlias -Name 'supabase' -Target 'Invoke-Supabase'
-    Set-AgentModeAlias -Name 'db-connect' -Target 'Connect-Database'
-    Set-AgentModeAlias -Name 'db-query' -Target 'Query-Database'
-    Set-AgentModeAlias -Name 'db-export' -Target 'Export-Database'
-    Set-AgentModeAlias -Name 'db-import' -Target 'Import-Database'
-    Set-AgentModeAlias -Name 'db-backup' -Target 'Backup-Database'
-    Set-AgentModeAlias -Name 'db-restore' -Target 'Restore-Database'
-    Set-AgentModeAlias -Name 'db-schema' -Target 'Get-DatabaseSchema'
-}
-else {
-    Set-Alias -Name 'mongodb-compass' -Value 'Invoke-MongoDbCompass' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'sql-workbench' -Value 'Invoke-SqlWorkbench' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'dbeaver' -Value 'Invoke-DBeaver' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'tableplus' -Value 'Invoke-TablePlus' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'hasura' -Value 'Invoke-Hasura' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'supabase' -Value 'Invoke-Supabase' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'db-connect' -Value 'Connect-Database' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'db-query' -Value 'Query-Database' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'db-export' -Value 'Export-Database' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'db-import' -Value 'Import-Database' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'db-backup' -Value 'Backup-Database' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'db-restore' -Value 'Restore-Database' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'db-schema' -Value 'Get-DatabaseSchema' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'mongodb-compass' -Target 'Invoke-MongoDbCompass'
+Set-AgentModeAlias -Name 'sql-workbench' -Target 'Invoke-SqlWorkbench'
+Set-AgentModeAlias -Name 'dbeaver' -Target 'Invoke-DBeaver'
+Set-AgentModeAlias -Name 'tableplus' -Target 'Invoke-TablePlus'
+Set-AgentModeAlias -Name 'hasura' -Target 'Invoke-Hasura'
+Set-AgentModeAlias -Name 'supabase' -Target 'Invoke-Supabase'
+Set-AgentModeAlias -Name 'db-connect' -Target 'Connect-Database'
+Set-AgentModeAlias -Name 'db-query' -Target 'Query-Database'
+Set-AgentModeAlias -Name 'db-export' -Target 'Export-Database'
+Set-AgentModeAlias -Name 'db-import' -Target 'Import-Database'
+Set-AgentModeAlias -Name 'db-backup' -Target 'Backup-Database'
+Set-AgentModeAlias -Name 'db-restore' -Target 'Restore-Database'
+Set-AgentModeAlias -Name 'db-schema' -Target 'Get-DatabaseSchema'
 

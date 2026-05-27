@@ -130,11 +130,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Start-MongoDbCompass -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Start-MongoDbCompass' -Body ${function:Start-MongoDbCompass}
-        Set-AgentModeAlias -Name 'mongodb-compass' -Target 'Start-MongoDbCompass'
-    }
-
+    Set-AgentModeFunction -Name 'Start-MongoDbCompass' -Body ${function:Start-MongoDbCompass}
+    Set-AgentModeAlias -Name 'mongodb-compass' -Target 'Start-MongoDbCompass'
     # ===============================================
     # SQL Workbench - SQL Workbench/J
     # ===============================================
@@ -225,11 +222,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Start-SqlWorkbench -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Start-SqlWorkbench' -Body ${function:Start-SqlWorkbench}
-        Set-AgentModeAlias -Name 'sql-workbench' -Target 'Start-SqlWorkbench'
-    }
-
+    Set-AgentModeFunction -Name 'Start-SqlWorkbench' -Body ${function:Start-SqlWorkbench}
+    Set-AgentModeAlias -Name 'sql-workbench' -Target 'Start-SqlWorkbench'
     # ===============================================
     # DBeaver - Universal database tool
     # ===============================================
@@ -320,11 +314,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Start-DBeaver -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Start-DBeaver' -Body ${function:Start-DBeaver}
-        Set-AgentModeAlias -Name 'dbeaver' -Target 'Start-DBeaver'
-    }
-
+    Set-AgentModeFunction -Name 'Start-DBeaver' -Body ${function:Start-DBeaver}
+    Set-AgentModeAlias -Name 'dbeaver' -Target 'Start-DBeaver'
     # ===============================================
     # TablePlus - Modern database client
     # ===============================================
@@ -408,11 +399,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Start-TablePlus -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Start-TablePlus' -Body ${function:Start-TablePlus}
-        Set-AgentModeAlias -Name 'tableplus' -Target 'Start-TablePlus'
-    }
-
+    Set-AgentModeFunction -Name 'Start-TablePlus' -Body ${function:Start-TablePlus}
+    Set-AgentModeAlias -Name 'tableplus' -Target 'Start-TablePlus'
     # ===============================================
     # Hasura CLI - Hasura GraphQL engine CLI
     # ===============================================
@@ -493,11 +481,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Hasura -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Hasura' -Body ${function:Invoke-Hasura}
-        Set-AgentModeAlias -Name 'hasura' -Target 'Invoke-Hasura'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Hasura' -Body ${function:Invoke-Hasura}
+    Set-AgentModeAlias -Name 'hasura' -Target 'Invoke-Hasura'
     # ===============================================
     # Supabase CLI - Supabase CLI
     # ===============================================
@@ -588,11 +573,8 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Supabase -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Supabase' -Body ${function:Invoke-Supabase}
-        Set-AgentModeAlias -Name 'supabase' -Target 'Invoke-Supabase'
-    }
-
+    Set-AgentModeFunction -Name 'Invoke-Supabase' -Body ${function:Invoke-Supabase}
+    Set-AgentModeAlias -Name 'supabase' -Target 'Invoke-Supabase'
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'database-clients'

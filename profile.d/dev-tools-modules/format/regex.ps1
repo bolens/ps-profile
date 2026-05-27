@@ -114,5 +114,4 @@ function Test-Regex {
     $PSBoundParameters.Remove('Input') | Out-Null
     _Test-Regex @PSBoundParameters
 }
-Set-Alias -Name regex-test -Value Test-Regex -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'regex-test' -Target 'Test-Regex'

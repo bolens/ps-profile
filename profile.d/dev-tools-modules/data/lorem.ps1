@@ -70,5 +70,4 @@ function Get-LoremIpsum {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _Get-LoremIpsum @PSBoundParameters
 }
-Set-Alias -Name lorem -Value Get-LoremIpsum -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'lorem' -Target 'Get-LoremIpsum'

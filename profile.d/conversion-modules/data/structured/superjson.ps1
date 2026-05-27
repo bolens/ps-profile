@@ -39,7 +39,7 @@ function Initialize-FileConversion-SuperJson {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.json$', '.superjson'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use SuperJSON conversions."
             }
             $jsonContent = Get-Content -LiteralPath $InputPath -Raw
@@ -84,7 +84,7 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.superjson$', '.json'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use SuperJSON conversions."
             }
             $nodeScript = @"
@@ -128,10 +128,10 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.superjson$', '.yaml'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
             }
             $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
@@ -156,10 +156,10 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ya?ml$', '.superjson'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
             }
             $json = & yq eval -o=json $InputPath 2>$null
@@ -185,7 +185,7 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.superjson$', '.toon'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
             $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
@@ -207,7 +207,7 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toon$', '.superjson'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
             $toon = Get-Content -LiteralPath $InputPath -Raw
@@ -229,10 +229,10 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.superjson$', '.toml'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
             }
             if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
@@ -262,10 +262,10 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.toml$', '.superjson'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
             }
             $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
@@ -291,7 +291,7 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.superjson$', '.xml'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
             $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
@@ -313,7 +313,7 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.xml$', '.superjson'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
             $xml = [xml](Get-Content -LiteralPath $InputPath -Raw)
@@ -337,7 +337,7 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.superjson$', '.csv'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
             $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
@@ -366,7 +366,7 @@ try {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.csv$', '.superjson'
             }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
             $data = Import-Csv -Path $InputPath
@@ -399,8 +399,7 @@ function ConvertTo-SuperJsonFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SuperJsonFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-superjson -Value ConvertTo-SuperJsonFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-superjson' -Target 'ConvertTo-SuperJsonFromJson'
 # Convert SuperJSON to JSON
 <#
 .SYNOPSIS
@@ -418,8 +417,7 @@ function ConvertFrom-SuperJsonToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SuperJsonToJson @PSBoundParameters
 }
-Set-Alias -Name superjson-to-json -Value ConvertFrom-SuperJsonToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'superjson-to-json' -Target 'ConvertFrom-SuperJsonToJson'
 # Convert SuperJSON to YAML
 <#
 .SYNOPSIS
@@ -437,8 +435,7 @@ function ConvertFrom-SuperJsonToYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SuperJsonToYaml @PSBoundParameters
 }
-Set-Alias -Name superjson-to-yaml -Value ConvertFrom-SuperJsonToYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'superjson-to-yaml' -Target 'ConvertFrom-SuperJsonToYaml'
 # Convert YAML to SuperJSON
 <#
 .SYNOPSIS
@@ -456,8 +453,7 @@ function ConvertTo-SuperJsonFromYaml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SuperJsonFromYaml @PSBoundParameters
 }
-Set-Alias -Name yaml-to-superjson -Value ConvertTo-SuperJsonFromYaml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'yaml-to-superjson' -Target 'ConvertTo-SuperJsonFromYaml'
 # Convert SuperJSON to TOON
 <#
 .SYNOPSIS
@@ -475,8 +471,7 @@ function ConvertFrom-SuperJsonToToon {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SuperJsonToToon @PSBoundParameters
 }
-Set-Alias -Name superjson-to-toon -Value ConvertFrom-SuperJsonToToon -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'superjson-to-toon' -Target 'ConvertFrom-SuperJsonToToon'
 # Convert TOON to SuperJSON
 <#
 .SYNOPSIS
@@ -494,8 +489,7 @@ function ConvertTo-SuperJsonFromToon {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SuperJsonFromToon @PSBoundParameters
 }
-Set-Alias -Name toon-to-superjson -Value ConvertTo-SuperJsonFromToon -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toon-to-superjson' -Target 'ConvertTo-SuperJsonFromToon'
 # Convert SuperJSON to TOML
 <#
 .SYNOPSIS
@@ -513,8 +507,7 @@ function ConvertFrom-SuperJsonToToml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SuperJsonToToml @PSBoundParameters
 }
-Set-Alias -Name superjson-to-toml -Value ConvertFrom-SuperJsonToToml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'superjson-to-toml' -Target 'ConvertFrom-SuperJsonToToml'
 # Convert TOML to SuperJSON
 <#
 .SYNOPSIS
@@ -532,8 +525,7 @@ function ConvertTo-SuperJsonFromToml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SuperJsonFromToml @PSBoundParameters
 }
-Set-Alias -Name toml-to-superjson -Value ConvertTo-SuperJsonFromToml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'toml-to-superjson' -Target 'ConvertTo-SuperJsonFromToml'
 # Convert SuperJSON to XML
 <#
 .SYNOPSIS
@@ -551,8 +543,7 @@ function ConvertFrom-SuperJsonToXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SuperJsonToXml @PSBoundParameters
 }
-Set-Alias -Name superjson-to-xml -Value ConvertFrom-SuperJsonToXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'superjson-to-xml' -Target 'ConvertFrom-SuperJsonToXml'
 # Convert XML to SuperJSON
 <#
 .SYNOPSIS
@@ -570,8 +561,7 @@ function ConvertTo-SuperJsonFromXml {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SuperJsonFromXml @PSBoundParameters
 }
-Set-Alias -Name xml-to-superjson -Value ConvertTo-SuperJsonFromXml -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'xml-to-superjson' -Target 'ConvertTo-SuperJsonFromXml'
 # Convert SuperJSON to CSV
 <#
 .SYNOPSIS
@@ -589,8 +579,7 @@ function ConvertFrom-SuperJsonToCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-SuperJsonToCsv @PSBoundParameters
 }
-Set-Alias -Name superjson-to-csv -Value ConvertFrom-SuperJsonToCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'superjson-to-csv' -Target 'ConvertFrom-SuperJsonToCsv'
 # Convert CSV to SuperJSON
 <#
 .SYNOPSIS
@@ -608,5 +597,4 @@ function ConvertTo-SuperJsonFromCsv {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-SuperJsonFromCsv @PSBoundParameters
 }
-Set-Alias -Name csv-to-superjson -Value ConvertTo-SuperJsonFromCsv -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'csv-to-superjson' -Target 'ConvertTo-SuperJsonFromCsv'

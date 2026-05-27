@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mise outdated
     }
-    Set-Alias -Name mise-outdated -Value Test-MiseOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mise-outdated' -Target 'Test-MiseOutdated'
     # Mise update - update runtimes
     <#
     .SYNOPSIS
@@ -39,8 +38,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mise update
     }
-    Set-Alias -Name mise-update -Value Update-MiseRuntimes -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mise-update' -Target 'Update-MiseRuntimes'
     # Mise self-update - update mise itself
     <#
     .SYNOPSIS
@@ -54,8 +52,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mise self-update
     }
-    Set-Alias -Name mise-self-update -Value Update-MiseSelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mise-self-update' -Target 'Update-MiseSelf'
     # Mise list - list installed runtimes
     <#
     .SYNOPSIS
@@ -69,8 +66,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mise list
     }
-    Set-Alias -Name mise-list -Value Get-MiseRuntimes -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mise-list' -Target 'Get-MiseRuntimes'
     # Mise install - install runtimes/tools
     <#
     .SYNOPSIS
@@ -95,9 +91,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mise install @Runtimes
     }
-    Set-Alias -Name mise-install -Value Install-MiseRuntime -ErrorAction SilentlyContinue
-    Set-Alias -Name mise-add -Value Install-MiseRuntime -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'mise-install' -Target 'Install-MiseRuntime'
+    Set-AgentModeAlias -Name 'mise-add' -Target 'Install-MiseRuntime'
     # Mise uninstall - remove runtimes/tools
     <#
     .SYNOPSIS
@@ -119,8 +114,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & mise uninstall @Runtimes
     }
-    Set-Alias -Name mise-uninstall -Value Remove-MiseRuntime -ErrorAction SilentlyContinue
-    Set-Alias -Name mise-remove -Value Remove-MiseRuntime -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'mise-uninstall' -Target 'Remove-MiseRuntime'
+    Set-AgentModeAlias -Name 'mise-remove' -Target 'Remove-MiseRuntime'
 }
 else {
     Write-MissingToolWarning -Tool 'mise' -InstallHint 'Install with: scoop install mise or curl https://mise.run | sh'

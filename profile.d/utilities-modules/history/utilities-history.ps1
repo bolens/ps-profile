@@ -20,5 +20,4 @@ function Get-History { Microsoft.PowerShell.Core\Get-History | Select-Object -La
     Searches through PowerShell command history for the specified pattern.
 #>
 function Find-History { Microsoft.PowerShell.Core\Get-History | Select-String $args }
-Set-Alias -Name hg -Value Find-History -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hg' -Target 'Find-History'

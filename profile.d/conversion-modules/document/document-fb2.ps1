@@ -30,7 +30,7 @@ function Initialize-FileConversion-DocumentFb2 {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -65,7 +65,7 @@ function Initialize-FileConversion-DocumentFb2 {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -100,7 +100,7 @@ function Initialize-FileConversion-DocumentFb2 {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -135,7 +135,7 @@ function Initialize-FileConversion-DocumentFb2 {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -170,7 +170,7 @@ function Initialize-FileConversion-DocumentFb2 {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -226,8 +226,7 @@ function ConvertFrom-Fb2ToMarkdown {
         Write-Error "Failed to convert FB2 to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name fb2-to-markdown -Value ConvertFrom-Fb2ToMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'fb2-to-markdown' -Target 'ConvertFrom-Fb2ToMarkdown'
 # Convert FB2 to HTML
 <#
 .SYNOPSIS
@@ -260,8 +259,7 @@ function ConvertTo-HtmlFromFb2 {
         Write-Error "Failed to convert FB2 to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name fb2-to-html -Value ConvertTo-HtmlFromFb2 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'fb2-to-html' -Target 'ConvertTo-HtmlFromFb2'
 # Convert FB2 to PDF
 <#
 .SYNOPSIS
@@ -294,8 +292,7 @@ function ConvertTo-PdfFromFb2 {
         Write-Error "Failed to convert FB2 to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name fb2-to-pdf -Value ConvertTo-PdfFromFb2 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'fb2-to-pdf' -Target 'ConvertTo-PdfFromFb2'
 # Convert FB2 to DOCX
 <#
 .SYNOPSIS
@@ -328,8 +325,7 @@ function ConvertTo-DocxFromFb2 {
         Write-Error "Failed to convert FB2 to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name fb2-to-docx -Value ConvertTo-DocxFromFb2 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'fb2-to-docx' -Target 'ConvertTo-DocxFromFb2'
 # Convert FB2 to LaTeX
 <#
 .SYNOPSIS
@@ -362,5 +358,4 @@ function ConvertTo-LaTeXFromFb2 {
         Write-Error "Failed to convert FB2 to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name fb2-to-latex -Value ConvertTo-LaTeXFromFb2 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'fb2-to-latex' -Target 'ConvertTo-LaTeXFromFb2'

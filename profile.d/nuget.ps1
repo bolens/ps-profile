@@ -54,9 +54,8 @@ if (Test-CachedCommand nuget) {
             & nuget @args
         }
     }
-    Set-Alias -Name nugetinstall -Value Install-NuGetPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name nugetadd -Value Install-NuGetPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'nugetinstall' -Target 'Install-NuGetPackage'
+    Set-AgentModeAlias -Name 'nugetadd' -Target 'Install-NuGetPackage'
     # NuGet restore - restore packages
     <#
     .SYNOPSIS
@@ -90,8 +89,7 @@ if (Test-CachedCommand nuget) {
         }
         & nuget @args
     }
-    Set-Alias -Name nugetrestore -Value Restore-NuGetPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'nugetrestore' -Target 'Restore-NuGetPackages'
     # NuGet update - update packages
     <#
     .SYNOPSIS
@@ -125,7 +123,7 @@ if (Test-CachedCommand nuget) {
         }
         & nuget @args
     }
-    Set-Alias -Name nugetupdate -Value Update-NuGetPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'nugetupdate' -Target 'Update-NuGetPackages'
 }
 else {
     Write-MissingToolWarning -Tool 'nuget' -InstallHint 'Install from: https://www.nuget.org/downloads or use: scoop install nuget (or: choco install nuget.commandline, or: winget install Microsoft.NuGet)'

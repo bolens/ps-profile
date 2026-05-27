@@ -40,9 +40,8 @@ if (Test-CachedCommand brew) {
         }
         & brew install @args @Packages
     }
-    Set-Alias -Name brewinstall -Value Install-BrewPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name brewadd -Value Install-BrewPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewinstall' -Target 'Install-BrewPackage'
+    Set-AgentModeAlias -Name 'brewadd' -Target 'Install-BrewPackage'
     # Homebrew uninstall - remove packages
     <#
     .SYNOPSIS
@@ -74,9 +73,8 @@ if (Test-CachedCommand brew) {
         }
         & brew uninstall @args @Packages
     }
-    Set-Alias -Name brewuninstall -Value Remove-BrewPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name brewremove -Value Remove-BrewPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewuninstall' -Target 'Remove-BrewPackage'
+    Set-AgentModeAlias -Name 'brewremove' -Target 'Remove-BrewPackage'
     # Homebrew outdated - check for outdated packages
     <#
     .SYNOPSIS
@@ -91,8 +89,7 @@ if (Test-CachedCommand brew) {
         
         & brew outdated
     }
-    Set-Alias -Name brewoutdated -Value Test-BrewOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewoutdated' -Target 'Test-BrewOutdated'
     # Homebrew upgrade - update packages
     <#
     .SYNOPSIS
@@ -122,9 +119,8 @@ if (Test-CachedCommand brew) {
             & brew upgrade
         }
     }
-    Set-Alias -Name brewupgrade -Value Update-BrewPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name brewupdate -Value Update-BrewPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewupgrade' -Target 'Update-BrewPackages'
+    Set-AgentModeAlias -Name 'brewupdate' -Target 'Update-BrewPackages'
     # Homebrew update - update Homebrew itself
     <#
     .SYNOPSIS
@@ -138,8 +134,7 @@ if (Test-CachedCommand brew) {
         
         & brew update
     }
-    Set-Alias -Name brewselfupdate -Value Update-BrewSelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewselfupdate' -Target 'Update-BrewSelf'
     # Homebrew cleanup - clean cache and old versions
     <#
     .SYNOPSIS
@@ -201,9 +196,8 @@ if (Test-CachedCommand brew) {
         
         & brew @args
     }
-    Set-Alias -Name brewcleanup -Value Clear-BrewCache -ErrorAction SilentlyContinue
-    Set-Alias -Name brewclean -Value Clear-BrewCache -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewcleanup' -Target 'Clear-BrewCache'
+    Set-AgentModeAlias -Name 'brewclean' -Target 'Clear-BrewCache'
     # Homebrew search - search for packages
     <#
     .SYNOPSIS
@@ -235,9 +229,8 @@ if (Test-CachedCommand brew) {
         }
         & brew @args @Query
     }
-    Set-Alias -Name brewsearch -Value Find-BrewPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name brewfind -Value Find-BrewPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewsearch' -Target 'Find-BrewPackage'
+    Set-AgentModeAlias -Name 'brewfind' -Target 'Find-BrewPackage'
     # Homebrew list - list installed packages
     <#
     .SYNOPSIS
@@ -274,8 +267,7 @@ if (Test-CachedCommand brew) {
         }
         & brew @args
     }
-    Set-Alias -Name brewlist -Value Get-BrewPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewlist' -Target 'Get-BrewPackage'
     # Homebrew info - show package information
     <#
     .SYNOPSIS
@@ -307,8 +299,7 @@ if (Test-CachedCommand brew) {
         }
         & brew @args @Packages
     }
-    Set-Alias -Name brewinfo -Value Get-BrewPackageInfo -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewinfo' -Target 'Get-BrewPackageInfo'
     # Homebrew bundle dump - backup installed packages
     <#
     .SYNOPSIS
@@ -349,9 +340,8 @@ if (Test-CachedCommand brew) {
         }
         & brew @args
     }
-    Set-Alias -Name brewexport -Value Export-BrewPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name brewbackup -Value Export-BrewPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'brewexport' -Target 'Export-BrewPackages'
+    Set-AgentModeAlias -Name 'brewbackup' -Target 'Export-BrewPackages'
     # Homebrew bundle - restore packages from backup
     <#
     .SYNOPSIS
@@ -416,8 +406,8 @@ if (Test-CachedCommand brew) {
             & brew @args
         }
     }
-    Set-Alias -Name brewimport -Value Import-BrewPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name brewrestore -Value Import-BrewPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'brewimport' -Target 'Import-BrewPackages'
+    Set-AgentModeAlias -Name 'brewrestore' -Target 'Import-BrewPackages'
 }
 else {
     Write-MissingToolWarning -Tool 'brew' -InstallHint 'Install from: https://brew.sh/'

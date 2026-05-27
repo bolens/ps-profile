@@ -134,16 +134,9 @@ function Invoke-Composer {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'php' -Target 'Invoke-Php'
-    Set-AgentModeAlias -Name 'php-server' -Target 'Start-PhpServer'
-    Set-AgentModeAlias -Name 'composer' -Target 'Invoke-Composer'
-}
-else {
-    Set-Alias -Name 'php' -Value 'Invoke-Php' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'php-server' -Value 'Start-PhpServer' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'composer' -Value 'Invoke-Composer' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'php' -Target 'Invoke-Php'
+Set-AgentModeAlias -Name 'php-server' -Target 'Start-PhpServer'
+Set-AgentModeAlias -Name 'composer' -Target 'Invoke-Composer'
 function Test-ComposerOutdated {
     [CmdletBinding()]
     param()
@@ -220,22 +213,12 @@ function Update-ComposerSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'php' -Target 'Invoke-Php'
-    Set-AgentModeAlias -Name 'php-server' -Target 'Start-PhpServer'
-    Set-AgentModeAlias -Name 'composer' -Target 'Invoke-Composer'
-    Set-AgentModeAlias -Name 'composer-outdated' -Target 'Test-ComposerOutdated'
-    Set-AgentModeAlias -Name 'composer-update' -Target 'Update-ComposerPackages'
-    Set-AgentModeAlias -Name 'composer-self-update' -Target 'Update-ComposerSelf'
-}
-else {
-    Set-Alias -Name 'php' -Value 'Invoke-Php' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'php-server' -Value 'Start-PhpServer' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'composer' -Value 'Invoke-Composer' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'composer-outdated' -Value 'Test-ComposerOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'composer-update' -Value 'Update-ComposerPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'composer-self-update' -Value 'Update-ComposerSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'php' -Target 'Invoke-Php'
+Set-AgentModeAlias -Name 'php-server' -Target 'Start-PhpServer'
+Set-AgentModeAlias -Name 'composer' -Target 'Invoke-Composer'
+Set-AgentModeAlias -Name 'composer-outdated' -Target 'Test-ComposerOutdated'
+Set-AgentModeAlias -Name 'composer-update' -Target 'Update-ComposerPackages'
+Set-AgentModeAlias -Name 'composer-self-update' -Target 'Update-ComposerSelf'
 
 # Composer add - add packages
 <#
@@ -324,13 +307,6 @@ function Remove-ComposerPackage {
 }
 
 # Create aliases for composer add/remove
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'composer-require' -Target 'Add-ComposerPackage'
-    Set-AgentModeAlias -Name 'composer-add' -Target 'Add-ComposerPackage'
-    Set-AgentModeAlias -Name 'composer-remove' -Target 'Remove-ComposerPackage'
-}
-else {
-    Set-Alias -Name 'composer-require' -Value 'Add-ComposerPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'composer-add' -Value 'Add-ComposerPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'composer-remove' -Value 'Remove-ComposerPackage' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'composer-require' -Target 'Add-ComposerPackage'
+Set-AgentModeAlias -Name 'composer-add' -Target 'Add-ComposerPackage'
+Set-AgentModeAlias -Name 'composer-remove' -Target 'Remove-ComposerPackage'

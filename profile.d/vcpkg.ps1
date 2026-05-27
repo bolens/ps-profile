@@ -48,9 +48,8 @@ if (Test-CachedCommand vcpkg) {
             & vcpkg @args
         }
     }
-    Set-Alias -Name vcpkginstall -Value Install-VcpkgPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name vcpkgadd -Value Install-VcpkgPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'vcpkginstall' -Target 'Install-VcpkgPackage'
+    Set-AgentModeAlias -Name 'vcpkgadd' -Target 'Install-VcpkgPackage'
     # vcpkg remove - remove packages
     <#
     .SYNOPSIS
@@ -81,9 +80,8 @@ if (Test-CachedCommand vcpkg) {
             & vcpkg @args
         }
     }
-    Set-Alias -Name vcpkgremove -Value Remove-VcpkgPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name vcpkguninstall -Value Remove-VcpkgPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'vcpkgremove' -Target 'Remove-VcpkgPackage'
+    Set-AgentModeAlias -Name 'vcpkguninstall' -Target 'Remove-VcpkgPackage'
     # vcpkg upgrade - upgrade packages
     <#
     .SYNOPSIS
@@ -118,8 +116,8 @@ if (Test-CachedCommand vcpkg) {
         }
         & vcpkg @args
     }
-    Set-Alias -Name vcpkgupgrade -Value Update-VcpkgPackages -ErrorAction SilentlyContinue
-    Set-Alias -Name vcpkgupdate -Value Update-VcpkgPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'vcpkgupgrade' -Target 'Update-VcpkgPackages'
+    Set-AgentModeAlias -Name 'vcpkgupdate' -Target 'Update-VcpkgPackages'
 }
 else {
     Write-MissingToolWarning -Tool 'vcpkg' -InstallHint 'Install from: https://vcpkg.io/en/getting-started.html'

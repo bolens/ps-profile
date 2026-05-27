@@ -313,17 +313,8 @@ function Update-CargoPackages {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rustup' -Target 'Invoke-Rustup'
-    Set-AgentModeAlias -Name 'rustup-update' -Target 'Update-RustupToolchain'
-    Set-AgentModeAlias -Name 'rustup-install' -Target 'Install-RustupToolchain'
-    Set-AgentModeAlias -Name 'rustup-check' -Target 'Test-RustupUpdates'
-    Set-AgentModeAlias -Name 'cargo-update' -Target 'Update-CargoPackages'
-}
-else {
-    Set-Alias -Name 'rustup' -Value 'Invoke-Rustup' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'rustup-update' -Value 'Update-RustupToolchain' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'rustup-install' -Value 'Install-RustupToolchain' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'rustup-check' -Value 'Test-RustupUpdates' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'cargo-update' -Value 'Update-CargoPackages' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rustup' -Target 'Invoke-Rustup'
+Set-AgentModeAlias -Name 'rustup-update' -Target 'Update-RustupToolchain'
+Set-AgentModeAlias -Name 'rustup-install' -Target 'Install-RustupToolchain'
+Set-AgentModeAlias -Name 'rustup-check' -Target 'Test-RustupUpdates'
+Set-AgentModeAlias -Name 'cargo-update' -Target 'Update-CargoPackages'

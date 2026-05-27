@@ -90,11 +90,5 @@ function Get-RcloneFileList {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'rcopy' -Target 'Copy-RcloneFile'
-    Set-AgentModeAlias -Name 'rls' -Target 'Get-RcloneFileList'
-}
-else {
-    Set-Alias -Name 'rcopy' -Value 'Copy-RcloneFile' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'rls' -Value 'Get-RcloneFileList' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'rcopy' -Target 'Copy-RcloneFile'
+Set-AgentModeAlias -Name 'rls' -Target 'Get-RcloneFileList'

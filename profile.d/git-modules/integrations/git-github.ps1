@@ -21,7 +21,7 @@ if (-not (Test-Path Function:New-GitHubPullRequest)) {
             Write-Warning 'GitHub CLI (gh) not found'
         }
     }
-    Set-Alias -Name prc -Value New-GitHubPullRequest -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'prc' -Target 'New-GitHubPullRequest'
 }
 
 if (-not (Test-Path Function:Show-GitHubPullRequest)) {
@@ -40,6 +40,6 @@ if (-not (Test-Path Function:Show-GitHubPullRequest)) {
             Write-Warning 'GitHub CLI (gh) not found'
         }
     }
-    Set-Alias -Name prv -Value Show-GitHubPullRequest -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'prv' -Target 'Show-GitHubPullRequest'
 }
 

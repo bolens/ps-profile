@@ -242,8 +242,7 @@ function ConvertFrom-DurationToTimeSpan {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-DurationToTimeSpan @PSBoundParameters
 }
-Set-Alias -Name duration-to-timespan -Value ConvertFrom-DurationToTimeSpan -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'duration-to-timespan' -Target 'ConvertFrom-DurationToTimeSpan'
 # Convert TimeSpan to Human-readable duration
 <#
 .SYNOPSIS
@@ -279,8 +278,7 @@ function ConvertTo-DurationFromTimeSpan {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-DurationFromTimeSpan @PSBoundParameters
 }
-Set-Alias -Name timespan-to-duration -Value ConvertTo-DurationFromTimeSpan -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'timespan-to-duration' -Target 'ConvertTo-DurationFromTimeSpan'
 # Additional conversion functions
 function ConvertFrom-DurationToSeconds {
     param(
@@ -290,8 +288,7 @@ function ConvertFrom-DurationToSeconds {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-DurationToSeconds @PSBoundParameters
 }
-Set-Alias -Name duration-to-seconds -Value ConvertFrom-DurationToSeconds -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'duration-to-seconds' -Target 'ConvertFrom-DurationToSeconds'
 function ConvertTo-DurationFromSeconds {
     param(
         [Parameter(Mandatory, ValueFromPipeline = $true)]
@@ -301,8 +298,7 @@ function ConvertTo-DurationFromSeconds {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-DurationFromSeconds @PSBoundParameters
 }
-Set-Alias -Name seconds-to-duration -Value ConvertTo-DurationFromSeconds -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'seconds-to-duration' -Target 'ConvertTo-DurationFromSeconds'
 function ConvertFrom-DurationToMilliseconds {
     param(
         [Parameter(Mandatory, ValueFromPipeline = $true)]
@@ -311,8 +307,7 @@ function ConvertFrom-DurationToMilliseconds {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-DurationToMilliseconds @PSBoundParameters
 }
-Set-Alias -Name duration-to-milliseconds -Value ConvertFrom-DurationToMilliseconds -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'duration-to-milliseconds' -Target 'ConvertFrom-DurationToMilliseconds'
 function ConvertTo-DurationFromMilliseconds {
     param(
         [Parameter(Mandatory, ValueFromPipeline = $true)]
@@ -322,5 +317,4 @@ function ConvertTo-DurationFromMilliseconds {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-DurationFromMilliseconds @PSBoundParameters
 }
-Set-Alias -Name milliseconds-to-duration -Value ConvertTo-DurationFromMilliseconds -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'milliseconds-to-duration' -Target 'ConvertTo-DurationFromMilliseconds'

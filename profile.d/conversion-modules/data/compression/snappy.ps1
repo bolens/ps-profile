@@ -25,7 +25,7 @@ function Initialize-FileConversion-CoreCompressionSnappy {
         )
         try {
             # Try snappy command first
-            $snappyCmd = Get-Command snappy -ErrorAction SilentlyContinue
+            $snappyCmd = Test-CachedCommand 'snappy'
             if ($snappyCmd) {
                 if (-not $OutputPath) {
                     $OutputPath = $InputPath + '.snappy'
@@ -99,7 +99,7 @@ except Exception as e:
         )
         try {
             # Try snappy command first
-            $snappyCmd = Get-Command snappy -ErrorAction SilentlyContinue
+            $snappyCmd = Test-CachedCommand 'snappy'
             if ($snappyCmd) {
                 if (-not $OutputPath) {
                     # Remove .snappy extension if present

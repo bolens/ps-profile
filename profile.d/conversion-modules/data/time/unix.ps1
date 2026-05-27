@@ -139,8 +139,7 @@ function ConvertFrom-UnixTimestampToDateTime {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-UnixTimestampToDateTime @PSBoundParameters
 }
-Set-Alias -Name unix-to-datetime -Value ConvertFrom-UnixTimestampToDateTime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'unix-to-datetime' -Target 'ConvertFrom-UnixTimestampToDateTime'
 # Convert DateTime to Unix Timestamp
 <#
 .SYNOPSIS
@@ -169,8 +168,7 @@ function ConvertTo-UnixTimestampFromDateTime {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-UnixTimestampFromDateTime @PSBoundParameters
 }
-Set-Alias -Name datetime-to-unix -Value ConvertTo-UnixTimestampFromDateTime -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'datetime-to-unix' -Target 'ConvertTo-UnixTimestampFromDateTime'
 # Convert Unix Timestamp to ISO 8601
 <#
 .SYNOPSIS
@@ -195,8 +193,7 @@ function ConvertFrom-UnixTimestampToIso8601 {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-UnixTimestampToIso8601 @PSBoundParameters
 }
-Set-Alias -Name unix-to-iso8601 -Value ConvertFrom-UnixTimestampToIso8601 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'unix-to-iso8601' -Target 'ConvertFrom-UnixTimestampToIso8601'
 # Convert ISO 8601 to Unix Timestamp
 <#
 .SYNOPSIS
@@ -221,8 +218,7 @@ function ConvertTo-UnixTimestampFromIso8601 {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-UnixTimestampFromIso8601 @PSBoundParameters
 }
-Set-Alias -Name iso8601-to-unix -Value ConvertTo-UnixTimestampFromIso8601 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'iso8601-to-unix' -Target 'ConvertTo-UnixTimestampFromIso8601'
 # Convert Unix Timestamp to Human-readable
 <#
 .SYNOPSIS
@@ -255,5 +251,4 @@ function ConvertFrom-UnixTimestampToHumanReadable {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-UnixTimestampToHumanReadable @PSBoundParameters
 }
-Set-Alias -Name unix-to-readable -Value ConvertFrom-UnixTimestampToHumanReadable -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'unix-to-readable' -Target 'ConvertFrom-UnixTimestampToHumanReadable'

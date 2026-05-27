@@ -78,12 +78,7 @@ function ConvertFrom-OggToWav {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ogg-to-wav' -Target 'ConvertFrom-OggToWav'
-}
-else {
-    Set-Alias -Name ogg-to-wav -Value ConvertFrom-OggToWav -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ogg-to-wav' -Target 'ConvertFrom-OggToWav'
 
 <#
 .SYNOPSIS
@@ -115,12 +110,7 @@ function ConvertFrom-OggToMp3 {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ogg-to-mp3' -Target 'ConvertFrom-OggToMp3'
-}
-else {
-    Set-Alias -Name ogg-to-mp3 -Value ConvertFrom-OggToMp3 -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ogg-to-mp3' -Target 'ConvertFrom-OggToMp3'
 
 <#
 .SYNOPSIS
@@ -150,12 +140,7 @@ function ConvertFrom-OggToFlac {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ogg-to-flac' -Target 'ConvertFrom-OggToFlac'
-}
-else {
-    Set-Alias -Name ogg-to-flac -Value ConvertFrom-OggToFlac -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ogg-to-flac' -Target 'ConvertFrom-OggToFlac'
 
 <#
 .SYNOPSIS
@@ -187,12 +172,7 @@ function ConvertFrom-OggToAac {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ogg-to-aac' -Target 'ConvertFrom-OggToAac'
-}
-else {
-    Set-Alias -Name ogg-to-aac -Value ConvertFrom-OggToAac -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ogg-to-aac' -Target 'ConvertFrom-OggToAac'
 
 <#
 .SYNOPSIS
@@ -224,10 +204,5 @@ function ConvertFrom-OggToOpus {
     }
 }
 # Aliases (using Set-AgentModeAlias if available, otherwise Set-Alias)
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ogg-to-opus' -Target 'ConvertFrom-OggToOpus'
-}
-else {
-    Set-Alias -Name ogg-to-opus -Value ConvertFrom-OggToOpus -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ogg-to-opus' -Target 'ConvertFrom-OggToOpus'
 

@@ -24,8 +24,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & conda update --all -y
     }
-    Set-Alias -Name conda-update -Value Update-CondaPackages -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'conda-update' -Target 'Update-CondaPackages'
     # Conda outdated - check for outdated packages
     <#
     .SYNOPSIS
@@ -40,8 +39,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & conda list --outdated
     }
-    Set-Alias -Name conda-outdated -Value Test-CondaOutdated -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'conda-outdated' -Target 'Test-CondaOutdated'
     # Conda self-update - update conda itself
     <#
     .SYNOPSIS
@@ -55,8 +53,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         
         & conda update conda -y
     }
-    Set-Alias -Name conda-self-update -Value Update-CondaSelf -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'conda-self-update' -Target 'Update-CondaSelf'
     # Conda install - install packages
     <#
     .SYNOPSIS
@@ -95,9 +92,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         $args += '-y'
         & conda install @args @Packages
     }
-    Set-Alias -Name conda-install -Value Install-CondaPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name conda-add -Value Install-CondaPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'conda-install' -Target 'Install-CondaPackage'
+    Set-AgentModeAlias -Name 'conda-add' -Target 'Install-CondaPackage'
     # Conda remove - remove packages
     <#
     .SYNOPSIS
@@ -130,8 +126,8 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         $args += '-y'
         & conda remove @args @Packages
     }
-    Set-Alias -Name conda-remove -Value Remove-CondaPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name conda-uninstall -Value Remove-CondaPackage -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'conda-remove' -Target 'Remove-CondaPackage'
+    Set-AgentModeAlias -Name 'conda-uninstall' -Target 'Remove-CondaPackage'
 }
 else {
     Write-MissingToolWarning -Tool 'conda' -InstallHint 'Install with: scoop install miniconda3 or download from https://docs.conda.io/en/latest/miniconda.html'

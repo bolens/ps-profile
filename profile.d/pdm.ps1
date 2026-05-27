@@ -46,9 +46,8 @@ if (Test-CachedCommand pdm) {
         }
         & pdm add @args @Packages
     }
-    Set-Alias -Name pdmadd -Value Add-PdmPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name pdminstall -Value Add-PdmPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pdmadd' -Target 'Add-PdmPackage'
+    Set-AgentModeAlias -Name 'pdminstall' -Target 'Add-PdmPackage'
     # PDM remove - remove packages
     <#
     .SYNOPSIS
@@ -86,9 +85,8 @@ if (Test-CachedCommand pdm) {
         }
         & pdm remove @args @Packages
     }
-    Set-Alias -Name pdmremove -Value Remove-PdmPackage -ErrorAction SilentlyContinue
-    Set-Alias -Name pdmuninstall -Value Remove-PdmPackage -ErrorAction SilentlyContinue
-
+    Set-AgentModeAlias -Name 'pdmremove' -Target 'Remove-PdmPackage'
+    Set-AgentModeAlias -Name 'pdmuninstall' -Target 'Remove-PdmPackage'
     # PDM update - update packages
     <#
     .SYNOPSIS
@@ -118,7 +116,7 @@ if (Test-CachedCommand pdm) {
             & pdm update
         }
     }
-    Set-Alias -Name pdmupdate -Value Update-PdmPackages -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pdmupdate' -Target 'Update-PdmPackages'
 }
 else {
     $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {

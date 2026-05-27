@@ -194,17 +194,8 @@ function Invoke-Mocha {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'jest' -Target 'Invoke-Jest'
-    Set-AgentModeAlias -Name 'vitest' -Target 'Invoke-Vitest'
-    Set-AgentModeAlias -Name 'playwright' -Target 'Invoke-Playwright'
-    Set-AgentModeAlias -Name 'cypress' -Target 'Invoke-Cypress'
-    Set-AgentModeAlias -Name 'mocha' -Target 'Invoke-Mocha'
-}
-else {
-    Set-Alias -Name 'jest' -Value 'Invoke-Jest' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'vitest' -Value 'Invoke-Vitest' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'playwright' -Value 'Invoke-Playwright' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'cypress' -Value 'Invoke-Cypress' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'mocha' -Value 'Invoke-Mocha' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'jest' -Target 'Invoke-Jest'
+Set-AgentModeAlias -Name 'vitest' -Target 'Invoke-Vitest'
+Set-AgentModeAlias -Name 'playwright' -Target 'Invoke-Playwright'
+Set-AgentModeAlias -Name 'cypress' -Target 'Invoke-Cypress'
+Set-AgentModeAlias -Name 'mocha' -Target 'Invoke-Mocha'

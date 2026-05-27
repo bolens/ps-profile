@@ -16,13 +16,13 @@ function Initialize-FileConversion-MediaImagesCommon {
     # Helper function to check for ImageMagick or GraphicsMagick
     Set-Item -Path Function:Global:_Ensure-ImageMagick -Value {
         # Try ImageMagick 7+ first ('magick' command)
-        $magickCmd = Get-Command magick -ErrorAction SilentlyContinue
+        $magickCmd = Test-CachedCommand 'magick'
         if ($magickCmd) {
             return @{ Name = 'magick'; Type = 'ImageMagick7' }
         }
         
         # Try ImageMagick 6 ('convert' command - but need to distinguish from GraphicsMagick)
-        $convertCmd = Get-Command convert -ErrorAction SilentlyContinue
+        $convertCmd = Test-CachedCommand 'convert'
         if ($convertCmd) {
             # Check if it's ImageMagick or GraphicsMagick by checking version output
             try {
@@ -41,7 +41,7 @@ function Initialize-FileConversion-MediaImagesCommon {
         }
         
         # Try GraphicsMagick 'gm' command
-        $gmCmd = Get-Command gm -ErrorAction SilentlyContinue
+        $gmCmd = Test-CachedCommand 'gm'
         if ($gmCmd) {
             return @{ Name = 'gm'; Type = 'GraphicsMagick' }
         }

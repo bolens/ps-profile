@@ -140,15 +140,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Invoke-Beads -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Invoke-Beads' -Body ${function:Invoke-Beads}
-    }
+    Set-AgentModeFunction -Name 'Invoke-Beads' -Body ${function:Invoke-Beads}
     if (-not (Get-Alias bd -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'bd' -Target 'Invoke-Beads'
         }
         else {
-            Set-Alias -Name 'bd' -Value 'Invoke-Beads' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'bd' -Target 'Invoke-Beads'
         }
     }
 
@@ -585,34 +583,15 @@ try {
     }
 
     # Register helper functions
-    if (-not (Test-Path Function:\Initialize-Beads -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Initialize-Beads' -Body ${function:Initialize-Beads}
-    }
-    if (-not (Test-Path Function:\Get-BeadsReady -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Get-BeadsReady' -Body ${function:Get-BeadsReady}
-    }
-    if (-not (Test-Path Function:\New-BeadsIssue -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'New-BeadsIssue' -Body ${function:New-BeadsIssue}
-    }
-    if (-not (Test-Path Function:\Get-BeadsIssue -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Get-BeadsIssue' -Body ${function:Get-BeadsIssue}
-    }
-    if (-not (Test-Path Function:\Get-BeadsIssues -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Get-BeadsIssues' -Body ${function:Get-BeadsIssues}
-    }
-    if (-not (Test-Path Function:\Update-BeadsIssue -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Update-BeadsIssue' -Body ${function:Update-BeadsIssue}
-    }
-    if (-not (Test-Path Function:\Close-BeadsIssue -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Close-BeadsIssue' -Body ${function:Close-BeadsIssue}
-    }
-    if (-not (Test-Path Function:\Get-BeadsStats -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Get-BeadsStats' -Body ${function:Get-BeadsStats}
-    }
-    if (-not (Test-Path Function:\Get-BeadsBlocked -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Get-BeadsBlocked' -Body ${function:Get-BeadsBlocked}
-    }
-
+    Set-AgentModeFunction -Name 'Initialize-Beads' -Body ${function:Initialize-Beads}
+    Set-AgentModeFunction -Name 'Get-BeadsReady' -Body ${function:Get-BeadsReady}
+    Set-AgentModeFunction -Name 'New-BeadsIssue' -Body ${function:New-BeadsIssue}
+    Set-AgentModeFunction -Name 'Get-BeadsIssue' -Body ${function:Get-BeadsIssue}
+    Set-AgentModeFunction -Name 'Get-BeadsIssues' -Body ${function:Get-BeadsIssues}
+    Set-AgentModeFunction -Name 'Update-BeadsIssue' -Body ${function:Update-BeadsIssue}
+    Set-AgentModeFunction -Name 'Close-BeadsIssue' -Body ${function:Close-BeadsIssue}
+    Set-AgentModeFunction -Name 'Get-BeadsStats' -Body ${function:Get-BeadsStats}
+    Set-AgentModeFunction -Name 'Get-BeadsBlocked' -Body ${function:Get-BeadsBlocked}
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'beads'

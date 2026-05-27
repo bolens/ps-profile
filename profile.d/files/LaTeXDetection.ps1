@@ -14,9 +14,9 @@
 #>
 function Test-DocumentLatexEngineAvailable {
     # Check PATH first
-    if (Get-Command pdflatex -ErrorAction SilentlyContinue) { return 'pdflatex' }
-    if (Get-Command xelatex -ErrorAction SilentlyContinue) { return 'xelatex' }
-    if (Get-Command luatex -ErrorAction SilentlyContinue) { return 'luatex' }
+    if (Test-CachedCommand 'pdflatex') { return 'pdflatex' }
+    if (Test-CachedCommand 'xelatex') { return 'xelatex' }
+    if (Test-CachedCommand 'luatex') { return 'luatex' }
     
     # Check Scoop MiKTeX installation if not in PATH
     # Check both global ($env:SCOOP_GLOBAL) and local ($env:SCOOP) Scoop installations

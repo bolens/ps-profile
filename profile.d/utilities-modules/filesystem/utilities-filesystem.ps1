@@ -11,5 +11,4 @@
     Launches Windows File Explorer in the current directory.
 #>
 function Open-Explorer { explorer.exe . }
-Set-Alias -Name open-explorer -Value Open-Explorer -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'open-explorer' -Target 'Open-Explorer'

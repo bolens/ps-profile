@@ -11,7 +11,7 @@ if (-not (Test-Path Function:\Get-SSHKeys)) {
     $sbList = { ssh-add -l }
     # Create directly via Function: provider to keep dot-source cheap
     New-Item -Path Function:\Get-SSHKeys -Value $sbList -Force | Out-Null
-    Set-Alias -Name ssh-list -Value Get-SSHKeys -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'ssh-list' -Target 'Get-SSHKeys'
 }
 
 # Add a private key to the agent (idempotent wrapper)
@@ -25,7 +25,7 @@ if (-not (Test-Path Function:\Add-SSHKeyIfNotLoaded)) {
         ssh-add $path
     }
     New-Item -Path Function:\Add-SSHKeyIfNotLoaded -Value $sbAddIf -Force | Out-Null
-    Set-Alias -Name ssh-add-if -Value Add-SSHKeyIfNotLoaded -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'ssh-add-if' -Target 'Add-SSHKeyIfNotLoaded'
 }
 
 # Start Pageant/ssh-agent on Windows (if not running)
@@ -50,6 +50,6 @@ if (-not (Test-Path Function:\Start-SSHAgent)) {
     }
     if (-not (Test-Path Function:\Start-SSHAgent)) {
         New-Item -Path Function:\Start-SSHAgent -Value $sb -Force | Out-Null
-        Set-Alias -Name ssh-agent-start -Value Start-SSHAgent -ErrorAction SilentlyContinue
+        Set-AgentModeAlias -Name 'ssh-agent-start' -Target 'Start-SSHAgent'
     }
 }

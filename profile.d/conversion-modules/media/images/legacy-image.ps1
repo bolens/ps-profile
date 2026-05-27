@@ -53,8 +53,7 @@ function Convert-Image {
     if (-not $global:FileConversionMediaInitialized) { Ensure-FileConversion-Media }
     _Convert-Image @PSBoundParameters
 }
-Set-Alias -Name image-convert -Value Convert-Image -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'image-convert' -Target 'Convert-Image'
 # Resize image
 <#
 .SYNOPSIS
@@ -75,5 +74,4 @@ function Resize-Image {
     if (-not $global:FileConversionMediaInitialized) { Ensure-FileConversion-Media }
     _Resize-Image @PSBoundParameters
 }
-Set-Alias -Name image-resize -Value Resize-Image -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'image-resize' -Target 'Resize-Image'

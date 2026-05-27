@@ -149,15 +149,7 @@ function New-NuxtApp {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'nuxi' -Target 'Invoke-Nuxt'
-    Set-AgentModeAlias -Name 'nuxt-dev' -Target 'Start-NuxtDev'
-    Set-AgentModeAlias -Name 'nuxt-build' -Target 'Build-NuxtApp'
-    Set-AgentModeAlias -Name 'create-nuxt-app' -Target 'New-NuxtApp'
-}
-else {
-    Set-Alias -Name 'nuxi' -Value 'Invoke-Nuxt' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'nuxt-dev' -Value 'Start-NuxtDev' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'nuxt-build' -Value 'Build-NuxtApp' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'create-nuxt-app' -Value 'New-NuxtApp' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'nuxi' -Target 'Invoke-Nuxt'
+Set-AgentModeAlias -Name 'nuxt-dev' -Target 'Start-NuxtDev'
+Set-AgentModeAlias -Name 'nuxt-build' -Target 'Build-NuxtApp'
+Set-AgentModeAlias -Name 'create-nuxt-app' -Target 'New-NuxtApp'

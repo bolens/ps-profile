@@ -71,7 +71,7 @@ $script = @"
 # pre-commit hook to format and validate PowerShell profile
 $psExe -NoProfile -File "$preCommitScript"
 if (`$LASTEXITCODE -ne 0) { Write-Host 'Pre-commit: checks failed' ; exit 1 }
-exit 0
+Exit-WithCode -ExitCode [ExitCode]::Success
 "@
 
 Set-Content -LiteralPath $hookPath -Value $script -NoNewline -Force

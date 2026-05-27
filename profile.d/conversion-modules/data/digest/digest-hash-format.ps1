@@ -224,8 +224,7 @@ function ConvertFrom-HashHexToBase64 {
         }
     }
 }
-Set-Alias -Name hash-hex-to-base64 -Value ConvertFrom-HashHexToBase64 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hash-hex-to-base64' -Target 'ConvertFrom-HashHexToBase64'
 # Convert hash from Base64 to Hex
 <#
 .SYNOPSIS
@@ -269,8 +268,7 @@ function ConvertFrom-HashBase64ToHex {
         }
     }
 }
-Set-Alias -Name hash-base64-to-hex -Value ConvertFrom-HashBase64ToHex -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hash-base64-to-hex' -Target 'ConvertFrom-HashBase64ToHex'
 # Convert hash from Hex to Base32
 <#
 .SYNOPSIS
@@ -310,8 +308,7 @@ function ConvertFrom-HashHexToBase32 {
         }
     }
 }
-Set-Alias -Name hash-hex-to-base32 -Value ConvertFrom-HashHexToBase32 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hash-hex-to-base32' -Target 'ConvertFrom-HashHexToBase32'
 # Convert hash from Base32 to Hex
 <#
 .SYNOPSIS
@@ -351,8 +348,7 @@ function ConvertFrom-HashBase32ToHex {
         }
     }
 }
-Set-Alias -Name hash-base32-to-hex -Value ConvertFrom-HashBase32ToHex -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hash-base32-to-hex' -Target 'ConvertFrom-HashBase32ToHex'
 # Convert hash from Base64 to Base32
 <#
 .SYNOPSIS
@@ -392,8 +388,7 @@ function ConvertFrom-HashBase64ToBase32 {
         }
     }
 }
-Set-Alias -Name hash-base64-to-base32 -Value ConvertFrom-HashBase64ToBase32 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hash-base64-to-base32' -Target 'ConvertFrom-HashBase64ToBase32'
 # Convert hash from Base32 to Base64
 <#
 .SYNOPSIS
@@ -433,5 +428,4 @@ function ConvertFrom-HashBase32ToBase64 {
         }
     }
 }
-Set-Alias -Name hash-base32-to-base64 -Value ConvertFrom-HashBase32ToBase64 -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'hash-base32-to-base64' -Target 'ConvertFrom-HashBase32ToBase64'

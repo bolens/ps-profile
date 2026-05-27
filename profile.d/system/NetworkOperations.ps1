@@ -13,7 +13,7 @@
 function Get-NetworkPorts {
     if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
         Invoke-WithWideEvent -OperationName 'network.ports.get' -Context @{} -ScriptBlock {
-            if (-not (Get-Command netstat -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'netstat')) {
                 throw "netstat command not found. This command is typically available on Windows and Unix systems."
             }
             & netstat -an
@@ -21,7 +21,7 @@ function Get-NetworkPorts {
     }
     else {
         try {
-            if (-not (Get-Command netstat -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'netstat')) {
                 Write-Error "netstat command not found. This command is typically available on Windows and Unix systems."
                 return
             }
@@ -33,8 +33,7 @@ function Get-NetworkPorts {
         }
     }
 }
-Set-Alias -Name ports -Value Get-NetworkPorts -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ports' -Target 'Get-NetworkPorts'
 # ptest equivalent
 <#
 .SYNOPSIS
@@ -43,8 +42,7 @@ Set-Alias -Name ports -Value Get-NetworkPorts -ErrorAction SilentlyContinue
     Tests connectivity to specified hosts using ping.
 #>
 function Test-NetworkConnection { Test-Connection @args }
-Set-Alias -Name ptest -Value Test-NetworkConnection -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'ptest' -Target 'Test-NetworkConnection'
 # dns equivalent
 <#
 .SYNOPSIS
@@ -53,8 +51,7 @@ Set-Alias -Name ptest -Value Test-NetworkConnection -ErrorAction SilentlyContinu
     Performs DNS lookups for hostnames or IP addresses.
 #>
 function Resolve-DnsNameCustom { Resolve-DnsName @args }
-Set-Alias -Name dns -Value Resolve-DnsNameCustom -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'dns' -Target 'Resolve-DnsNameCustom'
 # rest equivalent
 <#
 .SYNOPSIS
@@ -63,8 +60,7 @@ Set-Alias -Name dns -Value Resolve-DnsNameCustom -ErrorAction SilentlyContinue
     Sends HTTP requests to REST APIs and returns the response.
 #>
 function Invoke-RestApi { Invoke-RestMethod @args }
-Set-Alias -Name rest -Value Invoke-RestApi -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rest' -Target 'Invoke-RestApi'
 # web equivalent
 <#
 .SYNOPSIS
@@ -73,5 +69,4 @@ Set-Alias -Name rest -Value Invoke-RestApi -ErrorAction SilentlyContinue
     Downloads content from web URLs or sends HTTP requests.
 #>
 function Invoke-WebRequestCustom { Invoke-WebRequest @args }
-Set-Alias -Name web -Value Invoke-WebRequestCustom -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'web' -Target 'Invoke-WebRequestCustom'

@@ -168,7 +168,7 @@ try {
                 
                     # Ensure command path is stored
                     if (-not $global:StarshipCommand) {
-                        $starCmd = Get-Command starship -ErrorAction SilentlyContinue
+                        $starCmd = Test-CachedCommand 'starship'
                         if ($starCmd) {
                             $global:StarshipCommand = $starCmd.Source
                         }
@@ -192,7 +192,7 @@ try {
                 }
             
                 # Not initialized - proceed with initialization
-                $starCmd = Get-Command starship -ErrorAction SilentlyContinue
+                $starCmd = Test-CachedCommand 'starship'
                 if (-not $starCmd) {
                     if ($env:PS_PROFILE_DEBUG) {
                         Write-Host "Starship not found, using smart prompt" -ForegroundColor Yellow
@@ -327,10 +327,10 @@ try {
     if ($debugLevel -ge 2) {
         $hasStarship = $false
         if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) {
-            $hasStarship = Test-CachedCommand starship
+            $hasStarship = Test-CachedCommand 'starship'
         }
         else {
-            $hasStarship = $null -ne (Get-Command starship -ErrorAction SilentlyContinue)
+            $hasStarship = $null -ne (Test-CachedCommand 'starship')
         }
         
         # Verify function was created

@@ -792,15 +792,7 @@ else {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ffd' -Target 'Find-WithFd'
-    Set-AgentModeAlias -Name 'grg' -Target 'Grep-WithRipgrep'
-    Set-AgentModeAlias -Name 'z' -Target 'Navigate-WithZoxide'
-    Set-AgentModeAlias -Name 'vbat' -Target 'View-WithBat'
-}
-else {
-    Set-Alias -Name 'ffd' -Value 'Find-WithFd' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'grg' -Value 'Grep-WithRipgrep' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'z' -Value 'Navigate-WithZoxide' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'vbat' -Value 'View-WithBat' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ffd' -Target 'Find-WithFd'
+Set-AgentModeAlias -Name 'grg' -Target 'Grep-WithRipgrep'
+Set-AgentModeAlias -Name 'z' -Target 'Navigate-WithZoxide'
+Set-AgentModeAlias -Name 'vbat' -Target 'View-WithBat'

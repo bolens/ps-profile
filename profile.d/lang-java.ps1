@@ -142,15 +142,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Build-Maven -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Build-Maven' -Body ${function:Build-Maven}
-    }
+    Set-AgentModeFunction -Name 'Build-Maven' -Body ${function:Build-Maven}
     if (-not (Get-Alias mvn -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'mvn' -Target 'Build-Maven'
         }
         else {
-            Set-Alias -Name 'mvn' -Value 'Build-Maven' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'mvn' -Target 'Build-Maven'
         }
     }
 
@@ -242,15 +240,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Build-Gradle -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Build-Gradle' -Body ${function:Build-Gradle}
-    }
+    Set-AgentModeFunction -Name 'Build-Gradle' -Body ${function:Build-Gradle}
     if (-not (Get-Alias gradle -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'gradle' -Target 'Build-Gradle'
         }
         else {
-            Set-Alias -Name 'gradle' -Value 'Build-Gradle' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'gradle' -Target 'Build-Gradle'
         }
     }
 
@@ -339,15 +335,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Build-Ant -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Build-Ant' -Body ${function:Build-Ant}
-    }
+    Set-AgentModeFunction -Name 'Build-Ant' -Body ${function:Build-Ant}
     if (-not (Get-Alias ant -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'ant' -Target 'Build-Ant'
         }
         else {
-            Set-Alias -Name 'ant' -Value 'Build-Ant' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'ant' -Target 'Build-Ant'
         }
     }
 
@@ -432,15 +426,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Compile-Kotlin -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Compile-Kotlin' -Body ${function:Compile-Kotlin}
-    }
+    Set-AgentModeFunction -Name 'Compile-Kotlin' -Body ${function:Compile-Kotlin}
     if (-not (Get-Alias kotlinc -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'kotlinc' -Target 'Compile-Kotlin'
         }
         else {
-            Set-Alias -Name 'kotlinc' -Value 'Compile-Kotlin' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'kotlinc' -Target 'Compile-Kotlin'
         }
     }
 
@@ -525,15 +517,13 @@ try {
         }
     }
 
-    if (-not (Test-Path Function:\Compile-Scala -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Compile-Scala' -Body ${function:Compile-Scala}
-    }
+    Set-AgentModeFunction -Name 'Compile-Scala' -Body ${function:Compile-Scala}
     if (-not (Get-Alias scalac -ErrorAction SilentlyContinue)) {
         if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
             Set-AgentModeAlias -Name 'scalac' -Target 'Compile-Scala'
         }
         else {
-            Set-Alias -Name 'scalac' -Value 'Compile-Scala' -ErrorAction SilentlyContinue
+            Set-AgentModeAlias -Name 'scalac' -Target 'Compile-Scala'
         }
     }
 
@@ -804,10 +794,7 @@ try {
         return $null
     }
 
-    if (-not (Test-Path Function:\Set-JavaVersion -ErrorAction SilentlyContinue)) {
-        Set-AgentModeFunction -Name 'Set-JavaVersion' -Body ${function:Set-JavaVersion}
-    }
-
+    Set-AgentModeFunction -Name 'Set-JavaVersion' -Body ${function:Set-JavaVersion}
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'lang-java'

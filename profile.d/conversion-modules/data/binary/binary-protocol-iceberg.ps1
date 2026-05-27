@@ -202,8 +202,7 @@ function ConvertFrom-IcebergToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-IcebergToJson @PSBoundParameters
 }
-Set-Alias -Name iceberg-to-json -Value ConvertFrom-IcebergToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'iceberg-to-json' -Target 'ConvertFrom-IcebergToJson'
 # Convert JSON to Iceberg
 <#
 .SYNOPSIS
@@ -222,8 +221,7 @@ function ConvertTo-IcebergFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-IcebergFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-iceberg -Value ConvertTo-IcebergFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-iceberg' -Target 'ConvertTo-IcebergFromJson'
 # Convert Iceberg to Parquet
 <#
 .SYNOPSIS
@@ -242,5 +240,4 @@ function ConvertFrom-IcebergToParquet {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-IcebergToParquet @PSBoundParameters
 }
-Set-Alias -Name iceberg-to-parquet -Value ConvertFrom-IcebergToParquet -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'iceberg-to-parquet' -Target 'ConvertFrom-IcebergToParquet'

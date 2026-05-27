@@ -90,11 +90,5 @@ function Copy-MinioFile {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'mc-ls' -Target 'Get-MinioFileList'
-    Set-AgentModeAlias -Name 'mc-cp' -Target 'Copy-MinioFile'
-}
-else {
-    Set-Alias -Name 'mc-ls' -Value 'Get-MinioFileList' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'mc-cp' -Value 'Copy-MinioFile' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'mc-ls' -Target 'Get-MinioFileList'
+Set-AgentModeAlias -Name 'mc-cp' -Target 'Copy-MinioFile'

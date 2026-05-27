@@ -240,26 +240,14 @@ function Update-YarnSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-    Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-    Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-    Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-    Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-    Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-}
-else {
-    Set-Alias -Name 'yarn' -Value 'Invoke-Yarn' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-add' -Value 'Add-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-remove' -Value 'Remove-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-install' -Value 'Install-YarnDependencies' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-outdated' -Value 'Test-YarnOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-upgrade' -Value 'Update-YarnPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-global-upgrade' -Value 'Update-YarnGlobalPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-update' -Value 'Update-YarnSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
+Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
+Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
+Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
+Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
+Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
 #>
 function Update-YarnPackages {
     [CmdletBinding()]
@@ -336,26 +324,14 @@ function Update-YarnSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-    Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-    Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-    Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-    Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-    Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-}
-else {
-    Set-Alias -Name 'yarn' -Value 'Invoke-Yarn' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-add' -Value 'Add-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-remove' -Value 'Remove-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-install' -Value 'Install-YarnDependencies' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-outdated' -Value 'Test-YarnOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-upgrade' -Value 'Update-YarnPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-global-upgrade' -Value 'Update-YarnGlobalPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-update' -Value 'Update-YarnSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
+Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
+Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
+Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
+Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
+Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
 function Update-YarnSelf {
     [CmdletBinding()]
     param()
@@ -375,26 +351,14 @@ function Update-YarnSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-    Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-    Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-    Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-    Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-    Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-}
-else {
-    Set-Alias -Name 'yarn' -Value 'Invoke-Yarn' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-add' -Value 'Add-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-remove' -Value 'Remove-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-install' -Value 'Install-YarnDependencies' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-outdated' -Value 'Test-YarnOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-upgrade' -Value 'Update-YarnPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-global-upgrade' -Value 'Update-YarnGlobalPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-update' -Value 'Update-YarnSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
+Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
+Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
+Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
+Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
+Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
 function Update-YarnSelf {
     [CmdletBinding()]
     param()
@@ -414,26 +378,14 @@ function Update-YarnSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-    Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-    Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-    Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-    Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-    Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-}
-else {
-    Set-Alias -Name 'yarn' -Value 'Invoke-Yarn' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-add' -Value 'Add-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-remove' -Value 'Remove-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-install' -Value 'Install-YarnDependencies' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-outdated' -Value 'Test-YarnOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-upgrade' -Value 'Update-YarnPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-global-upgrade' -Value 'Update-YarnGlobalPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-update' -Value 'Update-YarnSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
+Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
+Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
+Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
+Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
+Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
 function Update-YarnSelf {
     [CmdletBinding()]
     param()
@@ -453,26 +405,14 @@ function Update-YarnSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-    Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-    Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-    Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-    Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-    Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-}
-else {
-    Set-Alias -Name 'yarn' -Value 'Invoke-Yarn' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-add' -Value 'Add-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-remove' -Value 'Remove-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-install' -Value 'Install-YarnDependencies' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-outdated' -Value 'Test-YarnOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-upgrade' -Value 'Update-YarnPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-global-upgrade' -Value 'Update-YarnGlobalPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-update' -Value 'Update-YarnSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
+Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
+Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
+Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
+Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
+Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
 function Update-YarnSelf {
     [CmdletBinding()]
     param()
@@ -492,26 +432,14 @@ function Update-YarnSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-    Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-    Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-    Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-    Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-    Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-}
-else {
-    Set-Alias -Name 'yarn' -Value 'Invoke-Yarn' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-add' -Value 'Add-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-remove' -Value 'Remove-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-install' -Value 'Install-YarnDependencies' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-outdated' -Value 'Test-YarnOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-upgrade' -Value 'Update-YarnPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-global-upgrade' -Value 'Update-YarnGlobalPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-update' -Value 'Update-YarnSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
+Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
+Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
+Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
+Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
+Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
 function Update-YarnSelf {
     [CmdletBinding()]
     param()
@@ -531,23 +459,11 @@ function Update-YarnSelf {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
-    Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
-    Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
-    Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
-    Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
-    Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
-    Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'
-}
-else {
-    Set-Alias -Name 'yarn' -Value 'Invoke-Yarn' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-add' -Value 'Add-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-remove' -Value 'Remove-YarnPackage' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-install' -Value 'Install-YarnDependencies' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-outdated' -Value 'Test-YarnOutdated' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-upgrade' -Value 'Update-YarnPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-global-upgrade' -Value 'Update-YarnGlobalPackages' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'yarn-update' -Value 'Update-YarnSelf' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'yarn' -Target 'Invoke-Yarn'
+Set-AgentModeAlias -Name 'yarn-add' -Target 'Add-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-remove' -Target 'Remove-YarnPackage'
+Set-AgentModeAlias -Name 'yarn-install' -Target 'Install-YarnDependencies'
+Set-AgentModeAlias -Name 'yarn-outdated' -Target 'Test-YarnOutdated'
+Set-AgentModeAlias -Name 'yarn-upgrade' -Target 'Update-YarnPackages'
+Set-AgentModeAlias -Name 'yarn-global-upgrade' -Target 'Update-YarnGlobalPackages'
+Set-AgentModeAlias -Name 'yarn-update' -Target 'Update-YarnSelf'

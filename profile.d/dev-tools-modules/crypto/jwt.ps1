@@ -62,7 +62,7 @@ function Initialize-DevTools-Jwt {
             [string]$Secret = ''
         )
         try {
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use JWT encoding."
             }
             $nodeScript = @"
@@ -129,8 +129,7 @@ function Decode-Jwt {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _Decode-Jwt @PSBoundParameters
 }
-Set-Alias -Name jwt-decode -Value Decode-Jwt -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'jwt-decode' -Target 'Decode-Jwt'
 <#
 .SYNOPSIS
     Encodes data into a JSON Web Token (JWT).
@@ -159,5 +158,4 @@ function Encode-Jwt {
     if (-not $global:DevToolsInitialized) { Ensure-DevTools }
     _Encode-Jwt @PSBoundParameters
 }
-Set-Alias -Name jwt-encode -Value Encode-Jwt -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'jwt-encode' -Target 'Encode-Jwt'

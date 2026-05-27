@@ -26,7 +26,7 @@ function Initialize-FileConversion-DocumentRst {
             }
             
             Ensure-DocumentLatexEngine | Out-Null
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -61,7 +61,7 @@ function Initialize-FileConversion-DocumentRst {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -96,7 +96,7 @@ function Initialize-FileConversion-DocumentRst {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -131,7 +131,7 @@ function Initialize-FileConversion-DocumentRst {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -166,7 +166,7 @@ function Initialize-FileConversion-DocumentRst {
                 throw "Input file not found: $InputPath"
             }
             
-            if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'pandoc')) {
                 throw "pandoc command not found. Please install pandoc to use this conversion function."
             }
             
@@ -216,8 +216,7 @@ function ConvertFrom-RstToMarkdown {
         Write-Error "Failed to convert RST to Markdown: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name rst-to-markdown -Value ConvertFrom-RstToMarkdown -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rst-to-markdown' -Target 'ConvertFrom-RstToMarkdown'
 # Convert RST to HTML
 <#
 .SYNOPSIS
@@ -244,8 +243,7 @@ function ConvertTo-HtmlFromRst {
         Write-Error "Failed to convert RST to HTML: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name rst-to-html -Value ConvertTo-HtmlFromRst -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rst-to-html' -Target 'ConvertTo-HtmlFromRst'
 # Convert RST to PDF
 <#
 .SYNOPSIS
@@ -272,8 +270,7 @@ function ConvertTo-PdfFromRst {
         Write-Error "Failed to convert RST to PDF: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name rst-to-pdf -Value ConvertTo-PdfFromRst -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rst-to-pdf' -Target 'ConvertTo-PdfFromRst'
 # Convert RST to DOCX
 <#
 .SYNOPSIS
@@ -300,8 +297,7 @@ function ConvertTo-DocxFromRst {
         Write-Error "Failed to convert RST to DOCX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name rst-to-docx -Value ConvertTo-DocxFromRst -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rst-to-docx' -Target 'ConvertTo-DocxFromRst'
 # Convert RST to LaTeX
 <#
 .SYNOPSIS
@@ -328,5 +324,4 @@ function ConvertTo-LaTeXFromRst {
         Write-Error "Failed to convert RST to LaTeX: $_" -ErrorAction SilentlyContinue
     }
 }
-Set-Alias -Name rst-to-latex -Value ConvertTo-LaTeXFromRst -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'rst-to-latex' -Target 'ConvertTo-LaTeXFromRst'

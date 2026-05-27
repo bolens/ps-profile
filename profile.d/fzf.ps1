@@ -80,11 +80,5 @@ function Find-CommandFuzzy {
 }
 
 # Create aliases for short forms
-if (Get-Command -Name 'Set-AgentModeAlias' -ErrorAction SilentlyContinue) {
-    Set-AgentModeAlias -Name 'ff' -Target 'Find-FileFuzzy'
-    Set-AgentModeAlias -Name 'fcmd' -Target 'Find-CommandFuzzy'
-}
-else {
-    Set-Alias -Name 'ff' -Value 'Find-FileFuzzy' -ErrorAction SilentlyContinue
-    Set-Alias -Name 'fcmd' -Value 'Find-CommandFuzzy' -ErrorAction SilentlyContinue
-}
+Set-AgentModeAlias -Name 'ff' -Target 'Find-FileFuzzy'
+Set-AgentModeAlias -Name 'fcmd' -Target 'Find-CommandFuzzy'

@@ -27,7 +27,7 @@ if (-not (Test-Path Function:Copy-ToClipboard -ErrorAction SilentlyContinue)) {
             }
         }
     }
-    Set-Alias -Name cb -Value Copy-ToClipboard -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'cb' -Target 'Copy-ToClipboard'
 }
 
 # Paste from clipboard
@@ -50,5 +50,5 @@ if (-not (Test-Path Function:Get-FromClipboard -ErrorAction SilentlyContinue)) {
             $null
         }
     }
-    Set-Alias -Name pb -Value Get-FromClipboard -ErrorAction SilentlyContinue
+    Set-AgentModeAlias -Name 'pb' -Target 'Get-FromClipboard'
 }

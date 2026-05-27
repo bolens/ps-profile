@@ -35,7 +35,7 @@ function Initialize-FileConversion-ColumnarDirect {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.parquet$', '.arrow' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use columnar format conversions."
             }
             $nodeScript = @"
@@ -91,7 +91,7 @@ const fs = require('fs');
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.arrow$', '.parquet' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use columnar format conversions."
             }
             $nodeScript = @"
@@ -151,8 +151,7 @@ function ConvertTo-ArrowFromParquet {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ArrowFromParquet @PSBoundParameters
 }
-Set-Alias -Name parquet-to-arrow -Value ConvertTo-ArrowFromParquet -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'parquet-to-arrow' -Target 'ConvertTo-ArrowFromParquet'
 # Convert Arrow to Parquet
 <#
 .SYNOPSIS
@@ -171,5 +170,4 @@ function ConvertTo-ParquetFromArrow {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ParquetFromArrow @PSBoundParameters
 }
-Set-Alias -Name arrow-to-parquet -Value ConvertTo-ParquetFromArrow -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'arrow-to-parquet' -Target 'ConvertTo-ParquetFromArrow'

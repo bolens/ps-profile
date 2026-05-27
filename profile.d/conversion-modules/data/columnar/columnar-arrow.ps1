@@ -35,7 +35,7 @@ function Initialize-FileConversion-ColumnarArrow {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.json$', '.arrow' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Arrow conversions."
             }
             $nodeScript = @"
@@ -78,7 +78,7 @@ try {
         param([string]$InputPath, [string]$OutputPath)
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.arrow$', '.json' }
-            if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+            if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available. Install Node.js to use Arrow conversions."
             }
             $nodeScript = @"
@@ -135,8 +135,7 @@ function ConvertTo-ArrowFromJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertTo-ArrowFromJson @PSBoundParameters
 }
-Set-Alias -Name json-to-arrow -Value ConvertTo-ArrowFromJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'json-to-arrow' -Target 'ConvertTo-ArrowFromJson'
 # Convert Arrow to JSON
 <#
 .SYNOPSIS
@@ -154,5 +153,4 @@ function ConvertFrom-ArrowToJson {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _ConvertFrom-ArrowToJson @PSBoundParameters
 }
-Set-Alias -Name arrow-to-json -Value ConvertFrom-ArrowToJson -ErrorAction SilentlyContinue
-
+Set-AgentModeAlias -Name 'arrow-to-json' -Target 'ConvertFrom-ArrowToJson'
