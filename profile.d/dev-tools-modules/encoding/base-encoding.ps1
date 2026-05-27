@@ -39,20 +39,19 @@ function Initialize-DevTools-BaseEncoding {
                     throw "Node.js is not available. Install Node.js to use Base32 encoding."
                 }
                 $nodeScript = @"
-try {
-    const base32 = require('base32-encode');
+import('base32-encode').then(({ default: base32Encode }) => {
     const text = process.argv[1];
     const buffer = Buffer.from(text, 'utf8');
-    const encoded = base32(buffer);
+    const encoded = base32Encode(buffer, 'RFC4648', { padding: false });
     console.log(encoded);
-} catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
+}).catch(error => {
+    if (error.code === 'ERR_MODULE_NOT_FOUND' || error.code === 'MODULE_NOT_FOUND') {
         console.error('Error: base32-encode package is not installed. Install it with: npm install -g base32-encode');
     } else {
         console.error('Error:', error.message);
     }
     process.exit(1);
-}
+});
 "@
                 $tempScript = Join-Path $env:TEMP "base32-encode-$(Get-Random).js"
                 Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
