@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/bolens/ps-profile/compare/v1.3.4...v1.3.5) (2026-05-28)
+
+
+### Bug Fixes
+
+* ansible cross-platform, CRLF newlines in asn1/edifact ([4c69874](https://github.com/bolens/ps-profile/commit/4c69874dd811cfb4ce2d632518d1aab476016d97))
+
 ## [1.3.4](https://github.com/bolens/ps-profile/compare/v1.3.3...v1.3.4) (2026-05-28)
 
 
