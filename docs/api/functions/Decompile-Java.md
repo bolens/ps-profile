@@ -54,4 +54,4 @@ Decompile-Java -InputFile "app.apk" -DecompileResources
 
 ## Source
 
-Defined in: ..\profile.d\re-tools.ps1
+Defined in: ../profile.d/re-tools.ps1

@@ -39,9 +39,9 @@ Add-BunPackage -D typescript
 
 This function has the following aliases:
 
-- `bun-add` - Adds packages using Bun.
+- `bun-add` - Updates Bun to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\bun.ps1
+Defined in: ../profile.d/bun.ps1

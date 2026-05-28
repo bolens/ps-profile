@@ -48,4 +48,4 @@ Set-JavaVersion -JavaHome "C:\Program Files\Java\jdk-17"
 
 ## Source
 
-Defined in: ..\profile.d\lang-java.ps1
+Defined in: ../profile.d/lang-java-version.ps1

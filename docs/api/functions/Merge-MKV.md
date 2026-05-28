@@ -42,4 +42,4 @@ Merge-MKV -InputPaths @("part1.mkv", "part2.mkv") -OutputPath "complete.mkv"
 
 ## Source
 
-Defined in: ..\profile.d\media-tools.ps1
+Defined in: ../profile.d/media-tools.ps1

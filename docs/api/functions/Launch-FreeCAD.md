@@ -46,4 +46,4 @@ Launch-FreeCAD -ProjectPath "model.FCStd"
 
 ## Source
 
-Defined in: ..\profile.d\3d-cad.ps1
+Defined in: ../profile.d/3d-cad.ps1

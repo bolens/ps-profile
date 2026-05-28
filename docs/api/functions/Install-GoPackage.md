@@ -27,9 +27,16 @@ Package paths to install (e.g., github.com/user/cmd/tool@latest).
 
 `powershell
 Install-GoPackage github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-    Installs golangci-lint globally.
+        Installs golangci-lint globally.
 ``
+
+## Aliases
+
+This function has the following aliases:
+
+- `go-install` - Installs Go packages globally.
+
 
 ## Source
 
-Defined in: ..\profile.d\go.ps1
+Defined in: ../profile.d/lang-go-basic.ps1

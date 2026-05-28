@@ -50,4 +50,4 @@ Export-AwsCredentials -Profile "dev" -ExportToEnv:$false
 
 ## Source
 
-Defined in: ..\profile.d\aws.ps1
+Defined in: ../profile.d/aws.ps1

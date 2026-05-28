@@ -46,4 +46,4 @@ Launch-Unity -ProjectPath "C:\Projects\MyGame"
 
 ## Source
 
-Defined in: ..\profile.d\game-dev.ps1
+Defined in: ../profile.d/game-dev.ps1

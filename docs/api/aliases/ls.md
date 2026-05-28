@@ -1,16 +1,16 @@
-# lS
+# ls
 
 ## Synopsis
 
-Lists directory contents sorted by size using eza.
+Lists directory contents using eza.
 
 ## Description
 
-Shows files sorted by file size in descending order.
+Replacement for ls command using eza for modern directory listing.
 
 ## Alias Information
 
-**Alias for:** `Get-ChildItemEzaBySize`
+**Alias for:** `Get-ChildItemEza`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\eza.ps1
+Defined in: ../profile.d/eza.ps1

@@ -95,11 +95,7 @@ function Initialize-FileConversion-Jsonc {
     Set-Item -Path Function:Global:_ConvertFrom-JsoncToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -139,17 +135,12 @@ function Initialize-FileConversion-Jsonc {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.to-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSONC to JSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.to-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -170,11 +161,7 @@ function Initialize-FileConversion-Jsonc {
     Set-Item -Path Function:Global:_ConvertTo-JsoncFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -214,17 +201,12 @@ function Initialize-FileConversion-Jsonc {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.from-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to JSONC: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.from-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -245,11 +227,7 @@ function Initialize-FileConversion-Jsonc {
     Set-Item -Path Function:Global:_ConvertFrom-JsoncToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -297,17 +275,12 @@ function Initialize-FileConversion-Jsonc {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.to-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSONC to YAML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.to-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -328,11 +301,7 @@ function Initialize-FileConversion-Jsonc {
     Set-Item -Path Function:Global:_ConvertTo-JsoncFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -380,17 +349,12 @@ function Initialize-FileConversion-Jsonc {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.from-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert YAML to JSONC: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonc.from-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details

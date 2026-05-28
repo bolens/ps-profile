@@ -54,4 +54,4 @@ Rip-CD -OutputPath "C:\Music\Album" -Format "mp3" -Quality 0
 
 ## Source
 
-Defined in: ..\profile.d\media-tools.ps1
+Defined in: ../profile.d/media-tools.ps1

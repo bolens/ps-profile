@@ -21,11 +21,7 @@ Notes:
 
 try {
     # Parse debug level once at fragment start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled, $debugLevel contains the numeric level (1-3)
-    }
-    
+    $debugLevel = Get-ProfileDebugLevel
     # Diagnostic: Confirm fragment is being loaded (this should appear during normal fragment loading)
     # If this only appears during manual load, the fragment isn't being loaded normally
     # Level 2: Verbose debug - fragment loading details

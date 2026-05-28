@@ -31,9 +31,9 @@ Update-YarnGlobalPackages
 
 This function has the following aliases:
 
-- `yarn-global-upgrade` - Updates all globally installed Yarn packages to their latest versions.
+- `yarn-global-upgrade` - Updates Yarn to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\yarn.ps1
+Defined in: ../profile.d/yarn.ps1

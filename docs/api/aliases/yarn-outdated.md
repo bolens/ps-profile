@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Checks for outdated packages in the current project.
+Updates Yarn to the latest version.
 
 ## Description
 
-Lists all packages that have newer versions available. This is equivalent to running 'yarn outdated'.
+Updates Yarn itself to the latest version using 'yarn set version latest'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\yarn.ps1
+Defined in: ../profile.d/yarn.ps1

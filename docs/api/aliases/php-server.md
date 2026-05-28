@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Starts PHP built-in development server.
+Updates Composer to the latest version.
 
 ## Description
 
-Wrapper for PHP built-in server command.
+Updates Composer itself to the latest version using 'composer self-update'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\php.ps1
+Defined in: ../profile.d/php.ps1

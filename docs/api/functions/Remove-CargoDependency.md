@@ -47,4 +47,4 @@ Remove-CargoDependency tokio-test -Dev
 
 ## Source
 
-Defined in: ..\profile.d\rustup.ps1
+Defined in: ../profile.d/rustup.ps1

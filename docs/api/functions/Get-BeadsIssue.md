@@ -41,4 +41,4 @@ Get-BeadsIssue -IssueId bd-a1b2
 
 ## Source
 
-Defined in: ..\profile.d\beads.ps1
+Defined in: ../profile.d/beads.ps1

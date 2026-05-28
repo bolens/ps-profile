@@ -52,4 +52,4 @@ New-PythonProject myproject -Path 'C:\Projects' -UseUV
 
 ## Source
 
-Defined in: ..\profile.d\lang-python.ps1
+Defined in: ../profile.d/lang-python-env.ps1

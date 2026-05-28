@@ -46,4 +46,4 @@ Flash-Android -FirmwarePath "firmware.zip"
 
 ## Source
 
-Defined in: ..\profile.d\mobile-dev.ps1
+Defined in: ../profile.d/mobile-dev.ps1

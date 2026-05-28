@@ -58,4 +58,4 @@ Get-KubeResources -ResourceType "deployments" -Namespace "production" -OutputFor
 
 ## Source
 
-Defined in: ..\profile.d\kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-enhanced.ps1

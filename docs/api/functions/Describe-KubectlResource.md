@@ -39,9 +39,9 @@ Describe-KubectlResource pod my-pod -n default
 
 This function has the following aliases:
 
-- `kd` - Describes Kubernetes resources.
+- `kd` - Gets the current Kubernetes context.
 
 
 ## Source
 
-Defined in: ..\profile.d\kubectl.ps1
+Defined in: ../profile.d/kubectl.ps1

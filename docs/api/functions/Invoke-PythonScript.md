@@ -48,4 +48,4 @@ Invoke-PythonScript -Arguments @('-c', 'print("Hello")')
 
 ## Source
 
-Defined in: ..\profile.d\lang-python.ps1
+Defined in: ../profile.d/lang-python-env.ps1

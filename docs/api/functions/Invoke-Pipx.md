@@ -55,4 +55,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\lang-python.ps1
+Defined in: ../profile.d/lang-python-pipx.ps1

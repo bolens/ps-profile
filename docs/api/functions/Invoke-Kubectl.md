@@ -39,9 +39,9 @@ Invoke-Kubectl get pods
 
 This function has the following aliases:
 
-- `k` - Executes kubectl with the specified arguments.
+- `k` - Gets the current Kubernetes context.
 
 
 ## Source
 
-Defined in: ..\profile.d\kubectl.ps1
+Defined in: ../profile.d/kubectl.ps1

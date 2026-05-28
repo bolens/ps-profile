@@ -54,4 +54,4 @@ Get-ContainerStats -Container "my-container" -NoStream
 
 ## Source
 
-Defined in: ..\profile.d\containers-enhanced.ps1
+Defined in: ../profile.d/containers-enhanced.ps1

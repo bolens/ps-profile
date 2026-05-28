@@ -37,4 +37,4 @@ Archive-WebPage -Url "https://example.com/article"
 
 ## Source
 
-Defined in: ..\profile.d\content-tools.ps1
+Defined in: ../profile.d/content-tools.ps1

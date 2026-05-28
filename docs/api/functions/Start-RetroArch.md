@@ -54,4 +54,4 @@ Start-RetroArch -RomPath "game.sfc" -Core "snes9x" -Fullscreen
 
 ## Source
 
-Defined in: ..\profile.d\game-emulators.ps1
+Defined in: ../profile.d/game-emulators.ps1

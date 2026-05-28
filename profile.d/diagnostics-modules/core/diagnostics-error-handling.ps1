@@ -38,11 +38,9 @@ try {
             [ValidateSet('Profile', 'Fragment', 'Command', 'Network', 'System')] [string]$Category = 'Profile'
         )
 
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            if ($debugLevel -ge 3) {
-                Write-Host "  [diagnostics.error-handling] Writing profile error - Category: $Category, Context: $Context" -ForegroundColor DarkGray
-            }
+        $debugLevel = Get-ProfileDebugLevel
+        if ($debugLevel -ge 3) {
+            Write-Host "  [diagnostics.error-handling] Writing profile error - Category: $Category, Context: $Context" -ForegroundColor DarkGray
         }
 
         # Use DateTimeFormatting module if available for unified date formatting
@@ -140,17 +138,15 @@ Message: $errorMessage
         }
 
         if (-not $suppressConsole) {
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                if ($debugLevel -ge 1) {
-                    Write-Host $formattedError -ForegroundColor Red
-                }
-                if ($debugLevel -ge 2) {
-                    Write-Verbose "[diagnostics.error-handling] Error displayed - Category: $Category, Type: $errorType"
-                }
-                if ($debugLevel -ge 3) {
-                    Write-Host "  [diagnostics.error-handling] Error details - Script: $scriptName, Line: $lineNumber, Context: $Context" -ForegroundColor DarkGray
-                }
+            $debugLevel = Get-ProfileDebugLevel
+            if ($debugLevel -ge 1) {
+                Write-Host $formattedError -ForegroundColor Red
+            }
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.error-handling] Error displayed - Category: $Category, Type: $errorType"
+            }
+            if ($debugLevel -ge 3) {
+                Write-Host "  [diagnostics.error-handling] Error details - Script: $scriptName, Line: $lineNumber, Context: $Context" -ForegroundColor DarkGray
             }
             else {
                 Write-Warning "$Category Error: $errorMessage"
@@ -171,11 +167,9 @@ Message: $errorMessage
     function Invoke-ProfileErrorHandler {
         param([System.Management.Automation.ErrorRecord]$ErrorRecord)
 
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            if ($debugLevel -ge 2) {
-                Write-Verbose "[diagnostics.error-handling] Invoking profile error handler"
-            }
+        $debugLevel = Get-ProfileDebugLevel
+        if ($debugLevel -ge 2) {
+            Write-Verbose "[diagnostics.error-handling] Invoking profile error handler"
         }
 
         $errorMessage = $ErrorRecord.Exception.Message
@@ -238,11 +232,9 @@ Message: $errorMessage
             [int]$MaxRetries = 2
         )
 
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            if ($debugLevel -ge 1) {
-                Write-Verbose "[diagnostics.error-handling] Loading fragment safely: $FragmentName"
-            }
+        $debugLevel = Get-ProfileDebugLevel
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[diagnostics.error-handling] Loading fragment safely: $FragmentName"
         }
 
         $attempt = 0
@@ -351,24 +343,22 @@ Message: $errorMessage
     Set-Variable -Name 'ErrorHandlingLoaded' -Value $true -Scope Global -Force
 }
 catch {
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        if ($debugLevel -ge 1) {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord $_ -OperationName 'error-handling' -Context @{
-                    fragment = 'diagnostics-error-handling'
-                }
-            }
-            else {
-                Write-Error "Error handling fragment failed: $($_.Exception.Message)"
+    $debugLevel = Get-ProfileDebugLevel
+    if ($debugLevel -ge 1) {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'error-handling' -Context @{
+                fragment = 'diagnostics-error-handling'
             }
         }
-        if ($debugLevel -ge 2) {
-            Write-Verbose "[error-handling] Fragment load error: $($_.Exception.Message)"
+        else {
+            Write-Error "Error handling fragment failed: $($_.Exception.Message)"
         }
-        if ($debugLevel -ge 3) {
-            Write-Host "  [error-handling] Error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
-        }
+    }
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[error-handling] Fragment load error: $($_.Exception.Message)"
+    }
+    if ($debugLevel -ge 3) {
+        Write-Host "  [error-handling] Error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
     }
     else {
         # Always log errors even if debug is off

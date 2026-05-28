@@ -58,4 +58,4 @@ Get-TerraformState -ResourceAddress "aws_instance.web" -OutputFormat "json"
 
 ## Source
 
-Defined in: ..\profile.d\iac-tools.ps1
+Defined in: ../profile.d/iac-tools.ps1

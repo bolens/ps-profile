@@ -58,4 +58,4 @@ Extract-AndroidApk -InputFile "app.apk" -Decompile
 
 ## Source
 
-Defined in: ..\profile.d\re-tools.ps1
+Defined in: ../profile.d/re-tools.ps1

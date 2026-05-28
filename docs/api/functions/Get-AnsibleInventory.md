@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Ansible inventory commands via WSL with UTF-8 locale.
+Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 ## Description
 
-Executes ansible-inventory commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
+No description available.
 
 ## Signature
 
@@ -29,19 +29,13 @@ Arguments to pass to ansible-inventory.
 Get-AnsibleInventory --list
 ``
 
-### Example 2
-
-`powershell
-Get-AnsibleInventory --host webserver
-``
-
 ## Aliases
 
 This function has the following aliases:
 
-- `ansible-inventory` - Runs Ansible inventory commands via WSL with UTF-8 locale.
+- `ansible-inventory` - Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 
 ## Source
 
-Defined in: ..\profile.d\ansible.ps1
+Defined in: ../profile.d/ansible.ps1

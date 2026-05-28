@@ -60,4 +60,4 @@ Get-BeadsReady -Limit 10 -Priority 1
 
 ## Source
 
-Defined in: ..\profile.d\beads.ps1
+Defined in: ../profile.d/beads.ps1

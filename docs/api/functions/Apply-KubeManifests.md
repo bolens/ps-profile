@@ -74,4 +74,4 @@ Apply-KubeManifests -Path "deployment.yaml" -Namespace "production" -ServerSide
 
 ## Source
 
-Defined in: ..\profile.d\kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-enhanced.ps1

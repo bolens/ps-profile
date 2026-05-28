@@ -124,11 +124,11 @@ function Write-DocsDebugMessage {
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
     if (-not $repoRoot) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to determine repository root from script path: $PSScriptRoot"
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to determine repository root from script path: $PSScriptRoot"
     }
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Handle OutputPath - if it's absolute, use it directly, otherwise join with repo root
@@ -144,7 +144,7 @@ else {
 }
 
 if ([string]::IsNullOrWhiteSpace($docsPath)) {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "OutputPath cannot be null or empty"
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "OutputPath cannot be null or empty"
 }
 
 # Use provided ProfilePath or default to repo root profile.d
@@ -201,7 +201,7 @@ if ($debugLevel -ge 2) {
 }
 
 if (-not $parsedData) {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to parse documented commands from profile path: $profilePath"
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to parse documented commands from profile path: $profilePath"
 }
 
 $functions = $parsedData.Functions
@@ -216,7 +216,7 @@ if (-not $aliases) {
 }
 
 if ($functions.Count -eq 0 -and $aliases.Count -eq 0) {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "No functions or aliases with documentation found."
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No functions or aliases with documentation found."
 }
 
 Write-ScriptMessage -Message "Found $($functions.Count) functions and $($aliases.Count) aliases with documentation."
@@ -429,9 +429,9 @@ if ($oldDocsPath -and -not [string]::IsNullOrWhiteSpace($oldDocsPath) -and (Test
 if ($DryRun) {
     Write-ScriptMessage -Message "`n[DRY RUN] Would generate API documentation in: $docsPath" -ForegroundColor Yellow
     Write-ScriptMessage -Message "Run without -DryRun to apply changes." -ForegroundColor Yellow
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "DRY RUN: Would generate documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would generate documentation for $($functions.Count) functions and $($aliases.Count) aliases."
 }
 else {
     Write-ScriptMessage -Message "`nAPI documentation generated in: $docsPath"
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Generated documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Generated documentation for $($functions.Count) functions and $($aliases.Count) aliases."
 }

@@ -58,4 +58,4 @@ Render-3DScene -ProjectPath "scene.blend" -OutputPath "render.png" -Frame 10 -En
 
 ## Source
 
-Defined in: ..\profile.d\3d-cad.ps1
+Defined in: ../profile.d/3d-cad.ps1

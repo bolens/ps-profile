@@ -18,11 +18,7 @@ function Initialize-FileConversion-CoreBasicXml {
     Set-Item -Path Function:Global:_ConvertFrom-XmlToJson -Value { 
         param([string]$Path)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -53,16 +49,11 @@ function Initialize-FileConversion-CoreBasicXml {
             return $json
         } 
         catch { 
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.xml.to-json' -Context @{
-                    input_path = $Path
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to parse XML: $_"
+            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.xml.to-json' -Context @{
+                input_path = $Path
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -93,27 +84,18 @@ function Initialize-FileConversion-CoreBasicXml {
 function ConvertFrom-XmlToJson {
     param([string]$Path)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     try {
         & "Global:_ConvertFrom-XmlToJson" @PSBoundParameters
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.xml.to-json' -Context @{
-                input_path = $Path
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-            }
-        }
-        else {
-            Write-Error "Failed to convert XML to JSON: $($_.Exception.Message)"
+        $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.xml.to-json' -Context @{
+            input_path = $Path
+            input_size_bytes = $inputSize
+            error_type = $_.Exception.GetType().FullName
         }
         
         # Level 2: Error details

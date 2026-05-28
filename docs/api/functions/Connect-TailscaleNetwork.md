@@ -39,9 +39,9 @@ Connect-TailscaleNetwork --accept-routes
 
 This function has the following aliases:
 
-- `ts-up` - Connects to the Tailscale network.
+- `ts-up` - Gets Tailscale connection status.
 
 
 ## Source
 
-Defined in: ..\profile.d\tailscale.ps1
+Defined in: ../profile.d/tailscale.ps1

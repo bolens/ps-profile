@@ -58,4 +58,4 @@ Edit-WithNeovim -Path "script.ps1" -UseGui
 
 ## Source
 
-Defined in: ..\profile.d\editors.ps1
+Defined in: ../profile.d/editors.ps1

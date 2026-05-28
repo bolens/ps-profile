@@ -62,4 +62,4 @@ Edit-WithVSCode -Path "script.ps1" -NewWindow
 
 ## Source
 
-Defined in: ..\profile.d\editors.ps1
+Defined in: ../profile.d/editors.ps1

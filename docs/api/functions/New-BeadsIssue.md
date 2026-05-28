@@ -68,4 +68,4 @@ New-BeadsIssue -Title "Add feature" -Description "Detailed description" -Type fe
 
 ## Source
 
-Defined in: ..\profile.d\beads.ps1
+Defined in: ../profile.d/beads.ps1

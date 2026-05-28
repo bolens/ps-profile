@@ -54,4 +54,4 @@ Deploy-Balena -Application "my-app" -Action "logs" -Device "device-uuid"
 
 ## Source
 
-Defined in: ..\profile.d\containers-enhanced.ps1
+Defined in: ../profile.d/containers-enhanced.ps1

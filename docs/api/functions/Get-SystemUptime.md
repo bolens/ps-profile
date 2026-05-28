@@ -6,7 +6,7 @@ Shows system uptime.
 
 ## Description
 
-Calculates and displays the time elapsed since the system was last booted.
+Calculates and displays the time elapsed since the system was last booted. On Windows uses Win32_OperatingSystem; on Linux reads /proc/uptime; on macOS uses sysctl.
 
 ## Signature
 
@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\system-info.ps1
+Defined in: ../profile.d/system-info.ps1

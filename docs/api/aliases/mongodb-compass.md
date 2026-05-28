@@ -6,11 +6,11 @@ Launches MongoDB Compass GUI.
 
 ## Description
 
-Opens MongoDB Compass, a GUI tool for MongoDB database management.
+Opens MongoDB Compass, a GUI tool for MongoDB database management and visualization. MongoDB Compass allows you to explore, query, and manage MongoDB databases.
 
 ## Alias Information
 
-**Alias for:** `Invoke-MongoDbCompass`
+**Alias for:** `Start-MongoDbCompass`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\database.ps1
+Defined in: ../profile.d/database-clients.ps1

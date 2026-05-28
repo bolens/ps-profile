@@ -39,9 +39,9 @@ Get-KubectlResource pods -n default
 
 This function has the following aliases:
 
-- `kg` - Gets Kubernetes resources.
+- `kg` - Gets the current Kubernetes context.
 
 
 ## Source
 
-Defined in: ..\profile.d\kubectl.ps1
+Defined in: ../profile.d/kubectl.ps1

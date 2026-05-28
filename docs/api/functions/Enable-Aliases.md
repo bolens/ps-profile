@@ -30,4 +30,4 @@ Enable-Aliases
 
 ## Source
 
-Defined in: ..\profile.d\aliases.ps1
+Defined in: ../profile.d/aliases.ps1

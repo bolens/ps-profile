@@ -6,7 +6,7 @@ Copies input to the clipboard.
 
 ## Description
 
-Copies text or objects to the clipboard. Uses Set-Clipboard if available, otherwise falls back to the 'clip' command.
+Copies text or objects to the clipboard. Uses Set-Clipboard on Windows/pwsh, wl-copy (Wayland), xclip/xsel (X11), or pbcopy (macOS) as available.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\clipboard.ps1
+Defined in: ../profile.d/clipboard.ps1

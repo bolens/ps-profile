@@ -39,9 +39,9 @@ Invoke-Bunx --version
 
 This function has the following aliases:
 
-- `bunx` - Executes packages using bunx.
+- `bunx` - Updates Bun to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\bun.ps1
+Defined in: ../profile.d/bun.ps1

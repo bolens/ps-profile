@@ -17,11 +17,7 @@ function Initialize-FileConversion-CoreBasicBase64 {
     Set-Item -Path Function:Global:_ConvertTo-Base64 -Value {
         param([Parameter(ValueFromPipeline = $true)] $InputObject)
         process {
-            # Parse debug level once at function start
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                # Debug is enabled
-            }
+            $debugLevel = Get-ProfileDebugLevel
             
             try {
                 # Level 1: Basic operation start
@@ -57,17 +53,12 @@ function Initialize-FileConversion-CoreBasicBase64 {
                 return $result
             }
             catch {
-                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    $inputType = if ($InputObject -is [byte[]]) { 'byte[]' } else { 'string' }
-                    $inputSize = if ($InputObject -is [byte[]]) { $InputObject.Length } elseif ($InputObject) { ([string]$InputObject).Length } else { 0 }
-                    Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.base64.encode' -Context @{
-                        input_type = $inputType
-                        input_size_bytes = $inputSize
-                        error_type = $_.Exception.GetType().FullName
-                    }
-                }
-                else {
-                    Write-Error "Failed to encode to base64: $_"
+                $inputType = if ($InputObject -is [byte[]]) { 'byte[]' } else { 'string' }
+                $inputSize = if ($InputObject -is [byte[]]) { $InputObject.Length } elseif ($InputObject) { ([string]$InputObject).Length } else { 0 }
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.base64.encode' -Context @{
+                    input_type = $inputType
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
                 }
                 
                 # Level 2: Error details
@@ -89,11 +80,7 @@ function Initialize-FileConversion-CoreBasicBase64 {
     Set-Item -Path Function:Global:_ConvertFrom-Base64 -Value {
         param([Parameter(ValueFromPipeline = $true)] $InputObject)
         process {
-            # Parse debug level once at function start
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                # Debug is enabled
-            }
+            $debugLevel = Get-ProfileDebugLevel
             
             $s = [string]$InputObject -replace '\s+', ''
             if ([string]::IsNullOrWhiteSpace($s)) {
@@ -125,14 +112,9 @@ function Initialize-FileConversion-CoreBasicBase64 {
                 return $result
             }
             catch {
-                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.base64.decode' -Context @{
-                        input_length = $s.Length
-                        error_type = $_.Exception.GetType().FullName
-                    }
-                }
-                else {
-                    Write-Error "Invalid base64 input: $_" -ErrorAction SilentlyContinue
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.base64.decode' -Context @{
+                    input_length = $s.Length
+                    error_type = $_.Exception.GetType().FullName
                 }
                 
                 # Level 2: Error details
@@ -186,11 +168,7 @@ Set-Alias -Name to-base64 -Value ConvertTo-Base64 -Scope Global -ErrorAction Sil
 function ConvertFrom-Base64 {
     param([Parameter(ValueFromPipeline = $true)] $InputObject)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     try {
@@ -198,15 +176,10 @@ function ConvertFrom-Base64 {
         return $result
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            $inputLength = if ($InputObject) { ([string]$InputObject -replace '\s+', '').Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.base64.decode' -Context @{
-                input_length = $inputLength
-                error_type = $_.Exception.GetType().FullName
-            }
-        }
-        else {
-            Write-Error "Failed to decode from base64: $($_.Exception.Message)" -ErrorAction SilentlyContinue
+        $inputLength = if ($InputObject) { ([string]$InputObject -replace '\s+', '').Length } else { 0 }
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.base64.decode' -Context @{
+            input_length = $inputLength
+            error_type = $_.Exception.GetType().FullName
         }
         
         # Level 2: Error details

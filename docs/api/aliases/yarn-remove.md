@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Remove-YarnPackage`
+Updates Yarn to the latest version.
 
 ## Description
 
-This is an alias that points to the `Remove-YarnPackage` command.
+Updates Yarn itself to the latest version using 'yarn set version latest'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\yarn.ps1
+Defined in: ../profile.d/yarn.ps1

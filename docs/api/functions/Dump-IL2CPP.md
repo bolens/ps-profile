@@ -50,4 +50,4 @@ Dump-IL2CPP -MetadataFile "global-metadata.dat" -BinaryFile "GameAssembly.dll"
 
 ## Source
 
-Defined in: ..\profile.d\re-tools.ps1
+Defined in: ../profile.d/re-tools.ps1

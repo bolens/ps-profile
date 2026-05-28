@@ -58,4 +58,4 @@ Apply-Infrastructure -PlanFile "plan.out" -AutoApprove
 
 ## Source
 
-Defined in: ..\profile.d\iac-tools.ps1
+Defined in: ../profile.d/iac-tools.ps1

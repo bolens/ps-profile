@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs npm scripts using Bun.
+Updates Bun to the latest version.
 
 ## Description
 
-Wrapper for bun run command.
+Updates Bun itself to the latest version using 'bun upgrade'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\bun.ps1
+Defined in: ../profile.d/bun.ps1

@@ -58,4 +58,4 @@ Build-GodotProject -ProjectPath "C:\Projects\MyGame" -ExportPreset "Windows Desk
 
 ## Source
 
-Defined in: ..\profile.d\game-dev.ps1
+Defined in: ../profile.d/game-dev.ps1

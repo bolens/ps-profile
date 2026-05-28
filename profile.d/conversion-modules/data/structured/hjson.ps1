@@ -118,11 +118,7 @@ function Initialize-FileConversion-Hjson {
     Set-Item -Path Function:Global:_ConvertFrom-HjsonToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -162,17 +158,12 @@ function Initialize-FileConversion-Hjson {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.to-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert HJSON to JSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.to-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -193,11 +184,7 @@ function Initialize-FileConversion-Hjson {
     Set-Item -Path Function:Global:_ConvertTo-HjsonFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -240,17 +227,12 @@ function Initialize-FileConversion-Hjson {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.from-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to HJSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.from-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -271,11 +253,7 @@ function Initialize-FileConversion-Hjson {
     Set-Item -Path Function:Global:_ConvertFrom-HjsonToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -323,17 +301,12 @@ function Initialize-FileConversion-Hjson {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.to-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert HJSON to YAML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.to-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -354,11 +327,7 @@ function Initialize-FileConversion-Hjson {
     Set-Item -Path Function:Global:_ConvertTo-HjsonFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -406,17 +375,12 @@ function Initialize-FileConversion-Hjson {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.from-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert YAML to HJSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.hjson.from-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details

@@ -54,4 +54,4 @@ Get-AwsCosts -StartDate "2024-01-01" -EndDate "2024-01-31" -Service "EC2"
 
 ## Source
 
-Defined in: ..\profile.d\aws.ps1
+Defined in: ../profile.d/aws.ps1

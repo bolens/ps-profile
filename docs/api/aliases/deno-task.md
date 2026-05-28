@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Deno tasks.
+Updates Deno to the latest version.
 
 ## Description
 
-Wrapper for deno task command to run tasks defined in deno.json.
+Updates Deno itself to the latest version using 'deno upgrade'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\deno.ps1
+Defined in: ../profile.d/deno.ps1

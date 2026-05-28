@@ -53,4 +53,4 @@ Start-Wireshark -Interface "Ethernet"
 
 ## Source
 
-Defined in: ..\profile.d\network-analysis.ps1
+Defined in: ../profile.d/network-analysis.ps1

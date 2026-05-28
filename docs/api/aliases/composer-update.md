@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates all packages in the current Composer project to their latest versions.
+Updates Composer to the latest version.
 
 ## Description
 
-Updates all packages to their latest versions according to the version constraints specified in composer.json. This is equivalent to running 'composer update'.
+Updates Composer itself to the latest version using 'composer self-update'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\php.ps1
+Defined in: ../profile.d/php.ps1

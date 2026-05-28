@@ -45,4 +45,4 @@ Tag-Audio -AudioPath "C:\Music" -Tool "picard"
 
 ## Source
 
-Defined in: ..\profile.d\media-tools.ps1
+Defined in: ../profile.d/media-tools.ps1

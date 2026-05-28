@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Ansible documentation commands via WSL with UTF-8 locale.
+Runs ansible-doc with the correct invocation strategy for the current platform.
 
 ## Description
 
-Executes ansible-doc commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
+No description available.
 
 ## Signature
 
@@ -29,19 +29,13 @@ Arguments to pass to ansible-doc.
 Get-AnsibleDoc ping
 ``
 
-### Example 2
-
-`powershell
-Get-AnsibleDoc -l
-``
-
 ## Aliases
 
 This function has the following aliases:
 
-- `ansible-doc` - Runs Ansible documentation commands via WSL with UTF-8 locale.
+- `ansible-doc` - Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 
 ## Source
 
-Defined in: ..\profile.d\ansible.ps1
+Defined in: ../profile.d/ansible.ps1

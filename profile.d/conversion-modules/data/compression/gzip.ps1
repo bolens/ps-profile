@@ -21,11 +21,7 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$OutputPath
         )
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -80,17 +76,12 @@ function Initialize-FileConversion-CoreCompressionGzip {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.gzip.compress' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to compress file with Gzip: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.gzip.compress' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -115,11 +106,7 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$OutputPath
         )
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -179,17 +166,12 @@ function Initialize-FileConversion-CoreCompressionGzip {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.gzip.decompress' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to decompress Gzip file: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.gzip.decompress' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -214,11 +196,7 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$OutputPath
         )
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -273,17 +251,12 @@ function Initialize-FileConversion-CoreCompressionGzip {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.zlib.compress' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to compress file with Zlib: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.zlib.compress' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -308,11 +281,7 @@ function Initialize-FileConversion-CoreCompressionGzip {
             [string]$OutputPath
         )
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -372,17 +341,12 @@ function Initialize-FileConversion-CoreCompressionGzip {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.zlib.decompress' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to decompress Zlib file: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.zlib.decompress' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details

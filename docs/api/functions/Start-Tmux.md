@@ -62,4 +62,4 @@ Start-Tmux -SessionName "dev" -Attach
 
 ## Source
 
-Defined in: ..\profile.d\terminal-enhanced.ps1
+Defined in: ../profile.d/terminal-enhanced.ps1

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Ansible playbook commands via WSL with UTF-8 locale.
+Runs ansible-playbook with the correct invocation strategy for the current platform.
 
 ## Description
 
-Executes ansible-playbook commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
+No description available.
 
 ## Signature
 
@@ -26,12 +26,6 @@ Arguments to pass to ansible-playbook.
 ### Example 1
 
 `powershell
-Invoke-AnsiblePlaybook playbook.yml
-``
-
-### Example 2
-
-`powershell
 Invoke-AnsiblePlaybook playbook.yml --check
 ``
 
@@ -39,9 +33,9 @@ Invoke-AnsiblePlaybook playbook.yml --check
 
 This function has the following aliases:
 
-- `ansible-playbook` - Runs Ansible playbook commands via WSL with UTF-8 locale.
+- `ansible-playbook` - Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 
 ## Source
 
-Defined in: ..\profile.d\ansible.ps1
+Defined in: ../profile.d/ansible.ps1

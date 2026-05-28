@@ -46,4 +46,4 @@ Launch-Lapce -Path "C:\Projects\MyApp"
 
 ## Source
 
-Defined in: ..\profile.d\editors.ps1
+Defined in: ../profile.d/editors.ps1

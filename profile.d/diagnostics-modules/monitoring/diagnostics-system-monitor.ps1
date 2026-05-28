@@ -145,11 +145,9 @@ try {
         and other system metrics in a clean, organized format.
     #>
     function Show-SystemDashboard {
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            if ($debugLevel -ge 1) {
-                Write-Verbose "[diagnostics.system-monitor] Showing system dashboard"
-            }
+        $debugLevel = Get-ProfileDebugLevel
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[diagnostics.system-monitor] Showing system dashboard"
         }
 
         $dashboardStartTime = [DateTime]::Now
@@ -838,24 +836,22 @@ try {
     Set-Variable -Name 'SystemMonitorLoaded' -Value $true -Scope Global -Force
 }
 catch {
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        if ($debugLevel -ge 1) {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor' -Context @{
-                    fragment = 'diagnostics-system-monitor'
-                }
-            }
-            else {
-                Write-Error "System monitor fragment failed: $($_.Exception.Message)"
+    $debugLevel = Get-ProfileDebugLevel
+    if ($debugLevel -ge 1) {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.system-monitor' -Context @{
+                fragment = 'diagnostics-system-monitor'
             }
         }
-        if ($debugLevel -ge 2) {
-            Write-Verbose "[diagnostics.system-monitor] Fragment load error: $($_.Exception.Message)"
+        else {
+            Write-Error "System monitor fragment failed: $($_.Exception.Message)"
         }
-        if ($debugLevel -ge 3) {
-            Write-Host "  [diagnostics.system-monitor] Fragment error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
-        }
+    }
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[diagnostics.system-monitor] Fragment load error: $($_.Exception.Message)"
+    }
+    if ($debugLevel -ge 3) {
+        Write-Host "  [diagnostics.system-monitor] Fragment error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
     }
     else {
         # Always log errors even if debug is off

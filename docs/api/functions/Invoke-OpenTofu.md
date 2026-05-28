@@ -41,4 +41,4 @@ Invoke-OpenTofu plan
 
 ## Source
 
-Defined in: ..\profile.d\iac-tools.ps1
+Defined in: ../profile.d/iac-tools.ps1

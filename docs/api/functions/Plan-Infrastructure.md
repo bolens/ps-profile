@@ -54,4 +54,4 @@ Plan-Infrastructure -OutputFile "plan.out" -Tool "opentofu"
 
 ## Source
 
-Defined in: ..\profile.d\iac-tools.ps1
+Defined in: ../profile.d/iac-tools.ps1

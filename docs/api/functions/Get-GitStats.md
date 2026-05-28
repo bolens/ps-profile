@@ -54,4 +54,4 @@ Get-GitStats -Since "2024-01-01"
 
 ## Source
 
-Defined in: ..\profile.d\git-enhanced.ps1
+Defined in: ../profile.d/git-enhanced.ps1

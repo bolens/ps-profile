@@ -56,4 +56,4 @@ Initialize-Beads -Contributor
 
 ## Source
 
-Defined in: ..\profile.d\beads.ps1
+Defined in: ../profile.d/beads.ps1

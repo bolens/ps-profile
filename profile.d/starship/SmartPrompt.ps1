@@ -602,18 +602,16 @@ if (-not $global:SmartPromptCommandTrackingSetup) {
             }
         
             # Now safe to do debug logging (after exclusions)
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                if ($debugLevel -ge 3) {
-                    # Temporarily disable guard for Write-Host (it's excluded, but be safe)
-                    $tempGuard = $global:SmartPromptPostCommandLookupInProgress
-                    $global:SmartPromptPostCommandLookupInProgress = $false
-                    try {
-                        Write-Host "  [prompt.timing] PostCommandLookupAction fired for command: $commandName" -ForegroundColor DarkGray
-                    }
-                    finally {
-                        $global:SmartPromptPostCommandLookupInProgress = $tempGuard
-                    }
+            $debugLevel = Get-ProfileDebugLevel
+            if ($debugLevel -ge 3) {
+                # Temporarily disable guard for Write-Host (it's excluded, but be safe)
+                $tempGuard = $global:SmartPromptPostCommandLookupInProgress
+                $global:SmartPromptPostCommandLookupInProgress = $false
+                try {
+                    Write-Host "  [prompt.timing] PostCommandLookupAction fired for command: $commandName" -ForegroundColor DarkGray
+                }
+                finally {
+                    $global:SmartPromptPostCommandLookupInProgress = $tempGuard
                 }
             }
                     
@@ -710,8 +708,8 @@ if (-not $global:SmartPromptCommandTrackingSetup) {
     $global:SmartPromptCommandTrackingSetup = $true
             
     # Level 1: Log setup completion
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+    $debugLevel = Get-ProfileDebugLevel
+    if ($debugLevel -ge 1) {
         Write-Verbose "[prompt.timing] Command tracking initialized using PostCommandLookupAction"
     }
 }

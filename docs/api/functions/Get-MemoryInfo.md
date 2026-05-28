@@ -6,7 +6,7 @@ Shows memory information.
 
 ## Description
 
-Displays total physical memory capacity in GB.
+Displays total physical memory capacity in GB. On Windows uses Win32_PhysicalMemory; on Linux reads /proc/meminfo.
 
 ## Signature
 
@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\system-info.ps1
+Defined in: ../profile.d/system-info.ps1

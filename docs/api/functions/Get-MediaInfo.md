@@ -54,4 +54,4 @@ Get-MediaInfo -MediaPath "video.mp4" -OutputFormat "json" -OutputPath "info.json
 
 ## Source
 
-Defined in: ..\profile.d\media-tools.ps1
+Defined in: ../profile.d/media-tools.ps1

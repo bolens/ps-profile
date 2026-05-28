@@ -70,14 +70,12 @@ try {
             Only available when PS_PROFILE_DEBUG environment variable is set.
         #>
         function Show-ProfileStartupTime {
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                if ($debugLevel -ge 2) {
-                    Write-Verbose "[diagnostics.profile.startup] Calculating profile startup time"
-                }
-                if ($debugLevel -ge 3) {
-                    Write-Host "  [diagnostics.profile.startup] Profile start time: $($global:PSProfileStartTime.ToString('o'))" -ForegroundColor DarkGray
-                }
+            $debugLevel = Get-ProfileDebugLevel
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[diagnostics.profile.startup] Calculating profile startup time"
+            }
+            if ($debugLevel -ge 3) {
+                Write-Host "  [diagnostics.profile.startup] Profile start time: $($global:PSProfileStartTime.ToString('o'))" -ForegroundColor DarkGray
             }
 
             try {
@@ -244,21 +242,19 @@ try {
                     $allHealthy = $false
                     
                     # Level 1: Log error
-                    $debugLevel = 0
-                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                        if ($debugLevel -ge 1) {
-                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                                Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile.health' -Context @{
-                                    check_name = $check.Name
-                                }
+                    $debugLevel = Get-ProfileDebugLevel
+                    if ($debugLevel -ge 1) {
+                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile.health' -Context @{
+                                check_name = $check.Name
                             }
                         }
-                        if ($debugLevel -ge 2) {
-                            Write-Verbose "[diagnostics.profile.health] Check error: $($check.Name) - $($_.Exception.Message)"
-                        }
-                        if ($debugLevel -ge 3) {
-                            Write-Host "  [diagnostics.profile.health] Check error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
-                        }
+                    }
+                    if ($debugLevel -ge 2) {
+                        Write-Verbose "[diagnostics.profile.health] Check error: $($check.Name) - $($_.Exception.Message)"
+                    }
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [diagnostics.profile.health] Check error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                     }
                 }
             }
@@ -327,24 +323,22 @@ try {
     }
 }
 catch {
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        if ($debugLevel -ge 1) {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile' -Context @{
-                    fragment = 'diagnostics-profile'
-                }
-            }
-            else {
-                Write-Error "Diagnostics fragment failed: $($_.Exception.Message)"
+    $debugLevel = Get-ProfileDebugLevel
+    if ($debugLevel -ge 1) {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'diagnostics.profile' -Context @{
+                fragment = 'diagnostics-profile'
             }
         }
-        if ($debugLevel -ge 2) {
-            Write-Verbose "[diagnostics.profile] Fragment load error: $($_.Exception.Message)"
+        else {
+            Write-Error "Diagnostics fragment failed: $($_.Exception.Message)"
         }
-        if ($debugLevel -ge 3) {
-            Write-Host "  [diagnostics.profile] Fragment error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
-        }
+    }
+    if ($debugLevel -ge 2) {
+        Write-Verbose "[diagnostics.profile] Fragment load error: $($_.Exception.Message)"
+    }
+    if ($debugLevel -ge 3) {
+        Write-Host "  [diagnostics.profile] Fragment error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
     }
     else {
         # Always log errors even if debug is off

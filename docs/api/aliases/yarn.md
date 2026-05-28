@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Executes Yarn commands.
+Updates Yarn to the latest version.
 
 ## Description
 
-Wrapper function for Yarn CLI that checks for command availability before execution.
+Updates Yarn itself to the latest version using 'yarn set version latest'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\yarn.ps1
+Defined in: ../profile.d/yarn.ps1

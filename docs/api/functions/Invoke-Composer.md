@@ -39,9 +39,9 @@ Invoke-Composer install
 
 This function has the following aliases:
 
-- `composer` - Executes Composer commands.
+- `composer` - Updates Composer to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\php.ps1
+Defined in: ../profile.d/php.ps1

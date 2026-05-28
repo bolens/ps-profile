@@ -39,9 +39,9 @@ Invoke-DenoTask build
 
 This function has the following aliases:
 
-- `deno-task` - Runs Deno tasks.
+- `deno-task` - Updates Deno to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\deno.ps1
+Defined in: ../profile.d/deno.ps1

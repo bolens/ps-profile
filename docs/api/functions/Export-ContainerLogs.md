@@ -58,4 +58,4 @@ Export-ContainerLogs -Container "my-container" -OutputPath "logs.txt" -Tail 100
 
 ## Source
 
-Defined in: ..\profile.d\containers-enhanced.ps1
+Defined in: ../profile.d/containers-enhanced.ps1

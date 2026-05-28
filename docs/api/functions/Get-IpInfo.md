@@ -62,4 +62,4 @@ Get-IpInfo -IpAddress "8.8.8.8" -Tool "ipinfo" -OutputFormat "json"
 
 ## Source
 
-Defined in: ..\profile.d\network-analysis.ps1
+Defined in: ../profile.d/network-analysis.ps1

@@ -64,4 +64,4 @@ Get-BeadsIssues -Priority 1 -Labels "urgent,backend"
 
 ## Source
 
-Defined in: ..\profile.d\beads.ps1
+Defined in: ../profile.d/beads.ps1

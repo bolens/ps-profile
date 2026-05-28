@@ -65,4 +65,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\conan.ps1
+Defined in: ../profile.d/conan.ps1

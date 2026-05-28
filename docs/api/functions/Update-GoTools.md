@@ -24,7 +24,7 @@ No parameters.
 
 `powershell
 Update-GoTools
-    Updates all Go development tools to their latest versions.
+        Updates all Go development tools to their latest versions.
 ``
 
 ## Aliases
@@ -36,4 +36,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\go.ps1
+Defined in: ../profile.d/lang-go-basic.ps1

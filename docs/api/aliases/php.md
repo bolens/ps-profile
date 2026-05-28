@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Executes PHP commands.
+Updates Composer to the latest version.
 
 ## Description
 
-Wrapper function for PHP CLI that checks for command availability before execution.
+Updates Composer itself to the latest version using 'composer self-update'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\php.ps1
+Defined in: ../profile.d/php.ps1

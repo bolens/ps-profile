@@ -39,9 +39,9 @@ Invoke-BunRun dev
 
 This function has the following aliases:
 
-- `bun-run` - Runs npm scripts using Bun.
+- `bun-run` - Updates Bun to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\bun.ps1
+Defined in: ../profile.d/bun.ps1

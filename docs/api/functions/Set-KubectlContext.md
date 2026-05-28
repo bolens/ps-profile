@@ -33,9 +33,9 @@ Set-KubectlContext my-context
 
 This function has the following aliases:
 
-- `kn` - Switches the current Kubernetes context.
+- `kn` - Gets the current Kubernetes context.
 
 
 ## Source
 
-Defined in: ..\profile.d\kubectl.ps1
+Defined in: ../profile.d/kubectl.ps1

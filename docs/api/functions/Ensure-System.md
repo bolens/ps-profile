@@ -26,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\system.ps1
+Defined in: ../profile.d/system.ps1

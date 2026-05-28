@@ -61,4 +61,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\security-tools.ps1
+Defined in: ../profile.d/security-tools.ps1

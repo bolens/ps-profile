@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Ansible Galaxy commands via WSL with UTF-8 locale.
+Runs ansible-galaxy with the correct invocation strategy for the current platform.
 
 ## Description
 
-Executes ansible-galaxy commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
+No description available.
 
 ## Signature
 
@@ -29,19 +29,13 @@ Arguments to pass to ansible-galaxy.
 Invoke-AnsibleGalaxy install geerlingguy.docker
 ``
 
-### Example 2
-
-`powershell
-Invoke-AnsibleGalaxy list
-``
-
 ## Aliases
 
 This function has the following aliases:
 
-- `ansible-galaxy` - Runs Ansible Galaxy commands via WSL with UTF-8 locale.
+- `ansible-galaxy` - Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 
 ## Source
 
-Defined in: ..\profile.d\ansible.ps1
+Defined in: ../profile.d/ansible.ps1

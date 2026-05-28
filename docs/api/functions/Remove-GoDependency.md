@@ -27,9 +27,16 @@ Package paths to remove (e.g., github.com/user/package).
 
 `powershell
 Remove-GoDependency github.com/gin-gonic/gin
-    Removes gin from dependencies.
+        Removes gin from dependencies.
 ``
+
+## Aliases
+
+This function has the following aliases:
+
+- `go-remove` - Removes Go module dependencies.
+
 
 ## Source
 
-Defined in: ..\profile.d\go.ps1
+Defined in: ../profile.d/lang-go-basic.ps1

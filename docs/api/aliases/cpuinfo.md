@@ -6,7 +6,7 @@ Shows CPU information.
 
 ## Description
 
-Displays processor information including name, number of cores, logical processors, and max clock speed.
+Displays processor information including name, number of cores, logical processors, and max clock speed. On Windows uses Win32_Processor; on Linux reads /proc/cpuinfo.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\system-info.ps1
+Defined in: ../profile.d/system-info.ps1

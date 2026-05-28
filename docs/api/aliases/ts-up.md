@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Connects to the Tailscale network.
+Gets Tailscale connection status.
 
 ## Description
 
-Wrapper for tailscale up command.
+Wrapper for tailscale status command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\tailscale.ps1
+Defined in: ../profile.d/tailscale.ps1

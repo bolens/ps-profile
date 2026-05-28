@@ -101,11 +101,9 @@ try {
     # If Starship is available, let it handle prompt initialization (loaded by 23-starship.ps1)
     # Starship and oh-my-posh are mutually exclusive prompt frameworks
     if (Test-CachedCommand 'starship') {
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            if ($debugLevel -ge 1) {
-                Write-Verbose "[oh-my-posh] Starship detected, skipping oh-my-posh proxy prompt"
-            }
+        $debugLevel = Get-ProfileDebugLevel
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[oh-my-posh] Starship detected, skipping oh-my-posh proxy prompt"
         }
         return
     }

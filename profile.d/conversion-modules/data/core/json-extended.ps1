@@ -36,11 +36,7 @@ function Initialize-FileConversion-CoreJsonExtended {
     Set-Item -Path Function:Global:_ConvertFrom-Json5ToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -112,20 +108,15 @@ try {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $nodeAvailable = Test-CachedCommand 'node'
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    node_available = $nodeAvailable
-                    node_exit_code = $LASTEXITCODE
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON5 to JSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            $nodeAvailable = Test-CachedCommand 'node'
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                node_available = $nodeAvailable
+                node_exit_code = $LASTEXITCODE
             }
             
             # Level 2: Error details
@@ -146,11 +137,7 @@ try {
     Set-Item -Path Function:Global:_ConvertTo-Json5FromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -222,20 +209,15 @@ try {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $nodeAvailable = Test-CachedCommand 'node'
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.from-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    node_available = $nodeAvailable
-                    node_exit_code = $LASTEXITCODE
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to JSON5: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            $nodeAvailable = Test-CachedCommand 'node'
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.from-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                node_available = $nodeAvailable
+                node_exit_code = $LASTEXITCODE
             }
             
             # Level 2: Error details
@@ -256,11 +238,7 @@ try {
     Set-Item -Path Function:Global:_ConvertFrom-JsonLToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -303,17 +281,12 @@ try {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonl.to-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSONL to JSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonl.to-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -334,11 +307,7 @@ try {
     Set-Item -Path Function:Global:_ConvertTo-JsonLFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -386,17 +355,12 @@ try {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonl.from-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to JSONL: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.jsonl.from-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -429,11 +393,7 @@ try {
 function ConvertFrom-Json5ToJson {
     param([string]$InputPath, [string]$OutputPath)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) {
         Ensure-FileConversion-Data
@@ -442,20 +402,15 @@ function ConvertFrom-Json5ToJson {
         _ConvertFrom-Json5ToJson @PSBoundParameters
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            $nodeAvailable = Test-CachedCommand 'node'
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-                node_available = $nodeAvailable
-                node_exit_code = $LASTEXITCODE
-            }
-        }
-        else {
-            Write-Error "Failed to convert JSON5 to JSON: $($_.Exception.Message)"
+        $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+        $nodeAvailable = Test-CachedCommand 'node'
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json5.to-json' -Context @{
+            input_path = $InputPath
+            output_path = $OutputPath
+            input_size_bytes = $inputSize
+            error_type = $_.Exception.GetType().FullName
+            node_available = $nodeAvailable
+            node_exit_code = $LASTEXITCODE
         }
         
         # Level 2: Error details

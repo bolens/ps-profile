@@ -28,11 +28,9 @@ try {
         $sbStart = {
             param([string]$CommandName)
 
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                if ($debugLevel -ge 3) {
-                    Write-Host "  [performance.timer] Starting timer for command: $CommandName" -ForegroundColor DarkGray
-                }
+            $debugLevel = Get-ProfileDebugLevel
+            if ($debugLevel -ge 3) {
+                Write-Host "  [performance.timer] Starting timer for command: $CommandName" -ForegroundColor DarkGray
             }
 
             try {
@@ -106,10 +104,8 @@ try {
             Also records to persistent SQLite database if available.
         #>
         $sbStop = {
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                # Debug level is available
-            }
+            $debugLevel = Get-ProfileDebugLevel
+            # Debug level is available
 
             if ($global:PSProfileCommandTimer) {
                 # Only show debug message when there's actually a timer to stop
@@ -531,18 +527,16 @@ try {
                 }
                 
                 # Now safe to do debug logging (after exclusions)
-                $debugLevel = 0
-                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                    if ($debugLevel -ge 3) {
-                        # Temporarily disable guard for Write-Host (it's excluded, but be safe)
-                        $tempGuard = $global:PSProfilePostCommandLookupInProgress
-                        $global:PSProfilePostCommandLookupInProgress = $false
-                        try {
-                            Write-Host "  [performance.tracking] PostCommandLookupAction fired for command: $commandName" -ForegroundColor DarkGray
-                        }
-                        finally {
-                            $global:PSProfilePostCommandLookupInProgress = $tempGuard
-                        }
+                $debugLevel = Get-ProfileDebugLevel
+                if ($debugLevel -ge 3) {
+                    # Temporarily disable guard for Write-Host (it's excluded, but be safe)
+                    $tempGuard = $global:PSProfilePostCommandLookupInProgress
+                    $global:PSProfilePostCommandLookupInProgress = $false
+                    try {
+                        Write-Host "  [performance.tracking] PostCommandLookupAction fired for command: $commandName" -ForegroundColor DarkGray
+                    }
+                    finally {
+                        $global:PSProfilePostCommandLookupInProgress = $tempGuard
                     }
                 }
                 
@@ -615,8 +609,8 @@ try {
         $global:PSProfileCommandTrackingSetup = $true
         
         # Level 1: Log setup completion
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+        $debugLevel = Get-ProfileDebugLevel
+        if ($debugLevel -ge 1) {
             Write-Verbose "[performance.tracking] Command tracking initialized using PostCommandLookupAction"
         }
     }
@@ -674,10 +668,8 @@ try {
             # This minimizes the overhead from output rendering and prompt generation
             # The timer was started in PostCommandLookupAction (just before execution)
             # so this measures: execution time + minimal prompt overhead
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                # Debug level is available
-            }
+            $debugLevel = Get-ProfileDebugLevel
+            # Debug level is available
             
             if ($global:PSProfileCommandTimer) {
                 # Only show debug message when there's actually a timer to stop

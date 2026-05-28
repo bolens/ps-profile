@@ -54,4 +54,4 @@ Get-AwsResources -Service 's3' -Action 'list-buckets'
 
 ## Source
 
-Defined in: ..\profile.d\aws.ps1
+Defined in: ../profile.d/aws.ps1

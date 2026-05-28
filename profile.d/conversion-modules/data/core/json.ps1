@@ -22,11 +22,7 @@ function Initialize-FileConversion-CoreBasicJson {
             $fileArgs
         )
         process {
-            # Parse debug level once at function start
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-                # Debug is enabled
-            }
+            $debugLevel = Get-ProfileDebugLevel
             
             $rawInput = $null
             $inputSource = 'pipeline'
@@ -151,26 +147,17 @@ function Initialize-FileConversion-CoreBasicJson {
 function Format-Json {
     param([Parameter(ValueFromPipeline = $true)] $InputObject, [Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     try {
         & "Global:_Format-Json" @PSBoundParameters
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json.format' -Context @{
-                has_file_args = ($null -ne $fileArgs)
-                file_args_count = if ($fileArgs) { $fileArgs.Count } else { 0 }
-                has_input_object = ($PSBoundParameters.ContainsKey('InputObject') -and $null -ne $InputObject)
-            }
-        }
-        else {
-            Write-Error "Failed to pretty-print JSON: $($_.Exception.Message)"
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.json.format' -Context @{
+            has_file_args = ($null -ne $fileArgs)
+            file_args_count = if ($fileArgs) { $fileArgs.Count } else { 0 }
+            has_input_object = ($PSBoundParameters.ContainsKey('InputObject') -and $null -ne $InputObject)
         }
         
         # Level 2: Error details

@@ -18,11 +18,7 @@ function Initialize-FileConversion-CoreBasicCsv {
     Set-Item -Path Function:Global:_ConvertFrom-CsvToJson -Value { 
         param([string]$Path)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -52,16 +48,11 @@ function Initialize-FileConversion-CoreBasicCsv {
             return $json
         } 
         catch { 
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.to-json' -Context @{
-                    input_path = $Path
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert CSV to JSON: $_"
+            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.to-json' -Context @{
+                input_path = $Path
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -82,11 +73,7 @@ function Initialize-FileConversion-CoreBasicCsv {
     Set-Item -Path Function:Global:_ConvertTo-CsvFromJson -Value { 
         param([string]$Path)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -133,18 +120,13 @@ function Initialize-FileConversion-CoreBasicCsv {
             }
         } 
         catch { 
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-                $outputPath = $Path.Replace('.json', '.csv')
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.from-json' -Context @{
-                    input_path = $Path
-                    output_path = $outputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to CSV: $_"
+            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+            $outputPath = $Path.Replace('.json', '.csv')
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.from-json' -Context @{
+                input_path = $Path
+                output_path = $outputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -165,11 +147,7 @@ function Initialize-FileConversion-CoreBasicCsv {
     Set-Item -Path Function:Global:_ConvertFrom-CsvToYaml -Value { 
         param([string]$Path)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -211,19 +189,14 @@ function Initialize-FileConversion-CoreBasicCsv {
             }
         } 
         catch { 
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-                $outputPath = $Path -replace '\.csv$', '.yaml'
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.to-yaml' -Context @{
-                    input_path = $Path
-                    output_path = $outputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    yq_exit_code = $LASTEXITCODE
-                }
-            }
-            else {
-                Write-Error "Failed to convert CSV to YAML: $_"
+            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+            $outputPath = $Path -replace '\.csv$', '.yaml'
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.to-yaml' -Context @{
+                input_path = $Path
+                output_path = $outputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                yq_exit_code = $LASTEXITCODE
             }
             
             # Level 2: Error details
@@ -273,27 +246,18 @@ function Initialize-FileConversion-CoreBasicCsv {
 function ConvertFrom-CsvToJson {
     param([string]$Path)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     try {
         _ConvertFrom-CsvToJson @PSBoundParameters
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.to-json' -Context @{
-                input_path = $Path
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-            }
-        }
-        else {
-            Write-Error "Failed to convert CSV to JSON: $($_.Exception.Message)"
+        $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.to-json' -Context @{
+            input_path = $Path
+            input_size_bytes = $inputSize
+            error_type = $_.Exception.GetType().FullName
         }
         
         # Level 2: Error details
@@ -322,29 +286,20 @@ Set-AgentModeAlias -Name 'csv-to-json' -Target 'ConvertFrom-CsvToJson'
 function ConvertTo-CsvFromJson {
     param([string]$Path)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     try {
         _ConvertTo-CsvFromJson @PSBoundParameters
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-            $outputPath = $Path.Replace('.json', '.csv')
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.from-json' -Context @{
-                input_path = $Path
-                output_path = $outputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-            }
-        }
-        else {
-            Write-Error "Failed to convert JSON to CSV: $($_.Exception.Message)"
+        $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+        $outputPath = $Path.Replace('.json', '.csv')
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.from-json' -Context @{
+            input_path = $Path
+            output_path = $outputPath
+            input_size_bytes = $inputSize
+            error_type = $_.Exception.GetType().FullName
         }
         
         # Level 2: Error details
@@ -394,30 +349,21 @@ Set-AgentModeAlias -Name 'csv-to-yaml' -Target 'ConvertFrom-CsvToYaml'
 function ConvertFrom-YamlToCsv {
     param([string]$Path)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     try {
         _ConvertFrom-YamlToCsv @PSBoundParameters
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
-            $outputPath = $Path -replace '\.ya?ml$', '.csv'
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.from-yaml' -Context @{
-                input_path = $Path
-                output_path = $outputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-                yq_exit_code = $LASTEXITCODE
-            }
-        }
-        else {
-            Write-Error "Failed to convert YAML to CSV: $($_.Exception.Message)"
+        $inputSize = if ($Path -and (Test-Path -LiteralPath $Path)) { (Get-Item -LiteralPath $Path).Length } else { 0 }
+        $outputPath = $Path -replace '\.ya?ml$', '.csv'
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.csv.from-yaml' -Context @{
+            input_path = $Path
+            output_path = $outputPath
+            input_size_bytes = $inputSize
+            error_type = $_.Exception.GetType().FullName
+            yq_exit_code = $LASTEXITCODE
         }
         
         # Level 2: Error details

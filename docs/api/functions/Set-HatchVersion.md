@@ -39,4 +39,4 @@ Set-HatchVersion -Version 1.2.3
 
 ## Source
 
-Defined in: ..\profile.d\hatch.ps1
+Defined in: ../profile.d/hatch.ps1

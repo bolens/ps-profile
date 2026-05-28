@@ -58,4 +58,4 @@ Extract-Audio -InputPath "video.mp4" -OutputPath "audio.flac" -AudioCodec "flac"
 
 ## Source
 
-Defined in: ..\profile.d\media-tools.ps1
+Defined in: ../profile.d/media-tools.ps1

@@ -113,7 +113,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Get profile directory using shared function
@@ -121,7 +121,7 @@ try {
     $fragDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 $psFiles = Get-PowerShellScripts -Path $fragDir -SortByName
@@ -409,8 +409,8 @@ else {
 if ($DryRun) {
     Write-ScriptMessage -Message "`n[DRY RUN] Would generate $filesToGenerate README file(s)" -ForegroundColor Yellow
     Write-ScriptMessage -Message "Run without -DryRun to apply changes." -ForegroundColor Yellow
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "DRY RUN: Would generate fragment README files and index."
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would generate fragment README files and index."
 }
 else {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message 'Done generating fragment README files and index.'
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Done generating fragment README files and index.'
 }

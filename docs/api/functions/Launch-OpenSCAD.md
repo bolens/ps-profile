@@ -62,4 +62,4 @@ Launch-OpenSCAD -ScriptPath "model.scad" -OutputPath "model.stl" -Format "stl"
 
 ## Source
 
-Defined in: ..\profile.d\3d-cad.ps1
+Defined in: ../profile.d/3d-cad.ps1

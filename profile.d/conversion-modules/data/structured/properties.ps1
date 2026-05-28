@@ -170,11 +170,7 @@ function Initialize-FileConversion-Properties {
     Set-Item -Path Function:Global:_ConvertFrom-PropertiesToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -215,17 +211,12 @@ function Initialize-FileConversion-Properties {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert Properties to JSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -246,11 +237,7 @@ function Initialize-FileConversion-Properties {
     Set-Item -Path Function:Global:_ConvertTo-PropertiesFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -304,17 +291,12 @@ function Initialize-FileConversion-Properties {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to Properties: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -335,11 +317,7 @@ function Initialize-FileConversion-Properties {
     Set-Item -Path Function:Global:_ConvertFrom-PropertiesToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -386,17 +364,12 @@ function Initialize-FileConversion-Properties {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert Properties to YAML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -417,11 +390,7 @@ function Initialize-FileConversion-Properties {
     Set-Item -Path Function:Global:_ConvertTo-PropertiesFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -484,17 +453,12 @@ function Initialize-FileConversion-Properties {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert YAML to Properties: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -515,11 +479,7 @@ function Initialize-FileConversion-Properties {
     Set-Item -Path Function:Global:_ConvertFrom-PropertiesToIni -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -567,17 +527,12 @@ function Initialize-FileConversion-Properties {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-ini' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert Properties to INI: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.to-ini' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -598,11 +553,7 @@ function Initialize-FileConversion-Properties {
     Set-Item -Path Function:Global:_ConvertTo-PropertiesFromIni -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -668,17 +619,12 @@ function Initialize-FileConversion-Properties {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-ini' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert INI to Properties: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.properties.from-ini' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details

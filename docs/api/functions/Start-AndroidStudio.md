@@ -46,4 +46,4 @@ Start-AndroidStudio -ProjectPath "C:\Projects\MyApp"
 
 ## Source
 
-Defined in: ..\profile.d\mobile-dev.ps1
+Defined in: ../profile.d/mobile-dev.ps1

@@ -39,9 +39,9 @@ Invoke-Rustup show
 
 This function has the following aliases:
 
-- `rustup` - Executes Rustup commands.
+- `rustup` - Updates all installed cargo packages to their latest versions.
 
 
 ## Source
 
-Defined in: ..\profile.d\rustup.ps1
+Defined in: ../profile.d/rustup.ps1

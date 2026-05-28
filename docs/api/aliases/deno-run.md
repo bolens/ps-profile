@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Deno scripts.
+Updates Deno to the latest version.
 
 ## Description
 
-Wrapper for deno run command.
+Updates Deno itself to the latest version using 'deno upgrade'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\deno.ps1
+Defined in: ../profile.d/deno.ps1

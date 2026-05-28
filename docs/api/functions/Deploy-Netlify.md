@@ -54,4 +54,4 @@ Deploy-Netlify -Action "status"
 
 ## Source
 
-Defined in: ..\profile.d\cloud-enhanced.ps1
+Defined in: ../profile.d/cloud-enhanced.ps1

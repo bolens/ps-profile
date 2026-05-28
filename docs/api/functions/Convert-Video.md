@@ -74,4 +74,4 @@ Convert-Video -InputPath "input.mp4" -OutputPath "output.mkv" -UseHandbrake -Pre
 
 ## Source
 
-Defined in: ..\profile.d\media-tools.ps1
+Defined in: ../profile.d/media-tools.ps1

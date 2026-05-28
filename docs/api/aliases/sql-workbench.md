@@ -6,11 +6,11 @@ Launches SQL Workbench/J.
 
 ## Description
 
-Opens SQL Workbench/J, a universal database tool for SQL databases.
+Opens SQL Workbench/J, a universal database tool for SQL databases. Supports multiple database systems including MySQL, PostgreSQL, Oracle, and more.
 
 ## Alias Information
 
-**Alias for:** `Invoke-SqlWorkbench`
+**Alias for:** `Start-SqlWorkbench`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\database.ps1
+Defined in: ../profile.d/database-clients.ps1

@@ -54,4 +54,4 @@ Convert-ComposeToK8s -ComposeFile "docker-compose.prod.yml" -OutputPath "k8s/"
 
 ## Source
 
-Defined in: ..\profile.d\containers-enhanced.ps1
+Defined in: ../profile.d/containers-enhanced.ps1

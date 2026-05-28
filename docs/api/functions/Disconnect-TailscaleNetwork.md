@@ -30,9 +30,9 @@ Disconnect-TailscaleNetwork
 
 This function has the following aliases:
 
-- `ts-down` - Disconnects from the Tailscale network.
+- `ts-down` - Gets Tailscale connection status.
 
 
 ## Source
 
-Defined in: ..\profile.d\tailscale.ps1
+Defined in: ../profile.d/tailscale.ps1

@@ -28,11 +28,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertFrom-TomlToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -73,18 +69,13 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    yq_exit_code = $LASTEXITCODE
-                }
-            }
-            else {
-                Write-Error "Failed to convert TOML to JSON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                yq_exit_code = $LASTEXITCODE
             }
             
             # Level 2: Error details
@@ -105,11 +96,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertTo-TomlFromJson -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -152,19 +139,14 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-json' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    pstoml_available = $pstomlAvailable
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to TOML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-json' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                pstoml_available = $pstomlAvailable
             }
             
             # Level 2: Error details
@@ -185,11 +167,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertFrom-TomlToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -230,18 +208,13 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    yq_exit_code = $LASTEXITCODE
-                }
-            }
-            else {
-                Write-Error "Failed to convert TOML to YAML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                yq_exit_code = $LASTEXITCODE
             }
             
             # Level 2: Error details
@@ -262,11 +235,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertTo-TomlFromYaml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -313,20 +282,15 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-yaml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    yq_exit_code = $LASTEXITCODE
-                    pstoml_available = $pstomlAvailable
-                }
-            }
-            else {
-                Write-Error "Failed to convert YAML to TOML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-yaml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                yq_exit_code = $LASTEXITCODE
+                pstoml_available = $pstomlAvailable
             }
             
             # Level 2: Error details
@@ -347,11 +311,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertFrom-TomlToToon -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -393,18 +353,13 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-toon' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    yq_exit_code = $LASTEXITCODE
-                }
-            }
-            else {
-                Write-Error "Failed to convert TOML to TOON: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-toon' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                yq_exit_code = $LASTEXITCODE
             }
             
             # Level 2: Error details
@@ -425,11 +380,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertTo-TomlFromToon -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -473,19 +424,14 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-toon' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    pstoml_available = $pstomlAvailable
-                }
-            }
-            else {
-                Write-Error "Failed to convert TOON to TOML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-toon' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                pstoml_available = $pstomlAvailable
             }
             
             # Level 2: Error details
@@ -506,11 +452,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertFrom-TomlToXml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -552,18 +494,13 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-xml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    yq_exit_code = $LASTEXITCODE
-                }
-            }
-            else {
-                Write-Error "Failed to convert TOML to XML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.to-xml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                yq_exit_code = $LASTEXITCODE
             }
             
             # Level 2: Error details
@@ -584,11 +521,7 @@ function Initialize-FileConversion-Toml {
     Set-Item -Path Function:Global:_ConvertTo-TomlFromXml -Value {
         param([string]$InputPath, [string]$OutputPath)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -635,19 +568,14 @@ function Initialize-FileConversion-Toml {
             }
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-                $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-xml' -Context @{
-                    input_path = $InputPath
-                    output_path = $OutputPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                    pstoml_available = $pstomlAvailable
-                }
-            }
-            else {
-                Write-Error "Failed to convert XML to TOML: $_"
+            $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
+            $pstomlAvailable = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.toml.from-xml' -Context @{
+                input_path = $InputPath
+                output_path = $OutputPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
+                pstoml_available = $pstomlAvailable
             }
             
             # Level 2: Error details

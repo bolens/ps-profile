@@ -18,11 +18,7 @@ function Initialize-FileConversion-CoreBasicYaml {
     Set-Item -Path Function:Global:_ConvertFrom-Yaml -Value {
         param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -89,21 +85,16 @@ function Initialize-FileConversion-CoreBasicYaml {
             # Build error message
             if (-not $errorOutput) {
                 $errorMsg = "yq command failed with exit code $exitCode : Unknown error (no output from yq)"
-                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
-                    Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
-                        [System.Exception]::new($errorMsg),
-                        'YqCommandFailed',
-                        [System.Management.Automation.ErrorCategory]::NotSpecified,
-                        $null
-                    )) -OperationName 'conversion.yaml.to-json' -Context @{
-                        input_path = $resolvedPath
-                        input_size_bytes = $inputSize
-                        yq_exit_code = $exitCode
-                    }
-                }
-                else {
-                    Write-Error $errorMsg -ErrorAction SilentlyContinue
+                $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
+                    [System.Exception]::new($errorMsg),
+                    'YqCommandFailed',
+                    [System.Management.Automation.ErrorCategory]::NotSpecified,
+                    $null
+                )) -OperationName 'conversion.yaml.to-json' -Context @{
+                    input_path = $resolvedPath
+                    input_size_bytes = $inputSize
+                    yq_exit_code = $exitCode
                 }
                 return $null
             }
@@ -117,22 +108,17 @@ function Initialize-FileConversion-CoreBasicYaml {
                 $errorOutput -join "`n"
             }
             
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
-                    [System.Exception]::new("yq command failed with exit code $exitCode : $errorMessage"),
-                    'YqCommandFailed',
-                    [System.Management.Automation.ErrorCategory]::NotSpecified,
-                    $null
-                )) -OperationName 'conversion.yaml.to-json' -Context @{
-                    input_path = $resolvedPath
-                    input_size_bytes = $inputSize
-                    yq_exit_code = $exitCode
-                    yq_error_output = $errorMessage
-                }
-            }
-            else {
-                Write-Error "yq command failed with exit code $exitCode : $errorMessage" -ErrorAction SilentlyContinue
+            $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
+                [System.Exception]::new("yq command failed with exit code $exitCode : $errorMessage"),
+                'YqCommandFailed',
+                [System.Management.Automation.ErrorCategory]::NotSpecified,
+                $null
+            )) -OperationName 'conversion.yaml.to-json' -Context @{
+                input_path = $resolvedPath
+                input_size_bytes = $inputSize
+                yq_exit_code = $exitCode
+                yq_error_output = $errorMessage
             }
             
             # Level 2: Error details
@@ -143,19 +129,14 @@ function Initialize-FileConversion-CoreBasicYaml {
             return $null
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $resolvedPath = if ($fileArgs -and $fileArgs.Count -gt 0) {
-                    try { (Resolve-Path @fileArgs -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path) } catch { $fileArgs[0] }
-                } else { $null }
-                $inputSize = if ($resolvedPath -and (Test-Path -LiteralPath $resolvedPath)) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.yaml.to-json' -Context @{
-                    input_path = $resolvedPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert YAML to JSON: $($_.Exception.Message)" -ErrorAction SilentlyContinue
+            $resolvedPath = if ($fileArgs -and $fileArgs.Count -gt 0) {
+                try { (Resolve-Path @fileArgs -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path) } catch { $fileArgs[0] }
+            } else { $null }
+            $inputSize = if ($resolvedPath -and (Test-Path -LiteralPath $resolvedPath)) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.yaml.to-json' -Context @{
+                input_path = $resolvedPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -176,11 +157,7 @@ function Initialize-FileConversion-CoreBasicYaml {
     Set-Item -Path Function:Global:_ConvertTo-Yaml -Value {
         param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
         
-        # Parse debug level once at function start
-        $debugLevel = 0
-        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-            # Debug is enabled
-        }
+        $debugLevel = Get-ProfileDebugLevel
         
         try {
             # Level 1: Basic operation start
@@ -252,21 +229,16 @@ function Initialize-FileConversion-CoreBasicYaml {
             # Build error message
             if (-not $errorOutput) {
                 $errorMsg = "yq command failed with exit code $exitCode : Unknown error (no output from yq)"
-                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
-                    Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
-                        [System.Exception]::new($errorMsg),
-                        'YqCommandFailed',
-                        [System.Management.Automation.ErrorCategory]::NotSpecified,
-                        $null
-                    )) -OperationName 'conversion.yaml.from-json' -Context @{
-                        input_path = $resolvedPath
-                        input_size_bytes = $inputSize
-                        yq_exit_code = $exitCode
-                    }
-                }
-                else {
-                    Write-Error $errorMsg -ErrorAction SilentlyContinue
+                $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
+                Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
+                    [System.Exception]::new($errorMsg),
+                    'YqCommandFailed',
+                    [System.Management.Automation.ErrorCategory]::NotSpecified,
+                    $null
+                )) -OperationName 'conversion.yaml.from-json' -Context @{
+                    input_path = $resolvedPath
+                    input_size_bytes = $inputSize
+                    yq_exit_code = $exitCode
                 }
                 return $null
             }
@@ -280,22 +252,17 @@ function Initialize-FileConversion-CoreBasicYaml {
                 $errorOutput -join "`n"
             }
             
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
-                    [System.Exception]::new("yq command failed with exit code $exitCode : $errorMessage"),
-                    'YqCommandFailed',
-                    [System.Management.Automation.ErrorCategory]::NotSpecified,
-                    $null
-                )) -OperationName 'conversion.yaml.from-json' -Context @{
-                    input_path = $resolvedPath
-                    input_size_bytes = $inputSize
-                    yq_exit_code = $exitCode
-                    yq_error_output = $errorMessage
-                }
-            }
-            else {
-                Write-Error "yq command failed with exit code $exitCode : $errorMessage" -ErrorAction SilentlyContinue
+            $inputSize = if (Test-Path -LiteralPath $resolvedPath) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord ([System.Management.Automation.ErrorRecord]::new(
+                [System.Exception]::new("yq command failed with exit code $exitCode : $errorMessage"),
+                'YqCommandFailed',
+                [System.Management.Automation.ErrorCategory]::NotSpecified,
+                $null
+            )) -OperationName 'conversion.yaml.from-json' -Context @{
+                input_path = $resolvedPath
+                input_size_bytes = $inputSize
+                yq_exit_code = $exitCode
+                yq_error_output = $errorMessage
             }
             
             # Level 2: Error details
@@ -306,19 +273,14 @@ function Initialize-FileConversion-CoreBasicYaml {
             return $null
         }
         catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                $resolvedPath = if ($fileArgs -and $fileArgs.Count -gt 0) {
-                    try { (Resolve-Path @fileArgs -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path) } catch { $fileArgs[0] }
-                } else { $null }
-                $inputSize = if ($resolvedPath -and (Test-Path -LiteralPath $resolvedPath)) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
-                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.yaml.from-json' -Context @{
-                    input_path = $resolvedPath
-                    input_size_bytes = $inputSize
-                    error_type = $_.Exception.GetType().FullName
-                }
-            }
-            else {
-                Write-Error "Failed to convert JSON to YAML: $($_.Exception.Message)" -ErrorAction SilentlyContinue
+            $resolvedPath = if ($fileArgs -and $fileArgs.Count -gt 0) {
+                try { (Resolve-Path @fileArgs -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path) } catch { $fileArgs[0] }
+            } else { $null }
+            $inputSize = if ($resolvedPath -and (Test-Path -LiteralPath $resolvedPath)) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
+            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.yaml.from-json' -Context @{
+                input_path = $resolvedPath
+                input_size_bytes = $inputSize
+                error_type = $_.Exception.GetType().FullName
             }
             
             # Level 2: Error details
@@ -360,30 +322,21 @@ Set-AgentModeAlias -Name 'yaml-to-json' -Target 'ConvertFrom-Yaml'
 function ConvertTo-Yaml {
     param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
     
-    # Parse debug level once at function start
-    $debugLevel = 0
-    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-        # Debug is enabled
-    }
+    $debugLevel = Get-ProfileDebugLevel
     
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     try {
         _ConvertTo-Yaml @PSBoundParameters
     }
     catch {
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            $resolvedPath = if ($fileArgs -and $fileArgs.Count -gt 0) {
-                try { (Resolve-Path @fileArgs -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path) } catch { $fileArgs[0] }
-            } else { $null }
-            $inputSize = if ($resolvedPath -and (Test-Path -LiteralPath $resolvedPath)) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.yaml.from-json' -Context @{
-                input_path = $resolvedPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-            }
-        }
-        else {
-            Write-Error "Failed to convert JSON to YAML: $($_.Exception.Message)"
+        $resolvedPath = if ($fileArgs -and $fileArgs.Count -gt 0) {
+            try { (Resolve-Path @fileArgs -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path) } catch { $fileArgs[0] }
+        } else { $null }
+        $inputSize = if ($resolvedPath -and (Test-Path -LiteralPath $resolvedPath)) { (Get-Item -LiteralPath $resolvedPath).Length } else { 0 }
+        Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.yaml.from-json' -Context @{
+            input_path = $resolvedPath
+            input_size_bytes = $inputSize
+            error_type = $_.Exception.GetType().FullName
         }
         
         # Level 2: Error details

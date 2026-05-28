@@ -46,4 +46,4 @@ Launch-Tiled -ProjectPath "map.tmx"
 
 ## Source
 
-Defined in: ..\profile.d\game-dev.ps1
+Defined in: ../profile.d/game-dev.ps1

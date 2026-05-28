@@ -49,4 +49,4 @@ Invoke-NetworkScan -Target "192.168.1.1" -Tool "trippy"
 
 ## Source
 
-Defined in: ..\profile.d\network-analysis.ps1
+Defined in: ../profile.d/network-analysis.ps1

@@ -41,4 +41,4 @@ Download-Playlist -Url "https://www.youtube.com/playlist?list=example"
 
 ## Source
 
-Defined in: ..\profile.d\content-tools.ps1
+Defined in: ../profile.d/content-tools.ps1

@@ -26,4 +26,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\git.ps1
+Defined in: ../profile.d/git.ps1

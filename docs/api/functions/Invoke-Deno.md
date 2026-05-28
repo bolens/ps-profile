@@ -39,9 +39,9 @@ Invoke-Deno run app.ts
 
 This function has the following aliases:
 
-- `deno` - Executes Deno commands.
+- `deno` - Updates Deno to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\deno.ps1
+Defined in: ../profile.d/deno.ps1

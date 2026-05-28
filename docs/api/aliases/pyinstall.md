@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\lang-python.ps1
+Defined in: ../profile.d/lang-python-packages.ps1

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Executes kubectl with the specified arguments.
+Gets the current Kubernetes context.
 
 ## Description
 
-Wrapper function for kubectl that checks for command availability before execution.
+Returns the name of the currently active Kubernetes context.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\kubectl.ps1
+Defined in: ../profile.d/kubectl.ps1

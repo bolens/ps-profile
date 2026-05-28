@@ -46,4 +46,4 @@ Analyze-PE -InputFile "app.exe"
 
 ## Source
 
-Defined in: ..\profile.d\re-tools.ps1
+Defined in: ../profile.d/re-tools.ps1

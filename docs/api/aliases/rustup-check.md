@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Checks for Rust toolchain updates.
+Updates all installed cargo packages to their latest versions.
 
 ## Description
 
-Checks for available updates to the Rust toolchain without installing them. This is equivalent to running 'rustup check'.
+Updates all globally installed cargo packages using cargo-install-update. This is equivalent to running 'cargo install-update --all'. Requires the cargo-install-update crate to be installed.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\rustup.ps1
+Defined in: ../profile.d/rustup.ps1

@@ -17,16 +17,21 @@ scripts/lib/ExitCodes.psm1
 #>
 
 # Exit code enum for type-safe exit code handling
-enum ExitCode {
-    Success = 0              # Operation completed successfully
-    ValidationFailure = 1    # Validation/check failure (expected, non-fatal)
-    SetupError = 2           # Setup/configuration error (unexpected, fatal)
-    OtherError = 3           # Other runtime errors (unexpected, fatal)
-    TestFailure = 4          # Tests failed (at least one test failed)
-    TestTimeout = 5          # Tests timed out
-    CoverageFailure = 6      # Code coverage below threshold
-    NoTestsFound = 7         # No tests found to run
-    WatchModeCanceled = 8    # Watch mode canceled by user
+# Defined via Add-Type so the type is globally accessible outside module scope
+if (-not ([System.Management.Automation.PSTypeName]'ExitCode').Type) {
+    Add-Type -TypeDefinition @'
+public enum ExitCode {
+    Success          = 0,
+    ValidationFailure = 1,
+    SetupError       = 2,
+    OtherError       = 3,
+    TestFailure      = 4,
+    TestTimeout      = 5,
+    CoverageFailure  = 6,
+    NoTestsFound     = 7,
+    WatchModeCanceled = 8
+}
+'@
 }
 
 # Standardized exit code constants (deprecated - use ExitCode enum directly)
@@ -77,14 +82,14 @@ function Exit-WithCode {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)]
-        [ExitCode]$ExitCode,
+        [int]$ExitCode,
 
         [string]$Message,
 
         [System.Management.Automation.ErrorRecord]$ErrorRecord
     )
 
-    # Convert enum to integer
+    # Convert enum to integer for process exit
     $exitCodeInt = [int]$ExitCode
 
     $debugLevel = 0

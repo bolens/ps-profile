@@ -41,4 +41,4 @@ Download-Twitch -Url "https://www.twitch.tv/videos/123456789"
 
 ## Source
 
-Defined in: ..\profile.d\content-tools.ps1
+Defined in: ../profile.d/content-tools.ps1

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Ansible commands via WSL with UTF-8 locale.
+Runs ansible with the correct invocation strategy for the current platform.
 
 ## Description
 
-Executes ansible commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
+No description available.
 
 ## Signature
 
@@ -26,12 +26,6 @@ Arguments to pass to ansible.
 ### Example 1
 
 `powershell
-Invoke-Ansible --version
-``
-
-### Example 2
-
-`powershell
 Invoke-Ansible all -m ping
 ``
 
@@ -39,9 +33,9 @@ Invoke-Ansible all -m ping
 
 This function has the following aliases:
 
-- `ansible` - Runs Ansible commands via WSL with UTF-8 locale.
+- `ansible` - Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 
 ## Source
 
-Defined in: ..\profile.d\ansible.ps1
+Defined in: ../profile.d/ansible.ps1

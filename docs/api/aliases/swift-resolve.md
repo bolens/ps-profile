@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\swift.ps1
+Defined in: ../profile.d/swift.ps1

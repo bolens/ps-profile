@@ -62,4 +62,4 @@ Send-NtfyNotification -Message "Alert!" -Title "System Alert" -Priority "urgent"
 
 ## Source
 
-Defined in: ..\profile.d\network-analysis.ps1
+Defined in: ../profile.d/network-analysis.ps1

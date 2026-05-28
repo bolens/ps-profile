@@ -37,4 +37,4 @@ Download-Gallery -Url "https://example.com/gallery"
 
 ## Source
 
-Defined in: ..\profile.d\content-tools.ps1
+Defined in: ../profile.d/content-tools.ps1

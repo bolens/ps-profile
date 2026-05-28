@@ -62,4 +62,4 @@ Launch-Blender -Background -Script "render.py"
 
 ## Source
 
-Defined in: ..\profile.d\3d-cad.ps1
+Defined in: ../profile.d/3d-cad.ps1

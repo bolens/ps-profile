@@ -35,4 +35,4 @@ Get-EditorInfo
 
 ## Source
 
-Defined in: ..\profile.d\editors.ps1
+Defined in: ../profile.d/editors.ps1

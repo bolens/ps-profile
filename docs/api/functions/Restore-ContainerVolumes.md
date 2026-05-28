@@ -54,4 +54,4 @@ Restore-ContainerVolumes -BackupPath "backup.tar.gz" -Volume "my-volume" -Create
 
 ## Source
 
-Defined in: ..\profile.d\containers-enhanced.ps1
+Defined in: ../profile.d/containers-enhanced.ps1

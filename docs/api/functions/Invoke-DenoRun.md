@@ -39,9 +39,9 @@ Invoke-DenoRun --allow-net server.ts
 
 This function has the following aliases:
 
-- `deno-run` - Runs Deno scripts.
+- `deno-run` - Updates Deno to the latest version.
 
 
 ## Source
 
-Defined in: ..\profile.d\deno.ps1
+Defined in: ../profile.d/deno.ps1

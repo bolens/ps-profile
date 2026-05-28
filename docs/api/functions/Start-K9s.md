@@ -41,4 +41,4 @@ Start-K9s -Namespace "production"
 
 ## Source
 
-Defined in: ..\profile.d\kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-enhanced.ps1

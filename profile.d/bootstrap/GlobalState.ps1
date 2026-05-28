@@ -127,6 +127,26 @@ function global:Test-EnvBool {
 }
 
 # ===============================================
+# Get-ProfileDebugLevel
+# ===============================================
+# Returns the current PS_PROFILE_DEBUG numeric level (0 if unset or non-numeric).
+# Usage: $debugLevel = Get-ProfileDebugLevel
+#
+# Replaces the recurring inline pattern:
+#   $debugLevel = 0
+#   if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) { ... }
+function global:Get-ProfileDebugLevel {
+    [CmdletBinding()]
+    [OutputType([int])]
+    param()
+    $level = 0
+    if ($env:PS_PROFILE_DEBUG) {
+        [void][int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$level)
+    }
+    return $level
+}
+
+# ===============================================
 # DEBUG MODE: ENABLE VERBOSE OUTPUT
 # ===============================================
 # When PS_PROFILE_DEBUG is enabled (level 1+), automatically enable verbose output

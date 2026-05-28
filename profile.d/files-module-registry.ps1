@@ -7,7 +7,8 @@
 # Registry structure: EnsureFunctionName -> Array of module paths
 $script:FileConversionModuleRegistry = @{
     'Ensure-FileConversion-Data'        = @(
-        # Shared helpers
+        # Shared base + helpers (loaded first so conversion modules can call Invoke-FormatConversion etc.)
+        @{ Dir = 'conversion-modules/helpers'; File = 'ConversionBase.ps1' }
         @{ Dir = 'conversion-modules/helpers'; File = 'helpers-xml.ps1' }
         @{ Dir = 'conversion-modules/helpers'; File = 'helpers-toon.ps1' }
         # Core basic formats

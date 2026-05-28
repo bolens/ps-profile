@@ -6,7 +6,7 @@ Executes Hasura CLI commands.
 
 ## Description
 
-Wrapper function for Hasura CLI that checks for command availability before execution.
+Wrapper function for Hasura CLI that executes Hasura GraphQL engine commands. Hasura provides instant GraphQL APIs over databases.
 
 ## Signature
 
@@ -18,7 +18,12 @@ Invoke-Hasura
 
 ### -Arguments
 
-Arguments to pass to hasura.
+Arguments to pass to hasura-cli command. Can be used multiple times or as an array.
+
+
+## Outputs
+
+System.String. Output from Hasura CLI execution.
 
 
 ## Examples
@@ -27,12 +32,21 @@ Arguments to pass to hasura.
 
 `powershell
 Invoke-Hasura version
+        Checks Hasura CLI version.
 ``
 
 ### Example 2
 
 `powershell
 Invoke-Hasura migrate apply
+        Applies database migrations.
+``
+
+### Example 3
+
+`powershell
+Invoke-Hasura console
+        Starts Hasura console.
 ``
 
 ## Aliases
@@ -44,4 +58,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\database.ps1
+Defined in: ../profile.d/database-clients.ps1

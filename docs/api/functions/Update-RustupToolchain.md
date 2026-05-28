@@ -30,9 +30,9 @@ Update-RustupToolchain
 
 This function has the following aliases:
 
-- `rustup-update` - Updates the Rust toolchain.
+- `rustup-update` - Updates all installed cargo packages to their latest versions.
 
 
 ## Source
 
-Defined in: ..\profile.d\rustup.ps1
+Defined in: ../profile.d/rustup.ps1

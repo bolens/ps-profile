@@ -58,4 +58,4 @@ Download-Video -Url "https://www.youtube.com/watch?v=example" -AudioOnly
 
 ## Source
 
-Defined in: ..\profile.d\content-tools.ps1
+Defined in: ../profile.d/content-tools.ps1

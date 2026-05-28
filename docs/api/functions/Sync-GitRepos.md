@@ -54,4 +54,4 @@ Sync-GitRepos -Recurse -MaxDepth 2
 
 ## Source
 
-Defined in: ..\profile.d\git-enhanced.ps1
+Defined in: ../profile.d/git-enhanced.ps1

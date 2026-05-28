@@ -50,4 +50,4 @@ Launch-Emacs -Path "script.ps1"
 
 ## Source
 
-Defined in: ..\profile.d\editors.ps1
+Defined in: ../profile.d/editors.ps1

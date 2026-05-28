@@ -42,4 +42,4 @@ Launch-Game -RomPath "game.iso"
 
 ## Source
 
-Defined in: ..\profile.d\game-emulators.ps1
+Defined in: ../profile.d/game-emulators.ps1

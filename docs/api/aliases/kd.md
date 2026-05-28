@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Describes Kubernetes resources.
+Gets the current Kubernetes context.
 
 ## Description
 
-Wrapper for kubectl describe command.
+Returns the name of the currently active Kubernetes context.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\kubectl.ps1
+Defined in: ../profile.d/kubectl.ps1

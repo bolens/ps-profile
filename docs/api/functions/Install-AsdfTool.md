@@ -47,4 +47,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ..\profile.d\asdf.ps1
+Defined in: ../profile.d/asdf.ps1

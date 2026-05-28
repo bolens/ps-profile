@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Runs Ansible documentation commands via WSL with UTF-8 locale.
+Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 ## Description
 
-Executes ansible-doc commands through WSL bash shell with proper UTF-8 locale settings for Linux toolchain compatibility.
+This is an alias that points to the `Get-AnsibleDoc` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\ansible.ps1
+Defined in: ../profile.d/ansible.ps1

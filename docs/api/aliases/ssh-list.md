@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-SSHKeys`
+SSH agent and key management helpers.
 
 ## Description
 
-This is an alias that points to the `Get-SSHKeys` command.
+Provides functions and aliases for SSH key management: - Get-SSHKeys (ssh-list): list loaded keys - Add-SSHKeyIfNotLoaded (ssh-add-if): idempotent key loader - Start-SSHAgent (ssh-agent-start): start agent if not running
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\ssh.ps1
+Defined in: ../profile.d/ssh.ps1

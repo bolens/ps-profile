@@ -54,4 +54,4 @@ Deploy-Vercel -Production
 
 ## Source
 
-Defined in: ..\profile.d\cloud-enhanced.ps1
+Defined in: ../profile.d/cloud-enhanced.ps1

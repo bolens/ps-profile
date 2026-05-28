@@ -54,4 +54,4 @@ Convert-3DFormat -InputFile "model.fbx" -OutputFile "model.dae" -Format "dae"
 
 ## Source
 
-Defined in: ..\profile.d\3d-cad.ps1
+Defined in: ../profile.d/3d-cad.ps1

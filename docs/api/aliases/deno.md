@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Executes Deno commands.
+Updates Deno to the latest version.
 
 ## Description
 
-Wrapper function for Deno CLI that checks for command availability before execution.
+Updates Deno itself to the latest version using 'deno upgrade'.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\deno.ps1
+Defined in: ../profile.d/deno.ps1

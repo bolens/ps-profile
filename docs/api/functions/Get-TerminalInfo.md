@@ -35,4 +35,4 @@ Get-TerminalInfo
 
 ## Source
 
-Defined in: ..\profile.d\terminal-enhanced.ps1
+Defined in: ../profile.d/terminal-enhanced.ps1

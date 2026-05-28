@@ -6,7 +6,7 @@ Shows system information.
 
 ## Description
 
-Displays basic computer system information including name, manufacturer, model, and total memory.
+Displays basic computer system information including name, manufacturer, model, and total memory. On Windows uses Win32_ComputerSystem; on Linux reads /proc/meminfo and dmidecode where available.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\system-info.ps1
+Defined in: ../profile.d/system-info.ps1

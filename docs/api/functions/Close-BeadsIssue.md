@@ -52,4 +52,4 @@ Close-BeadsIssue -IssueId bd-a1b2,bd-f14c -Reason "Fixed"
 
 ## Source
 
-Defined in: ..\profile.d\beads.ps1
+Defined in: ../profile.d/beads.ps1
