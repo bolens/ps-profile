@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/bolens/ps-profile/compare/v1.4.0...v1.4.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* **ci:** correct action versions and missing scripts across all workflows ([a6a8224](https://github.com/bolens/ps-profile/commit/a6a8224ef7a722dfe17e75bbb65d8f8cc5307fb9))
+
 # [1.4.0](https://github.com/bolens/ps-profile/compare/v1.3.6...v1.4.0) (2026-05-28)
 
 
