@@ -118,11 +118,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'mix-remove' -Target 'Remove-MixDependency'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'mix' -ToolType 'elixir-package' -DefaultInstallCommand 'Install Elixir from: https://elixir-lang.org/install.html or use: scoop install elixir'
-    }
-    else {
-        'Install Elixir from: https://elixir-lang.org/install.html or use: scoop install elixir'
-    }
-    Write-MissingToolWarning -Tool 'mix' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'mix' -ToolType 'elixir-package' -DefaultInstallCommand 'Install Elixir from: https://elixir-lang.org/install.html or use: scoop install elixir'
 }

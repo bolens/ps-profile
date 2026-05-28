@@ -29,23 +29,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'iac-tools') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Invoke-Terragrunt - Terragrunt wrapper
     # ===============================================
@@ -85,15 +68,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'terragrunt' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'terragrunt' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "terragrunt is not installed. Install it with: scoop install terragrunt"
-            }
+            Invoke-MissingToolWarning -ToolName 'terragrunt'
             return
         }
 
@@ -153,15 +128,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'opentofu' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'tofu' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "opentofu is not installed. Install it with: scoop install opentofu"
-            }
+            Invoke-MissingToolWarning -ToolName 'opentofu' -Tool 'tofu'
             return
         }
 
@@ -248,15 +215,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'terraform' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'terraform' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "terraform is not installed. Install it with: scoop install terraform"
-            }
+            Invoke-MissingToolWarning -ToolName 'terraform'
             return
         }
 
@@ -372,15 +331,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'terraform' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'terraform' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "terraform is not installed. Install it with: scoop install terraform"
-            }
+            Invoke-MissingToolWarning -ToolName 'terraform'
             return
         }
 
@@ -505,15 +456,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'terraform' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'terraform' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "terraform is not installed. Install it with: scoop install terraform"
-            }
+            Invoke-MissingToolWarning -ToolName 'terraform'
             return
         }
 
@@ -602,15 +545,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'pulumi' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'pulumi' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "pulumi is not installed. Install it with: scoop install pulumi"
-            }
+            Invoke-MissingToolWarning -ToolName 'pulumi'
             return
         }
 

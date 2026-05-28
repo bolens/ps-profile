@@ -26,23 +26,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'mobile-dev') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Connect-AndroidDevice - Connect Android device
     # ===============================================
@@ -100,15 +83,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'adb' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'adb' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "adb is not installed. Install it with: scoop install adb"
-            }
+            Invoke-MissingToolWarning -ToolName 'adb'
             return
         }
 
@@ -264,15 +239,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'scrcpy' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'scrcpy' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "scrcpy is not installed. Install it with: scoop install scrcpy"
-            }
+            Invoke-MissingToolWarning -ToolName 'scrcpy'
             return
         }
 
@@ -377,15 +344,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'adb' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'adb' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "adb is not installed. Install it with: scoop install adb"
-            }
+            Invoke-MissingToolWarning -ToolName 'adb'
             return $false
         }
 
@@ -501,15 +460,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'libimobiledevice' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'libimobiledevice' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "libimobiledevice is not installed. Install it with: scoop install libimobiledevice"
-            }
+            Invoke-MissingToolWarning -ToolName 'libimobiledevice'
             return @()
         }
 
@@ -631,15 +582,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'pixelflasher' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'pixelflasher' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "pixelflasher is not installed. Install it with: scoop install pixelflasher"
-            }
+            Invoke-MissingToolWarning -ToolName 'pixelflasher'
             return
         }
 
@@ -711,15 +654,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'android-studio-canary' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'android-studio-canary' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "android-studio-canary or android-studio is not installed. Install it with: scoop install android-studio-canary"
-            }
+            Invoke-MissingToolWarning -ToolName 'android-studio-canary'
             return
         }
 

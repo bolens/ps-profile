@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 543
-**Total Aliases:** 783
-**Generated:** 2026-01-08 14:53:51
+**Total Functions:** 528
+**Total Aliases:** 514
+**Generated:** 2026-05-27 18:22:52
 
 ## Functions by Fragment
 
@@ -38,12 +38,12 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### ansible (6 functions)
 
-- [Get-AnsibleDoc](functions/Get-AnsibleDoc.md) - Runs Ansible documentation commands via WSL with UTF-8 locale.
-- [Get-AnsibleInventory](functions/Get-AnsibleInventory.md) - Runs Ansible inventory commands via WSL with UTF-8 locale.
-- [Invoke-Ansible](functions/Invoke-Ansible.md) - Runs Ansible commands via WSL with UTF-8 locale.
-- [Invoke-AnsibleGalaxy](functions/Invoke-AnsibleGalaxy.md) - Runs Ansible Galaxy commands via WSL with UTF-8 locale.
-- [Invoke-AnsiblePlaybook](functions/Invoke-AnsiblePlaybook.md) - Runs Ansible playbook commands via WSL with UTF-8 locale.
-- [Invoke-AnsibleVault](functions/Invoke-AnsibleVault.md) - Runs Ansible Vault commands via WSL with UTF-8 locale.
+- [Get-AnsibleDoc](functions/Get-AnsibleDoc.md) - Runs ansible-doc with the correct invocation strategy for the current platform.
+- [Get-AnsibleInventory](functions/Get-AnsibleInventory.md) - Runs ansible-inventory with the correct invocation strategy for the current platform.
+- [Invoke-Ansible](functions/Invoke-Ansible.md) - Runs ansible with the correct invocation strategy for the current platform.
+- [Invoke-AnsibleGalaxy](functions/Invoke-AnsibleGalaxy.md) - Runs ansible-galaxy with the correct invocation strategy for the current platform.
+- [Invoke-AnsiblePlaybook](functions/Invoke-AnsiblePlaybook.md) - Runs ansible-playbook with the correct invocation strategy for the current platform.
+- [Invoke-AnsibleVault](functions/Invoke-AnsibleVault.md) - Runs ansible-vault with the correct invocation strategy for the current platform.
 
 ### api-tools (6 functions)
 
@@ -93,13 +93,12 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-BeadsIssue](functions/New-BeadsIssue.md) - Creates a new Beads issue.
 - [Update-BeadsIssue](functions/Update-BeadsIssue.md) - Updates a Beads issue.
 
-### bun (6 functions)
+### bun (5 functions)
 
 - [Add-BunPackage](functions/Add-BunPackage.md) - Adds packages using Bun.
 - [Invoke-BunRun](functions/Invoke-BunRun.md) - Runs npm scripts using Bun.
 - [Invoke-Bunx](functions/Invoke-Bunx.md) - Executes packages using bunx.
 - [Remove-BunPackage](functions/Remove-BunPackage.md) - Removes packages using Bun.
-- [Update-BunSelf](functions/Update-BunSelf.md) - Updates Bun to the latest version.
 - [Update-BunSelf](functions/Update-BunSelf.md) - Updates Bun to the latest version.
 
 ### chocolatey (11 functions)
@@ -192,19 +191,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [Start-SqlWorkbench](functions/Start-SqlWorkbench.md) - Launches SQL Workbench/J.
 - [Start-TablePlus](functions/Start-TablePlus.md) - Launches TablePlus.
 
-### database (13 functions)
+### database (7 functions)
 
 - [Backup-Database](functions/Backup-Database.md) - Creates a backup of a database.
 - [Connect-Database](functions/Connect-Database.md) - Connects to a database using available client tools.
 - [Export-Database](functions/Export-Database.md) - Exports a database to a file.
 - [Get-DatabaseSchema](functions/Get-DatabaseSchema.md) - Gets database schema information.
 - [Import-Database](functions/Import-Database.md) - Imports a database from a file.
-- [Invoke-DBeaver](functions/Invoke-DBeaver.md) - Launches DBeaver Universal Database Tool.
-- [Invoke-Hasura](functions/Invoke-Hasura.md) - Executes Hasura CLI commands.
-- [Invoke-MongoDbCompass](functions/Invoke-MongoDbCompass.md) - Launches MongoDB Compass GUI.
-- [Invoke-SqlWorkbench](functions/Invoke-SqlWorkbench.md) - Launches SQL Workbench/J.
-- [Invoke-Supabase](functions/Invoke-Supabase.md) - Executes Supabase CLI commands.
-- [Invoke-TablePlus](functions/Invoke-TablePlus.md) - Launches TablePlus.
 - [Query-Database](functions/Query-Database.md) - Executes a database query.
 - [Restore-Database](functions/Restore-Database.md) - Restores a database from a backup.
 
@@ -332,17 +325,6 @@ This documentation is automatically generated from comment-based help in the pro
         This lazy loading approach improves profile startup performance.
         Loads Git modules from the git-modules subdirectory.
 
-### go (8 functions)
-
-- [Build-GoProgram](functions/Build-GoProgram.md) - Builds Go programs.
-- [Install-GoPackage](functions/Install-GoPackage.md) - Installs Go packages globally.
-- [Invoke-GoModule](functions/Invoke-GoModule.md) - Manages Go modules.
-- [Invoke-GoRun](functions/Invoke-GoRun.md) - Runs Go programs.
-- [Remove-GoDependency](functions/Remove-GoDependency.md) - Removes Go module dependencies.
-- [Test-GoPackage](functions/Test-GoPackage.md) - Runs Go tests.
-- [Update-GoTools](functions/Update-GoTools.md) - Updates Go development tools to their latest versions.
-- [Update-GoTools](functions/Update-GoTools.md) - Updates Go development tools to their latest versions.
-
 ### gradle (4 functions)
 
 - [Add-GradleDependency](functions/Add-GradleDependency.md) - Adds Gradle dependencies to project.
@@ -433,6 +415,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [Start-Minikube](functions/Start-Minikube.md) - Starts a Minikube Kubernetes cluster.
 - [Tail-KubeLogs](functions/Tail-KubeLogs.md) - Tails logs from Kubernetes pods.
 
+### lang-go-basic (7 functions)
+
+- [Build-GoProgram](functions/Build-GoProgram.md) - Builds Go programs.
+- [Install-GoPackage](functions/Install-GoPackage.md) - Installs Go packages globally.
+- [Invoke-GoModule](functions/Invoke-GoModule.md) - Manages Go modules.
+- [Invoke-GoRun](functions/Invoke-GoRun.md) - Runs Go programs.
+- [Remove-GoDependency](functions/Remove-GoDependency.md) - Removes Go module dependencies.
+- [Test-GoPackage](functions/Test-GoPackage.md) - Runs Go tests.
+- [Update-GoTools](functions/Update-GoTools.md) - Updates Go development tools to their latest versions.
+
 ### lang-go (5 functions)
 
 - [Build-GoProject](functions/Build-GoProject.md) - Builds a Go project with common optimizations.
@@ -441,32 +433,50 @@ This documentation is automatically generated from comment-based help in the pro
 - [Release-GoProject](functions/Release-GoProject.md) - Creates Go project releases using goreleaser.
 - [Test-GoProject](functions/Test-GoProject.md) - Runs Go tests with common options.
 
-### lang-java (6 functions)
+### lang-java-build (3 functions)
 
 - [Build-Ant](functions/Build-Ant.md) - Builds Java projects using Apache Ant.
 - [Build-Gradle](functions/Build-Gradle.md) - Builds Java projects using Gradle.
 - [Build-Maven](functions/Build-Maven.md) - Builds Java projects using Maven.
+
+### lang-java-compilers (2 functions)
+
 - [Compile-Kotlin](functions/Compile-Kotlin.md) - Compiles Kotlin code.
 - [Compile-Scala](functions/Compile-Scala.md) - Compiles Scala code.
+
+### lang-java-version (1 functions)
+
 - [Set-JavaVersion](functions/Set-JavaVersion.md) - Switches Java version using JAVA_HOME.
 
-### lang-python (6 functions)
+### lang-python-env (3 functions)
 
-- [Install-PythonApp](functions/Install-PythonApp.md) - Installs Python applications using pipx.
-- [Install-PythonPackage](functions/Install-PythonPackage.md) - Installs Python packages using the best available tool.
-- [Invoke-Pipx](functions/Invoke-Pipx.md) - Runs pipx-installed applications.
 - [Invoke-PythonScript](functions/Invoke-PythonScript.md) - Runs Python scripts and commands.
 - [New-PythonProject](functions/New-PythonProject.md) - Creates a new Python project structure.
 - [New-PythonVirtualEnv](functions/New-PythonVirtualEnv.md) - Creates a Python virtual environment.
 
-### lang-rust (7 functions)
+### lang-python-packages (1 functions)
+
+- [Install-PythonPackage](functions/Install-PythonPackage.md) - Installs Python packages using the best available tool.
+
+### lang-python-pipx (2 functions)
+
+- [Install-PythonApp](functions/Install-PythonApp.md) - Installs Python applications using pipx.
+- [Invoke-Pipx](functions/Invoke-Pipx.md) - Runs pipx-installed applications.
+
+### lang-rust-audit (2 functions)
 
 - [Audit-RustProject](functions/Audit-RustProject.md) - Audits Rust project dependencies for security vulnerabilities.
+- [Test-RustOutdated](functions/Test-RustOutdated.md) - Checks for outdated Rust dependencies.
+
+### lang-rust-build (3 functions)
+
 - [Build-RustRelease](functions/Build-RustRelease.md) - Builds a Rust project in release mode with optimizations.
 - [Clear-CargoCache](functions/Clear-CargoCache.md) - Cleans up Cargo cache and build artifacts.
-- [Install-RustBinary](functions/Install-RustBinary.md) - Installs Rust binaries using cargo-binstall.
-- [Test-RustOutdated](functions/Test-RustOutdated.md) - Checks for outdated Rust dependencies.
 - [Update-RustDependencies](functions/Update-RustDependencies.md) - Updates Rust project dependencies to their latest compatible versions.
+
+### lang-rust-tools (2 functions)
+
+- [Install-RustBinary](functions/Install-RustBinary.md) - Installs Rust binaries using cargo-binstall.
 - [Watch-RustProject](functions/Watch-RustProject.md) - Watches files and runs cargo commands on changes.
 
 ### laravel (3 functions)
@@ -854,22 +864,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [Start-UbuntuWSL](functions/Start-UbuntuWSL.md) - Launches or switches to Ubuntu WSL distribution.
 - [Stop-WSL](functions/Stop-WSL.md) - Shuts down all WSL distributions.
 
-### yarn (15 functions)
+### yarn (8 functions)
 
 - [Add-YarnPackage](functions/Add-YarnPackage.md) - Adds packages to project dependencies.
 - [Install-YarnDependencies](functions/Install-YarnDependencies.md) - Installs project dependencies.
 - [Invoke-Yarn](functions/Invoke-Yarn.md) - Executes Yarn commands.
+- [Remove-YarnPackage](functions/Remove-YarnPackage.md) - Removes packages from project dependencies.
 - [Test-YarnOutdated](functions/Test-YarnOutdated.md) - Checks for outdated packages in the current project.
 - [Update-YarnGlobalPackages](functions/Update-YarnGlobalPackages.md) - Updates all globally installed Yarn packages to their latest versions.
-- [Update-YarnGlobalPackages](functions/Update-YarnGlobalPackages.md) - Updates all globally installed Yarn packages to their latest versions.
 - [Update-YarnPackages](functions/Update-YarnPackages.md) - Updates all packages in the current project to their latest versions.
-- [Update-YarnPackages](functions/Update-YarnPackages.md) - Updates Yarn to the latest version.
-- [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
-- [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
-- [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
-- [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
-- [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
-- [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
 - [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
 
 
@@ -896,29 +899,20 @@ This documentation is automatically generated from comment-based help in the pro
 - [la](aliases/la.md) - Enables user-defined aliases and helper functions for enhanced shell experience. (alias for `Get-ChildItemEnhancedAll`)
 - [ll](aliases/ll.md) - Enables user-defined aliases and helper functions for enhanced shell experience. (alias for `Get-ChildItemEnhanced`)
 
-### angular (6 aliases)
+### angular (3 aliases)
 
 - [ng](aliases/ng.md) - Executes Angular CLI commands. (alias for `Invoke-Angular`)
-- [ng](aliases/ng.md) - Executes Angular CLI commands. (alias for `Invoke-Angular`)
-- [ng-new](aliases/ng-new.md) - Creates a new Angular application. (alias for `New-AngularApp`)
 - [ng-new](aliases/ng-new.md) - Creates a new Angular application. (alias for `New-AngularApp`)
 - [ng-serve](aliases/ng-serve.md) - Starts Angular development server. (alias for `Start-AngularDev`)
-- [ng-serve](aliases/ng-serve.md) - Starts Angular development server. (alias for `Start-AngularDev`)
 
-### ansible (12 aliases)
+### ansible (6 aliases)
 
-- [ansible](aliases/ansible.md) - Runs Ansible inventory commands via WSL with UTF-8 locale. (alias for `Invoke-Ansible`)
-- [ansible](aliases/ansible.md) - Runs Ansible commands via WSL with UTF-8 locale. (alias for `Invoke-Ansible`)
-- [ansible-doc](aliases/ansible-doc.md) - Runs Ansible documentation commands via WSL with UTF-8 locale. (alias for `Get-AnsibleDoc`)
-- [ansible-doc](aliases/ansible-doc.md) - Runs Ansible documentation commands via WSL with UTF-8 locale. (alias for `Get-AnsibleDoc`)
-- [ansible-galaxy](aliases/ansible-galaxy.md) - Runs Ansible Galaxy commands via WSL with UTF-8 locale. (alias for `Invoke-AnsibleGalaxy`)
-- [ansible-galaxy](aliases/ansible-galaxy.md) - Runs Ansible Galaxy commands via WSL with UTF-8 locale. (alias for `Invoke-AnsibleGalaxy`)
-- [ansible-inventory](aliases/ansible-inventory.md) - Runs Ansible inventory commands via WSL with UTF-8 locale. (alias for `Get-AnsibleInventory`)
-- [ansible-inventory](aliases/ansible-inventory.md) - Runs Ansible inventory commands via WSL with UTF-8 locale. (alias for `Get-AnsibleInventory`)
-- [ansible-playbook](aliases/ansible-playbook.md) - Runs Ansible inventory commands via WSL with UTF-8 locale. (alias for `Invoke-AnsiblePlaybook`)
-- [ansible-playbook](aliases/ansible-playbook.md) - Runs Ansible playbook commands via WSL with UTF-8 locale. (alias for `Invoke-AnsiblePlaybook`)
-- [ansible-vault](aliases/ansible-vault.md) - Runs Ansible Vault commands via WSL with UTF-8 locale. (alias for `Invoke-AnsibleVault`)
-- [ansible-vault](aliases/ansible-vault.md) - Runs Ansible Vault commands via WSL with UTF-8 locale. (alias for `Invoke-AnsibleVault`)
+- [ansible](aliases/ansible.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-Ansible`)
+- [ansible-doc](aliases/ansible-doc.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Get-AnsibleDoc`)
+- [ansible-galaxy](aliases/ansible-galaxy.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-AnsibleGalaxy`)
+- [ansible-inventory](aliases/ansible-inventory.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Get-AnsibleInventory`)
+- [ansible-playbook](aliases/ansible-playbook.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-AnsiblePlaybook`)
+- [ansible-vault](aliases/ansible-vault.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-AnsibleVault`)
 
 ### api-tools (6 aliases)
 
@@ -938,30 +932,20 @@ This documentation is automatically generated from comment-based help in the pro
 - [asdfselfupdate](aliases/asdfselfupdate.md) - Updates asdf to the latest version. (alias for `Update-AsdfSelf`)
 - [asdfuninstall](aliases/asdfuninstall.md) - Uninstalls tools from asdf. (alias for `Remove-AsdfTool`)
 
-### aws (12 aliases)
+### aws (6 aliases)
 
 - [aws](aliases/aws.md) - Executes AWS CLI commands. (alias for `Invoke-Aws`)
-- [aws](aliases/aws.md) - Executes AWS CLI commands. (alias for `Invoke-Aws`)
-- [aws-credentials](aliases/aws-credentials.md) - Lists configured AWS credential profiles. (alias for `Get-AwsCredentials`)
 - [aws-credentials](aliases/aws-credentials.md) - Lists configured AWS credential profiles. (alias for `Get-AwsCredentials`)
 - [aws-profile](aliases/aws-profile.md) - Sets the AWS profile environment variable. (alias for `Set-AwsProfile`)
-- [aws-profile](aliases/aws-profile.md) - Sets the AWS profile environment variable. (alias for `Set-AwsProfile`)
-- [aws-region](aliases/aws-region.md) - Sets the AWS region environment variable. (alias for `Set-AwsRegion`)
 - [aws-region](aliases/aws-region.md) - Sets the AWS region environment variable. (alias for `Set-AwsRegion`)
 - [aws-switch](aliases/aws-switch.md) - Switches AWS account/profile quickly. (alias for `Switch-AwsAccount`)
-- [aws-switch](aliases/aws-switch.md) - Switches AWS account/profile quickly. (alias for `Switch-AwsAccount`)
-- [aws-test](aliases/aws-test.md) - Tests AWS connectivity and credentials. (alias for `Test-AwsConnection`)
 - [aws-test](aliases/aws-test.md) - Tests AWS connectivity and credentials. (alias for `Test-AwsConnection`)
 
-### azure (8 aliases)
+### azure (4 aliases)
 
 - [az](aliases/az.md) - Executes Azure CLI commands. (alias for `Invoke-Azure`)
-- [az](aliases/az.md) - Executes Azure CLI commands. (alias for `Invoke-Azure`)
-- [az-login](aliases/az-login.md) - Authenticates with Azure CLI. (alias for `Connect-AzureAccount`)
 - [az-login](aliases/az-login.md) - Authenticates with Azure CLI. (alias for `Connect-AzureAccount`)
 - [azd](aliases/azd.md) - Executes Azure Developer CLI commands. (alias for `Invoke-AzureDeveloper`)
-- [azd](aliases/azd.md) - Executes Azure Developer CLI commands. (alias for `Invoke-AzureDeveloper`)
-- [azd-up](aliases/azd-up.md) - Provisions and deploys using Azure Developer CLI. (alias for `Start-AzureDeveloperUp`)
 - [azd-up](aliases/azd-up.md) - Provisions and deploys using Azure Developer CLI. (alias for `Start-AzureDeveloperUp`)
 
 ### beads (2 aliases)
@@ -969,29 +953,12 @@ This documentation is automatically generated from comment-based help in the pro
 - [bd](aliases/bd.md) - Executes Beads (bd) commands. (alias for `Invoke-Beads`)
 - [bd](aliases/bd.md) - Executes Beads (bd) commands. (alias for `Invoke-Beads`)
 
-### bun (22 aliases)
+### bun (5 aliases)
 
-- [bun-add](aliases/bun-add.md) - Adds packages using Bun. (alias for `Add-BunPackage`)
-- [bun-add](aliases/bun-add.md) - Adds packages using Bun. (alias for `Add-BunPackage`)
-- [bun-add](aliases/bun-add.md) - Adds packages using Bun. (alias for `Add-BunPackage`)
-- [bun-add](aliases/bun-add.md) - Adds packages using Bun. (alias for `Add-BunPackage`)
-- [bun-remove](aliases/bun-remove.md) - Removes packages using Bun. (alias for `Remove-BunPackage`)
-- [bun-remove](aliases/bun-remove.md) - Removes packages using Bun. (alias for `Remove-BunPackage`)
-- [bun-remove](aliases/bun-remove.md) - Removes packages using Bun. (alias for `Remove-BunPackage`)
-- [bun-remove](aliases/bun-remove.md) - Removes packages using Bun. (alias for `Remove-BunPackage`)
-- [bun-remove](aliases/bun-remove.md) - Removes packages using Bun. (alias for `Remove-BunPackage`)
+- [bun-add](aliases/bun-add.md) - Updates Bun to the latest version. (alias for `Add-BunPackage`)
 - [bun-remove](aliases/bun-remove.md) - Removes packages using Bun. (alias for `Remove-BunPackage`)
 - [bun-run](aliases/bun-run.md) - Updates Bun to the latest version. (alias for `Invoke-BunRun`)
-- [bun-run](aliases/bun-run.md) - Runs npm scripts using Bun. (alias for `Invoke-BunRun`)
-- [bun-run](aliases/bun-run.md) - Runs npm scripts using Bun. (alias for `Invoke-BunRun`)
-- [bun-run](aliases/bun-run.md) - Updates Bun to the latest version. (alias for `Invoke-BunRun`)
 - [bun-upgrade](aliases/bun-upgrade.md) - Updates Bun to the latest version. (alias for `Update-BunSelf`)
-- [bun-upgrade](aliases/bun-upgrade.md) - Updates Bun to the latest version. (alias for `Update-BunSelf`)
-- [bun-upgrade](aliases/bun-upgrade.md) - Updates Bun to the latest version. (alias for `Update-BunSelf`)
-- [bun-upgrade](aliases/bun-upgrade.md) - Updates Bun to the latest version. (alias for `Update-BunSelf`)
-- [bunx](aliases/bunx.md) - Executes packages using bunx. (alias for `Invoke-Bunx`)
-- [bunx](aliases/bunx.md) - Executes packages using bunx. (alias for `Invoke-Bunx`)
-- [bunx](aliases/bunx.md) - Updates Bun to the latest version. (alias for `Invoke-Bunx`)
 - [bunx](aliases/bunx.md) - Updates Bun to the latest version. (alias for `Invoke-Bunx`)
 
 ### chocolatey (18 aliases)
@@ -1063,44 +1030,21 @@ This documentation is automatically generated from comment-based help in the pro
 - [supabase](aliases/supabase.md) - Executes Supabase CLI commands. (alias for `Invoke-Supabase`)
 - [tableplus](aliases/tableplus.md) - Launches TablePlus. (alias for `Start-TablePlus`)
 
-### database (26 aliases)
+### database (7 aliases)
 
 - [db-backup](aliases/db-backup.md) - Creates a backup of a database. (alias for `Backup-Database`)
-- [db-backup](aliases/db-backup.md) - Creates a backup of a database. (alias for `Backup-Database`)
-- [db-connect](aliases/db-connect.md) - Connects to a database using available client tools. (alias for `Connect-Database`)
 - [db-connect](aliases/db-connect.md) - Connects to a database using available client tools. (alias for `Connect-Database`)
 - [db-export](aliases/db-export.md) - Exports a database to a file. (alias for `Export-Database`)
-- [db-export](aliases/db-export.md) - Exports a database to a file. (alias for `Export-Database`)
-- [db-import](aliases/db-import.md) - Imports a database from a file. (alias for `Import-Database`)
 - [db-import](aliases/db-import.md) - Imports a database from a file. (alias for `Import-Database`)
 - [db-query](aliases/db-query.md) - Executes a database query. (alias for `Query-Database`)
-- [db-query](aliases/db-query.md) - Executes a database query. (alias for `Query-Database`)
-- [db-restore](aliases/db-restore.md) - Restores a database from a backup. (alias for `Restore-Database`)
 - [db-restore](aliases/db-restore.md) - Restores a database from a backup. (alias for `Restore-Database`)
 - [db-schema](aliases/db-schema.md) - Gets database schema information. (alias for `Get-DatabaseSchema`)
-- [db-schema](aliases/db-schema.md) - Gets database schema information. (alias for `Get-DatabaseSchema`)
-- [dbeaver](aliases/dbeaver.md) - Launches DBeaver Universal Database Tool. (alias for `Invoke-DBeaver`)
-- [dbeaver](aliases/dbeaver.md) - Launches DBeaver Universal Database Tool. (alias for `Invoke-DBeaver`)
-- [hasura](aliases/hasura.md) - Executes Hasura CLI commands. (alias for `Invoke-Hasura`)
-- [hasura](aliases/hasura.md) - Executes Hasura CLI commands. (alias for `Invoke-Hasura`)
-- [mongodb-compass](aliases/mongodb-compass.md) - Launches MongoDB Compass GUI. (alias for `Invoke-MongoDbCompass`)
-- [mongodb-compass](aliases/mongodb-compass.md) - Launches MongoDB Compass GUI. (alias for `Invoke-MongoDbCompass`)
-- [sql-workbench](aliases/sql-workbench.md) - Launches SQL Workbench/J. (alias for `Invoke-SqlWorkbench`)
-- [sql-workbench](aliases/sql-workbench.md) - Launches SQL Workbench/J. (alias for `Invoke-SqlWorkbench`)
-- [supabase](aliases/supabase.md) - Executes Supabase CLI commands. (alias for `Invoke-Supabase`)
-- [supabase](aliases/supabase.md) - Executes Supabase CLI commands. (alias for `Invoke-Supabase`)
-- [tableplus](aliases/tableplus.md) - Launches TablePlus. (alias for `Invoke-TablePlus`)
-- [tableplus](aliases/tableplus.md) - Launches TablePlus. (alias for `Invoke-TablePlus`)
 
-### deno (8 aliases)
+### deno (4 aliases)
 
 - [deno](aliases/deno.md) - Updates Deno to the latest version. (alias for `Invoke-Deno`)
-- [deno](aliases/deno.md) - Executes Deno commands. (alias for `Invoke-Deno`)
 - [deno-run](aliases/deno-run.md) - Updates Deno to the latest version. (alias for `Invoke-DenoRun`)
-- [deno-run](aliases/deno-run.md) - Runs Deno scripts. (alias for `Invoke-DenoRun`)
-- [deno-task](aliases/deno-task.md) - Runs Deno tasks. (alias for `Invoke-DenoTask`)
-- [deno-task](aliases/deno-task.md) - Runs Deno tasks. (alias for `Invoke-DenoTask`)
-- [deno-upgrade](aliases/deno-upgrade.md) - Updates Deno to the latest version. (alias for `Update-DenoSelf`)
+- [deno-task](aliases/deno-task.md) - Updates Deno to the latest version. (alias for `Invoke-DenoTask`)
 - [deno-upgrade](aliases/deno-upgrade.md) - Updates Deno to the latest version. (alias for `Update-DenoSelf`)
 
 ### dotnet (6 aliases)
@@ -1131,31 +1075,22 @@ This documentation is automatically generated from comment-based help in the pro
 - [lta](aliases/lta.md) - Lists all directory contents in tree format using eza. (alias for `Get-ChildItemEzaTreeAll`)
 - [ltime](aliases/ltime.md) - Lists directory contents sorted by modification time using eza. (alias for `Get-ChildItemEzaByTime`)
 
-### firebase (6 aliases)
+### firebase (3 aliases)
 
 - [fb](aliases/fb.md) - Executes Firebase CLI commands. (alias for `Invoke-Firebase`)
-- [fb](aliases/fb.md) - Executes Firebase CLI commands. (alias for `Invoke-Firebase`)
-- [fb-deploy](aliases/fb-deploy.md) - Deploys to Firebase hosting. (alias for `Publish-FirebaseDeployment`)
 - [fb-deploy](aliases/fb-deploy.md) - Deploys to Firebase hosting. (alias for `Publish-FirebaseDeployment`)
 - [fb-serve](aliases/fb-serve.md) - Starts Firebase local development server. (alias for `Start-FirebaseServer`)
-- [fb-serve](aliases/fb-serve.md) - Starts Firebase local development server. (alias for `Start-FirebaseServer`)
 
-### fzf (4 aliases)
+### fzf (2 aliases)
 
 - [fcmd](aliases/fcmd.md) - Finds PowerShell commands using fzf fuzzy finder. (alias for `Find-CommandFuzzy`)
-- [fcmd](aliases/fcmd.md) - Finds PowerShell commands using fzf fuzzy finder. (alias for `Find-CommandFuzzy`)
-- [ff](aliases/ff.md) - Finds PowerShell commands using fzf fuzzy finder. (alias for `Find-FileFuzzy`)
 - [ff](aliases/ff.md) - Finds PowerShell commands using fzf fuzzy finder. (alias for `Find-FileFuzzy`)
 
-### gcloud (8 aliases)
+### gcloud (4 aliases)
 
 - [gcloud](aliases/gcloud.md) - Executes Google Cloud CLI commands. (alias for `Invoke-GCloud`)
-- [gcloud](aliases/gcloud.md) - Executes Google Cloud CLI commands. (alias for `Invoke-GCloud`)
-- [gcloud-auth](aliases/gcloud-auth.md) - Manages Google Cloud authentication. (alias for `Set-GCloudAuth`)
 - [gcloud-auth](aliases/gcloud-auth.md) - Manages Google Cloud authentication. (alias for `Set-GCloudAuth`)
 - [gcloud-config](aliases/gcloud-config.md) - Manages Google Cloud configuration. (alias for `Set-GCloudConfig`)
-- [gcloud-config](aliases/gcloud-config.md) - Manages Google Cloud configuration. (alias for `Set-GCloudConfig`)
-- [gcloud-projects](aliases/gcloud-projects.md) - Manages Google Cloud Platform projects. (alias for `Get-GCloudProjects`)
 - [gcloud-projects](aliases/gcloud-projects.md) - Manages Google Cloud Platform projects. (alias for `Get-GCloudProjects`)
 
 ### gem (9 aliases)
@@ -1170,11 +1105,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [ridk-install](aliases/ridk-install.md) - Installs MSYS2 development tools using Ruby Installer Development Kit. (alias for `Install-RubyDevKit`)
 - [ruby-devkit-install](aliases/ruby-devkit-install.md) - Installs MSYS2 development tools using Ruby Installer Development Kit. (alias for `Install-RubyDevKit`)
 
-### gh (4 aliases)
+### gh (2 aliases)
 
 - [gh-open](aliases/gh-open.md) - Opens a GitHub repository in the web browser. (alias for `Open-GitHubRepository`)
-- [gh-open](aliases/gh-open.md) - Opens a GitHub repository in the web browser. (alias for `Open-GitHubRepository`)
-- [gh-pr](aliases/gh-pr.md) - Manages GitHub pull requests. (alias for `Invoke-GitHubPullRequest`)
 - [gh-pr](aliases/gh-pr.md) - Manages GitHub pull requests. (alias for `Invoke-GitHubPullRequest`)
 
 ### git-enhanced (10 aliases)
@@ -1195,41 +1128,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [Git-CurrentBranch](aliases/Git-CurrentBranch.md) - Alias for `Get-GitCurrentBranch` (alias for `Get-GitCurrentBranch`)
 - [Git-StatusShort](aliases/Git-StatusShort.md) - Alias for `Get-GitStatusShort` (alias for `Get-GitStatusShort`)
 - [Prompt-GitSegment](aliases/Prompt-GitSegment.md) - Alias for `Format-PromptGitSegment` (alias for `Format-PromptGitSegment`)
-
-### go (32 aliases)
-
-- [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
-- [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
-- [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
-- [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
-- [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
-- [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
-- [go-mod](aliases/go-mod.md) - Manages Go modules. (alias for `Invoke-GoModule`)
-- [go-mod](aliases/go-mod.md) - Manages Go modules. (alias for `Invoke-GoModule`)
-- [go-mod](aliases/go-mod.md) - Manages Go modules. (alias for `Invoke-GoModule`)
-- [go-mod](aliases/go-mod.md) - Manages Go modules. (alias for `Invoke-GoModule`)
-- [go-mod](aliases/go-mod.md) - Manages Go modules. (alias for `Invoke-GoModule`)
-- [go-mod](aliases/go-mod.md) - Manages Go modules. (alias for `Invoke-GoModule`)
-- [go-run](aliases/go-run.md) - Runs Go programs. (alias for `Invoke-GoRun`)
-- [go-run](aliases/go-run.md) - Updates Go development tools to their latest versions. (alias for `Invoke-GoRun`)
-- [go-run](aliases/go-run.md) - Runs Go programs. (alias for `Invoke-GoRun`)
-- [go-run](aliases/go-run.md) - Runs Go programs. (alias for `Invoke-GoRun`)
-- [go-run](aliases/go-run.md) - Updates Go development tools to their latest versions. (alias for `Invoke-GoRun`)
-- [go-run](aliases/go-run.md) - Runs Go programs. (alias for `Invoke-GoRun`)
-- [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
-- [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
-- [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
-- [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
-- [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
-- [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
-- [go-tools-update](aliases/go-tools-update.md) - Updates Go development tools to their latest versions. (alias for `Update-GoTools`)
-- [go-tools-update](aliases/go-tools-update.md) - Updates Go development tools to their latest versions. (alias for `Update-GoTools`)
-- [go-tools-update](aliases/go-tools-update.md) - Updates Go development tools to their latest versions. (alias for `Update-GoTools`)
-- [go-tools-update](aliases/go-tools-update.md) - Updates Go development tools to their latest versions. (alias for `Update-GoTools`)
-- [go-update](aliases/go-update.md) - Alias for `Update-GoDependencies` (alias for `Update-GoDependencies`)
-- [go-update](aliases/go-update.md) - Alias for `Update-GoDependencies` (alias for `Update-GoDependencies`)
-- [go-update](aliases/go-update.md) - Alias for `Update-GoDependencies` (alias for `Update-GoDependencies`)
-- [go-update](aliases/go-update.md) - Alias for `Update-GoDependencies` (alias for `Update-GoDependencies`)
 
 ### gradle (4 aliases)
 
@@ -1252,15 +1150,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [hatchenv](aliases/hatchenv.md) - Creates a virtual environment using Hatch. (alias for `New-HatchEnvironment`)
 - [hatchversion](aliases/hatchversion.md) - Gets or sets project version. (alias for `Get-HatchVersion`)
 
-### helm (8 aliases)
+### helm (4 aliases)
 
 - [helm](aliases/helm.md) - Executes Helm commands. (alias for `Invoke-Helm`)
-- [helm](aliases/helm.md) - Executes Helm commands. (alias for `Invoke-Helm`)
-- [helm-install](aliases/helm-install.md) - Installs Helm charts. (alias for `Install-HelmChart`)
 - [helm-install](aliases/helm-install.md) - Installs Helm charts. (alias for `Install-HelmChart`)
 - [helm-list](aliases/helm-list.md) - Lists Helm releases. (alias for `Get-HelmReleases`)
-- [helm-list](aliases/helm-list.md) - Lists Helm releases. (alias for `Get-HelmReleases`)
-- [helm-upgrade](aliases/helm-upgrade.md) - Upgrades Helm releases. (alias for `Update-HelmRelease`)
 - [helm-upgrade](aliases/helm-upgrade.md) - Upgrades Helm releases. (alias for `Update-HelmRelease`)
 
 ### homebrew (18 aliases)
@@ -1284,11 +1178,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [brewupdate](aliases/brewupdate.md) - Updates Homebrew packages. (alias for `Update-BrewPackages`)
 - [brewupgrade](aliases/brewupgrade.md) - Updates Homebrew packages. (alias for `Update-BrewPackages`)
 
-### jq-yq (4 aliases)
+### jq-yq (2 aliases)
 
 - [jq2json](aliases/jq2json.md) - Converts JSON to compact JSON format using jq. (alias for `Convert-JqToJson`)
-- [jq2json](aliases/jq2json.md) - Converts JSON to compact JSON format using jq. (alias for `Convert-JqToJson`)
-- [yq2json](aliases/yq2json.md) - Converts YAML to JSON format using yq. (alias for `Convert-YqToJson`)
 - [yq2json](aliases/yq2json.md) - Converts YAML to JSON format using yq. (alias for `Convert-YqToJson`)
 
 ### julia (4 aliases)
@@ -1298,25 +1190,28 @@ This documentation is automatically generated from comment-based help in the pro
 - [julia-status](aliases/julia-status.md) - Shows Julia package status. (alias for `Get-JuliaPackages`)
 - [julia-update](aliases/julia-update.md) - Updates Julia packages. (alias for `Update-JuliaPackages`)
 
-### kube (4 aliases)
+### kube (2 aliases)
 
 - [minikube-start](aliases/minikube-start.md) - Starts a Minikube cluster. (alias for `Start-MinikubeCluster`)
-- [minikube-start](aliases/minikube-start.md) - Starts a Minikube cluster. (alias for `Start-MinikubeCluster`)
-- [minikube-stop](aliases/minikube-stop.md) - Stops a Minikube cluster. (alias for `Stop-MinikubeCluster`)
 - [minikube-stop](aliases/minikube-stop.md) - Stops a Minikube cluster. (alias for `Stop-MinikubeCluster`)
 
-### kubectl (10 aliases)
+### kubectl (5 aliases)
 
 - [k](aliases/k.md) - Gets the current Kubernetes context. (alias for `Invoke-Kubectl`)
-- [k](aliases/k.md) - Executes kubectl with the specified arguments. (alias for `Invoke-Kubectl`)
-- [kctx](aliases/kctx.md) - Gets the current Kubernetes context. (alias for `Get-KubectlContext`)
 - [kctx](aliases/kctx.md) - Gets the current Kubernetes context. (alias for `Get-KubectlContext`)
 - [kd](aliases/kd.md) - Gets the current Kubernetes context. (alias for `Describe-KubectlResource`)
-- [kd](aliases/kd.md) - Describes Kubernetes resources. (alias for `Describe-KubectlResource`)
 - [kg](aliases/kg.md) - Gets the current Kubernetes context. (alias for `Get-KubectlResource`)
-- [kg](aliases/kg.md) - Gets Kubernetes resources. (alias for `Get-KubectlResource`)
 - [kn](aliases/kn.md) - Gets the current Kubernetes context. (alias for `Set-KubectlContext`)
-- [kn](aliases/kn.md) - Switches the current Kubernetes context. (alias for `Set-KubectlContext`)
+
+### lang-go-basic (7 aliases)
+
+- [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
+- [go-install](aliases/go-install.md) - Installs Go packages globally. (alias for `Install-GoPackage`)
+- [go-mod](aliases/go-mod.md) - Manages Go modules. (alias for `Invoke-GoModule`)
+- [go-remove](aliases/go-remove.md) - Removes Go module dependencies. (alias for `Remove-GoDependency`)
+- [go-run](aliases/go-run.md) - Runs Go programs. (alias for `Invoke-GoRun`)
+- [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
+- [go-tools-update](aliases/go-tools-update.md) - Updates Go development tools to their latest versions. (alias for `Update-GoTools`)
 
 ### lang-go (10 aliases)
 
@@ -1331,61 +1226,72 @@ This documentation is automatically generated from comment-based help in the pro
 - [mage](aliases/mage.md) - Runs mage build targets for Go projects. (alias for `Invoke-Mage`)
 - [mage](aliases/mage.md) - Runs mage build targets for Go projects. (alias for `Invoke-Mage`)
 
-### lang-java (10 aliases)
+### lang-java-build (6 aliases)
 
 - [ant](aliases/ant.md) - Builds Java projects using Apache Ant. (alias for `Build-Ant`)
 - [ant](aliases/ant.md) - Builds Java projects using Apache Ant. (alias for `Build-Ant`)
 - [gradle](aliases/gradle.md) - Builds Java projects using Gradle. (alias for `Build-Gradle`)
 - [gradle](aliases/gradle.md) - Builds Java projects using Gradle. (alias for `Build-Gradle`)
-- [kotlinc](aliases/kotlinc.md) - Compiles Kotlin code. (alias for `Compile-Kotlin`)
-- [kotlinc](aliases/kotlinc.md) - Compiles Kotlin code. (alias for `Compile-Kotlin`)
 - [mvn](aliases/mvn.md) - Builds Java projects using Maven. (alias for `Build-Maven`)
 - [mvn](aliases/mvn.md) - Builds Java projects using Maven. (alias for `Build-Maven`)
+
+### lang-java-compilers (4 aliases)
+
+- [kotlinc](aliases/kotlinc.md) - Compiles Kotlin code. (alias for `Compile-Kotlin`)
+- [kotlinc](aliases/kotlinc.md) - Compiles Kotlin code. (alias for `Compile-Kotlin`)
 - [scalac](aliases/scalac.md) - Compiles Scala code. (alias for `Compile-Scala`)
 - [scalac](aliases/scalac.md) - Compiles Scala code. (alias for `Compile-Scala`)
 
-### lang-python (8 aliases)
+### lang-python-env (2 aliases)
+
+- [pyvenv](aliases/pyvenv.md) - Creates a Python virtual environment. (alias for `New-PythonVirtualEnv`)
+- [pyvenv](aliases/pyvenv.md) - Creates a Python virtual environment. (alias for `New-PythonVirtualEnv`)
+
+### lang-python-packages (2 aliases)
+
+- [pyinstall](aliases/pyinstall.md) - Installs Python packages using the best available tool. (alias for `Install-PythonPackage`)
+- [pyinstall](aliases/pyinstall.md) - Installs Python packages using the best available tool. (alias for `Install-PythonPackage`)
+
+### lang-python-pipx (4 aliases)
 
 - [pipx](aliases/pipx.md) - Runs pipx-installed applications. (alias for `Invoke-Pipx`)
 - [pipx](aliases/pipx.md) - Runs pipx-installed applications. (alias for `Invoke-Pipx`)
 - [pipx-install](aliases/pipx-install.md) - Installs Python applications using pipx. (alias for `Install-PythonApp`)
 - [pipx-install](aliases/pipx-install.md) - Installs Python applications using pipx. (alias for `Install-PythonApp`)
-- [pyinstall](aliases/pyinstall.md) - Installs Python packages using the best available tool. (alias for `Install-PythonPackage`)
-- [pyinstall](aliases/pyinstall.md) - Installs Python packages using the best available tool. (alias for `Install-PythonPackage`)
-- [pyvenv](aliases/pyvenv.md) - Creates a Python virtual environment. (alias for `New-PythonVirtualEnv`)
-- [pyvenv](aliases/pyvenv.md) - Creates a Python virtual environment. (alias for `New-PythonVirtualEnv`)
 
-### lang-rust (16 aliases)
+### lang-rust-audit (4 aliases)
 
 - [cargo-audit](aliases/cargo-audit.md) - Audits Rust project dependencies for security vulnerabilities. (alias for `Audit-RustProject`)
 - [cargo-audit](aliases/cargo-audit.md) - Audits Rust project dependencies for security vulnerabilities. (alias for `Audit-RustProject`)
-- [cargo-binstall](aliases/cargo-binstall.md) - Installs Rust binaries using cargo-binstall. (alias for `Install-RustBinary`)
-- [cargo-binstall](aliases/cargo-binstall.md) - Installs Rust binaries using cargo-binstall. (alias for `Install-RustBinary`)
+- [cargo-outdated](aliases/cargo-outdated.md) - Checks for outdated Rust dependencies. (alias for `Test-RustOutdated`)
+- [cargo-outdated](aliases/cargo-outdated.md) - Checks for outdated Rust dependencies. (alias for `Test-RustOutdated`)
+
+### lang-rust-build (8 aliases)
+
 - [cargo-build-release](aliases/cargo-build-release.md) - Builds a Rust project in release mode with optimizations. (alias for `Build-RustRelease`)
 - [cargo-build-release](aliases/cargo-build-release.md) - Builds a Rust project in release mode with optimizations. (alias for `Build-RustRelease`)
 - [cargo-clean](aliases/cargo-clean.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
 - [cargo-clean](aliases/cargo-clean.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
 - [cargo-cleanup](aliases/cargo-cleanup.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
 - [cargo-cleanup](aliases/cargo-cleanup.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
-- [cargo-outdated](aliases/cargo-outdated.md) - Checks for outdated Rust dependencies. (alias for `Test-RustOutdated`)
-- [cargo-outdated](aliases/cargo-outdated.md) - Checks for outdated Rust dependencies. (alias for `Test-RustOutdated`)
 - [cargo-update-deps](aliases/cargo-update-deps.md) - Updates Rust project dependencies to their latest compatible versions. (alias for `Update-RustDependencies`)
 - [cargo-update-deps](aliases/cargo-update-deps.md) - Updates Rust project dependencies to their latest compatible versions. (alias for `Update-RustDependencies`)
+
+### lang-rust-tools (4 aliases)
+
+- [cargo-binstall](aliases/cargo-binstall.md) - Installs Rust binaries using cargo-binstall. (alias for `Install-RustBinary`)
+- [cargo-binstall](aliases/cargo-binstall.md) - Installs Rust binaries using cargo-binstall. (alias for `Install-RustBinary`)
 - [cargo-watch](aliases/cargo-watch.md) - Watches files and runs cargo commands on changes. (alias for `Watch-RustProject`)
 - [cargo-watch](aliases/cargo-watch.md) - Watches files and runs cargo commands on changes. (alias for `Watch-RustProject`)
 
-### laravel (6 aliases)
+### laravel (3 aliases)
 
 - [art](aliases/art.md) - Executes Laravel Artisan commands (alias). (alias for `Invoke-LaravelArt`)
-- [art](aliases/art.md) - Executes Laravel Artisan commands (alias). (alias for `Invoke-LaravelArt`)
-- [artisan](aliases/artisan.md) - Executes Laravel Artisan commands. (alias for `Invoke-LaravelArtisan`)
 - [artisan](aliases/artisan.md) - Executes Laravel Artisan commands. (alias for `Invoke-LaravelArtisan`)
 - [laravel-new](aliases/laravel-new.md) - Creates a new Laravel application. (alias for `New-LaravelApp`)
-- [laravel-new](aliases/laravel-new.md) - Creates a new Laravel application. (alias for `New-LaravelApp`)
 
-### lazydocker (2 aliases)
+### lazydocker (1 aliases)
 
-- [ld](aliases/ld.md) - Launches lazydocker terminal UI. (alias for `Invoke-LazyDocker`)
 - [ld](aliases/ld.md) - Launches lazydocker terminal UI. (alias for `Invoke-LazyDocker`)
 
 ### maven (4 aliases)
@@ -1395,11 +1301,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [maven-remove](aliases/maven-remove.md) - Removes Maven dependencies from project. (alias for `Remove-MavenDependency`)
 - [maven-update](aliases/maven-update.md) - Updates Maven dependencies. (alias for `Update-MavenDependencies`)
 
-### minio (4 aliases)
+### minio (2 aliases)
 
 - [mc-cp](aliases/mc-cp.md) - Copies files using MinIO client. (alias for `Copy-MinioFile`)
-- [mc-cp](aliases/mc-cp.md) - Copies files using MinIO client. (alias for `Copy-MinioFile`)
-- [mc-ls](aliases/mc-ls.md) - Lists files in MinIO storage. (alias for `Get-MinioFileList`)
 - [mc-ls](aliases/mc-ls.md) - Lists files in MinIO storage. (alias for `Get-MinioFileList`)
 
 ### mise (8 aliases)
@@ -1434,24 +1338,17 @@ This documentation is automatically generated from comment-based help in the pro
 - [navip](aliases/navip.md) - Prints commands from navi cheatsheets without executing them. (alias for `Invoke-NaviPrint`)
 - [navis](aliases/navis.md) - Searches navi cheatsheets interactively. (alias for `Invoke-NaviSearch`)
 
-### nextjs (8 aliases)
+### nextjs (4 aliases)
 
 - [create-next-app](aliases/create-next-app.md) - Creates a new Next.js application. (alias for `New-NextJsApp`)
-- [create-next-app](aliases/create-next-app.md) - Creates a new Next.js application. (alias for `New-NextJsApp`)
-- [next-build](aliases/next-build.md) - Builds Next.js application for production. (alias for `Build-NextJsApp`)
 - [next-build](aliases/next-build.md) - Builds Next.js application for production. (alias for `Build-NextJsApp`)
 - [next-dev](aliases/next-dev.md) - Starts Next.js development server. (alias for `Start-NextJsDev`)
-- [next-dev](aliases/next-dev.md) - Starts Next.js development server. (alias for `Start-NextJsDev`)
-- [next-start](aliases/next-start.md) - Starts Next.js production server. (alias for `Start-NextJsProduction`)
 - [next-start](aliases/next-start.md) - Starts Next.js production server. (alias for `Start-NextJsProduction`)
 
-### ngrok (6 aliases)
+### ngrok (3 aliases)
 
 - [ngrok](aliases/ngrok.md) - Executes Ngrok commands. (alias for `Invoke-Ngrok`)
-- [ngrok](aliases/ngrok.md) - Executes Ngrok commands. (alias for `Invoke-Ngrok`)
 - [ngrok-http](aliases/ngrok-http.md) - Creates an Ngrok HTTP tunnel. (alias for `Start-NgrokHttpTunnel`)
-- [ngrok-http](aliases/ngrok-http.md) - Creates an Ngrok HTTP tunnel. (alias for `Start-NgrokHttpTunnel`)
-- [ngrok-tcp](aliases/ngrok-tcp.md) - Creates an Ngrok TCP tunnel. (alias for `Start-NgrokTcpTunnel`)
 - [ngrok-tcp](aliases/ngrok-tcp.md) - Creates an Ngrok TCP tunnel. (alias for `Start-NgrokTcpTunnel`)
 
 ### nimble (6 aliases)
@@ -1484,26 +1381,18 @@ This documentation is automatically generated from comment-based help in the pro
 - [nugetrestore](aliases/nugetrestore.md) - Restores packages from packages.config or project.json. (alias for `Restore-NuGetPackages`)
 - [nugetupdate](aliases/nugetupdate.md) - Updates packages in packages.config. (alias for `Update-NuGetPackages`)
 
-### nuxt (8 aliases)
+### nuxt (4 aliases)
 
 - [create-nuxt-app](aliases/create-nuxt-app.md) - Creates a new Nuxt.js application. (alias for `New-NuxtApp`)
-- [create-nuxt-app](aliases/create-nuxt-app.md) - Creates a new Nuxt.js application. (alias for `New-NuxtApp`)
-- [nuxi](aliases/nuxi.md) - Executes Nuxt CLI (nuxi) commands. (alias for `Invoke-Nuxt`)
 - [nuxi](aliases/nuxi.md) - Executes Nuxt CLI (nuxi) commands. (alias for `Invoke-Nuxt`)
 - [nuxt-build](aliases/nuxt-build.md) - Builds Nuxt.js application for production. (alias for `Build-NuxtApp`)
-- [nuxt-build](aliases/nuxt-build.md) - Builds Nuxt.js application for production. (alias for `Build-NuxtApp`)
-- [nuxt-dev](aliases/nuxt-dev.md) - Starts Nuxt.js development server. (alias for `Start-NuxtDev`)
 - [nuxt-dev](aliases/nuxt-dev.md) - Starts Nuxt.js development server. (alias for `Start-NuxtDev`)
 
-### ollama (8 aliases)
+### ollama (4 aliases)
 
 - [ol](aliases/ol.md) - Executes Ollama commands. (alias for `Invoke-Ollama`)
-- [ol](aliases/ol.md) - Executes Ollama commands. (alias for `Invoke-Ollama`)
-- [ol-list](aliases/ol-list.md) - Lists available Ollama models. (alias for `Get-OllamaModelList`)
 - [ol-list](aliases/ol-list.md) - Lists available Ollama models. (alias for `Get-OllamaModelList`)
 - [ol-pull](aliases/ol-pull.md) - Downloads an Ollama model. (alias for `Get-OllamaModel`)
-- [ol-pull](aliases/ol-pull.md) - Downloads an Ollama model. (alias for `Get-OllamaModel`)
-- [ol-run](aliases/ol-run.md) - Runs an Ollama model interactively. (alias for `Start-OllamaModel`)
 - [ol-run](aliases/ol-run.md) - Runs an Ollama model interactively. (alias for `Start-OllamaModel`)
 
 ### open (1 aliases)
@@ -1518,32 +1407,20 @@ This documentation is automatically generated from comment-based help in the pro
 - [pdmuninstall](aliases/pdmuninstall.md) - Removes packages using PDM. (alias for `Remove-PdmPackage`)
 - [pdmupdate](aliases/pdmupdate.md) - Updates packages using PDM. (alias for `Update-PdmPackages`)
 
-### php (24 aliases)
+### php (12 aliases)
 
 - [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
-- [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
-- [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
-- [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
+- [composer](aliases/composer.md) - Updates Composer to the latest version. (alias for `Invoke-Composer`)
 - [composer-add](aliases/composer-add.md) - Adds packages to Composer project. (alias for `Add-ComposerPackage`)
-- [composer-add](aliases/composer-add.md) - Adds packages to Composer project. (alias for `Add-ComposerPackage`)
-- [composer-outdated](aliases/composer-outdated.md) - Executes Composer commands. (alias for `Test-ComposerOutdated`)
-- [composer-outdated](aliases/composer-outdated.md) - Executes Composer commands. (alias for `Test-ComposerOutdated`)
-- [composer-remove](aliases/composer-remove.md) - Removes packages from Composer project. (alias for `Remove-ComposerPackage`)
+- [composer-outdated](aliases/composer-outdated.md) - Updates Composer to the latest version. (alias for `Test-ComposerOutdated`)
 - [composer-remove](aliases/composer-remove.md) - Removes packages from Composer project. (alias for `Remove-ComposerPackage`)
 - [composer-require](aliases/composer-require.md) - Adds packages to Composer project. (alias for `Add-ComposerPackage`)
-- [composer-require](aliases/composer-require.md) - Adds packages to Composer project. (alias for `Add-ComposerPackage`)
 - [composer-self-update](aliases/composer-self-update.md) - Updates Composer to the latest version. (alias for `Update-ComposerSelf`)
-- [composer-self-update](aliases/composer-self-update.md) - Updates Composer to the latest version. (alias for `Update-ComposerSelf`)
-- [composer-update](aliases/composer-update.md) - Updates all packages in the current Composer project to their latest versions. (alias for `Update-ComposerPackages`)
-- [composer-update](aliases/composer-update.md) - Updates all packages in the current Composer project to their latest versions. (alias for `Update-ComposerPackages`)
+- [composer-update](aliases/composer-update.md) - Updates Composer to the latest version. (alias for `Update-ComposerPackages`)
 - [php](aliases/php.md) - Executes PHP commands. (alias for `Invoke-Php`)
 - [php](aliases/php.md) - Updates Composer to the latest version. (alias for `Invoke-Php`)
-- [php](aliases/php.md) - Executes PHP commands. (alias for `Invoke-Php`)
-- [php](aliases/php.md) - Executes PHP commands. (alias for `Invoke-Php`)
+- [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
 - [php-server](aliases/php-server.md) - Updates Composer to the latest version. (alias for `Start-PhpServer`)
-- [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
-- [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
-- [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
 
 ### pip (11 aliases)
 
@@ -1616,30 +1493,22 @@ This documentation is automatically generated from comment-based help in the pro
 - [ps](aliases/ps.md) - Lists processes with procs. (alias for `procs`)
 - [psgrep](aliases/psgrep.md) - Searches processes with procs. (alias for `procs`)
 
-### rclone (4 aliases)
+### rclone (2 aliases)
 
 - [rcopy](aliases/rcopy.md) - Copies files using rclone. (alias for `Copy-RcloneFile`)
-- [rcopy](aliases/rcopy.md) - Copies files using rclone. (alias for `Copy-RcloneFile`)
-- [rls](aliases/rls.md) - Lists files using rclone. (alias for `Get-RcloneFileList`)
 - [rls](aliases/rls.md) - Lists files using rclone. (alias for `Get-RcloneFileList`)
 
-### rg (2 aliases)
+### rg (1 aliases)
 
 - [rgf](aliases/rgf.md) - Finds text using ripgrep with common options. (alias for `Find-RipgrepText`)
-- [rgf](aliases/rgf.md) - Finds text using ripgrep with common options. (alias for `Find-RipgrepText`)
 
-### rustup (10 aliases)
+### rustup (5 aliases)
 
-- [cargo-update](aliases/cargo-update.md) - Updates all installed cargo packages to their latest versions. (alias for `Update-CargoPackages`)
 - [cargo-update](aliases/cargo-update.md) - Updates all installed cargo packages to their latest versions. (alias for `Update-CargoPackages`)
 - [rustup](aliases/rustup.md) - Updates all installed cargo packages to their latest versions. (alias for `Invoke-Rustup`)
-- [rustup](aliases/rustup.md) - Executes Rustup commands. (alias for `Invoke-Rustup`)
 - [rustup-check](aliases/rustup-check.md) - Updates all installed cargo packages to their latest versions. (alias for `Test-RustupUpdates`)
-- [rustup-check](aliases/rustup-check.md) - Checks for Rust toolchain updates. (alias for `Test-RustupUpdates`)
 - [rustup-install](aliases/rustup-install.md) - Updates all installed cargo packages to their latest versions. (alias for `Install-RustupToolchain`)
-- [rustup-install](aliases/rustup-install.md) - Installs Rust toolchains. (alias for `Install-RustupToolchain`)
 - [rustup-update](aliases/rustup-update.md) - Updates all installed cargo packages to their latest versions. (alias for `Update-RustupToolchain`)
-- [rustup-update](aliases/rustup-update.md) - Updates the Rust toolchain. (alias for `Update-RustupToolchain`)
 
 ### rye (6 aliases)
 
@@ -1687,7 +1556,7 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [ssh-add-if](aliases/ssh-add-if.md) - Alias for `Add-SSHKeyIfNotLoaded` (alias for `Add-SSHKeyIfNotLoaded`)
 - [ssh-agent-start](aliases/ssh-agent-start.md) - Alias for `Start-SSHAgent` (alias for `Start-SSHAgent`)
-- [ssh-list](aliases/ssh-list.md) - Alias for `Get-SSHKeys` (alias for `Get-SSHKeys`)
+- [ssh-list](aliases/ssh-list.md) - SSH agent and key management helpers. (alias for `Get-SSHKeys`)
 
 ### swift (4 aliases)
 
@@ -1704,28 +1573,19 @@ This documentation is automatically generated from comment-based help in the pro
 - [sysinfo](aliases/sysinfo.md) - Shows system information. (alias for `Get-SystemInfo`)
 - [uptime](aliases/uptime.md) - Shows system uptime. (alias for `Get-SystemUptime`)
 
-### tailscale (8 aliases)
+### tailscale (4 aliases)
 
-- [tailscale](aliases/tailscale.md) - Gets Tailscale connection status. (alias for `Invoke-Tailscale`)
 - [tailscale](aliases/tailscale.md) - Gets Tailscale connection status. (alias for `Invoke-Tailscale`)
 - [ts-down](aliases/ts-down.md) - Gets Tailscale connection status. (alias for `Disconnect-TailscaleNetwork`)
-- [ts-down](aliases/ts-down.md) - Disconnects from the Tailscale network. (alias for `Disconnect-TailscaleNetwork`)
-- [ts-status](aliases/ts-status.md) - Gets Tailscale connection status. (alias for `Get-TailscaleStatus`)
 - [ts-status](aliases/ts-status.md) - Gets Tailscale connection status. (alias for `Get-TailscaleStatus`)
 - [ts-up](aliases/ts-up.md) - Gets Tailscale connection status. (alias for `Connect-TailscaleNetwork`)
-- [ts-up](aliases/ts-up.md) - Connects to the Tailscale network. (alias for `Connect-TailscaleNetwork`)
 
-### terraform (10 aliases)
+### terraform (5 aliases)
 
 - [tf](aliases/tf.md) - Executes terraform with the specified arguments. (alias for `Invoke-Terraform`)
-- [tf](aliases/tf.md) - Executes terraform with the specified arguments. (alias for `Invoke-Terraform`)
-- [tfa](aliases/tfa.md) - Applies Terraform changes. (alias for `Invoke-TerraformApply`)
 - [tfa](aliases/tfa.md) - Applies Terraform changes. (alias for `Invoke-TerraformApply`)
 - [tfd](aliases/tfd.md) - Destroys Terraform-managed infrastructure. (alias for `Remove-TerraformInfrastructure`)
-- [tfd](aliases/tfd.md) - Destroys Terraform-managed infrastructure. (alias for `Remove-TerraformInfrastructure`)
 - [tfi](aliases/tfi.md) - Initializes a Terraform working directory. (alias for `Initialize-Terraform`)
-- [tfi](aliases/tfi.md) - Initializes a Terraform working directory. (alias for `Initialize-Terraform`)
-- [tfp](aliases/tfp.md) - Creates a Terraform execution plan. (alias for `Get-TerraformPlan`)
 - [tfp](aliases/tfp.md) - Creates a Terraform execution plan. (alias for `Get-TerraformPlan`)
 
 ### uv (9 aliases)
@@ -1749,15 +1609,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [vcpkgupdate](aliases/vcpkgupdate.md) - Upgrades vcpkg packages. (alias for `Update-VcpkgPackages`)
 - [vcpkgupgrade](aliases/vcpkgupgrade.md) - Upgrades vcpkg packages. (alias for `Update-VcpkgPackages`)
 
-### vite (8 aliases)
+### vite (4 aliases)
 
 - [create-vite](aliases/create-vite.md) - Creates a new Vite project. (alias for `New-ViteProject`)
-- [create-vite](aliases/create-vite.md) - Creates a new Vite project. (alias for `New-ViteProject`)
-- [vite](aliases/vite.md) - Executes Vite commands. (alias for `Invoke-Vite`)
 - [vite](aliases/vite.md) - Executes Vite commands. (alias for `Invoke-Vite`)
 - [vite-build](aliases/vite-build.md) - Builds Vite application for production. (alias for `Build-ViteApp`)
-- [vite-build](aliases/vite-build.md) - Builds Vite application for production. (alias for `Build-ViteApp`)
-- [vite-dev](aliases/vite-dev.md) - Starts Vite development server. (alias for `Start-ViteDev`)
 - [vite-dev](aliases/vite-dev.md) - Starts Vite development server. (alias for `Start-ViteDev`)
 
 ### volta (7 aliases)
@@ -1770,13 +1626,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [voltaselfupdate](aliases/voltaselfupdate.md) - Updates Volta to the latest version. (alias for `Update-VoltaSelf`)
 - [voltauninstall](aliases/voltauninstall.md) - Uninstalls tools from Volta. (alias for `Remove-VoltaTool`)
 
-### vue (6 aliases)
+### vue (3 aliases)
 
 - [vue](aliases/vue.md) - Executes Vue CLI commands. (alias for `Invoke-Vue`)
-- [vue](aliases/vue.md) - Executes Vue CLI commands. (alias for `Invoke-Vue`)
 - [vue-create](aliases/vue-create.md) - Creates a new Vue.js project. (alias for `New-VueApp`)
-- [vue-create](aliases/vue-create.md) - Creates a new Vue.js project. (alias for `New-VueApp`)
-- [vue-serve](aliases/vue-serve.md) - Starts Vue.js development server. (alias for `Start-VueDev`)
 - [vue-serve](aliases/vue-serve.md) - Starts Vue.js development server. (alias for `Start-VueDev`)
 
 ### winget (17 aliases)
@@ -1805,120 +1658,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [wsl-list](aliases/wsl-list.md) - Lists all WSL distributions with their status. (alias for `Get-WSLDistribution`)
 - [wsl-shutdown](aliases/wsl-shutdown.md) - Shuts down all WSL distributions. (alias for `Stop-WSL`)
 
-### yarn (112 aliases)
+### yarn (8 aliases)
 
 - [yarn](aliases/yarn.md) - Updates Yarn to the latest version. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Updates Yarn to the latest version. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
 - [yarn-add](aliases/yarn-add.md) - Updates Yarn to the latest version. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Updates Yarn to the latest version. (alias for `Add-YarnPackage`)
-- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
-- [yarn-remove](aliases/yarn-remove.md) - Alias for `Remove-YarnPackage` (alias for `Remove-YarnPackage`)
+- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates Yarn to the latest version. (alias for `Update-YarnGlobalPackages`)
+- [yarn-install](aliases/yarn-install.md) - Updates Yarn to the latest version. (alias for `Install-YarnDependencies`)
+- [yarn-outdated](aliases/yarn-outdated.md) - Updates Yarn to the latest version. (alias for `Test-YarnOutdated`)
+- [yarn-remove](aliases/yarn-remove.md) - Updates Yarn to the latest version. (alias for `Remove-YarnPackage`)
 - [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
+- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates Yarn to the latest version. (alias for `Update-YarnPackages`)
 
 
 ## Generation

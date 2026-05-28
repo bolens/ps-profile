@@ -132,11 +132,5 @@ if (Test-CachedCommand rye) {
     Set-AgentModeAlias -Name 'ryeupdate' -Target 'Update-RyePackages'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'rye' -ToolType 'python-package' -DefaultInstallCommand 'Install from: https://rye-up.com/'
-    }
-    else {
-        'Install from: https://rye-up.com/'
-    }
-    Write-MissingToolWarning -Tool 'rye' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'rye' -ToolType 'python-package' -DefaultInstallCommand 'Install from: https://rye-up.com/'
 }

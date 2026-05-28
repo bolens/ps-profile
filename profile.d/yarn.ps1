@@ -48,13 +48,7 @@ function Invoke-Yarn {
         & yarn @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 
@@ -86,13 +80,7 @@ function Add-YarnPackage {
         & yarn add @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 
@@ -124,13 +112,7 @@ function Remove-YarnPackage {
         & yarn remove @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 
@@ -153,13 +135,7 @@ function Install-YarnDependencies {
         & yarn install
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 
@@ -182,13 +158,7 @@ function Test-YarnOutdated {
         & yarn outdated
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 
@@ -211,13 +181,7 @@ function Update-YarnPackages {
         & yarn upgrade
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 
@@ -239,13 +203,7 @@ function Update-YarnGlobalPackages {
         & yarn global upgrade
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 
@@ -267,13 +225,7 @@ function Update-YarnSelf {
         & yarn set version latest
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'yarn' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install yarn'
-        }
-        Write-MissingToolWarning -Tool 'yarn' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'yarn' -ToolType 'node-package'
     }
 }
 

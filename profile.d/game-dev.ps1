@@ -26,23 +26,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'game-dev') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Launch-Blockbench - Launch Blockbench
     # ===============================================
@@ -84,15 +67,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'blockbench' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'blockbench' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "blockbench is not installed. Install it with: scoop install blockbench"
-            }
+            Invoke-MissingToolWarning -ToolName 'blockbench'
             return
         }
 
@@ -174,15 +149,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'tiled' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'tiled' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "tiled is not installed. Install it with: scoop install tiled"
-            }
+            Invoke-MissingToolWarning -ToolName 'tiled'
             return
         }
 
@@ -269,15 +236,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'godot' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'godot' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "godot is not installed. Install it with: scoop install godot"
-            }
+            Invoke-MissingToolWarning -ToolName 'godot'
             return
         }
 
@@ -381,15 +340,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'godot' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'godot' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "godot is not installed. Install it with: scoop install godot"
-            }
+            Invoke-MissingToolWarning -ToolName 'godot'
             return
         }
 
@@ -514,15 +465,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'unity-hub' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'unity-hub' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "unity-hub or unity is not installed. Install it with: scoop install unity-hub"
-            }
+            Invoke-MissingToolWarning -ToolName 'unity-hub'
             return
         }
 

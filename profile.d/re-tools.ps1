@@ -30,23 +30,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 're-tools') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Decompile-Java - Decompile Java/Dex files
     # ===============================================
@@ -100,15 +83,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'jadx' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'jadx' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "jadx is not installed. Install it with: scoop install jadx"
-            }
+            Invoke-MissingToolWarning -ToolName 'jadx'
             return
         }
 
@@ -226,15 +201,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'dnspyex' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'dnspyex' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "dnspyex or dnspy is not installed. Install it with: scoop install dnspyex"
-            }
+            Invoke-MissingToolWarning -ToolName 'dnspyex'
             return
         }
 
@@ -361,15 +328,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'pe-bear' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'pe-bear' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "pe-bear, exeinfo-pe, or detect-it-easy is not installed. Install it with: scoop install pe-bear"
-            }
+            Invoke-MissingToolWarning -ToolName 'pe-bear'
             return
         }
 
@@ -528,15 +487,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'apktool' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'apktool' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "apktool is not installed. Install it with: scoop install apktool"
-            }
+            Invoke-MissingToolWarning -ToolName 'apktool'
             return
         }
 
@@ -658,15 +609,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'il2cppdumper' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'il2cppdumper' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "il2cppdumper is not installed. Install it with: scoop install il2cppdumper"
-            }
+            Invoke-MissingToolWarning -ToolName 'il2cppdumper'
             return
         }
 

@@ -30,23 +30,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'api-tools') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Bruno - API client
     # ===============================================
@@ -96,18 +79,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'bruno' -RepoRoot $repoRoot
-                }
-                else {
-                    "Install with: scoop install bruno"
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -Tool 'bruno' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "bruno not found. $installHint"
-                }
+                Invoke-MissingToolWarning -ToolName 'bruno' -DefaultInstallCommand 'scoop install bruno'
                 return $null
             }
 
@@ -220,18 +192,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'hurl' -RepoRoot $repoRoot
-                }
-                else {
-                    "Install with: scoop install hurl"
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -Tool 'hurl' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "hurl not found. $installHint"
-                }
+                Invoke-MissingToolWarning -ToolName 'hurl' -DefaultInstallCommand 'scoop install hurl'
                 return $null
             }
 
@@ -360,18 +321,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'httpie' -RepoRoot $repoRoot
-                }
-                else {
-                    "Install with: scoop install httpie"
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -Tool 'httpie' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "httpie not found. $installHint"
-                }
+                Invoke-MissingToolWarning -ToolName 'httpie' -DefaultInstallCommand 'scoop install httpie'
                 return $null
             }
 
@@ -496,18 +446,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'httptoolkit' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install httptoolkit"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'httptoolkit' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "httptoolkit not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'httptoolkit' -DefaultInstallCommand 'scoop install httptoolkit'
             return $null
         }
 
@@ -590,18 +529,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'insomnia' -RepoRoot $repoRoot
-                }
-                else {
-                    "Install with: scoop install insomnia"
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -Tool 'insomnia' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "insomnia not found. $installHint"
-                }
+                Invoke-MissingToolWarning -ToolName 'insomnia' -DefaultInstallCommand 'scoop install insomnia'
                 return $null
             }
 
@@ -720,18 +648,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'newman' -RepoRoot $repoRoot
-                }
-                else {
-                    "Install with: npm install -g newman"
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -Tool 'newman' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "newman (Postman CLI) not found. $installHint"
-                }
+                Invoke-MissingToolWarning -ToolName 'newman' -DefaultInstallCommand 'npm install -g newman'
                 return $null
             }
 

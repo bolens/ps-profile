@@ -47,13 +47,7 @@ function Invoke-Php {
         & php @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'php' -ToolType 'php-package' -DefaultInstallCommand 'scoop install php'
-        }
-        else {
-            'Install with: scoop install php'
-        }
-        Write-MissingToolWarning -Tool 'php' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'php' -ToolType 'php-package' -DefaultInstallCommand 'scoop install php'
     }
 }
 
@@ -85,13 +79,7 @@ function Start-PhpServer {
         php -S localhost:$Port
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'php' -ToolType 'php-package' -DefaultInstallCommand 'scoop install php'
-        }
-        else {
-            'Install with: scoop install php'
-        }
-        Write-MissingToolWarning -Tool 'php' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'php' -ToolType 'php-package' -DefaultInstallCommand 'scoop install php'
     }
 }
 
@@ -123,13 +111,7 @@ function Invoke-Composer {
         composer @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
-        }
-        else {
-            'Install with: scoop install composer'
-        }
-        Write-MissingToolWarning -Tool 'composer' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
     }
 }
 
@@ -145,13 +127,7 @@ function Test-ComposerOutdated {
         & composer outdated
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
-        }
-        else {
-            'Install with: scoop install composer'
-        }
-        Write-MissingToolWarning -Tool 'composer' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
     }
 }
 
@@ -174,13 +150,7 @@ function Update-ComposerPackages {
         & composer update
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
-        }
-        else {
-            'Install with: scoop install composer'
-        }
-        Write-MissingToolWarning -Tool 'composer' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
     }
 }
 
@@ -202,13 +172,7 @@ function Update-ComposerSelf {
         & composer self-update
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
-        }
-        else {
-            'Install with: scoop install composer'
-        }
-        Write-MissingToolWarning -Tool 'composer' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
     }
 }
 
@@ -253,13 +217,7 @@ function Add-ComposerPackage {
         & composer require @args @Packages
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
-        }
-        else {
-            'Install with: scoop install composer'
-        }
-        Write-MissingToolWarning -Tool 'composer' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
     }
 }
 
@@ -296,13 +254,7 @@ function Remove-ComposerPackage {
         & composer remove @args @Packages
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
-        }
-        else {
-            'Install with: scoop install composer'
-        }
-        Write-MissingToolWarning -Tool 'composer' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
     }
 }
 

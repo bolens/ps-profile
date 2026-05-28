@@ -48,13 +48,7 @@ try {
             & go run @Arguments
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
-            }
-            else {
-                'Install with: scoop install go'
-            }
-            Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
         }
     }
 
@@ -81,13 +75,7 @@ try {
             & go build @Arguments
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
-            }
-            else {
-                'Install with: scoop install go'
-            }
-            Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
         }
     }
 
@@ -114,13 +102,7 @@ try {
             & go mod @Arguments
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
-            }
-            else {
-                'Install with: scoop install go'
-            }
-            Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
         }
     }
 
@@ -147,13 +129,7 @@ try {
             & go test @Arguments
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
-            }
-            else {
-                'Install with: scoop install go'
-            }
-            Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
         }
     }
 
@@ -175,13 +151,7 @@ try {
             & go install golang.org/x/tools/cmd/...@latest
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
-            }
-            else {
-                'Install with: scoop install go'
-            }
-            Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
         }
     }
 
@@ -210,13 +180,7 @@ try {
             & go mod tidy
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
-            }
-            else {
-                'Install with: scoop install go'
-            }
-            Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
         }
     }
 
@@ -242,13 +206,7 @@ try {
             & go install @Packages
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
-            }
-            else {
-                'Install with: scoop install go'
-            }
-            Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
         }
     }
 

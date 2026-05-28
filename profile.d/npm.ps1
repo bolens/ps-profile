@@ -56,13 +56,7 @@ if (Test-CachedCommand npm) {
             & npm install @args @Packages
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-            }
-            else {
-                'Install with: scoop install nodejs'
-            }
-            Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
         }
     }
     Set-AgentModeAlias -Name 'npminstall' -Target 'Install-NpmPackage'
@@ -115,13 +109,7 @@ if (Test-CachedCommand npm) {
             & npm uninstall @args @Packages
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-            }
-            else {
-                'Install with: scoop install nodejs'
-            }
-            Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
         }
     }
     Set-AgentModeAlias -Name 'npmuninstall' -Target 'Remove-NpmPackage'
@@ -142,13 +130,7 @@ if (Test-CachedCommand npm) {
             & npm outdated
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-            }
-            else {
-                'Install with: scoop install nodejs'
-            }
-            Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
         }
     }
     Set-AgentModeAlias -Name 'npmoutdated' -Target 'Test-NpmOutdated'
@@ -168,13 +150,7 @@ if (Test-CachedCommand npm) {
             & npm update
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-            }
-            else {
-                'Install with: scoop install nodejs'
-            }
-            Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
         }
     }
     Set-AgentModeAlias -Name 'npmupdate' -Target 'Update-NpmPackages'
@@ -193,13 +169,7 @@ if (Test-CachedCommand npm) {
             & npm install -g npm@latest
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-            }
-            else {
-                'Install with: scoop install nodejs'
-            }
-            Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
         }
     }
     Set-AgentModeAlias -Name 'npmupgrade' -Target 'Update-NpmSelf'
@@ -242,13 +212,7 @@ if (Test-CachedCommand npm) {
             }
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-            }
-            else {
-                'Install with: scoop install nodejs'
-            }
-            Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
         }
     }
     Set-AgentModeAlias -Name 'npmexport' -Target 'Export-NpmGlobalPackages'
@@ -317,24 +281,12 @@ if (Test-CachedCommand npm) {
             }
         }
         else {
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-            }
-            else {
-                'Install with: scoop install nodejs'
-            }
-            Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+            Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
         }
     }
     Set-AgentModeAlias -Name 'npmimport' -Target 'Import-NpmGlobalPackages'
     Set-AgentModeAlias -Name 'npmrestore' -Target 'Import-NpmGlobalPackages'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'npm' -ToolType 'node-package'
-    }
-    else {
-        'Install with: scoop install nodejs'
-    }
-    Write-MissingToolWarning -Tool 'npm' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package'
 }

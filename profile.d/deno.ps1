@@ -47,13 +47,7 @@ function Invoke-Deno {
         & deno @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
-        }
-        else {
-            'Install with: scoop install deno'
-        }
-        Write-MissingToolWarning -Tool 'deno' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
     }
 }
 
@@ -85,13 +79,7 @@ function Invoke-DenoRun {
         & deno run @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
-        }
-        else {
-            'Install with: scoop install deno'
-        }
-        Write-MissingToolWarning -Tool 'deno' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
     }
 }
 
@@ -123,13 +111,7 @@ function Invoke-DenoTask {
         & deno task @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
-        }
-        else {
-            'Install with: scoop install deno'
-        }
-        Write-MissingToolWarning -Tool 'deno' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
     }
 }
 
@@ -151,13 +133,7 @@ function Update-DenoSelf {
         & deno upgrade
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
-        }
-        else {
-            'Install with: scoop install deno'
-        }
-        Write-MissingToolWarning -Tool 'deno' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
     }
 }
 

@@ -29,31 +29,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'ai-tools') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = $null
-        if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            try {
-                $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-            }
-            catch {
-                # Get-RepoRoot expects scripts/ subdirectory, but we're in profile.d/
-                # Fall back to manual path resolution
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-        }
-        else {
-            $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Ollama - Local LLM runner (enhanced)
     # ===============================================
@@ -102,18 +77,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'ollama' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install ollama"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'ollama' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "ollama not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'ollama' -DefaultInstallCommand 'scoop install ollama'
             return $null
         }
 
@@ -208,18 +172,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'lmstudio' -RepoRoot $repoRoot
-            }
-            else {
-                "Install LM Studio from https://lmstudio.ai/ and run 'lms bootstrap' to enable CLI"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'lms' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "lms (LM Studio CLI) not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'lmstudio' -DefaultInstallCommand 'Install LM Studio from https://lmstudio.ai/ and run 'lms bootstrap' to enable CLI' -Tool 'lms'
             return $null
         }
 
@@ -302,18 +255,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'koboldcpp' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install koboldcpp"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'koboldcpp' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "koboldcpp not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'koboldcpp' -DefaultInstallCommand 'scoop install koboldcpp'
             return $null
         }
 
@@ -406,18 +348,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'llamafile' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install llamafile"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'llamafile' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "llamafile not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'llamafile' -DefaultInstallCommand 'scoop install llamafile'
             return $null
         }
 
@@ -528,18 +459,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'llama-cpp' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install llama-cpp-cuda (or llama-cpp)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'llama-cpp' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "llama-cpp not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'llama-cpp' -DefaultInstallCommand 'scoop install llama-cpp-cuda (or llama-cpp)'
             return $null
         }
 
@@ -629,18 +549,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'comfy-cli' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: pip install comfy-cli (or pipx install comfy-cli)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'comfy' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "comfy (ComfyUI CLI) not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'comfy-cli' -DefaultInstallCommand 'pip install comfy-cli (or pipx install comfy-cli)' -Tool 'comfy'
             return $null
         }
 

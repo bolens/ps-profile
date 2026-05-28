@@ -163,11 +163,5 @@ if (Test-CachedCommand conan) {
     Set-AgentModeAlias -Name 'conanupdate' -Target 'Update-ConanPackages'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'conan' -ToolType 'python-package'
-    }
-    else {
-        'Install with: pip install conan'
-    }
-    Write-MissingToolWarning -Tool 'conan' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'conan' -ToolType 'python-package'
 }

@@ -27,23 +27,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'content-tools') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Download-Video - Download videos with yt-dlp
     # ===============================================
@@ -102,15 +85,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'yt-dlp-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'yt-dlp' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "yt-dlp is not installed. Install it with: scoop install yt-dlp-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'yt-dlp-nightly' -Tool 'yt-dlp'
             return
         }
 
@@ -208,15 +183,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'gallery-dl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'gallery-dl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "gallery-dl is not installed. Install it with: scoop install gallery-dl"
-            }
+            Invoke-MissingToolWarning -ToolName 'gallery-dl'
             return
         }
 
@@ -298,15 +265,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'yt-dlp-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'yt-dlp' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "yt-dlp is not installed. Install it with: scoop install yt-dlp-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'yt-dlp-nightly' -Tool 'yt-dlp'
             return
         }
 
@@ -390,15 +349,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'monolith' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'monolith' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "monolith is not installed. Install it with: scoop install monolith"
-            }
+            Invoke-MissingToolWarning -ToolName 'monolith'
             return
         }
 
@@ -489,15 +440,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'twitchdownloader-cli' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'twitchdownloader' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "twitchdownloader is not installed. Install it with: scoop install twitchdownloader-cli"
-            }
+            Invoke-MissingToolWarning -ToolName 'twitchdownloader-cli' -Tool 'twitchdownloader'
             return
         }
 

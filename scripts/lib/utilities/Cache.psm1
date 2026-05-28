@@ -19,6 +19,13 @@ scripts/lib/Cache.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+# Initialize module-level cache dictionaries at load time so they are always
+# defined before Get-CachedValue is called. Under Set-StrictMode -Version Latest
+# reading an unset $script: variable throws, so we must not rely on lazy init
+# inside the function body.
+$script:ValueCache = @{}
+$script:ValueCacheExpiry = @{}
+
 <#
 .SYNOPSIS
     Gets or sets a cached value with expiration.
@@ -67,13 +74,6 @@ function Get-CachedValue {
 
         [switch]$Clear
     )
-
-    # Initialize module-level cache dictionaries if they don't exist
-    # Uses separate dictionaries for values and expiration times for efficient lookups
-    if (-not $script:ValueCache) {
-        $script:ValueCache = @{}
-        $script:ValueCacheExpiry = @{}
-    }
 
     # Clear cache entry if requested (removes both value and expiration entry)
     if ($Clear) {

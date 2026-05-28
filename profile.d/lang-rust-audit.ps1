@@ -25,33 +25,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'lang-rust-audit') { return }
     }
 
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = $null
-        if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            try {
-                $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-            }
-            catch {
-                # Get-RepoRoot expects scripts/ subdirectory, but we're in profile.d/
-                # Fall back to manual path resolution
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-        }
-        else {
-            $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-    }
 
     # ===============================================
     # cargo-audit - Security audit
@@ -101,21 +74,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'cargo-audit' -ToolType 'rust-package'
-            }
-            elseif (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'cargo-audit' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: cargo install cargo-audit (or cargo-binstall cargo-audit)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'cargo-audit' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "cargo-audit not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'cargo-audit' -ToolType 'rust-package'
             return $null
         }
 
@@ -196,21 +155,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'cargo-outdated' -ToolType 'rust-package'
-            }
-            elseif (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'cargo-outdated' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: cargo install cargo-outdated (or cargo-binstall cargo-outdated)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'cargo-outdated' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "cargo-outdated not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'cargo-outdated' -ToolType 'rust-package'
             return $null
         }
 

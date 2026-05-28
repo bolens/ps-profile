@@ -31,23 +31,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'git-enhanced') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # git-cliff - Changelog generation
     # ===============================================
@@ -105,15 +88,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'git-cliff' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'git-cliff' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "git-cliff is not installed. Install it with: scoop install git-cliff"
-            }
+            Invoke-MissingToolWarning -ToolName 'git-cliff'
             return
         }
 
@@ -205,15 +180,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'git-tower' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'git-tower' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "git-tower is not installed. Install it with: scoop install git-tower"
-            }
+            Invoke-MissingToolWarning -ToolName 'git-tower'
             return
         }
 
@@ -274,15 +241,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'gitkraken' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'gitkraken' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "gitkraken is not installed. Install it with: scoop install gitkraken"
-            }
+            Invoke-MissingToolWarning -ToolName 'gitkraken'
             return
         }
 
@@ -348,15 +307,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'gitbutler-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'gitbutler' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "gitbutler is not installed. Install it with: scoop install gitbutler-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'gitbutler-nightly' -Tool 'gitbutler'
             return
         }
 
@@ -432,15 +383,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'jj' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'jj' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "jj is not installed. Install it with: scoop install jj"
-            }
+            Invoke-MissingToolWarning -ToolName 'jj'
             return
         }
 
@@ -526,7 +469,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Write-Warning "git is not installed. Install it with: scoop install git"
+            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
             return
         }
 
@@ -640,7 +583,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Write-Warning "git is not installed. Install it with: scoop install git"
+            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
             return @{}
         }
 
@@ -741,7 +684,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Write-Warning "git is not installed. Install it with: scoop install git"
+            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
             return @()
         }
 
@@ -862,7 +805,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Write-Warning "git is not installed. Install it with: scoop install git"
+            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
             return
         }
 
@@ -1040,7 +983,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Write-Warning "git is not installed. Install it with: scoop install git"
+            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
             return @()
         }
 

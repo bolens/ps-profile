@@ -30,23 +30,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'kubernetes-enhanced') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Set-KubeContext - Switch Kubernetes context
     # ===============================================
@@ -98,15 +81,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 
@@ -206,15 +181,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 
@@ -324,15 +291,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 
@@ -442,15 +401,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 
@@ -550,15 +501,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'minikube' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'minikube' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "minikube is not installed. Install it with: scoop install minikube"
-            }
+            Invoke-MissingToolWarning -ToolName 'minikube'
             return
         }
 
@@ -640,15 +583,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'k9s' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'k9s' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "k9s is not installed. Install it with: scoop install k9s"
-            }
+            Invoke-MissingToolWarning -ToolName 'k9s'
             return
         }
 
@@ -734,15 +669,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 
@@ -857,15 +784,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 
@@ -984,15 +903,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 
@@ -1146,15 +1057,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kubectl' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kubectl' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kubectl is not installed. Install it with: scoop install kubectl"
-            }
+            Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
 

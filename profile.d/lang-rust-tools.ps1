@@ -25,33 +25,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'lang-rust-tools') { return }
     }
 
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = $null
-        if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            try {
-                $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-            }
-            catch {
-                # Get-RepoRoot expects scripts/ subdirectory, but we're in profile.d/
-                # Fall back to manual path resolution
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-        }
-        else {
-            $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-    }
     # ===============================================
     # cargo-binstall - Fast binary installer
     # ===============================================
@@ -107,21 +80,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'cargo-binstall' -ToolType 'rust-package'
-            }
-            elseif (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'cargo-binstall' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: cargo install cargo-binstall (or scoop install cargo-binstall)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'cargo-binstall' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "cargo-binstall not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'cargo-binstall' -ToolType 'rust-package'
             return $null
         }
 
@@ -224,21 +183,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'cargo-watch' -ToolType 'rust-package'
-            }
-            elseif (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'cargo-watch' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: cargo install cargo-watch (or cargo-binstall cargo-watch)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'cargo-watch' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "cargo-watch not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'cargo-watch' -ToolType 'rust-package'
             return $null
         }
 

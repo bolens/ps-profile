@@ -286,11 +286,5 @@ if (Test-CachedCommand pnpm) {
     Set-AgentModeAlias -Name 'pndevserver' -Target 'Start-PnpmDev'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'pnpm' -ToolType 'node-package'
-    }
-    else {
-        'Install with: scoop install pnpm'
-    }
-    Write-MissingToolWarning -Tool 'pnpm' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'pnpm' -ToolType 'node-package'
 }

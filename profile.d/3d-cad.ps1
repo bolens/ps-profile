@@ -26,23 +26,6 @@ try {
         if (Test-FragmentLoaded -FragmentName '3d-cad') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Launch-Blender - Launch Blender
     # ===============================================
@@ -99,15 +82,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'blender' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'blender' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "blender is not installed. Install it with: scoop install blender"
-            }
+            Invoke-MissingToolWarning -ToolName 'blender'
             return
         }
 
@@ -213,15 +188,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'freecad' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'freecad' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "freecad is not installed. Install it with: scoop install freecad"
-            }
+            Invoke-MissingToolWarning -ToolName 'freecad'
             return
         }
 
@@ -329,15 +296,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'openscad-dev' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'openscad-dev' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "openscad-dev or openscad is not installed. Install it with: scoop install openscad-dev"
-            }
+            Invoke-MissingToolWarning -ToolName 'openscad-dev'
             return
         }
 
@@ -474,15 +433,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'blender' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'blender' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "blender is not installed. Install it with: scoop install blender"
-            }
+            Invoke-MissingToolWarning -ToolName 'blender'
             return
         }
 
@@ -604,15 +555,7 @@ bpy.ops.wm.export_${Format}(filepath=r'$($OutputFile.Replace('\', '\\'))')
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'blender' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'blender' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "blender is not installed. Install it with: scoop install blender"
-            }
+            Invoke-MissingToolWarning -ToolName 'blender'
             return
         }
 

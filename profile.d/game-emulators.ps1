@@ -28,23 +28,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'game-emulators') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Start-Dolphin - Launch Dolphin emulator
     # ===============================================
@@ -103,15 +86,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'dolphin-dev' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'dolphin-dev' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "dolphin-dev, dolphin-nightly, or dolphin is not installed. Install it with: scoop install dolphin-dev"
-            }
+            Invoke-MissingToolWarning -ToolName 'dolphin-dev'
             return
         }
 
@@ -212,15 +187,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'ryujinx-canary' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'ryujinx-canary' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "ryujinx-canary or ryujinx is not installed. Install it with: scoop install ryujinx-canary"
-            }
+            Invoke-MissingToolWarning -ToolName 'ryujinx-canary'
             return
         }
 
@@ -326,15 +293,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'retroarch-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'retroarch-nightly' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "retroarch-nightly or retroarch is not installed. Install it with: scoop install retroarch-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'retroarch-nightly'
             return
         }
 

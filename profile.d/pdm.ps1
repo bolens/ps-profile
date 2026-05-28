@@ -119,11 +119,5 @@ if (Test-CachedCommand pdm) {
     Set-AgentModeAlias -Name 'pdmupdate' -Target 'Update-PdmPackages'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'pdm' -ToolType 'python-package'
-    }
-    else {
-        'Install with: pip install pdm'
-    }
-    Write-MissingToolWarning -Tool 'pdm' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'pdm' -ToolType 'python-package'
 }

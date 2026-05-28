@@ -174,17 +174,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     }
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'gem' -ToolType 'ruby-package' -DefaultInstallCommand 'scoop install ruby'
-    }
-    else {
-        $hasScoop = Test-CachedCommand scoop
-        if ($hasScoop) {
-            'Install with: scoop install ruby'
-        }
-        else {
-            'Install Ruby from: https://www.ruby-lang.org/ or use: scoop install ruby'
-        }
-    }
-    Write-MissingToolWarning -Tool 'gem' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'gem' -ToolType 'ruby-package' -DefaultInstallCommand 'scoop install ruby'
 }

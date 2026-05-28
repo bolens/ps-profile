@@ -95,13 +95,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'dart-remove' -Target 'Remove-DartPackage'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'dart' -ToolType 'dart-package' -DefaultInstallCommand 'Install Dart from: https://dart.dev/get-dart or use: scoop install dart-sdk'
-    }
-    else {
-        'Install Dart from: https://dart.dev/get-dart or use: scoop install dart-sdk'
-    }
-    Write-MissingToolWarning -Tool 'dart' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'dart' -ToolType 'dart-package' -DefaultInstallCommand 'Install Dart from: https://dart.dev/get-dart or use: scoop install dart-sdk'
 }
 
 # Flutter-specific helpers (if flutter is available but dart is not)
@@ -192,11 +186,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'flutter-remove' -Target 'Remove-FlutterPackage'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'flutter' -ToolType 'dart-package' -DefaultInstallCommand 'Install Flutter from: https://flutter.dev/docs/get-started/install or use: scoop install flutter'
-    }
-    else {
-        'Install Flutter from: https://flutter.dev/docs/get-started/install or use: scoop install flutter'
-    }
-    Write-MissingToolWarning -Tool 'flutter' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'flutter' -ToolType 'dart-package' -DefaultInstallCommand 'Install Flutter from: https://flutter.dev/docs/get-started/install or use: scoop install flutter'
 }

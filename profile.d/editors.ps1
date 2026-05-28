@@ -28,23 +28,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'editors') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Edit-WithVSCode - Open in VS Code
     # ===============================================
@@ -113,15 +96,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'vscode' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'vscode' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "vscode, vscode-insiders, or vscodium is not installed. Install it with: scoop install vscode"
-            }
+            Invoke-MissingToolWarning -ToolName 'vscode'
             return
         }
 
@@ -233,15 +208,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'cursor' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'cursor' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "cursor is not installed. Install it with: scoop install cursor"
-            }
+            Invoke-MissingToolWarning -ToolName 'cursor'
             return
         }
 
@@ -361,15 +328,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'neovim-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'neovim-nightly' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "neovim-nightly, nvim, or neovim is not installed. Install it with: scoop install neovim-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'neovim-nightly'
             return
         }
 
@@ -433,15 +392,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'emacs' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'emacs' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "emacs is not installed. Install it with: scoop install emacs"
-            }
+            Invoke-MissingToolWarning -ToolName 'emacs'
             return
         }
 
@@ -517,15 +468,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'lapce-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'lapce-nightly' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "lapce-nightly or lapce is not installed. Install it with: scoop install lapce-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'lapce-nightly'
             return
         }
 
@@ -594,15 +537,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'zed-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'zed-nightly' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "zed-nightly or zed is not installed. Install it with: scoop install zed-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'zed-nightly'
             return
         }
 

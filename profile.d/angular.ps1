@@ -52,14 +52,7 @@ function Invoke-Angular {
         ng @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            $pmHint = Get-PreferenceAwareInstallHint -ToolName '@angular/cli' -ToolType 'node-package'
-            $pmHint -replace '@angular/cli', 'npm or @angular/cli'
-        }
-        else {
-            'Install with: npm install -g npm or npm install -g @angular/cli'
-        }
-        Write-MissingToolWarning -Tool 'npx or ng' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -DefaultInstallCommand 'npm install -g npm or npm install -g @angular/cli' -Tool 'npx or ng'
     }
 }
 
@@ -94,14 +87,7 @@ function New-AngularApp {
         ng new @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            $pmHint = Get-PreferenceAwareInstallHint -ToolName '@angular/cli' -ToolType 'node-package'
-            $pmHint -replace '@angular/cli', 'npm or @angular/cli'
-        }
-        else {
-            'Install with: npm install -g npm or npm install -g @angular/cli'
-        }
-        Write-MissingToolWarning -Tool 'npx or ng' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -DefaultInstallCommand 'npm install -g npm or npm install -g @angular/cli' -Tool 'npx or ng'
     }
 }
 
@@ -136,14 +122,7 @@ function Start-AngularDev {
         ng serve @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            $pmHint = Get-PreferenceAwareInstallHint -ToolName '@angular/cli' -ToolType 'node-package'
-            $pmHint -replace '@angular/cli', 'npm or @angular/cli'
-        }
-        else {
-            'Install with: npm install -g npm or npm install -g @angular/cli'
-        }
-        Write-MissingToolWarning -Tool 'npx or ng' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -DefaultInstallCommand 'npm install -g npm or npm install -g @angular/cli' -Tool 'npx or ng'
     }
 }
 

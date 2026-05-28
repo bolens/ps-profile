@@ -25,34 +25,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'lang-java-build') { return }
     }
 
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = $null
-        if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            try {
-                $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-            }
-            catch {
-                # Get-RepoRoot expects scripts/ subdirectory, but we're in profile.d/
-                # Fall back to manual path resolution
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-        }
-        else {
-            $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
-    }
     # ===============================================
     # Maven - Build tool
     # ===============================================
@@ -104,21 +76,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'maven' -ToolType 'java-build-tool'
-            }
-            elseif (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'maven' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install maven"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'mvn' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "mvn not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'maven' -ToolType 'java-build-tool' -Tool 'mvn'
             return $null
         }
 
@@ -202,21 +160,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'gradle' -ToolType 'java-build-tool'
-            }
-            elseif (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'gradle' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install gradle"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'gradle' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "gradle not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'gradle' -ToolType 'java-build-tool'
             return $null
         }
 
@@ -300,18 +244,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'ant' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install ant"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'ant' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "ant not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'ant' -DefaultInstallCommand 'scoop install ant'
             return $null
         }
 

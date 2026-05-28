@@ -30,23 +30,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'database-clients') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # MongoDB Compass - MongoDB GUI client
     # ===============================================
@@ -88,18 +71,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'mongodb-compass' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install mongodb-compass"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'mongodb-compass' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "mongodb-compass not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'mongodb-compass' -DefaultInstallCommand 'scoop install mongodb-compass'
             return $null
         }
 
@@ -173,18 +145,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'sql-workbench' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install sql-workbench"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'sql-workbench' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "sql-workbench not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'sql-workbench' -DefaultInstallCommand 'scoop install sql-workbench'
             return $null
         }
 
@@ -265,18 +226,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'dbeaver' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install dbeaver"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'dbeaver' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "dbeaver not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'dbeaver' -DefaultInstallCommand 'scoop install dbeaver'
             return $null
         }
 
@@ -357,18 +307,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'tableplus' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install tableplus"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'tableplus' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "tableplus not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'tableplus' -DefaultInstallCommand 'scoop install tableplus'
             return $null
         }
 
@@ -447,18 +386,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'hasura-cli' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install hasura-cli"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'hasura-cli' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "hasura-cli not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'hasura-cli' -DefaultInstallCommand 'scoop install hasura-cli'
             return $null
         }
 
@@ -537,18 +465,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'supabase' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install supabase-beta"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'supabase' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "supabase not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'supabase' -DefaultInstallCommand 'scoop install supabase-beta'
             return $null
         }
 

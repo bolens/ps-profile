@@ -277,11 +277,5 @@ if (Test-CachedCommand poetry) {
     Set-AgentModeAlias -Name 'poetryrestore' -Target 'Import-PoetryDependencies'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'poetry' -ToolType 'python-package' -DefaultInstallCommand 'scoop install poetry (or uv tool install poetry, or pip install poetry, or curl -sSL https://install.python-poetry.org | python -)'
-    }
-    else {
-        'Install with: scoop install poetry (or uv tool install poetry, or pip install poetry, or curl -sSL https://install.python-poetry.org | python -)'
-    }
-    Write-MissingToolWarning -Tool 'poetry' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'poetry' -ToolType 'python-package' -DefaultInstallCommand 'scoop install poetry (or uv tool install poetry, or pip install poetry, or curl -sSL https://install.python-poetry.org | python -)'
 }

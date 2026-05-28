@@ -141,11 +141,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'dotnet-remove' -Target 'Remove-DotnetPackage'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'dotnet' -ToolType 'dotnet-package' -DefaultInstallCommand 'scoop install dotnet-sdk (or winget install Microsoft.DotNet.SDK)'
-    }
-    else {
-        'Install with: scoop install dotnet-sdk (or winget install Microsoft.DotNet.SDK)'
-    }
-    Write-MissingToolWarning -Tool 'dotnet' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'dotnet' -ToolType 'dotnet-package' -DefaultInstallCommand 'scoop install dotnet-sdk (or winget install Microsoft.DotNet.SDK)'
 }

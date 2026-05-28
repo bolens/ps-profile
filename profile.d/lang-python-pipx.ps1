@@ -24,33 +24,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'lang-python-pipx') { return }
     }
 
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = $null
-        if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            try {
-                $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-            }
-            catch {
-                # Get-RepoRoot expects scripts/ subdirectory, but we're in profile.d/
-                # Fall back to manual path resolution
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-        }
-        else {
-            $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-    }
     # ===============================================
     # pipx - Python application installer
     # ===============================================
@@ -106,18 +79,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'pipx' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: pip install pipx (or python -m pip install pipx)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'pipx' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "pipx not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'pipx' -DefaultInstallCommand 'pip install pipx (or python -m pip install pipx)'
             return $null
         }
 
@@ -211,18 +173,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'pipx' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: pip install pipx (or python -m pip install pipx)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'pipx' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "pipx not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'pipx' -DefaultInstallCommand 'pip install pipx (or python -m pip install pipx)'
             return $null
         }
 

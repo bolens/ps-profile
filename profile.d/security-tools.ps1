@@ -30,23 +30,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'security-tools') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Gitleaks - Secret scanning in Git repositories
     # ===============================================
@@ -102,18 +85,7 @@ try {
             else {
                 $null
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'gitleaks' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install gitleaks"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'gitleaks' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "gitleaks not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'gitleaks' -DefaultInstallCommand 'scoop install gitleaks'
             return $null
         }
 
@@ -214,18 +186,7 @@ try {
                 else {
                     $null
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'trufflehog' -RepoRoot $repoRoot
-                }
-                else {
-                    "Install with: scoop install trufflehog"
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -Tool 'trufflehog' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "trufflehog not found. $installHint"
-                }
+                Invoke-MissingToolWarning -ToolName 'trufflehog' -DefaultInstallCommand 'scoop install trufflehog'
                 return $null
             }
 
@@ -312,24 +273,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'osv-scanner')) {
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                        Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                    }
-                    else {
-                        $null
-                    }
-                    Get-ToolInstallHint -ToolName 'osv-scanner' -RepoRoot $repoRoot
-                }
-                else {
-                    "Install with: scoop install osv-scanner"
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -Tool 'osv-scanner' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "osv-scanner not found. $installHint"
-                }
+                Invoke-MissingToolWarning -ToolName 'osv-scanner' -DefaultInstallCommand 'scoop install osv-scanner'
                 return $null
             }
 
@@ -420,24 +364,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'yara')) {
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    $null
-                }
-                Get-ToolInstallHint -ToolName 'yara' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install yara"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'yara' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "yara not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'yara' -DefaultInstallCommand 'scoop install yara'
             return $null
         }
 
@@ -542,24 +469,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'clamscan')) {
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    $null
-                }
-                Get-ToolInstallHint -ToolName 'clamav' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install clamav"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'clamscan' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "clamscan (ClamAV) not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'clamav' -DefaultInstallCommand 'scoop install clamav' -Tool 'clamscan'
             return $null
         }
 
@@ -657,27 +567,11 @@ try {
         )
 
         if (-not (Test-CachedCommand 'dangerzone')) {
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    $null
-                }
-                Get-ToolInstallHint -ToolName 'dangerzone' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install dangerzone"
-            }
+            $installHint = Get-PreferenceAwareInstallHint -ToolName 'dangerzone' -ToolType 'Utility' -DefaultInstallCommand 'scoop install dangerzone'
             if ($installHint -notmatch 'Docker') {
                 $installHint += ' (requires Docker)'
             }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'dangerzone' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "dangerzone not found. $installHint"
-            }
+            Write-MissingToolWarning -Tool 'dangerzone' -InstallHint $installHint
             return $null
         }
 

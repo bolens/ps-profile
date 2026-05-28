@@ -142,11 +142,5 @@ if (Test-CachedCommand uv) {
     Set-AgentModeAlias -Name 'uvs' -Target 'Sync-UVDependencies'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'uv' -ToolType 'python-package'
-    }
-    else {
-        'Install with: scoop install uv'
-    }
-    Write-MissingToolWarning -Tool 'uv' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'uv' -ToolType 'python-package'
 }

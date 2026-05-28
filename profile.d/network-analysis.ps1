@@ -31,23 +31,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'network-analysis') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Start-Wireshark - Launch Wireshark capture
     # ===============================================
@@ -97,15 +80,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'wireshark' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'wireshark' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "wireshark is not installed. Install it with: scoop install wireshark"
-            }
+            Invoke-MissingToolWarning -ToolName 'wireshark'
             return
         }
 
@@ -204,15 +179,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'sniffnet' -RepoRoot $repoRoot
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -ToolName 'sniffnet' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "sniffnet is not installed. Install it with: scoop install sniffnet"
-                }
+                Invoke-MissingToolWarning -ToolName 'sniffnet'
                 return
             }
 
@@ -243,15 +210,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'trippy' -RepoRoot $repoRoot
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -ToolName 'trippy' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "trippy is not installed. Install it with: scoop install trippy"
-                }
+                Invoke-MissingToolWarning -ToolName 'trippy'
                 return
             }
 
@@ -350,15 +309,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'nali' -RepoRoot $repoRoot
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -ToolName 'nali' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "nali is not installed. Install it with: scoop install nali"
-                }
+                Invoke-MissingToolWarning -ToolName 'nali'
                 return
             }
 
@@ -421,15 +372,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'ipinfo-cli' -RepoRoot $repoRoot
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -ToolName 'ipinfo' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "ipinfo is not installed. Install it with: scoop install ipinfo-cli"
-                }
+                Invoke-MissingToolWarning -ToolName 'ipinfo-cli' -Tool 'ipinfo'
                 return
             }
 
@@ -523,15 +466,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'cloudflared' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'cloudflared' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "cloudflared is not installed. Install it with: scoop install cloudflared"
-            }
+            Invoke-MissingToolWarning -ToolName 'cloudflared'
             return
         }
 
@@ -632,15 +567,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'ntfy' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'ntfy' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "ntfy is not installed. Install it with: scoop install ntfy"
-            }
+            Invoke-MissingToolWarning -ToolName 'ntfy'
             return
         }
 

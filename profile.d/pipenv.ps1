@@ -112,11 +112,5 @@ if (Test-CachedCommand pipenv) {
     Set-AgentModeAlias -Name 'pipenvupdate' -Target 'Update-PipenvPackages'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'pipenv' -ToolType 'python-package'
-    }
-    else {
-        'Install with: scoop install pipenv (or uv tool install pipenv, or pip install pipenv)'
-    }
-    Write-MissingToolWarning -Tool 'pipenv' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'pipenv' -ToolType 'python-package'
 }

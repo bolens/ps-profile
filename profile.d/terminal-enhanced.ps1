@@ -25,23 +25,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'terminal-enhanced') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Launch-Alacritty - Launch Alacritty terminal
     # ===============================================
@@ -88,15 +71,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'alacritty' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'alacritty' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "alacritty is not installed. Install it with: scoop install alacritty"
-            }
+            Invoke-MissingToolWarning -ToolName 'alacritty'
             return
         }
 
@@ -188,15 +163,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'kitty' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'kitty' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "kitty is not installed. Install it with: scoop install kitty"
-            }
+            Invoke-MissingToolWarning -ToolName 'kitty'
             return
         }
 
@@ -298,15 +265,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'wezterm-nightly' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'wezterm-nightly' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "wezterm-nightly or wezterm is not installed. Install it with: scoop install wezterm-nightly"
-            }
+            Invoke-MissingToolWarning -ToolName 'wezterm-nightly'
             return
         }
 
@@ -381,15 +340,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'tabby' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'tabby' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "tabby is not installed. Install it with: scoop install tabby"
-            }
+            Invoke-MissingToolWarning -ToolName 'tabby'
             return
         }
 
@@ -472,15 +423,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'tmux' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'tmux' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "tmux is not installed. Install it with: scoop install tmux"
-            }
+            Invoke-MissingToolWarning -ToolName 'tmux'
             return
         }
 

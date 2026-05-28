@@ -27,31 +27,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'lang-go') { return }
     }
 
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = $null
-        if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            try {
-                $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-            }
-            catch {
-                # Get-RepoRoot expects scripts/ subdirectory, but we're in profile.d/
-                # Fall back to manual path resolution
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-        }
-        else {
-            $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # goreleaser - Release automation
     # ===============================================
@@ -105,21 +80,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                Get-PreferenceAwareInstallHint -ToolName 'goreleaser' -ToolType 'go-package' -DefaultInstallCommand 'go install github.com/goreleaser/goreleaser/v2/cmd/goreleaser@latest (or scoop install goreleaser)'
-            }
-            elseif (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'goreleaser' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: go install github.com/goreleaser/goreleaser/v2/cmd/goreleaser@latest (or scoop install goreleaser)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'goreleaser' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "goreleaser not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'goreleaser' -ToolType 'go-package' -DefaultInstallCommand 'go install github.com/goreleaser/goreleaser/v2/cmd/goreleaser@latest (or scoop install goreleaser)'
             return $null
         }
 
@@ -210,18 +171,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'mage' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: go install github.com/magefile/mage@latest (or scoop install mage)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'mage' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "mage not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'mage' -DefaultInstallCommand 'go install github.com/magefile/mage@latest (or scoop install mage)'
             return $null
         }
 
@@ -321,18 +271,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'golangci-lint' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest (or scoop install golangci-lint)"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'golangci-lint' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "golangci-lint not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'golangci-lint' -DefaultInstallCommand 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest (or scoop install golangci-lint)'
             return $null
         }
 
@@ -423,18 +362,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'go' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install go"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "go not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'go' -DefaultInstallCommand 'scoop install go'
             return $null
         }
 
@@ -546,18 +474,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'go' -RepoRoot $repoRoot
-            }
-            else {
-                "Install with: scoop install go"
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'go' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "go not found. $installHint"
-            }
+            Invoke-MissingToolWarning -ToolName 'go' -DefaultInstallCommand 'scoop install go'
             return $null
         }
 

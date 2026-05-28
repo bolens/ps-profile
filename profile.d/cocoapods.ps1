@@ -90,16 +90,5 @@ else {
         'gem install cocoapods (requires Ruby: https://www.ruby-lang.org/ or scoop install ruby)'
     }
     
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'cocoapods' -ToolType 'ruby-package' -DefaultInstallCommand $defaultHint
-    }
-    else {
-        if ($defaultHint -notmatch '^Install with:') {
-            "Install with: $defaultHint"
-        }
-        else {
-            $defaultHint
-        }
-    }
-    Write-MissingToolWarning -Tool 'pod' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'cocoapods' -ToolType 'ruby-package' -DefaultInstallCommand $defaultHint -Tool 'pod'
 }

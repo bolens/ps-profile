@@ -30,23 +30,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'media-tools') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Convert-Video - Video conversion wrapper
     # ===============================================
@@ -137,15 +120,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'handbrake-cli' -RepoRoot $repoRoot
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -ToolName 'handbrake-cli' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "handbrake-cli is not installed. Install it with: scoop install handbrake-cli"
-                }
+                Invoke-MissingToolWarning -ToolName 'handbrake-cli'
                 return
             }
 
@@ -205,15 +180,7 @@ try {
                 else {
                     Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
                 }
-                $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                    Get-ToolInstallHint -ToolName 'ffmpeg' -RepoRoot $repoRoot
-                }
-                if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                    Write-MissingToolWarning -ToolName 'ffmpeg' -InstallHint $installHint
-                }
-                else {
-                    Write-Warning "ffmpeg is not installed. Install it with: scoop install ffmpeg"
-                }
+                Invoke-MissingToolWarning -ToolName 'ffmpeg'
                 return
             }
 
@@ -314,15 +281,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'ffmpeg' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'ffmpeg' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "ffmpeg is not installed. Install it with: scoop install ffmpeg"
-            }
+            Invoke-MissingToolWarning -ToolName 'ffmpeg'
             return
         }
 
@@ -449,15 +408,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName $toolName -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName $toolName -InstallHint $installHint
-            }
-            else {
-                Write-Warning "$toolName is not installed. Install it with: scoop install $toolName"
-            }
+            Invoke-MissingToolWarning -ToolName $toolName
             return
         }
 
@@ -533,15 +484,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'cyanrip' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'cyanrip' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "cyanrip is not installed. Install it with: scoop install cyanrip"
-            }
+            Invoke-MissingToolWarning -ToolName 'cyanrip'
             return
         }
 
@@ -665,15 +608,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'mediainfo' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'mediainfo' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "mediainfo is not installed. Install it with: scoop install mediainfo"
-            }
+            Invoke-MissingToolWarning -ToolName 'mediainfo'
             return
         }
 
@@ -773,15 +708,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'mkvtoolnix' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -ToolName 'mkvmerge' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "mkvmerge is not installed. Install it with: scoop install mkvtoolnix"
-            }
+            Invoke-MissingToolWarning -ToolName 'mkvtoolnix' -Tool 'mkvmerge'
             return
         }
 

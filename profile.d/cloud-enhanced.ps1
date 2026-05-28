@@ -30,23 +30,6 @@ try {
         if (Test-FragmentLoaded -FragmentName 'cloud-enhanced') { return }
     }
     
-    # Import Command module for Get-ToolInstallHint (if not already available)
-    if (-not (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-            Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-        }
-        else {
-            Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-        }
-        
-        if ($repoRoot) {
-            $commandModulePath = Join-Path $repoRoot 'scripts' 'lib' 'utilities' 'Command.psm1'
-            if (Test-Path -LiteralPath $commandModulePath) {
-                Import-Module $commandModulePath -DisableNameChecking -ErrorAction SilentlyContinue
-            }
-        }
-    }
-
     # ===============================================
     # Set-AzureSubscription - Switch Azure subscription
     # ===============================================
@@ -94,15 +77,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'azure-cli' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'az' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "az is not installed. Install it with: scoop install azure-cli"
-            }
+            Invoke-MissingToolWarning -ToolName 'azure-cli' -Tool 'az'
             return
         }
 
@@ -221,15 +196,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'gcloud' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'gcloud' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "gcloud is not installed. Install it with: scoop install gcloud"
-            }
+            Invoke-MissingToolWarning -ToolName 'gcloud'
             return
         }
 
@@ -359,15 +326,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'doppler' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'doppler' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "doppler is not installed. Install it with: scoop install doppler"
-            }
+            Invoke-MissingToolWarning -ToolName 'doppler'
             return
         }
 
@@ -476,15 +435,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'heroku-cli' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'heroku' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "heroku is not installed. Install it with: scoop install heroku-cli"
-            }
+            Invoke-MissingToolWarning -ToolName 'heroku-cli' -Tool 'heroku'
             return
         }
 
@@ -626,15 +577,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'vercel' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'vercel' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "vercel is not installed. Install it with: npm install -g vercel"
-            }
+            Invoke-MissingToolWarning -ToolName 'vercel'
             return
         }
 
@@ -779,15 +722,7 @@ try {
             else {
                 Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            $installHint = if (Get-Command Get-ToolInstallHint -ErrorAction SilentlyContinue) {
-                Get-ToolInstallHint -ToolName 'netlify' -RepoRoot $repoRoot
-            }
-            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-                Write-MissingToolWarning -Tool 'netlify' -InstallHint $installHint
-            }
-            else {
-                Write-Warning "netlify is not installed. Install it with: npm install -g netlify-cli"
-            }
+            Invoke-MissingToolWarning -ToolName 'netlify'
             return
         }
 

@@ -48,13 +48,7 @@ function Invoke-Bunx {
         & bunx @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'bun' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install bun'
-        }
-        Write-MissingToolWarning -Tool 'bun' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'bun' -ToolType 'node-package'
     }
 }
 
@@ -86,13 +80,7 @@ function Invoke-BunRun {
         & bun run @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'bun' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install bun'
-        }
-        Write-MissingToolWarning -Tool 'bun' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'bun' -ToolType 'node-package'
     }
 }
 
@@ -124,13 +112,7 @@ function Add-BunPackage {
         & bun add @Arguments
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'bun' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install bun'
-        }
-        Write-MissingToolWarning -Tool 'bun' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'bun' -ToolType 'node-package'
     }
 }
 
@@ -152,13 +134,7 @@ function Update-BunSelf {
         & bun upgrade
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'bun' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install bun'
-        }
-        Write-MissingToolWarning -Tool 'bun' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'bun' -ToolType 'node-package'
     }
 }
 
@@ -204,13 +180,7 @@ function Remove-BunPackage {
         & bun remove @args @Packages
     }
     else {
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            Get-PreferenceAwareInstallHint -ToolName 'bun' -ToolType 'node-package'
-        }
-        else {
-            'Install with: scoop install bun'
-        }
-        Write-MissingToolWarning -Tool 'bun' -InstallHint $installHint
+        Invoke-MissingToolWarning -ToolName 'bun' -ToolType 'node-package'
     }
 }
 

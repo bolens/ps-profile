@@ -88,11 +88,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'hatchversion' -Target 'Get-HatchVersion'
 }
 else {
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-        Get-PreferenceAwareInstallHint -ToolName 'hatch' -ToolType 'python-package'
-    }
-    else {
-        'Install with: scoop install hatch (or uv tool install hatch, or pip install hatch)'
-    }
-    Write-MissingToolWarning -Tool 'hatch' -InstallHint $installHint
+    Invoke-MissingToolWarning -ToolName 'hatch' -ToolType 'python-package'
 }

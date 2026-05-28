@@ -1121,3 +1121,69 @@ function global:Get-PreferenceAwareInstallHint {
     
     return "Install with: $installCmd"
 }
+
+function global:Invoke-MissingToolWarning {
+    <#
+    .SYNOPSIS
+        Resolves an install hint and emits a missing-tool warning in one call.
+
+    .DESCRIPTION
+        Combines Get-PreferenceAwareInstallHint and Write-MissingToolWarning into a
+        single helper to eliminate the repeated 7-12 line boilerplate at every
+        missing-tool branch.  When Get-PreferenceAwareInstallHint is not yet loaded
+        the DefaultInstallCommand is used verbatim as the fallback hint, so call
+        sites always produce a useful message even during early profile loading.
+
+    .PARAMETER ToolName
+        The canonical tool name (passed to both hint resolver and warning emitter).
+
+    .PARAMETER ToolType
+        The tool type category forwarded to Get-PreferenceAwareInstallHint
+        (e.g. 'node-package', 'python-package', 'rust-package').
+
+    .PARAMETER DefaultInstallCommand
+        Fallback install hint string used when hint resolution is unavailable.
+
+    .PARAMETER Tool
+        Display name override for the warning message.  Defaults to ToolName.
+
+    .EXAMPLE
+        Invoke-MissingToolWarning -ToolName 'bun' -ToolType 'node-package' -DefaultInstallCommand 'scoop install bun'
+
+    .EXAMPLE
+        Invoke-MissingToolWarning -ToolName 'kubectl' -DefaultInstallCommand 'scoop install kubectl'
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName,
+
+        [string]$ToolType = 'generic',
+
+        [string]$DefaultInstallCommand,
+
+        [string]$Tool
+    )
+
+    $displayTool = if ($Tool) { $Tool } else { $ToolName }
+
+    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+        $splat = @{ ToolName = $ToolName; ToolType = $ToolType }
+        if ($DefaultInstallCommand) { $splat['DefaultInstallCommand'] = $DefaultInstallCommand }
+        Get-PreferenceAwareInstallHint @splat
+    }
+    elseif ($DefaultInstallCommand) {
+        "Install with: $DefaultInstallCommand"
+    }
+    else {
+        $null
+    }
+
+    if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
+        Write-MissingToolWarning -Tool $displayTool -InstallHint $installHint
+    }
+    else {
+        $hint = if ($installHint) { " $installHint" } else { '' }
+        Write-Warning "$displayTool is not installed.$hint"
+    }
+}
