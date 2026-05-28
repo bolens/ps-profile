@@ -248,7 +248,7 @@ function Initialize-FileConversion-Edifact {
             $xmlLines += '  </Interchange>'
             $xmlLines += '</EDIFACT>'
             
-            $xmlContent = $xmlLines -join "`r`n"
+            $xmlContent = $xmlLines -join $([System.Environment]::NewLine)
             Set-Content -LiteralPath $OutputPath -Value $xmlContent -Encoding UTF8
         }
         catch {
@@ -295,7 +295,7 @@ function Initialize-FileConversion-Edifact {
                 $csvLines += ($row -join ',')
             }
             
-            $csvContent = $csvLines -join "`r`n"
+            $csvContent = $csvLines -join $([System.Environment]::NewLine)
             Set-Content -LiteralPath $OutputPath -Value $csvContent -Encoding UTF8
         }
         catch {

@@ -244,7 +244,8 @@ function Initialize-FileConversion-Asn1 {
                             foreach ($comp in $typeSpec.Components) {
                                 $components += "    $($comp.Name) $($comp.Type)"
                             }
-                            $specStr += "`r`n" + ($components -join ",`r`n")
+                            $nl = [System.Environment]::NewLine
+                            $specStr += $nl + ($components -join (",$nl"))
                         }
                         $specStr += '}'
                     }
@@ -255,7 +256,8 @@ function Initialize-FileConversion-Asn1 {
                             foreach ($comp in $typeSpec.Components) {
                                 $components += "    $($comp.Name) $($comp.Type)"
                             }
-                            $specStr += "`r`n" + ($components -join ",`r`n")
+                            $nl = [System.Environment]::NewLine
+                            $specStr += $nl + ($components -join (",$nl"))
                         }
                         $specStr += '}'
                     }
@@ -273,7 +275,7 @@ function Initialize-FileConversion-Asn1 {
             
             $asn1Lines += 'END'
             
-            $asn1Content = $asn1Lines -join "`r`n"
+            $asn1Content = $asn1Lines -join $([System.Environment]::NewLine)
             Set-Content -LiteralPath $OutputPath -Value $asn1Content -Encoding UTF8
         }
         catch {
@@ -328,7 +330,7 @@ function Initialize-FileConversion-Asn1 {
             $xmlLines += "  </Module>"
             $xmlLines += '</ASN1>'
             
-            $xmlContent = $xmlLines -join "`r`n"
+            $xmlContent = $xmlLines -join $([System.Environment]::NewLine)
             Set-Content -LiteralPath $OutputPath -Value $xmlContent -Encoding UTF8
         }
         catch {
