@@ -8,13 +8,13 @@ jobs:
   commit-message-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Run commit message validation
         id: validate
         run: |
           set -o pipefail
-          pwsh -NoProfile -File scripts/check-commit-messages.ps1 2>&1 | tee commit-msg-output.txt || true
+          pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1 2>&1 | tee commit-msg-output.txt || true
           echo "status=$?" >> $GITHUB_OUTPUT
 
       - name: Prepare comment body (on failure)

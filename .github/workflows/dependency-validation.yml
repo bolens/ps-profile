@@ -13,12 +13,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Setup PowerShell
-        uses: actions/setup-powershell@v1
-        with:
-          pwsh-version: '7.4'
 
       - name: Validate Dependencies
         id: validate-deps

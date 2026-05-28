@@ -28,12 +28,8 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Setup PowerShell
-        uses: actions/setup-powershell@v1
-        with:
-          pwsh-version: '7.4'
 
       - name: Collect Code Metrics
         id: collect-code-metrics
@@ -68,7 +64,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Metrics Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: metrics-artifacts
@@ -123,15 +119,11 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Setup PowerShell
-        uses: actions/setup-powershell@v1
-        with:
-          pwsh-version: '7.4'
 
       - name: Download Metrics Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v4
         with:
           name: metrics-artifacts
           path: scripts/data
