@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/bolens/ps-profile/compare/v1.3.3...v1.3.4) (2026-05-28)
+
+
+### Bug Fixes
+
+* cross-platform temp dir and clipboard ([4d4a634](https://github.com/bolens/ps-profile/commit/4d4a634ee25b90476ae2539a73fb17799c6f59d5))
+
 ## [1.3.3](https://github.com/bolens/ps-profile/compare/v1.3.2...v1.3.3) (2026-05-28)
 
 
