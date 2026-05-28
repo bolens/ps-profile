@@ -25,7 +25,7 @@ function Initialize-FileConversion-DatabaseSqlite {
             
             # Try sqlite3 command first
             if (Test-CachedCommand 'sqlite3') {
-                $tempJson = Join-Path $env:TEMP "sqlite-to-json-$(Get-Random).json"
+                $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "sqlite-to-json-$(Get-Random).json"
                 try {
                     if ($TableName) {
                         # Export specific table

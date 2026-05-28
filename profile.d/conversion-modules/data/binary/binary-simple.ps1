@@ -57,7 +57,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "bson-encode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "bson-encode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -107,7 +107,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "bson-decode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "bson-decode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -148,7 +148,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "msgpack-encode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "msgpack-encode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -194,7 +194,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "msgpack-decode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "msgpack-decode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -234,7 +234,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "cbor-encode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "cbor-encode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -276,7 +276,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "cbor-decode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "cbor-decode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath

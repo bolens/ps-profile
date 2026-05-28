@@ -75,7 +75,7 @@ try {
                 $OutputPath = Join-Path (Get-Location) "wifi-$Ssid.png"
             }
 
-            $tempScript = Join-Path $env:TEMP "qrcode-wifi-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "qrcode-wifi-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $wifiString, $OutputPath, $options
@@ -159,7 +159,7 @@ try {
                 $OutputPath = Join-Path (Get-Location) "contact-$safeName.png"
             }
 
-            $tempScript = Join-Path $env:TEMP "qrcode-contact-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "qrcode-contact-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $vcardString, $OutputPath, $options
@@ -255,7 +255,7 @@ try {
                 $OutputPath = Join-Path (Get-Location) "calendar-$safeTitle.png"
             }
 
-            $tempScript = Join-Path $env:TEMP "qrcode-calendar-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "qrcode-calendar-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $icalString, $OutputPath, $options

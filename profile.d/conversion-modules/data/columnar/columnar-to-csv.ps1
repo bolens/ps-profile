@@ -79,7 +79,7 @@ const fs = require('fs');
     }
 })();
 "@
-            $tempScript = Join-Path $env:TEMP "parquet-to-csv-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "parquet-to-csv-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -105,7 +105,7 @@ const fs = require('fs');
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             # Convert CSV to JSON first, then JSON to Parquet
-            $tempJson = Join-Path $env:TEMP "csv-to-parquet-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "csv-to-parquet-$(Get-Random).json"
             try {
                 # Use PowerShell's Import-Csv and ConvertTo-Json
                 $csvData = Import-Csv -Path $InputPath -ErrorAction Stop
@@ -140,7 +140,7 @@ const fs = require('fs');
                 throw "Node.js is not available. Install Node.js to use Arrow conversions."
             }
             # Convert Arrow to JSON first, then JSON to CSV
-            $tempJson = Join-Path $env:TEMP "arrow-to-csv-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "arrow-to-csv-$(Get-Random).json"
             try {
                 _ConvertFrom-ArrowToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
                 if (-not ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and (Test-Path -LiteralPath $tempJson))) {
@@ -186,7 +186,7 @@ const fs = require('fs');
                 throw "Node.js is not available. Install Node.js to use Arrow conversions."
             }
             # Convert CSV to JSON first, then JSON to Arrow
-            $tempJson = Join-Path $env:TEMP "csv-to-arrow-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "csv-to-arrow-$(Get-Random).json"
             try {
                 # Use PowerShell's Import-Csv and ConvertTo-Json
                 $csvData = Import-Csv -Path $InputPath -ErrorAction Stop

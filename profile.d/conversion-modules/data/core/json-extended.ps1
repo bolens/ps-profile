@@ -78,7 +78,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "json5-parse-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json5-parse-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             
             # Level 1: Conversion execution
@@ -188,7 +188,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "json5-stringify-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json5-stringify-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             
             # Level 1: Conversion execution

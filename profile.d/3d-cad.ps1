@@ -504,7 +504,7 @@ try {
         }
 
         # Create temporary Python script for Blender
-        $tempScript = Join-Path $env:TEMP "blender_convert_$(New-Guid).py"
+        $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "blender_convert_$(New-Guid).py"
         $scriptContent = @"
 import bpy
 import sys

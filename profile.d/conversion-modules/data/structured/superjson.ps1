@@ -59,7 +59,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "superjson-serialize-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "superjson-serialize-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath
@@ -103,7 +103,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "superjson-deserialize-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "superjson-deserialize-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath
@@ -134,7 +134,7 @@ try {
             if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
             }
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
             if ($tempJson -and
                 -not [string]::IsNullOrWhiteSpace($tempJson) -and
@@ -164,7 +164,7 @@ try {
             }
             $json = & yq eval -o=json $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
-                $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+                $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
                 $json | Set-Content -LiteralPath $tempJson -Encoding UTF8
                 _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
                 Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
@@ -188,7 +188,7 @@ try {
             if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
             $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
             $toon = Convert-JsonToToon -JsonObject $jsonObj
@@ -212,7 +212,7 @@ try {
             }
             $toon = Get-Content -LiteralPath $InputPath -Raw
             $jsonObj = Convert-ToonToJson -ToonString $toon
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             $jsonObj | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $tempJson -Encoding UTF8
             _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
             Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
@@ -238,7 +238,7 @@ try {
             if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
                 throw "PSToml module is not available"
             }
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
             $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
             $toml = $jsonObj | ConvertTo-Toml -Depth 100
@@ -270,7 +270,7 @@ try {
             }
             $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
-                $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+                $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
                 $json | Set-Content -LiteralPath $tempJson -Encoding UTF8
                 _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
                 Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
@@ -294,7 +294,7 @@ try {
             if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
             $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
             $xml = Convert-JsonToXml -JsonObject $jsonObj
@@ -320,7 +320,7 @@ try {
             $result = @{}
             $result[$xml.DocumentElement.Name] = Convert-XmlToJsonObject $xml.DocumentElement
             $jsonObj = [PSCustomObject]$result
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             $jsonObj | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $tempJson -Encoding UTF8
             _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
             Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
@@ -340,7 +340,7 @@ try {
             if (-not (Test-CachedCommand 'node')) {
                 throw "Node.js is not available"
             }
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             _ConvertFrom-SuperJsonToJson -InputPath $InputPath -OutputPath $tempJson
             $data = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
             if ($data -is [array]) {
@@ -370,7 +370,7 @@ try {
                 throw "Node.js is not available"
             }
             $data = Import-Csv -Path $InputPath
-            $tempJson = Join-Path $env:TEMP "temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
             $data | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $tempJson -Encoding UTF8
             _ConvertTo-SuperJsonFromJson -InputPath $tempJson -OutputPath $OutputPath
             Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue

@@ -153,7 +153,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToCsv -Value {
             throw "Node.js is not available. Install Node.js to use BSON conversions."
         }
         # Convert BSON to JSON first, then JSON to CSV
-        $tempJson = Join-Path $env:TEMP "bson-to-csv-$(Get-Random).json"
+        $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "bson-to-csv-$(Get-Random).json"
         try {
             _ConvertFrom-BsonToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -199,7 +199,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToCsv -Value {
             throw "Node.js is not available. Install Node.js to use MessagePack conversions."
         }
         # Convert MessagePack to JSON first, then JSON to CSV
-        $tempJson = Join-Path $env:TEMP "msgpack-to-csv-$(Get-Random).json"
+        $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "msgpack-to-csv-$(Get-Random).json"
         try {
             _ConvertFrom-MessagePackToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -245,7 +245,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToCsv -Value {
             throw "Node.js is not available. Install Node.js to use CBOR conversions."
         }
         # Convert CBOR to JSON first, then JSON to CSV
-        $tempJson = Join-Path $env:TEMP "cbor-to-csv-$(Get-Random).json"
+        $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "cbor-to-csv-$(Get-Random).json"
         try {
             _ConvertFrom-CborToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -294,7 +294,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToYaml -Value {
             throw "yq is not available. Install yq to use BSON to YAML conversions."
         }
         # Convert BSON to JSON first, then JSON to YAML
-        $tempJson = Join-Path $env:TEMP "bson-to-yaml-$(Get-Random).json"
+        $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "bson-to-yaml-$(Get-Random).json"
         try {
             _ConvertFrom-BsonToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -339,7 +339,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToYaml -Value {
             throw "yq is not available. Install yq to use MessagePack to YAML conversions."
         }
         # Convert MessagePack to JSON first, then JSON to YAML
-        $tempJson = Join-Path $env:TEMP "msgpack-to-yaml-$(Get-Random).json"
+        $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "msgpack-to-yaml-$(Get-Random).json"
         try {
             _ConvertFrom-MessagePackToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -384,7 +384,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToYaml -Value {
             throw "yq is not available. Install yq to use CBOR to YAML conversions."
         }
         # Convert CBOR to JSON first, then JSON to YAML
-        $tempJson = Join-Path $env:TEMP "cbor-to-yaml-$(Get-Random).json"
+        $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "cbor-to-yaml-$(Get-Random).json"
         try {
             _ConvertFrom-CborToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {

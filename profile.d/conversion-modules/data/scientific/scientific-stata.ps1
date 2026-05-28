@@ -120,7 +120,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "stata-decode-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "stata-decode-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1
@@ -216,7 +216,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "stata-encode-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "stata-encode-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1
@@ -292,7 +292,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "stata-to-csv-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "stata-to-csv-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1

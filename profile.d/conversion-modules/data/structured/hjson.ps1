@@ -294,7 +294,7 @@ function Initialize-FileConversion-Hjson {
             
             $convStartTime = Get-Date
             # Convert HJSON to JSON first, then JSON to YAML
-            $tempJson = Join-Path $env:TEMP "hjson-temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "hjson-temp-$(Get-Random).json"
             try {
                 _ConvertFrom-HjsonToJson -InputPath $InputPath -OutputPath $tempJson
                 if (Get-Command _ConvertFrom-JsonToYaml -ErrorAction SilentlyContinue) {
@@ -377,7 +377,7 @@ function Initialize-FileConversion-Hjson {
             
             $convStartTime = Get-Date
             # Convert YAML to JSON first, then JSON to HJSON
-            $tempJson = Join-Path $env:TEMP "hjson-temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "hjson-temp-$(Get-Random).json"
             try {
                 if (Get-Command _ConvertFrom-YamlToJson -ErrorAction SilentlyContinue) {
                     _ConvertFrom-YamlToJson -InputPath $InputPath -OutputPath $tempJson

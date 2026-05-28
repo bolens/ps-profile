@@ -82,7 +82,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "jwt-encode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "jwt-encode-$(Get-Random).js"
             $payloadJson = $Payload | ConvertTo-Json -Compress
             $headerJson = $Header | ConvertTo-Json -Compress
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8

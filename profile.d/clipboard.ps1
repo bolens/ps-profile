@@ -1,26 +1,60 @@
 # ===============================================
 # clipboard.ps1
-# Clipboard helpers (cross-platform via pwsh)
+# Clipboard helpers (cross-platform)
 # ===============================================
-
-# Copy text to clipboard (uses Set-Clipboard when available)
 # Tier: essential
 # Dependencies: bootstrap, env
+
 if (-not (Test-Path Function:Copy-ToClipboard -ErrorAction SilentlyContinue)) {
     <#
     .SYNOPSIS
         Copies input to the clipboard.
 
     .DESCRIPTION
-        Copies text or objects to the clipboard. Uses Set-Clipboard if available,
-        otherwise falls back to the 'clip' command.
+        Copies text or objects to the clipboard. Uses Set-Clipboard on Windows/pwsh,
+        wl-copy (Wayland), xclip/xsel (X11), or pbcopy (macOS) as available.
+
+    .PARAMETER InputObject
+        The object(s) to copy. Accepts pipeline input.
+
+    .EXAMPLE
+        "hello" | Copy-ToClipboard
+
+    .EXAMPLE
+        Get-Content file.txt | Copy-ToClipboard
     #>
     function Copy-ToClipboard {
-        [CmdletBinding()] param([Parameter(ValueFromPipeline = $true)] $input)
+        [CmdletBinding()]
+        param([Parameter(ValueFromPipeline = $true)] $InputObject)
         process {
             try {
-                # Use Test-HasCommand which handles caching and fallback internally
-                if (Test-CachedCommand Set-Clipboard) { $input | Set-Clipboard } else { $input | Out-String | clip }
+                if (Test-CachedCommand Set-Clipboard) {
+                    $InputObject | Set-Clipboard
+                }
+                elseif ($IsLinux) {
+                    $text = $InputObject | Out-String
+                    if (Test-CachedCommand wl-copy) {
+                        $text | wl-copy
+                    }
+                    elseif (Test-CachedCommand xclip) {
+                        $text | xclip -selection clipboard
+                    }
+                    elseif (Test-CachedCommand xsel) {
+                        $text | xsel --clipboard --input
+                    }
+                    else {
+                        Write-Warning "No clipboard tool found. Install wl-clipboard (Wayland) or xclip/xsel (X11)."
+                    }
+                }
+                elseif ($IsMacOS -and (Test-CachedCommand pbcopy)) {
+                    $InputObject | Out-String | pbcopy
+                }
+                elseif (Test-CachedCommand clip) {
+                    $InputObject | Out-String | clip
+                }
+                else {
+                    Write-Warning "No clipboard tool available on this platform."
+                }
             }
             catch {
                 Write-Warning "Failed to copy to clipboard: $_"
@@ -30,20 +64,48 @@ if (-not (Test-Path Function:Copy-ToClipboard -ErrorAction SilentlyContinue)) {
     Set-AgentModeAlias -Name 'cb' -Target 'Copy-ToClipboard'
 }
 
-# Paste from clipboard
 if (-not (Test-Path Function:Get-FromClipboard -ErrorAction SilentlyContinue)) {
     <#
     .SYNOPSIS
         Pastes content from the clipboard.
 
     .DESCRIPTION
-        Retrieves content from the clipboard. Uses Get-Clipboard if available,
-        otherwise falls back to the 'paste' command.
+        Retrieves content from the clipboard. Uses Get-Clipboard on Windows/pwsh,
+        wl-paste (Wayland), xclip/xsel (X11), or pbpaste (macOS) as available.
+
+    .EXAMPLE
+        Get-FromClipboard
+
+    .OUTPUTS
+        System.String
     #>
     function Get-FromClipboard {
         try {
-            # Use Test-CachedCommand which handles caching and fallback internally
-            if (Test-CachedCommand Get-Clipboard) { Get-Clipboard } else { cmd /c paste }
+            if (Test-CachedCommand Get-Clipboard) {
+                Get-Clipboard
+            }
+            elseif ($IsLinux) {
+                if (Test-CachedCommand wl-paste) {
+                    wl-paste
+                }
+                elseif (Test-CachedCommand xclip) {
+                    xclip -selection clipboard -out
+                }
+                elseif (Test-CachedCommand xsel) {
+                    xsel --clipboard --output
+                }
+                else {
+                    Write-Warning "No clipboard tool found. Install wl-clipboard (Wayland) or xclip/xsel (X11)."
+                    $null
+                }
+            }
+            elseif ($IsMacOS -and (Test-CachedCommand pbpaste)) {
+                pbpaste
+            }
+            else {
+                Write-Warning "No clipboard tool available on this platform."
+                $null
+            }
         }
         catch {
             Write-Warning "Failed to paste from clipboard: $_"

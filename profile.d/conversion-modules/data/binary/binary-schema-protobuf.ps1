@@ -67,7 +67,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "protobuf-encode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "protobuf-encode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath, $SchemaPath
@@ -120,7 +120,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "protobuf-decode-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "protobuf-decode-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath, $SchemaPath

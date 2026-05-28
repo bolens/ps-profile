@@ -63,7 +63,7 @@ try {
                 margin               = $Margin
             } | ConvertTo-Json -Compress
 
-            $tempScript = Join-Path $env:TEMP "qrcode-svg-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "qrcode-svg-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $Data, $OutputPath, $options
@@ -117,7 +117,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "qrcode-term-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "qrcode-term-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $Data, $Small.IsPresent
@@ -188,7 +188,7 @@ try {
                 margin               = $Margin
             } | ConvertTo-Json -Compress
 
-            $tempScript = Join-Path $env:TEMP "qrcode-uri-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "qrcode-uri-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $Data, $options

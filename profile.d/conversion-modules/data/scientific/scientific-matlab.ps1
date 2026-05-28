@@ -88,7 +88,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "matlab-decode-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "matlab-decode-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -154,7 +154,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "matlab-encode-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "matlab-encode-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -234,7 +234,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "matlab-to-csv-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "matlab-to-csv-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $args = @($InputPath, $OutputPath)

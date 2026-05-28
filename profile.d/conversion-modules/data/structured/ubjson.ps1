@@ -75,7 +75,7 @@ try {
     process.exit(1);
 }
 "@
-                $tempScript = Join-Path $env:TEMP "ubjson-to-json-$(Get-Random).js"
+                $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "ubjson-to-json-$(Get-Random).js"
                 Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
                 try {
                     $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -140,7 +140,7 @@ try {
     process.exit(1);
 }
 "@
-                $tempScript = Join-Path $env:TEMP "json-to-ubjson-$(Get-Random).js"
+                $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json-to-ubjson-$(Get-Random).js"
                 Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
                 try {
                     $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath

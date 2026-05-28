@@ -92,7 +92,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "cfg-to-json-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "cfg-to-json-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             
             # Level 1: Conversion execution
@@ -213,7 +213,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "json-to-cfg-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json-to-cfg-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             
             # Level 1: Conversion execution
@@ -302,7 +302,7 @@ except Exception as e:
             
             $convStartTime = Get-Date
             # Convert CFG to JSON first, then to YAML
-            $tempJson = Join-Path $env:TEMP "cfg-to-yaml-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "cfg-to-yaml-$(Get-Random).json"
             try {
                 _ConvertFrom-CfgToJson -InputPath $InputPath -OutputPath $tempJson
                 
@@ -403,7 +403,7 @@ except Exception as e:
             
             $convStartTime = Get-Date
             # Convert YAML to JSON first, then to CFG
-            $tempJson = Join-Path $env:TEMP "yaml-to-cfg-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "yaml-to-cfg-$(Get-Random).json"
             try {
                 # Convert YAML to JSON
                 $yamlContent = Get-Content -LiteralPath $InputPath -Raw
@@ -519,7 +519,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "cfg-to-ini-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "cfg-to-ini-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             
             # Level 1: Conversion execution
@@ -630,7 +630,7 @@ except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
-            $tempScript = Join-Path $env:TEMP "ini-to-cfg-$(Get-Random).py"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "ini-to-cfg-$(Get-Random).py"
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             
             # Level 1: Conversion execution

@@ -81,7 +81,7 @@ try {
     process.exit(1);
 }
 "@
-            $tempScript = Join-Path $env:TEMP "barcode-gen-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "barcode-gen-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = & node $tempScript $data $OutputPath $Format 2>&1
@@ -125,7 +125,7 @@ try {
             $jsonString = $jsonObj | ConvertTo-Json -Compress
             
             # Create temporary text file with JSON string
-            $tempTextFile = Join-Path $env:TEMP "barcode-json-$(Get-Random).txt"
+            $tempTextFile = Join-Path ([System.IO.Path]::GetTempPath()) "barcode-json-$(Get-Random).txt"
             try {
                 Set-Content -LiteralPath $tempTextFile -Value $jsonString -Encoding UTF8 -NoNewline
                 _ConvertTo-BarcodeFromText -InputPath $tempTextFile -OutputPath $OutputPath -Format $Format

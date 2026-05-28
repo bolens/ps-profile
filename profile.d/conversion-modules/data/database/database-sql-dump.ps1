@@ -242,7 +242,7 @@ function Initialize-FileConversion-DatabaseSqlDump {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.sql$', '.csv' }
             
             # First convert to JSON, then to CSV
-            $tempJson = Join-Path $env:TEMP "sql-dump-to-json-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "sql-dump-to-json-$(Get-Random).json"
             try {
                 _ConvertFrom-SqlDumpToJson -InputPath $InputPath -OutputPath $tempJson
                 if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {

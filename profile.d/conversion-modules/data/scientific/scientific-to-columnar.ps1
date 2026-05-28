@@ -60,7 +60,7 @@ function Initialize-FileConversion-ScientificToColumnar {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             # Convert HDF5 to JSON first, then JSON to Parquet
-            $tempJson = Join-Path $env:TEMP "hdf5-to-parquet-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "hdf5-to-parquet-$(Get-Random).json"
             try {
                 _ConvertFrom-Hdf5ToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
                 if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -108,7 +108,7 @@ function Initialize-FileConversion-ScientificToColumnar {
                 throw "Python is not available. Install Python with h5py package to use HDF5 conversions."
             }
             # Convert Parquet to JSON first, then JSON to HDF5
-            $tempJson = Join-Path $env:TEMP "parquet-to-hdf5-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "parquet-to-hdf5-$(Get-Random).json"
             try {
                 # Use columnar module function
                 if (Get-Command _ConvertFrom-ParquetToJson -ErrorAction SilentlyContinue) {
@@ -156,7 +156,7 @@ function Initialize-FileConversion-ScientificToColumnar {
                 throw "Node.js is not available. Install Node.js to use Parquet conversions."
             }
             # Convert NetCDF to JSON first, then JSON to Parquet
-            $tempJson = Join-Path $env:TEMP "netcdf-to-parquet-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "netcdf-to-parquet-$(Get-Random).json"
             try {
                 _ConvertFrom-NetCdfToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
                 if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -204,7 +204,7 @@ function Initialize-FileConversion-ScientificToColumnar {
                 throw "Python is not available. Install Python with netCDF4 package to use NetCDF conversions."
             }
             # Convert Parquet to JSON first, then JSON to NetCDF
-            $tempJson = Join-Path $env:TEMP "parquet-to-netcdf-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "parquet-to-netcdf-$(Get-Random).json"
             try {
                 # Use columnar module function
                 if (Get-Command _ConvertFrom-ParquetToJson -ErrorAction SilentlyContinue) {

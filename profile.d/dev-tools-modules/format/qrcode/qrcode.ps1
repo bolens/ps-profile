@@ -78,7 +78,7 @@ try {
                 margin               = $Margin
             } | ConvertTo-Json -Compress
 
-            $tempScript = Join-Path $env:TEMP "qrcode-gen-$(Get-Random).js"
+            $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "qrcode-gen-$(Get-Random).js"
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $Data, $OutputPath, $options

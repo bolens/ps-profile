@@ -390,7 +390,7 @@ function Initialize-FileConversion-Edn {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.edn$', '.yaml' }
             
             # Convert EDN to JSON first, then to YAML
-            $tempJson = Join-Path $env:TEMP "edn-to-yaml-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "edn-to-yaml-$(Get-Random).json"
             try {
                 _ConvertFrom-EdnToJson -InputPath $InputPath -OutputPath $tempJson
                 

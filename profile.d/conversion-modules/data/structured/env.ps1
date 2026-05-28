@@ -256,7 +256,7 @@ function Initialize-FileConversion-Env {
             
             $convStartTime = Get-Date
             # Convert .env to JSON first, then JSON to YAML
-            $tempJson = Join-Path $env:TEMP "env-temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "env-temp-$(Get-Random).json"
             try {
                 _ConvertFrom-EnvToJson -InputPath $InputPath -OutputPath $tempJson
                 if (Get-Command _ConvertFrom-JsonToYaml -ErrorAction SilentlyContinue) {
@@ -339,7 +339,7 @@ function Initialize-FileConversion-Env {
             
             $convStartTime = Get-Date
             # Convert YAML to JSON first, then JSON to .env
-            $tempJson = Join-Path $env:TEMP "env-temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "env-temp-$(Get-Random).json"
             try {
                 if (Get-Command _ConvertFrom-YamlToJson -ErrorAction SilentlyContinue) {
                     _ConvertFrom-YamlToJson -InputPath $InputPath -OutputPath $tempJson
@@ -509,7 +509,7 @@ function Initialize-FileConversion-Env {
             
             $convStartTime = Get-Date
             # Convert INI to JSON first, then JSON to .env
-            $tempJson = Join-Path $env:TEMP "env-temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "env-temp-$(Get-Random).json"
             try {
                 if (Get-Command _ConvertFrom-IniToJson -ErrorAction SilentlyContinue) {
                     _ConvertFrom-IniToJson -InputPath $InputPath -OutputPath $tempJson

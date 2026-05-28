@@ -241,7 +241,7 @@ function Initialize-FileConversion-CoreTextGaps {
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.jsonl$', '.yaml' }
             # Convert JSONL to JSON first, then JSON to YAML
-            $tempJson = Join-Path $env:TEMP "jsonl-to-yaml-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "jsonl-to-yaml-$(Get-Random).json"
             try {
                 _ConvertFrom-JsonLToJson -InputPath $InputPath -OutputPath $tempJson
                 # Ensure yq is validated
@@ -291,7 +291,7 @@ function Initialize-FileConversion-CoreTextGaps {
         try {
             if (-not $OutputPath) { $OutputPath = $InputPath -replace '\.yaml$', '.jsonl' }
             # Convert YAML to JSON first, then JSON to JSONL
-            $tempJson = Join-Path $env:TEMP "yaml-to-jsonl-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "yaml-to-jsonl-$(Get-Random).json"
             try {
                 $jsonResult = & yq eval -o=json '.' $InputPath 2>&1
                 if ($LASTEXITCODE -ne 0) {

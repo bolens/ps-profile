@@ -268,7 +268,7 @@ function Initialize-FileConversion-Jsonc {
             
             $convStartTime = Get-Date
             # Convert JSONC to JSON first, then JSON to YAML
-            $tempJson = Join-Path $env:TEMP "jsonc-temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "jsonc-temp-$(Get-Random).json"
             try {
                 _ConvertFrom-JsoncToJson -InputPath $InputPath -OutputPath $tempJson
                 if (Get-Command _ConvertFrom-JsonToYaml -ErrorAction SilentlyContinue) {
@@ -351,7 +351,7 @@ function Initialize-FileConversion-Jsonc {
             
             $convStartTime = Get-Date
             # Convert YAML to JSON first, then JSON to JSONC
-            $tempJson = Join-Path $env:TEMP "jsonc-temp-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "jsonc-temp-$(Get-Random).json"
             try {
                 if (Get-Command _ConvertFrom-YamlToJson -ErrorAction SilentlyContinue) {
                     _ConvertFrom-YamlToJson -InputPath $InputPath -OutputPath $tempJson

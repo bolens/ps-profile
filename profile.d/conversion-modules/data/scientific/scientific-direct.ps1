@@ -40,7 +40,7 @@ function Initialize-FileConversion-ScientificDirect {
                 throw "Python is not available. Install Python with h5py and netCDF4 packages to use scientific format conversions."
             }
             # Convert HDF5 to JSON first, then JSON to NetCDF
-            $tempJson = Join-Path $env:TEMP "hdf5-to-netcdf-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "hdf5-to-netcdf-$(Get-Random).json"
             try {
                 _ConvertFrom-Hdf5ToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
                 if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
@@ -79,7 +79,7 @@ function Initialize-FileConversion-ScientificDirect {
                 throw "Python is not available. Install Python with h5py and netCDF4 packages to use scientific format conversions."
             }
             # Convert NetCDF to JSON first, then JSON to HDF5
-            $tempJson = Join-Path $env:TEMP "netcdf-to-hdf5-$(Get-Random).json"
+            $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "netcdf-to-hdf5-$(Get-Random).json"
             try {
                 _ConvertFrom-NetCdfToJson -InputPath $InputPath -OutputPath $tempJson -ErrorAction Stop
                 if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
