@@ -65,7 +65,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -98,7 +98,7 @@ if (-not $CoverageXmlPath) {
 
 if (-not $CoverageXmlPath -or -not (Test-Path -Path $CoverageXmlPath)) {
     Write-ScriptMessage -Message "Coverage file not found. Run tests with coverage first." -IsWarning
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 # Level 1: Coverage parsing start
@@ -118,7 +118,7 @@ if ($debugLevel -ge 2) {
 
 if ($currentCoverage.Error) {
     Write-ScriptMessage -Message "Failed to parse coverage: $($currentCoverage.Error)" -IsWarning
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
@@ -184,7 +184,7 @@ if ($debugLevel -ge 2) {
 if ($historicalFiles.Count -eq 0) {
     Write-ScriptMessage -Message "No historical coverage data found in the last $Days days." -LogLevel Info
     Write-ScriptMessage -Message "Run with -SaveSnapshot to start tracking trends." -LogLevel Info
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 Write-ScriptMessage -Message "`nAnalyzing $($historicalFiles.Count) historical snapshots..." -LogLevel Info
@@ -361,4 +361,4 @@ if ($debugLevel -ge 3) {
     Write-Host "  [metrics.track-coverage] Performance - Parse: ${coverageDuration}ms, History: ${historyDuration}ms, Analysis: ${analysisDuration}ms, Trend: ${trendDuration}ms, Summary: ${summaryDuration}ms, Total: ${totalDuration}ms" -ForegroundColor DarkGray
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

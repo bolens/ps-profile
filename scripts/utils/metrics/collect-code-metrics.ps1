@@ -63,7 +63,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -473,14 +473,14 @@ catch {
     # Still exit with success if we collected metrics, but warn about save failure
     if ($allMetrics.Count -gt 0) {
         Write-ScriptMessage -Message "Metrics were collected but could not be saved. Consider retrying with a different output path." -IsWarning
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to save metrics file"
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to save metrics file"
     }
     else {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to collect and save metrics" -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to collect and save metrics" -ErrorRecord $_
     }
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS
 
 
 

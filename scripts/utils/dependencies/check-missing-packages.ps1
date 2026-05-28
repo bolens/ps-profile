@@ -53,11 +53,11 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
     if (-not $repoRoot) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to determine repository root from script path: $PSScriptRoot"
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to determine repository root from script path: $PSScriptRoot"
     }
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Source TestSupport to get Test-NpmPackageAvailable
@@ -432,7 +432,7 @@ if ($debugLevel -ge 3) {
 Write-ScriptMessage -Message ("=" * 60) -LogLevel Info
 if ($missingNpm.Count -eq 0 -and $missingPython.Count -eq 0 -and $missingScoop.Count -eq 0) {
     Write-ScriptMessage -Message "All packages are installed!" -ForegroundColor Green
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 else {
     if ($missingNpm.Count -gt 0) {
@@ -533,6 +533,6 @@ else {
         Write-ScriptMessage -Message "Install with: $installHint" -LogLevel Info
         Write-ScriptMessage -Message "Or install individually: <package-manager> install <package-name>" -LogLevel Info
     }
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Some packages are missing"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Some packages are missing"
 }
 

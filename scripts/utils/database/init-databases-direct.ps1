@@ -51,7 +51,7 @@ foreach ($path in $sqlitePaths) {
 
 if (-not $sqliteCmd) {
     Write-Host "SQLite not found. Install with: choco install sqlite -y" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Determine cache directory
@@ -234,9 +234,9 @@ if ($debugLevel -ge 3) {
 if ($failCount -eq 0) {
     Write-Host "All databases initialized successfully!" -ForegroundColor Green
     Get-ChildItem "$cacheDir\*.db" | Select-Object Name, @{N='Size (KB)';E={[math]::Round($_.Length/1KB,2)}}, LastWriteTime | Format-Table -AutoSize
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 else {
     Write-Host "Some databases failed to initialize" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }

@@ -92,7 +92,7 @@ try {
 }
 catch {
     Write-Error "Failed to import required modules: $_"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Level 1: Basic operation start

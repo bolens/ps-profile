@@ -53,12 +53,12 @@ $orchestrationModule = Join-Path $fragmentLibDir 'FragmentCommandParserOrchestra
 
 if (-not (Test-Path -LiteralPath $cacheInitModule)) {
     Write-Host "✗ FragmentCacheInitialization module not found: $cacheInitModule" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 if (-not (Test-Path -LiteralPath $orchestrationModule)) {
     Write-Host "✗ FragmentCommandParserOrchestration module not found: $orchestrationModule" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 try {
@@ -67,7 +67,7 @@ try {
 }
 catch {
     Write-Host "✗ Failed to import modules: $($_.Exception.Message)" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Create a temporary test fragment
@@ -122,7 +122,7 @@ try {
 }
 catch {
     Write-Host "  ✗ Cache initialization failed: $($_.Exception.Message)" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Parse the fragment initially
@@ -146,7 +146,7 @@ try {
 }
 catch {
     Write-Host "  ✗ Initial parse failed: $($_.Exception.Message)" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Verify cache entries exist
@@ -230,7 +230,7 @@ try {
 }
 catch {
     Write-Host "  ✗ Re-parse failed: $($_.Exception.Message)" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Verify new cache entries
@@ -288,4 +288,4 @@ Write-Host "Verification Complete" -ForegroundColor Cyan
 Write-Host "=" * 70 -ForegroundColor Cyan
 Write-Host ""
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

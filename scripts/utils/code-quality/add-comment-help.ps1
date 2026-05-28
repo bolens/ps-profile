@@ -70,7 +70,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Determine paths to scan
@@ -87,7 +87,7 @@ if (-not [string]::IsNullOrWhiteSpace($Path)) {
     }
     else {
         Write-ScriptMessage -Message "Path not found: $resolvedPath" -IsError
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Path not found: $resolvedPath"
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Path not found: $resolvedPath"
     }
 }
 else {
@@ -587,13 +587,13 @@ if ($errors -gt 0) {
 
 if ($DryRun) {
     Write-ScriptMessage -Message "Dry run completed. Use without -DryRun to apply changes."
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 else {
     if ($functionsAdded -gt 0) {
-        Exit-WithCode -ExitCode [ExitCode]::Success -Message "Successfully added comment-based help to $functionsAdded functions."
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Successfully added comment-based help to $functionsAdded functions."
     }
     else {
-        Exit-WithCode -ExitCode [ExitCode]::Success -Message "All functions already have comment-based help."
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All functions already have comment-based help."
     }
 }

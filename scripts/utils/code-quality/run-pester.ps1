@@ -681,7 +681,7 @@ try {
 }
 catch {
     Write-Host "Failed to import test runner modules: $_" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Parse debug level once at script start (after modules are loaded)
@@ -750,7 +750,7 @@ try {
 }
 catch {
     Write-Host "Failed to resolve repository root: $_" -ForegroundColor Red
-    Exit-WithCleanup -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Load configuration file if specified (before processing other parameters)
@@ -783,12 +783,12 @@ if ($ConfigFile) {
     }
     catch {
         Write-Host "Failed to load configuration file: $_" -ForegroundColor Red
-        Exit-WithCleanup -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
 if (-not (Test-Path -LiteralPath $testSupportPath)) {
-    Exit-WithCleanup -ExitCode [ExitCode]::SetupError -Message "Test support script not found at $testSupportPath"
+    Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -Message "Test support script not found at $testSupportPath"
 }
 
 # Ensure confirmation suppression is active before loading TestSupport (tests may run during load)
@@ -826,7 +826,7 @@ try {
 }
 catch {
     Write-Host "Failed to ensure Pester is available: $_" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 $installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
@@ -837,20 +837,20 @@ if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersio
         $installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
     }
     catch {
-        Exit-WithCleanup -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
 if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
     $message = "Pester $requiredPesterVersion or newer is required but could not be installed."
-    Exit-WithCleanup -ExitCode [ExitCode]::SetupError -Message $message
+    Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -Message $message
 }
 
 try {
     Import-Module -Name 'Pester' -MinimumVersion $requiredPesterVersion -Force -ErrorAction Stop
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 Write-Host "Using Pester v$($installedPester.Version)" -ForegroundColor Cyan
@@ -879,7 +879,7 @@ if ($HealthCheck) {
         }
 
         if ($StrictMode) {
-            Exit-WithCleanup -ExitCode [ExitCode]::ValidationFailure -Message "Environment health check failed"
+            Exit-WithCleanup -ExitCode $EXIT_VALIDATION_FAILURE -Message "Environment health check failed"
         }
         else {
             Write-ScriptMessage -Message "Continuing despite health check failures..." -LogLevel 'Warning'
@@ -916,7 +916,7 @@ if (Get-Command 'Initialize-TestMocks' -ErrorAction SilentlyContinue) {
 # Prevent recursive execution - if we're already running tests, don't run again
 if ($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
     Write-ScriptMessage -Message "Test runner is already active. Skipping recursive execution to prevent infinite loops." -LogLevel 'Warning'
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Recursive test execution detected and prevented"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Recursive test execution detected and prevented"
 }
 
 # Mark that we're running tests
@@ -1014,12 +1014,12 @@ try {
     
         if (-not $failedTestInfo.Success) {
             Write-Host "ERROR: $($failedTestInfo.Message)" -ForegroundColor Red
-            Exit-WithCleanup -ExitCode [ExitCode]::ValidationFailure -Message $failedTestInfo.Message
+            Exit-WithCleanup -ExitCode $EXIT_VALIDATION_FAILURE -Message $failedTestInfo.Message
         }
     
         if ($failedTestInfo.FailedTests.Count -eq 0) {
             Write-Host "No failed tests found in last run. All tests passed!" -ForegroundColor Green
-            Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "No failed tests to re-run"
+            Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "No failed tests to re-run"
         }
     
         Write-Host "Found $($failedTestInfo.FailedTests.Count) failed test(s)" -ForegroundColor Yellow
@@ -1070,7 +1070,7 @@ try {
         if ($changedSourceFiles.Count -eq 0) {
             Write-Host "No changed files found." -ForegroundColor Yellow
             if (-not $ListTests) {
-                Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "No changed files to test"
+                Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "No changed files to test"
             }
         }
         else {
@@ -1146,7 +1146,7 @@ try {
     
         if ($filteredTestPaths.Count -eq 0) {
             Write-Host "ERROR: No test files match pattern: $TestFilePattern" -ForegroundColor Red
-            Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No test files match pattern: $TestFilePattern"
+            Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No test files match pattern: $TestFilePattern"
         }
     
         Write-Host "Filtered to $($filteredTestPaths.Count) test file(s) matching pattern: $TestFilePattern" -ForegroundColor Green
@@ -1154,7 +1154,7 @@ try {
 
     if ($filteredTestPaths.Count -eq 0) {
         Write-Host "ERROR: No valid test paths found after filtering" -ForegroundColor Red
-        Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No valid test paths found after filtering"
+        Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No valid test paths found after filtering"
     }
 
     # Handle Interactive mode
@@ -1164,7 +1164,7 @@ try {
     
         if ($testList.Tests.Count -eq 0) {
             Write-Host "No tests found to select." -ForegroundColor Yellow
-            Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No tests found for interactive selection"
+            Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No tests found for interactive selection"
         }
     
         $selection = Select-TestsInteractively -TestList $testList -RepoRoot $repoRoot
@@ -1183,7 +1183,7 @@ try {
                 "Interactive test selection canceled"
             }
             Write-Host $cancelMsg -ForegroundColor Yellow
-            Exit-WithCleanup -ExitCode [ExitCode]::WatchModeCanceled -Message $exitMsg
+            Exit-WithCleanup -ExitCode $EXIT_WATCH_MODE_CANCELED -Message $exitMsg
         }
     
         # Update filtered paths to only selected files
@@ -1192,7 +1192,7 @@ try {
         
             if ($filteredTestPaths.Count -eq 0) {
                 Write-Host "No test files selected." -ForegroundColor Yellow
-                Exit-WithCleanup -ExitCode [ExitCode]::NoTestsFound -Message "No test files selected"
+                Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No test files selected"
             }
         
             Write-Host "Running $($selection.SelectedTests.Count) selected test(s) from $($filteredTestPaths.Count) file(s)" -ForegroundColor Green
@@ -1217,7 +1217,7 @@ try {
         }
         
         Show-TestList -TestList $testList -ShowDetails:$ShowDetails
-        Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "Test listing completed"
+        Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "Test listing completed"
     }
 
     # Level 1: Test count summary
@@ -1323,7 +1323,7 @@ try {
             Write-Verbose "[test.run-pester] Configuration validation failed: $($_.Exception.Message)"
         }
         
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -ErrorRecord $_
     }
 
 
@@ -1447,11 +1447,11 @@ try {
                 "Watch mode canceled"
             }
             Write-Host $cancelMsg -ForegroundColor Yellow
-            Exit-WithCleanup -ExitCode [ExitCode]::WatchModeCanceled -Message $exitMsg
+            Exit-WithCleanup -ExitCode $EXIT_WATCH_MODE_CANCELED -Message $exitMsg
         }
     
         # Should not reach here, but just in case
-        Exit-WithCleanup -ExitCode [ExitCode]::Success
+        Exit-WithCleanup -ExitCode $EXIT_SUCCESS
     }
 
     # Level 1: Output interception start
@@ -1472,7 +1472,7 @@ try {
             
             Write-Host "DRY RUN MODE - No tests will be executed" -ForegroundColor Yellow
             Invoke-TestDryRun -Config $config -TestPaths $filteredTestPaths
-            Exit-WithCleanup -ExitCode [ExitCode]::Success -Message "Dry run completed"
+            Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "Dry run completed"
         }
 
         # Ensure confirmation suppression is active before test execution
@@ -1894,20 +1894,20 @@ try {
         }
 
         # Determine exit code based on results
-        $exitCode = [ExitCode]::Success
+        $exitCode = $EXIT_SUCCESS
     
         if ($result.FailedCount -gt 0) {
-            $exitCode = [ExitCode]::TestFailure
+            $exitCode = $EXIT_TEST_FAILURE
         }
         elseif ($result.TotalCount -eq 0) {
-            $exitCode = [ExitCode]::NoTestsFound
+            $exitCode = $EXIT_NO_TESTS_FOUND
         }
         elseif ($MinimumCoverage -and $enableCoverage) {
             # Check coverage threshold if specified
             if ($result.Coverage) {
                 $coveragePercent = [Math]::Round($result.Coverage.NumberOfCommandsExecuted / $result.Coverage.NumberOfCommandsAnalyzed * 100, 2)
                 if ($coveragePercent -lt $MinimumCoverage) {
-                    $exitCode = [ExitCode]::CoverageFailure
+                    $exitCode = $EXIT_COVERAGE_FAILURE
                     $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                         Format-LocaleNumber $coveragePercent -Format 'N2'
                     }
@@ -1927,7 +1927,7 @@ try {
     
         # Exit with appropriate code (unless in watch mode or interactive mode where we return result)
         if (-not $Watch -and -not $Interactive) {
-            if ($exitCode -ne [ExitCode]::Success) {
+            if ($exitCode -ne $EXIT_SUCCESS) {
                 Exit-WithCleanup -ExitCode $exitCode -Message "Test execution completed with failures or issues"
             }
         }

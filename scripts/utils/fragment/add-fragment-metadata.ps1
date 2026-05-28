@@ -62,7 +62,7 @@ for ($i = 1; $i -le 3; $i++) {
 $profileDDir = Join-Path $repoRoot 'profile.d'
 if (-not (Test-Path $profileDDir)) {
     Write-Error "profile.d directory not found: $profileDDir"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Level 1: Basic operation start
@@ -85,7 +85,7 @@ $fragments = if ($Fragment) {
     }
     else {
         Write-Error "Fragment not found: $Fragment"
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
 }
 else {

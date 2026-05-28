@@ -52,7 +52,7 @@ try {
 }
 catch {
     Write-Host "[verify] ✗ Profile load failed: $($_.Exception.Message)" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Host ""
@@ -207,11 +207,11 @@ if ($allGood) {
     Write-Host ""
     Write-Host "✓ Cache system is properly initialized!" -ForegroundColor Green
     Write-Host ""
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 else {
     Write-Host ""
     Write-Host "✗ Cache system has issues - see details above" -ForegroundColor Red
     Write-Host ""
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }

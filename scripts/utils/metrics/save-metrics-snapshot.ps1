@@ -59,7 +59,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -125,9 +125,9 @@ try {
     }
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to save metrics snapshot: $($_.Exception.Message)" -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to save metrics snapshot: $($_.Exception.Message)" -ErrorRecord $_
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS
 
 

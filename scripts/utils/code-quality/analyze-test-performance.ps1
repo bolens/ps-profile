@@ -63,7 +63,7 @@ catch {
         Write-Host "Failed to import required modules: $_" -ForegroundColor Red
     }
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
     else {
         Write-Error "Failed to import required modules: $($_.Exception.Message)" -ErrorAction Stop
@@ -85,7 +85,7 @@ catch {
         Write-Host "Failed to get repository root: $_" -ForegroundColor Red
     }
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
     else {
         Write-Error "Failed to get repository root: $($_.Exception.Message)" -ErrorAction Stop
@@ -108,7 +108,7 @@ catch {
         Write-Host "Failed to import test discovery modules: $_" -ForegroundColor Red
     }
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
     else {
         Write-Error "Failed to import test discovery modules: $($_.Exception.Message)" -ErrorAction Stop
@@ -131,7 +131,7 @@ catch {
         Write-Host "Failed to import Pester: $_" -ForegroundColor Red
     }
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
     else {
         Write-Error "Failed to import Pester: $($_.Exception.Message)" -ErrorAction Stop
@@ -155,7 +155,7 @@ $testPaths = Get-TestPaths -Suite $suiteString -TestFile $null -RepoRoot $repoRo
 
 if ($testPaths.Count -eq 0) {
     Write-Host "No test paths found for suite: $suiteString" -ForegroundColor Yellow
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "No test paths found for suite: $suiteString"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No test paths found for suite: $suiteString"
 }
 
 Write-Host "Found $($testPaths.Count) test file(s)" -ForegroundColor Green

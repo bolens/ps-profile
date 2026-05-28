@@ -67,7 +67,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Load requirements file using the new loader
@@ -75,7 +75,7 @@ try {
     if ($RequirementsFile) {
         # If specific file provided, use legacy import
         if (-not (Test-Path -Path $RequirementsFile)) {
-            Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Requirements file not found: $RequirementsFile"
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Requirements file not found: $RequirementsFile"
         }
         if (Get-Command Import-CachedPowerShellDataFile -ErrorAction SilentlyContinue) {
             $requirements = Import-CachedPowerShellDataFile -Path $RequirementsFile -ErrorAction Stop
@@ -90,7 +90,7 @@ try {
     }
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -399,7 +399,7 @@ if ($missingRequired.Count -eq 0 -and $versionMismatches.Count -eq 0) {
         Write-ScriptMessage -Message "  ⚠ $($missingOptional.Count) optional dependency(ies) missing" -IsWarning
     }
     
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Dependency validation passed"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Dependency validation passed"
 }
 else {
     Write-ScriptMessage -Message "  ✗ Missing or invalid dependencies found:" -IsError
@@ -418,7 +418,7 @@ else {
         Write-ScriptMessage -Message "`nRun with -InstallMissing to automatically install missing PowerShell modules." -LogLevel Info
     }
     
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Dependency validation failed"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Dependency validation failed"
 }
 
 

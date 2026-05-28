@@ -77,7 +77,7 @@ try {
     $Path = Resolve-DefaultPath -Path $Path -DefaultPath $defaultPath -PathType 'Directory'
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -94,7 +94,7 @@ try {
     Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Normalize line endings to LF (Unix-style) to match Git's behavior
@@ -225,22 +225,22 @@ if ($errors.Count -gt 0) {
         }
         # Continue with success if we formatted at least some files
         if ($DryRun) {
-            Exit-WithCode -ExitCode [ExitCode]::Success -Message "DRY RUN: Would format $filesFormatted file(s) (with $($errors.Count) failures). Run without -DryRun to apply changes."
+            Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would format $filesFormatted file(s) (with $($errors.Count) failures). Run without -DryRun to apply changes."
         }
         else {
-            Exit-WithCode -ExitCode [ExitCode]::Success -Message "PSScriptAnalyzer: formatted $filesFormatted file(s) (with $($errors.Count) failures)"
+            Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: formatted $filesFormatted file(s) (with $($errors.Count) failures)"
         }
     }
     else {
         # All files failed - this is a real failure
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message $errorMessage
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message $errorMessage
     }
 }
 
 if ($DryRun) {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "DRY RUN: Would format $filesFormatted file(s). Run without -DryRun to apply changes."
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would format $filesFormatted file(s). Run without -DryRun to apply changes."
 }
 else {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "PSScriptAnalyzer: all files formatted successfully"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: all files formatted successfully"
 }
 

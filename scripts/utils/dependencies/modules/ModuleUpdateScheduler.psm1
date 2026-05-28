@@ -116,7 +116,7 @@ function Register-UpdateSchedule {
 
     if ($hour -lt 0 -or $hour -gt 23 -or $minute -lt 0 -or $minute -gt 59) {
         Write-ScriptMessage -Message "Invalid time: $ScheduleTime. Hour must be 0-23, minute must be 0-59" -IsError
-        Exit-WithCode -ExitCode [ExitCode]::SetupError
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
     }
 
     try {
@@ -125,14 +125,14 @@ function Register-UpdateSchedule {
     }
     catch {
         Write-ScriptMessage -Message "PowerShell (pwsh) not found. Cannot create scheduled task." -IsError
-        Exit-WithCode -ExitCode [ExitCode]::SetupError
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
     }
 
     # Build script path
     $scriptPath = Join-Path $RepoRoot 'scripts' 'utils' 'dependencies' 'check-module-updates.ps1'
     if (-not (Test-Path $scriptPath)) {
         Write-ScriptMessage -Message "Script not found at: $scriptPath" -IsError
-        Exit-WithCode -ExitCode [ExitCode]::SetupError
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
     }
 
     # Build arguments
@@ -176,7 +176,7 @@ function Register-UpdateSchedule {
         'Weekly' {
             if ($ScheduleDays.Count -eq 0) {
                 Write-ScriptMessage -Message "ScheduleDays is required for Weekly frequency" -IsError
-                Exit-WithCode -ExitCode [ExitCode]::SetupError
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
             }
             $daysOfWeek = $ScheduleDays | ForEach-Object {
                 [System.DayOfWeek]::Parse($_, $true)
@@ -186,7 +186,7 @@ function Register-UpdateSchedule {
         'Monthly' {
             if ($ScheduleDayOfMonth -lt 1 -or $ScheduleDayOfMonth -gt 31) {
                 Write-ScriptMessage -Message "ScheduleDayOfMonth must be between 1 and 31" -IsError
-                Exit-WithCode -ExitCode [ExitCode]::SetupError
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
             }
             $trigger = New-ScheduledTaskTrigger -Weekly -WeeksInterval 4 -DaysOfWeek ([System.DayOfWeek]::Sunday) -At $ScheduleTime
             # Note: Monthly triggers are complex in Task Scheduler. This is a simplified approach.

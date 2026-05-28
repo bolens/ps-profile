@@ -59,7 +59,7 @@ try {
 catch {
     Write-Host "Failed to import required modules: $_" -ForegroundColor Red
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
     else {
         Write-Error "Failed to import required modules: $($_.Exception.Message)" -ErrorAction Stop
@@ -75,7 +75,7 @@ try {
 catch {
     Write-Host "Failed to get repository root: $_" -ForegroundColor Red
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
     else {
         Write-Error "Failed to get repository root: $($_.Exception.Message)" -ErrorAction Stop
@@ -142,7 +142,7 @@ if ($Category) {
     $categories = $categories | Where-Object { $_.Name -eq $Category }
     if (-not $categories) {
         Write-CategoryMessage "Category '$Category' not found. Available categories: $($categories.Name -join ', ')" -Level 'Error'
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
 }
 
@@ -479,7 +479,7 @@ $($failureSummary | ForEach-Object { @"
 
 if ($totalFailed -gt 0) {
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Test execution completed with $totalFailed failures"
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Test execution completed with $totalFailed failures"
     }
     else {
         Write-Host "Test execution completed with $totalFailed failures" -ForegroundColor Yellow

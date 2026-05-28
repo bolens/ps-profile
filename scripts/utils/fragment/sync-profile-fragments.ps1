@@ -74,7 +74,7 @@ for ($i = 1; $i -le 3; $i++) {
 
 if (-not (Test-Path (Join-Path $repoRoot 'profile.d'))) {
     Write-Error "Could not resolve repository root. Please run from repository directory."
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Import required modules directly
@@ -87,11 +87,11 @@ $fragmentLoadingPath = Join-Path $fragmentLibDir 'FragmentLoading.psm1'
 
 if (-not (Test-Path $fragmentConfigPath)) {
     Write-Error "FragmentConfig module not found at: $fragmentConfigPath"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 if (-not (Test-Path $fragmentLoadingPath)) {
     Write-Error "FragmentLoading module not found at: $fragmentLoadingPath"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Import-Module $fragmentConfigPath -DisableNameChecking -ErrorAction Stop
@@ -105,7 +105,7 @@ if (-not $ProfileDir) {
 $profileDDir = Join-Path $ProfileDir 'profile.d'
 if (-not (Test-Path -LiteralPath $profileDDir)) {
     Write-Error "profile.d directory not found: $profileDDir"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 if (-not $ConfigPath) {
@@ -432,7 +432,7 @@ if ($DryRun -and $existingConfig.environments.ContainsKey('full')) {
 if ($DryRun) {
     Write-Host "`n[DRY RUN] Would update $ConfigPath" -ForegroundColor Yellow
     Write-Host "Run without -DryRun to apply changes." -ForegroundColor Yellow
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 # Write updated config
@@ -460,9 +460,9 @@ try {
     }
     
     Write-Host "`n✓ Updated $ConfigPath" -ForegroundColor Green
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 catch {
     Write-Error "Failed to write config: $($_.Exception.Message)"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }

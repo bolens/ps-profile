@@ -47,12 +47,12 @@ $cacheSqliteModule = Join-Path $fragmentLibDir 'FragmentCacheSqlite.psm1'
 
 if (-not (Test-Path -LiteralPath $cachePathModule)) {
     Write-Host "✗ FragmentCachePath module not found: $cachePathModule" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 if (-not (Test-Path -LiteralPath $cacheSqliteModule)) {
     Write-Host "✗ FragmentCacheSqlite module not found: $cacheSqliteModule" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 try {
@@ -61,7 +61,7 @@ try {
 }
 catch {
     Write-Host "✗ Failed to import modules: $($_.Exception.Message)" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Get database path
@@ -73,12 +73,12 @@ if (Get-Command Get-FragmentCacheDbPath -ErrorAction SilentlyContinue) {
     }
     catch {
         Write-Host "✗ Failed to get database path: $($_.Exception.Message)" -ForegroundColor Red
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
 }
 else {
     Write-Host "✗ Get-FragmentCacheDbPath not available" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Check if database exists
@@ -91,19 +91,19 @@ if ($dbPath -and (Test-Path -LiteralPath $dbPath)) {
     # Check SQLite availability
     if (-not (Get-Command Test-SqliteAvailable -ErrorAction SilentlyContinue)) {
         Write-Host "✗ Test-SqliteAvailable not available" -ForegroundColor Red
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
     
     $sqliteAvailable = Test-SqliteAvailable
     if (-not $sqliteAvailable) {
         Write-Host "✗ SQLite not available - cannot query database" -ForegroundColor Red
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
     
     $sqliteCmd = Get-SqliteCommandName
     if (-not $sqliteCmd) {
         Write-Host "✗ SQLite command not found" -ForegroundColor Red
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
     
     Write-Host ""
@@ -192,4 +192,4 @@ else {
 }
 
 Write-Host ""
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

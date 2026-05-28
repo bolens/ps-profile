@@ -104,7 +104,7 @@ if ($OutputPath) {
 # Return exit code based on issues
 if ($results.Issues.Count -gt 0) {
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Function naming validation failed with $($results.Issues.Count) issue(s)."
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Function naming validation failed with $($results.Issues.Count) issue(s)."
     }
     else {
         Write-Error "Function naming validation failed with $($results.Issues.Count) issue(s)." -ErrorAction Stop
@@ -112,7 +112,7 @@ if ($results.Issues.Count -gt 0) {
 }
 else {
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::Success -Message "Function naming validation passed with no issues."
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Function naming validation passed with no issues."
     }
     else {
         return

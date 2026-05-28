@@ -48,7 +48,7 @@ for ($i = 1; $i -le 3; $i++) {
 $fragmentLoadingPath = Join-Path $repoRoot 'scripts' 'lib' 'fragment' 'FragmentLoading.psm1'
 if (-not (Test-Path $fragmentLoadingPath)) {
     Write-Error "FragmentLoading module not found at: $fragmentLoadingPath"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 Import-Module $fragmentLoadingPath -DisableNameChecking -ErrorAction Stop
 
@@ -90,7 +90,7 @@ catch {
     else {
         Write-Error "Failed to validate fragment dependencies: $($_.Exception.Message)"
     }
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 if ($result.Valid) {
@@ -127,7 +127,7 @@ if ($result.Valid) {
         Write-Host "  ... and $($sorted.Count - 20) more" -ForegroundColor Gray
     }
     
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 else {
     Write-Host "❌ Dependency validation failed!" -ForegroundColor Red
@@ -149,6 +149,6 @@ else {
         Write-Host ""
     }
     
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 

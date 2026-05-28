@@ -152,4 +152,4 @@ Write-Host @"
 Write-Host "`n📊 For detailed benchmark:" -ForegroundColor Cyan
 Write-Host "   pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1" -ForegroundColor White
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

@@ -188,14 +188,14 @@ $requiredModules = @(
 foreach ($moduleName in $requiredModules) {
     $modulePath = Join-Path $modulesPath $moduleName
     if (-not (Test-Path $modulePath)) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Required module not found: $modulePath"
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Required module not found: $modulePath"
     }
     
     try {
         Import-Module $modulePath -DisableNameChecking -ErrorAction Stop
     }
     catch {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to import required module '$moduleName': $($_.Exception.Message)"
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to import required module '$moduleName': $($_.Exception.Message)"
     }
 }
 
@@ -205,7 +205,7 @@ try {
     $localModulesPath = Join-Path $repoRoot 'Modules'
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Scheduled task name
@@ -219,7 +219,7 @@ if ($EmailTo.Count -eq 1 -and $EmailTo[0] -match ',') {
 # Handle scheduling operations
 if ($RemoveSchedule) {
     Remove-UpdateSchedule -ScheduledTaskName $scheduledTaskName
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 if ($Schedule) {
@@ -259,7 +259,7 @@ if ($ModuleFilter.Count -gt 0) {
     $modulesToCheck = $modulesToCheck | Where-Object { $_ -in $ModuleFilter }
     if ($modulesToCheck.Count -eq 0) {
         Write-ScriptMessage -Message "No modules match the specified filter" -IsWarning
-        Exit-WithCode -ExitCode [ExitCode]::Success
+        Exit-WithCode -ExitCode $EXIT_SUCCESS
     }
 }
 
@@ -297,7 +297,7 @@ if ($updatesAvailable.Count -gt 0) {
 
     if ($DryRun) {
         Write-ScriptMessage -Message "`nDRY RUN MODE: No updates will be installed. Run with -Update to install updates."
-        Exit-WithCode -ExitCode [ExitCode]::Success
+        Exit-WithCode -ExitCode $EXIT_SUCCESS
     }
 
     if ($Update) {
@@ -404,4 +404,4 @@ if ($TrackHistory) {
 $updatesAvailableCount = $updatesAvailable.Count -gt 0
 Send-UpdateNotification -ReportData $reportData -UpdatesAvailable $updatesAvailableCount -EmailTo $EmailTo -EmailFrom $EmailFrom -EmailSmtpServer $EmailSmtpServer -EmailSmtpPort $EmailSmtpPort -EmailSmtpCredential $EmailSmtpCredential -EmailOnlyOnUpdates:$EmailOnlyOnUpdates
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

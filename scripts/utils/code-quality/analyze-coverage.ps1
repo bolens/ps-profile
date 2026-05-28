@@ -79,7 +79,7 @@ $PSDefaultParameterValues['Remove-Item:Recurse'] = $true
 # Ensure Pester is available
 if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version -ge [version]'5.0.0' })) {
     Write-Error "Pester 5.0+ is required for coverage analysis"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Import-Module Pester -MinimumVersion 5.0 -ErrorAction Stop
@@ -385,7 +385,7 @@ else {
 # If we have test files but no source files, we can still run the tests (just without coverage)
 if ($testFiles.Count -eq 0 -and $sourceFiles.Count -eq 0) {
     Write-Warning "No source files or test files found to analyze"
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 # Create Pester configuration

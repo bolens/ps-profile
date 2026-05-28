@@ -75,7 +75,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Convert enum to string (normalize to uppercase for file extension)
@@ -290,10 +290,10 @@ try {
     Write-ScriptMessage -Message "Format: $outputFormatString" -LogLevel Info
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to export metrics: $($_.Exception.Message)" -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to export metrics: $($_.Exception.Message)" -ErrorRecord $_
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS
 
 
 

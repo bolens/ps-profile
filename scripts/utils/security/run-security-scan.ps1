@@ -81,7 +81,7 @@ try {
     $Path = Resolve-DefaultPath -Path $Path -DefaultPath $defaultPath -PathType 'Directory'
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -100,7 +100,7 @@ try {
     Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Load allowlist
@@ -191,7 +191,7 @@ if ($failedFiles.Count -gt 0) {
     
     # If all files failed, exit with error
     if ($failedFiles.Count -eq $scripts.Count) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "All files failed during security scan"
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "All files failed during security scan"
     }
 }
 
@@ -219,7 +219,7 @@ if ($debugLevel -ge 1) {
 
 # Check for scan errors that should cause failure
 if ($results.ScanErrors.Count -gt 0) {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to scan $($results.ScanErrors.Count) file(s). Check warnings above for details."
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to scan $($results.ScanErrors.Count) file(s). Check warnings above for details."
 }
 
 # Display results
@@ -227,11 +227,11 @@ Write-SecurityReport -Results $results
 
 # Exit with appropriate code
 if ($results.BlockingIssues.Count -gt 0) {
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Found $($results.BlockingIssues.Count) security-related error(s)"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($results.BlockingIssues.Count) security-related error(s)"
 }
 
 if ($results.WarningIssues.Count -gt 0) {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Security scan completed with $($results.WarningIssues.Count) warning(s)"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Security scan completed with $($results.WarningIssues.Count) warning(s)"
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success -Message "Security scan completed: no issues found"
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Security scan completed: no issues found"

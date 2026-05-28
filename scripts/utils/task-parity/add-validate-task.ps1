@@ -47,12 +47,12 @@ $taskGeneratorPath = Join-Path $modulesPath 'TaskGenerator.psm1'
 
 if (-not (Test-Path -LiteralPath $taskParserPath)) {
     Write-Error "TaskParser module not found: $taskParserPath"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 if (-not (Test-Path -LiteralPath $taskGeneratorPath)) {
     Write-Error "TaskGenerator module not found: $taskGeneratorPath"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Import-Module $taskParserPath -DisableNameChecking -ErrorAction Stop
@@ -133,4 +133,4 @@ else {
     Write-Host "✓ Validate task already exists in all task runner files" -ForegroundColor Green
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

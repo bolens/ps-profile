@@ -169,11 +169,11 @@ if ($failures.Count -gt 0) {
     foreach ($failure in $failures) {
         Write-Host "  - $failure" -ForegroundColor Red
     }
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 else {
     Write-Host ""
     Write-Host "✅ All fragments loaded successfully!" -ForegroundColor Green
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 

@@ -86,7 +86,7 @@ if (-not $WorkspaceRoot) {
     }
     catch {
         if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-            Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
         }
         else {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
@@ -97,7 +97,7 @@ if (-not $WorkspaceRoot) {
             else {
                 Write-Error "Failed to resolve workspace root: $($_.Exception.Message)"
             }
-            Exit-WithCode -ExitCode [ExitCode]::SetupError
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
         }
     }
 }
@@ -604,7 +604,7 @@ try {
 }
 catch {
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
     else {
         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
@@ -615,7 +615,7 @@ catch {
         else {
             Write-Error "Failed to create data directory: $($_.Exception.Message)"
         }
-        Exit-WithCode -ExitCode [ExitCode]::SetupError
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
     }
 }
 
@@ -664,7 +664,7 @@ if (Test-Path -LiteralPath $performanceMetricsModule) {
 if ($regressionDetected -and -not $UpdateBaseline) {
     Pop-Location
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Performance regression detected. Use -UpdateBaseline to accept new performance baseline."
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Performance regression detected. Use -UpdateBaseline to accept new performance baseline."
     }
     else {
         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
@@ -681,16 +681,16 @@ if ($regressionDetected -and -not $UpdateBaseline) {
         else {
             Write-Error "Performance regression detected. Use -UpdateBaseline to accept new performance baseline."
         }
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
 }
 
 Pop-Location
 if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Benchmark completed successfully"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Benchmark completed successfully"
 }
 else {
     Write-Host "Benchmark completed successfully"
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 

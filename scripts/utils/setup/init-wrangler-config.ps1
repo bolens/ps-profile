@@ -164,7 +164,7 @@ try {
     Write-Host "Directory ready: $dir"
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to create directory: $($_.Exception.Message)" -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to create directory: $($_.Exception.Message)" -ErrorRecord $_
 }
 
 if ($DryRun) {
@@ -177,14 +177,14 @@ if ($DryRun) {
         Write-Host "  - Account ID: $AccountId" -ForegroundColor Yellow
     }
     Write-Host "Run without -DryRun to create the config file." -ForegroundColor Yellow
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "DRY RUN: Would create config file at $file"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would create config file at $file"
 }
 
 if (Test-Path -Path $file -and -not $Force) {
     $ok = Read-Host "File already exists at $file. Overwrite? (y/N)"
     if ($ok -notin @('y', 'Y', 'yes', 'YES')) {
         Write-Host 'Aborting; existing file retained.'
-        Exit-WithCode -ExitCode [ExitCode]::Success -Message "Operation canceled by user"
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Operation canceled by user"
     }
 }
 

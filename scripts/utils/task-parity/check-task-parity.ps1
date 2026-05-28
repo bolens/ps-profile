@@ -87,7 +87,7 @@ if ($pathResolutionPath -and -not [string]::IsNullOrWhiteSpace($pathResolutionPa
     else {
         Write-Error $errorMsg
     }
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 $pathResolutionImported = $false
@@ -127,7 +127,7 @@ if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) 
     else {
         Write-Error $errorMsg
     }
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 try {
@@ -403,14 +403,14 @@ if (-not $RepoRoot) {
         # Use Exit-WithCode if available, otherwise use numeric exit code
         if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
             try {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
             }
             catch {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
             }
         }
         else {
-            Exit-WithCode -ExitCode [ExitCode]::SetupError
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
         }
     }
 }
@@ -462,14 +462,14 @@ foreach ($moduleFile in ($requiredModules + $optionalModules)) {
             }
             if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
                 try {
-                    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Required module not found: $moduleName"
+                    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Required module not found: $moduleName"
                 }
                 catch {
-                    Exit-WithCode -ExitCode [ExitCode]::SetupError
+                    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
                 }
             }
             else {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
             }
         }
         else {
@@ -507,14 +507,14 @@ foreach ($moduleFile in ($requiredModules + $optionalModules)) {
             }
             if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
                 try {
-                    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+                    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
                 }
                 catch {
-                    Exit-WithCode -ExitCode [ExitCode]::SetupError
+                    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
                 }
             }
             else {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
             }
         }
         else {
@@ -538,14 +538,14 @@ foreach ($moduleFile in ($requiredModules + $optionalModules)) {
                 }
                 if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
                     try {
-                        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
+                        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message $errorMsg
                     }
                     catch {
-                        Exit-WithCode -ExitCode [ExitCode]::SetupError
+                        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
                     }
                 }
                 else {
-                    Exit-WithCode -ExitCode [ExitCode]::SetupError
+                    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
                 }
             }
         }
@@ -602,14 +602,14 @@ if ($Generate) {
         }
         if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
             try {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message $errorMsg
             }
             catch {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
             }
         }
         else {
-            Exit-WithCode -ExitCode [ExitCode]::SetupError
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
         }
     }
 }
@@ -642,14 +642,14 @@ if (-not (Test-Path -LiteralPath $RepoRoot)) {
     }
     if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
         try {
-            Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message $errorMsg
         }
         catch {
-            Exit-WithCode -ExitCode [ExitCode]::SetupError
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
         }
     }
     else {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
     }
 }
 
@@ -782,14 +782,14 @@ catch {
     # Use Exit-WithCode if available, otherwise use numeric exit code
     if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
         try {
-            Exit-WithCode -ExitCode [ExitCode]::RuntimeError -ErrorRecord $_
+            Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -ErrorRecord $_
         }
         catch {
-            Exit-WithCode -ExitCode [ExitCode]::OtherError
+            Exit-WithCode -ExitCode $EXIT_OTHER_ERROR
         }
     }
     else {
-        Exit-WithCode -ExitCode [ExitCode]::OtherError
+        Exit-WithCode -ExitCode $EXIT_OTHER_ERROR
     }
 }
 
@@ -916,14 +916,14 @@ if ($Generate) {
         }
         if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
             try {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError -Message $errorMsg
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message $errorMsg
             }
             catch {
-                Exit-WithCode -ExitCode [ExitCode]::SetupError
+                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
             }
         }
         else {
-            Exit-WithCode -ExitCode [ExitCode]::SetupError
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
         }
     }
     Write-Host "Generating missing tasks..." -ForegroundColor Yellow
@@ -1087,14 +1087,14 @@ if ($hasMissingTasks) {
     # Use Exit-WithCode if available, otherwise use numeric exit code
     if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
         try {
-            Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Task parity check found differences"
+            Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Task parity check found differences"
         }
         catch {
-            Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+            Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
         }
     }
     else {
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
 }
 else {
@@ -1105,13 +1105,13 @@ else {
     # Use Exit-WithCode if available, otherwise use numeric exit code
     if ($importedModules.ExitCodes -and (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)) {
         try {
-            Exit-WithCode -ExitCode [ExitCode]::Success
+            Exit-WithCode -ExitCode $EXIT_SUCCESS
         }
         catch {
-            Exit-WithCode -ExitCode [ExitCode]::Success
+            Exit-WithCode -ExitCode $EXIT_SUCCESS
         }
     }
     else {
-        Exit-WithCode -ExitCode [ExitCode]::Success
+        Exit-WithCode -ExitCode $EXIT_SUCCESS
     }
 }

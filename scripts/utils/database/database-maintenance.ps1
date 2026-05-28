@@ -186,7 +186,7 @@ try {
                     else {
                         Write-Error $errorMsg
                     }
-                    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+                    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
                 }
             }
             else {
@@ -264,7 +264,7 @@ try {
                     else {
                         Write-Error $errorMsg
                     }
-                    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+                    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
                 }
             }
             else {
@@ -343,7 +343,7 @@ try {
                     else {
                         Write-Error $errorMsg
                     }
-                    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+                    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
                 }
             }
             else {
@@ -421,7 +421,7 @@ try {
                     else {
                         Write-Error $errorMsg
                     }
-                    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+                    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
                 }
             }
             else {
@@ -490,7 +490,7 @@ try {
         }
     }
     
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 catch {
     if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
@@ -502,5 +502,5 @@ catch {
     else {
         Write-Error "Error: $($_.Exception.Message)"
     }
-    Exit-WithCode -ExitCode [ExitCode]::OtherError
+    Exit-WithCode -ExitCode $EXIT_OTHER_ERROR
 }

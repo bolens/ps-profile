@@ -87,7 +87,7 @@ Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableN
 $perfMetricsModule = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'database' 'PerformanceMetricsDatabase.psm1'
 if (-not (Test-Path -LiteralPath $perfMetricsModule)) {
     Write-ScriptMessage -Message "Performance Metrics Database module not found: $perfMetricsModule" -IsWarning
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Performance Metrics Database module not found"
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Performance Metrics Database module not found"
 }
 
 Import-Module $perfMetricsModule -DisableNameChecking -ErrorAction Stop
@@ -111,7 +111,7 @@ catch {
             script_path = $PSScriptRoot
         }
     }
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 Write-ScriptMessage -Message "Populating Performance Metrics Database..." -LogLevel Info
@@ -129,7 +129,7 @@ if (-not (Initialize-PerformanceMetricsDb)) {
     else {
         Write-ScriptMessage -Message "Failed to initialize performance metrics database" -IsWarning
     }
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to initialize performance metrics database"
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to initialize performance metrics database"
 }
 
 $environment = if ($env:CI) { 'CI' } else { 'local' }
@@ -1191,5 +1191,5 @@ if (Test-Path -LiteralPath (Join-Path $repoRoot 'profile.d' 'fragment-config.jso
 
 Write-ScriptMessage -Message "Performance metrics database population completed." -LogLevel Info
 
-Exit-WithCode -ExitCode [ExitCode]::Success
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS
+Exit-WithCode -ExitCode $EXIT_SUCCESS

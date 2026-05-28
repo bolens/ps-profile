@@ -77,7 +77,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 $profileDDir = Join-Path $repoRoot 'profile.d'
@@ -109,7 +109,7 @@ if ($Number -lt 0) {
 
 # Ensure number is in valid range
 if ($Number -lt 0 -or $Number -gt 99) {
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Fragment number must be between 00 and 99"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Fragment number must be between 00 and 99"
 }
 
 $fragmentFileName = "{0:D2}-{1}.ps1" -f $Number, $Name
@@ -117,7 +117,7 @@ $fragmentPath = Join-Path $profileDDir $fragmentFileName
 
 # Check if fragment already exists
 if (Test-Path $fragmentPath) {
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Fragment already exists: $fragmentPath"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Fragment already exists: $fragmentPath"
 }
 
 # Build header metadata
@@ -231,7 +231,7 @@ try {
     Write-Host "2. Update the README with function documentation" -ForegroundColor Yellow
     Write-Host "3. Test the fragment by reloading your profile: . `$PROFILE" -ForegroundColor Yellow
     
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Fragment created successfully"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Fragment created successfully"
 }
 catch {
     if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
@@ -241,7 +241,7 @@ catch {
             readme_path = $readmePath
         }
     }
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 

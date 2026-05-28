@@ -12,8 +12,9 @@ scripts/lib/ExitCodes.psm1
     Module Version: 2.0.0
     PowerShell Version: 5.0+ (for enum support)
     
-    This module now uses an enum for type-safe exit codes.
-    The $EXIT_ constants are deprecated - use [ExitCode]::Value directly.
+    This module provides exit code constants ($EXIT_SUCCESS, $EXIT_VALIDATION_FAILURE, etc.)
+    and an Exit-WithCode function. Use the $EXIT_* variable constants at call sites since
+    [ExitCode]:: expressions require parentheses to evaluate correctly in -File scripts.
 #>
 
 # Exit code enum for type-safe exit code handling
@@ -39,17 +40,17 @@ public enum ExitCode {
 # New code should use [ExitCode]::Value directly instead of $EXIT_ constants
 # These match the conventions documented in CONTRIBUTING.md and ensure consistent
 # error reporting across all utility scripts in the repository.
-$script:EXIT_SUCCESS = [int][ExitCode]::Success              # Operation completed successfully
-$script:EXIT_VALIDATION_FAILURE = [int][ExitCode]::ValidationFailure    # Validation/check failure (expected, non-fatal)
-$script:EXIT_SETUP_ERROR = [int][ExitCode]::SetupError           # Setup/configuration error (unexpected, fatal)
-$script:EXIT_OTHER_ERROR = [int][ExitCode]::OtherError          # Other runtime errors (unexpected, fatal)
+$script:EXIT_SUCCESS = [int]$EXIT_SUCCESS              # Operation completed successfully
+$script:EXIT_VALIDATION_FAILURE = [int]$EXIT_VALIDATION_FAILURE    # Validation/check failure (expected, non-fatal)
+$script:EXIT_SETUP_ERROR = [int]$EXIT_SETUP_ERROR           # Setup/configuration error (unexpected, fatal)
+$script:EXIT_OTHER_ERROR = [int]$EXIT_OTHER_ERROR          # Other runtime errors (unexpected, fatal)
 
 # Additional granular exit codes for test runner
-$script:EXIT_TEST_FAILURE = [int][ExitCode]::TestFailure         # Tests failed (at least one test failed)
-$script:EXIT_TEST_TIMEOUT = [int][ExitCode]::TestTimeout          # Tests timed out
-$script:EXIT_COVERAGE_FAILURE = [int][ExitCode]::CoverageFailure      # Code coverage below threshold
-$script:EXIT_NO_TESTS_FOUND = [int][ExitCode]::NoTestsFound        # No tests found to run
-$script:EXIT_WATCH_MODE_CANCELED = [int][ExitCode]::WatchModeCanceled  # Watch mode canceled by user
+$script:EXIT_TEST_FAILURE = [int]$EXIT_TEST_FAILURE         # Tests failed (at least one test failed)
+$script:EXIT_TEST_TIMEOUT = [int]$EXIT_TEST_TIMEOUT          # Tests timed out
+$script:EXIT_COVERAGE_FAILURE = [int]$EXIT_COVERAGE_FAILURE      # Code coverage below threshold
+$script:EXIT_NO_TESTS_FOUND = [int]$EXIT_NO_TESTS_FOUND        # No tests found to run
+$script:EXIT_WATCH_MODE_CANCELED = [int]$EXIT_WATCH_MODE_CANCELED  # Watch mode canceled by user
 
 <#
 .SYNOPSIS
@@ -63,7 +64,7 @@ $script:EXIT_WATCH_MODE_CANCELED = [int][ExitCode]::WatchModeCanceled  # Watch m
 
 .PARAMETER ExitCode
     The exit code to use. Must be an ExitCode enum value.
-    Use enum values: [ExitCode]::Success, [ExitCode]::ValidationFailure, etc.
+    Use enum values: $EXIT_SUCCESS, $EXIT_VALIDATION_FAILURE, etc.
 
 .PARAMETER Message
     Optional message to display before exiting.
@@ -72,10 +73,10 @@ $script:EXIT_WATCH_MODE_CANCELED = [int][ExitCode]::WatchModeCanceled  # Watch m
     Optional error record to display before exiting.
 
 .EXAMPLE
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Validation failed"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Validation failed"
 
 .EXAMPLE
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 #>
 function Exit-WithCode {
     [CmdletBinding()]

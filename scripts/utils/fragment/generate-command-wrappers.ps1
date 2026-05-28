@@ -79,7 +79,7 @@ $loaderModulePath = Join-Path $fragmentLibDir 'FragmentLoader.psm1'
 
 if (-not (Test-Path -LiteralPath $registryModulePath)) {
     Write-Error "FragmentCommandRegistry module not found at: $registryModulePath"
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Required module not found"
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Required module not found"
 }
 
 Import-Module $registryModulePath -DisableNameChecking -ErrorAction Stop
@@ -102,7 +102,7 @@ if (-not $DryRun) {
         }
         catch {
             Write-Error "Failed to create output directory: $($_.Exception.Message)"
-            Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
         }
     }
 }
@@ -197,7 +197,7 @@ catch {
     else {
         Write-Error "Failed to retrieve commands from registry: $($_.Exception.Message)"
     }
-    Exit-WithCode -ExitCode [ExitCode]::RuntimeError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -ErrorRecord $_
 }
 
 if ($commands.Count -eq 0) {
@@ -207,7 +207,7 @@ if ($commands.Count -eq 0) {
     else {
         Write-Warning "No commands found in registry. Make sure the profile has been loaded at least once to populate the registry."
     }
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "No commands to generate wrappers for"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "No commands to generate wrappers for"
 }
 
 Write-Host "Found $($commands.Count) command(s) to generate wrappers for" -ForegroundColor Cyan
@@ -307,7 +307,7 @@ param(
 # Check if fragment exists
 if (-not (Test-Path -LiteralPath `$fragmentPath)) {
     Write-Error "Fragment file not found: `$fragmentPath"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Load fragment dependencies if FragmentLoader is available
@@ -342,12 +342,12 @@ if (Get-Command '$cmdName' -ErrorAction SilentlyContinue) {
     }
     catch {
         Write-Error "Failed to execute command '$cmdName': `$(`$_.Exception.Message)"
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
 }
 else {
     Write-Error "Command '$cmdName' not found after loading fragment '$fragmentName'"
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 "@
 
@@ -424,7 +424,7 @@ Write-Host "  Generated: $generated" -ForegroundColor Green
 Write-Host "  Skipped: $skipped" -ForegroundColor Yellow
 if ($errors -gt 0) {
     Write-Host "  Errors: $errors" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::RuntimeError -Message "Errors occurred during wrapper generation"
+    Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message "Errors occurred during wrapper generation"
 }
 
 if (-not $DryRun) {
@@ -436,4 +436,4 @@ if (-not $DryRun) {
     Write-Host "  `$env:Path += `";$OutputPath`"" -ForegroundColor Yellow
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

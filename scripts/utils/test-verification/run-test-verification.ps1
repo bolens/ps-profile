@@ -212,10 +212,10 @@ try {
     }
 
     Write-VerificationMessage "Test verification plan execution complete." -Level 'Info'
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 catch {
     Write-VerificationMessage "Error during test verification: $_" -Level 'Error'
-    Exit-WithCode -ExitCode [ExitCode]::OtherError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_OTHER_ERROR -ErrorRecord $_
 }
 

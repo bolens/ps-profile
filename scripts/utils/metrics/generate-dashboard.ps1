@@ -77,7 +77,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -169,7 +169,7 @@ if ($DryRun) {
         Write-ScriptMessage -Message "  - Historical trend analysis" -ForegroundColor Yellow
     }
     Write-ScriptMessage -Message "Run without -DryRun to generate the dashboard." -ForegroundColor Yellow
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "DRY RUN: Would generate dashboard at $OutputPath"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would generate dashboard at $OutputPath"
 }
 
 try {
@@ -182,7 +182,7 @@ try {
     }
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Failed to generate dashboard: $($_.Exception.Message)" -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate dashboard: $($_.Exception.Message)" -ErrorRecord $_
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success
+Exit-WithCode -ExitCode $EXIT_SUCCESS

@@ -41,7 +41,7 @@ try {
     Test-PathExists -Path $profileDir -PathType 'Directory'
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 $files = Get-PowerShellScripts -Path $profileDir -SortByName
@@ -132,7 +132,7 @@ if ($debugLevel -ge 3) {
 }
 
 if ($groups.Count -eq 0) {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "No duplicate function definitions found in profile.d"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No duplicate function definitions found in profile.d"
 }
 
 foreach ($g in $groups) {
@@ -142,5 +142,5 @@ foreach ($g in $groups) {
 }
 
 # Exit with validation failure if duplicates found (non-zero exit indicates issue)
-Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Found $($groups.Count) duplicate function definition(s)"
+Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($groups.Count) duplicate function definition(s)"
 

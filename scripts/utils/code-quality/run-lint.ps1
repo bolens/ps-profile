@@ -52,7 +52,7 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Level 1: Basic operation start
@@ -74,7 +74,7 @@ if ($debugLevel -ge 2) {
 
 if (-not $paths) {
     Write-ScriptMessage -Message "No paths found to analyze"
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 # Ensure PSScriptAnalyzer is available
@@ -82,7 +82,7 @@ try {
     Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 # Locate settings file if present
@@ -174,7 +174,7 @@ if ($failedPaths.Count -gt 0) {
     
     # If all paths failed, exit with error
     if ($failedPaths.Count -eq $paths.Count) {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "All paths failed during linting"
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "All paths failed during linting"
     }
 }
 
@@ -197,9 +197,9 @@ Write-ScriptMessage -Message "Saved report to $out"
 # Fail if any Error-level findings (matching CI behavior)
 $errorFindings = $results | Where-Object { $_.Severity -eq [SeverityLevel]::Error.ToString() }
 if ($errorFindings) {
-    Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Errors found by PSScriptAnalyzer"
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Errors found by PSScriptAnalyzer"
 }
 
-Exit-WithCode -ExitCode [ExitCode]::Success -Message "PSScriptAnalyzer: no issues found"
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: no issues found"
 
 

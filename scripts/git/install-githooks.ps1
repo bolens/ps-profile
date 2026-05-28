@@ -58,17 +58,17 @@ try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
 $gitHooksDir = Join-Path $repoRoot $GitDir
 if ($gitHooksDir -and -not [string]::IsNullOrWhiteSpace($gitHooksDir) -and -not (Test-Path -LiteralPath $gitHooksDir)) {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Git hooks directory '$gitHooksDir' not found. Run this from the repo root."
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Git hooks directory '$gitHooksDir' not found. Run this from the repo root."
 }
 
 $srcHooks = Join-Path $repoRoot 'scripts' 'git' 'hooks'
 if ($srcHooks -and -not [string]::IsNullOrWhiteSpace($srcHooks) -and -not (Test-Path -LiteralPath $srcHooks)) {
-    Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "Source hooks directory not found: $srcHooks"
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Source hooks directory not found: $srcHooks"
 }
 
 $hookFiles = Get-ChildItem -Path $srcHooks -Filter '*.ps1' -File
@@ -125,5 +125,5 @@ if ($DryRun) {
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would install $($hookFiles.Count) hook(s). Run without -DryRun to apply changes."
 }
 else {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "Git hooks installed. Ensure .git/hooks/* are executable if using a Unix-like environment."
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Git hooks installed. Ensure .git/hooks/* are executable if using a Unix-like environment."
 }

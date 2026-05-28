@@ -54,7 +54,7 @@ Write-Host ""
 if (-not (Test-SqliteAvailable)) {
     Write-Host "✗ SQLite is not available" -ForegroundColor Red
     Write-Host "  Install sqlite3: choco install sqlite -y (Windows) or brew install sqlite (macOS)" -ForegroundColor Yellow
-    Exit-WithCode -ExitCode [ExitCode]::SetupError
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 $sqliteCmd = Get-SqliteCommandName
@@ -211,9 +211,9 @@ Write-Host ""
 
 if ($failCount -eq 0) {
     Write-Host "✓ All databases initialized successfully!" -ForegroundColor Green
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 else {
     Write-Host "✗ Some databases failed to initialize" -ForegroundColor Red
-    Exit-WithCode -ExitCode [ExitCode]::SetupError
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }

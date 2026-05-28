@@ -54,7 +54,7 @@ if (-not $Path) {
         $Path = Join-Path $repoRoot 'scripts'
     }
     catch {
-        Exit-WithCode -ExitCode [ExitCode]::SetupError -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
@@ -211,14 +211,14 @@ if ($issues.Count -gt 0) {
     
     # Exit with validation failure if there are errors or warnings
     if ($errors.Count -gt 0 -or $warnings.Count -gt 0) {
-        Exit-WithCode -ExitCode [ExitCode]::ValidationFailure -Message "Found $($errors.Count + $warnings.Count) issue(s) that need attention"
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($errors.Count + $warnings.Count) issue(s) that need attention"
     }
     else {
-        Exit-WithCode -ExitCode [ExitCode]::Success -Message "Found $($info.Count) informational issue(s) - no action required"
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Found $($info.Count) informational issue(s) - no action required"
     }
 }
 else {
-    Exit-WithCode -ExitCode [ExitCode]::Success -Message "All scripts comply with codebase standards"
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All scripts comply with codebase standards"
 }
 
 
