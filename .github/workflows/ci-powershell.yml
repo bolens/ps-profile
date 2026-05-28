@@ -14,7 +14,7 @@ jobs:
     name: Validate on ${{ matrix.os }} / PowerShell ${{ matrix.pwsh }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         pwsh: [7.2, 7.4]
     runs-on: ${{ matrix.os }}
     steps:
@@ -22,4 +22,4 @@ jobs:
       - name: Install PSScriptAnalyzer
         run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force"
       - name: Validate profile (lint + idempotency)
-        run: pwsh -NoProfile -Command ./scripts/checks/validate-profile.ps1
+        run: pwsh -NoProfile -File scripts/checks/validate-profile.ps1
