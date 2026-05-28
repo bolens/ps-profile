@@ -8,49 +8,37 @@ scripts/lib/ExitCodes.psm1
     Provides standardized exit code constants and exit handling functions
     for consistent error handling across utility scripts.
 
+    The ExitCode enum is defined in CommonEnums.psm1 via Add-Type, making it
+    globally accessible. The $EXIT_* integer constants are exported for use at
+    call sites — use $EXIT_* variables rather than ([ExitCode]::Value) expressions
+    to avoid the PowerShell -File argument-parsing quirk where [Type]::Member
+    without parentheses is stringified instead of evaluated.
+
 .NOTES
     Module Version: 2.0.0
-    PowerShell Version: 5.0+ (for enum support)
-    
-    This module provides exit code constants ($EXIT_SUCCESS, $EXIT_VALIDATION_FAILURE, etc.)
-    and an Exit-WithCode function. Use the $EXIT_* variable constants at call sites since
-    [ExitCode]:: expressions require parentheses to evaluate correctly in -File scripts.
+    PowerShell Version: 5.0+
+    Load Order: import CommonEnums before this module.
 #>
 
-# Exit code enum for type-safe exit code handling
-# Defined via Add-Type so the type is globally accessible outside module scope
-if (-not ([System.Management.Automation.PSTypeName]'ExitCode').Type) {
-    Add-Type -TypeDefinition @'
-public enum ExitCode {
-    Success          = 0,
-    ValidationFailure = 1,
-    SetupError       = 2,
-    OtherError       = 3,
-    TestFailure      = 4,
-    TestTimeout      = 5,
-    CoverageFailure  = 6,
-    NoTestsFound     = 7,
-    WatchModeCanceled = 8
-}
-'@
+# Import CommonEnums so ExitCode (and LogLevel) are available as global .NET types
+$commonEnumsPath = Join-Path $PSScriptRoot 'CommonEnums.psm1'
+if (Test-Path -LiteralPath $commonEnumsPath) {
+    Import-Module $commonEnumsPath -DisableNameChecking -Global -ErrorAction Stop
 }
 
-# Standardized exit code constants (deprecated - use ExitCode enum directly)
-# These are kept for legacy code that hasn't been migrated yet
-# New code should use [ExitCode]::Value directly instead of $EXIT_ constants
-# These match the conventions documented in CONTRIBUTING.md and ensure consistent
-# error reporting across all utility scripts in the repository.
-$script:EXIT_SUCCESS = [int]$EXIT_SUCCESS              # Operation completed successfully
-$script:EXIT_VALIDATION_FAILURE = [int]$EXIT_VALIDATION_FAILURE    # Validation/check failure (expected, non-fatal)
-$script:EXIT_SETUP_ERROR = [int]$EXIT_SETUP_ERROR           # Setup/configuration error (unexpected, fatal)
-$script:EXIT_OTHER_ERROR = [int]$EXIT_OTHER_ERROR          # Other runtime errors (unexpected, fatal)
+# Standardized exit code constants — exported for use at call sites.
+# Prefer these over [ExitCode]:: expressions in script files.
+$script:EXIT_SUCCESS             = [int][ExitCode]::Success
+$script:EXIT_VALIDATION_FAILURE  = [int][ExitCode]::ValidationFailure
+$script:EXIT_SETUP_ERROR         = [int][ExitCode]::SetupError
+$script:EXIT_OTHER_ERROR         = [int][ExitCode]::OtherError
+$script:EXIT_RUNTIME_ERROR       = [int][ExitCode]::OtherError   # alias
+$script:EXIT_TEST_FAILURE        = [int][ExitCode]::TestFailure
+$script:EXIT_TEST_TIMEOUT        = [int][ExitCode]::TestTimeout
+$script:EXIT_COVERAGE_FAILURE    = [int][ExitCode]::CoverageFailure
+$script:EXIT_NO_TESTS_FOUND      = [int][ExitCode]::NoTestsFound
+$script:EXIT_WATCH_MODE_CANCELED = [int][ExitCode]::WatchModeCanceled
 
-# Additional granular exit codes for test runner
-$script:EXIT_TEST_FAILURE = [int]$EXIT_TEST_FAILURE         # Tests failed (at least one test failed)
-$script:EXIT_TEST_TIMEOUT = [int]$EXIT_TEST_TIMEOUT          # Tests timed out
-$script:EXIT_COVERAGE_FAILURE = [int]$EXIT_COVERAGE_FAILURE      # Code coverage below threshold
-$script:EXIT_NO_TESTS_FOUND = [int]$EXIT_NO_TESTS_FOUND        # No tests found to run
-$script:EXIT_WATCH_MODE_CANCELED = [int]$EXIT_WATCH_MODE_CANCELED  # Watch mode canceled by user
 
 <#
 .SYNOPSIS

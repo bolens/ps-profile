@@ -20,6 +20,12 @@ scripts/lib/Logging.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+# Import CommonEnums so LogLevel (and ExitCode) are available as global .NET types
+$commonEnumsPath = Join-Path $PSScriptRoot 'CommonEnums.psm1'
+if (Test-Path -LiteralPath $commonEnumsPath) {
+    Import-Module $commonEnumsPath -DisableNameChecking -Global -ErrorAction SilentlyContinue
+}
+
 # Import Locale module for locale-aware date formatting
 # Use SafeImport module if available, otherwise fall back to manual check
 $safeImportModulePath = Join-Path $PSScriptRoot 'SafeImport.psm1'
@@ -112,7 +118,7 @@ function Write-ScriptMessage {
 
         [switch]$IsError,
 
-        [string]$LogLevel,
+        [LogLevel]$LogLevel,
 
         [switch]$StructuredOutput,
 
@@ -126,8 +132,8 @@ function Write-ScriptMessage {
     )
 
     # Determine log level
-    $level = if ($LogLevel) {
-        $LogLevel
+    $level = if ($PSBoundParameters.ContainsKey('LogLevel')) {
+        $LogLevel.ToString()
     }
     elseif ($IsError) {
         'Error'
