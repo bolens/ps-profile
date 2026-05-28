@@ -1,3 +1,13 @@
+## [1.3.3](https://github.com/bolens/ps-profile/compare/v1.3.2...v1.3.3) (2026-05-28)
+
+
+### Bug Fixes
+
+* audit pass — dedup functions, fix yarn typo, add missing Remove-YarnPackage ([1c5c771](https://github.com/bolens/ps-profile/commit/1c5c77159e70f771a1f5b6683897d0600f02989b))
+* cross-platform compat for speedtest, ruby gems, Java paths, PATH separator ([76128a5](https://github.com/bolens/ps-profile/commit/76128a5a68bd6b57f4adb2f1c229e699bae0a4d8))
+* **encoding:** migrate base32-encode to v2 ESM API, bump to ^2.0.0 ([3252411](https://github.com/bolens/ps-profile/commit/32524113883c03b94584437236eee98f48e4efcb))
+* restore encoding modules, add doc blocks, cross-platform Linux compat ([9f95d48](https://github.com/bolens/ps-profile/commit/9f95d48347378c601a394072e7c5495dd58082b2))
+
 ## [1.3.2](https://github.com/bolens/ps-profile/compare/v1.3.1...v1.3.2) (2026-01-16)
 
 
