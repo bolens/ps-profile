@@ -26,9 +26,8 @@ function Get-PythonPath {
     # First, check common Python-related environment variables (highest priority)
     $pythonEnvVars = @('PYTHON_HOME', 'PYTHON_ROOT', 'PYTHON', 'VIRTUAL_ENV', 'CONDA_PREFIX')
     foreach ($envVar in $pythonEnvVars) {
-        $envVarName = "env:$envVar"
-        $envValue = if (Test-Path -Path "Variable:$envVarName" -ErrorAction SilentlyContinue) {
-            (Get-Item -Path "Variable:$envVarName" -ErrorAction SilentlyContinue).Value
+        $envValue = if (Test-Path -Path "env:$envVar" -ErrorAction SilentlyContinue) {
+            (Get-Item -Path "env:$envVar" -ErrorAction SilentlyContinue).Value
         }
         else {
             $null

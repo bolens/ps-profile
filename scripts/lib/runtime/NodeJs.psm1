@@ -32,9 +32,8 @@ function Get-PnpmGlobalPath {
     # First, check common pnpm/Node.js-related environment variables (highest priority)
     $pnpmEnvVars = @('PNPM_HOME', 'PNPM_ROOT', 'NPM_CONFIG_PREFIX', 'NODE_PATH', 'NVM_DIR')
     foreach ($envVar in $pnpmEnvVars) {
-        $envVarName = "env:$envVar"
-        $envValue = if (Test-Path -Path "Variable:$envVarName" -ErrorAction SilentlyContinue) {
-            (Get-Item -Path "Variable:$envVarName" -ErrorAction SilentlyContinue).Value
+        $envValue = if (Test-Path -Path "env:$envVar" -ErrorAction SilentlyContinue) {
+            (Get-Item -Path "env:$envVar" -ErrorAction SilentlyContinue).Value
         }
         else {
             $null

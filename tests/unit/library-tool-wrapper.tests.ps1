@@ -82,24 +82,20 @@ Describe 'Register-ToolWrapper Function' {
             Get-Command $script:TestFunctionName -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
         
-        It 'Returns false for null FunctionName' {
-            $result = Register-ToolWrapper -FunctionName $null -CommandName 'test'
-            $result | Should -Be $false
+        It 'Throws on null FunctionName (ValidateNotNullOrEmpty)' {
+            { Register-ToolWrapper -FunctionName $null -CommandName 'test' } | Should -Throw
         }
-        
-        It 'Returns false for empty FunctionName' {
-            $result = Register-ToolWrapper -FunctionName '' -CommandName 'test'
-            $result | Should -Be $false
+
+        It 'Throws on empty FunctionName (ValidateNotNullOrEmpty)' {
+            { Register-ToolWrapper -FunctionName '' -CommandName 'test' } | Should -Throw
         }
-        
-        It 'Returns false for null CommandName' {
-            $result = Register-ToolWrapper -FunctionName 'test' -CommandName $null
-            $result | Should -Be $false
+
+        It 'Throws on null CommandName (ValidateNotNullOrEmpty)' {
+            { Register-ToolWrapper -FunctionName 'test' -CommandName $null } | Should -Throw
         }
-        
-        It 'Returns false for empty CommandName' {
-            $result = Register-ToolWrapper -FunctionName 'test' -CommandName ''
-            $result | Should -Be $false
+
+        It 'Throws on empty CommandName (ValidateNotNullOrEmpty)' {
+            { Register-ToolWrapper -FunctionName 'test' -CommandName '' } | Should -Throw
         }
         
         It 'Does not overwrite existing function' {
@@ -174,8 +170,8 @@ Describe 'Register-ToolWrapper Function' {
     
     Context 'Command Detection' {
         AfterEach {
-            Remove-Item -Path "Function:\\$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\\global:$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
         }
 
         It 'Registers wrapper for a function-type command discovered via Test-CachedCommand' {
@@ -205,8 +201,8 @@ Describe 'Register-ToolWrapper Function' {
     
     Context 'Error Handling' {
         AfterEach {
-            Remove-Item -Path "Function:\\$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\\global:$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
         }
 
         It 'Wrapper for missing command emits a warning (not throws) when invoked with InstallHint' {
@@ -235,23 +231,26 @@ Describe 'Register-ToolWrapper Function' {
     Context 'Idempotency' {
         It 'Can be called multiple times safely' {
             $testCmd = if (Get-Command git -ErrorAction SilentlyContinue) { 'git' } else { 'pwsh' }
-            
-            $result1 = Register-ToolWrapper -FunctionName $script:TestFunctionName -CommandName $testCmd
-            $result2 = Register-ToolWrapper -FunctionName $script:TestFunctionName -CommandName $testCmd
-            
-            $result1 | Should -Be $true
-            $result2 | Should -Be $false  # Second call should return false (function already exists)
-            
-            # Clean up
-            Remove-Item -Path "Function:\$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\global:$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
+            $idempotentName = "IdempotencyTest_$(Get-Random)"
+
+            try {
+                $result1 = Register-ToolWrapper -FunctionName $idempotentName -CommandName $testCmd
+                $result2 = Register-ToolWrapper -FunctionName $idempotentName -CommandName $testCmd
+
+                $result1 | Should -Be $true
+                $result2 | Should -Be $false  # Second call returns false (function already exists)
+            }
+            finally {
+                Remove-Item -Path "Function:\$idempotentName" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\global:$idempotentName" -Force -ErrorAction SilentlyContinue
+            }
         }
     }
     
     Context 'CommandType Parameter' {
         AfterEach {
-            Remove-Item -Path "Function:\\$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\\global:$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$script:TestFunctionName" -Force -ErrorAction SilentlyContinue
         }
 
         It 'Defaults to Application command type (git is an Application)' {
@@ -260,29 +259,39 @@ Describe 'Register-ToolWrapper Function' {
                 return
             }
 
-            $result = Register-ToolWrapper -FunctionName $script:TestFunctionName -CommandName 'git'
-            $result | Should -Be $true
+            $cmdTypeName = "CmdTypeTest_$(Get-Random)"
+            try {
+                $result = Register-ToolWrapper -FunctionName $cmdTypeName -CommandName 'git'
+                $result | Should -Be $true
 
-            # Wrapper should exist and forwarding should work
-            { & $script:TestFunctionName --version 2>&1 | Out-Null } | Should -Not -Throw
+                # Wrapper should exist and forwarding should work
+                { & $cmdTypeName --version 2>&1 | Out-Null } | Should -Not -Throw
+            }
+            finally {
+                Remove-Item -Path "Function:\$cmdTypeName" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\global:$cmdTypeName" -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Accepts Function CommandType and wraps a function correctly' {
             $innerFunc = "InnerFunc_$(Get-Random)"
-            Set-Item -Path "Function:\\$innerFunc" -Value { Write-Output 'wrapped-output' } -Force
+            $outerFunc = "OuterFunc_$(Get-Random)"
+            Set-Item -Path "Function:\$innerFunc" -Value { Write-Output 'wrapped-output' } -Force
 
             try {
-                $result = Register-ToolWrapper -FunctionName $script:TestFunctionName `
+                $result = Register-ToolWrapper -FunctionName $outerFunc `
                     -CommandName $innerFunc `
                     -CommandType Function
 
                 $result | Should -Be $true
 
                 # Calling the wrapper should not throw
-                { & $script:TestFunctionName 2>&1 | Out-Null } | Should -Not -Throw
+                { & $outerFunc 2>&1 | Out-Null } | Should -Not -Throw
             }
             finally {
-                Remove-Item -Path "Function:\\$innerFunc" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\$innerFunc" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\$outerFunc" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\global:$outerFunc" -Force -ErrorAction SilentlyContinue
             }
         }
     }
