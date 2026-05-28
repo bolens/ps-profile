@@ -126,7 +126,7 @@ try {
         if ($JavaHome) {
             if (Test-Path -LiteralPath $JavaHome -PathType Container) {
                 $env:JAVA_HOME = $JavaHome
-                $env:PATH = "$JavaHome\bin;$env:PATH"
+                $env:PATH = (Join-Path $JavaHome "bin") + [System.IO.Path]::PathSeparator + $env:PATH
                 Write-Host "JAVA_HOME set to: $JavaHome" -ForegroundColor Green
                 return "JAVA_HOME set to: $JavaHome"
             }
@@ -179,7 +179,7 @@ try {
                             if ($currentVersion -eq $Version) {
                                 Write-Host "Java $Version found via ${envVar}: $envValue" -ForegroundColor Green
                                 $env:JAVA_HOME = $envValue
-                                $env:PATH = "$envValue\bin;$env:PATH"
+                                $env:PATH = (Join-Path $envValue "bin") + [System.IO.Path]::PathSeparator + $env:PATH
                                 return "Java $Version set via ${envVar}: $envValue"
                             }
                         }
@@ -191,25 +191,43 @@ try {
             }
             
             $commonPaths = @()
-            
-            # Standard Java installation paths
-            $commonPaths += "$env:ProgramFiles\Java\jdk-$Version"
-            $commonPaths += "$env:ProgramFiles\Java\jdk-$Version*"
-            
-            # ProgramFiles(x86) if it exists
-            $programFilesX86 = [Environment]::GetFolderPath('ProgramFilesX86')
-            if ($programFilesX86) {
-                $commonPaths += "$programFilesX86\Java\jdk-$Version"
-                $commonPaths += "$programFilesX86\Java\jdk-$Version*"
+
+            $isWin = $IsWindows -or $PSVersionTable.Platform -eq 'Win32NT'
+
+            if ($isWin) {
+                # Standard Java installation paths (Windows)
+                $commonPaths += "$env:ProgramFiles\Java\jdk-$Version"
+                $commonPaths += "$env:ProgramFiles\Java\jdk-$Version*"
+
+                # ProgramFiles(x86) if it exists
+                $programFilesX86 = [Environment]::GetFolderPath('ProgramFilesX86')
+                if ($programFilesX86) {
+                    $commonPaths += "$programFilesX86\Java\jdk-$Version"
+                    $commonPaths += "$programFilesX86\Java\jdk-$Version*"
+                }
+
+                # Eclipse Adoptium (Temurin) paths
+                $commonPaths += "$env:LOCALAPPDATA\Programs\Eclipse Adoptium\jdk-$Version*"
+                $commonPaths += "$env:ProgramFiles\Eclipse Adoptium\jdk-$Version*"
+
+                # Microsoft OpenJDK paths
+                $commonPaths += "$env:ProgramFiles\Microsoft\jdk-$Version"
+                $commonPaths += "$env:ProgramFiles\Microsoft\jdk-$Version*"
             }
-            
-            # Eclipse Adoptium (Temurin) paths
-            $commonPaths += "$env:LOCALAPPDATA\Programs\Eclipse Adoptium\jdk-$Version*"
-            $commonPaths += "$env:ProgramFiles\Eclipse Adoptium\jdk-$Version*"
-            
-            # Microsoft OpenJDK paths
-            $commonPaths += "$env:ProgramFiles\Microsoft\jdk-$Version"
-            $commonPaths += "$env:ProgramFiles\Microsoft\jdk-$Version*"
+            else {
+                # Standard Java installation paths (Linux/macOS)
+                $commonPaths += "/usr/lib/jvm/java-$Version-openjdk-amd64"
+                $commonPaths += "/usr/lib/jvm/java-$Version-openjdk-arm64"
+                $commonPaths += "/usr/lib/jvm/java-$Version*"
+                $commonPaths += "/usr/lib/jvm/temurin-$Version*"
+                $commonPaths += "/usr/lib/jvm/jdk-$Version*"
+                # macOS (Homebrew / SDKMAN)
+                $commonPaths += "/Library/Java/JavaVirtualMachines/jdk-$Version*.jdk/Contents/Home"
+                $commonPaths += "/Library/Java/JavaVirtualMachines/temurin-$Version.jdk/Contents/Home"
+                # SDKMAN
+                $sdkmanDir = if ($env:SDKMAN_DIR) { $env:SDKMAN_DIR } else { Join-Path ($env:HOME ?? '~') '.sdkman' }
+                $commonPaths += "$sdkmanDir/candidates/java/$Version*"
+            }
             
             # Scoop installation paths (if Scoop is installed)
             $scoopRoot = $null
@@ -306,7 +324,7 @@ try {
 
             if ($foundPath) {
                 $env:JAVA_HOME = $foundPath
-                $env:PATH = "$foundPath\bin;$env:PATH"
+                $env:PATH = (Join-Path $foundPath "bin") + [System.IO.Path]::PathSeparator + $env:PATH
                 Write-Host "Switched to Java $Version at: $foundPath" -ForegroundColor Green
                 return "Switched to Java $Version at: $foundPath"
             }

@@ -11,14 +11,14 @@ jobs:
   benchmark:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Run Performance Benchmark
         run: pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 3
       - name: Update Performance Baseline
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 5 -UpdateBaseline
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: performance-results
           path: |

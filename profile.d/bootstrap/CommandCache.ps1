@@ -190,12 +190,14 @@ function global:Test-CachedCommand {
                                     }
                                 }
                                 
-                                # Check user gem directories
-                                # Ruby uses ~/.local/share/gem/ruby/<version>/bin on Windows (or ~/.gem/ruby/<version>/bin)
-                                if (-not $result -and $env:USERPROFILE) {
+                # Check user gem directories (cross-platform)
+                                # Linux/macOS: ~/.local/share/gem/ruby/<ver>/bin or ~/.gem/ruby/<ver>/bin
+                                # Windows: same paths relative to USERPROFILE
+                                $userHomeForGems = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { $null }
+                                if (-not $result -and $userHomeForGems) {
                                     $userGemPaths = @(
-                                        Join-Path $env:USERPROFILE '.local\share\gem\ruby',
-                                        Join-Path $env:USERPROFILE '.gem\ruby'
+                                        Join-Path $userHomeForGems '.local' 'share' 'gem' 'ruby',
+                                        Join-Path $userHomeForGems '.gem' 'ruby'
                                     )
                                     
                                     foreach ($userGemBase in $userGemPaths) {

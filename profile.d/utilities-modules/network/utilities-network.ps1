@@ -28,5 +28,12 @@ Set-AgentModeAlias -Name 'myip' -Target 'Get-MyIP'
 .DESCRIPTION
     Executes speedtest-cli to measure internet connection speed.
 #>
-function Start-SpeedTest { & (Get-Command speedtest.exe).Source --accept-license }
+function Start-SpeedTest {
+    # 'speedtest' on Linux/macOS, 'speedtest.exe' on Windows; fall back to bare name
+    $stCmd = if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') { 'speedtest.exe' } else { 'speedtest' }
+    $stBin = Get-Command $stCmd -ErrorAction SilentlyContinue
+    if (-not $stBin) { $stBin = Get-Command 'speedtest' -ErrorAction SilentlyContinue }
+    if (-not $stBin) { Write-Warning "speedtest not found in PATH. Install speedtest-cli."; return }
+    & $stBin.Source --accept-license
+}
 Set-AgentModeAlias -Name 'speedtest' -Target 'Start-SpeedTest'
