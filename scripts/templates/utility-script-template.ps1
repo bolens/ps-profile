@@ -50,11 +50,11 @@ try {
     # Your script logic here
     
     Write-ScriptMessage -Message "Script completed successfully" -LogLevel Info
-    Exit-WithCode -ExitCode [ExitCode]::Success
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 catch {
     Write-ScriptMessage -Message "Script failed: $_" -LogLevel Error
-    Exit-WithCode -ExitCode [ExitCode]::OtherError
+    Exit-WithCode -ExitCode $EXIT_OTHER_ERROR
 }
 
 

@@ -373,7 +373,7 @@ Write-Output "Fallback chain: $($fallbackInfo.FallbackChain)"
 
 ## Related Documentation
 
-- [AGENTS.md](../AGENTS.md) - AI assistant guidelines
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Technical architecture
-- [PROFILE_README.md](../PROFILE_README.md) - Profile documentation
+- [AGENTS.md](../../AGENTS.md) - AI assistant guidelines
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Technical architecture
+- [PROFILE_README.md](../../PROFILE_README.md) - Profile documentation
 - `.env.example` - Environment variable examples

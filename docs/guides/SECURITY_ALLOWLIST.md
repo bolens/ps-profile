@@ -182,5 +182,5 @@ Two template files are available:
 
 ## Related Documentation
 
-- [Security Scanning Workflow](../.github/workflows/security.yml)
-- [Security Scan Script](../scripts/utils/security/run-security-scan.ps1)
+- [Security Scanning Workflow](../../.github/workflows/security.yml)
+- [Security Scan Script](../../scripts/utils/security/run-security-scan.ps1)

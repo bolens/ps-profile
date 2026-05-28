@@ -1302,8 +1302,6 @@ If coverage is lower than expected:
 - [AGENTS.md](../../AGENTS.md) - AI assistant guidelines
 - [CONTRIBUTING.md](../../CONTRIBUTING.md) - Contribution guidelines
 - [docs/guides/DEVELOPMENT.md](DEVELOPMENT.md) - Development guide
-- [docs/guides/TEST_REFACTORING_PLAN.md](TEST_REFACTORING_PLAN.md) - Test refactoring plan (completed)
-- [docs/guides/TEST_REFACTORING_PROGRESS.md](TEST_REFACTORING_PROGRESS.md) - Test refactoring progress report
 
 ## Quick Reference
 

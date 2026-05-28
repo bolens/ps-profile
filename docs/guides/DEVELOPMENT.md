@@ -472,5 +472,5 @@ If `Get-RepoRoot` fails:
 
 ## Additional Resources
 
-- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
-- [requirements/](../requirements/) - Modular dependency requirements structure
+- [CONTRIBUTING.md](../../CONTRIBUTING.md) - Contribution guidelines
+- [requirements/](../../requirements/) - Modular dependency requirements structure
