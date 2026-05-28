@@ -58,30 +58,18 @@ Describe 'OutputUtils Module Tests' {
     }
 
     Context 'Output Interception' {
-        It 'Intercepts and sanitizes Write-Host output' {
-            Start-TestOutputInterceptor
-
-            try {
-                # Capture output
-                $output = Write-Host "Path: $script:TestRepoRoot\profile.d" 6>$null
-                # Note: In Pester, we can't easily capture Write-Host output, so we test the mechanism exists
-                $true | Should -Be $true # Placeholder test
-            }
-            finally {
-                Stop-TestOutputInterceptor
-            }
+        It 'Start-TestOutputInterceptor and Stop-TestOutputInterceptor do not throw' {
+            { Start-TestOutputInterceptor } | Should -Not -Throw
+            { Stop-TestOutputInterceptor } | Should -Not -Throw
         }
 
-        It 'Intercepts and deduplicates Write-Warning output' {
+        It 'Interceptor can wrap Write-Warning calls without throwing' {
             Start-TestOutputInterceptor
 
             try {
-                # This would normally show the warning only once
-                Write-Warning 'Duplicate warning message'
-                Write-Warning 'Duplicate warning message'
-                Write-Warning 'Unique warning message'
-
-                $true | Should -Be $true # Test that no exceptions occurred
+                { Write-Warning 'Duplicate warning message' } | Should -Not -Throw
+                { Write-Warning 'Duplicate warning message' } | Should -Not -Throw
+                { Write-Warning 'Unique warning message' } | Should -Not -Throw
             }
             finally {
                 Stop-TestOutputInterceptor

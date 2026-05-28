@@ -14,9 +14,8 @@ Describe 'Profile fragments' {
     Context 'Fragment lifecycle' {
         It 'loads fragments twice without error (idempotency)' {
             $fragments = Get-ChildItem -Path $script:ProfileDir -Filter *.ps1 -File | Sort-Object Name | Select-Object -ExpandProperty FullName
-            & { param($files, $root) $PSScriptRoot = $root; foreach ($fragment in $files) { . $fragment } } $fragments $PSScriptRoot
-            & { param($files, $root) $PSScriptRoot = $root; foreach ($fragment in $files) { . $fragment } } $fragments $PSScriptRoot
-            $true | Should -Be $true
+            { & { param($files, $root) $PSScriptRoot = $root; foreach ($fragment in $files) { . $fragment } } $fragments $PSScriptRoot } | Should -Not -Throw
+            { & { param($files, $root) $PSScriptRoot = $root; foreach ($fragment in $files) { . $fragment } } $fragments $PSScriptRoot } | Should -Not -Throw
         }
     }
 
@@ -50,11 +49,10 @@ Describe 'Profile fragments' {
     }
 
     Context 'Utility helpers' {
-        It 'base64 encode/decode roundtrip for small content' {
-            $payload = 'hello world'
-            $encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($payload))
-            $decoded = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($encoded))
-            $decoded | Should -Be 'hello world'
+        It 'Test-CachedCommand returns bool for known command' {
+            . $script:BootstrapPath
+            $result = Test-CachedCommand 'pwsh'
+            $result | Should -BeOfType [bool]
         }
     }
 }

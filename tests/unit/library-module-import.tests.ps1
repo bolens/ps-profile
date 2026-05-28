@@ -64,17 +64,11 @@ Describe 'ModuleImport Module Functions' {
         }
 
         It 'Throws when Get-RepoRoot is not available' {
-            # This test is difficult to mock properly since Get-RepoRoot is called internally
-            # Skip for now as it requires more complex mocking setup
-            # The functionality is tested indirectly through other tests
-            $true | Should -Be $true
+            Set-ItResult -Skipped -Because 'Requires removing Get-RepoRoot from global scope — complex to isolate without affecting other tests'
         }
 
         It 'Throws when scripts/lib directory does not exist' {
-            # This test is difficult to mock properly since Get-RepoRoot is called internally
-            # Skip for now as it requires more complex mocking setup
-            # The functionality is tested indirectly through other tests
-            $true | Should -Be $true
+            Set-ItResult -Skipped -Because 'Requires mocking Get-RepoRoot return value — covered indirectly by other path tests'
         }
 
         It 'Uses cached value when available' {

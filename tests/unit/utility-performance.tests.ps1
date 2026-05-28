@@ -27,13 +27,12 @@ Describe 'Performance Metrics Functions' {
         }
 
         It 'Captures errors in metrics' {
-            try {
-                $metrics = Measure-Operation -ScriptBlock { throw 'Test error' } -OperationName 'FailingOperation' -ErrorAction Stop
-            }
-            catch {
-            }
+            $metrics = Measure-Operation -ScriptBlock { throw 'Test error' } -OperationName 'FailingOperation'
 
-            $true | Should -Be $true
+            $metrics | Should -Not -BeNullOrEmpty
+            $metrics.Success | Should -Be $false
+            $metrics.ErrorMessage | Should -Be 'Test error'
+            $metrics.DurationMs | Should -BeGreaterOrEqual 0
         }
     }
 

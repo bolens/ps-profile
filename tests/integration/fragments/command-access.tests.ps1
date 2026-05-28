@@ -236,9 +236,7 @@ Describe 'Fragment Command Access - Integration Tests' {
         }
         
         It 'Handles missing modules gracefully' {
-            # Test that functions degrade gracefully when modules aren't available
-            # This is tested implicitly by the conditional checks in the tests above
-            $true | Should -Be $true
+            Set-ItResult -Skipped -Because 'Graceful degradation is verified implicitly by conditional guards throughout the tests above'
         }
     }
 }

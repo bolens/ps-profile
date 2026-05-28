@@ -46,8 +46,8 @@ if (-not (Test-Path Function:\Start-SSHAgent)) {
         try {
             $out = ssh-agent -s 2>$null
             if ($out) {
-                $env:SSH_AUTH_SOCK = ($out | Select-String -Pattern 'SSH_AUTH_SOCK' | ForEach-Object { ($_ -split ';')[0] -replace 'set | ', '' })
-                $env:SSH_AGENT_PID = ($out | Select-String -Pattern 'SSH_AGENT_PID' | ForEach-Object { ($_ -split ';')[0] -replace 'set | ', '' })
+                $env:SSH_AUTH_SOCK = ($out | Select-String -Pattern 'SSH_AUTH_SOCK' | ForEach-Object { ($_ -replace 'SSH_AUTH_SOCK=', '') -split ';' | Select-Object -First 1 })
+                $env:SSH_AGENT_PID = ($out | Select-String -Pattern 'SSH_AGENT_PID' | ForEach-Object { ($_ -replace 'SSH_AGENT_PID=', '') -split ';' | Select-Object -First 1 })
                 Write-Output 'ssh-agent started (if available)'
             }
             else {

@@ -139,20 +139,12 @@ Describe 'Register-ToolWrapper Function' {
             $result = Register-ToolWrapper -FunctionName $script:TestFunctionName -CommandName $nonExistentCmd
             
             $result | Should -Be $true
-            
+
             # Verify function was created
             Get-Command $script:TestFunctionName -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            
-            # Call the wrapper - should show warning (we can't easily capture warnings in tests)
-            # But we can verify the function exists and can be called
-            try {
-                & $script:TestFunctionName 2>&1 | Out-Null
-            }
-            catch {
-                # Expected - command doesn't exist
-            }
-            
-            $true | Should -Be $true  # Function was created successfully
+
+            # Call the wrapper — should emit a warning about the missing command, not throw
+            { & $script:TestFunctionName 2>&1 | Out-Null } | Should -Not -Throw
         }
         
         It 'Uses custom warning message when provided' {

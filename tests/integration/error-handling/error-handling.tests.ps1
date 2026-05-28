@@ -89,8 +89,8 @@ Describe 'Error Handling Module' {
 
             $result = Write-ProfileError -ErrorRecord $errorRecord -Category "Command"
 
-            # Should not throw and should have written warning
-            $true | Should -Be $true  # Just to have an assertion
+            # Should not throw; Write-ProfileError returns nothing (void/null)
+            { Write-ProfileError -ErrorRecord $errorRecord -Category "Command" } | Should -Not -Throw
         }
 
         It 'handles different error categories' {

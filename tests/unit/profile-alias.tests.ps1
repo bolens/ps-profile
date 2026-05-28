@@ -734,7 +734,7 @@ function Test-Function {
             $result = & $scriptPath -OutputPath $tempDir 2>&1
 
             # The script should run without throwing an exception
-            $true | Should -Be $true
+            $result | Should -Not -BeNullOrEmpty
         }
 
         It 'generates index with functions and aliases sections' {

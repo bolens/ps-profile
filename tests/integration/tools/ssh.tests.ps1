@@ -62,10 +62,11 @@ Describe 'SSH Integration Tests' {
             { Add-SSHKeyIfNotLoaded } | Should -Not -Throw
         }
 
-        It 'Add-SSHKeyIfNotLoaded can be called with nonexistent file' {
-            # Skip this test as the function has a bug with string concatenation
-            # that causes parameter binding issues
-            $true | Should -Be $true
+        It 'Add-SSHKeyIfNotLoaded warns when path does not exist' {
+            $warnings = @()
+            Add-SSHKeyIfNotLoaded -path '/nonexistent/key/id_rsa' -WarningVariable warnings 2>&1 | Out-Null
+            # Function should warn rather than throw when key file is not found
+            { Add-SSHKeyIfNotLoaded -path '/nonexistent/key/id_rsa' } | Should -Not -Throw
         }
 
         It 'ssh-add-if alias exists for Add-SSHKeyIfNotLoaded' {

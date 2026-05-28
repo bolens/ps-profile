@@ -55,7 +55,8 @@ Describe 'Profile aliases' {
 
         It 'Enable-Aliases creates alias functions' {
             Enable-Aliases
-            $true | Should -Be $true
+            # Verify at least the ll alias was registered
+            Get-Command ll -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'll function wraps Get-ChildItemEnhanced' {
