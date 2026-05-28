@@ -1,3 +1,11 @@
+## [1.3.6](https://github.com/bolens/ps-profile/compare/v1.3.5...v1.3.6) (2026-05-28)
+
+
+### Bug Fixes
+
+* **scripts/lib:** fix strict-mode crash in Cache.psm1, resolve LogLevel type error, replace [ExitCode]:: with \$EXIT_* constants across all scripts ([bd2c9b9](https://github.com/bolens/ps-profile/commit/bd2c9b912d02712a7e84c0a9d4c0bf74a8e1add8))
+* **scripts:** replace $env:TEMP and hardcoded Windows paths for cross-platform compat ([5b06aab](https://github.com/bolens/ps-profile/commit/5b06aab4d57436cb7589d45892f7fc7552a2b6fc))
+
 ## [1.3.5](https://github.com/bolens/ps-profile/compare/v1.3.4...v1.3.5) (2026-05-28)
 
 
