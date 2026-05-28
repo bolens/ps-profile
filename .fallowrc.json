@@ -1,0 +1,58 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+
+  "entry": ["*.js", "*.ts", "*.mjs", "*.cjs"],
+
+  "ignorePatterns": [
+    "node_modules/**",
+    ".fallow/cache/**",
+    "fallow-baselines/**",
+    "tests/**",
+    "*.tests.ps1"
+  ],
+
+  "ignoreDependencies": [
+    "@msgpack/msgpack",
+    "apache-arrow",
+    "avsc",
+    "base32-decode",
+    "base32-encode",
+    "bson",
+    "cbor",
+    "flatbuffers",
+    "json5",
+    "jsonc",
+    "jsonwebtoken",
+    "parquetjs",
+    "protobufjs",
+    "qrcode",
+    "superjson",
+    "thrift",
+    "ubjson",
+    "uuid",
+    "@cspell/dict-aws",
+    "@cspell/dict-companies",
+    "@cspell/dict-docker",
+    "@cspell/dict-dotnet",
+    "@cspell/dict-en-au",
+    "@cspell/dict-en-ca",
+    "@cspell/dict-en-gb-ise",
+    "@cspell/dict-filetypes",
+    "@cspell/dict-k8s",
+    "@cspell/dict-node",
+    "@cspell/dict-npm",
+    "@cspell/dict-powershell",
+    "@cspell/dict-python",
+    "@cspell/dict-software-terms",
+    "cspell",
+    "markdownlint-cli"
+  ],
+
+  "rules": {
+    "unused-files": "warn",
+    "unused-exports": "warn",
+    "unused-types": "warn",
+    "unused-dependencies": "warn",
+    "circular-dependencies": "warn"
+  }
+}

@@ -1,0 +1,16 @@
+# Auto-generated files
+docs/api/
+docs/fragments/
+.fallow/index.json
+
+# Dependency/build artifacts
+node_modules/
+
+# Test output / reports
+test-results/
+coverage/
+*.html
+
+# Large binary/lock files
+*.zip
+*.tar.gz

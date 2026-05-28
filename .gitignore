@@ -449,3 +449,8 @@ cache/powershell-profile/
 *.cert
 !*.example.crt
 !*.example.key
+
+# fallow cache and snapshots
+.fallow/cache/
+.fallow/snapshots/
+.fallow/regression-baseline.json

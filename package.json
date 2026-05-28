@@ -57,7 +57,7 @@
     "export-metrics": "pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1",
     "save-metrics-snapshot": "pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1",
     "track-coverage-trends": "pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1",
-    "quality-check": "pnpm run format && pnpm run security-scan && pnpm run lint && pnpm run spellcheck && pnpm run markdownlint && pnpm run check-comment-help && pnpm run test && pnpm run validate-function-naming && echo All quality checks passed",
+    "quality-check": "pnpm run format && pnpm run security-scan && pnpm run lint && pnpm run spellcheck && pnpm run markdownlint && pnpm run check-comment-help && pnpm run test && pnpm run validate-function-naming && pnpm run drift:check && echo All quality checks passed",
     "pre-commit-checks": "pwsh -NoProfile -File scripts/git/pre-commit.ps1",
     "check-idempotency": "pwsh -NoProfile -File scripts/checks/check-idempotency.ps1",
     "validate-function-naming": "pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1",
@@ -70,7 +70,17 @@
     "init-wrangler-config": "pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1",
     "dev-setup": "pwsh -NoProfile -File scripts/dev/setup.ps1",
     "check-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1",
-    "generate-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate"
+    "generate-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate",
+    "fallow": "fallow dead-code",
+    "fallow:duplication": "fallow dupes",
+    "fallow:complexity": "fallow health",
+    "fallow:circular": "fallow dead-code",
+    "fallow:all": "fallow",
+    "fallow:audit": "fallow audit",
+    "fallow:watch": "fallow watch",
+    "fallow:mcp": "node_modules/.bin/fallow-mcp",
+    "drift:check": "drift check",
+    "drift:update": "drift update"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",
@@ -111,6 +121,7 @@
     "@cspell/dict-python": "^4.2.26",
     "@cspell/dict-software-terms": "^5.2.2",
     "cspell": "^10.0.0",
+    "fallow": "^2.83.0",
     "markdownlint-cli": "^0.48.0"
   }
 }
