@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/bolens/ps-profile/compare/v1.3.6...v1.4.0) (2026-05-28)
+
+
+### Bug Fixes
+
+* **docs:** repair broken links and remove stale references ([76a7380](https://github.com/bolens/ps-profile/commit/76a738025a78dcf45f13775c2ed771c7a764a254))
+
+
+### Features
+
+* **tooling:** integrate fallow and drift ([0de571f](https://github.com/bolens/ps-profile/commit/0de571f7d8ff48d82dfd20cca1a0142c93c20be9))
+
 ## [1.3.6](https://github.com/bolens/ps-profile/compare/v1.3.5...v1.3.6) (2026-05-28)
 
 
