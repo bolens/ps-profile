@@ -25,7 +25,7 @@ git clone https://github.com/bolens/ps-profile.git $HOME\Documents\PowerShell
 - **Performance Optimized**: Lazy loading and deferred initialization for fast startup
 - **Container Support**: Docker/Podman helpers with auto-detection (`dcu`, `dcd`, `dcl`, etc.)
 - **Prompt Frameworks**: oh-my-posh and Starship with lazy initialization
-- **Comprehensive Tooling**: 110+ functions, 100+ aliases, validation scripts, benchmarks (see `docs/api/README.md` for current counts)
+- **Comprehensive Tooling**: 500+ functions, 700+ aliases, validation scripts, benchmarks (see `docs/api/README.md` for current counts)
 
 ## Quick Reference
 

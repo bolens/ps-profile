@@ -6,7 +6,7 @@ This file provides guidance for AI coding assistants (Claude, Cursor, GitHub Cop
 
 This is a **modular PowerShell profile** with:
 
-- **110+ functions** and **100+ aliases** (see `docs/api/README.md` for current counts)
+- **500+ functions** and **700+ aliases** (see `docs/api/README.md` for current counts)
 - **Comprehensive testing** with Pester (unit, integration, performance)
 - **Strict code quality** standards (PSScriptAnalyzer, formatting, security scanning)
 - **Performance optimized** with lazy loading, caching, and deferred initialization
