@@ -61,8 +61,8 @@ $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptR
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import required modules using Import-LibModule
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 <#
 .SYNOPSIS

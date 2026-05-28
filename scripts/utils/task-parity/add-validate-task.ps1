@@ -1,4 +1,4 @@
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 <#
 .SYNOPSIS
     Adds the validate task to all task runner files using the task-parity utilities.

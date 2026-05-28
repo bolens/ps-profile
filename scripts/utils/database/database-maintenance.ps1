@@ -48,9 +48,9 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
     Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Parse debug level once at script start
 $debugLevel = 0

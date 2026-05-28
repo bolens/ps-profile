@@ -36,9 +36,9 @@ $moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleIm
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root using shared function
 try {

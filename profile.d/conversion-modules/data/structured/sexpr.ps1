@@ -21,6 +21,20 @@
     Reference: https://en.wikipedia.org/wiki/S-expression
 #>
 function Initialize-FileConversion-Sexpr {
+    # Shared helper: convert a parsed S-expression tree node to a JSON-serialisable value.
+    # Defined once here as a Global function so both _ConvertFrom-SexprToJson and
+    # _ConvertFrom-SexprToYaml can use it without duplicating the body.
+    Set-Item -Path Function:Global:_ConvertSexprItemToJson -Value {
+        param($Item)
+        if ($null -eq $Item) { return $null }
+        if ($Item -is [System.Collections.IList] -or $Item -is [System.Array]) {
+            $result = @()
+            foreach ($subItem in $Item) { $result += & $_ConvertSexprItemToJson $subItem }
+            return $result
+        }
+        return $Item
+    } -Force
+
     # Helper function to parse S-Expression
     Set-Item -Path Function:Global:_Parse-Sexpr -Value {
         param([string]$SexprContent)
@@ -243,23 +257,7 @@ function Initialize-FileConversion-Sexpr {
             $sexprContent = Get-Content -LiteralPath $InputPath -Raw
             $parsed = _Parse-Sexpr -SexprContent $sexprContent
             
-            # Convert parsed structure to JSON
-            function ConvertToJsonObject {
-                param($Item)
-                if ($null -eq $Item) {
-                    return $null
-                }
-                if ($Item -is [System.Collections.IList] -or $Item -is [System.Array]) {
-                    $result = @()
-                    foreach ($subItem in $Item) {
-                        $result += ConvertToJsonObject -Item $subItem
-                    }
-                    return $result
-                }
-                return $Item
-            }
-            
-            $jsonObj = ConvertToJsonObject -Item $parsed
+            $jsonObj = & $Function:_ConvertSexprItemToJson $parsed
             $json = $jsonObj | ConvertTo-Json -Depth 100
             Set-Content -LiteralPath $OutputPath -Value $json -Encoding UTF8
         }
@@ -297,22 +295,7 @@ function Initialize-FileConversion-Sexpr {
             $parsed = _Parse-Sexpr -SexprContent $sexprContent
             
             # Convert to JSON first, then to YAML (simple approach)
-            function ConvertToJsonObject {
-                param($Item)
-                if ($null -eq $Item) {
-                    return $null
-                }
-                if ($Item -is [System.Collections.IList] -or $Item -is [System.Array]) {
-                    $result = @()
-                    foreach ($subItem in $Item) {
-                        $result += ConvertToJsonObject -Item $subItem
-                    }
-                    return $result
-                }
-                return $Item
-            }
-            
-            $jsonObj = ConvertToJsonObject -Item $parsed
+            $jsonObj = & $Function:_ConvertSexprItemToJson $parsed
             $json = $jsonObj | ConvertTo-Json -Depth 100
             $yamlObj = $json | ConvertFrom-Json
             $yaml = $yamlObj | ConvertTo-Yaml -ErrorAction SilentlyContinue

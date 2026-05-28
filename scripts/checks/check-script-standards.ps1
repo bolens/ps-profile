@@ -35,17 +35,17 @@ $moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleIm
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'CommonEnums' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathValidation' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'FileFiltering' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'CommonEnums' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathValidation' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileFiltering' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Default to scripts directory relative to repository root
 if (-not $Path) {

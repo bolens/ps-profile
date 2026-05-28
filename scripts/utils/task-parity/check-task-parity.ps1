@@ -171,7 +171,7 @@ if (Test-Path -LiteralPath $exitCodesPath) {
         # Try via Import-LibModule if available
         if ($moduleImportImported -and (Get-Command Import-LibModule -ErrorAction SilentlyContinue)) {
             try {
-                Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
+                Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction SilentlyContinue
                 if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
                     $importedModules.ExitCodes = $true
                     if ($debugLevel -ge 2) {
@@ -191,7 +191,7 @@ else {
     # Try via Import-LibModule if available
     if ($moduleImportImported -and (Get-Command Import-LibModule -ErrorAction SilentlyContinue)) {
         try {
-            Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
+            Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction SilentlyContinue
             if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
                 $importedModules.ExitCodes = $true
             }
@@ -207,7 +207,7 @@ else {
 # Import Logging (optional, script can work without it)
 if ($moduleImportImported -and (Get-Command Import-LibModule -ErrorAction SilentlyContinue)) {
     try {
-        Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
+        Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction SilentlyContinue
         $importedModules.Logging = $true
     }
     catch {
@@ -220,7 +220,7 @@ if ($moduleImportImported -and (Get-Command Import-LibModule -ErrorAction Silent
 # Import JsonUtilities (optional, only needed for package.json parsing which has fallback)
 if ($moduleImportImported -and (Get-Command Import-LibModule -ErrorAction SilentlyContinue)) {
     try {
-        Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
+        Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction SilentlyContinue
         $importedModules.JsonUtilities = $true
     }
     catch {

@@ -34,8 +34,8 @@ $moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleIm
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import required modules using Import-LibModule
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 Write-ScriptMessage -Message "Analyzing commits for release..."
 

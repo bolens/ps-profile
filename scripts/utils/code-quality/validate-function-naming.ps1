@@ -53,8 +53,8 @@ param(
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
 if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and (Test-Path -LiteralPath $moduleImportPath)) {
     Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
-    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-    Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Required:$false
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+    Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -Required:$false
 }
 
 # Import validation modules

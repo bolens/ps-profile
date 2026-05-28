@@ -53,14 +53,14 @@ if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debu
 }
 
 # Import shared utilities using ModuleImport
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Cache' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'DataFile' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'RequirementsLoader' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Cache' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'DataFile' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'RequirementsLoader' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root
 try {

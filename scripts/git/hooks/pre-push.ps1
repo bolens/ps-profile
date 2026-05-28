@@ -26,8 +26,8 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
 # Use the original hook script path for ModuleImport resolution
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking -Global
 
 $validate = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 

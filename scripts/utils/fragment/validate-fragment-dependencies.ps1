@@ -24,7 +24,7 @@ if (-not (Test-Path $_ewcLibPath)) {
 }
 if (Test-Path $_ewcLibPath) {
     Import-Module $_ewcLibPath -DisableNameChecking -ErrorAction Stop
-    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 } else {
     function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
     enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }

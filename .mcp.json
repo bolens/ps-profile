@@ -1,8 +1,3 @@
 {
-  "mcpServers": {
-    "fallow": {
-      "command": "node_modules/.bin/fallow-mcp",
-      "description": "Fallow codebase intelligence: dead-code detection, duplication, complexity, circular deps for JS/TS files in this project"
-    }
-  }
+  "mcpServers": {}
 }

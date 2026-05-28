@@ -301,46 +301,6 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{.CLI_ARGS}}
 
-  fallow:
-    desc: Run fallow dead-code analysis on JS/TS files
-    cmds:
-      - fallow dead-code
-
-  fallow-duplication:
-    desc: Run fallow code duplication analysis
-    cmds:
-      - fallow dupes
-
-  fallow-complexity:
-    desc: Run fallow health/complexity analysis
-    cmds:
-      - fallow health
-
-  fallow-circular:
-    desc: Run fallow circular-dependency / dead-code analysis
-    cmds:
-      - fallow dead-code
-
-  fallow-all:
-    desc: Run all fallow analyses combined (dead-code + dupes + health)
-    cmds:
-      - fallow
-
-  fallow-audit:
-    desc: Review changed files for dead code, complexity, and duplication
-    cmds:
-      - fallow audit
-
-  fallow-watch:
-    desc: Re-run fallow analysis as files change
-    cmds:
-      - fallow watch
-
-  fallow-mcp:
-    desc: Start fallow MCP server (for AI assistant integration)
-    cmds:
-      - node_modules/.bin/fallow-mcp
-
   drift-check:
     desc: Check that all doc-to-code bindings are current (drift)
     cmds:

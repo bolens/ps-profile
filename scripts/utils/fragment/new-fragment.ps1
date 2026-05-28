@@ -67,8 +67,8 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
 }
 
 # Import required modules using Import-LibModule
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Convert enum to string
 $tierString = $Tier.ToString()

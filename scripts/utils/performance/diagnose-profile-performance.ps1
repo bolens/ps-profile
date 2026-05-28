@@ -15,9 +15,9 @@ $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptR
 if (Test-Path $moduleImportPath) {
     Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
     
-    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-    Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-    Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+    Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+    Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
     
     try {
         $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot

@@ -71,14 +71,6 @@
     "dev-setup": "pwsh -NoProfile -File scripts/dev/setup.ps1",
     "check-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1",
     "generate-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate",
-    "fallow": "fallow dead-code",
-    "fallow:duplication": "fallow dupes",
-    "fallow:complexity": "fallow health",
-    "fallow:circular": "fallow dead-code",
-    "fallow:all": "fallow",
-    "fallow:audit": "fallow audit",
-    "fallow:watch": "fallow watch",
-    "fallow:mcp": "node_modules/.bin/fallow-mcp",
     "drift:check": "drift check",
     "drift:update": "drift update"
   },
@@ -121,7 +113,6 @@
     "@cspell/dict-python": "^4.2.26",
     "@cspell/dict-software-terms": "^5.2.2",
     "cspell": "^10.0.0",
-    "fallow": "^2.83.0",
     "markdownlint-cli": "^0.48.0"
   }
 }

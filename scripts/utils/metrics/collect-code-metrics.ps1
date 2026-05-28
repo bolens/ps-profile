@@ -54,11 +54,11 @@ if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debu
 }
 
 # Import shared utilities using ModuleImport
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
@@ -236,7 +236,7 @@ else {
 }
 
 # Import PathUtilities module for path normalization
-Import-LibModule -ModuleName 'PathUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'PathUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Normalize paths to be relative to repo root to avoid personal absolute paths
 # Use PathUtilities module if available
@@ -306,7 +306,7 @@ if ($IncludeQualityScore -or -not $PSBoundParameters.ContainsKey('IncludeQuality
         AverageComplexityPerFile = if ($totalFiles -gt 0) { [math]::Round($totalComplexity / $totalFiles, 2) } else { 0 }
     }
     try {
-        Import-LibModule -ModuleName 'CodeQualityScore' -ScriptPath $PSScriptRoot -DisableNameChecking
+        Import-LibModule -ModuleName 'CodeQualityScore' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
         $qualityScore = Get-CodeQualityScore -CodeMetrics $aggregatedMetrics -TestCoverage $testCoverage
         Write-ScriptMessage -Message "  Quality Score: $($qualityScore.Score)/100" -LogLevel Info
     }
@@ -325,7 +325,7 @@ $codeSimilarity = $null
 if ($IncludeCodeSimilarity -or -not $PSBoundParameters.ContainsKey('IncludeCodeSimilarity')) {
     Write-ScriptMessage -Message "Detecting code similarity..." -LogLevel Info
     try {
-        Import-LibModule -ModuleName 'CodeSimilarityDetection' -ScriptPath $PSScriptRoot -DisableNameChecking
+        Import-LibModule -ModuleName 'CodeSimilarityDetection' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
         $similarityResults = [System.Collections.Generic.List[PSCustomObject]]::new()
         foreach ($path in $pathsToAnalyze) {
             $similar = Get-CodeSimilarity -Path $path -Recurse -MinSimilarity $SimilarityThreshold

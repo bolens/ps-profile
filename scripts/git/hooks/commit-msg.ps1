@@ -42,9 +42,9 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
 # Use the original hook script path for ModuleImport resolution
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking
-Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $hookScriptPath -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking -Global
+Import-LibModule -ModuleName 'RegexUtilities' -ScriptPath $hookScriptPath -DisableNameChecking -Global
 
 if (-not $CommitMsgFile -or [string]::IsNullOrWhiteSpace($CommitMsgFile) -or -not (Test-Path -LiteralPath $CommitMsgFile)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "commit-msg: commit message file not provided or not found"

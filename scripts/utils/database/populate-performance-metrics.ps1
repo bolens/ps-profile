@@ -78,10 +78,10 @@ param(
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking
-Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Import Performance Metrics Database
 $perfMetricsModule = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'database' 'PerformanceMetricsDatabase.psm1'
@@ -759,9 +759,9 @@ if ($IncludeDocumentationMetrics) {
     $docsStartTime = Get-Date
     
     try {
-        Import-LibModule -ModuleName 'CommentHelp' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
-        Import-LibModule -ModuleName 'AstParsing' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
-        Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
+        Import-LibModule -ModuleName 'CommentHelp' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction SilentlyContinue
+        Import-LibModule -ModuleName 'AstParsing' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction SilentlyContinue
+        Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction SilentlyContinue
         
         if ((Get-Command Test-FunctionHasHelp -ErrorAction SilentlyContinue) -and
             (Get-Command Get-PowerShellAst -ErrorAction SilentlyContinue) -and
