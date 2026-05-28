@@ -51,7 +51,7 @@ if ($files.Count -eq 0) {
     Exit-WithCode -ExitCode [ExitCode]::SetupError -Message "No fragments found in $profileD"
 }
 
-$temp = [IO.Path]::Combine($env:TEMP, [IO.Path]::GetRandomFileName() + '.ps1')
+$temp = [IO.Path]::Combine([IO.Path]::GetTempPath(), [IO.Path]::GetRandomFileName() + '.ps1')
 
 # Use List for better performance than array concatenation
 $content = [System.Collections.Generic.List[string]]::new()

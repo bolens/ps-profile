@@ -3,7 +3,7 @@
 # ===============================================
 # This script reads the profile loading log file to see where execution stopped
 
-$logFile = Join-Path $env:TEMP "powershell-profile-load.log"
+$logFile = Join-Path ([IO.Path]::GetTempPath()) "powershell-profile-load.log"
 
 Write-Host "=== Profile Loading Log ===" -ForegroundColor Cyan
 Write-Host "Log file: $logFile" -ForegroundColor Yellow

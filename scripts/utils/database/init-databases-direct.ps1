@@ -73,7 +73,7 @@ elseif ($env:HOME) {
     $cacheDir = Join-Path $env:HOME '.cache' 'powershell-profile'
 }
 else {
-    $cacheDir = Join-Path $env:TEMP 'PowerShellProfile'
+    $cacheDir = Join-Path ([IO.Path]::GetTempPath()) 'PowerShellProfile'
 }
 
 if (-not (Test-Path $cacheDir)) {

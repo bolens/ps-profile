@@ -71,7 +71,7 @@ catch {
 }
 
 # Create a temporary test fragment
-$testFragmentDir = Join-Path $env:TEMP "fragment-cache-test"
+$testFragmentDir = Join-Path ([IO.Path]::GetTempPath()) "fragment-cache-test"
 if (-not (Test-Path -LiteralPath $testFragmentDir)) {
     New-Item -ItemType Directory -Path $testFragmentDir -Force | Out-Null
 }

@@ -13,7 +13,8 @@ if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debu
     # Debug is enabled, $debugLevel contains the numeric level (1-3)
 }
 
-$starshipConfig = "$env:USERPROFILE\.config\starship.toml"
+$userHome = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { '~' }
+$starshipConfig = Join-Path $userHome '.config' 'starship.toml'
 
 # Level 1: Basic operation start
 if ($debugLevel -ge 1) {

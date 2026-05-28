@@ -288,7 +288,7 @@ foreach ($pkg in $pythonPackages) {
     
     # Check if package is available
     $checkScript = "import sys; import importlib.util; spec = importlib.util.find_spec('$pkg'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-$(Get-Random).py"
+    $tempCheck = Join-Path ([IO.Path]::GetTempPath()) "python-check-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkScript -Encoding UTF8
     try {
         & $pythonCmd $tempCheck 2>&1 | Out-Null
