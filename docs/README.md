@@ -38,7 +38,11 @@ Fragments are modular components of the profile, loaded in dependency-aware orde
 
 Comprehensive guides for developers working on or contributing to the profile.
 
+- **Guide Index**: [Browse all guides](guides/README.md) - Full categorized guide index
 - **Development Guide**: [DEVELOPMENT.md](guides/DEVELOPMENT.md) - Developer guide and advanced testing
+- **Quick Start**: [DEVELOPMENT_QUICK_START.md](guides/DEVELOPMENT_QUICK_START.md) - Fast profile loading and common dev commands
+- **Error Handling Standard**: [ERROR_HANDLING_STANDARD.md](guides/ERROR_HANDLING_STANDARD.md) - Error handling, logging, and color coding standards
+- **Fragment Command Access**: [FRAGMENT_COMMAND_ACCESS.md](guides/FRAGMENT_COMMAND_ACCESS.md) - How to access fragment-defined commands
 - **Type Safety Guide**: [TYPE_SAFETY.md](guides/TYPE_SAFETY.md) - Improving type safety with enums, classes, and validation
 - **Type Safety Implementation**: [TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md](guides/TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md) - Summary of implemented type safety improvements
 - **Type Safety Migration Status**: [TYPE_SAFETY_MIGRATION_STATUS.md](guides/TYPE_SAFETY_MIGRATION_STATUS.md) - Current migration status from constants to enums
