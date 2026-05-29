@@ -156,16 +156,38 @@ Python packages are checked using `Test-PythonPackageAvailable` from `TestSuppor
 **Installation:**
 
 ```powershell
-# Using pip
-pip install ion-python pyodbc dbfread dbf pyreadstat pandas scipy astropy pyarrow delta-spark deltalake pyiceberg python-snappy h5py netCDF4 numpy
-
-# Using uv
-uv pip install ion-python pyodbc dbfread dbf pyreadstat pandas scipy astropy pyarrow delta-spark deltalake pyiceberg python-snappy h5py netCDF4 numpy
+# From requirements.txt (recommended)
+uv pip install -r requirements.txt
 ```
 
-### Scoop Packages
+```bash
+# Virtual environment (bash/zsh)
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+```
 
-Scoop packages are checked using `Test-ScoopPackageAvailable` from `TestSupport/TestScoopHelpers.ps1`. The function requires Scoop to be installed.
+```fish
+# Virtual environment (fish)
+uv venv
+source .venv/bin/activate.fish
+uv pip install -r requirements.txt
+```
+
+```powershell
+# Virtual environment (PowerShell on Windows)
+uv venv
+.venv\Scripts\Activate.ps1
+uv pip install -r requirements.txt
+```
+
+### Scoop Packages (Windows)
+
+Scoop packages are listed in `requirements-scoop.txt` and checked using `Test-ScoopPackageAvailable` from `TestSupport/TestScoopHelpers.ps1`. The function requires Scoop to be installed.
+
+### Linux System Packages
+
+Linux packages are listed in `requirements-linux.txt` with separate sections for **apt** (Debian/Ubuntu), **pacman** (Arch), and **dnf** (Fedora/RHEL). The `check-missing-packages.ps1` script auto-detects the package manager (or uses `$env:PS_SYSTEM_PACKAGE_MANAGER`) and checks the matching section via `Test-LinuxSystemPackageAvailable`.
 
 **Categories:**
 

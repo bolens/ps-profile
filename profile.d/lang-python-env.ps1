@@ -317,13 +317,15 @@ Python project created with lang-python.ps1
 python -m venv .venv
 
 # Activate virtual environment
-# Windows:
+# Windows (PowerShell):
 .venv\Scripts\Activate.ps1
-# Unix:
+# bash/zsh:
 source .venv/bin/activate
+# fish:
+source .venv/bin/activate.fish
 
 # Install dependencies
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 \`\`\`
 
 ## Usage

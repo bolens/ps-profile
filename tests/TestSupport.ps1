@@ -114,6 +114,12 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
     if ($testScoopHelpersPath -and -not [string]::IsNullOrWhiteSpace($testScoopHelpersPath) -and (Test-Path -LiteralPath $testScoopHelpersPath)) {
         . $testScoopHelpersPath
     }
+
+    # Load TestLinuxPackageHelpers (standalone)
+    $testLinuxPackageHelpersPath = Join-Path $testSupportDir 'TestLinuxPackageHelpers.ps1'
+    if ($testLinuxPackageHelpersPath -and -not [string]::IsNullOrWhiteSpace($testLinuxPackageHelpersPath) -and (Test-Path -LiteralPath $testLinuxPackageHelpersPath)) {
+        . $testLinuxPackageHelpersPath
+    }
     
     # Load TestMocks (standalone, but should load early)
     $testMocksPath = Join-Path $testSupportDir 'TestMocks.ps1'

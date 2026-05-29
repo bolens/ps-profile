@@ -1,0 +1,225 @@
+# Linux system package requirements for PowerShell profile tools and conversions
+# Mirrors requirements-scoop.txt. Package names differ by distro — use the section for your system.
+#
+# Debian/Ubuntu:
+#   sudo apt update && sudo apt install -y $(sed -n '/^# --- apt /,/^# --- pacman /p' requirements-linux.txt | grep -v '^#' | grep -v '^$')
+#
+# Arch / CachyOS / Manjaro:
+#   sudo pacman -S --needed $(sed -n '/^# --- pacman /,/^# --- dnf /p' requirements-linux.txt | grep -v '^#' | grep -v '^$')
+#
+# Fedora / RHEL / Rocky / Alma:
+#   sudo dnf install -y $(sed -n '/^# --- dnf /,$p' requirements-linux.txt | grep -v '^#' | grep -v '^$')
+#
+# Tools marked (manual) are not in default repos — see requirements/external-tools/*.psd1 InstallCommand.Linux
+
+# --- apt (Debian/Ubuntu) ---
+
+# CLI Tools
+bat
+fd-find
+httpie
+fzf
+ripgrep
+git-delta
+
+# Containers
+docker.io
+podman
+docker-compose
+
+# Document Formats
+pandoc
+calibre
+djvulibre-bin
+imagemagick
+
+# File & Data Tools
+jq
+rclone
+zstd
+
+# Git Tools
+# gh — install from https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+
+# Kubernetes & Cloud
+# kubectl — https://kubernetes.io/docs/tasks/tools/
+# helm — https://helm.sh/docs/intro/install/
+# terraform — https://www.terraform.io/downloads
+# awscli — https://aws.amazon.com/cli/
+# azure-cli — https://learn.microsoft.com/en-us/cli/azure/install-azure-cli
+# azd — https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd
+
+# Language Runtimes
+golang-go
+# rustup — https://rustup.rs/
+# uv — https://github.com/astral-sh/uv
+# pixi — https://github.com/prefix-dev/pixi
+# pnpm — npm install -g pnpm
+# bun — https://bun.sh/docs/installation
+# deno — https://deno.land/manual/getting_started/installation
+
+# Other Tools
+# ngrok — https://ngrok.com/download
+# tailscale — https://tailscale.com/download/linux
+# starship — https://starship.rs/guide/#-installation
+# oh-my-posh — https://ohmyposh.dev/docs/installation
+
+# Compression Tools (for conversion modules)
+xz-utils
+libsnappy-dev
+liblz4-dev
+
+# Media Tools
+ffmpeg
+graphicsmagick
+
+# LaTeX (use TeX Live on Linux instead of MiKTeX)
+texlive-latex-base
+texlive-latex-extra
+
+# --- pacman (Arch / CachyOS / Manjaro) ---
+
+# CLI Tools
+bat
+fd
+httpie
+zoxide
+fzf
+ripgrep
+git-delta
+tldr
+eza
+procs
+bottom
+gum
+
+# Containers
+docker
+podman
+docker-compose
+lazydocker
+
+# Document Formats
+pandoc-cli
+calibre
+djvulibre
+imagemagick
+
+# File & Data Tools
+jq
+go-yq
+rclone
+minio-client
+zstd
+
+# Git Tools
+github-cli
+
+# Kubernetes & Cloud
+kubectl
+helm
+terraform
+aws-cli
+azure-cli
+
+# Language Runtimes
+bun
+deno
+go
+rustup
+uv
+pixi
+pnpm
+
+# Other Tools
+# ngrok — AUR/blackarch or https://ngrok.com/download
+tailscale
+starship
+# oh-my-posh — AUR oh-my-posh-bin or https://ohmyposh.dev/docs/installation
+# azure-developer-cli — AUR or https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd
+
+# Compression Tools (for conversion modules)
+xz
+snappy
+lz4
+
+# Media Tools
+ffmpeg
+graphicsmagick
+
+# LaTeX (use TeX Live on Linux instead of MiKTeX)
+texlive-basic
+texlive-bin
+
+# --- dnf (Fedora / RHEL / Rocky / Alma) ---
+
+# CLI Tools
+bat
+fd-find
+httpie
+fzf
+ripgrep
+git-delta
+tldr
+eza
+procs
+bottom
+gum
+
+# Containers
+docker
+podman
+docker-compose
+# lazydocker — https://github.com/jesseduffield/lazydocker
+
+# Document Formats
+pandoc
+# calibre — RPM Fusion: sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+djvulibre
+ImageMagick
+
+# File & Data Tools
+jq
+yq
+rclone
+# minio-client — https://min.io/download#/linux
+zstd
+
+# Git Tools
+gh
+
+# Kubernetes & Cloud
+kubectl
+helm
+terraform
+awscli
+azure-cli
+# azure-developer-cli — https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd
+
+# Language Runtimes
+bun
+deno
+golang
+rust
+# uv — https://github.com/astral-sh/uv
+# pixi — https://github.com/prefix-dev/pixi
+nodejs
+pnpm
+
+# Other Tools
+# ngrok — https://ngrok.com/download
+tailscale
+starship
+# oh-my-posh — https://ohmyposh.dev/docs/installation
+
+# Compression Tools (for conversion modules)
+xz
+snappy
+lz4
+
+# Media Tools
+ffmpeg
+GraphicsMagick
+
+# LaTeX (use TeX Live on Linux instead of MiKTeX)
+texlive-scheme-basic

@@ -2,12 +2,12 @@
 scripts/utils/dependencies/check-missing-packages.ps1
 
 .SYNOPSIS
-    Checks for missing npm, Python, and Scoop packages required for data format conversions and tools.
+    Checks for missing npm, Python, and system packages required for data format conversions and tools.
 
 .DESCRIPTION
-    Scans the codebase to identify all required npm (via pnpm), Python (via uv), and Scoop packages
-    needed for data format conversions and various tools, then checks if they are installed. 
-    Reports missing packages with installation instructions.
+    Loads package lists from requirements.txt, requirements-scoop.txt, requirements-linux.txt,
+    and package.json, then checks whether they are installed. Reports missing packages with
+    installation instructions for the detected package manager (Scoop, apt, pacman, or dnf).
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\dependencies\check-missing-packages.ps1
@@ -15,17 +15,13 @@ scripts/utils/dependencies/check-missing-packages.ps1
     Checks all required packages and reports which are missing.
 
 .NOTES
-    This script checks for:
-    - npm packages: bson, @msgpack/msgpack, cbor, protobufjs, avsc, flatbuffers, thrift,
-      superjson, json5, parquetjs, apache-arrow, base32-encode, base32-decode, qrcode,
-      uuid, jsonwebtoken, ubjson
-    - Python packages: h5py, netCDF4, numpy, astropy, scipy, pandas, polars, pyreadstat,
-      ion-python, pyodbc, dbfread, dbf, pyarrow, delta-spark, deltalake, pyiceberg, python-snappy
-    - Scoop packages: bat, fd, httpie, zoxide, git-delta, tldr, fzf, ripgrep, eza, procs, dust,
-      bottom, navi, gum, docker, podman, docker-compose, lazydocker, pandoc, calibre, djvulibre,
-      imagemagick, jq, yq, rclone, minio-client, zstd, gh, kubectl, helm, terraform, aws,
-      azure-cli, azure-developer-cli, bun, deno, go, rustup, uv, pixi, pnpm, ngrok, tailscale,
-      starship, oh-my-posh, xz, snappy, lz4, ffmpeg, graphicsmagick, miktex
+    Package lists:
+    - npm: package.json dependencies
+    - Python: requirements.txt
+    - Windows: requirements-scoop.txt (Scoop)
+    - Linux: requirements-linux.txt (apt, pacman, or dnf section)
+
+    Override system package manager: $env:PS_SYSTEM_PACKAGE_MANAGER = 'apt' | 'pacman' | 'dnf' | 'scoop'
 
     Exit Codes:
     - 0 (EXIT_SUCCESS): All packages are installed
@@ -33,23 +29,20 @@ scripts/utils/dependencies/check-missing-packages.ps1
 #>
 
 # Import ModuleImport first (bootstrap)
-# Script is in scripts/utils/dependencies/, so go up 3 levels to get to repo root, then join with scripts/lib
 $repoRootForLib = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $moduleImportPath = Join-Path $repoRootForLib 'scripts' 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
-# Parse debug level once at script start
 $debugLevel = 0
 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
-    # Debug is enabled, $debugLevel contains the numeric level (1-3)
+    # Debug enabled
 }
 
-# Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'RequirementsList' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
-# Get repository root
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
     if (-not $repoRoot) {
@@ -60,139 +53,62 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-# Source TestSupport to get Test-NpmPackageAvailable
-$testSupportPath = Join-Path $repoRoot 'tests' 'TestSupport.ps1'
-if ($testSupportPath -and -not [string]::IsNullOrWhiteSpace($testSupportPath) -and (Test-Path -LiteralPath $testSupportPath)) {
+$testSupportDir = Join-Path $repoRoot 'tests' 'TestSupport'
+if ($testSupportDir -and (Test-Path -LiteralPath $testSupportDir)) {
     $env:TERM = 'xterm-256color'
-    $env:PS_PROFILE_TEST_MODE = '1'
-    . $testSupportPath
+    $helperScripts = @(
+        'TestNpmHelpers.ps1',
+        'TestPythonHelpers.ps1',
+        'TestScoopHelpers.ps1',
+        'TestLinuxPackageHelpers.ps1'
+    )
+    foreach ($helperScript in $helperScripts) {
+        $helperPath = Join-Path $testSupportDir $helperScript
+        if (Test-Path -LiteralPath $helperPath) {
+            . $helperPath
+        }
+    }
 }
 else {
-    Write-ScriptMessage -Message "Warning: TestSupport.ps1 not found, npm package checking may not work" -Level Warning
+    Write-ScriptMessage -Message "Warning: TestSupport helpers not found, package checking may be limited" -Level Warning
 }
 
-# Collect all required packages from the codebase
-$npmPackages = @(
-    # Data format conversion packages
-    'bson',
-    '@msgpack/msgpack',
-    'cbor',
-    'protobufjs',
-    'avsc',
-    'flatbuffers',
-    'thrift',
-    'superjson',
-    'json5',
-    'jsonc',
-    'parquetjs',
-    'apache-arrow',
-    'ubjson',
-    # Dev tools packages
-    'base32-encode',
-    'base32-decode',
-    'qrcode',
-    'uuid',
-    'jsonwebtoken'
-)
+try {
+    $packageJsonPath = Join-Path $repoRoot 'package.json'
+    $npmPackages = Get-NpmRequirementsFromPackageJson -Path $packageJsonPath
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load npm packages from package.json: $($_.Exception.Message)"
+}
 
-$pythonPackages = @(
-    # Scientific data formats
-    'h5py',
-    'netCDF4',
-    'xarray',
-    'numpy',
-    'astropy',
-    'scipy',
-    'pandas',
-    'polars',
-    'pyreadstat',
-    # Structured data formats
-    'ion-python',
-    # Database formats
-    'pyodbc',
-    'dbfread',
-    'dbf',
-    # Columnar/binary formats
-    'pyarrow',
-    'fastparquet',
-    'delta-spark',
-    'deltalake',
-    'pyiceberg',
-    # Compression
-    'python-snappy'
-)
+try {
+    $pythonRequirementsPath = Join-Path $repoRoot 'requirements.txt'
+    $pythonPackages = Get-PythonRequirementsFromFile -Path $pythonRequirementsPath
+}
+catch {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load Python packages from requirements.txt: $($_.Exception.Message)"
+}
 
-$scoopPackages = @(
-    # CLI Tools
-    'bat',
-    'fd',
-    'httpie',
-    'zoxide',
-    'git-delta',
-    'tldr',
-    'fzf',
-    'ripgrep',
-    'eza',
-    'procs',
-    'dust',
-    'bottom',
-    'navi',
-    'gum',
-    # Containers
-    'docker',
-    'podman',
-    'docker-compose',
-    'lazydocker',
-    # Document Formats
-    'pandoc',
-    'calibre',
-    'djvulibre',
-    'imagemagick',
-    # File & Data Tools
-    'jq',
-    'yq',
-    'rclone',
-    'minio-client',
-    'zstd',
-    # Git Tools
-    'gh',
-    # Kubernetes & Cloud
-    'kubectl',
-    'helm',
-    'terraform',
-    'aws',
-    'azure-cli',
-    'azure-developer-cli',
-    # Language Runtimes
-    'bun',
-    'deno',
-    'go',
-    'rustup',
-    'uv',
-    'pixi',
-    'pnpm',
-    # Other Tools
-    'ngrok',
-    'tailscale',
-    'starship',
-    'oh-my-posh',
-    # Compression Tools (for conversion modules)
-    'xz',
-    'snappy',
-    'lz4',
-    # Media Tools
-    'ffmpeg',
-    'graphicsmagick',
-    'imagemagick',
-    # LaTeX
-    'miktex'
-)
+$systemPackageManager = Get-SystemPackageManagerKind
+$systemPackages = @()
+if ($systemPackageManager -in 'scoop', 'apt', 'pacman', 'dnf') {
+    try {
+        $systemPackages = Get-SystemRequirementsPackages -RepoRoot $repoRoot -PackageManager $systemPackageManager
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load system packages: $($_.Exception.Message)"
+    }
+}
 
 $missingNpm = @()
 $missingPython = @()
-$missingScoop = @()
+$missingSystem = @()
+$npmCheckDuration = 0
+$pythonCheckDuration = 0
+$systemCheckDuration = 0
 
-Write-ScriptMessage -Message "Checking npm/pnpm packages..." -LogLevel Info
+Write-ScriptMessage -Message "Checking npm/pnpm packages ($($npmPackages.Count) from package.json)..." -LogLevel Info
+$npmCheckStartTime = Get-Date
 $npmCheckErrors = [System.Collections.Generic.List[string]]::new()
 foreach ($pkg in $npmPackages) {
     try {
@@ -224,7 +140,6 @@ foreach ($pkg in $npmPackages) {
 }
 $npmCheckDuration = ((Get-Date) - $npmCheckStartTime).TotalMilliseconds
 
-# Level 2: npm check timing
 if ($debugLevel -ge 2) {
     Write-Verbose "[dependencies.check-packages] npm check completed in ${npmCheckDuration}ms"
     Write-Verbose "[dependencies.check-packages] npm missing: $($missingNpm.Count), Errors: $($npmCheckErrors.Count)"
@@ -234,32 +149,28 @@ if ($npmCheckErrors.Count -gt 0) {
     if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
         Write-StructuredWarning -Message "Some npm package checks failed" -OperationName 'dependencies.check-npm' -Context @{
             failed_packages = $npmCheckErrors -join ','
-            failed_count = $npmCheckErrors.Count
+            failed_count    = $npmCheckErrors.Count
         } -Code 'NpmPackageCheckPartialFailure'
     }
 }
 
-Write-ScriptMessage -Message "Checking Python/uv packages..." -LogLevel Info
+Write-ScriptMessage -Message "Checking Python packages ($($pythonPackages.Count) from requirements.txt)..." -LogLevel Info
 
-# Level 1: Python check start
 if ($debugLevel -ge 1) {
     Write-Verbose "[dependencies.check-packages] Starting Python package check"
 }
 
-# Check for virtual environment in project root
 $venvPython = $null
 $venvPath = Join-Path $repoRoot '.venv'
-if ($venvPath -and -not [string]::IsNullOrWhiteSpace($venvPath) -and (Test-Path -LiteralPath $venvPath)) {
-    # Try Windows path first
+if ($venvPath -and (Test-Path -LiteralPath $venvPath)) {
     $venvPythonPath = Join-Path $venvPath 'Scripts' 'python.exe'
-    if ($venvPythonPath -and -not [string]::IsNullOrWhiteSpace($venvPythonPath) -and (Test-Path -LiteralPath $venvPythonPath)) {
+    if ($venvPythonPath -and (Test-Path -LiteralPath $venvPythonPath)) {
         $venvPython = $venvPythonPath
         Write-ScriptMessage -Message "  Using virtual environment: $venvPath" -LogLevel Debug
     }
     else {
-        # Try Unix-style path
         $venvPythonPath = Join-Path $venvPath 'bin' 'python'
-        if ($venvPythonPath -and -not [string]::IsNullOrWhiteSpace($venvPythonPath) -and (Test-Path -LiteralPath $venvPythonPath)) {
+        if ($venvPythonPath -and (Test-Path -LiteralPath $venvPythonPath)) {
             $venvPython = $venvPythonPath
             Write-ScriptMessage -Message "  Using virtual environment: $venvPath" -LogLevel Debug
         }
@@ -268,7 +179,17 @@ if ($venvPath -and -not [string]::IsNullOrWhiteSpace($venvPath) -and (Test-Path 
 
 $pythonCheckStartTime = Get-Date
 foreach ($pkg in $pythonPackages) {
-    # Check if Python is available
+    if (Get-Command Test-PythonPackageAvailable -ErrorAction SilentlyContinue) {
+        if (Test-PythonPackageAvailable -PackageName $pkg) {
+            Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
+        }
+        else {
+            Write-ScriptMessage -Message "  ✗ $pkg" -ForegroundColor Red
+            $missingPython += $pkg
+        }
+        continue
+    }
+
     $pythonCmd = $null
     if ($venvPython) {
         $pythonCmd = $venvPython
@@ -279,14 +200,13 @@ foreach ($pkg in $pythonPackages) {
     elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
         $pythonCmd = 'python3'
     }
-    
+
     if (-not $pythonCmd) {
         Write-ScriptMessage -Message "  ✗ Python not available" -IsError
         $missingPython = $pythonPackages
         break
     }
-    
-    # Check if package is available
+
     $checkScript = "import sys; import importlib.util; spec = importlib.util.find_spec('$pkg'); sys.exit(0 if spec else 1)"
     $tempCheck = Join-Path ([IO.Path]::GetTempPath()) "python-check-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkScript -Encoding UTF8
@@ -317,222 +237,212 @@ foreach ($pkg in $pythonPackages) {
 }
 $pythonCheckDuration = ((Get-Date) - $pythonCheckStartTime).TotalMilliseconds
 
-# Level 2: Python check timing
 if ($debugLevel -ge 2) {
     Write-Verbose "[dependencies.check-packages] Python check completed in ${pythonCheckDuration}ms"
     Write-Verbose "[dependencies.check-packages] Python missing: $($missingPython.Count)"
 }
 
-Write-ScriptMessage -Message "Checking Scoop packages..." -LogLevel Info
-
-# Level 1: Scoop check start
-if ($debugLevel -ge 1) {
-    Write-Verbose "[dependencies.check-packages] Starting Scoop package check"
+if (-not $systemPackageManager) {
+    Write-ScriptMessage -Message "Skipping system package check (no supported package manager detected)" -IsWarning
 }
-
-# Check if Scoop is available
-if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
-    Write-ScriptMessage -Message "  ✗ Scoop is not installed - cannot check Scoop packages" -IsWarning
-    Write-ScriptMessage -Message "  Install Scoop from: https://scoop.sh/" -LogLevel Info
-    $missingScoop = $scoopPackages  # Mark all as missing if Scoop isn't available
+elseif ($systemPackages.Count -eq 0) {
+    Write-ScriptMessage -Message "Skipping system package check (no packages listed for $systemPackageManager)" -IsWarning
 }
 else {
-    # Load ScoopDetection module if available
-    $scoopDetectionPath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'ScoopDetection.psm1'
-    if ($scoopDetectionPath -and -not [string]::IsNullOrWhiteSpace($scoopDetectionPath) -and (Test-Path -LiteralPath $scoopDetectionPath)) {
-        Import-Module $scoopDetectionPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+    $requirementsFile = if ($systemPackageManager -eq 'scoop') {
+        'requirements-scoop.txt'
     }
-    
-    # Load TestScoopHelpers if available
-    $testSupportPath = Join-Path $repoRoot 'tests' 'TestSupport.ps1'
-    if ($testSupportPath -and -not [string]::IsNullOrWhiteSpace($testSupportPath) -and (Test-Path -LiteralPath $testSupportPath)) {
-        $env:PS_PROFILE_TEST_MODE = '1'
-        . $testSupportPath
+    else {
+        "requirements-linux.txt ($systemPackageManager section)"
     }
-    
-    $scoopCheckErrors = [System.Collections.Generic.List[string]]::new()
-    foreach ($pkg in $scoopPackages) {
-        try {
-            if (Get-Command Test-ScoopPackageAvailable -ErrorAction SilentlyContinue) {
-                if (Test-ScoopPackageAvailable -PackageName $pkg -ErrorAction Stop) {
+
+    Write-ScriptMessage -Message "Checking system packages ($($systemPackages.Count) from $requirementsFile via $systemPackageManager)..." -LogLevel Info
+
+    if ($debugLevel -ge 1) {
+        Write-Verbose "[dependencies.check-packages] Starting system package check ($systemPackageManager)"
+    }
+
+    $systemCheckStartTime = Get-Date
+    $systemCheckErrors = [System.Collections.Generic.List[string]]::new()
+
+    if ($systemPackageManager -eq 'scoop' -and -not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+        Write-ScriptMessage -Message "  ✗ Scoop is not installed - cannot check Scoop packages" -IsWarning
+        Write-ScriptMessage -Message "  Install Scoop from: https://scoop.sh/" -LogLevel Info
+        $missingSystem = $systemPackages
+    }
+    else {
+        if ($systemPackageManager -eq 'scoop') {
+            $scoopDetectionPath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'ScoopDetection.psm1'
+            if ($scoopDetectionPath -and (Test-Path -LiteralPath $scoopDetectionPath)) {
+                Import-Module $scoopDetectionPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+            }
+        }
+
+        foreach ($pkg in $systemPackages) {
+            try {
+                $installed = $false
+                if ($systemPackageManager -eq 'scoop') {
+                    if (Get-Command Test-ScoopPackageAvailable -ErrorAction SilentlyContinue) {
+                        $installed = Test-ScoopPackageAvailable -PackageName $pkg -ErrorAction Stop
+                    }
+                    else {
+                        $scoopList = & scoop list $pkg 2>&1 -ErrorAction Stop
+                        $installed = ($LASTEXITCODE -eq 0 -and $scoopList -match $pkg)
+                    }
+                }
+                elseif (Get-Command Test-LinuxSystemPackageAvailable -ErrorAction SilentlyContinue) {
+                    $installed = Test-LinuxSystemPackageAvailable -PackageName $pkg -PackageManager $systemPackageManager -ErrorAction Stop
+                }
+
+                if ($installed) {
                     Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
                 }
                 else {
                     Write-ScriptMessage -Message "  ✗ $pkg" -ForegroundColor Red
-                    $missingScoop += $pkg
+                    $missingSystem += $pkg
                 }
             }
-            else {
-                # Fallback: use scoop list directly
-                try {
-                    $scoopList = & scoop list $pkg 2>&1 -ErrorAction Stop
-                    if ($LASTEXITCODE -eq 0 -and $scoopList -match $pkg) {
-                        Write-ScriptMessage -Message "  ✓ $pkg" -ForegroundColor Green
-                    }
-                    else {
-                        Write-ScriptMessage -Message "  ✗ $pkg" -ForegroundColor Red
-                        $missingScoop += $pkg
-                    }
+            catch {
+                $systemCheckErrors.Add($pkg)
+                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    Write-StructuredWarning -Message "Failed to check system package" -OperationName 'dependencies.check-system' -Context @{
+                        package_name     = $pkg
+                        package_manager  = $systemPackageManager
+                    } -Code 'SystemPackageCheckFailed'
                 }
-                catch {
-                    $scoopCheckErrors.Add($pkg)
-                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Failed to check Scoop package" -OperationName 'dependencies.check-scoop' -Context @{
-                            package_name = $pkg
-                        } -Code 'ScoopPackageCheckFailed'
-                    }
-                    else {
-                        Write-ScriptMessage -Message "  ? $pkg (error checking)" -IsWarning
-                    }
-                    $missingScoop += $pkg
+                else {
+                    Write-ScriptMessage -Message "  ? $pkg (error checking)" -IsWarning
                 }
+                $missingSystem += $pkg
             }
         }
-        catch {
-            $scoopCheckErrors.Add($pkg)
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord $_ -OperationName 'dependencies.check-scoop' -Context @{
-                    package_name = $pkg
-                }
+
+        if ($systemCheckErrors.Count -gt 0) {
+            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                Write-StructuredWarning -Message "Some system package checks failed" -OperationName 'dependencies.check-system' -Context @{
+                    failed_packages = $systemCheckErrors -join ','
+                    failed_count    = $systemCheckErrors.Count
+                } -Code 'SystemPackageCheckPartialFailure'
             }
-            else {
-                Write-ScriptMessage -Message "  ✗ $pkg (error checking)" -IsWarning
-            }
-            $missingScoop += $pkg
         }
     }
-    if ($scoopCheckErrors.Count -gt 0) {
-        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-            Write-StructuredWarning -Message "Some Scoop package checks failed" -OperationName 'dependencies.check-scoop' -Context @{
-                failed_packages = $scoopCheckErrors -join ','
-                failed_count = $scoopCheckErrors.Count
-            } -Code 'ScoopPackageCheckPartialFailure'
-        }
-    }
-    $scoopCheckDuration = ((Get-Date) - $scoopCheckStartTime).TotalMilliseconds
-    
-    # Level 2: Scoop check timing
+
+    $systemCheckDuration = ((Get-Date) - $systemCheckStartTime).TotalMilliseconds
+
     if ($debugLevel -ge 2) {
-        Write-Verbose "[dependencies.check-packages] Scoop check completed in ${scoopCheckDuration}ms"
-        Write-Verbose "[dependencies.check-packages] Scoop missing: $($missingScoop.Count), Errors: $($scoopCheckErrors.Count)"
+        Write-Verbose "[dependencies.check-packages] System check completed in ${systemCheckDuration}ms"
+        Write-Verbose "[dependencies.check-packages] System missing: $($missingSystem.Count), Errors: $($systemCheckErrors.Count)"
     }
 }
 
-# Level 1: Summary generation
 if ($debugLevel -ge 1) {
     Write-Verbose "[dependencies.check-packages] Generating package check summary"
 }
 
-# Level 3: Performance breakdown
 if ($debugLevel -ge 3) {
-    $totalCheckDuration = $npmCheckDuration + $pythonCheckDuration + $scoopCheckDuration
-    Write-Host "  [dependencies.check-packages] Performance - npm: ${npmCheckDuration}ms, Python: ${pythonCheckDuration}ms, Scoop: ${scoopCheckDuration}ms, Total: ${totalCheckDuration}ms" -ForegroundColor DarkGray
+    $totalCheckDuration = $npmCheckDuration + $pythonCheckDuration + $systemCheckDuration
+    Write-Host "  [dependencies.check-packages] Performance - npm: ${npmCheckDuration}ms, Python: ${pythonCheckDuration}ms, System: ${systemCheckDuration}ms, Total: ${totalCheckDuration}ms" -ForegroundColor DarkGray
 }
 
 Write-ScriptMessage -Message ("=" * 60) -LogLevel Info
-if ($missingNpm.Count -eq 0 -and $missingPython.Count -eq 0 -and $missingScoop.Count -eq 0) {
+if ($missingNpm.Count -eq 0 -and $missingPython.Count -eq 0 -and $missingSystem.Count -eq 0) {
     Write-ScriptMessage -Message "All packages are installed!" -ForegroundColor Green
     Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
-else {
-    if ($missingNpm.Count -gt 0) {
-        Write-ScriptMessage -Message "Missing npm/pnpm packages:" -IsWarning
-        $missingNpm | ForEach-Object { Write-ScriptMessage -Message "  - $_" -IsWarning }
-        $packageJsonFile = Join-Path $repoRoot 'package.json'
-        if ($packageJsonFile -and -not [string]::IsNullOrWhiteSpace($packageJsonFile) -and (Test-Path -LiteralPath $packageJsonFile)) {
-            Write-ScriptMessage -Message "Install with: pnpm add -g $($missingNpm -join ' ')" -LogLevel Info
-            Write-ScriptMessage -Message "Or use: pnpm run install-global (from project root with package.json)" -LogLevel Info
-        }
-        else {
-            Write-ScriptMessage -Message "Install with: pnpm add -g $($missingNpm -join ' ')" -LogLevel Info
-        }
+
+if ($missingNpm.Count -gt 0) {
+    Write-ScriptMessage -Message "Missing npm/pnpm packages:" -IsWarning
+    $missingNpm | ForEach-Object { Write-ScriptMessage -Message "  - $_" -IsWarning }
+    $packageJsonFile = Join-Path $repoRoot 'package.json'
+    if ($packageJsonFile -and (Test-Path -LiteralPath $packageJsonFile)) {
+        Write-ScriptMessage -Message "Install with: pnpm add -g $($missingNpm -join ' ')" -LogLevel Info
+        Write-ScriptMessage -Message "Or use: pnpm run install-js-global (from project root)" -LogLevel Info
     }
-    
-    if ($missingPython.Count -gt 0) {
-        Write-ScriptMessage -Message "Missing Python packages:" -IsWarning
-        $missingPython | ForEach-Object { Write-ScriptMessage -Message "  - $_" -IsWarning }
-        
-        # Use preference-aware install hint if available
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-            try {
-                $hint = Get-PreferenceAwareInstallHint -ToolName 'python-package' -ToolType 'python-package' -DefaultInstallCommand "pip install $($missingPython[0])"
-                # Extract command from hint
-                if ($hint -match '^Install with:\s*(.+)$') {
-                    $matches[1] -replace '\{package\}', $missingPython[0]
-                }
-                else {
-                    "pip install $($missingPython -join ' ')"
-                }
+    else {
+        Write-ScriptMessage -Message "Install with: pnpm add -g $($missingNpm -join ' ')" -LogLevel Info
+    }
+}
+
+if ($missingPython.Count -gt 0) {
+    Write-ScriptMessage -Message "Missing Python packages:" -IsWarning
+    $missingPython | ForEach-Object { Write-ScriptMessage -Message "  - $_" -IsWarning }
+
+    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+        try {
+            $hint = Get-PreferenceAwareInstallHint -ToolName 'python-package' -ToolType 'python-package' -DefaultInstallCommand "pip install $($missingPython[0])"
+            if ($hint -match '^Install with:\s*(.+)$') {
+                $Matches[1] -replace '\{package\}', $missingPython[0]
             }
-            catch {
+            else {
                 "pip install $($missingPython -join ' ')"
             }
         }
-        else {
+        catch {
             "pip install $($missingPython -join ' ')"
         }
-        
-        $requirementsFile = Join-Path $repoRoot 'requirements.txt'
-        if ($requirementsFile -and -not [string]::IsNullOrWhiteSpace($requirementsFile) -and (Test-Path -LiteralPath $requirementsFile)) {
-            # Try to get requirements install command
-            $reqInstallHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
-                try {
-                    $hint = Get-PreferenceAwareInstallHint -ToolName 'requirements' -ToolType 'python-package' -DefaultInstallCommand "pip install -r requirements.txt"
-                    if ($hint -match '^Install with:\s*(.+)$') {
-                        $matches[1] -replace '-r requirements\.txt', '-r requirements.txt'
-                    }
-                    else {
-                        "pip install -r requirements.txt"
-                    }
-                }
-                catch {
-                    "pip install -r requirements.txt"
-                }
-            }
-            else {
-                "pip install -r requirements.txt"
-            }
-            Write-ScriptMessage -Message "Install with: $reqInstallHint" -LogLevel Info
-            Write-ScriptMessage -Message "Or install individually: $installHint" -LogLevel Info
-        }
-        else {
-            Write-ScriptMessage -Message "Install with: $installHint" -LogLevel Info
-        }
     }
-    
-    if ($missingScoop.Count -gt 0) {
-        Write-ScriptMessage -Message "Missing system packages:" -IsWarning
-        $missingScoop | ForEach-Object { Write-ScriptMessage -Message "  - $_" -IsWarning }
-        
-        # Use preference-aware install hint if available
-        $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+    else {
+        "pip install $($missingPython -join ' ')"
+    }
+
+    $requirementsFile = Join-Path $repoRoot 'requirements.txt'
+    if (Test-Path -LiteralPath $requirementsFile) {
+        $reqInstallHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
             try {
-                $hint = Get-PreferenceAwareInstallHint -ToolName $missingScoop[0] -ToolType 'generic' -DefaultInstallCommand "scoop install $($missingScoop[0])"
-                # Extract command from hint
+                $hint = Get-PreferenceAwareInstallHint -ToolName 'requirements' -ToolType 'python-package' -DefaultInstallCommand 'pip install -r requirements.txt'
                 if ($hint -match '^Install with:\s*(.+)$') {
-                    $baseCmd = $matches[1] -replace $missingScoop[0], '{package}'
-                    if ($missingScoop.Count -eq 1) {
-                        $baseCmd -replace '\{package\}', $missingScoop[0]
-                    }
-                    else {
-                        $baseCmd -replace '\{package\}', ($missingScoop -join ' ')
-                    }
+                    $Matches[1] -replace '-r requirements\.txt', '-r requirements.txt'
                 }
                 else {
-                    "scoop install $($missingScoop -join ' ')"
+                    'uv pip install -r requirements.txt'
                 }
             }
             catch {
-                "scoop install $($missingScoop -join ' ')"
+                'uv pip install -r requirements.txt'
             }
         }
         else {
-            "scoop install $($missingScoop -join ' ')"
+            'uv pip install -r requirements.txt'
         }
-        
-        Write-ScriptMessage -Message "Install with: $installHint" -LogLevel Info
-        Write-ScriptMessage -Message "Or install individually: <package-manager> install <package-name>" -LogLevel Info
+        Write-ScriptMessage -Message "Install with: $reqInstallHint" -LogLevel Info
+        Write-ScriptMessage -Message "Or install individually: $installHint" -LogLevel Info
     }
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Some packages are missing"
+    else {
+        Write-ScriptMessage -Message "Install with: $installHint" -LogLevel Info
+    }
 }
 
+if ($missingSystem.Count -gt 0 -and $systemPackageManager) {
+    Write-ScriptMessage -Message "Missing system packages ($systemPackageManager):" -IsWarning
+    $missingSystem | ForEach-Object { Write-ScriptMessage -Message "  - $_" -IsWarning }
+
+    $bulkInstall = Get-SystemPackageInstallCommand -PackageNames $missingSystem -PackageManager $systemPackageManager
+
+    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+        try {
+            $hint = Get-PreferenceAwareInstallHint -ToolName $missingSystem[0] -ToolType 'generic' -DefaultInstallCommand $bulkInstall
+            if ($hint -match '^Install with:\s*(.+)$') {
+                $Matches[1]
+            }
+            else {
+                $bulkInstall
+            }
+        }
+        catch {
+            $bulkInstall
+        }
+    }
+    else {
+        $bulkInstall
+    }
+
+    Write-ScriptMessage -Message "Install with: $installHint" -LogLevel Info
+    if ($systemPackageManager -ne 'scoop') {
+        Write-ScriptMessage -Message "See requirements-linux.txt ($systemPackageManager section) for the full package list" -LogLevel Info
+    }
+    else {
+        Write-ScriptMessage -Message "See requirements-scoop.txt for the full package list" -LogLevel Info
+    }
+}
+
+Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Some packages are missing"
