@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/bolens/ps-profile/compare/v1.5.0...v1.6.0) (2026-05-29)
+
+
+### Features
+
+* **deps:** load requirements from list files and add Linux/dnf support ([15e2bab](https://github.com/bolens/ps-profile/commit/15e2bab8165df1caf61418bb8568a5e771e95892))
+
 # [1.5.0](https://github.com/bolens/ps-profile/compare/v1.4.1...v1.5.0) (2026-05-29)
 
 
