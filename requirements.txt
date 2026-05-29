@@ -1,5 +1,5 @@
 # Python package requirements for data format conversions
-# Windows Scoop tools: requirements-scoop.txt | Linux system packages: requirements-linux.txt
+# Windows Scoop tools: requirements/scoop.txt | Linux system packages: requirements/linux.txt
 #
 # Install (system/user): uv pip install -r requirements.txt
 #

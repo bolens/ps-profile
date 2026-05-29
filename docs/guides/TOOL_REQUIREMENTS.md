@@ -6,6 +6,20 @@ This document lists all tools and packages required or recommended for running t
 
 The test suite uses a tool detection framework (`TestSupport/ToolDetection.ps1`) to gracefully handle missing tools. Tests will skip with clear messages when optional tools are missing, and provide installation recommendations.
 
+### Package manifest files
+
+Install lists live in plain-text manifests (checked by [check-missing-packages.ps1](../../scripts/utils/dependencies/check-missing-packages.ps1)):
+
+| Manifest | Description |
+|----------|-------------|
+| [requirements.txt](../../requirements.txt) | Python packages (`uv pip install -r requirements.txt`) |
+| [requirements/scoop.txt](../../requirements/scoop.txt) | Windows Scoop packages |
+| [requirements/linux.txt](../../requirements/linux.txt) | Linux packages (`apt`, `pacman`, `dnf` sections) |
+| [package.json](../../package.json) | npm/pnpm conversion dependencies |
+| [requirements/README.md](../../requirements/README.md) | PSD1 modular requirements + manifest overview |
+
+Run `task check-missing-packages` (or `pnpm run check-missing-packages`) to see what is missing on your system.
+
 ## Tool Detection Framework
 
 The framework provides several functions:
@@ -183,11 +197,11 @@ uv pip install -r requirements.txt
 
 ### Scoop Packages (Windows)
 
-Scoop packages are listed in `requirements-scoop.txt` and checked using `Test-ScoopPackageAvailable` from `TestSupport/TestScoopHelpers.ps1`. The function requires Scoop to be installed.
+Scoop packages are listed in [requirements/scoop.txt](../../requirements/scoop.txt) and checked using `Test-ScoopPackageAvailable` from `TestSupport/TestScoopHelpers.ps1`. The function requires Scoop to be installed.
 
 ### Linux System Packages
 
-Linux packages are listed in `requirements-linux.txt` with separate sections for **apt** (Debian/Ubuntu), **pacman** (Arch), and **dnf** (Fedora/RHEL). The `check-missing-packages.ps1` script auto-detects the package manager (or uses `$env:PS_SYSTEM_PACKAGE_MANAGER`) and checks the matching section via `Test-LinuxSystemPackageAvailable`.
+Linux packages are listed in [requirements/linux.txt](../../requirements/linux.txt) with separate sections for **apt** (Debian/Ubuntu), **pacman** (Arch), and **dnf** (Fedora/RHEL). [check-missing-packages.ps1](../../scripts/utils/dependencies/check-missing-packages.ps1) auto-detects the package manager (or uses `$env:PS_SYSTEM_PACKAGE_MANAGER`) and checks the matching section via `Test-LinuxSystemPackageAvailable`.
 
 **Categories:**
 
@@ -209,8 +223,21 @@ Linux packages are listed in `requirements-linux.txt` with separate sections for
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 irm get.scoop.sh | iex
 
-# Install packages
-scoop install docker kubectl terraform aws azure-cli gcloud bat fd httpie zoxide delta tldr procs dust
+# Install from requirements/scoop.txt (see file for full list)
+Get-Content requirements/scoop.txt |
+    Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' } |
+    ForEach-Object { scoop install $_ }
+```
+
+```bash
+# Debian/Ubuntu (apt section in requirements/linux.txt)
+sudo apt update && sudo apt install -y $(sed -n '/^# --- apt /,/^# --- pacman /p' requirements/linux.txt | grep -v '^#' | grep -v '^$')
+
+# Arch / CachyOS (pacman section)
+sudo pacman -S --needed $(sed -n '/^# --- pacman /,/^# --- dnf /p' requirements/linux.txt | grep -v '^#' | grep -v '^$')
+
+# Fedora / RHEL (dnf section)
+sudo dnf install -y $(sed -n '/^# --- dnf /,$p' requirements/linux.txt | grep -v '^#' | grep -v '^$')
 ```
 
 ### NPM Packages
@@ -280,21 +307,22 @@ It 'Tests Python package functionality' {
 
 ## Installation Scripts
 
-### Quick Install (Windows with Scoop)
+### Quick Install
 
 ```powershell
-# Install Scoop (if not installed)
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-irm get.scoop.sh | iex
+# Report missing packages (reads all manifest files)
+task check-missing-packages
 
-# Install all recommended tools
-scoop install docker kubectl terraform aws azure-cli gcloud bat fd httpie zoxide delta tldr procs dust gh git
+# Python — see requirements.txt
+uv pip install -r requirements.txt
 
-# Install Python packages
-pip install ion-python pyodbc dbfread dbf pyreadstat pandas scipy astropy pyarrow delta-spark deltalake pyiceberg python-snappy h5py netCDF4 numpy
+# npm — see package.json or:
+pnpm run install-js-global
 
-# Install NPM packages
-npm install -g superjson @msgpack/msgpack bson cbor qrcode jimp pnpm
+# Windows Scoop — see requirements/scoop.txt
+Get-Content requirements/scoop.txt |
+    Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' } |
+    ForEach-Object { scoop install $_ }
 ```
 
 ### Check Missing Tools

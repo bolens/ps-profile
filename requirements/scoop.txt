@@ -1,6 +1,6 @@
 # Scoop package requirements for PowerShell profile tools and conversions (Windows)
 # Install with: scoop install <package-name>
-# Linux equivalents: see requirements-linux.txt (apt and pacman sections)
+# Linux equivalents: see requirements/linux.txt (apt, pacman, and dnf sections)
 # Or install all: scoop install bat fd httpie zoxide git-delta tldr fzf ripgrep eza procs dust bottom navi gum docker podman docker-compose lazydocker pandoc calibre djvulibre imagemagick jq yq rclone minio-client zstd gh kubectl helm terraform aws azure-cli azure-developer-cli bun deno go rustup uv pixi pnpm ngrok tailscale starship oh-my-posh xz snappy lz4 ffmpeg graphicsmagick miktex
 
 # CLI Tools

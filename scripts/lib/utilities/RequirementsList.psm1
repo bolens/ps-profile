@@ -5,10 +5,36 @@ scripts/lib/utilities/RequirementsList.psm1
     Parses root-level requirements list files (Python, Scoop, Linux distro sections).
 
 .DESCRIPTION
-    Loads package names from requirements.txt, requirements-scoop.txt, and
-    requirements-linux.txt (apt, pacman, dnf sections). Used by dependency
+    Loads package names from requirements.txt (repo root), requirements/scoop.txt,
+    and requirements/linux.txt (apt, pacman, dnf sections). Used by dependency
     validation scripts and tests.
 #>
+
+function Get-RequirementsManifestPath {
+    <#
+    .SYNOPSIS
+        Resolves canonical paths for install manifest files.
+    .PARAMETER Kind
+        python - requirements.txt at repo root; scoop - requirements/scoop.txt;
+        linux - requirements/linux.txt.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$RepoRoot,
+
+        [Parameter(Mandatory)]
+        [ValidateSet('python', 'scoop', 'linux')]
+        [string]$Kind
+    )
+
+    switch ($Kind) {
+        'python' { return Join-Path $RepoRoot 'requirements.txt' }
+        'scoop' { return Join-Path $RepoRoot 'requirements' 'scoop.txt' }
+        'linux' { return Join-Path $RepoRoot 'requirements' 'linux.txt' }
+    }
+}
 
 function Get-RequirementsListFromFile {
     <#
@@ -74,7 +100,7 @@ function Get-PythonRequirementsFromFile {
 function Get-LinuxRequirementsFromFile {
     <#
     .SYNOPSIS
-        Parses a distro section from requirements-linux.txt.
+        Parses a distro section from requirements/linux.txt.
     .PARAMETER Section
         apt, pacman, or dnf (matches # --- section headers).
     #>
@@ -231,11 +257,11 @@ function Get-SystemRequirementsPackages {
 
     switch ($pm) {
         'scoop' {
-            $path = Join-Path $RepoRoot 'requirements-scoop.txt'
+            $path = Get-RequirementsManifestPath -RepoRoot $RepoRoot -Kind 'scoop'
             return Get-RequirementsListFromFile -Path $path
         }
         { $_ -in 'apt', 'pacman', 'dnf' } {
-            $path = Join-Path $RepoRoot 'requirements-linux.txt'
+            $path = Get-RequirementsManifestPath -RepoRoot $RepoRoot -Kind 'linux'
             return Get-LinuxRequirementsFromFile -Path $path -Section $pm
         }
         default {
@@ -275,6 +301,7 @@ function Get-SystemPackageInstallCommand {
 }
 
 Export-ModuleMember -Function @(
+    'Get-RequirementsManifestPath'
     'Get-RequirementsListFromFile'
     'Get-PythonRequirementsFromFile'
     'Get-LinuxRequirementsFromFile'

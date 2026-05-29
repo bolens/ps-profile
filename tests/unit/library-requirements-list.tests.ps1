@@ -10,6 +10,17 @@ AfterAll {
 }
 
 Describe 'RequirementsList module' {
+    Context 'Get-RequirementsManifestPath' {
+        It 'Resolves manifest paths under repo root' {
+            Get-RequirementsManifestPath -RepoRoot $script:RepoRoot -Kind 'python' |
+                Should -Be (Join-Path $script:RepoRoot 'requirements.txt')
+            Get-RequirementsManifestPath -RepoRoot $script:RepoRoot -Kind 'scoop' |
+                Should -Be (Join-Path $script:RepoRoot 'requirements' 'scoop.txt')
+            Get-RequirementsManifestPath -RepoRoot $script:RepoRoot -Kind 'linux' |
+                Should -Be (Join-Path $script:RepoRoot 'requirements' 'linux.txt')
+        }
+    }
+
     Context 'Get-PythonRequirementsFromFile' {
         It 'Parses package names and strips version specifiers' {
             $file = Join-Path $TestDrive 'requirements.txt'
@@ -28,9 +39,9 @@ numpy>=2.0.0
 
     Context 'Get-LinuxRequirementsFromFile' {
         It 'Returns only packages from the requested section' {
-            $file = Join-Path $script:RepoRoot 'requirements-linux.txt'
+            $file = Get-RequirementsManifestPath -RepoRoot $script:RepoRoot -Kind 'linux'
             if (-not (Test-Path -LiteralPath $file)) {
-                Set-ItResult -Skipped -Because 'requirements-linux.txt not found'
+                Set-ItResult -Skipped -Because 'requirements/linux.txt not found'
                 return
             }
 
@@ -51,10 +62,10 @@ numpy>=2.0.0
     }
 
     Context 'Get-RequirementsListFromFile' {
-        It 'Loads scoop package names from requirements-scoop.txt' {
-            $file = Join-Path $script:RepoRoot 'requirements-scoop.txt'
+        It 'Loads scoop package names from requirements/scoop.txt' {
+            $file = Get-RequirementsManifestPath -RepoRoot $script:RepoRoot -Kind 'scoop'
             if (-not (Test-Path -LiteralPath $file)) {
-                Set-ItResult -Skipped -Because 'requirements-scoop.txt not found'
+                Set-ItResult -Skipped -Because 'requirements/scoop.txt not found'
                 return
             }
 

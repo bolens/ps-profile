@@ -5,7 +5,7 @@ scripts/utils/dependencies/check-missing-packages.ps1
     Checks for missing npm, Python, and system packages required for data format conversions and tools.
 
 .DESCRIPTION
-    Loads package lists from requirements.txt, requirements-scoop.txt, requirements-linux.txt,
+    Loads package lists from requirements.txt, requirements/scoop.txt, requirements/linux.txt,
     and package.json, then checks whether they are installed. Reports missing packages with
     installation instructions for the detected package manager (Scoop, apt, pacman, or dnf).
 
@@ -18,8 +18,8 @@ scripts/utils/dependencies/check-missing-packages.ps1
     Package lists:
     - npm: package.json dependencies
     - Python: requirements.txt
-    - Windows: requirements-scoop.txt (Scoop)
-    - Linux: requirements-linux.txt (apt, pacman, or dnf section)
+    - Windows: requirements/scoop.txt (Scoop)
+    - Linux: requirements/linux.txt (apt, pacman, or dnf section)
 
     Override system package manager: $env:PS_SYSTEM_PACKAGE_MANAGER = 'apt' | 'pacman' | 'dnf' | 'scoop'
 
@@ -82,7 +82,7 @@ catch {
 }
 
 try {
-    $pythonRequirementsPath = Join-Path $repoRoot 'requirements.txt'
+    $pythonRequirementsPath = Get-RequirementsManifestPath -RepoRoot $repoRoot -Kind 'python'
     $pythonPackages = Get-PythonRequirementsFromFile -Path $pythonRequirementsPath
 }
 catch {
@@ -250,10 +250,10 @@ elseif ($systemPackages.Count -eq 0) {
 }
 else {
     $requirementsFile = if ($systemPackageManager -eq 'scoop') {
-        'requirements-scoop.txt'
+        'requirements/scoop.txt'
     }
     else {
-        "requirements-linux.txt ($systemPackageManager section)"
+        "requirements/linux.txt ($systemPackageManager section)"
     }
 
     Write-ScriptMessage -Message "Checking system packages ($($systemPackages.Count) from $requirementsFile via $systemPackageManager)..." -LogLevel Info
@@ -385,7 +385,7 @@ if ($missingPython.Count -gt 0) {
         "pip install $($missingPython -join ' ')"
     }
 
-    $requirementsFile = Join-Path $repoRoot 'requirements.txt'
+    $requirementsFile = Get-RequirementsManifestPath -RepoRoot $repoRoot -Kind 'python'
     if (Test-Path -LiteralPath $requirementsFile) {
         $reqInstallHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
             try {
@@ -438,10 +438,10 @@ if ($missingSystem.Count -gt 0 -and $systemPackageManager) {
 
     Write-ScriptMessage -Message "Install with: $installHint" -LogLevel Info
     if ($systemPackageManager -ne 'scoop') {
-        Write-ScriptMessage -Message "See requirements-linux.txt ($systemPackageManager section) for the full package list" -LogLevel Info
+        Write-ScriptMessage -Message "See requirements/linux.txt ($systemPackageManager section) for the full package list" -LogLevel Info
     }
     else {
-        Write-ScriptMessage -Message "See requirements-scoop.txt for the full package list" -LogLevel Info
+        Write-ScriptMessage -Message "See requirements/scoop.txt for the full package list" -LogLevel Info
     }
 }
 

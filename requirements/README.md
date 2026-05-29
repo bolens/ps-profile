@@ -2,10 +2,14 @@
 
 This directory contains the modular requirements configuration structure for the PowerShell profile project.
 
+Python packages stay at the repo root as `requirements.txt` (standard `pip`/`uv` convention). System package manifests for bulk installs live here.
+
 ## Structure
 
 ```
 requirements/
+├── scoop.txt                       # Windows Scoop packages (one name per line)
+├── linux.txt                       # Linux packages (apt, pacman, dnf sections)
 ├── modules.psd1                    # PowerShell modules (PSScriptAnalyzer, Pester, etc.)
 ├── platform.psd1                   # Platform-specific requirements
 ├── load-requirements.ps1          # Loader script that combines all modules
@@ -21,6 +25,18 @@ requirements/
     ├── specialized-formats.psd1   # Specialized format tools (qrcode, jsonwebtoken, jsbarcode, canvas)
     └── document-formats.psd1      # Document format tools (pandoc, calibre, djvulibre, ImageMagick)
 ```
+
+## Install manifests (plain text)
+
+| File | Purpose |
+|------|---------|
+| [requirements.txt](../requirements.txt) | Python packages for conversion modules (`uv pip install -r requirements.txt`) |
+| [scoop.txt](scoop.txt) | Windows Scoop packages (`scoop install <name>`) |
+| [linux.txt](linux.txt) | Distro packages by section (`apt`, `pacman`, `dnf`) |
+
+Paths are resolved via `Get-RequirementsManifestPath` in `scripts/lib/utilities/RequirementsList.psm1`. Checked by [check-missing-packages.ps1](../scripts/utils/dependencies/check-missing-packages.ps1).
+
+See also [Tool Requirements for Tests](../docs/guides/TOOL_REQUIREMENTS.md) for install examples and test tooling context.
 
 ## Usage
 

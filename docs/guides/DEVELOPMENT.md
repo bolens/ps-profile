@@ -473,4 +473,8 @@ If `Get-RepoRoot` fails:
 ## Additional Resources
 
 - [CONTRIBUTING.md](../../CONTRIBUTING.md) - Contribution guidelines
-- [requirements/](../../requirements/) - Modular dependency requirements structure
+- [requirements/](../../requirements/) - Modular dependency requirements (PSD1) and install manifests:
+  - [requirements.txt](../../requirements.txt) — Python packages
+  - [requirements/scoop.txt](../../requirements/scoop.txt) — Windows Scoop packages
+  - [requirements/linux.txt](../../requirements/linux.txt) — Linux `apt` / `pacman` / `dnf` packages
+  - [TOOL_REQUIREMENTS.md](TOOL_REQUIREMENTS.md) — Test and conversion tool requirements

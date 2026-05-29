@@ -78,7 +78,7 @@ All language-specific fragments now use preference-aware install hints:
 
 ### Dependency Management
 
-- **`scripts/utils/dependencies/check-missing-packages.ps1`**
+- **[check-missing-packages.ps1](../../scripts/utils/dependencies/check-missing-packages.ps1)** (reads [requirements.txt](../../requirements.txt), [requirements/scoop.txt](../../requirements/scoop.txt), [requirements/linux.txt](../../requirements/linux.txt))
   - Python package checks now use preference-aware hints
   - System package checks use preference-aware fallback chains
   - Shows multiple installation options when available

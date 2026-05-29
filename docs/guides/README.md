@@ -124,9 +124,9 @@ Guide for verifying test coverage for utility modules.
 
 #### [Tool Requirements](TOOL_REQUIREMENTS.md)
 
-Documentation of tool requirements for tests.
+Documentation of tool requirements for tests, with links to [requirements.txt](../../requirements.txt), [requirements/scoop.txt](../../requirements/scoop.txt), [requirements/linux.txt](../../requirements/linux.txt), and [check-missing-packages.ps1](../../scripts/utils/dependencies/check-missing-packages.ps1).
 
-**When to use**: Understanding which tools are required for tests.
+**When to use**: Understanding which tools are required for tests or installing optional conversion dependencies.
 
 ### Code Quality
 

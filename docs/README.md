@@ -48,6 +48,7 @@ Comprehensive guides for developers working on or contributing to the profile.
 - **Type Safety Migration Status**: [TYPE_SAFETY_MIGRATION_STATUS.md](guides/TYPE_SAFETY_MIGRATION_STATUS.md) - Current migration status from constants to enums
 - **Function Naming Exceptions**: [FUNCTION_NAMING_EXCEPTIONS.md](guides/FUNCTION_NAMING_EXCEPTIONS.md) - Exceptions to standard naming conventions
 - **Security Allowlist**: [SECURITY_ALLOWLIST.md](guides/SECURITY_ALLOWLIST.md) - Security scanning allowlist
+- **Tool Requirements**: [TOOL_REQUIREMENTS.md](guides/TOOL_REQUIREMENTS.md) - Test/conversion dependencies ([requirements.txt](../requirements.txt), [scoop.txt](../requirements/scoop.txt), [linux.txt](../requirements/linux.txt))
 
 ## Quick Links
 
