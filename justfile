@@ -233,6 +233,50 @@ pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 {{argument
 generate-task-parity:
 pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{arguments()}}
 
+# Check that doc links and bindings are current (drift)
+drift-check:
+drift check
+
+# Show drift doc anchor and link status
+drift-status:
+drift status
+
+# Build/warm fragment cache by parsing all fragments
+build-fragment-cache:
+pwsh -NoProfile -File scripts/utils/build-fragment-cache.ps1 {{arguments()}}
+
+# Install all optional profile dependencies (global or local)
+install-all:
+pnpm run install-all
+
+# Install optional JS and Python dependencies globally
+install-all-global:
+pnpm run install-all-global
+
+# Install optional JS and Python dependencies locally
+install-all-local:
+pnpm run install-all-local
+
+# Install optional JS conversion packages globally
+install-js-global:
+pnpm run install-js-global
+
+# Install optional JS conversion packages locally
+install-js-local:
+pnpm run install-js-local
+
+# Install optional Python data packages globally
+install-python-global:
+pnpm run install-python-global
+
+# Install optional Python data packages locally
+install-python-local:
+pnpm run install-python-local
+
+# Install recommended CLI tools via Scoop
+install-scoop:
+pnpm run install-scoop
+
 # Default: run lint (common first task)
 default: lint
 

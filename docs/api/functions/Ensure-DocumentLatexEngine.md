@@ -34,4 +34,4 @@ The project assumes Scoop is installed; MiKTeX can be installed via `scoop insta
 
 ## Source
 
-Defined in: ..\profile.d\02-files.ps1
+Defined in: ../profile.d/02-files.ps1

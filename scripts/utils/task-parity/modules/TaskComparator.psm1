@@ -15,6 +15,11 @@ scripts/utils/task-parity/modules/TaskComparator.psm1
     PowerShell Version: 5.0+
 #>
 
+$utilitiesModulePath = Join-Path $PSScriptRoot 'TaskParityUtilities.psm1'
+if (Test-Path -LiteralPath $utilitiesModulePath) {
+    Import-Module $utilitiesModulePath -DisableNameChecking -Force
+}
+
 function Compare-Tasks {
     <#
     .SYNOPSIS
@@ -123,6 +128,14 @@ function Normalize-Command {
     $normalized = $normalized -replace '\{\{\.CLI_ARGS\}\}', '{{ARGS}}'
     $normalized = $normalized -replace '\$\(ARGS\)', '{{ARGS}}'
     $normalized = $normalized -replace '\{\{arguments\(\)\}\}', '{{ARGS}}'
+    $normalized = $normalized -replace '\$\{workspaceFolder\}[\\/]', '${workspaceFolder}/'
+
+    if (Get-Command Normalize-TaskScriptPathInText -ErrorAction SilentlyContinue) {
+        $normalized = Normalize-TaskScriptPathInText -Text $normalized
+    }
+    else {
+        $normalized = $normalized -replace '\\', '/'
+    }
     
     return $normalized
 }

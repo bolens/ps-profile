@@ -22,17 +22,17 @@
     Repository root directory. Auto-detected if not specified.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\utils\task-parity\check-task-parity.ps1
+    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1
     
     Reports task parity differences without making changes.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\utils\task-parity\check-task-parity.ps1 -Generate -TargetFile 'makefile'
+    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate -TargetFile 'makefile'
     
     Generates missing tasks in Makefile only.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\utils\task-parity\check-task-parity.ps1 -Generate
+    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate
     
     Generates missing tasks in all files to achieve full parity.
 #>
@@ -428,7 +428,7 @@ $parserModules = @{
 }
 
 # Determine required vs optional modules based on -Generate flag
-$requiredModules = @('TaskParser.psm1', 'TaskComparator.psm1')
+$requiredModules = @('TaskParityUtilities.psm1', 'TaskParser.psm1', 'TaskComparator.psm1')
 $optionalModules = @()
 
 # TaskGenerator is required if -Generate is used, otherwise optional
@@ -656,8 +656,12 @@ if (-not (Test-Path -LiteralPath $RepoRoot)) {
 # Parse tasks from all files
 Write-Host "Parsing task files..." -ForegroundColor Yellow
 $allTasks = @{}
+$cliFileTypes = @('taskfile', 'makefile', 'package', 'justfile')
 
 foreach ($fileType in $taskFiles.Keys) {
+    if ($fileType -eq 'tasksjson') {
+        continue
+    }
     $filePath = $taskFiles[$fileType]
     
     if (-not (Test-Path -LiteralPath $filePath)) {
@@ -760,12 +764,53 @@ foreach ($fileType in $taskFiles.Keys) {
     }
 }
 
+# Parse VS Code tasks after Taskfile.yml so labels map to canonical task names
+$tasksJsonPath = $taskFiles['tasksjson']
+if (Test-Path -LiteralPath $tasksJsonPath) {
+    $referenceTasks = if ($allTasks['taskfile'] -and $allTasks['taskfile'].Count -gt 0) {
+        $allTasks['taskfile']
+    }
+    else {
+        $null
+    }
+
+    try {
+        if (-not (Get-Command Get-TasksFromTasksJson -ErrorAction SilentlyContinue)) {
+            throw 'Get-TasksFromTasksJson is not available. TaskParser module may not be loaded.'
+        }
+
+        $vscodeTasks = Get-TasksFromTasksJson -FilePath $tasksJsonPath -ReferenceTasks $referenceTasks
+        $allTasks['tasksjson'] = $vscodeTasks
+        Write-Host "    .vscode/tasks.json : Found $($vscodeTasks.Count) tasks (canonical names)" -ForegroundColor Green
+    }
+    catch {
+        Write-Warning "Failed to parse tasksjson: $_"
+        $allTasks['tasksjson'] = @{}
+        Write-Host "    .vscode/tasks.json : 0 tasks (parse failed)" -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Warning "Task file not found: $tasksJsonPath"
+    $allTasks['tasksjson'] = @{}
+}
+
 Write-Host ""
+
+# Tasks allowed to differ by runner (e.g. just uses `default: lint` recipe alias, not task --list-all)
+$parityExcludeTasks = @('default')
 
 # Compare tasks
 Write-Host "Comparing tasks..." -ForegroundColor Yellow
 try {
+    $cliTaskSets = @{}
+    foreach ($fileType in $cliFileTypes) {
+        if ($allTasks.ContainsKey($fileType)) {
+            $cliTaskSets[$fileType] = $allTasks[$fileType]
+        }
+    }
+
     $comparison = Compare-Tasks -TaskSets $allTasks
+    $cliComparison = Compare-Tasks -TaskSets $cliTaskSets
     if ($debugLevel -ge 2) {
         Write-Host "  [task-parity] Comparison completed" -ForegroundColor DarkGray
     }
@@ -801,20 +846,20 @@ Write-Host ""
 # Summary statistics with validation
 Write-Host "Summary:" -ForegroundColor Yellow
 try {
-    $totalTasks = if ($comparison.AllTasks) {
-        ($comparison.AllTasks | Measure-Object).Count
+    $cliUniqueTasks = if ($cliComparison.AllTasks) {
+        ($cliComparison.AllTasks | Select-Object -Unique | Measure-Object).Count
     }
     else {
         0
     }
-    $uniqueTasks = if ($comparison.AllTasks) {
-        ($comparison.AllTasks | Select-Object -Unique | Measure-Object).Count
+    $vscodeUniqueTasks = if ($allTasks['tasksjson']) {
+        $allTasks['tasksjson'].Count
     }
     else {
         0
     }
-    Write-Host "  Total task definitions: $totalTasks" -ForegroundColor White
-    Write-Host "  Unique task names: $uniqueTasks" -ForegroundColor White
+    Write-Host "  CLI task runners (task/make/pnpm/just): $cliUniqueTasks unique tasks" -ForegroundColor White
+    Write-Host "  VS Code tasks (canonical): $vscodeUniqueTasks tasks" -ForegroundColor White
     
     # Additional statistics
     if ($debugLevel -ge 2) {
@@ -831,11 +876,15 @@ catch {
 }
 
 # Missing tasks per file with validation
-Write-Host "Missing Tasks by File:" -ForegroundColor Yellow
-if ($comparison.MissingTasks) {
-    foreach ($fileType in $comparison.MissingTasks.Keys) {
+Write-Host "Missing Tasks (CLI runners):" -ForegroundColor Yellow
+if ($cliComparison.MissingTasks) {
+    foreach ($fileType in $cliFileTypes) {
+        if (-not $cliComparison.MissingTasks.ContainsKey($fileType)) {
+            continue
+        }
+
         try {
-            $missing = $comparison.MissingTasks[$fileType]
+            $missing = @($cliComparison.MissingTasks[$fileType] | Where-Object { $_ -notin $parityExcludeTasks })
             if ($null -eq $missing) {
                 $missing = @()
             }
@@ -861,6 +910,60 @@ if ($comparison.MissingTasks) {
 }
 else {
     Write-Host "  Unable to determine missing tasks (comparison data incomplete)" -ForegroundColor Yellow
+}
+
+$vscodeMissing = @()
+if ($cliComparison.AllTasks -and $allTasks['tasksjson'] -and (Get-Command Get-TaskCommandSignature -ErrorAction SilentlyContinue)) {
+    foreach ($taskName in $cliComparison.AllTasks) {
+        if ($taskName -in $parityExcludeTasks) {
+            continue
+        }
+
+        if ($allTasks['tasksjson'].ContainsKey($taskName)) {
+            continue
+        }
+
+        $referenceCommand = $null
+        foreach ($cliType in $cliFileTypes) {
+            if ($allTasks[$cliType].ContainsKey($taskName)) {
+                $referenceCommand = $allTasks[$cliType][$taskName].Command
+                break
+            }
+        }
+
+        if ([string]::IsNullOrWhiteSpace($referenceCommand)) {
+            $vscodeMissing += $taskName
+            continue
+        }
+
+        $referenceSignature = Get-TaskCommandSignature -Command $referenceCommand
+        $signatureMatch = $false
+        if ($referenceSignature) {
+            foreach ($vscodeTask in $allTasks['tasksjson'].Values) {
+                $vscodeSignature = Get-TaskCommandSignature -Command $vscodeTask.Command
+                if ($vscodeSignature -and $vscodeSignature -eq $referenceSignature) {
+                    $signatureMatch = $true
+                    break
+                }
+            }
+        }
+
+        if (-not $signatureMatch) {
+            $vscodeMissing += $taskName
+        }
+    }
+}
+
+Write-Host ""
+Write-Host "Missing Tasks (VS Code workspace):" -ForegroundColor Yellow
+if ($vscodeMissing.Count -gt 0) {
+    Write-Host "  tasksjson : $($vscodeMissing.Count) missing" -ForegroundColor Red
+    foreach ($taskName in $vscodeMissing) {
+        Write-Host "    - $taskName" -ForegroundColor DarkGray
+    }
+}
+else {
+    Write-Host "  tasksjson : No missing tasks" -ForegroundColor Green
 }
 Write-Host ""
 
@@ -1067,9 +1170,24 @@ if ($Generate) {
 # Exit with appropriate code (with validation)
 $hasMissingTasks = $false
 try {
-    if ($comparison.MissingTasks) {
-        $missingCounts = $comparison.MissingTasks.Values | Where-Object { $null -ne $_ -and $_.Count -gt 0 }
-        $hasMissingTasks = ($missingCounts | Measure-Object).Count -gt 0
+    if ($cliComparison.MissingTasks) {
+        $hasCliMissing = $false
+        foreach ($fileType in $cliFileTypes) {
+            if (-not $cliComparison.MissingTasks.ContainsKey($fileType)) {
+                continue
+            }
+
+            $missing = @($cliComparison.MissingTasks[$fileType] | Where-Object { $_ -notin $parityExcludeTasks })
+            if ($missing.Count -gt 0) {
+                $hasCliMissing = $true
+                break
+            }
+        }
+
+        $hasMissingTasks = $hasCliMissing -or ($vscodeMissing.Count -gt 0)
+    }
+    elseif ($vscodeMissing.Count -gt 0) {
+        $hasMissingTasks = $true
     }
 }
 catch {

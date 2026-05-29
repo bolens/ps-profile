@@ -17,6 +17,11 @@ scripts/utils/task-parity/modules/TaskParser.psm1
     PowerShell Version: 5.0+
 #>
 
+$utilitiesModulePath = Join-Path $PSScriptRoot 'TaskParityUtilities.psm1'
+if (Test-Path -LiteralPath $utilitiesModulePath) {
+    Import-Module $utilitiesModulePath -DisableNameChecking -Force
+}
+
 function Get-TasksFromFile {
     <#
     .SYNOPSIS
@@ -65,7 +70,7 @@ function Get-TasksFromFile {
             $tasks = Get-TasksFromJustfile -FilePath $FilePath
         }
         'tasksjson' {
-            $tasks = Get-TasksFromTasksJson -FilePath $FilePath
+            throw 'Get-TasksFromFile does not support tasksjson; call Get-TasksFromTasksJson with -ReferenceTasks instead.'
         }
     }
     
@@ -148,18 +153,18 @@ function Get-TasksFromTaskfile {
             
             if ($isTaskDefinition) {
                 # Save previous task if exists
-                if ($currentTask) {
-                    $cmd = $cmdLines -join "`n"
-                    if ($cmd) {
-                        $tasks[$currentTask] = @{
-                            Command = $cmd
-                            Description = $currentDesc
-                        }
+            if ($currentTask) {
+                $cmd = Join-TaskCommandLines -Lines $cmdLines
+                if ($cmd) {
+                    $tasks[$currentTask] = @{
+                        Command     = $cmd
+                        Description = $currentDesc
                     }
                 }
-                
-                # Start new task
-                $currentTask = $taskName
+            }
+            
+            # Start new task
+            $currentTask = $taskName
                 $currentDesc = $taskValue
                 $inCmds = $false
                 $inDeps = $false
@@ -236,10 +241,10 @@ function Get-TasksFromTaskfile {
     
     # Save last task
     if ($currentTask) {
-        $cmd = $cmdLines -join "`n"
+        $cmd = Join-TaskCommandLines -Lines $cmdLines
         if ($cmd) {
             $tasks[$currentTask] = @{
-                Command = $cmd
+                Command     = $cmd
                 Description = $currentDesc
             }
         }
@@ -280,10 +285,10 @@ function Get-TasksFromMakefile {
         if ($trimmed -match '^([a-zA-Z0-9_-]+):\s*(.*?)(?:\s+##\s*(.+))?$') {
             # Save previous task
             if ($currentTask) {
-                $cmd = $cmdLines -join "`n"
+                $cmd = Join-TaskCommandLines -Lines $cmdLines
                 if ($cmd) {
                     $tasks[$currentTask] = @{
-                        Command = $cmd
+                        Command     = $cmd
                         Description = $currentDesc
                     }
                 }
@@ -306,10 +311,10 @@ function Get-TasksFromMakefile {
     
     # Save last task
     if ($currentTask) {
-        $cmd = $cmdLines -join "`n"
+        $cmd = Join-TaskCommandLines -Lines $cmdLines
         if ($cmd) {
             $tasks[$currentTask] = @{
-                Command = $cmd
+                Command     = $cmd
                 Description = $currentDesc
             }
         }
@@ -355,7 +360,7 @@ function Get-TasksFromPackageJson {
                     $command = $json.scripts.$taskName
                     if (-not [string]::IsNullOrWhiteSpace($command)) {
                         $tasks[$taskName] = @{
-                            Command = $command
+                            Command     = (Normalize-TaskScriptPathInText -Text $command)
                             Description = $null  # package.json doesn't have descriptions
                         }
                     }
@@ -409,10 +414,10 @@ function Get-TasksFromJustfile {
         elseif ($trimmed -match '^([a-zA-Z0-9_-]+)(?:\s+[a-zA-Z0-9_-]+)*:\s*$') {
             # Save previous task
             if ($currentTask) {
-                $cmd = $cmdLines -join "`n"
+                $cmd = Join-TaskCommandLines -Lines $cmdLines
                 if ($cmd) {
                     $tasks[$currentTask] = @{
-                        Command = $cmd
+                        Command     = $cmd
                         Description = $currentDesc
                     }
                 }
@@ -435,16 +440,164 @@ function Get-TasksFromJustfile {
     
     # Save last task
     if ($currentTask) {
-        $cmd = $cmdLines -join "`n"
+        $cmd = Join-TaskCommandLines -Lines $cmdLines
         if ($cmd) {
             $tasks[$currentTask] = @{
-                Command = $cmd
+                Command     = $cmd
                 Description = $currentDesc
             }
         }
     }
     
     return $tasks
+}
+
+function Get-TaskCommandSignature {
+    <#
+    .SYNOPSIS
+        Builds a comparable signature from a task command (script path plus key flags).
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [AllowEmptyString()]
+        [string]$Command
+    )
+
+    $scriptPath = Get-ScriptPathFromTaskCommand -Command $Command
+    if (-not $scriptPath) {
+        return $null
+    }
+
+    $signatureParts = @($scriptPath)
+    $normalized = $Command -replace '\\', '/'
+    $normalized = $normalized -replace '\{\{[^}]+\}\}', ''
+    $normalized = $normalized -replace '\$\([^)]+\)', ''
+    $normalized = $normalized -replace '\$\{[^}]+\}', ''
+
+    foreach ($flag in @('-Suite', '-Action', '-UpdateBaseline', '-TestOperations')) {
+        if ($normalized -match "$flag(?:\s|=)([^\s]+)?" -or $normalized -match "$flag\b") {
+            if ($Matches[1]) {
+                $signatureParts += "$flag=$($Matches[1])"
+            }
+            else {
+                $signatureParts += $flag
+            }
+        }
+    }
+
+    if ($normalized -match '(?<![\w-])-Update(?![\w-])') {
+        $signatureParts += '-Update'
+    }
+
+    if ($normalized -match '(?<![\w-])-DryRun(?![\w-])') {
+        $signatureParts += '-DryRun'
+    }
+
+    if ($normalized -match '(?<![\w-])-Coverage(?![\w-])') {
+        $signatureParts += '-Coverage'
+    }
+
+    if ($normalized -match '(?<![\w-])-Parallel(?![\w-])') {
+        $signatureParts += '-Parallel'
+    }
+
+    if ($normalized -match '(?<![\w-])-Generate(?![\w-])') {
+        $signatureParts += '-Generate'
+    }
+
+    return ($signatureParts -join '|').ToLowerInvariant()
+}
+
+function Get-ScriptPathFromTaskCommand {
+    <#
+    .SYNOPSIS
+        Extracts the scripts/*.ps1 path from a task command string.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [AllowEmptyString()]
+        [string]$Command
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Command)) {
+        return $null
+    }
+
+    $normalized = $Command -replace '\\', '/'
+    if ($normalized -match '(scripts/[^\s"''`]+\.ps1)') {
+        return $Matches[1]
+    }
+
+    return $null
+}
+
+function Resolve-CanonicalTaskNameFromVsCodeTask {
+    <#
+    .SYNOPSIS
+        Maps a VS Code task label/command to a canonical task runner name.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Label,
+
+        [Parameter(Mandatory)]
+        [AllowEmptyString()]
+        [string]$Command,
+
+        [Parameter(Mandatory)]
+        [hashtable]$ReferenceTasks
+    )
+
+    if ($ReferenceTasks.ContainsKey($Label)) {
+        return $Label
+    }
+
+    $signature = Get-TaskCommandSignature -Command $Command
+    if ($signature) {
+        foreach ($taskName in $ReferenceTasks.Keys) {
+            $refSignature = Get-TaskCommandSignature -Command $ReferenceTasks[$taskName].Command
+            if ($refSignature -and $refSignature -eq $signature) {
+                return $taskName
+            }
+        }
+    }
+
+    return $Label
+}
+
+function Convert-TasksJsonToCanonicalNames {
+    <#
+    .SYNOPSIS
+        Re-keys VS Code tasks by canonical task names using reference task commands.
+    #>
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param(
+        [Parameter(Mandatory)]
+        [hashtable]$Tasks,
+
+        [Parameter(Mandatory)]
+        [hashtable]$ReferenceTasks
+    )
+
+    $canonical = @{}
+
+    foreach ($taskName in $Tasks.Keys) {
+        $task = $Tasks[$taskName]
+        $canonicalName = Resolve-CanonicalTaskNameFromVsCodeTask -Label $taskName -Command $task.Command -ReferenceTasks $ReferenceTasks
+
+        if (-not $canonical.ContainsKey($canonicalName)) {
+            $canonical[$canonicalName] = $task
+        }
+    }
+
+    return $canonical
 }
 
 function Get-TasksFromTasksJson {
@@ -456,7 +609,9 @@ function Get-TasksFromTasksJson {
     [OutputType([hashtable])]
     param(
         [Parameter(Mandatory)]
-        [string]$FilePath
+        [string]$FilePath,
+
+        [hashtable]$ReferenceTasks = $null
     )
     
     $tasks = @{}
@@ -485,7 +640,7 @@ function Get-TasksFromTasksJson {
                     continue
                 }
                 
-                $taskName = $task.label
+                $label = $task.label
                 $command = $null
                 
                 # Build command from task definition
@@ -504,22 +659,29 @@ function Get-TasksFromTasksJson {
                             }
                         }
                         
-                        $command = $cmdParts -join ' '
+                        $command = Normalize-TaskScriptPathInText -Text ($cmdParts -join ' ')
                     }
                     elseif ($task.command -is [string]) {
-                        $command = $task.command
+                        $command = Normalize-TaskScriptPathInText -Text $task.command
                     }
                 }
                 elseif ($task.command) {
-                    # For other types, use command as-is
-                    $command = $task.command
+                    $command = Normalize-TaskScriptPathInText -Text $task.command
                 }
                 
                 # Only add task if it has a command (skip composite tasks that only have dependsOn)
                 if (-not [string]::IsNullOrWhiteSpace($command)) {
-                    $tasks[$taskName] = @{
-                        Command = $command
-                        Description = if ($task.detail) { $task.detail } else { $null }
+                    $taskName = $label
+                    if ($ReferenceTasks) {
+                        $taskName = Resolve-CanonicalTaskNameFromVsCodeTask -Label $label -Command $command -ReferenceTasks $ReferenceTasks
+                    }
+
+                    if (-not $tasks.ContainsKey($taskName)) {
+                        $tasks[$taskName] = @{
+                            Command     = $command
+                            Description = if ($task.detail) { $task.detail } else { $null }
+                            VsCodeLabel = $label
+                        }
                     }
                 }
             }
@@ -534,4 +696,4 @@ function Get-TasksFromTasksJson {
     return $tasks
 }
 
-Export-ModuleMember -Function Get-TasksFromFile, Get-TasksFromTaskfile, Get-TasksFromMakefile, Get-TasksFromPackageJson, Get-TasksFromJustfile, Get-TasksFromTasksJson
+Export-ModuleMember -Function Get-TasksFromFile, Get-TasksFromTaskfile, Get-TasksFromMakefile, Get-TasksFromPackageJson, Get-TasksFromJustfile, Get-TasksFromTasksJson, Get-ScriptPathFromTaskCommand, Get-TaskCommandSignature, Resolve-CanonicalTaskNameFromVsCodeTask, Convert-TasksJsonToCanonicalNames

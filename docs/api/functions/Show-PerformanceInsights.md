@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\73-performance-insights.ps1
+Defined in: ../profile.d/73-performance-insights.ps1

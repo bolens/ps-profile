@@ -32,4 +32,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\00-bootstrap.ps1
+Defined in: ../profile.d/00-bootstrap.ps1

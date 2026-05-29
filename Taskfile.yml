@@ -73,6 +73,46 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update {{.CLI_ARGS}}
 
+  install-all:
+    desc: Install all optional profile dependencies (global or local)
+    cmds:
+      - pnpm run install-all
+
+  install-all-global:
+    desc: Install optional JS and Python dependencies globally
+    cmds:
+      - pnpm run install-all-global
+
+  install-all-local:
+    desc: Install optional JS and Python dependencies locally
+    cmds:
+      - pnpm run install-all-local
+
+  install-js-global:
+    desc: Install optional JS conversion packages globally
+    cmds:
+      - pnpm run install-js-global
+
+  install-js-local:
+    desc: Install optional JS conversion packages locally
+    cmds:
+      - pnpm run install-js-local
+
+  install-python-global:
+    desc: Install optional Python data packages globally
+    cmds:
+      - pnpm run install-python-global
+
+  install-python-local:
+    desc: Install optional Python data packages locally
+    cmds:
+      - pnpm run install-python-local
+
+  install-scoop:
+    desc: Install recommended CLI tools via Scoop
+    cmds:
+      - pnpm run install-scoop
+
   generate-changelog:
     desc: Generate Changelog
     cmds:
@@ -302,14 +342,14 @@ tasks:
       - pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{.CLI_ARGS}}
 
   drift-check:
-    desc: Check that all doc-to-code bindings are current (drift)
+    desc: Check that doc links and bindings are current (drift)
     cmds:
       - drift check
 
-  drift-update:
-    desc: Update drift doc-to-code binding signatures
+  drift-status:
+    desc: Show drift doc anchor and link status
     cmds:
-      - drift update
+      - drift status
 
   default:
     desc: Run default task

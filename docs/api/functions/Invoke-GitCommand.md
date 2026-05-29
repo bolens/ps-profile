@@ -48,4 +48,4 @@ Invoke-GitCommand -Subcommand 'status' -Arguments @('--short')
 
 ## Source
 
-Defined in: ..\profile.d\11-git.ps1
+Defined in: ../profile.d/11-git.ps1

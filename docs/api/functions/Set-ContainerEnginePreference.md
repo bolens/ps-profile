@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\24-container-utils.ps1
+Defined in: ../profile.d/24-container-utils.ps1

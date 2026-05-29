@@ -4,6 +4,7 @@
   "description": "Global npm packages required for PowerShell profile data format conversions",
   "private": true,
   "scripts": {
+    "default": "task --list-all",
     "install-all": "pnpm run install-all-global || pnpm run install-all-local",
     "install-all-global": "pnpm run install-js-global && pnpm run install-python-global",
     "install-all-local": "pnpm run install-js-local && pnpm run install-python-local",
@@ -57,7 +58,7 @@
     "export-metrics": "pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1",
     "save-metrics-snapshot": "pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1",
     "track-coverage-trends": "pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1",
-    "quality-check": "pnpm run format && pnpm run security-scan && pnpm run lint && pnpm run spellcheck && pnpm run markdownlint && pnpm run check-comment-help && pnpm run test && pnpm run validate-function-naming && pnpm run drift:check && echo All quality checks passed",
+    "quality-check": "pnpm run format && pnpm run security-scan && pnpm run lint && pnpm run spellcheck && pnpm run markdownlint && pnpm run check-comment-help && pnpm run test && pnpm run validate-function-naming && pnpm run drift-check && echo All quality checks passed",
     "pre-commit-checks": "pwsh -NoProfile -File scripts/git/pre-commit.ps1",
     "check-idempotency": "pwsh -NoProfile -File scripts/checks/check-idempotency.ps1",
     "validate-function-naming": "pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1",
@@ -71,8 +72,8 @@
     "dev-setup": "pwsh -NoProfile -File scripts/dev/setup.ps1",
     "check-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1",
     "generate-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate",
-    "drift:check": "drift check",
-    "drift:update": "drift update"
+    "drift-check": "drift check",
+    "drift-status": "drift status"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",

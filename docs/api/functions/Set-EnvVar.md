@@ -40,4 +40,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\05-utilities.ps1
+Defined in: ../profile.d/05-utilities.ps1

@@ -12,6 +12,11 @@ scripts/utils/task-parity/modules/TaskGenerator.psm1
     PowerShell Version: 5.0+
 #>
 
+$utilitiesModulePath = Join-Path $PSScriptRoot 'TaskParityUtilities.psm1'
+if (Test-Path -LiteralPath $utilitiesModulePath) {
+    Import-Module $utilitiesModulePath -DisableNameChecking -Force
+}
+
 function Add-MissingTasks {
     <#
     .SYNOPSIS
@@ -52,7 +57,11 @@ function Add-MissingTasks {
         return
     }
     
-    $content = Get-Content -Path $FilePath -Raw
+    $existingContent = $null
+    if (Test-Path -LiteralPath $FilePath) {
+        $existingContent = [System.IO.File]::ReadAllText($FilePath)
+    }
+
     $newTasks = @()
     
     foreach ($taskName in $MissingTaskNames) {
@@ -106,8 +115,8 @@ function Add-MissingTasks {
         $inserted = $false
         
         foreach ($line in $lines) {
-            # Insert before default task or at end
-            if (-not $inserted -and ($line -match '^default:' -or ($line -match '^[a-zA-Z0-9_-]+:\s*$' -and $line.Trim() -eq 'default:'))) {
+            # Insert before default task (taskfile/just recipe alias or make help target)
+            if (-not $inserted -and $line -match '^\s*default:') {
                 $output += $newContent
                 $inserted = $true
             }
@@ -118,8 +127,15 @@ function Add-MissingTasks {
             $output += ''
             $output += $newContent
         }
-        
-        Set-Content -Path $FilePath -Value $output -NoNewline
+
+        $lineEnding = if ($existingContent) {
+            Get-TextLineEnding -Content $existingContent
+        }
+        else {
+            "`n"
+        }
+        $joined = $output -join $lineEnding
+        Write-TaskParityTextFile -Path $FilePath -Content $joined -LineEnding $lineEnding -ExistingContent $existingContent
     }
 }
 
@@ -149,11 +165,8 @@ function Format-TaskfileTask {
     
     $lines += "    cmds:"
     
-    # Split command by newlines and add each as a command
-    $cmdLines = $Command -split "`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-    foreach ($cmdLine in $cmdLines) {
-        $trimmed = $cmdLine.Trim()
-        # Convert argument placeholders
+    foreach ($cmdLine in (Split-TaskCommandLines -Command $Command)) {
+        $trimmed = Normalize-TaskScriptPathInText -Text $cmdLine
         $trimmed = $trimmed -replace '\{\{ARGS\}\}', '{{.CLI_ARGS}}'
         $trimmed = $trimmed -replace '\$\(ARGS\)', '{{.CLI_ARGS}}'
         $trimmed = $trimmed -replace '\{\{arguments\(\)\}\}', '{{.CLI_ARGS}}'
@@ -184,17 +197,14 @@ function Format-MakefileTask {
     
     # Task definition with description
     if ($Description) {
-        $lines += "$TaskName: ## $Description"
+        $lines += "${TaskName}: ## $Description"
     }
     else {
-        $lines += "$TaskName:"
+        $lines += "${TaskName}:"
     }
     
-    # Split command by newlines and add each as a command (with tab)
-    $cmdLines = $Command -split "`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-    foreach ($cmdLine in $cmdLines) {
-        $trimmed = $cmdLine.Trim()
-        # Convert argument placeholders
+    foreach ($cmdLine in (Split-TaskCommandLines -Command $Command)) {
+        $trimmed = Normalize-TaskScriptPathInText -Text $cmdLine
         $trimmed = $trimmed -replace '\{\{ARGS\}\}', '$(ARGS)'
         $trimmed = $trimmed -replace '\{\{\.CLI_ARGS\}\}', '$(ARGS)'
         $trimmed = $trimmed -replace '\{\{arguments\(\)\}\}', '$(ARGS)'
@@ -219,8 +229,8 @@ function Format-PackageJsonTask {
         [string]$Command
     )
     
-    # Normalize command (package.json doesn't use argument placeholders typically)
-    $normalized = $Command -replace '\{\{ARGS\}\}', '' -replace '\{\{\.CLI_ARGS\}\}', '' -replace '\{\{arguments\(\)\}\}', ''
+    $normalized = Normalize-TaskScriptPathInText -Text $Command
+    $normalized = $normalized -replace '\{\{ARGS\}\}', '' -replace '\{\{\.CLI_ARGS\}\}', '' -replace '\{\{arguments\(\)\}\}', ''
     $normalized = $normalized.Trim()
     
     # Remove && echo statements that are common in package.json
@@ -256,11 +266,8 @@ function Format-JustfileTask {
     # Task definition
     $lines += "$TaskName`:"
     
-    # Split command by newlines and add each as a command
-    $cmdLines = $Command -split "`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-    foreach ($cmdLine in $cmdLines) {
-        $trimmed = $cmdLine.Trim()
-        # Convert argument placeholders
+    foreach ($cmdLine in (Split-TaskCommandLines -Command $Command)) {
+        $trimmed = Normalize-TaskScriptPathInText -Text $cmdLine
         $trimmed = $trimmed -replace '\{\{ARGS\}\}', '{{arguments()}}'
         $trimmed = $trimmed -replace '\{\{\.CLI_ARGS\}\}', '{{arguments()}}'
         $trimmed = $trimmed -replace '\$\(ARGS\)', '{{arguments()}}'
@@ -288,10 +295,11 @@ function Update-PackageJsonTasks {
     )
     
     try {
-        $json = Get-Content -Path $FilePath -Raw | ConvertFrom-Json
+        $existingContent = [System.IO.File]::ReadAllText($FilePath)
+        $json = $existingContent | ConvertFrom-Json
         
         if (-not $json.scripts) {
-            $json | Add-Member -MemberType NoteProperty -Name 'scripts' -Value @{} -Force
+            $json | Add-Member -MemberType NoteProperty -Name 'scripts' -Value ([ordered]@{}) -Force
         }
         
         foreach ($taskName in $NewTasks) {
@@ -302,11 +310,8 @@ function Update-PackageJsonTasks {
             }
         }
         
-        # Convert back to JSON with proper formatting
-        $jsonString = $json | ConvertTo-Json -Depth 10
-        # Format JSON (basic indentation)
-        $formatted = Format-JsonString -JsonString $jsonString
-        Set-Content -Path $FilePath -Value $formatted -NoNewline
+        $formatted = Format-JsonString -JsonString ($json | ConvertTo-Json -Depth 10)
+        Write-TaskParityTextFile -Path $FilePath -Content $formatted -ExistingContent $existingContent
     }
     catch {
         throw "Failed to update package.json: $_"
@@ -354,63 +359,25 @@ function Update-TasksJsonTasks {
     )
     
     try {
-        $json = Get-Content -Path $FilePath -Raw | ConvertFrom-Json
+        $existingContent = [System.IO.File]::ReadAllText($FilePath)
+        $json = $existingContent | ConvertFrom-Json
         
         if (-not $json.tasks) {
             $json | Add-Member -MemberType NoteProperty -Name 'tasks' -Value @() -Force
         }
         
         foreach ($taskName in $NewTasks) {
-            if ($ReferenceTasks.ContainsKey($taskName)) {
-                $refTask = $ReferenceTasks[$taskName]
-                $command = $refTask.Command
-                $description = $refTask.Description
-                
-                # Parse command into command and args
-                # Commands are typically: pwsh -NoProfile -File script.ps1 [args...]
-                $cmdParts = $command -split '\s+'
-                $taskCommand = $cmdParts[0]
-                $taskArgs = @()
-                
-                # Extract arguments (skip the command itself)
-                for ($i = 1; $i -lt $cmdParts.Count; $i++) {
-                    $arg = $cmdParts[$i]
-                    # Replace placeholders with VS Code variables
-                    $arg = $arg -replace '\$\{workspaceFolder\}', '${workspaceFolder}'
-                    # Convert {{ARGS}} to a placeholder that can be handled
-                    if ($arg -match '\{\{ARGS\}\}' -or $arg -match '\{\{\.CLI_ARGS\}\}' -or $arg -match '\{\{arguments\(\)\}\}') {
-                        # Skip argument placeholders for now (VS Code tasks don't have direct equivalents)
-                        continue
-                    }
-                    $taskArgs += $arg
-                }
-                
-                # Create task object
-                $newTask = @{
-                    label = $taskName
-                    type = 'shell'
-                    command = $taskCommand
-                    args = $taskArgs
-                    presentation = @{
-                        reveal = 'always'
-                    }
-                    problemMatcher = @()
-                }
-                
-                if ($description) {
-                    $newTask.detail = $description
-                }
-                
-                # Add to tasks array
-                $json.tasks += $newTask
+            if (-not $ReferenceTasks.ContainsKey($taskName)) {
+                continue
             }
+
+            $refTask = $ReferenceTasks[$taskName]
+            $newTask = ConvertTo-VsCodeShellTaskDefinition -Label $taskName -Command $refTask.Command -Description $refTask.Description
+            $json.tasks += $newTask
         }
         
-        # Convert back to JSON with proper formatting
-        $jsonString = $json | ConvertTo-Json -Depth 10
-        # Format JSON (basic indentation)
-        $formatted = Format-JsonString -JsonString $jsonString
-        Set-Content -Path $FilePath -Value $formatted -NoNewline
+        $formatted = Format-JsonString -JsonString ($json | ConvertTo-Json -Depth 10)
+        Write-TaskParityTextFile -Path $FilePath -Content $formatted -ExistingContent $existingContent
     }
     catch {
         throw "Failed to update tasks.json: $_"

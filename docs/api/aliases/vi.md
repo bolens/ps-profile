@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ..\profile.d\07-system.ps1
+Defined in: ../profile.d/07-system.ps1

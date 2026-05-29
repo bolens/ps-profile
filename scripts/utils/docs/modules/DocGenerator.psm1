@@ -113,12 +113,8 @@ function Get-RelativePath {
     $relativeUri = $fromUri.MakeRelativeUri($toUri)
     $relativePath = [Uri]::UnescapeDataString($relativeUri.ToString())
 
-    # Convert forward slashes to backslashes on Windows
-    if ([Environment]::OSVersion.Platform -eq 'Win32NT') {
-        $relativePath = $relativePath -replace '/', '\'
-    }
-
-    return $relativePath
+    # Always emit POSIX-style paths so drift link checks stay consistent across platforms.
+    return ($relativePath -replace '\\', '/')
 }
 
 <#

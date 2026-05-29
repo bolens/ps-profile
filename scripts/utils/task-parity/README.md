@@ -9,6 +9,7 @@ This utility checks that all tasks defined in `Taskfile.yml` are also present in
 - `Makefile`
 - `package.json` (scripts section)
 - `justfile`
+- `.vscode/tasks.json` (matched by canonical task name / command signature)
 
 It can also automatically generate missing tasks to achieve parity.
 
@@ -48,6 +49,7 @@ pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate 
 - **Parity Checking**: Identifies missing tasks in each file
 - **Command Comparison**: Detects command differences for the same task
 - **Auto-Generation**: Automatically adds missing tasks in the correct format
+- **VS Code mapping**: Friendly labels (e.g. `Run Spellcheck`) map to canonical names via script signatures
 - **Argument Normalization**: Handles different argument placeholder formats:
   - Taskfile: `{{.CLI_ARGS}}`
   - Makefile: `$(ARGS)`
@@ -117,9 +119,17 @@ Task generation complete. Please review the changes before committing.
 ## Module Structure
 
 - `check-task-parity.ps1` - Main script
+- `modules/TaskParityUtilities.psm1` - Cross-platform file I/O, path normalization, VS Code task building
 - `modules/TaskParser.psm1` - Parses tasks from different file formats
 - `modules/TaskComparator.psm1` - Compares tasks across files
 - `modules/TaskGenerator.psm1` - Generates missing tasks
+
+## Cross-Platform Notes
+
+- Script paths in generated commands use forward slashes (`scripts/...`) so tasks work on Windows, Linux, and macOS under `pwsh`.
+- VS Code tasks use `${workspaceFolder}/scripts/...` (forward slashes) in `-File` arguments.
+- File writes preserve the target file's line endings (CRLF or LF) and UTF-8 encoding (with BOM when already present).
+- Multiline task commands are split on both LF and CRLF.
 
 ## Notes
 

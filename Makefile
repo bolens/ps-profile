@@ -13,7 +13,8 @@
 .PHONY: collect-code-metrics export-metrics save-metrics-snapshot track-coverage-trends
 .PHONY: quality-check pre-commit-checks check-idempotency validate-function-naming
 .PHONY: check-missing-tests validate-dependencies check-missing-packages check-vulnerabilities
-.PHONY: format-and-lint all-docs init-wrangler-config dev-setup default
+.PHONY: format-and-lint all-docs init-wrangler-config dev-setup default drift-check drift-status
+.PHONY: install-all install-all-global install-all-local install-js-global install-js-local install-python-global install-python-local install-scoop
 .PHONY: db-health db-statistics db-optimize db-backup db-repair db-validate db-validate-full db-init
 .PHONY: clear-fragment-cache build-fragment-cache validate-fragment-cache
 
@@ -193,6 +194,36 @@ check-task-parity: ## Check task parity across all task runner files
 
 generate-task-parity: ## Generate missing tasks to achieve parity across all task runner files
 	pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate $(ARGS)
+
+drift-check: ## Check that doc links and bindings are current (drift)
+	drift check
+
+drift-status: ## Show drift doc anchor and link status
+	drift status
+
+install-all: ## Install all optional profile dependencies (global or local)
+	pnpm run install-all
+
+install-all-global: ## Install optional JS and Python dependencies globally
+	pnpm run install-all-global
+
+install-all-local: ## Install optional JS and Python dependencies locally
+	pnpm run install-all-local
+
+install-js-global: ## Install optional JS conversion packages globally
+	pnpm run install-js-global
+
+install-js-local: ## Install optional JS conversion packages locally
+	pnpm run install-js-local
+
+install-python-global: ## Install optional Python data packages globally
+	pnpm run install-python-global
+
+install-python-local: ## Install optional Python data packages locally
+	pnpm run install-python-local
+
+install-scoop: ## Install recommended CLI tools via Scoop
+	pnpm run install-scoop
 
 default: ## Show make target help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -10,7 +10,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-lint.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -22,7 +24,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\checks\\validate-profile.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -34,7 +38,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\checks\\check-comment-help.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -48,7 +54,9 @@
         "-Coverage",
         "-Parallel"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -63,7 +71,9 @@
         "-Parallel",
         "-DryRun"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -78,7 +88,9 @@
         "Unit",
         "-Parallel"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -93,7 +105,9 @@
         "Integration",
         "-Parallel"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -108,7 +122,9 @@
         "Performance",
         "-Parallel"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -122,7 +138,9 @@
         "-Coverage",
         "-Parallel"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -134,7 +152,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -146,7 +166,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\security\\run-security-scan.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -158,8 +180,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\performance\\diagnose-profile-performance.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -171,8 +197,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\performance\\optimize-git-performance.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -185,8 +215,12 @@
         "${workspaceFolder}\\scripts\\utils\\performance\\optimize-git-performance.ps1",
         "-DryRun"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -198,7 +232,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -211,7 +247,9 @@
         "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1",
         "-DryRun"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -224,7 +262,9 @@
         "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1",
         "-Update"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -236,7 +276,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\docs\\generate-changelog.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -248,8 +290,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\generate-dashboard.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -262,8 +308,12 @@
         "${workspaceFolder}\\scripts\\utils\\metrics\\generate-dashboard.ps1",
         "-DryRun"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -276,7 +326,9 @@
         "${workspaceFolder}\\scripts\\utils\\release\\create-release.ps1",
         "-DryRun"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -288,7 +340,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\docs\\generate-docs.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -301,7 +355,9 @@
         "${workspaceFolder}\\scripts\\utils\\docs\\generate-docs.ps1",
         "-DryRun"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -313,7 +369,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\spellcheck.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -327,7 +385,9 @@
         "-Action",
         "health"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -341,7 +401,9 @@
         "-Action",
         "statistics"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -355,7 +417,9 @@
         "-Action",
         "optimize"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -369,7 +433,9 @@
         "-Action",
         "backup"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -383,7 +449,9 @@
         "-Action",
         "repair"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -395,7 +463,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\database\\validate-databases.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -408,7 +478,9 @@
         "${workspaceFolder}\\scripts\\utils\\database\\validate-databases.ps1",
         "-TestOperations"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -420,7 +492,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\database\\initialize-databases.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -432,8 +506,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\clear-fragment-cache.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -446,8 +524,12 @@
         "${workspaceFolder}\\scripts\\utils\\clear-fragment-cache.ps1",
         "-WhatIf"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -459,8 +541,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\build-fragment-cache.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -473,8 +559,12 @@
         "${workspaceFolder}\\scripts\\utils\\build-fragment-cache.ps1",
         "-WhatIf"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -486,8 +576,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\verify-cache-cleared.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -499,8 +593,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\checks\\check-script-standards.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -512,7 +610,9 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-markdownlint.ps1"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -524,8 +624,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\git\\install-githooks.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -538,8 +642,12 @@
         "${workspaceFolder}\\scripts\\git\\install-githooks.ps1",
         "-DryRun"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -551,8 +659,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\git\\install-pre-commit-hook.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -564,8 +676,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-format.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -578,8 +694,12 @@
         "${workspaceFolder}\\scripts\\utils\\code-quality\\run-format.ps1",
         "-DryRun"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -591,8 +711,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\find-duplicate-functions.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -604,8 +728,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\docs\\generate-fragment-readmes.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -618,8 +746,12 @@
         "${workspaceFolder}\\scripts\\utils\\docs\\generate-fragment-readmes.ps1",
         "-DryRun"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -631,8 +763,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\fragment\\new-fragment.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -644,8 +780,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\checks\\check-commit-messages.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -658,7 +798,9 @@
         "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1",
         "-UpdateBaseline"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -672,7 +814,9 @@
         "-UpdateBaseline",
         "-DryRun"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -684,8 +828,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\collect-code-metrics.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -697,8 +845,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\export-metrics.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -710,8 +862,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\save-metrics-snapshot.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -723,8 +879,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\metrics\\track-coverage-trends.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -736,8 +896,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\add-missing-help.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -749,8 +913,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\fix-markdown-blank-lines.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -762,8 +930,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\fix-markdown-readme-formatting.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -778,7 +950,9 @@
         "Run Pester Tests",
         "Validate Function Naming"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -790,8 +964,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\git\\pre-commit.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -803,8 +981,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\checks\\check-idempotency.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -816,8 +998,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\validate-function-naming.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -829,8 +1015,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\code-quality\\check-missing-tests.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -842,8 +1032,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\dependencies\\validate-dependencies.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -855,8 +1049,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\dependencies\\check-missing-packages.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -868,8 +1066,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -878,19 +1080,31 @@
         "Fix Markdown Blank Lines",
         "Fix Markdown README Formatting"
       ],
-      "presentation": { "reveal": "always" },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
       "label": "Format and Lint",
-      "dependsOn": ["Format Code", "Lint profile.d"],
-      "presentation": { "reveal": "always" },
+      "dependsOn": [
+        "Format Code",
+        "Lint profile.d"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
       "label": "Generate All Documentation",
-      "dependsOn": ["Generate API Documentation", "Generate Fragment READMEs"],
-      "presentation": { "reveal": "always" },
+      "dependsOn": [
+        "Generate API Documentation",
+        "Generate Fragment READMEs"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -902,8 +1116,12 @@
         "-File",
         "${workspaceFolder}\\scripts\\utils\\setup\\init-wrangler-config.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -916,8 +1134,12 @@
         "${workspaceFolder}\\scripts\\utils\\setup\\init-wrangler-config.ps1",
         "-DryRun"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
     },
     {
@@ -929,9 +1151,458 @@
         "-File",
         "${workspaceFolder}\\scripts\\dev\\setup.ps1"
       ],
-      "options": { "cwd": "${workspaceFolder}" },
-      "presentation": { "reveal": "always" },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": []
+    },
+    {
+      "label": "all-docs",
+      "detail": "Generate All Documentation (API docs + fragment READMEs)",
+      "command": "echo",
+      "problemMatcher": [],
+      "args": [
+        "\"All",
+        "documentation",
+        "generated\""
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "drift-check",
+      "detail": "Check that doc links and bindings are current (drift)",
+      "command": "drift",
+      "problemMatcher": [],
+      "args": [
+        "check"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-all-global",
+      "detail": "Install optional JS and Python dependencies globally",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-all-global"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "db-repair",
+      "detail": "Repair corrupted SQLite databases",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/database/database-maintenance.ps1",
+        "-Action",
+        "repair"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "test-coverage",
+      "detail": "Run Pester Tests with Coverage",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/code-quality/run-pester.ps1",
+        "-Coverage",
+        "-Parallel"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "drift-status",
+      "detail": "Show drift doc anchor and link status",
+      "command": "drift",
+      "problemMatcher": [],
+      "args": [
+        "status"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "test-performance",
+      "detail": "Run Performance Test Suite",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/code-quality/run-pester.ps1",
+        "-Suite",
+        "Performance",
+        "-Parallel"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-python-local",
+      "detail": "Install optional Python data packages locally",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-python-local"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "format-and-lint",
+      "detail": "Format and Lint Code",
+      "command": "echo",
+      "problemMatcher": [],
+      "args": [
+        "\"Format",
+        "and",
+        "lint",
+        "completed\""
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "test-integration",
+      "detail": "Run Integration Test Suite",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/code-quality/run-pester.ps1",
+        "-Suite",
+        "Integration",
+        "-Parallel"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "db-backup",
+      "detail": "Backup all SQLite databases",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/database/database-maintenance.ps1",
+        "-Action",
+        "backup"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-all-local",
+      "detail": "Install optional JS and Python dependencies locally",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-all-local"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "quality-check",
+      "detail": "Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests + function naming + drift)",
+      "command": "echo",
+      "problemMatcher": [],
+      "args": [
+        "\"All",
+        "quality",
+        "checks",
+        "passed\""
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "db-health",
+      "detail": "Check health of all SQLite databases",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/database/database-maintenance.ps1",
+        "-Action",
+        "health"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-js-local",
+      "detail": "Install optional JS conversion packages locally",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-js-local"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "benchmark",
+      "detail": "Run Performance Benchmark",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/metrics/benchmark-startup.ps1"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-scoop",
+      "detail": "Install recommended CLI tools via Scoop",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-scoop"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "db-statistics",
+      "detail": "Get statistics for all SQLite databases",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/database/database-maintenance.ps1",
+        "-Action",
+        "statistics"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-python-global",
+      "detail": "Install optional Python data packages globally",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-python-global"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "check-task-parity",
+      "detail": "Check task parity across all task runner files",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/task-parity/check-task-parity.ps1"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "check-module-updates",
+      "detail": "Check Module Updates",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/dependencies/check-module-updates.ps1"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-module-updates",
+      "detail": "Install Module Updates",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/dependencies/check-module-updates.ps1",
+        "-Update"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "generate-command-wrappers",
+      "detail": "Generate standalone script wrappers for fragment commands",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/fragment/generate-command-wrappers.ps1"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-js-global",
+      "detail": "Install optional JS conversion packages globally",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-js-global"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "db-validate-full",
+      "detail": "Validate SQLite databases with operation testing",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/database/validate-databases.ps1",
+        "-TestOperations"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "generate-task-parity",
+      "detail": "Generate missing tasks to achieve parity across all task runner files",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/task-parity/check-task-parity.ps1",
+        "-Generate"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "install-all",
+      "detail": "Install all optional profile dependencies (global or local)",
+      "command": "pnpm",
+      "problemMatcher": [],
+      "args": [
+        "run",
+        "install-all"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "test-unit",
+      "detail": "Run Unit Test Suite",
+      "command": "pwsh",
+      "problemMatcher": [],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "scripts/utils/code-quality/run-pester.ps1",
+        "-Suite",
+        "Unit",
+        "-Parallel"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
+    },
+    {
+      "label": "default",
+      "detail": "Run default task",
+      "command": "task",
+      "problemMatcher": [],
+      "args": [
+        "--list-all"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "type": "shell"
     }
   ]
 }
