@@ -1,3 +1,19 @@
+# [1.5.0](https://github.com/bolens/ps-profile/compare/v1.4.1...v1.5.0) (2026-05-29)
+
+
+### Bug Fixes
+
+* **ci:** opt into Node.js 24 for all workflows using JS actions ([08a4378](https://github.com/bolens/ps-profile/commit/08a437801f550dde29e85d7a7b08f007eb92cdbf))
+* **ci:** remove incompatible workflows and fix matrix/node version issues ([8704916](https://github.com/bolens/ps-profile/commit/8704916b8df45481734ca1916d6ec5c93cb9cc99))
+* **ci:** remove nonexistent -CacheResult param from Invoke-ScriptAnalyzer ([6ad3515](https://github.com/bolens/ps-profile/commit/6ad35158732b5c2a83b1fd0ff77ffb10173f3812))
+* correct env var path bug in NodeJs/Python runtime modules; fix library-module and tool-wrapper tests ([c3f6672](https://github.com/bolens/ps-profile/commit/c3f6672f97923c248e71ab208d0c34b1e0ef5d78))
+* **spellcheck:** add technical terms and tool names to cspell wordlist ([9b4c7bb](https://github.com/bolens/ps-profile/commit/9b4c7bb6924d15dd29481fb97f4167f564268c19))
+
+
+### Features
+
+* **tooling:** sync drift tasks, task parity, and cross-platform doc links ([fa0ffab](https://github.com/bolens/ps-profile/commit/fa0ffab7109bf989aae53ba82ab2ff92d8ef6b21))
+
 ## [1.4.1](https://github.com/bolens/ps-profile/compare/v1.4.0...v1.4.1) (2026-05-28)
 
 
