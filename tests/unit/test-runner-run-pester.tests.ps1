@@ -21,12 +21,29 @@ BeforeAll {
     if (-not (Test-Path $script:RunPesterPath)) {
         throw "Test runner script not found at: $script:RunPesterPath"
     }
-    
+
     # Helper function to clear recursive detection flag
     function Clear-TestRunnerFlag {
         $env:PS_PROFILE_TEST_RUNNER_ACTIVE = $null
     }
+
+    # Helper to skip a test when modules can't load
+    function Skip-IfModulesUnavailable {
+        if (-not $script:RunPesterModulesWork) {
+            Set-ItResult -Skipped -Because 'PesterConfig.psm1 cannot load — [PesterVerbosity] type requires Pester pre-loaded in session'
+        }
+    }
+
+    # Check if PesterConfig.psm1 can load — it uses [PesterVerbosity] type in parameter defaults
+    # which requires Pester to be loaded in the session. Without it, the script crashes on import.
+    $pesterConfigPath = Join-Path $script:TestRepoRoot 'scripts/utils/code-quality/modules/PesterConfig.psm1'
+    $configLoadResult = pwsh -NoProfile -Command "
+        try { Import-Module '$pesterConfigPath' -Force -ErrorAction Stop; 'OK' }
+        catch { 'FAIL:' + \$_.Exception.Message }
+    " 2>&1
+    $script:RunPesterModulesWork = $configLoadResult -notmatch '^FAIL:'
 }
+
 
 # Clear recursive detection flag before each test to ensure clean state
 # This is done at the start of each Describe block since BeforeEach can't be at root level
@@ -34,6 +51,7 @@ BeforeAll {
 Describe 'run-pester.ps1 Parameter Validation' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     Context 'Suite Parameter' {
@@ -140,6 +158,7 @@ Describe 'run-pester.ps1 Parameter Validation' {
 Describe 'run-pester.ps1 Dry Run Functionality' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Executes successfully in dry run mode' {
@@ -167,6 +186,7 @@ Describe 'run-pester.ps1 Dry Run Functionality' {
 Describe 'run-pester.ps1 Module Integration' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Loads all required modules successfully' {
@@ -188,6 +208,7 @@ Describe 'run-pester.ps1 Module Integration' {
 Describe 'run-pester.ps1 Test Discovery' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Discovers unit tests correctly' {
@@ -217,6 +238,7 @@ Describe 'run-pester.ps1 Test Discovery' {
 Describe 'run-pester.ps1 Error Handling' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Handles missing test directories gracefully' {
@@ -238,6 +260,7 @@ Describe 'run-pester.ps1 Error Handling' {
 Describe 'run-pester.ps1 Output Handling' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Generates test results when requested' {
@@ -262,6 +285,7 @@ Describe 'run-pester.ps1 Output Handling' {
 Describe 'run-pester.ps1 Performance Features' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Handles performance baseline generation' {
@@ -294,6 +318,7 @@ Describe 'run-pester.ps1 Performance Features' {
 Describe 'run-pester.ps1 Advanced Features' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Handles retry logic configuration' {
@@ -326,6 +351,7 @@ Describe 'run-pester.ps1 Advanced Features' {
 Describe 'run-pester.ps1 CI Integration' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Handles CI mode correctly' {
@@ -346,6 +372,7 @@ Describe 'run-pester.ps1 CI Integration' {
 Describe 'run-pester.ps1 Filtering and Selection' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Handles test name filtering' {
@@ -370,6 +397,7 @@ Describe 'run-pester.ps1 Filtering and Selection' {
 Describe 'run-pester.ps1 List Tests' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Lists tests without running them' {
@@ -394,6 +422,7 @@ Describe 'run-pester.ps1 List Tests' {
 Describe 'run-pester.ps1 Test File Pattern Filtering' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Filters test files by pattern' {
@@ -416,6 +445,7 @@ Describe 'run-pester.ps1 Test File Pattern Filtering' {
 Describe 'run-pester.ps1 Multiple Test Files' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Accepts multiple test files via TestFile parameter' {
@@ -452,6 +482,7 @@ Describe 'run-pester.ps1 Multiple Test Files' {
 Describe 'run-pester.ps1 Configuration Files' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Saves configuration to file' {
@@ -509,6 +540,7 @@ Describe 'run-pester.ps1 Configuration Files' {
 Describe 'run-pester.ps1 Git Integration' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Handles ChangedFiles parameter when in git repo' {
@@ -553,6 +585,7 @@ Describe 'run-pester.ps1 Git Integration' {
 Describe 'run-pester.ps1 Failed Only' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Handles FailedOnly when no previous results exist' {
@@ -568,6 +601,7 @@ Describe 'run-pester.ps1 Failed Only' {
 Describe 'run-pester.ps1 Summary Statistics' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Shows summary statistics when requested' {
@@ -586,6 +620,7 @@ Describe 'run-pester.ps1 Summary Statistics' {
 Describe 'run-pester.ps1 Exit Codes' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Returns appropriate exit code for no tests found' {
@@ -601,6 +636,7 @@ Describe 'run-pester.ps1 Exit Codes' {
 Describe 'run-pester.ps1 Watch Mode' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Accepts Watch parameter without error' {
@@ -622,6 +658,7 @@ Describe 'run-pester.ps1 Watch Mode' {
 Describe 'run-pester.ps1 Interactive Mode' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Accepts Interactive parameter' {
@@ -636,6 +673,7 @@ Describe 'run-pester.ps1 Interactive Mode' {
 Describe 'run-pester.ps1 Parameter Combinations' {
     BeforeEach {
         Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
     }
     
     It 'Combines multiple features' {

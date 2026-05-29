@@ -65,7 +65,8 @@ Describe 'mise Tools Integration Tests' {
                 }
             }
 
-            { Test-MiseOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-MiseOutdated
+            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
             Get-Command Test-MiseOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'mise Tools Integration Tests' {
                 }
             }
 
-            { Update-MiseRuntimes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-MiseRuntimes
+            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
             Get-Command Update-MiseRuntimes -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -109,7 +111,8 @@ Describe 'mise Tools Integration Tests' {
                 }
             }
 
-            { Update-MiseSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-MiseSelf
+            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
             Get-Command Update-MiseSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -133,7 +136,8 @@ Describe 'mise Tools Integration Tests' {
                 }
             }
 
-            { Get-MiseRuntimes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Get-MiseRuntimes
+            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
             Get-Command Get-MiseRuntimes -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

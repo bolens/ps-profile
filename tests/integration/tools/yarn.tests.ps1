@@ -106,7 +106,8 @@ Describe 'Yarn Tools Integration Tests' {
                 }
             }
 
-            { Test-YarnOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-YarnOutdated
+            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
             Get-Command Test-YarnOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -128,7 +129,8 @@ Describe 'Yarn Tools Integration Tests' {
                 }
             }
 
-            { Update-YarnPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-YarnPackages
+            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
             Get-Command Update-YarnPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -150,7 +152,8 @@ Describe 'Yarn Tools Integration Tests' {
                 }
             }
 
-            { Update-YarnGlobalPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-YarnGlobalPackages
+            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
             Get-Command Update-YarnGlobalPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -172,7 +175,8 @@ Describe 'Yarn Tools Integration Tests' {
                 }
             }
 
-            { Update-YarnSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-YarnSelf
+            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
             Get-Command Update-YarnSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

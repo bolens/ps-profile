@@ -263,7 +263,8 @@ Describe 'Advanced Development Tools Integration Tests' {
                 }
             }
 
-            { Test-RustupUpdates -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-RustupUpdates
+            Should -Invoke -CommandName 'rustup' -Times 1 -Exactly
             Get-Command Test-RustupUpdates -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -285,7 +286,8 @@ Describe 'Advanced Development Tools Integration Tests' {
                 }
             }
 
-            { Update-CargoPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-CargoPackages
+            Should -Invoke -CommandName 'cargo' -Times 1 -Exactly
             Get-Command Update-CargoPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

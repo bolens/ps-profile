@@ -69,7 +69,8 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            { Add-PdmPackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Add-PdmPackage requests
+            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
         It 'Add-PdmPackage supports --dev flag' {
@@ -81,7 +82,8 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            { Add-PdmPackage pytest -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Add-PdmPackage pytest -Dev
+            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
         It 'Creates Remove-PdmPackage function' {
@@ -107,7 +109,8 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            { Remove-PdmPackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Remove-PdmPackage requests
+            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
         It 'Creates Update-PdmPackages function' {
@@ -128,7 +131,8 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            { Update-PdmPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PdmPackages
+            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
         It 'Update-PdmPackages calls pdm update for specific packages' {
@@ -140,7 +144,8 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            { Update-PdmPackages requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PdmPackages requests
+            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
         It 'PDM fragment handles missing tool gracefully' {

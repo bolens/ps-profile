@@ -65,7 +65,8 @@ Describe 'Conda Tools Integration Tests' {
                 }
             }
 
-            { Test-CondaOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-CondaOutdated
+            Should -Invoke -CommandName 'conda' -Times 1 -Exactly
             Get-Command Test-CondaOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'Conda Tools Integration Tests' {
                 }
             }
 
-            { Update-CondaPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-CondaPackages
+            Should -Invoke -CommandName 'conda' -Times 1 -Exactly
             Get-Command Update-CondaPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -109,7 +111,8 @@ Describe 'Conda Tools Integration Tests' {
                 }
             }
 
-            { Update-CondaSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-CondaSelf
+            Should -Invoke -CommandName 'conda' -Times 1 -Exactly
             Get-Command Update-CondaSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

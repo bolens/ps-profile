@@ -65,7 +65,8 @@ Describe 'nimble Tools Integration Tests' {
                 }
             }
 
-            { Test-NimbleOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-NimbleOutdated
+            Should -Invoke -CommandName 'nimble' -Times 1 -Exactly
             Get-Command Test-NimbleOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'nimble Tools Integration Tests' {
                 }
             }
 
-            { Update-NimblePackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-NimblePackages
+            Should -Invoke -CommandName 'nimble' -Times 1 -Exactly
             Get-Command Update-NimblePackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

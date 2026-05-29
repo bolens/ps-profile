@@ -93,7 +93,8 @@ Describe 'Deno Tools Integration Tests' {
                 }
             }
 
-            { Update-DenoSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-DenoSelf
+            Should -Invoke -CommandName 'deno' -Times 1 -Exactly
             Get-Command Update-DenoSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

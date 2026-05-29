@@ -64,7 +64,8 @@ Describe 'CocoaPods Tools Integration Tests' {
                 }
             }
 
-            { Install-CocoaPodsDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-CocoaPodsDependencies
+            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
         }
 
         It 'Creates Update-CocoaPodsDependencies function' {
@@ -85,7 +86,8 @@ Describe 'CocoaPods Tools Integration Tests' {
                 }
             }
 
-            { Update-CocoaPodsDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-CocoaPodsDependencies
+            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
         }
 
         It 'Update-CocoaPodsDependencies calls pod update for specific pods' {
@@ -97,7 +99,8 @@ Describe 'CocoaPods Tools Integration Tests' {
                 }
             }
 
-            { Update-CocoaPodsDependencies Alamofire -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-CocoaPodsDependencies Alamofire
+            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
         }
 
         It 'Creates Remove-CocoaPodsIntegration function' {
@@ -118,7 +121,8 @@ Describe 'CocoaPods Tools Integration Tests' {
                 }
             }
 
-            { Remove-CocoaPodsIntegration -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Remove-CocoaPodsIntegration
+            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
         }
 
         It 'CocoaPods fragment handles missing tool gracefully' {

@@ -52,7 +52,7 @@ try {
             }
         } | Select-Object -First $MaxResults
 
-        if ($fuzzyMatches.Count -eq 0) {
+        if (@($fuzzyMatches).Count -eq 0) {
             Write-Host "No matches found for pattern: $Pattern"
             return
         }
@@ -130,7 +130,7 @@ try {
         }
 
         $history = Get-History | Select-Object -Last 200  # Limit for performance
-        if (-not $history -or $history.Count -eq 0) {
+        if (-not $history -or @($history).Count -eq 0) {
             Write-Host "No command history available."
             return
         }
@@ -294,7 +294,7 @@ try {
         $cutoffDate = (Get-Date).AddDays(-$Days)
         $history = Get-History | Where-Object { $_.StartExecutionTime -lt $cutoffDate }
 
-        if ($history.Count -eq 0) {
+        if (@($history).Count -eq 0) {
             Write-Host "No commands older than $Days days found."
             return
         }
@@ -303,7 +303,7 @@ try {
             Clear-History -Id $_.Id -ErrorAction SilentlyContinue
         }
 
-        Write-Host "🗑️ Removed $($history.Count) commands older than $Days days."
+        Write-Host "🗑️ Removed $(@($history).Count) commands older than $Days days."
     }
 
     # Smart history recall
@@ -348,7 +348,7 @@ try {
 
         $recent = Get-History | Sort-Object Id -Descending | Select-Object -First $Count
 
-        if ($recent.Count -eq 0) {
+        if (@($recent).Count -eq 0) {
             Write-Host "No command history available."
             return
         }

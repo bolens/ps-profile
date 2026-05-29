@@ -76,7 +76,8 @@ Describe 'Poetry Tools Integration Tests' {
                 }
             }
 
-            { Test-PoetryOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-PoetryOutdated
+            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
             Get-Command Test-PoetryOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -98,7 +99,8 @@ Describe 'Poetry Tools Integration Tests' {
                 }
             }
 
-            { Update-PoetryDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PoetryDependencies
+            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
             Get-Command Update-PoetryDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -120,7 +122,8 @@ Describe 'Poetry Tools Integration Tests' {
                 }
             }
 
-            { Update-PoetrySelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PoetrySelf
+            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
             Get-Command Update-PoetrySelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 

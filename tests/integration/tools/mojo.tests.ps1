@@ -82,7 +82,8 @@ Describe 'Mojo Tools Integration Tests' {
                 }
             }
 
-            { Update-MojoSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-MojoSelf
+            Should -Invoke -CommandName 'mojo' -Times 1 -Exactly
             Get-Command Update-MojoSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

@@ -69,7 +69,8 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            { Add-RyePackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Add-RyePackage requests
+            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
         It 'Add-RyePackage supports --dev flag' {
@@ -81,7 +82,8 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            { Add-RyePackage pytest -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Add-RyePackage pytest -Dev
+            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
         It 'Creates Remove-RyePackage function' {
@@ -107,7 +109,8 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            { Remove-RyePackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Remove-RyePackage requests
+            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
         It 'Creates Sync-RyeDependencies function' {
@@ -128,7 +131,8 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            { Sync-RyeDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Sync-RyeDependencies
+            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
         It 'Creates Update-RyePackages function' {
@@ -149,7 +153,8 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            { Update-RyePackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-RyePackages
+            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
         It 'Update-RyePackages calls rye add --upgrade for specific packages' {
@@ -161,7 +166,8 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            { Update-RyePackages requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-RyePackages requests
+            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
         It 'Rye fragment handles missing tool gracefully' {

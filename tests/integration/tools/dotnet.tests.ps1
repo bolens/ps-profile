@@ -65,7 +65,8 @@ Describe 'dotnet Tools Integration Tests' {
                 }
             }
 
-            { Test-DotnetOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-DotnetOutdated
+            Should -Invoke -CommandName 'dotnet' -Times 1 -Exactly
             Get-Command Test-DotnetOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -96,7 +97,8 @@ Describe 'dotnet Tools Integration Tests' {
                 }
             }
 
-            { Update-DotnetTools -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-DotnetTools
+            Should -Invoke -CommandName 'dotnet' -Times 1 -Exactly
             Get-Command Update-DotnetTools -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

@@ -113,7 +113,8 @@ Describe 'Language Tools Integration Tests' {
                 }
             }
 
-            { Update-GoDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-GoDependencies
+            Should -Invoke -CommandName 'go' -Times 1 -Exactly
             Get-Command Update-GoDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -135,7 +136,8 @@ Describe 'Language Tools Integration Tests' {
                 }
             }
 
-            { Update-GoTools -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-GoTools
+            Should -Invoke -CommandName 'go' -Times 1 -Exactly
             Get-Command Update-GoTools -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

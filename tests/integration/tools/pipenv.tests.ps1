@@ -69,7 +69,8 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            { Install-PipenvPackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-PipenvPackage requests
+            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
         It 'Install-PipenvPackage supports --dev flag' {
@@ -81,7 +82,8 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            { Install-PipenvPackage pytest -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-PipenvPackage pytest -Dev
+            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
         It 'Creates Remove-PipenvPackage function' {
@@ -107,7 +109,8 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            { Remove-PipenvPackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Remove-PipenvPackage requests
+            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
         It 'Creates Update-PipenvPackages function' {
@@ -128,7 +131,8 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            { Update-PipenvPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PipenvPackages
+            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
         It 'Update-PipenvPackages calls pipenv update for specific packages' {
@@ -140,7 +144,8 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            { Update-PipenvPackages requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PipenvPackages requests
+            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
         It 'Pipenv fragment handles missing tool gracefully' {

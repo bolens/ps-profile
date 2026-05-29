@@ -67,7 +67,8 @@ Describe 'npm Tools Integration Tests' {
                 }
             }
 
-            { Test-NpmOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-NpmOutdated
+            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
             Get-Command Test-NpmOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -89,7 +90,8 @@ Describe 'npm Tools Integration Tests' {
                 }
             }
 
-            { Update-NpmPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-NpmPackages
+            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
             Get-Command Update-NpmPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -111,7 +113,8 @@ Describe 'npm Tools Integration Tests' {
                 }
             }
 
-            { Update-NpmSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-NpmSelf
+            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
             Get-Command Update-NpmSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 

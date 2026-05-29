@@ -126,7 +126,8 @@ Describe 'PHP and Laravel Tools Integration Tests' {
                 }
             }
 
-            { Test-ComposerOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-ComposerOutdated
+            Should -Invoke -CommandName 'composer' -Times 1 -Exactly
             Get-Command Test-ComposerOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -148,7 +149,8 @@ Describe 'PHP and Laravel Tools Integration Tests' {
                 }
             }
 
-            { Update-ComposerPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-ComposerPackages
+            Should -Invoke -CommandName 'composer' -Times 1 -Exactly
             Get-Command Update-ComposerPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -170,7 +172,8 @@ Describe 'PHP and Laravel Tools Integration Tests' {
                 }
             }
 
-            { Update-ComposerSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-ComposerSelf
+            Should -Invoke -CommandName 'composer' -Times 1 -Exactly
             Get-Command Update-ComposerSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

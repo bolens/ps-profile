@@ -69,7 +69,8 @@ Describe 'NuGet Tools Integration Tests' {
                 }
             }
 
-            { Install-NuGetPackage Newtonsoft.Json -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-NuGetPackage Newtonsoft.Json
+            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
         }
 
         It 'Creates Restore-NuGetPackages function' {
@@ -90,7 +91,8 @@ Describe 'NuGet Tools Integration Tests' {
                 }
             }
 
-            { Restore-NuGetPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Restore-NuGetPackages
+            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
         }
 
         It 'Creates Update-NuGetPackages function' {
@@ -111,7 +113,8 @@ Describe 'NuGet Tools Integration Tests' {
                 }
             }
 
-            { Update-NuGetPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-NuGetPackages
+            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
         }
 
         It 'Update-NuGetPackages supports -Id parameter for individual packages' {
@@ -123,7 +126,8 @@ Describe 'NuGet Tools Integration Tests' {
                 }
             }
 
-            { Update-NuGetPackages -Id Newtonsoft.Json -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-NuGetPackages -Id Newtonsoft.Json
+            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
         }
 
         It 'NuGet fragment handles missing tool gracefully' {

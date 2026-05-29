@@ -64,7 +64,8 @@ Describe 'swift Tools Integration Tests' {
                 }
             }
 
-            { Update-SwiftPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-SwiftPackages
+            Should -Invoke -CommandName 'swift' -Times 1 -Exactly
             Get-Command Update-SwiftPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -86,7 +87,8 @@ Describe 'swift Tools Integration Tests' {
                 }
             }
 
-            { Resolve-SwiftPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Resolve-SwiftPackages
+            Should -Invoke -CommandName 'swift' -Times 1 -Exactly
             Get-Command Resolve-SwiftPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

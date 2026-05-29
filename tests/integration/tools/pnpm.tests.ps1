@@ -92,7 +92,8 @@ Describe 'pnpm Tools Integration Tests' {
                 }
             }
 
-            { Test-PnpmOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-PnpmOutdated
+            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
             Get-Command Test-PnpmOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -114,7 +115,8 @@ Describe 'pnpm Tools Integration Tests' {
                 }
             }
 
-            { Update-PnpmPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PnpmPackages
+            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
             Get-Command Update-PnpmPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -136,7 +138,8 @@ Describe 'pnpm Tools Integration Tests' {
                 }
             }
 
-            { Update-PnpmSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PnpmSelf
+            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
             Get-Command Update-PnpmSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 

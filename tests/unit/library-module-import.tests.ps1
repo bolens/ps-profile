@@ -119,10 +119,6 @@ Describe 'ModuleImport Module Functions' {
             $result | Should -BeNullOrEmpty
         }
 
-        It 'Warns when module does not exist and Required is false' {
-            $warningOutput = { Import-LibModule -ModuleName 'NonExistentModule' -ScriptPath $script:TestScriptPath -Required:$false -ErrorAction Continue } | Out-String
-            # Note: Warning output may not be captured in all test scenarios
-        }
 
         It 'Imports module with DisableNameChecking' {
             $module = Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $script:TestScriptPath -DisableNameChecking -ErrorAction Stop

@@ -104,7 +104,8 @@ Describe 'Bun Tools Integration Tests' {
                 }
             }
 
-            { Update-BunSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-BunSelf
+            Should -Invoke -CommandName 'bun' -Times 1 -Exactly
             Get-Command Update-BunSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

@@ -326,7 +326,9 @@ Describe 'Command Module Functions' {
 
         It 'Extracts package name from npm command' {
             $result = Resolve-InstallCommand -InstallCommand 'npm install -g qrcode' -PackageName 'qrcode'
+            # PackageName is used for preference lookup; command passes through as-is when no preference is set
             $result | Should -Not -BeNullOrEmpty
+            $result | Should -Match 'qrcode'
         }
 
         It 'Handles Python pip commands' {
@@ -361,19 +363,22 @@ Describe 'Command Module Functions' {
 
         It 'Extracts package name from pip command' {
             $result = Resolve-InstallCommand -InstallCommand 'pip install qrcode' -PackageName 'qrcode'
+            # PackageName is used for preference lookup; command passes through when no preference is set
             $result | Should -Not -BeNullOrEmpty
+            $result | Should -Match 'qrcode'
         }
 
         It 'Handles pip install with --user flag' {
             $result = Resolve-InstallCommand -InstallCommand 'pip install --user qrcode'
-            $result | Should -Not -BeNullOrEmpty
-            # Should not be treated as global
+            # --user flag commands pass through unchanged — not treated as global installs
+            $result | Should -Be 'pip install --user qrcode'
         }
 
         It 'Handles pip install with --system flag' {
             $result = Resolve-InstallCommand -InstallCommand 'uv pip install --system qrcode'
+            # --system flag commands are passed through to the caller to handle
             $result | Should -Not -BeNullOrEmpty
-            # Should be treated as global
+            $result | Should -Match 'qrcode'
         }
 
         It 'Returns non-package-manager commands as-is' {

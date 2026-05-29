@@ -81,8 +81,9 @@ Describe "Starship Module Tests" {
     }
 
     Context "Test-PromptNeedsReplacement" {
-        It "Function exists and can be called" {
-            { Get-Command Test-PromptNeedsReplacement -ErrorAction SilentlyContinue } | Should -Not -BeNullOrEmpty
+        It "Function exists and is callable" {
+            Get-Command Test-PromptNeedsReplacement -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            { Test-PromptNeedsReplacement } | Should -Not -Throw
         }
     }
 
@@ -129,9 +130,8 @@ Describe "Starship Module Tests" {
     }
 
     Context "Invoke-StarshipInitScript" {
-        It "Executes without error when starship is available" {
-            # Skip complex external command testing - focus on function availability
-            { Get-Command Invoke-StarshipInitScript -ErrorAction SilentlyContinue } | Should -Not -BeNullOrEmpty
+        It "Function exists and is callable" {
+            Get-Command Invoke-StarshipInitScript -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
 

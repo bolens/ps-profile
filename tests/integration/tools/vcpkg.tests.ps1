@@ -69,7 +69,8 @@ Describe 'vcpkg Tools Integration Tests' {
                 }
             }
 
-            { Install-VcpkgPackage boost -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-VcpkgPackage boost
+            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
         It 'Creates Remove-VcpkgPackage function' {
@@ -95,7 +96,8 @@ Describe 'vcpkg Tools Integration Tests' {
                 }
             }
 
-            { Remove-VcpkgPackage boost -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Remove-VcpkgPackage boost
+            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
         It 'Creates Update-VcpkgPackages function' {
@@ -116,7 +118,8 @@ Describe 'vcpkg Tools Integration Tests' {
                 }
             }
 
-            { Update-VcpkgPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-VcpkgPackages
+            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
         It 'Update-VcpkgPackages calls vcpkg upgrade for specific packages with -NoDryRun' {
@@ -128,7 +131,8 @@ Describe 'vcpkg Tools Integration Tests' {
                 }
             }
 
-            { Update-VcpkgPackages boost -NoDryRun -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-VcpkgPackages boost -NoDryRun
+            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
         It 'vcpkg fragment handles missing tool gracefully' {

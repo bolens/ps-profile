@@ -199,7 +199,8 @@ Describe 'lang-rust.ps1 Integration Tests' {
             }
             
             # Execute
-            { Clear-CargoCache -ErrorAction SilentlyContinue 4>&1 | Out-Null } | Should -Not -Throw
+            Clear-CargoCache -ErrorAction SilentlyContinue 4>&1 | Out-Null
+            Should -Invoke -CommandName 'cargo-cache' -Times 1 -Exactly
             
             # Verify
             if ($script:capturedArgs) {
@@ -217,7 +218,8 @@ Describe 'lang-rust.ps1 Integration Tests' {
             }
             
             # Execute
-            { Clear-CargoCache -Autoclean -ErrorAction SilentlyContinue 4>&1 | Out-Null } | Should -Not -Throw
+            Clear-CargoCache -Autoclean -ErrorAction SilentlyContinue 4>&1 | Out-Null
+            Should -Invoke -CommandName 'cargo-cache' -Times 1 -Exactly
             
             # Verify
             if ($script:capturedArgs) {
@@ -235,7 +237,8 @@ Describe 'lang-rust.ps1 Integration Tests' {
             }
             
             # Execute
-            { Clear-CargoCache -All -ErrorAction SilentlyContinue 4>&1 | Out-Null } | Should -Not -Throw
+            Clear-CargoCache -All -ErrorAction SilentlyContinue 4>&1 | Out-Null
+            Should -Invoke -CommandName 'cargo-cache' -Times 1 -Exactly
             
             # Verify
             if ($script:capturedArgs) {

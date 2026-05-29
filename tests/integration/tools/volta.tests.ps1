@@ -69,7 +69,8 @@ Describe 'Volta Tools Integration Tests' {
                 }
             }
 
-            { Install-VoltaTool node@18 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-VoltaTool node@18
+            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
         }
 
         It 'Creates Pin-VoltaTool function' {
@@ -90,7 +91,8 @@ Describe 'Volta Tools Integration Tests' {
                 }
             }
 
-            { Pin-VoltaTool node@18 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Pin-VoltaTool node@18
+            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
         }
 
         It 'Creates Get-VoltaTools function' {
@@ -112,7 +114,8 @@ Describe 'Volta Tools Integration Tests' {
                 }
             }
 
-            { Get-VoltaTools -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Get-VoltaTools
+            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
         }
 
         It 'Creates Remove-VoltaTool function' {
@@ -138,7 +141,8 @@ Describe 'Volta Tools Integration Tests' {
                 }
             }
 
-            { Remove-VoltaTool node@18 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Remove-VoltaTool node@18
+            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
         }
 
         It 'Creates Update-VoltaSelf function' {
@@ -159,7 +163,8 @@ Describe 'Volta Tools Integration Tests' {
                 }
             }
 
-            { Update-VoltaSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-VoltaSelf
+            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
         }
 
         It 'Volta fragment handles missing tool gracefully' {

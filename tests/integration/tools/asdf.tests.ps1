@@ -69,7 +69,8 @@ Describe 'asdf Tools Integration Tests' {
                 }
             }
 
-            { Install-AsdfTool nodejs 18.0.0 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-AsdfTool nodejs 18.0.0
+            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
         }
 
         It 'Creates Get-AsdfTools function' {
@@ -93,7 +94,8 @@ Describe 'asdf Tools Integration Tests' {
                 }
             }
 
-            { Get-AsdfTools -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Get-AsdfTools
+            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
         }
 
         It 'Get-AsdfTools calls asdf list for specific tool' {
@@ -106,7 +108,8 @@ Describe 'asdf Tools Integration Tests' {
                 }
             }
 
-            { Get-AsdfTools nodejs -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Get-AsdfTools nodejs
+            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
         }
 
         It 'Creates Remove-AsdfTool function' {
@@ -132,7 +135,8 @@ Describe 'asdf Tools Integration Tests' {
                 }
             }
 
-            { Remove-AsdfTool nodejs 18.0.0 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Remove-AsdfTool nodejs 18.0.0
+            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
         }
 
         It 'Creates Update-AsdfSelf function' {
@@ -153,7 +157,8 @@ Describe 'asdf Tools Integration Tests' {
                 }
             }
 
-            { Update-AsdfSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-AsdfSelf
+            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
         }
 
         It 'asdf fragment handles missing tool gracefully' {

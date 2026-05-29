@@ -88,18 +88,19 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
     
     Context 'Provider-Specific Usage Patterns' {
         It 'Supports AWS-style service/action pattern' {
-            # This test verifies the pattern works, not actual AWS execution
+            # Verifies Get-CloudResources handles missing aws CLI without throwing
+            Mock -CommandName Test-CachedCommand -MockWith { $false } -ParameterFilter { $CommandName -eq 'aws' }
             $result = Get-CloudResources -CommandName 'aws' -Service 's3' -Action 'list-buckets' -ErrorAction SilentlyContinue
-            
-            # Should not throw, even if AWS is not available
-            $result | Should -Not -Throw
+            # When aws is not available, result should be null/empty (graceful degradation)
+            $result | Should -BeNullOrEmpty
         }
         
         It 'Supports Azure-style direct arguments pattern' {
+            # Verifies Get-CloudResources handles missing az CLI without throwing
+            Mock -CommandName Test-CachedCommand -MockWith { $false } -ParameterFilter { $CommandName -eq 'az' }
             $result = Get-CloudResources -CommandName 'az' -Arguments @('account', 'show') -ErrorAction SilentlyContinue
-            
-            # Should not throw, even if Azure CLI is not available
-            $result | Should -Not -Throw
+            # When az is not available, result should be null/empty (graceful degradation)
+            $result | Should -BeNullOrEmpty
         }
         
         It 'Supports GCloud-style project management' {

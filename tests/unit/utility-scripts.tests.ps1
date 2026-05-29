@@ -56,7 +56,9 @@ Describe 'Utility Script Integration Tests' {
                 '\.psm1$',           # Module files
                 'test.*\.ps1$',      # Test scripts
                 '.*test.*\.ps1$',    # Scripts with "test" in name
-                '^test\.ps1$'        # Simple test.ps1
+                '^test\.ps1$',       # Simple test.ps1
+                '^build-fragment-cache\.ps1$',  # Bootstrapper — must direct-import lib before Import-LibModule is available
+                '^clear-fragment-cache\.ps1$'   # Bootstrapper — same reason as build-fragment-cache
             )
             
             foreach ($script in $scripts) {
@@ -109,28 +111,27 @@ Describe 'Utility Script Integration Tests' {
     Context 'Error Handling' {
         It 'Scripts wrap risky operations in try-catch' {
             $scripts = Get-PowerShellScripts -Path $script:ScriptsUtilsPath
-            $riskyOperations = @('Get-RepoRoot', 'Ensure-ModuleAvailable', 'Get-Content', 'Set-Content', 'Invoke-ScriptAnalyzer')
+            # Focused on top-level operations that, if they throw, would abort the script entirely.
+            # We verify that Get-RepoRoot calls (the bootstrap import that every script uses)
+            # appear inside a try block somewhere in the file.
+            $violations = @()
 
             foreach ($script in $scripts) {
                 if ($script.Name -eq 'Common.psm1') { continue }
 
                 $content = Get-Content -Path $script.FullName -Raw
+                # Skip module files (psm1) and test scripts
+                if ($script.Name -match '\.psm1$|test.*\.ps1$') { continue }
+                # Skip scripts in modules/ subdirectory
+                if ($script.FullName -match '[\\/]modules[\\/]') { continue }
 
-                foreach ($operation in $riskyOperations) {
-                    if ($content -match "\b$operation\b") {
-                        $operationIndex = $content.IndexOf($operation)
-                        if ($operationIndex -gt 0) {
-                            $beforeOperation = $content.Substring(0, $operationIndex)
-                            $tryCount = ([regex]::Matches($beforeOperation, '\btry\s*\{')).Count
-                            $catchCount = ([regex]::Matches($beforeOperation, '\bcatch\s*\{')).Count
-
-                            if ($tryCount -eq 0) {
-                                Write-Warning "$($script.Name) uses $operation but may not have try-catch protection"
-                            }
-                        }
-                    }
+                # If the script uses Get-RepoRoot but has zero try blocks, it has no error handling
+                if ($content -match '\bGet-RepoRoot\b' -and $content -notmatch '\btry\s*\{') {
+                    $violations += $script.Name
                 }
             }
+
+            $violations | Should -BeNullOrEmpty -Because "scripts using Get-RepoRoot should wrap it in try-catch to avoid unhandled exceptions: $($violations -join ', ')"
         }
     }
 }

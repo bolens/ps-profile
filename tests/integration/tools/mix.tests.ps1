@@ -65,7 +65,8 @@ Describe 'mix Tools Integration Tests' {
                 }
             }
 
-            { Test-MixOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-MixOutdated
+            Should -Invoke -CommandName 'mix' -Times 1 -Exactly
             Get-Command Test-MixOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'mix Tools Integration Tests' {
                 }
             }
 
-            { Update-MixDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-MixDependencies
+            Should -Invoke -CommandName 'mix' -Times 1 -Exactly
             Get-Command Update-MixDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

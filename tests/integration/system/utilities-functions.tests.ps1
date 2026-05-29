@@ -72,12 +72,11 @@ Describe 'System Utility Functions' {
 
         It 'Get-NetworkPorts function exists' {
             Get-Command Get-NetworkPorts -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Mock netstat command availability and execution to avoid actual network calls
-            # Get-NetworkPorts checks: Get-Command netstat, then calls: & netstat -an
             Mock-CommandAvailabilityPester -CommandName 'netstat' -Available $true -Scope It
             Mock -CommandName netstat -MockWith { "Active Connections`nTCP    0.0.0.0:80" }
-            # Test that function doesn't throw when called
-            { Get-NetworkPorts -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
+            $result = Get-NetworkPorts -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke netstat -Times 1 -Exactly
         }
 
         It 'Get-NetworkPorts handles missing netstat command gracefully' {
@@ -167,20 +166,18 @@ Describe 'System Utility Functions' {
 
         It 'Invoke-RestApi function exists' {
             Get-Command Invoke-RestApi -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Mock Invoke-RestMethod to avoid network dependency (Invoke-RestApi uses Invoke-RestMethod internally)
-            # Call Mock directly in test context to ensure proper scoping
             $returnValue = @{ success = $true }
             $returnValueJson = ($returnValue | ConvertTo-Json -Compress -Depth 10)
             $mockWith = [scriptblock]::Create("('$returnValueJson' | ConvertFrom-Json)")
             Mock -CommandName Invoke-RestMethod -MockWith $mockWith
-            # Test that function doesn't throw when called
-            { Invoke-RestApi -Uri 'http://test.example.com' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $result = Invoke-RestApi -Uri 'http://test.example.com' -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+            $result.success | Should -Be $true
+            Should -Invoke Invoke-RestMethod -Times 1 -Exactly
         }
 
         It 'Invoke-WebRequestCustom function exists' {
             Get-Command Invoke-WebRequestCustom -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Mock Invoke-WebRequest to avoid network dependency (Invoke-WebRequestCustom uses Invoke-WebRequest internally)
-            # Call Mock directly in test context to ensure proper scoping
             $values = @{
                 StatusCode = 200
                 Content    = "Test response"
@@ -189,8 +186,10 @@ Describe 'System Utility Functions' {
             $valuesJson = ($values | ConvertTo-Json -Compress -Depth 10)
             $mockWith = [scriptblock]::Create("`$v = ('$valuesJson' | ConvertFrom-Json); [PSCustomObject]@{ StatusCode = `$v.StatusCode; Content = `$v.Content; Headers = `$v.Headers }")
             Mock -CommandName Invoke-WebRequest -MockWith $mockWith
-            # Test that function doesn't throw when called
-            { Invoke-WebRequestCustom -Uri 'http://test.example.com' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $result = Invoke-WebRequestCustom -Uri 'http://test.example.com' -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+            $result.StatusCode | Should -Be 200
+            Should -Invoke Invoke-WebRequest -Times 1 -Exactly
         }
 
         It 'Expand-ArchiveCustom function exists' {

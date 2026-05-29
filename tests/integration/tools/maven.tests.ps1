@@ -65,7 +65,8 @@ Describe 'maven Tools Integration Tests' {
                 }
             }
 
-            { Test-MavenOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-MavenOutdated
+            Should -Invoke -CommandName 'mvn' -Times 1 -Exactly
             Get-Command Test-MavenOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'maven Tools Integration Tests' {
                 }
             }
 
-            { Update-MavenDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-MavenDependencies
+            Should -Invoke -CommandName 'mvn' -Times 1 -Exactly
             Get-Command Update-MavenDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

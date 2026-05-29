@@ -67,7 +67,8 @@ Describe 'pip Tools Integration Tests' {
                 }
             }
 
-            { Test-PipOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-PipOutdated
+            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
             Get-Command Test-PipOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -97,7 +98,8 @@ Describe 'pip Tools Integration Tests' {
                 }
             }
 
-            { Update-PipPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PipPackages
+            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
             Get-Command Update-PipPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -119,7 +121,8 @@ Describe 'pip Tools Integration Tests' {
                 }
             }
 
-            { Update-PipSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-PipSelf
+            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
             Get-Command Update-PipSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 

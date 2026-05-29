@@ -65,7 +65,8 @@ Describe 'gradle Tools Integration Tests' {
                 }
             }
 
-            { Test-GradleOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-GradleOutdated
+            Should -Invoke -CommandName 'gradle' -Times 1 -Exactly
             Get-Command Test-GradleOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'gradle Tools Integration Tests' {
                 }
             }
 
-            { Update-GradleWrapper -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-GradleWrapper
+            Should -Invoke -CommandName 'gradle' -Times 1 -Exactly
             Get-Command Update-GradleWrapper -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

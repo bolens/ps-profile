@@ -196,7 +196,8 @@ Describe 'uv Tools Integration Tests' {
             # Function should exist and be callable
             Get-Command Update-UVOutdatedPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             # Try to call the function - it may call real uv if mock doesn't work, but should not throw
-            { Update-UVOutdatedPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-UVOutdatedPackages
+            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
             # If mock was called, verify it was called at least for list --outdated and freeze
             # Note: Mock may not work for external commands, so this is a best-effort check
             if ($callCount -gt 0) {

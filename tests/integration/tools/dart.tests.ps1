@@ -65,7 +65,8 @@ Describe 'dart Tools Integration Tests' {
                 }
             }
 
-            { Test-DartOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-DartOutdated
+            Should -Invoke -CommandName 'dart' -Times 1 -Exactly
             Get-Command Test-DartOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'dart Tools Integration Tests' {
                 }
             }
 
-            { Update-DartPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-DartPackages
+            Should -Invoke -CommandName 'dart' -Times 1 -Exactly
             Get-Command Update-DartPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -118,7 +120,8 @@ Describe 'dart Tools Integration Tests' {
                 }
             }
 
-            { Test-FlutterOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-FlutterOutdated
+            Should -Invoke -CommandName 'flutter' -Times 1 -Exactly
             Get-Command Test-FlutterOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -140,7 +143,8 @@ Describe 'dart Tools Integration Tests' {
                 }
             }
 
-            { Update-FlutterPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-FlutterPackages
+            Should -Invoke -CommandName 'flutter' -Times 1 -Exactly
             Get-Command Update-FlutterPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

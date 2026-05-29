@@ -64,7 +64,8 @@ Describe 'julia Tools Integration Tests' {
                 }
             }
 
-            { Update-JuliaPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-JuliaPackages
+            Should -Invoke -CommandName 'julia' -Times 1 -Exactly
             Get-Command Update-JuliaPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -87,7 +88,8 @@ Describe 'julia Tools Integration Tests' {
                 }
             }
 
-            { Get-JuliaPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Get-JuliaPackages
+            Should -Invoke -CommandName 'julia' -Times 1 -Exactly
             Get-Command Get-JuliaPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

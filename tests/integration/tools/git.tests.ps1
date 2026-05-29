@@ -84,8 +84,10 @@ Describe 'Git Integration Tests' {
                 }
                 
                 git init --quiet 2>&1 | Out-Null
-                { gs --short } | Should -Not -Throw
-                { gl --oneline -5 } | Should -Not -Throw
+                gs --short
+                Should -Invoke -CommandName 'git' -Times 1 -Exactly
+                gl --oneline -5
+                Should -Invoke -CommandName 'git' -Times 1 -Exactly
             }
             finally {
                 Pop-Location

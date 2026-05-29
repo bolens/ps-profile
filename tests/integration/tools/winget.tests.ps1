@@ -65,7 +65,8 @@ Describe 'winget Tools Integration Tests' {
                 }
             }
 
-            { Test-WingetOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-WingetOutdated
+            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
             Get-Command Test-WingetOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 

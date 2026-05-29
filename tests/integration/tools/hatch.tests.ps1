@@ -64,7 +64,8 @@ Describe 'Hatch Tools Integration Tests' {
                 }
             }
 
-            { New-HatchEnvironment -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            New-HatchEnvironment
+            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
         }
 
         It 'Creates Build-HatchProject function' {
@@ -85,7 +86,8 @@ Describe 'Hatch Tools Integration Tests' {
                 }
             }
 
-            { Build-HatchProject -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Build-HatchProject
+            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
         }
 
         It 'Creates Get-HatchVersion function' {
@@ -110,7 +112,8 @@ Describe 'Hatch Tools Integration Tests' {
                 }
             }
 
-            { Get-HatchVersion -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Get-HatchVersion
+            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
         }
 
         It 'Set-HatchVersion calls hatch version with version' {
@@ -122,7 +125,8 @@ Describe 'Hatch Tools Integration Tests' {
                 }
             }
 
-            { Set-HatchVersion -Version '2.0.0' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Set-HatchVersion -Version '2.0.0'
+            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
         }
 
         It 'Hatch fragment handles missing tool gracefully' {

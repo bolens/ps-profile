@@ -137,7 +137,8 @@ Describe 're-tools.ps1 - Integration Tests' {
                 return 'Success'
             }
             
-            { Decompile-Java -InputFile 'test.dex' -OutputPath $TestDrive -ErrorAction Stop } | Should -Not -Throw
+            Decompile-Java -InputFile 'test.dex' -OutputPath $TestDrive -ErrorAction Stop
+            Should -Invoke -CommandName 'jadx' -Times 1 -Exactly
         }
         
         It 'Decompile-DotNet accepts parameters' {
@@ -153,7 +154,8 @@ Describe 're-tools.ps1 - Integration Tests' {
                 return 'Success'
             }
             
-            { Decompile-DotNet -InputFile 'test.dll' -OutputPath $TestDrive -ErrorAction Stop } | Should -Not -Throw
+            Decompile-DotNet -InputFile 'test.dll' -OutputPath $TestDrive -ErrorAction Stop
+            Should -Invoke -CommandName 'dnspyex' -Times 1 -Exactly
         }
     }
 }

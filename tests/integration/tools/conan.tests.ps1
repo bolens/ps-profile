@@ -64,7 +64,8 @@ Describe 'Conan Tools Integration Tests' {
                 }
             }
 
-            { Install-ConanPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Install-ConanPackages
+            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
         }
 
         It 'Creates New-ConanPackage function' {
@@ -85,7 +86,8 @@ Describe 'Conan Tools Integration Tests' {
                 }
             }
 
-            { New-ConanPackage ./conanfile.py -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            New-ConanPackage ./conanfile.py
+            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
         }
 
         It 'Creates Find-ConanPackage function' {
@@ -106,7 +108,8 @@ Describe 'Conan Tools Integration Tests' {
                 }
             }
 
-            { Find-ConanPackage boost -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Find-ConanPackage boost
+            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
         }
 
         It 'Creates Update-ConanPackages function' {
@@ -127,7 +130,8 @@ Describe 'Conan Tools Integration Tests' {
                 }
             }
 
-            { Update-ConanPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-ConanPackages
+            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
         }
 
         It 'Conan fragment handles missing tool gracefully' {

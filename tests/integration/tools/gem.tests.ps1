@@ -64,7 +64,8 @@ Describe 'gem Tools Integration Tests' {
                 }
             }
 
-            { Test-GemOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Test-GemOutdated
+            Should -Invoke -CommandName 'gem' -Times 1 -Exactly
             Get-Command Test-GemOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -86,7 +87,8 @@ Describe 'gem Tools Integration Tests' {
                 }
             }
 
-            { Update-GemPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-GemPackages
+            Should -Invoke -CommandName 'gem' -Times 1 -Exactly
             Get-Command Update-GemPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -108,7 +110,8 @@ Describe 'gem Tools Integration Tests' {
                 }
             }
 
-            { Update-GemSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            Update-GemSelf
+            Should -Invoke -CommandName 'gem' -Times 1 -Exactly
             Get-Command Update-GemSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
