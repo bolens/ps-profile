@@ -103,7 +103,7 @@
     "@cspell/dict-companies": "^3.2.11",
     "@cspell/dict-docker": "^1.1.17",
     "@cspell/dict-dotnet": "^5.0.13",
-    "@cspell/dict-en-au": "^1.1.20",
+    "@cspell/dict-en-au": "^1.1.22",
     "@cspell/dict-en-ca": "^1.0.58",
     "@cspell/dict-en-gb-ise": "^1.0.27",
     "@cspell/dict-filetypes": "^3.0.18",
