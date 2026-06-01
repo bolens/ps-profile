@@ -105,7 +105,7 @@
     "@cspell/dict-dotnet": "^5.0.13",
     "@cspell/dict-en-au": "^1.1.20",
     "@cspell/dict-en-ca": "^1.0.58",
-    "@cspell/dict-en-gb-ise": "^1.0.27",
+    "@cspell/dict-en-gb-ise": "^1.0.29",
     "@cspell/dict-filetypes": "^3.0.18",
     "@cspell/dict-k8s": "^1.0.12",
     "@cspell/dict-node": "^5.0.9",
