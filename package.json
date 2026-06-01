@@ -111,7 +111,7 @@
     "@cspell/dict-node": "^5.0.9",
     "@cspell/dict-npm": "^5.2.38",
     "@cspell/dict-powershell": "^5.0.15",
-    "@cspell/dict-python": "^4.2.26",
+    "@cspell/dict-python": "^4.2.27",
     "@cspell/dict-software-terms": "^5.2.2",
     "cspell": "^10.0.0",
     "markdownlint-cli": "^0.48.0"
