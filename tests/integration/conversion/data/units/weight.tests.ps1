@@ -14,7 +14,7 @@
 Describe 'Weight/Mass Unit Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
     }
 
     Context 'Weight/Mass Conversions' {

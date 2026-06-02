@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     try {
         # Load bootstrap first to get Test-HasCommand
         $global:__psprofile_fragment_loaded = @{}

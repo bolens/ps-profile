@@ -73,8 +73,7 @@ function Test-PythonPackageAvailable {
     
     # Check if package is available using Python's importlib
     $checkScript = "import sys; import importlib.util; spec = importlib.util.find_spec('$PackageName'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-$(Get-Random).py"
-    Set-Content -Path $tempCheck -Value $checkScript -Encoding UTF8
+    $tempCheck = New-TestTempFile -Prefix 'python-check' -Extension '.py' -Content $checkScript
     try {
         & $pythonCmd $tempCheck 2>&1 | Out-Null
         return ($LASTEXITCODE -eq 0)

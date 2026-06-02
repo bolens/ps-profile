@@ -3,9 +3,8 @@
 # Integration tests for beads.ps1
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:BeadsPath = Join-Path $script:ProfileDir 'beads.ps1'
     

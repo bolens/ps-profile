@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'winget Tools Integration Tests' {
     BeforeAll {
@@ -394,7 +396,7 @@ Describe 'winget Tools Integration Tests' {
             }
 
             # Execute
-            { Export-WingetPackages -Path 'test-winget-packages.json' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-WingetPackages -Path (Get-TestArtifactPath -FileName 'test-winget-packages.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'winget' -Times 1 -Exactly
@@ -415,7 +417,7 @@ Describe 'winget Tools Integration Tests' {
             }
 
             # Execute
-            { Export-WingetPackages -Path 'test-winget-packages.json' -Source winget -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-WingetPackages -Path (Get-TestArtifactPath -FileName 'test-winget-packages.json') -Source winget -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'winget' -Times 1 -Exactly

@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'Scoop Tools Integration Tests' {
     BeforeAll {
@@ -102,7 +104,7 @@ Describe 'Scoop Tools Integration Tests' {
                 Write-Output '{"git": "2.40.0"}'
             }
 
-            { Export-ScoopPackages -Path 'test-scoopfile.json' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-ScoopPackages -Path (Get-TestArtifactPath -FileName 'test-scoopfile.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
         }
 
@@ -116,7 +118,7 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Import-ScoopPackages calls scoop import' {
-            $testFile = 'test-scoopfile.json'
+            $testFile = Get-TestArtifactPath -FileName 'test-scoopfile.json'
             '{"git": "2.40.0"}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
             $script:capturedArgs = $null
@@ -158,7 +160,7 @@ Describe 'Scoop Tools Integration Tests' {
                 $script:capturedArgs = $Arguments
             }
 
-            { Import-ScoopPackages -Path 'nonexistent.json' -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
+            { Import-ScoopPackages -Path (Get-TestArtifactPath -FileName 'nonexistent.json') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'scoop' -Times 0 -Exactly
         }
 

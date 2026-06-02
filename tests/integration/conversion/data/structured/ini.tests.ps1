@@ -21,36 +21,7 @@ else {
 Describe 'INI Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        
-        # Load bootstrap for core functions
-        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-        if (Test-Path -LiteralPath $bootstrapPath) {
-            . $bootstrapPath
-        }
-        
-        # Load files fragment for conversion module infrastructure
-        $filesPath = Join-Path $script:ProfileDir 'files.ps1'
-        if (Test-Path -LiteralPath $filesPath) {
-            . $filesPath
-        }
-        
-        # Load required helper modules (INI depends on helpers-xml.ps1 for XML conversions)
-        $helpersXmlPath = Join-Path $script:ProfileDir 'conversion-modules' 'helpers' 'helpers-xml.ps1'
-        if (Test-Path -LiteralPath $helpersXmlPath) {
-            . $helpersXmlPath
-        }
-        else {
-            throw "Required helper module not found: helpers-xml.ps1"
-        }
-        
-        # Load INI module directly (bypass Ensure pattern for faster test startup)
-        $iniModulePath = Join-Path $script:ProfileDir 'conversion-modules' 'data' 'structured' 'ini.ps1'
-        if (Test-Path -LiteralPath $iniModulePath) {
-            . $iniModulePath
-        }
-        else {
-            throw "INI module not found at: $iniModulePath"
-        }
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
     }
 
     Context 'INI Format Conversions' {

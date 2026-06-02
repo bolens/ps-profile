@@ -16,7 +16,7 @@
 Describe 'SQLite Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
         # Check if SQLite is available
         $script:SqliteAvailable = (Get-Command sqlite3 -ErrorAction SilentlyContinue) -ne $null

@@ -16,7 +16,7 @@
 Describe 'XZ/LZMA Compression Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
         # Check if native tools are available
         $script:XzAvailable = (Get-Command xz -ErrorAction SilentlyContinue) -ne $null

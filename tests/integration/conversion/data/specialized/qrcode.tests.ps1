@@ -15,7 +15,7 @@
 Describe 'QR Code Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Specialized' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
     }
 
     Context 'QR Code Conversions' {

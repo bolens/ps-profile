@@ -1,4 +1,6 @@
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'Tooling Integration Tests' {
     BeforeAll {

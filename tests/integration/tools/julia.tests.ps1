@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'julia Tools Integration Tests' {
     BeforeAll {

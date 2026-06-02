@@ -7,7 +7,9 @@
     and that function registration is performant.
 #>
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+}
 
 Describe 'Security Tools Fragment Performance Tests' {
     BeforeAll {

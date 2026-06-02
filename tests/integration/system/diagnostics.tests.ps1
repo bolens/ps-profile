@@ -3,6 +3,8 @@
 Describe 'Diagnostics Integration Tests' {
     BeforeAll {
         try {
+            . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:BootstrapPath -or [string]::IsNullOrWhiteSpace($script:BootstrapPath)) {

@@ -15,7 +15,7 @@
 Describe 'AAC Audio Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Media' -LoadFilesFragment -EnsureFileConversionMedia
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
     }
 
     Context 'Audio conversion utilities - AAC format' {

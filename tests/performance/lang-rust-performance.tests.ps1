@@ -3,9 +3,8 @@
 # Performance tests for lang-rust.ps1 fragment
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:LangRustPath = Join-Path $script:ProfileDir 'lang-rust.ps1'
 }

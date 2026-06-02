@@ -14,7 +14,7 @@
 Describe 'Document Roundtrip Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'All' -LoadFilesFragment -EnsureFileConversionDocuments -EnsureFileConversionMedia
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
     }
 
     Context 'Cross-format document roundtrip conversions' {

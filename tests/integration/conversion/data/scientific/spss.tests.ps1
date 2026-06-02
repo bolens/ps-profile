@@ -17,7 +17,7 @@
 Describe 'SPSS Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
         # Initialize Python mocks if in test mode
         if ($env:PS_PROFILE_TEST_MODE -eq '1' -and (Get-Command Initialize-PythonMocks -ErrorAction SilentlyContinue)) {

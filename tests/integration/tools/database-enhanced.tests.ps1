@@ -3,9 +3,8 @@
 # Integration tests for database.ps1 enhanced functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
@@ -100,7 +99,7 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
             Mock-CommandAvailabilityPester -CommandName 'pg_dump' -Available $false
             
             $output = & {
-                Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction SilentlyContinue
+                Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath (Get-TestArtifactPath -FileName 'backup.sql') -ErrorAction SilentlyContinue
             } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pg_dump not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pg_dump'
@@ -159,7 +158,8 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
         }
         
         It 'Backup-Database returns string path' {
-            $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath 'backup.dump' -ErrorAction SilentlyContinue
+            $backupPath = Join-Path $TestDrive 'backup.dump'
+            $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $backupPath -ErrorAction SilentlyContinue
             
             # May be null if tools not available, but if it returns, should be string
             if ($null -ne $result) {

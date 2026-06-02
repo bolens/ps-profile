@@ -3,9 +3,8 @@
 # Integration tests for ai-tools.ps1
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:AiToolsPath = Join-Path $script:ProfileDir 'ai-tools.ps1'
     

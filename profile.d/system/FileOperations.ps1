@@ -12,22 +12,20 @@
     of existing files (Unix touch behavior).
 #>
 function New-EmptyFile {
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
     param(
-        [Parameter(ValueFromRemainingArguments = $true, Position = 0)]
+        [Parameter(ValueFromRemainingArguments = $true, Position = 0, ParameterSetName = 'Path')]
         [string[]]$Path,
 
-        [Alias('LiteralPath')]
-        [string[]]$AdditionalPaths
+        [Parameter(Mandatory, ParameterSetName = 'LiteralPath')]
+        [string[]]$LiteralPath
     )
 
-    $paths = @()
-
-    if ($Path) {
-        $paths += $Path
+    $paths = if ($PSCmdlet.ParameterSetName -eq 'LiteralPath') {
+        @($LiteralPath)
     }
-
-    if ($AdditionalPaths) {
-        $paths += $AdditionalPaths
+    else {
+        @($Path)
     }
 
     if (-not $paths) {
@@ -129,10 +127,13 @@ Set-AgentModeAlias -Name 'touch' -Target 'New-EmptyFile'
     Creates the full directory path including parent directories.
 #>
 function New-Directory {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Path')]
     param(
-        [Parameter(ValueFromRemainingArguments = $true, Position = 0)]
+        [Parameter(ValueFromRemainingArguments = $true, Position = 0, ParameterSetName = 'Path')]
         [string[]]$Path,
+
+        [Parameter(Mandatory, ParameterSetName = 'LiteralPath')]
+        [string[]]$LiteralPath,
 
         [Alias('p')]
         [switch]$Parent
@@ -142,7 +143,10 @@ function New-Directory {
     $createParents = $false
     $dirPaths = @()
 
-    if ($Path) {
+    if ($PSCmdlet.ParameterSetName -eq 'LiteralPath') {
+        $dirPaths = @($LiteralPath)
+    }
+    elseif ($Path) {
         foreach ($arg in $Path) {
             if ($arg -eq '-p' -or $arg -eq '--parent') {
                 $createParents = $true

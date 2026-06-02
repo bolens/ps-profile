@@ -720,7 +720,7 @@ if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debu
     # Debug is enabled, $debugLevel contains the numeric level (1-3)
 }
 
-# Helper function to exit while ensuring cleanup
+# Helper function to exit while ensuring basic runner cleanup
 # Must be defined after modules are imported but before any calls to it
 function Exit-WithCleanup {
     param(
@@ -1935,7 +1935,11 @@ try {
                     # Generate regression report if there are significant changes
                     if ($comparison.Regressions.Count -gt 0 -or $comparison.Improvements.Count -gt 0) {
                         try {
-                            $reportPath = Join-Path $repoRoot 'performance-regression-report.txt'
+                            $testArtifactsDir = Join-Path $repoRoot (Join-Path 'tests' 'test-artifacts')
+                            if (-not (Test-Path -LiteralPath $testArtifactsDir)) {
+                                New-Item -ItemType Directory -Path $testArtifactsDir -Force | Out-Null
+                            }
+                            $reportPath = Join-Path $testArtifactsDir 'performance-regression-report.txt'
                             New-PerformanceRegressionReport -Comparison $comparison -OutputPath $reportPath
                         }
                         catch {
@@ -2009,6 +2013,10 @@ try {
     }
 }
 finally {
+    if (Get-Command Remove-TestArtifacts -ErrorAction SilentlyContinue) {
+        Remove-TestArtifacts
+    }
+
     # Stop output interception using modular function (if available)
     if (Get-Command -Name 'Stop-TestOutputInterceptor' -ErrorAction SilentlyContinue) {
         Stop-TestOutputInterceptor

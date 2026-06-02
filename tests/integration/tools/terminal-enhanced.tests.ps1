@@ -3,9 +3,8 @@
 # Integration tests for terminal-enhanced.ps1 module
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }

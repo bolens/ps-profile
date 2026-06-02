@@ -1,5 +1,7 @@
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe "Modern CLI Tools" {
     BeforeAll {
@@ -239,7 +241,7 @@ Describe "Modern CLI Tools" {
         }
 
         It "View-WithBat emits missing-tool warning when bat is unavailable" {
-            $batOutput = View-WithBat -Path 'test.txt' 2>&1 3>&1 | Out-String
+            $batOutput = View-WithBat -Path (Get-TestArtifactPath -FileName 'test.txt') 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $batOutput -Pattern 'bat not found'
         }
         

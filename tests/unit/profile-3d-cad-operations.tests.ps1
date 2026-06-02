@@ -8,6 +8,9 @@ BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir '3d-cad.ps1')
+
+    $script:TestSceneBlend = Get-TestArtifactPath -FileName 'scene.blend'
+    $script:TestRenderPng = Get-TestArtifactPath -FileName 'render.png'
 }
 
 Describe '3d-cad.ps1 - Operation Functions' {
@@ -84,7 +87,7 @@ Describe '3d-cad.ps1 - Operation Functions' {
         It 'Returns null when blender is not available' {
             Set-TestCommandAvailabilityState -CommandName 'blender' -Available $false
 
-            $result = Render-3DScene -ProjectPath 'scene.blend' -OutputPath 'render.png' -ErrorAction SilentlyContinue
+            $result = Render-3DScene -ProjectPath $script:TestSceneBlend -OutputPath $script:TestRenderPng -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
         }
@@ -93,7 +96,7 @@ Describe '3d-cad.ps1 - Operation Functions' {
             Setup-AvailableCommandMock -CommandName 'blender'
             $missingProject = Join-Path (New-TestTempDirectory -Prefix 'Render3DMissing') 'nonexistent.blend'
 
-            { Render-3DScene -ProjectPath $missingProject -OutputPath 'render.png' -ErrorAction Stop } | Should -Throw
+            { Render-3DScene -ProjectPath $missingProject -OutputPath $script:TestRenderPng -ErrorAction Stop } | Should -Throw
         }
 
         It 'Calls blender with render arguments' {

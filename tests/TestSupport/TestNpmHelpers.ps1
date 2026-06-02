@@ -59,9 +59,7 @@ try {
 }
 "@
     
-    $tempRoot = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
-    $tempCheck = Join-Path $tempRoot "npm-check-$(Get-Random).js"
-    Set-Content -Path $tempCheck -Value $checkScript -Encoding UTF8
+    $tempCheck = New-TestTempFile -Prefix 'npm-check' -Extension '.js' -Content $checkScript
     try {
         # Set NODE_PATH to include pnpm global if available
         $env:NODE_PATH = if ($pnpmGlobalPath) { $pnpmGlobalPath } else { $env:NODE_PATH }

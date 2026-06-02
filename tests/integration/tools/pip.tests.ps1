@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'pip Tools Integration Tests' {
     BeforeAll {
@@ -162,7 +164,7 @@ Describe 'pip Tools Integration Tests' {
                 Write-Output 'pandas==2.0.0'
             }
 
-            { Export-PipPackages -Path 'test-requirements.txt' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-PipPackages -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'pip' -Times 1 -Exactly
             if ($null -ne $script:capturedArgs) {
                 $script:capturedArgs | Should -Contain 'freeze'
@@ -177,7 +179,7 @@ Describe 'pip Tools Integration Tests' {
                 Write-Output 'requests==2.31.0'
             }
 
-            { Export-PipPackages -Path 'test-requirements.txt' -User -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-PipPackages -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -User -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'pip' -Times 1 -Exactly
             if ($null -ne $script:capturedArgs) {
                 $script:capturedArgs | Should -Contain 'freeze'
@@ -195,7 +197,7 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Import-PipPackages calls pip install -r' {
-            $testFile = 'test-requirements.txt'
+            $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
             $script:capturedArgs = $null
@@ -217,7 +219,7 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Import-PipPackages with User passes --user flag' {
-            $testFile = 'test-requirements.txt'
+            $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
             $script:capturedArgs = $null
@@ -349,7 +351,7 @@ Describe 'pip Tools Integration Tests' {
                 Write-Output 'Packages installed'
             }
 
-            { Import-PipPackages -Path 'nonexistent.txt' -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
+            { Import-PipPackages -Path (Get-TestArtifactPath -FileName 'nonexistent.txt') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'pip' -Times 0 -Exactly
         }
     }

@@ -22,53 +22,14 @@ else {
 Describe 'SuperJSON to/from JSON Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        
-        # Load bootstrap for core functions
-        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-        if (Test-Path -LiteralPath $bootstrapPath) {
-            . $bootstrapPath
-        }
-        
-        # Load files fragment for conversion module infrastructure
-        $filesPath = Join-Path $script:ProfileDir 'files.ps1'
-        if (Test-Path -LiteralPath $filesPath) {
-            . $filesPath
-        }
-        
-        # Load required helper modules (SuperJSON depends on helpers-xml.ps1 and helpers-toon.ps1)
-        $helpersXmlPath = Join-Path $script:ProfileDir 'conversion-modules' 'helpers' 'helpers-xml.ps1'
-        if (Test-Path -LiteralPath $helpersXmlPath) {
-            . $helpersXmlPath
-        }
-        else {
-            throw "Required helper module not found: helpers-xml.ps1"
-        }
-        
-        $helpersToonPath = Join-Path $script:ProfileDir 'conversion-modules' 'helpers' 'helpers-toon.ps1'
-        if (Test-Path -LiteralPath $helpersToonPath) {
-            . $helpersToonPath
-        }
-        else {
-            throw "Required helper module not found: helpers-toon.ps1"
-        }
-        
-        # Load SuperJSON module directly (bypass Ensure pattern for faster test startup)
-        $superjsonModulePath = Join-Path $script:ProfileDir 'conversion-modules' 'data' 'structured' 'superjson.ps1'
-        if (Test-Path -LiteralPath $superjsonModulePath) {
-            . $superjsonModulePath
-        }
-        else {
-            throw "SuperJSON module not found at: $superjsonModulePath"
-        }
-        
-        # Ensure NodeJs module is loaded (provides Invoke-NodeScript)
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+
         $repoRoot = Split-Path -Parent $script:ProfileDir
         $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
         if ($nodeJsModulePath -and -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force -Global
         }
-        
-        # Check if dependencies are available
+
         $script:NodeAvailable = (Get-Command node -ErrorAction SilentlyContinue) -ne $null
         $script:InvokeNodeScriptAvailable = (Get-Command Invoke-NodeScript -ErrorAction SilentlyContinue) -ne $null
     }

@@ -7,10 +7,8 @@ BeforeAll {
     # Import the module under test
     Import-Module $script:PythonPath -DisableNameChecking -ErrorAction Stop -Force
 
-    # Create test directory — use cross-platform temp path
-    $tmpRoot = if ($env:TEMP) { $env:TEMP } elseif ($env:TMPDIR) { $env:TMPDIR } else { '/tmp' }
-    $script:TestDir = Join-Path $tmpRoot "test-python-$(Get-Random)"
-    New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
+    # Keep all transient test data under tests/test-data
+    $script:TestDir = New-TestTempDirectory -Prefix 'test-python'
 }
 
 AfterAll {

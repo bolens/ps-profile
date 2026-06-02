@@ -1,5 +1,6 @@
-
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+}
 
 $script:ProfilePath = $null
 $script:ProfileDir = $null

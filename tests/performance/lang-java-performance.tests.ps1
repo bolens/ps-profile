@@ -3,9 +3,8 @@
 # Performance tests for lang-java.ps1 fragment
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:FragmentPath = Join-Path $script:ProfileDir 'lang-java.ps1'
 

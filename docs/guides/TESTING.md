@@ -188,7 +188,15 @@ The module uses a structured approach where module configurations are separated 
 **TestMocks Module** (`TestSupport/TestMocks.ps1`):
 
 - `Initialize-TestMocks` - Sets up mock functions for testing
-- `Remove-TestArtifacts` - Cleans up test artifacts
+- `Remove-TestArtifacts` - Cleans registered paths and known repo-root spillover after each test
+- `Clear-TestRepoRootSpillover` - Removes transient files accidentally created in the repository root
+
+**TestPaths Module** (`TestSupport/TestPaths.ps1`):
+
+- `Get-TestDataPath` / `Get-TestArtifactsPath` - Canonical storage under `tests/test-data` and `tests/test-artifacts`
+- `New-TestTempDirectory` / `New-TestTempFile` - Creates transient paths and registers them for cleanup
+- `Get-TestArtifactPath` - Single named file under `tests/test-data` (use instead of bare filenames like `backup.dump`)
+- `Register-TestCleanupPath` - Registers a path for `Remove-TestArtifacts`
 
 **TestNpmHelpers Module** (`TestSupport/TestNpmHelpers.ps1`):
 
@@ -209,13 +217,16 @@ tests/unit/my-module.tests.ps1
 #>
 
 BeforeAll {
-    # Import test support
+    # Import test support from a Pester hook (not at file top level)
     . $PSScriptRoot/../TestSupport.ps1
 
     # Import the module or code to test
     $modulePath = Get-TestPath -RelativePath 'scripts/lib/MyModule.psm1'
     Import-Module $modulePath -Force
 }
+
+# Transient outputs: never use bare relative paths (for example 'backup.dump' or 'CHANGELOG.md')
+# at repository CWD — use Get-TestArtifactPath, New-TestTempDirectory, or New-TestTempFile.
 
 AfterAll {
     # Cleanup if needed

@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'Poetry Tools Integration Tests' {
     BeforeAll {
@@ -144,7 +146,7 @@ Describe 'Poetry Tools Integration Tests' {
                 Write-Output 'requests==2.31.0'
             }
 
-            { Export-PoetryDependencies -Path 'test-requirements.txt' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
             if ($null -ne $script:capturedArgs) {
                 $script:capturedArgs | Should -Contain 'export'
@@ -161,7 +163,7 @@ Describe 'Poetry Tools Integration Tests' {
                 Write-Output 'requests==2.31.0'
             }
 
-            { Export-PoetryDependencies -Path 'test-requirements.txt' -WithoutHashes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -WithoutHashes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
             if ($null -ne $script:capturedArgs) {
                 $script:capturedArgs | Should -Contain 'export'
@@ -179,7 +181,7 @@ Describe 'Poetry Tools Integration Tests' {
         }
 
         It 'Import-PoetryDependencies calls pip install -r' {
-            $testFile = 'test-requirements.txt'
+            $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
             $script:capturedArgs = @()
@@ -201,7 +203,7 @@ Describe 'Poetry Tools Integration Tests' {
         }
 
         It 'Import-PoetryDependencies with NoDeps passes --no-deps flag' {
-            $testFile = 'test-requirements.txt'
+            $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
             $script:capturedArgs = @()
@@ -239,7 +241,7 @@ Describe 'Poetry Tools Integration Tests' {
                 Write-Output 'requests==2.31.0'
             }
 
-            { Export-PoetryDependencies -Path 'test-requirements.txt' -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
             if ($null -ne $script:capturedArgs) {
                 $script:capturedArgs | Should -Contain 'export'
@@ -255,7 +257,7 @@ Describe 'Poetry Tools Integration Tests' {
                 Write-Output 'Packages installed'
             }
 
-            { Import-PoetryDependencies -Path 'nonexistent.txt' -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
+            { Import-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'nonexistent.txt') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'pip' -Times 0 -Exactly
         }
     }

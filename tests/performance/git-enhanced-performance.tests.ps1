@@ -3,9 +3,8 @@
 # Performance tests for git-enhanced.ps1 fragment
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')

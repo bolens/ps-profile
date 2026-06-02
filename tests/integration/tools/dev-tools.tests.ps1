@@ -13,7 +13,9 @@
     Some tests require Node.js and npm packages.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'Developer Tools Integration Tests' {
     BeforeAll {

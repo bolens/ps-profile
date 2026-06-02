@@ -42,16 +42,49 @@ function global:Invoke-SystemUtility {
         [object[]]$Arguments
     )
 
-    if (Get-Alias -Name $AliasName -ErrorAction SilentlyContinue) {
-        & $AliasName @Arguments
-        return
-    }
-
     if (-not (Get-Command -Name $FunctionName -ErrorAction SilentlyContinue)) {
+        if (Get-Alias -Name $AliasName -ErrorAction SilentlyContinue) {
+            if ($null -ne $Arguments -and @($Arguments).Count -gt 0) {
+                & $AliasName @Arguments
+            }
+            else {
+                & $AliasName
+            }
+
+            return
+        }
+
         throw "Profile system function '$FunctionName' is not available."
     }
 
-    & $FunctionName @Arguments
+  # Array splatting does not bind -LiteralPath; route it explicitly (avoids creating ./-LiteralPath).
+    $argumentList = @($Arguments)
+    if ($argumentList.Count -gt 0) {
+        $literalIndex = [array]::IndexOf($argumentList, '-LiteralPath')
+        if ($literalIndex -ge 0) {
+            $literalPaths = @($argumentList[($literalIndex + 1)..($argumentList.Count - 1)])
+            $leadingArgs = @()
+            if ($literalIndex -gt 0) {
+                $leadingArgs = @($argumentList[0..($literalIndex - 1)])
+            }
+
+            if ($leadingArgs.Count -gt 0) {
+                & $FunctionName @leadingArgs -LiteralPath $literalPaths
+            }
+            else {
+                & $FunctionName -LiteralPath $literalPaths
+            }
+
+            return
+        }
+    }
+
+    if ($argumentList.Count -gt 0) {
+        & $FunctionName @argumentList
+    }
+    else {
+        & $FunctionName
+    }
 }
 
 Describe 'Profile system utility functions' {
@@ -146,8 +179,12 @@ Describe 'Profile system utility functions' {
                 Remove-Item $tempFile -Force
             }
 
+            $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+            $spillPath = Join-Path $repoRoot '-LiteralPath'
+
             Invoke-SystemUtility New-EmptyFile touch -LiteralPath $tempFile
             Test-Path -LiteralPath $tempFile | Should -Be $true
+            Test-Path -LiteralPath $spillPath | Should -Be $false -Because 'array splat must not create a repo-root file named -LiteralPath'
         }
 
         It 'touch throws when parent directory is missing' {
@@ -159,6 +196,22 @@ Describe 'Profile system utility functions' {
 
             { Invoke-SystemUtility New-EmptyFile touch $tempFile -ErrorAction Stop } | Should -Throw
             Test-Path $tempFile | Should -Be $false
+        }
+    }
+
+    Context 'New-Directory / mkdir' {
+        It 'mkdir supports LiteralPath parameter' {
+            $tempDir = Join-Path $script:TestRoot 'folder with spaces' 'literal mkdir'
+            $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+            $spillPath = Join-Path $repoRoot '-LiteralPath'
+
+            if (Test-Path -LiteralPath $tempDir) {
+                Remove-Item -LiteralPath $tempDir -Recurse -Force
+            }
+
+            Invoke-SystemUtility New-Directory mkdir -LiteralPath $tempDir
+            Test-Path -LiteralPath $tempDir | Should -Be $true
+            Test-Path -LiteralPath $spillPath | Should -Be $false -Because 'array splat must not create a repo-root file named -LiteralPath'
         }
     }
 

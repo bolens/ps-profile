@@ -146,16 +146,248 @@ function New-TestTempDirectory {
     $uniqueName = '{0}-{1}' -f $Prefix, ([System.Guid]::NewGuid().ToString())
     $path = Join-Path $testDataRoot $uniqueName
     New-Item -ItemType Directory -Path $path -Force | Out-Null
+    Register-TestCleanupPath -Path $path
     return $path
+}
+
+<#
+.SYNOPSIS
+    Gets the tests/test-data directory path.
+.DESCRIPTION
+    Resolves and optionally creates the test-data directory used for transient test files.
+.PARAMETER StartPath
+    Optional path used to determine repository root.
+.PARAMETER EnsureExists
+    Creates the directory when it does not already exist.
+.OUTPUTS
+    System.String
+#>
+function Get-TestDataPath {
+    param(
+        [string]$StartPath = $PSScriptRoot,
+        [switch]$EnsureExists
+    )
+
+    $repoRoot = Get-TestRepoRoot -StartPath $StartPath
+    $testDataPath = Join-Path $repoRoot (Join-Path 'tests' 'test-data')
+
+    if ($EnsureExists -and -not (Test-Path -LiteralPath $testDataPath)) {
+        New-Item -ItemType Directory -Path $testDataPath -Force | Out-Null
+    }
+
+    return $testDataPath
+}
+
+<#
+.SYNOPSIS
+    Gets the tests/test-artifacts directory path.
+.DESCRIPTION
+    Resolves and optionally creates the test-artifacts directory used for generated test reports.
+.PARAMETER StartPath
+    Optional path used to determine repository root.
+.PARAMETER EnsureExists
+    Creates the directory when it does not already exist.
+.OUTPUTS
+    System.String
+#>
+function Get-TestArtifactsPath {
+    param(
+        [string]$StartPath = $PSScriptRoot,
+        [switch]$EnsureExists
+    )
+
+    $repoRoot = Get-TestRepoRoot -StartPath $StartPath
+    $testArtifactsPath = Join-Path $repoRoot (Join-Path 'tests' 'test-artifacts')
+
+    if ($EnsureExists -and -not (Test-Path -LiteralPath $testArtifactsPath)) {
+        New-Item -ItemType Directory -Path $testArtifactsPath -Force | Out-Null
+    }
+
+    return $testArtifactsPath
+}
+
+<#
+.SYNOPSIS
+    Creates a transient test data file path.
+.DESCRIPTION
+    Returns a unique file path under tests/test-data and optionally writes file content.
+.PARAMETER Prefix
+    Prefix used for the generated filename.
+.PARAMETER Extension
+    File extension to use (with or without a leading dot).
+.PARAMETER StartPath
+    Optional path used to determine repository root.
+.PARAMETER Content
+    Optional content written to the generated file path.
+.OUTPUTS
+    System.String
+#>
+function New-TestTempFile {
+    param(
+        [string]$Prefix = 'PesterTest',
+        [string]$Extension = '.tmp',
+        [string]$StartPath = $PSScriptRoot,
+        [string]$Content
+    )
+
+    $testDataPath = Get-TestDataPath -StartPath $StartPath -EnsureExists
+    $normalizedExtension = if ([string]::IsNullOrWhiteSpace($Extension)) { '.tmp' } elseif ($Extension.StartsWith('.')) { $Extension } else { ".$Extension" }
+    $fileName = '{0}-{1}{2}' -f $Prefix, ([System.Guid]::NewGuid().ToString()), $normalizedExtension
+    $tempFilePath = Join-Path $testDataPath $fileName
+
+    if ($PSBoundParameters.ContainsKey('Content')) {
+        Set-Content -Path $tempFilePath -Value $Content -Encoding UTF8
+    }
+
+    Register-TestCleanupPath -Path $tempFilePath
+    return $tempFilePath
+}
+
+<#
+.SYNOPSIS
+    Returns a path for a transient test artifact under tests/test-data.
+.DESCRIPTION
+    Use this instead of bare filenames (for example backup.dump) that would write to the
+    repository root when a real external tool is invoked during integration tests.
+.PARAMETER FileName
+    File name to place under tests/test-data.
+.PARAMETER StartPath
+    Optional path used to determine the repository root.
+.OUTPUTS
+    System.String
+#>
+function Get-TestArtifactPath {
+    param(
+        [Parameter(Mandatory)]
+        [string]$FileName,
+
+        [string]$StartPath = $PSScriptRoot
+    )
+
+    $testDataPath = Get-TestDataPath -StartPath $StartPath -EnsureExists
+    $artifactPath = Join-Path $testDataPath $FileName
+    Register-TestCleanupPath -Path $artifactPath
+    return $artifactPath
+}
+
+<#
+.SYNOPSIS
+    Initializes the per-test cleanup path registry.
+#>
+function Initialize-TestCleanupRegistry {
+    if (-not (Get-Variable -Name 'TestCleanupPaths' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:TestCleanupPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    }
+}
+
+<#
+.SYNOPSIS
+    Registers a file or directory for removal after the current test.
+.PARAMETER Path
+    Absolute or relative path created during the test.
+#>
+function Register-TestCleanupPath {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+
+    Initialize-TestCleanupRegistry
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return
+    }
+
+    try {
+        $resolvedPath = (Resolve-Path -LiteralPath $Path -ErrorAction Stop).Path
+    }
+    catch {
+        $resolvedPath = $Path
+    }
+
+    [void]$global:TestCleanupPaths.Add($resolvedPath)
+}
+
+<#
+.SYNOPSIS
+    Removes paths registered during the current or most recent test.
+#>
+function Clear-RegisteredTestCleanupPaths {
+    if ($env:PS_PROFILE_SKIP_TEST_CLEANUP -eq '1') {
+        return
+    }
+
+    Initialize-TestCleanupRegistry
+
+    foreach ($path in @($global:TestCleanupPaths | Sort-Object { $_.Length } -Descending)) {
+        if ($path -and -not [string]::IsNullOrWhiteSpace($path) -and (Test-Path -LiteralPath $path)) {
+            Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $global:TestCleanupPaths.Clear()
+}
+
+<#
+.SYNOPSIS
+    Removes all transient content under tests/test-data and tests/test-artifacts.
+.DESCRIPTION
+    Deletes every file and directory inside the gitignored test storage folders while
+    preserving the parent directories themselves. Safe to call before and after test runs
+    because these locations are only used for generated test output.
+.PARAMETER StartPath
+    Optional path used to determine the repository root.
+.OUTPUTS
+    System.Collections.Hashtable
+    Summary with RemovedItemCount and cleaned directory paths.
+#>
+function Clear-TestTransientStorage {
+    param(
+        [string]$StartPath = $PSScriptRoot
+    )
+
+    $summary = @{
+        RemovedItemCount = 0
+        CleanedPaths     = @()
+    }
+
+    if ($env:PS_PROFILE_SKIP_TEST_CLEANUP -eq '1') {
+        return $summary
+    }
+
+    try {
+        $repoRoot = Get-TestRepoRoot -StartPath $StartPath
+    }
+    catch {
+        return $summary
+    }
+
+    foreach ($relativePath in @('tests\test-data', 'tests\test-artifacts')) {
+        $storageRoot = Join-Path $repoRoot $relativePath
+        if (-not (Test-Path -LiteralPath $storageRoot)) {
+            continue
+        }
+
+        $summary.CleanedPaths += $storageRoot
+
+        $children = @(Get-ChildItem -LiteralPath $storageRoot -Force -ErrorAction SilentlyContinue)
+        foreach ($child in $children) {
+            Remove-Item -LiteralPath $child.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            if (-not (Test-Path -LiteralPath $child.FullName)) {
+                $summary.RemovedItemCount++
+            }
+        }
+    }
+
+    return $summary
 }
 
 <#
 .SYNOPSIS
     Gets or creates a test script path in the test artifacts directory.
 .DESCRIPTION
-    Creates a test script file in tests/test-artifacts/ that mirrors the repository structure.
-    This allows tests to create scripts in locations like scripts/utils/ without polluting the actual repository.
-    The path resolution functions will still work correctly since tests/test-artifacts/ is under the repo root.
+    Creates a test script file in tests/test-artifacts/ that mirrors repository-relative script paths.
+    This allows tests to model paths like scripts/utils/*.ps1 without writing under real source directories.
 .PARAMETER RelativePath
     The relative path from the repository root (e.g., 'scripts/utils/test.ps1').
 .PARAMETER StartPath
@@ -177,14 +409,14 @@ function Get-TestScriptPath {
 
     $repoRoot = Get-TestRepoRoot -StartPath $StartPath
 
-    # Paths must live under the real repo scripts/ tree so Get-RepoRoot can walk up to the repo root.
+    # Relative input must still model scripts/ paths, but generated fixtures should live under test-artifacts.
     $normalizedRelative = ($RelativePath -replace '\\', '/').TrimStart('/')
     if ($normalizedRelative -notmatch '^scripts/') {
         throw "Get-TestScriptPath RelativePath must begin with 'scripts/' (got: $RelativePath)"
     }
 
-    $relativeAfterScripts = $normalizedRelative -replace '^scripts/', ''
-    $testScriptPath = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path '.test-fixtures' ($relativeAfterScripts -replace '/', [IO.Path]::DirectorySeparatorChar)))
+    $relativeWithPlatformSeparator = $normalizedRelative -replace '/', [IO.Path]::DirectorySeparatorChar
+    $testScriptPath = Join-Path $repoRoot (Join-Path 'tests' (Join-Path 'test-artifacts' $relativeWithPlatformSeparator))
 
     # Ensure parent directory exists
     $parentDir = Split-Path -Path $testScriptPath -Parent
@@ -197,6 +429,7 @@ function Get-TestScriptPath {
         Set-Content -Path $testScriptPath -Value $Content -ErrorAction SilentlyContinue
     }
 
+    Register-TestCleanupPath -Path $testScriptPath
     return $testScriptPath
 }
 

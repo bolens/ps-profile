@@ -15,7 +15,7 @@
 Describe 'Zstandard (zstd) Compression Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
         # Check if zstd command is available once for all tests (Get-Command finds it regardless of extension)
         $script:zstdAvailable = $false

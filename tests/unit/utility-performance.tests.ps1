@@ -67,7 +67,8 @@ Describe 'Performance Metrics Functions' {
 
         It 'Handles missing baseline gracefully' {
             $currentMetrics = @{ DurationMs = 1000 }
-            $result = Test-PerformanceRegression -CurrentMetrics $currentMetrics -BaselineFile 'nonexistent.json'
+            $missingBaseline = Join-Path $script:PerformanceTestDir 'nonexistent.json'
+            $result = Test-PerformanceRegression -CurrentMetrics $currentMetrics -BaselineFile $missingBaseline
             $result.RegressionDetected | Should -Be $false
             $result.Message | Should -Match 'No baseline found'
         }

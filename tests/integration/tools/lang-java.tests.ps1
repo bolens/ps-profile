@@ -3,9 +3,8 @@
 # Integration tests for lang-java-*.ps1 fragments
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
 
     # lang-java is split into three fragments

@@ -16,7 +16,7 @@
 Describe 'Snappy Compression Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
         # Check if native tools are available
         $script:SnappyAvailable = (Get-Command snappy -ErrorAction SilentlyContinue) -ne $null

@@ -8,6 +8,12 @@ BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
+
+    $script:TestChangelogPath = Get-TestArtifactPath -FileName 'CHANGELOG.md'
+    $script:TestDocsChangelogDir = Join-Path (New-TestTempDirectory -Prefix 'GitChangelogDocs') 'docs'
+    New-Item -ItemType Directory -Path $script:TestDocsChangelogDir -Force | Out-Null
+    $script:TestDocsChangelogPath = Join-Path $script:TestDocsChangelogDir 'CHANGELOG.md'
+    $script:TestCliffConfigPath = Get-TestArtifactPath -FileName 'cliff.toml'
 }
 
 Describe 'git-enhanced.ps1 - New-GitChangelog' {
@@ -33,34 +39,34 @@ Describe 'git-enhanced.ps1 - New-GitChangelog' {
 
     Context 'Tool available' {
         It 'Calls git-cliff with default output path' {
-            Setup-CapturingCommandMock -CommandName 'git-cliff' -Output 'CHANGELOG.md'
+            Setup-CapturingCommandMock -CommandName 'git-cliff' -Output $script:TestChangelogPath
 
-            New-GitChangelog -ErrorAction SilentlyContinue | Out-Null
+            New-GitChangelog -OutputPath $script:TestChangelogPath -ErrorAction SilentlyContinue | Out-Null
 
             $global:TestCommandInvocationCaptures.Count | Should -Be 1
             $args = Get-TestCommandInvocationArgsFlat
             $args | Should -Contain '--output'
-            $args | Should -Contain 'CHANGELOG.md'
+            $args | Should -Contain $script:TestChangelogPath
         }
 
         It 'Calls git-cliff with custom output path' {
-            Setup-CapturingCommandMock -CommandName 'git-cliff' -Output 'docs/CHANGELOG.md'
+            Setup-CapturingCommandMock -CommandName 'git-cliff' -Output $script:TestDocsChangelogPath
 
-            New-GitChangelog -OutputPath 'docs/CHANGELOG.md' -ErrorAction SilentlyContinue | Out-Null
+            New-GitChangelog -OutputPath $script:TestDocsChangelogPath -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
             $args | Should -Contain '--output'
-            $args | Should -Contain 'docs/CHANGELOG.md'
+            $args | Should -Contain $script:TestDocsChangelogPath
         }
 
         It 'Calls git-cliff with config path' {
             Setup-CapturingCommandMock -CommandName 'git-cliff'
 
-            New-GitChangelog -ConfigPath 'cliff.toml' -ErrorAction SilentlyContinue | Out-Null
+            New-GitChangelog -ConfigPath $script:TestCliffConfigPath -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
             $args | Should -Contain '--config'
-            $args | Should -Contain 'cliff.toml'
+            $args | Should -Contain $script:TestCliffConfigPath
         }
 
         It 'Calls git-cliff with tag' {
@@ -85,9 +91,9 @@ Describe 'git-enhanced.ps1 - New-GitChangelog' {
         It 'Returns output path on success' {
             Setup-CapturingCommandMock -CommandName 'git-cliff' -ExitCode 0
 
-            $result = New-GitChangelog -OutputPath 'CHANGELOG.md' -ErrorAction SilentlyContinue
+            $result = New-GitChangelog -OutputPath $script:TestChangelogPath -ErrorAction SilentlyContinue
 
-            $result | Should -Be 'CHANGELOG.md'
+            $result | Should -Be $script:TestChangelogPath
         }
 
         It 'Handles git-cliff execution errors' {

@@ -623,21 +623,104 @@ function Restore-TestSupportFunctions {
 
 <#
 .SYNOPSIS
+    Removes known transient files left in the repository root by tests.
+#>
+function Clear-TestRepoRootSpillover {
+    param(
+        [string]$StartPath = $PSScriptRoot
+    )
+
+    if ($env:PS_PROFILE_SKIP_TEST_CLEANUP -eq '1') {
+        return
+    }
+
+    $repoRoot = Get-TestRepoRoot -StartPath $StartPath
+    $artifactsToRemove = @(
+        '0'
+        '2'
+        '5'
+        'backup.dump'
+        'backup.tar.gz'
+        'custom-backup.dump'
+        'backup.sql'
+        'backup.sql.gz'
+        'output.mkv'
+        'render.png'
+        'scene.blend'
+        'test-volume-backup.tar.gz'
+        'test-results.xml'
+        'results.xml'
+        'test-requirements.txt'
+        'test-scoopfile.json'
+        'test-npm-global.json'
+        'test-npm-global-empty.json'
+        'test-winget-packages.json'
+        'test.txt'
+        'test.hurl'
+        'test-Brewfile'
+        'test-packages.config'
+        'cliff.toml'
+        'nonexistent.csv'
+        'nonexistent.yaml'
+        'nonexistent.txt'
+        'nonexistent.sql'
+        'nonexistent.dump'
+        'nonexistent.json'
+        'hook-test-spill.txt'
+        '-LiteralPath'
+    )
+
+    foreach ($artifact in $artifactsToRemove) {
+        $artifactPath = Join-Path $repoRoot $artifact
+        if (Test-Path -LiteralPath $artifactPath) {
+            Remove-Item -LiteralPath $artifactPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    Get-ChildItem -LiteralPath $repoRoot -File -ErrorAction SilentlyContinue |
+    Where-Object {
+        $_.Name -match '^testdb-\d{14}\.(dump|sql|archive)$' -or
+        $_.Name -match '^test-.*\.(json|txt|xml|sql|dump|tar\.gz|hurl|config)$' -or
+        $_.Name -match '^hook-test-.*\.txt$'
+    } |
+    ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue }
+
+    $testWorktreePath = Join-Path $repoRoot 'test-worktree'
+    if (Test-Path -LiteralPath $testWorktreePath) {
+        Remove-Item -LiteralPath $testWorktreePath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+<#
+.SYNOPSIS
     Removes test artifacts from project root.
 .DESCRIPTION
-    Cleans up temporary files and directories created during tests that may have been
-    left in the project root directory.
+    Cleans up registered test-data paths and any files accidentally created in the
+    repository root by tests that used relative output paths.
 #>
 function Remove-TestArtifacts {
     try {
+        if (Get-Command Clear-RegisteredTestCleanupPaths -ErrorAction SilentlyContinue) {
+            Clear-RegisteredTestCleanupPaths
+        }
+
+        if (Get-Command Clear-TestRepoRootSpillover -ErrorAction SilentlyContinue) {
+            Clear-TestRepoRootSpillover -StartPath $PSScriptRoot
+        }
+
         # Note: Get-TestRepoRoot should be available from TestSupport.ps1 loading TestPaths.ps1 first
         $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-        $artifactsToRemove = @('0', '2', '5', 'nonexistent.csv', 'nonexistent.yaml', 'nonexistent.txt')
-        foreach ($artifact in $artifactsToRemove) {
-            $artifactPath = Join-Path $repoRoot $artifact
-            if (Test-Path $artifactPath) {
-                Remove-Item $artifactPath -Force -ErrorAction SilentlyContinue
-            }
+
+        # Remove legacy test fixture location if present
+        $legacyFixtureRoot = Join-Path $repoRoot (Join-Path 'scripts' '.test-fixtures')
+        if (Test-Path -LiteralPath $legacyFixtureRoot) {
+            Remove-Item -LiteralPath $legacyFixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+
+        # Remove legacy performance report written at repository root
+        $legacyRegressionReport = Join-Path $repoRoot 'performance-regression-report.txt'
+        if (Test-Path -LiteralPath $legacyRegressionReport) {
+            Remove-Item -LiteralPath $legacyRegressionReport -Force -ErrorAction SilentlyContinue
         }
     }
     catch {

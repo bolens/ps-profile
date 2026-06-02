@@ -3,9 +3,8 @@
 # Integration tests for containers-enhanced.ps1 fragment
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')
@@ -142,7 +141,7 @@ Describe 'containers-enhanced.ps1 - Graceful Degradation' {
         Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
         Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
         $output = & {
-            Restore-ContainerVolumes -BackupPath 'backup.tar.gz' -ErrorAction SilentlyContinue
+            Restore-ContainerVolumes -BackupPath (Get-TestArtifactPath -FileName 'backup.tar.gz') -ErrorAction SilentlyContinue
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }

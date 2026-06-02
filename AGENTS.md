@@ -201,6 +201,8 @@ if (Test-CachedCommand 'docker') {
 
 ### 4. Testing Requirements
 
+**Transient test files** must live under `tests/test-data` or `tests/test-artifacts`. Never pass bare filenames (for example `backup.dump`, `CHANGELOG.md`) that resolve against the repository root when a real tool runs. Use `Get-TestArtifactPath`, `New-TestTempDirectory`, or `New-TestTempFile` from `TestSupport/TestPaths.ps1`. Load `TestSupport.ps1` from a Pester hook (`BeforeAll` / `Describe` / `Context`), not at file top level, so per-test `Remove-TestArtifacts` runs via `AfterEach`.
+
 **ALWAYS write tests** for new functionality:
 
 ```powershell

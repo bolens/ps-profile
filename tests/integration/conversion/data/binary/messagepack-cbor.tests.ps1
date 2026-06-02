@@ -15,7 +15,7 @@
 Describe 'MessagePack and CBOR Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
         # Ensure NodeJs module is loaded (provides Invoke-NodeScript)
         $repoRoot = Split-Path -Parent $script:ProfileDir

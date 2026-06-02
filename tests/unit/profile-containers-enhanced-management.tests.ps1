@@ -233,7 +233,8 @@ Describe 'containers-enhanced.ps1 - Management Functions' {
         It 'Returns null when no container engine available' {
             Install-TestUnavailableContainerEnginePreference
 
-            $result = Restore-ContainerVolumes -BackupPath 'backup.tar.gz' -ErrorAction SilentlyContinue
+            $backupPath = Get-TestArtifactPath -FileName 'backup.tar.gz'
+            $result = Restore-ContainerVolumes -BackupPath $backupPath -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
         }

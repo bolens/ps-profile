@@ -15,7 +15,7 @@
 Describe 'JWT Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Specialized' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
         # Ensure NodeJs module is loaded (provides Invoke-NodeScript)
         $repoRoot = Split-Path -Parent $script:ProfileDir

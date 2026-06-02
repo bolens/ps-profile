@@ -128,7 +128,7 @@ Describe 'API Tools Integration Tests' {
                 Clear-CommandCache -CommandName 'hurl' -ErrorAction SilentlyContinue
             }
             Mock-CommandAvailabilityPester -CommandName 'hurl' -Available $false
-            $testFile = Join-Path (Get-Location).Path 'test.hurl'
+            $testFile = Get-TestArtifactPath -FileName 'test.hurl'
             $output = hurl -TestFile $testFile 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'hurl not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'hurl'

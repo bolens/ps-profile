@@ -59,11 +59,12 @@ function Import-TestModule {
         # Dot-source the module (suppress registration return values)
         $null = . $ModulePath
 
-        # Promote initialization function to global scope if specified
+        # Promote and invoke initialization function so module internals (e.g. _Compress-Zstd) are registered
         if ($InitFunctionName) {
             $func = Get-Command $InitFunctionName -ErrorAction SilentlyContinue -All
             if ($func) {
                 Set-Item -Path "Function:\global:$InitFunctionName" -Value $func.ScriptBlock -ErrorAction SilentlyContinue -Force
+                & "global:$InitFunctionName"
             }
         }
 
@@ -514,7 +515,10 @@ function Get-MediaAudioModulesConfig {
 #>
 function Get-SpecializedModulesConfig {
     return @{
-        'specialized.ps1' = 'Initialize-FileConversion-Specialized'
+        'specialized.ps1'         = 'Initialize-FileConversion-Specialized'
+        'specialized-qrcode.ps1'  = 'Initialize-FileConversion-SpecializedQrcode'
+        'specialized-barcode.ps1' = 'Initialize-FileConversion-SpecializedBarcode'
+        'specialized-jwt.ps1'     = 'Initialize-FileConversion-SpecializedJwt'
     }
 }
 
@@ -694,73 +698,71 @@ function Import-DataConversionModules {
         # Encoding module is in data/encoding/
         $encodingDir = Join-Path $dataDir 'encoding'
         Import-ModuleGroup -BaseDir $encodingDir -ModuleConfig @{ 'encoding.ps1' = 'Initialize-FileConversion-CoreEncoding' } -DefaultFunctionPatterns @('^(Convert|Format)')
-    
-        # Compression modules are in data/compression/
-        $compressionDir = Join-Path $dataDir 'compression'
-        $compressionModules = @{
-            'gzip.ps1'   = 'Initialize-FileConversion-CoreCompressionGzip'
-            'brotli.ps1' = 'Initialize-FileConversion-CoreCompressionBrotli'
-            'zstd.ps1'   = 'Initialize-FileConversion-CoreCompressionZstd'
-            'lz4.ps1'    = 'Initialize-FileConversion-CoreCompressionLz4'
-            'snappy.ps1' = 'Initialize-FileConversion-CoreCompressionSnappy'
-            'xz.ps1'     = 'Initialize-FileConversion-CoreCompressionXz'
-        }
-        Import-ModuleGroup -BaseDir $compressionDir -ModuleConfig $compressionModules -DefaultFunctionPatterns @('^(Convert|Format)')
-    
-        # Time modules are in data/time/
-        $timeDir = Join-Path $dataDir 'time'
-        $timeModules = @{
-            'unix.ps1'           = 'Initialize-FileConversion-CoreTimeUnix'
-            'iso8601.ps1'        = 'Initialize-FileConversion-CoreTimeIso8601'
-            'rfc3339.ps1'        = 'Initialize-FileConversion-CoreTimeRfc3339'
-            'human-readable.ps1' = 'Initialize-FileConversion-CoreTimeHumanReadable'
-            'timezone.ps1'       = 'Initialize-FileConversion-CoreTimeTimezone'
-            'duration.ps1'       = 'Initialize-FileConversion-CoreTimeDuration'
-        }
-        Import-ModuleGroup -BaseDir $timeDir -ModuleConfig $timeModules -DefaultFunctionPatterns @('^(Convert|Format)')
-    
-        # Encoding sub-modules (uuid, guid, and all other encoding modules) are in data/encoding/
-        # Encoding sub-modules are in data/encoding/
-        # Map file names to their initialization function names
-        $encodingSubModules = @{
-            'uuid.ps1'        = 'Initialize-FileConversion-CoreEncodingUuid'
-            'guid.ps1'        = 'Initialize-FileConversion-CoreEncodingGuid'
-            'roman.ps1'       = 'Initialize-FileConversion-CoreEncodingRoman'
-            'modhex.ps1'      = 'Initialize-FileConversion-CoreEncodingModHex'
-            'ascii.ps1'       = 'Initialize-FileConversion-CoreEncodingAscii'
-            'hex.ps1'         = 'Initialize-FileConversion-CoreEncodingHex'
-            'binary.ps1'      = 'Initialize-FileConversion-CoreEncodingBinary'
-            'numeric.ps1'     = 'Initialize-FileConversion-CoreEncodingNumeric'
-            'base32.ps1'      = 'Initialize-FileConversion-CoreEncodingBase32'
-            'base36.ps1'      = 'Initialize-FileConversion-CoreEncodingBase36'
-            'base58.ps1'      = 'Initialize-FileConversion-CoreEncodingBase58'
-            'base62.ps1'      = 'Initialize-FileConversion-CoreEncodingBase62'
-            'base85.ps1'      = 'Initialize-FileConversion-CoreEncodingBase85'
-            'z85.ps1'         = 'Initialize-FileConversion-CoreEncodingZ85'
-            'base91.ps1'      = 'Initialize-FileConversion-CoreEncodingBase91'
-            'utf16-utf32.ps1' = 'Initialize-FileConversion-CoreEncodingUtf16Utf32'
-            'rot.ps1'         = 'Initialize-FileConversion-CoreEncodingRot'
-            'morse.ps1'       = 'Initialize-FileConversion-CoreEncodingMorse'
-            'url.ps1'         = 'Initialize-FileConversion-CoreEncodingUrl'
-        }
-        Import-ModuleGroup -BaseDir $encodingDir -ModuleConfig $encodingSubModules -DefaultFunctionPatterns @('^ConvertFrom-')
-    
-        # Units modules are in data/units/
-        $unitsDir = Join-Path $dataDir 'units'
-        $unitsModules = @{
-            'datasize.ps1'    = 'Initialize-FileConversion-CoreUnitsDataSize'
-            'length.ps1'      = 'Initialize-FileConversion-CoreUnitsLength'
-            'weight.ps1'      = 'Initialize-FileConversion-CoreUnitsWeight'
-            'temperature.ps1' = 'Initialize-FileConversion-CoreUnitsTemperature'
-            'volume.ps1'      = 'Initialize-FileConversion-CoreUnitsVolume'
-            'energy.ps1'      = 'Initialize-FileConversion-CoreUnitsEnergy'
-            'speed.ps1'       = 'Initialize-FileConversion-CoreUnitsSpeed'
-            'area.ps1'        = 'Initialize-FileConversion-CoreUnitsArea'
-            'pressure.ps1'    = 'Initialize-FileConversion-CoreUnitsPressure'
-            'angle.ps1'       = 'Initialize-FileConversion-CoreUnitsAngle'
-        }
-        Import-ModuleGroup -BaseDir $unitsDir -ModuleConfig $unitsModules -DefaultFunctionPatterns @('^(Convert|Format)') -CustomPatterns $coreCustomPatterns
     }
+
+    $coreCustomPatterns = @{
+        'datasize.ps1' = @('^(Convert|ConvertFrom|ConvertTo)-')
+    }
+    $compressionDir = Join-Path $dataDir 'compression'
+    $compressionModules = @{
+        'gzip.ps1'   = 'Initialize-FileConversion-CoreCompressionGzip'
+        'brotli.ps1' = 'Initialize-FileConversion-CoreCompressionBrotli'
+        'zstd.ps1'   = 'Initialize-FileConversion-CoreCompressionZstd'
+        'lz4.ps1'    = 'Initialize-FileConversion-CoreCompressionLz4'
+        'snappy.ps1' = 'Initialize-FileConversion-CoreCompressionSnappy'
+        'xz.ps1'     = 'Initialize-FileConversion-CoreCompressionXz'
+    }
+    Import-ModuleGroup -BaseDir $compressionDir -ModuleConfig $compressionModules -DefaultFunctionPatterns @('^(Convert|Format)') -SelectiveModules $SelectiveModules
+
+    $timeDir = Join-Path $dataDir 'time'
+    $timeModules = @{
+        'unix.ps1'           = 'Initialize-FileConversion-CoreTimeUnix'
+        'iso8601.ps1'        = 'Initialize-FileConversion-CoreTimeIso8601'
+        'rfc3339.ps1'        = 'Initialize-FileConversion-CoreTimeRfc3339'
+        'human-readable.ps1' = 'Initialize-FileConversion-CoreTimeHumanReadable'
+        'timezone.ps1'       = 'Initialize-FileConversion-CoreTimeTimezone'
+        'duration.ps1'       = 'Initialize-FileConversion-CoreTimeDuration'
+    }
+    Import-ModuleGroup -BaseDir $timeDir -ModuleConfig $timeModules -DefaultFunctionPatterns @('^(Convert|Format)') -SelectiveModules $SelectiveModules
+
+    $encodingDir = Join-Path $dataDir 'encoding'
+    $encodingSubModules = @{
+        'uuid.ps1'        = 'Initialize-FileConversion-CoreEncodingUuid'
+        'guid.ps1'        = 'Initialize-FileConversion-CoreEncodingGuid'
+        'roman.ps1'       = 'Initialize-FileConversion-CoreEncodingRoman'
+        'modhex.ps1'      = 'Initialize-FileConversion-CoreEncodingModHex'
+        'ascii.ps1'       = 'Initialize-FileConversion-CoreEncodingAscii'
+        'hex.ps1'         = 'Initialize-FileConversion-CoreEncodingHex'
+        'binary.ps1'      = 'Initialize-FileConversion-CoreEncodingBinary'
+        'numeric.ps1'     = 'Initialize-FileConversion-CoreEncodingNumeric'
+        'base32.ps1'      = 'Initialize-FileConversion-CoreEncodingBase32'
+        'base36.ps1'      = 'Initialize-FileConversion-CoreEncodingBase36'
+        'base58.ps1'      = 'Initialize-FileConversion-CoreEncodingBase58'
+        'base62.ps1'      = 'Initialize-FileConversion-CoreEncodingBase62'
+        'base85.ps1'      = 'Initialize-FileConversion-CoreEncodingBase85'
+        'z85.ps1'         = 'Initialize-FileConversion-CoreEncodingZ85'
+        'base91.ps1'      = 'Initialize-FileConversion-CoreEncodingBase91'
+        'utf16-utf32.ps1' = 'Initialize-FileConversion-CoreEncodingUtf16Utf32'
+        'rot.ps1'         = 'Initialize-FileConversion-CoreEncodingRot'
+        'morse.ps1'       = 'Initialize-FileConversion-CoreEncodingMorse'
+        'url.ps1'         = 'Initialize-FileConversion-CoreEncodingUrl'
+    }
+    Import-ModuleGroup -BaseDir $encodingDir -ModuleConfig $encodingSubModules -DefaultFunctionPatterns @('^ConvertFrom-') -SelectiveModules $SelectiveModules
+
+    $unitsDir = Join-Path $dataDir 'units'
+    $unitsModules = @{
+        'datasize.ps1'    = 'Initialize-FileConversion-CoreUnitsDataSize'
+        'length.ps1'      = 'Initialize-FileConversion-CoreUnitsLength'
+        'weight.ps1'      = 'Initialize-FileConversion-CoreUnitsWeight'
+        'temperature.ps1' = 'Initialize-FileConversion-CoreUnitsTemperature'
+        'volume.ps1'      = 'Initialize-FileConversion-CoreUnitsVolume'
+        'energy.ps1'      = 'Initialize-FileConversion-CoreUnitsEnergy'
+        'speed.ps1'       = 'Initialize-FileConversion-CoreUnitsSpeed'
+        'area.ps1'        = 'Initialize-FileConversion-CoreUnitsArea'
+        'pressure.ps1'    = 'Initialize-FileConversion-CoreUnitsPressure'
+        'angle.ps1'       = 'Initialize-FileConversion-CoreUnitsAngle'
+    }
+    Import-ModuleGroup -BaseDir $unitsDir -ModuleConfig $unitsModules -DefaultFunctionPatterns @('^(Convert|Format)') -CustomPatterns $coreCustomPatterns -SelectiveModules $SelectiveModules
 
     # Structured modules (always load, but filter if SelectiveModules specified)
     $structuredModules = Get-DataStructuredModulesConfig
@@ -822,7 +824,9 @@ function Import-DocumentConversionModules {
 function Import-MediaConversionModules {
     param(
         [Parameter(Mandatory)]
-        [string]$ConversionModulesDir
+        [string]$ConversionModulesDir,
+
+        [string[]]$SelectiveModules
     )
 
     $mediaDir = Join-Path $ConversionModulesDir 'media'
@@ -832,26 +836,26 @@ function Import-MediaConversionModules {
 
     # Load basic media modules first (pdf, and legacy modules if they exist)
     $mediaModules = Get-MediaModulesConfig
-    Import-ModuleGroup -BaseDir $mediaDir -ModuleConfig $mediaModules -DefaultFunctionPatterns @('^Convert(To|From)-|^Convert-', '^(Merge|Resize)-')
+    Import-ModuleGroup -BaseDir $mediaDir -ModuleConfig $mediaModules -DefaultFunctionPatterns @('^Convert(To|From)-|^Convert-', '^(Merge|Resize)-') -SelectiveModules $SelectiveModules
 
     # Load image modules (from media/images/)
     $imageModules = Get-MediaImageModulesConfig
     $imagesDir = Join-Path $mediaDir 'images'
     if ($imagesDir -and (Test-Path -LiteralPath $imagesDir)) {
-        Import-ModuleGroup -BaseDir $imagesDir -ModuleConfig $imageModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-')
+        Import-ModuleGroup -BaseDir $imagesDir -ModuleConfig $imageModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-') -SelectiveModules $SelectiveModules
     }
 
     # Load audio modules (from media/audio/)
     $audioModules = Get-MediaAudioModulesConfig
     $audioDir = Join-Path $mediaDir 'audio'
     if ($audioDir -and (Test-Path -LiteralPath $audioDir)) {
-        Import-ModuleGroup -BaseDir $audioDir -ModuleConfig $audioModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-')
+        Import-ModuleGroup -BaseDir $audioDir -ModuleConfig $audioModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-') -SelectiveModules $SelectiveModules
     }
 
     # Load video modules (from media/video/)
     $videoDir = Join-Path $mediaDir 'video'
     if ($videoDir -and (Test-Path -LiteralPath $videoDir)) {
-        Import-ModuleGroup -BaseDir $videoDir -ModuleConfig @{ 'video.ps1' = 'Initialize-FileConversion-MediaVideo' } -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-')
+        Import-ModuleGroup -BaseDir $videoDir -ModuleConfig @{ 'video.ps1' = 'Initialize-FileConversion-MediaVideo' } -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-') -SelectiveModules $SelectiveModules
     }
 
     # Load color conversion modules (in dependency order)
@@ -864,7 +868,7 @@ function Import-MediaConversionModules {
     }
     $colorsDir = Join-Path $mediaDir 'colors'
     if ($colorsDir -and (Test-Path -LiteralPath $colorsDir)) {
-        Import-ModuleGroup -BaseDir $colorsDir -ModuleConfig $colorModulesMapped -DefaultFunctionPatterns @('^.*')
+        Import-ModuleGroup -BaseDir $colorsDir -ModuleConfig $colorModulesMapped -DefaultFunctionPatterns @('^.*') -SelectiveModules $SelectiveModules
     }
 }
 
@@ -888,7 +892,7 @@ function Ensure-ConversionModulesLoaded {
         [Parameter(Mandatory)]
         [string]$ProfileDir,
         
-        [ValidateSet('Data', 'Documents', 'Media', 'All')]
+        [ValidateSet('Data', 'Documents', 'Media', 'Specialized', 'All')]
         [string]$ModuleType = 'All',
 
         [switch]$ParallelLoad,
@@ -897,7 +901,8 @@ function Ensure-ConversionModulesLoaded {
     )
     
     # Cache key for module loading
-    $cacheKey = "ConversionModules_$ModuleType"
+    $selectiveKey = if ($SelectiveModules) { ($SelectiveModules | Sort-Object) -join ',' } else { 'all' }
+    $cacheKey = "ConversionModules_${ModuleType}_$selectiveKey"
     
     # Check if already loaded (use script scope for cross-file caching)
     if ($null -eq $script:ModuleLoadCache) {
@@ -930,14 +935,14 @@ function Ensure-ConversionModulesLoaded {
     }
     
     if ($ModuleType -in @('Media', 'All')) {
-        Import-MediaConversionModules -ConversionModulesDir $conversionModulesDir
+        Import-MediaConversionModules -ConversionModulesDir $conversionModulesDir -SelectiveModules $SelectiveModules
     }
     
     if ($ModuleType -in @('Specialized', 'All')) {
         $specializedModules = Get-SpecializedModulesConfig
         $specializedDir = Join-Path $conversionModulesDir 'specialized'
         if ($specializedDir -and (Test-Path -LiteralPath $specializedDir)) {
-            Import-ModuleGroup -BaseDir $specializedDir -ModuleConfig $specializedModules -DefaultFunctionPatterns @('^.*')
+            Import-ModuleGroup -BaseDir $specializedDir -ModuleConfig $specializedModules -DefaultFunctionPatterns @('^.*') -SelectiveModules $SelectiveModules
         }
     }
     
@@ -1012,7 +1017,8 @@ function Initialize-TestProfile {
     )
     
     # Cache key based on what we're loading
-    $cacheKey = "Profile_$(if ($LoadBootstrap) { 'Bootstrap' })_$(if ($LoadConversionModules) { $LoadConversionModules })_$(if ($LoadFilesFragment) { 'Files' })_$(if ($EnsureFileConversion) { 'EnsureData' })_$(if ($EnsureFileConversionMedia) { 'EnsureMedia' })_$(if ($EnsureFileConversionDocuments) { 'EnsureDocs' })"
+    $selectiveKey = if ($SelectiveModules) { ($SelectiveModules | Sort-Object) -join ',' } else { 'all' }
+    $cacheKey = "Profile_$(if ($LoadBootstrap) { 'Bootstrap' })_$(if ($LoadConversionModules) { $LoadConversionModules })_${selectiveKey}_$(if ($LoadFilesFragment) { 'Files' })_$(if ($EnsureFileConversion) { 'EnsureData' })_$(if ($EnsureFileConversionMedia) { 'EnsureMedia' })_$(if ($EnsureFileConversionDocuments) { 'EnsureDocs' })"
     
     # Check if already loaded (use script scope for cross-file caching)
     if ($null -eq $script:ProfileLoadCache) {
@@ -1145,6 +1151,302 @@ function Initialize-SystemUtilityIntegration {
 
 <#
 .SYNOPSIS
+    Returns selective document conversion module file names for integration tests.
+#>
+function Get-DocumentConversionSelectiveModules {
+    [CmdletBinding()]
+    param(
+        [ValidateSet('Standard', 'Html', 'Latex', 'Docx', 'Epub', 'Roundtrip')]
+        [string]$Set = 'Standard'
+    )
+
+    $standard = @(
+        'document-markdown.ps1'
+        'document-common-html.ps1'
+        'document-common-docx.ps1'
+        'document-common-epub.ps1'
+        'document-office-odt.ps1'
+        'document-office-ods.ps1'
+        'document-office-odp.ps1'
+        'document-office-rtf.ps1'
+        'document-office-excel.ps1'
+        'document-office-plaintext.ps1'
+        'document-office-orgmode.ps1'
+        'document-office-asciidoc.ps1'
+        'document-ebook-mobi.ps1'
+        'document-textile.ps1'
+        'document-fb2.ps1'
+    )
+
+    switch ($Set) {
+        'Html' {
+            return @(
+                'document-common-html.ps1'
+                'document-markdown.ps1'
+                'document-office-odt.ps1'
+                'document-office-ods.ps1'
+                'document-office-odp.ps1'
+                'document-office-rtf.ps1'
+                'document-common-epub.ps1'
+                'document-ebook-mobi.ps1'
+                'document-office-plaintext.ps1'
+                'document-office-orgmode.ps1'
+                'document-office-asciidoc.ps1'
+                'document-textile.ps1'
+                'document-fb2.ps1'
+                'document-latex.ps1'
+            )
+        }
+        'Latex' {
+            return @(
+                $standard
+                'document-latex.ps1'
+                'document-rst.ps1'
+                'document-textile.ps1'
+                'document-djvu.ps1'
+            ) | Select-Object -Unique
+        }
+        'Docx' {
+            return @(
+                $standard
+                'document-common-docx.ps1'
+                'document-latex.ps1'
+            ) | Select-Object -Unique
+        }
+        'Epub' {
+            return @(
+                'document-common-epub.ps1'
+                'document-markdown.ps1'
+                'document-common-html.ps1'
+                'document-ebook-mobi.ps1'
+                'document-office-odt.ps1'
+                'document-office-rtf.ps1'
+                'document-office-plaintext.ps1'
+                'document-fb2.ps1'
+            )
+        }
+        'Roundtrip' {
+            return @(
+                'document-markdown.ps1'
+                'document-common-html.ps1'
+                'document-common-docx.ps1'
+                'document-office-rtf.ps1'
+                'document-office-plaintext.ps1'
+            )
+        }
+        default { return $standard }
+    }
+}
+
+<#
+.SYNOPSIS
+    Resolves selective conversion module names and ensure flags from a test file path.
+#>
+function Resolve-ConversionIntegrationForTest {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$TestScriptPath
+    )
+
+    $testName = [System.IO.Path]::GetFileNameWithoutExtension($TestScriptPath)
+    if ($testName.EndsWith('.tests', [StringComparison]::OrdinalIgnoreCase)) {
+        $testName = $testName.Substring(0, $testName.Length - 6)
+    }
+
+    $normalized = ($TestScriptPath -replace '\\', '/')
+    $relative = if ($normalized -match 'conversion/(.+)$') { $Matches[1] } else { $testName }
+    $relativeKey = ($relative -replace '\.tests\.ps1$', '')
+
+    $overrides = @{
+        'data/structured/yaml-json'              = @{ ModuleType = 'Data'; SelectiveModules = @('yaml.ps1', 'json.ps1'); EnsureData = $true }
+        'data/structured/superjson-json'         = @{ ModuleType = 'Data'; SelectiveModules = @('superjson.ps1'); EnsureData = $true }
+        'data/structured/superjson-yaml'         = @{ ModuleType = 'Data'; SelectiveModules = @('superjson.ps1'); EnsureData = $true }
+        'data/structured/superjson-xml'          = @{ ModuleType = 'Data'; SelectiveModules = @('superjson.ps1'); EnsureData = $true }
+        'data/structured/superjson-toml'       = @{ ModuleType = 'Data'; SelectiveModules = @('superjson.ps1', 'toml.ps1'); EnsureData = $true }
+        'data/structured/superjson-toon'         = @{ ModuleType = 'Data'; SelectiveModules = @('superjson.ps1', 'toon.ps1'); EnsureData = $true }
+        'data/structured/superjson-csv'          = @{ ModuleType = 'Data'; SelectiveModules = @('superjson.ps1'); EnsureData = $true }
+        'data/structured/env'                    = @{ ModuleType = 'Data'; SelectiveModules = @('env.ps1', 'ini.ps1'); EnsureData = $true }
+        'data/roundtrip/format-chain'            = @{ ModuleType = 'Data'; SelectiveModules = @('toon.ps1', 'toml.ps1'); EnsureData = $true }
+        'data/roundtrip/multi-format-roundtrip'  = @{ ModuleType = 'Data'; SelectiveModules = @('toon.ps1', 'toml.ps1', 'superjson.ps1'); EnsureData = $true }
+        'data/compression/xz-lzma'               = @{ ModuleType = 'Data'; SelectiveModules = @('xz.ps1'); EnsureData = $true }
+        'data/time/encoding-time'                = @{ ModuleType = 'Data'; SelectiveModules = @('base58.ps1'); EnsureData = $true }
+        'data/time/time-extended'                = @{ ModuleType = 'Data'; SelectiveModules = @('unix.ps1', 'iso8601.ps1', 'human-readable.ps1'); EnsureData = $true }
+        'data/encoding/rot-cipher'             = @{ ModuleType = 'Data'; SelectiveModules = @('rot.ps1'); EnsureData = $true }
+        'data/encoding/ascii-hex'                = @{ ModuleType = 'Data'; SelectiveModules = @('ascii.ps1', 'hex.ps1'); EnsureData = $true }
+        'data/encoding/ascii-binary'           = @{ ModuleType = 'Data'; SelectiveModules = @('ascii.ps1', 'binary.ps1'); EnsureData = $true }
+        'data/encoding/ascii-modhex'           = @{ ModuleType = 'Data'; SelectiveModules = @('ascii.ps1', 'modhex.ps1'); EnsureData = $true }
+        'data/encoding/hex-binary'             = @{ ModuleType = 'Data'; SelectiveModules = @('hex.ps1', 'binary.ps1'); EnsureData = $true }
+        'data/encoding/hex-modhex'             = @{ ModuleType = 'Data'; SelectiveModules = @('hex.ps1', 'modhex.ps1'); EnsureData = $true }
+        'data/encoding/binary-modhex'          = @{ ModuleType = 'Data'; SelectiveModules = @('binary.ps1', 'modhex.ps1'); EnsureData = $true }
+        'data/encoding/octal-decimal-roman'    = @{ ModuleType = 'Data'; SelectiveModules = @('numeric.ps1', 'roman.ps1'); EnsureData = $true }
+        'data/encoding/encoding-roundtrip'     = @{ ModuleType = 'Data'; SelectiveModules = @('ascii.ps1', 'hex.ps1', 'base64.ps1'); EnsureData = $true }
+        'data/encoding/uuid-guid'              = @{ ModuleType = 'Data'; SelectiveModules = @('uuid.ps1', 'guid.ps1'); EnsureData = $true }
+        'data/text-formats/xml-yaml'           = @{ ModuleType = 'Data'; SelectiveModules = @(); EnsureData = $true }
+        'data/text-formats/jsonl-csv'          = @{ ModuleType = 'Data'; SelectiveModules = @('json-extended.ps1'); EnsureData = $true }
+        'data/text-formats/jsonl-yaml'         = @{ ModuleType = 'Data'; SelectiveModules = @('json-extended.ps1'); EnsureData = $true }
+        'data/structured/jsonl'                = @{ ModuleType = 'Data'; SelectiveModules = @('json-extended.ps1'); EnsureData = $true }
+        'data/network/query-string'            = @{ ModuleType = 'Data'; SelectiveModules = @('network-query-string.ps1'); EnsureData = $true }
+        'data/network/url-uri'                 = @{ ModuleType = 'Data'; SelectiveModules = @('network-url-uri.ps1'); EnsureData = $true }
+        'data/network/http-headers'            = @{ ModuleType = 'Data'; SelectiveModules = @('network-http-headers.ps1'); EnsureData = $true }
+        'data/network/mime-types'              = @{ ModuleType = 'Data'; SelectiveModules = @('network-mime-types.ps1'); EnsureData = $true }
+        'data/database/sql-dump'               = @{ ModuleType = 'Data'; SelectiveModules = @('database-sql-dump.ps1'); EnsureData = $true }
+        'data/database/sqlite'                 = @{ ModuleType = 'Data'; SelectiveModules = @('database-sqlite.ps1'); EnsureData = $true }
+        'data/database/access'                 = @{ ModuleType = 'Data'; SelectiveModules = @('database-access.ps1'); EnsureData = $true }
+        'data/database/dbf'                    = @{ ModuleType = 'Data'; SelectiveModules = @('database-dbf.ps1'); EnsureData = $true }
+        'data/binary-to-text/bson-to-csv'      = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
+        'data/binary-to-text/bson-to-yaml'     = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
+        'data/binary-to-text/cbor-to-csv'      = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
+        'data/binary-to-text/messagepack-to-csv' = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
+        'data/binary/avro-schema-evolution'    = @{ ModuleType = 'Data'; SelectiveModules = @('binary-schema-avro.ps1'); EnsureData = $true }
+        'data/binary/capn-proto'               = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-capnp.ps1'); EnsureData = $true }
+        'data/binary/binary-formats'           = @{ ModuleType = 'Data'; SelectiveModules = @('binary-simple.ps1', 'binary-direct.ps1'); EnsureData = $true }
+        'data/columnar/delta-lake'             = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-delta.ps1'); EnsureData = $true }
+        'data/csv-xml/csv-xml-roundtrip'       = @{ ModuleType = 'Data'; SelectiveModules = @(); EnsureData = $true }
+        'data/error-handling/conversion-errors' = @{ ModuleType = 'Data'; SelectiveModules = @('json.ps1'); EnsureData = $true }
+        'document/html'                        = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Html'); EnsureDocuments = $true }
+        'document/markdown'                    = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Standard'); EnsureDocuments = $true }
+        'document/epub'                        = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Epub'); EnsureDocuments = $true }
+        'document/docx'                        = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Docx'); EnsureDocuments = $true }
+        'document/latex'                       = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Latex'); EnsureDocuments = $true }
+        'document/document-roundtrip'          = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Roundtrip'); EnsureDocuments = $true }
+        'media/images/bmp'                     = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'bmp.ps1'); EnsureMedia = $true }
+        'media/images/webp'                    = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'webp.ps1'); EnsureMedia = $true }
+        'media/images/avif'                    = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'avif.ps1'); EnsureMedia = $true }
+        'media/images/heic'                    = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'heic.ps1'); EnsureMedia = $true }
+        'media/images/svg'                     = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'svg.ps1'); EnsureMedia = $true }
+        'media/images/tiff'                    = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'tiff.ps1'); EnsureMedia = $true }
+        'media/images/ico'                     = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'ico.ps1'); EnsureMedia = $true }
+        'media/images/legacy-image'            = @{ ModuleType = 'Media'; SelectiveModules = @('common.ps1', 'media-images.ps1'); EnsureMedia = $true }
+        'media/video/video-to-gif'             = @{ ModuleType = 'Media'; SelectiveModules = @('video.ps1'); EnsureMedia = $true }
+        'media/video/video-to-audio'           = @{ ModuleType = 'Media'; SelectiveModules = @('video.ps1'); EnsureMedia = $true }
+        'media/colors/named-colors'            = @{ ModuleType = 'Media'; SelectiveModules = @('named.ps1', 'parse.ps1'); EnsureMedia = $true }
+        'media/colors/hex-formats'             = @{ ModuleType = 'Media'; SelectiveModules = @('hex.ps1', 'parse.ps1'); EnsureMedia = $true }
+        'media/colors/rgb-hsl'                 = @{ ModuleType = 'Media'; SelectiveModules = @('hsl.ps1', 'parse.ps1', 'convert.ps1'); EnsureMedia = $true }
+        'media/colors/color-parsing'           = @{ ModuleType = 'Media'; SelectiveModules = @('parse.ps1'); EnsureMedia = $true }
+        'media/colors/color-roundtrip'         = @{ ModuleType = 'Media'; SelectiveModules = @('parse.ps1', 'convert.ps1', 'hex.ps1', 'hsl.ps1'); EnsureMedia = $true }
+        'media/colors/cmyk-hwb-ncol'           = @{ ModuleType = 'Media'; SelectiveModules = @('cmyk.ps1', 'hwb.ps1', 'ncol.ps1', 'parse.ps1'); EnsureMedia = $true }
+        'data/specialized/qrcode'              = @{ ModuleType = 'Specialized'; SelectiveModules = @('specialized-qrcode.ps1') }
+        'data/specialized/barcode'             = @{ ModuleType = 'Specialized'; SelectiveModules = @('specialized-barcode.ps1') }
+        'data/specialized/jwt'                 = @{ ModuleType = 'Specialized'; SelectiveModules = @('specialized-jwt.ps1') }
+    }
+
+    if ($overrides.ContainsKey($relativeKey)) {
+        return $overrides[$relativeKey]
+    }
+
+    $pathParts = @($relativeKey -split '/')
+    $category = $pathParts[0]
+    $subCategory = if ($pathParts.Count -gt 1) { $pathParts[1] } else { '' }
+
+    $moduleType = switch ($category) {
+        'document' { 'Documents' }
+        'media' { 'Media' }
+        default { 'Data' }
+    }
+
+    $selective = switch ($subCategory) {
+        'structured' { @("$testName.ps1") }
+        'compression' { @("$testName.ps1") }
+        'scientific' { @("scientific-$testName.ps1") }
+        'database' {
+            $dbName = $testName -replace '-', '-'
+            @("database-$dbName.ps1")
+        }
+        'network' { @("network-$($testName -replace '-', '-').ps1") }
+        'columnar' { @("columnar-$testName.ps1") }
+        'binary' { @('binary-simple.ps1') }
+        'binary-to-text' { @('binary-to-text.ps1') }
+        'units' { @("$testName.ps1") }
+        'time' { @("$testName.ps1") }
+        'encoding' {
+            $encodingMap = @{
+                'rot-cipher'          = @('rot.ps1')
+                'morse-code'          = @('morse.ps1')
+                'braille'             = @('encoding.ps1')
+                'ebcdic'              = @('encoding.ps1')
+                'base122'             = @('encoding.ps1')
+            }
+            if ($encodingMap.ContainsKey($testName)) { $encodingMap[$testName] } else { @("$testName.ps1") }
+        }
+        'digest' { @('digest.ps1') }
+        'base64' { @('base64.ps1') }
+        'media' {
+            if ($relativeKey -match '/audio/') { @("$testName.ps1") }
+            elseif ($relativeKey -match '/images/') { @('common.ps1', "$testName.ps1") }
+            else { @("$testName.ps1") }
+        }
+        default { @("$testName.ps1") }
+    }
+
+    $result = @{
+        ModuleType        = $moduleType
+        SelectiveModules  = $selective
+    }
+    if ($moduleType -eq 'Data') { $result['EnsureData'] = $true }
+    if ($moduleType -eq 'Documents') { $result['EnsureDocuments'] = $true }
+    if ($moduleType -eq 'Media') { $result['EnsureMedia'] = $true }
+    return $result
+}
+
+<#
+.SYNOPSIS
+    Ensures document conversion stub and initialized flag when selective loading skips files.ps1 enabler.
+#>
+function Set-ConversionDocumentsIntegrationStub {
+    if (-not (Get-Command Ensure-FileConversion-Documents -ErrorAction SilentlyContinue)) {
+        function global:Ensure-FileConversion-Documents { }
+    }
+    $global:FileConversionDocumentsInitialized = $true
+}
+
+<#
+.SYNOPSIS
+    Initializes conversion integration test setup from a test script path.
+#>
+function Initialize-ConversionIntegrationForTestFile {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ProfileDir,
+
+        [string]$TestScriptPath
+    )
+
+    if (-not $TestScriptPath) {
+        $callerFrame = Get-PSCallStack |
+            Where-Object { $_.ScriptName -and $_.ScriptName -like '*.tests.ps1' } |
+            Select-Object -First 1
+        if ($callerFrame) {
+            $TestScriptPath = $callerFrame.ScriptName
+        }
+        elseif ($PSCommandPath -like '*.tests.ps1') {
+            $TestScriptPath = $PSCommandPath
+        }
+        else {
+            throw 'Could not resolve test script path. Pass -TestScriptPath explicitly.'
+        }
+    }
+
+    $resolved = Resolve-ConversionIntegrationForTest -TestScriptPath $TestScriptPath
+    $params = @{
+        ProfileDir       = $ProfileDir
+        ModuleType       = $resolved.ModuleType
+        SelectiveModules = $resolved.SelectiveModules
+    }
+    if ($resolved.ContainsKey('EnsureData') -and $resolved.EnsureData) { $params['EnsureData'] = $true }
+    if ($resolved.ContainsKey('EnsureDocuments') -and $resolved.EnsureDocuments) { $params['EnsureDocuments'] = $true }
+    if ($resolved.ContainsKey('EnsureMedia') -and $resolved.EnsureMedia) { $params['EnsureMedia'] = $true }
+
+    Initialize-ConversionIntegration @params
+
+    if ($resolved.ContainsKey('EnsureDocuments') -and $resolved.EnsureDocuments) {
+        Set-ConversionDocumentsIntegrationStub
+    }
+}
+
+<#
+.SYNOPSIS
     Loads conversion modules for integration tests with optional selective loading.
 #>
 function Initialize-ConversionIntegration {
@@ -1195,12 +1497,22 @@ function Initialize-ConversionIntegration {
         }
     }
 
-    if ($EnsureDocuments -and (Get-Command Ensure-FileConversion-Documents -ErrorAction SilentlyContinue)) {
-        Ensure-FileConversion-Documents
+    if ($EnsureDocuments) {
+        if ($SelectiveModules -and @($SelectiveModules).Count -gt 0) {
+            Set-ConversionDocumentsIntegrationStub
+        }
+        elseif (Get-Command Ensure-FileConversion-Documents -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Documents
+        }
     }
 
-    if ($EnsureMedia -and (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue)) {
-        Ensure-FileConversion-Media
+    if ($EnsureMedia) {
+        if ($SelectiveModules -and @($SelectiveModules).Count -gt 0) {
+            $global:FileConversionMediaInitialized = $true
+        }
+        elseif (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Media
+        }
     }
 }
 

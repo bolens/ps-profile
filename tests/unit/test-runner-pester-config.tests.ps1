@@ -35,6 +35,8 @@ BeforeAll {
     # Set up test repository root
     $script:TestRepoRoot = Split-Path $PSScriptRoot -Parent
     Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
+    $script:TestResultsXml = Get-TestArtifactPath -FileName 'test-results.xml'
+    $script:ResultsXml = Get-TestArtifactPath -FileName 'results.xml'
 }
 
 Describe 'PesterConfig Module Tests' {
@@ -60,7 +62,7 @@ Describe 'PesterConfig Module Tests' {
         }
 
         It 'Configures CI optimizations when CI is enabled' {
-            $config = New-PesterTestConfiguration -CI -OutputPath 'test-results.xml'
+            $config = New-PesterTestConfiguration -CI -OutputPath $script:TestResultsXml
 
             $config.Output.Verbosity.Value | Should -Be 'Normal'
             $config.TestResult.Enabled.Value | Should -Be $true
@@ -136,7 +138,7 @@ Describe 'PesterConfig Module Tests' {
         It 'Applies CI-specific settings' {
             $config = New-PesterConfiguration
 
-            $config = Set-PesterCIOptimizations -Config $config -OutputPath 'results.xml' -Coverage
+            $config = Set-PesterCIOptimizations -Config $config -OutputPath $script:ResultsXml -Coverage
 
             $config.Output.Verbosity.Value | Should -Be 'Normal'
             $config.TestResult.Enabled.Value | Should -Be $true
@@ -148,7 +150,7 @@ Describe 'PesterConfig Module Tests' {
         It 'Configures test results with OutputPath' {
             $config = New-PesterConfiguration
 
-            $config = Set-PesterTestResults -Config $config -OutputPath 'results.xml'
+            $config = Set-PesterTestResults -Config $config -OutputPath $script:ResultsXml
 
             $config.TestResult.Enabled.Value | Should -Be $true
             $config.TestResult.OutputPath.Value | Should -Be 'results.xml'

@@ -3,9 +3,8 @@
 # Integration tests for lang-python-*.ps1 fragments
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:FragmentPaths = @(
         (Join-Path $script:ProfileDir 'lang-python-pipx.ps1'),

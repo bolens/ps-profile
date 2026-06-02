@@ -25,41 +25,7 @@ else {
 Describe 'TOML Conversion Integration Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        
-        # Load bootstrap for core functions
-        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-        if (Test-Path -LiteralPath $bootstrapPath) {
-            . $bootstrapPath
-        }
-        
-        # Load files fragment for conversion module infrastructure
-        $filesPath = Join-Path $script:ProfileDir 'files.ps1'
-        if (Test-Path -LiteralPath $filesPath) {
-            . $filesPath
-        }
-        
-        # Load required helper modules (TOML depends on these for XML/TOON conversions)
-        $helpersXmlPath = Join-Path $script:ProfileDir 'conversion-modules' 'helpers' 'helpers-xml.ps1'
-        if (Test-Path -LiteralPath $helpersXmlPath) {
-            . $helpersXmlPath
-        }
-        else {
-            throw "Required helper module not found: helpers-xml.ps1"
-        }
-        
-        $helpersToonPath = Join-Path $script:ProfileDir 'conversion-modules' 'helpers' 'helpers-toon.ps1'
-        if (Test-Path -LiteralPath $helpersToonPath) {
-            . $helpersToonPath
-        }
-        
-        # Load TOML module directly (bypass Ensure pattern for faster test startup)
-        $tomlModulePath = Join-Path $script:ProfileDir 'conversion-modules' 'data' 'structured' 'toml.ps1'
-        if (Test-Path -LiteralPath $tomlModulePath) {
-            . $tomlModulePath
-        }
-        else {
-            throw "TOML module not found at: $tomlModulePath"
-        }
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
     }
 
     Context 'TOML conversion utilities' {

@@ -10,6 +10,8 @@
 Describe 'System Utilities - Clipboard Integration Tests' {
     BeforeAll {
         try {
+            . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
                 throw "Get-TestPath returned null or empty value for ProfileDir"

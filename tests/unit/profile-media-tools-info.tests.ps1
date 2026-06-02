@@ -18,6 +18,7 @@ BeforeAll {
     $script:TestInputFile2 = Join-Path $script:TestMkvDir 'part2.mkv'
     Set-Content -Path $script:TestInputFile1 -Value 'test content 1'
     Set-Content -Path $script:TestInputFile2 -Value 'test content 2'
+    $script:TestOutputMkv = Get-TestArtifactPath -FileName 'output.mkv'
 }
 
 Describe 'media-tools.ps1 - Get-MediaInfo' {
@@ -115,7 +116,7 @@ Describe 'media-tools.ps1 - Merge-MKV' {
 
     Context 'Tool not available' {
         It 'Returns null when mkvmerge is not available' {
-            $result = Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath 'output.mkv' -ErrorAction SilentlyContinue
+            $result = Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath $script:TestOutputMkv -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
         }
@@ -125,7 +126,7 @@ Describe 'media-tools.ps1 - Merge-MKV' {
         It 'Returns error when input file does not exist' {
             $missingFile = Join-Path (New-TestTempDirectory -Prefix 'MkvMissing') 'nonexistent.mkv'
 
-            $result = Merge-MKV -InputPaths @($missingFile) -OutputPath 'output.mkv' -Confirm:$false -ErrorAction SilentlyContinue
+            $result = Merge-MKV -InputPaths @($missingFile) -OutputPath $script:TestOutputMkv -Confirm:$false -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
         }
@@ -135,11 +136,11 @@ Describe 'media-tools.ps1 - Merge-MKV' {
         It 'Calls mkvmerge with correct arguments' {
             Setup-CapturingCommandMock -CommandName 'mkvmerge' -Output ''
 
-            Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath 'output.mkv' -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+            Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath $script:TestOutputMkv -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
             $args | Should -Contain '-o'
-            $args | Should -Contain 'output.mkv'
+            $args | Should -Contain $script:TestOutputMkv
             $args | Should -Contain $script:TestInputFile1
             $args | Should -Contain $script:TestInputFile2
         }
@@ -147,15 +148,15 @@ Describe 'media-tools.ps1 - Merge-MKV' {
         It 'Returns output path on success' {
             Setup-CapturingCommandMock -CommandName 'mkvmerge' -Output ''
 
-            $result = Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath 'output.mkv' -Confirm:$false -ErrorAction SilentlyContinue
+            $result = Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath $script:TestOutputMkv -Confirm:$false -ErrorAction SilentlyContinue
 
-            $result | Should -Be 'output.mkv'
+            $result | Should -Be $script:TestOutputMkv
         }
 
         It 'Handles mkvmerge execution errors' {
             Setup-CapturingCommandMock -CommandName 'mkvmerge' -Output '' -ExitCode 1
 
-            { Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath 'output.mkv' -Confirm:$false -ErrorAction Stop } | Should -Throw
+            { Merge-MKV -InputPaths @($script:TestInputFile1, $script:TestInputFile2) -OutputPath $script:TestOutputMkv -Confirm:$false -ErrorAction Stop } | Should -Throw
         }
     }
 }

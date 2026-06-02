@@ -10,12 +10,16 @@ BeforeAll {
     . (Join-Path $script:ProfileDir 'database.ps1')
 
     $script:OriginalQueryDatabase = ${function:Query-Database}
-    $script:TestImportFile = Join-Path (New-TestTempDirectory -Prefix 'DbImport') 'backup.sql'
-    Set-Content -Path $script:TestImportFile -Value 'CREATE TABLE test (id INT);'
 }
 
 Describe 'database.ps1 - Enhanced Functions' {
     BeforeEach {
+        $script:TestWorkDir = New-TestTempDirectory -Prefix 'DbEnhanced'
+        $script:TestImportFile = Join-Path $script:TestWorkDir 'backup.sql'
+        $script:TestDumpFile = Join-Path $script:TestWorkDir 'backup.dump'
+        $script:TestCustomBackupFile = Join-Path $script:TestWorkDir 'custom-backup.dump'
+        Set-Content -Path $script:TestImportFile -Value 'CREATE TABLE test (id INT);'
+
         Clear-TestStartProcessCapture
         Clear-TestCommandInvocationCapture
 
@@ -119,32 +123,32 @@ Describe 'database.ps1 - Enhanced Functions' {
         It 'Returns null when required tools are not available' {
             Mark-TestCommandsUnavailable -CommandNames 'pg_dump'
 
-            $result = Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction SilentlyContinue
+            $result = Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath $script:TestImportFile -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
         }
 
         It 'Validates DatabaseType parameter' {
-            { Export-Database -DatabaseType InvalidType -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction Stop } | Should -Throw
+            { Export-Database -DatabaseType InvalidType -Database 'testdb' -OutputPath $script:TestImportFile -ErrorAction Stop } | Should -Throw
         }
 
         It 'Calls pg_dump with correct arguments for PostgreSQL' {
             Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
 
-            Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.dump' -ErrorAction SilentlyContinue | Out-Null
+            Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath $script:TestDumpFile -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
             $args | Should -Contain '-F'
             $args | Should -Contain 'c'
             $args | Should -Contain '-f'
-            $args | Should -Contain 'backup.dump'
+            $args | Should -Contain $script:TestDumpFile
             $args | Should -Contain 'testdb'
         }
 
         It 'Adds schema-only flag when SchemaOnly is specified' {
             Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
 
-            Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.dump' -SchemaOnly -ErrorAction SilentlyContinue | Out-Null
+            Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath $script:TestDumpFile -SchemaOnly -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
             $args | Should -Contain '--schema-only'
@@ -153,7 +157,8 @@ Describe 'database.ps1 - Enhanced Functions' {
 
     Context 'Import-Database' {
         It 'Returns false when input file does not exist' {
-            $result = Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath 'nonexistent.sql' -ErrorAction SilentlyContinue
+            $missingImport = Join-Path $script:TestWorkDir 'nonexistent.sql'
+            $result = Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $missingImport -ErrorAction SilentlyContinue
 
             $result | Should -Be $false
         }
@@ -185,22 +190,27 @@ Describe 'database.ps1 - Enhanced Functions' {
         It 'Generates default backup path with timestamp' {
             Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
 
-            $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
-
-            @($result)[-1] | Should -Match '^testdb-\d{14}\.dump$'
+            Push-Location $script:TestWorkDir
+            try {
+                $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
+                @($result)[-1] | Should -Match '^testdb-\d{14}\.dump$'
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Uses provided BackupPath' {
             Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
 
-            $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath 'custom-backup.dump' -ErrorAction SilentlyContinue
+            $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $script:TestCustomBackupFile -ErrorAction SilentlyContinue
 
-            @($result)[-1] | Should -Be 'custom-backup.dump'
+            @($result)[-1] | Should -Be $script:TestCustomBackupFile
         }
 
         It 'Compresses backup when Compress is specified' {
             Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
-            $backupFile = Join-Path (New-TestTempDirectory -Prefix 'DbBackup') 'backup.dump'
+            $backupFile = $script:TestDumpFile
             Set-Content -Path $backupFile -Value 'test content'
 
             $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $backupFile -Compress -ErrorAction SilentlyContinue
@@ -211,7 +221,8 @@ Describe 'database.ps1 - Enhanced Functions' {
 
     Context 'Restore-Database' {
         It 'Returns false when backup file does not exist' {
-            $result = Restore-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath 'nonexistent.dump' -ErrorAction SilentlyContinue
+            $missingBackup = Join-Path $script:TestWorkDir 'nonexistent.dump'
+            $result = Restore-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $missingBackup -ErrorAction SilentlyContinue
 
             $result | Should -Be $false
         }

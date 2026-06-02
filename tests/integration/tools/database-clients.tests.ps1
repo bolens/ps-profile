@@ -3,9 +3,8 @@
 # Integration tests for database-clients.ps1
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:DatabaseClientsPath = Join-Path $script:ProfileDir 'database-clients.ps1'
     

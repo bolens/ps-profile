@@ -3,9 +3,8 @@
 # Integration tests for 3d-cad.ps1 module
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
@@ -106,7 +105,7 @@ Describe '3d-cad.ps1 - Integration Tests' {
             Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
 
             $output = & {
-                Render-3DScene -ProjectPath 'scene.blend' -OutputPath 'render.png' -ErrorAction SilentlyContinue
+                Render-3DScene -ProjectPath (Get-TestArtifactPath -FileName 'scene.blend') -OutputPath (Get-TestArtifactPath -FileName 'render.png') -ErrorAction SilentlyContinue
             } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'blender not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'blender'

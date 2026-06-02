@@ -44,8 +44,8 @@ Describe 'TaskParityUtilities' {
     }
 
     It 'Write-TaskParityTextFile preserves CRLF when updating existing files' {
-        $tempDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_.FullName }
-        $filePath = Join-Path $tempDir.FullName 'sample.txt'
+        $tempDir = New-TestTempDirectory -Prefix 'TaskParityUtilities'
+        $filePath = Join-Path $tempDir 'sample.txt'
         $crlfContent = "line1`r`nline2`r`n"
         [System.IO.File]::WriteAllText($filePath, $crlfContent, [System.Text.UTF8Encoding]::new($false))
 

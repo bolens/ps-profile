@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'Homebrew Tools Integration Tests' {
     BeforeAll {
@@ -559,7 +561,7 @@ Describe 'Homebrew Tools Integration Tests' {
             }
 
             # Execute
-            { Export-BrewPackages -Path 'test-Brewfile' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-BrewPackages -Path (Get-TestArtifactPath -FileName 'test-Brewfile') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'brew' -Times 1 -Exactly
@@ -581,7 +583,7 @@ Describe 'Homebrew Tools Integration Tests' {
             }
 
             # Execute
-            { Export-BrewPackages -Path 'test-Brewfile' -Describe -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-BrewPackages -Path (Get-TestArtifactPath -FileName 'test-Brewfile') -Describe -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'brew' -Times 1 -Exactly
@@ -602,7 +604,7 @@ Describe 'Homebrew Tools Integration Tests' {
             }
 
             # Execute
-            { Export-BrewPackages -Path 'test-Brewfile' -Force -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-BrewPackages -Path (Get-TestArtifactPath -FileName 'test-Brewfile') -Force -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'brew' -Times 1 -Exactly

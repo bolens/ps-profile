@@ -22,44 +22,7 @@ else {
 Describe 'TOON Conversion Integration Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        
-        # Load bootstrap for core functions
-        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-        if (Test-Path -LiteralPath $bootstrapPath) {
-            . $bootstrapPath
-        }
-        
-        # Load files fragment for conversion module infrastructure
-        $filesPath = Join-Path $script:ProfileDir 'files.ps1'
-        if (Test-Path -LiteralPath $filesPath) {
-            . $filesPath
-        }
-        
-        # Load required helper modules (TOON depends on helpers-xml.ps1 and helpers-toon.ps1)
-        $helpersXmlPath = Join-Path $script:ProfileDir 'conversion-modules' 'helpers' 'helpers-xml.ps1'
-        if (Test-Path -LiteralPath $helpersXmlPath) {
-            . $helpersXmlPath
-        }
-        else {
-            throw "Required helper module not found: helpers-xml.ps1"
-        }
-        
-        $helpersToonPath = Join-Path $script:ProfileDir 'conversion-modules' 'helpers' 'helpers-toon.ps1'
-        if (Test-Path -LiteralPath $helpersToonPath) {
-            . $helpersToonPath
-        }
-        else {
-            throw "Required helper module not found: helpers-toon.ps1"
-        }
-        
-        # Load TOON module directly (bypass Ensure pattern for faster test startup)
-        $toonModulePath = Join-Path $script:ProfileDir 'conversion-modules' 'data' 'structured' 'toon.ps1'
-        if (Test-Path -LiteralPath $toonModulePath) {
-            . $toonModulePath
-        }
-        else {
-            throw "TOON module not found at: $toonModulePath"
-        }
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
     }
 
     Context 'TOON conversion utilities' {

@@ -15,7 +15,7 @@ Describe 'DOCX and Office Document Conversion Tests' {
     BeforeAll {
         try {
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'All' -LoadFilesFragment -EnsureFileConversionDocuments -EnsureFileConversionMedia
+            Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         }
         catch {
             $errorDetails = @{

@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'Chocolatey Tools Integration Tests' {
     BeforeAll {
@@ -461,7 +463,7 @@ Describe 'Chocolatey Tools Integration Tests' {
             }
 
             # Execute
-            { Export-ChocoPackages -Path 'test-packages.config' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-ChocoPackages -Path (Get-TestArtifactPath -FileName 'test-packages.config') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'choco' -Times 1 -Exactly
@@ -482,7 +484,7 @@ Describe 'Chocolatey Tools Integration Tests' {
             }
 
             # Execute
-            { Export-ChocoPackages -Path 'test-packages.config' -IncludeVersions -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-ChocoPackages -Path (Get-TestArtifactPath -FileName 'test-packages.config') -IncludeVersions -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'choco' -Times 1 -Exactly

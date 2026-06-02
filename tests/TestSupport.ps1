@@ -256,7 +256,36 @@ if (Get-Command Initialize-TestMocks -ErrorAction SilentlyContinue) {
     Initialize-TestMocks
 }
 
-# Register cleanup to run after tests
-if (Get-Command Remove-TestArtifacts -ErrorAction SilentlyContinue) {
-    Remove-TestArtifacts
+<#
+.SYNOPSIS
+    Registers an AfterEach hook that cleans transient test artifacts.
+.DESCRIPTION
+    Must be called from within a Describe/Context/BeforeAll block. When TestSupport
+    is dot-sourced from a file's top level, this is not registered automatically.
+#>
+function Add-TestPerTestCleanup {
+    if (-not (Get-Command AfterEach -ErrorAction SilentlyContinue -CommandType Function)) {
+        return
+    }
+
+    AfterEach {
+        if (Get-Command Remove-TestArtifacts -ErrorAction SilentlyContinue) {
+            Remove-TestArtifacts
+        }
+    }
+}
+
+function Test-IsDotSourcedFromPesterHook {
+    $hookCommands = @('BeforeAll', 'BeforeEach', 'BeforeDiscovery', 'Describe', 'Context')
+    foreach ($frame in (Get-PSCallStack | Select-Object -Skip 1 -First 10)) {
+        if ($frame.Command -in $hookCommands) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+if (Test-IsDotSourcedFromPesterHook) {
+    Add-TestPerTestCleanup
 }

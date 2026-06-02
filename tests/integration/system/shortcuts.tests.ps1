@@ -2,6 +2,7 @@
 
 Describe 'Shortcuts Integration Tests' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
         try {
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
@@ -25,20 +26,8 @@ Describe 'Shortcuts Integration Tests' {
     }
     
     AfterAll {
-        # Clean up any files that might have been created in project root
         if (Get-Command Remove-TestArtifacts -ErrorAction SilentlyContinue) {
             Remove-TestArtifacts
-        }
-        else {
-            # Fallback cleanup
-            $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-            $filesToClean = @('0', '2', '5', 'nonexistent.csv', 'nonexistent.yaml', 'nonexistent.txt')
-            foreach ($file in $filesToClean) {
-                $filePath = Join-Path $repoRoot $file
-                if ($filePath -and (Test-Path -LiteralPath $filePath)) {
-                    Remove-Item $filePath -Force -ErrorAction SilentlyContinue
-                }
-            }
         }
     }
 

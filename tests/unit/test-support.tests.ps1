@@ -45,8 +45,8 @@ Describe 'TestSupport Modules' {
             }
 
             It 'Throws error when repository root cannot be found' {
-                # Create a temporary directory that is NOT in a git repository
-                # Use system temp directory to ensure it's outside the repo
+                # This specific test must use a location outside the repository tree;
+                # otherwise Get-TestRepoRoot will always find the repo .git directory.
                 $tempBase = [System.IO.Path]::GetTempPath()
                 $tempDir = Join-Path $tempBase "NoGitRepo-$([Guid]::NewGuid())"
                 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
@@ -180,6 +180,87 @@ Describe 'TestSupport Modules' {
                     for ($i = 0; $i -lt ($result.Count - 1); $i++) {
                         $result[$i].FullName | Should -BeLessOrEqual $result[$i + 1].FullName
                     }
+                }
+            }
+        }
+
+        Context 'Register-TestCleanupPath' {
+            It 'Remove-TestArtifacts clears registered paths after each test' {
+                $fixtureDir = New-TestTempDirectory -Prefix 'CleanupRegistry'
+                Test-Path -LiteralPath $fixtureDir | Should -Be $true
+
+                Remove-TestArtifacts
+
+                Test-Path -LiteralPath $fixtureDir | Should -Be $false
+            }
+        }
+
+        Context 'Get-TestArtifactPath' {
+            It 'Places artifacts under tests/test-data and registers cleanup' {
+                $artifactPath = Get-TestArtifactPath -FileName 'artifact-cleanup-probe.txt'
+                $testDataPath = Get-TestDataPath -StartPath $PSScriptRoot
+
+                $artifactPath | Should -BeLike "*$([IO.Path]::DirectorySeparatorChar)test-data$([IO.Path]::DirectorySeparatorChar)*"
+                $artifactPath | Should -Be (Join-Path $testDataPath 'artifact-cleanup-probe.txt')
+
+                Set-Content -LiteralPath $artifactPath -Value 'probe' -Force
+                Test-Path -LiteralPath $artifactPath | Should -Be $true
+
+                Remove-TestArtifacts
+
+                Test-Path -LiteralPath $artifactPath | Should -Be $false
+            }
+        }
+
+        Context 'Clear-TestRepoRootSpillover' {
+            It 'Removes known transient files from the repository root' {
+                $spillFile = Join-Path $script:RepoRoot 'hook-test-spill.txt'
+                Set-Content -LiteralPath $spillFile -Value 'spill' -Force
+
+                Clear-TestRepoRootSpillover -StartPath $PSScriptRoot
+
+                Test-Path -LiteralPath $spillFile | Should -Be $false
+            }
+        }
+
+        Context 'Clear-TestTransientStorage' {
+            It 'Removes all children from tests/test-data and tests/test-artifacts' {
+                $dataDir = Get-TestDataPath -StartPath $PSScriptRoot -EnsureExists
+                $artifactsDir = Get-TestArtifactsPath -StartPath $PSScriptRoot -EnsureExists
+
+                $dataFixture = New-TestTempDirectory -Prefix 'CleanupData'
+                $artifactFixture = Join-Path $artifactsDir 'scripts/utils/cleanup-test.ps1'
+                $artifactParent = Split-Path -Path $artifactFixture -Parent
+                if (-not (Test-Path -LiteralPath $artifactParent)) {
+                    New-Item -ItemType Directory -Path $artifactParent -Force | Out-Null
+                }
+                Set-Content -Path $artifactFixture -Value '# cleanup test' -Encoding UTF8
+
+                $summary = Clear-TestTransientStorage -StartPath $PSScriptRoot
+                $summary.RemovedItemCount | Should -BeGreaterOrEqual 2
+                Test-Path -LiteralPath $dataFixture | Should -Be $false
+                Test-Path -LiteralPath $artifactFixture | Should -Be $false
+                Test-Path -LiteralPath $dataDir | Should -Be $true
+                Test-Path -LiteralPath $artifactsDir | Should -Be $true
+            }
+
+            It 'Skips cleanup when PS_PROFILE_SKIP_TEST_CLEANUP is set' {
+                $fixtureDir = New-TestTempDirectory -Prefix 'CleanupSkip'
+                $originalSkip = $env:PS_PROFILE_SKIP_TEST_CLEANUP
+                try {
+                    $env:PS_PROFILE_SKIP_TEST_CLEANUP = '1'
+                    $summary = Clear-TestTransientStorage -StartPath $PSScriptRoot
+                    $summary.RemovedItemCount | Should -Be 0
+                    Test-Path -LiteralPath $fixtureDir | Should -Be $true
+                }
+                finally {
+                    if ($null -eq $originalSkip) {
+                        Remove-Item Env:\PS_PROFILE_SKIP_TEST_CLEANUP -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        $env:PS_PROFILE_SKIP_TEST_CLEANUP = $originalSkip
+                    }
+                    Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -381,7 +462,7 @@ Describe 'TestSupport Modules' {
 
         Context 'Import-TestModule' {
             It 'Loads module file successfully' {
-                $testModulePath = Join-Path ([System.IO.Path]::GetTempPath()) "test-module-$(Get-Random).ps1"
+                $testModulePath = New-TestTempFile -Prefix 'test-module' -Extension '.ps1'
                 $moduleContent = @'
 function Test-MyFunction {
     Write-Output "Test function"
@@ -400,7 +481,8 @@ function Test-MyFunction {
             }
 
             It 'Handles missing module file gracefully' {
-                $nonexistentPath = Join-Path ([System.IO.Path]::GetTempPath()) "nonexistent-module-$(Get-Random).ps1"
+                $nonexistentPath = New-TestTempFile -Prefix 'nonexistent-module' -Extension '.ps1'
+                Remove-Item -LiteralPath $nonexistentPath -Force -ErrorAction SilentlyContinue
                 { Import-TestModule -ModulePath $nonexistentPath } | Should -Not -Throw
             }
         }

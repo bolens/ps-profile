@@ -3,9 +3,8 @@
 # Performance tests for modern-cli.ps1 enhanced functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
@@ -81,7 +80,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             Mock-CommandAvailabilityPester -CommandName 'bat' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-            View-WithBat -Path "test.txt" -ErrorAction SilentlyContinue
+            View-WithBat -Path (Get-TestArtifactPath -FileName 'test.txt') -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
             $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100

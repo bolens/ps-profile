@@ -8,7 +8,9 @@
     missing tools gracefully.
 #>
 
-. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
 
 Describe 'npm Tools Integration Tests' {
     BeforeAll {
@@ -143,7 +145,7 @@ Describe 'npm Tools Integration Tests' {
                 }
             }
 
-            { Export-NpmGlobalPackages -Path 'test-npm-global.json' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-NpmGlobalPackages -Path (Get-TestArtifactPath -FileName 'test-npm-global.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'npm' -Times 1 -Exactly
         }
 
@@ -157,7 +159,7 @@ Describe 'npm Tools Integration Tests' {
         }
 
         It 'Import-NpmGlobalPackages calls npm install -g for each package' {
-            $testFile = 'test-npm-global.json'
+            $testFile = Get-TestArtifactPath -FileName 'test-npm-global.json'
             '{"dependencies": {"typescript": "5.0.0", "nodemon": "2.0.0"}}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
             $script:capturedArgs = @()
@@ -356,7 +358,7 @@ Describe 'npm Tools Integration Tests' {
                 }
             }
 
-            { Export-NpmGlobalPackages -Path 'test-npm-global-empty.json' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-NpmGlobalPackages -Path (Get-TestArtifactPath -FileName 'test-npm-global-empty.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'npm' -Times 1 -Exactly
         }
 
@@ -368,7 +370,7 @@ Describe 'npm Tools Integration Tests' {
                 Write-Output 'Package installed successfully'
             }
 
-            { Import-NpmGlobalPackages -Path 'nonexistent.json' -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
+            { Import-NpmGlobalPackages -Path (Get-TestArtifactPath -FileName 'nonexistent.json') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
             Should -Invoke -CommandName 'npm' -Times 0 -Exactly
         }
     }

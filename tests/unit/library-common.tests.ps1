@@ -42,7 +42,7 @@ BeforeAll {
             $script:TestTempRoot = Get-TempDirectory
         }
         else {
-            $script:TestTempRoot = [System.IO.Path]::GetTempPath()
+            $script:TestTempRoot = New-TestTempDirectory -Prefix 'LibraryCommonTests'
         }
     }
     catch {
