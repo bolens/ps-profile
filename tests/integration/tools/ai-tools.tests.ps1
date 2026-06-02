@@ -140,31 +140,39 @@ Describe 'ai-tools.ps1 - Integration Tests' {
     
     Context 'Graceful Degradation' {
         It 'Handles missing ollama gracefully' {
+            Mock-CommandAvailabilityPester -CommandName 'ollama' -Available $false
             # Function should exist even if tool is not available
             { Invoke-OllamaEnhanced -Arguments @('list') -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
         
         It 'Handles missing lms gracefully' {
+            Mock-CommandAvailabilityPester -CommandName 'lms' -Available $false
             # Function should exist even if tool is not available
             { Invoke-LMStudio -Arguments @('list') -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
         
         It 'Handles missing koboldcpp gracefully' {
+            Mock-CommandAvailabilityPester -CommandName 'koboldcpp' -Available $false
             # Function should exist even if tool is not available
             { Invoke-KoboldCpp -Arguments @('--help') -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
         
         It 'Handles missing llamafile gracefully' {
+            Mock-CommandAvailabilityPester -CommandName 'llamafile' -Available $false
             # Function should exist even if tool is not available
             { Invoke-Llamafile -Arguments @('--help') -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
         
         It 'Handles missing llama-cpp gracefully' {
+            foreach ($cmd in @('llama-cpp-cuda', 'llama-cpp', 'llama.cpp')) {
+                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            }
             # Function should exist even if tool is not available
             { Invoke-LlamaCpp -Arguments @('--help') -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
         
         It 'Handles missing comfy gracefully' {
+            Mock-CommandAvailabilityPester -CommandName 'comfy' -Available $false
             # Function should exist even if tool is not available
             { Invoke-ComfyUI -Arguments @('install') -ErrorAction SilentlyContinue } | Should -Not -Throw
         }

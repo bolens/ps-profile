@@ -91,26 +91,14 @@ Describe "Container Functions" {
         }
 
         It "Provides installation command when no engines are available" {
-            # Clear cache to ensure fresh evaluation
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force
-            }
-            
-            # Mock all container commands as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also mock Test-HasCommand to ensure it returns false
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
-            
+            Initialize-ContainerEngineUnavailableMocks
+
             $result = Get-ContainerEnginePreference
             $result.Available | Should -Be $false
-            $result.InstallationCommand | Should -Match 'scoop install (docker|podman)'
+            $result.InstallationCommand | Should -Not -BeNullOrEmpty
+            $result.InstallationCommand | Should -Match 'docker'
+            $result.InstallationCommand | Should -Match 'podman'
+            Assert-TestOutputContainsInstallCommand -Output $result.InstallationCommand -ToolNames @('docker', 'podman')
         }
 
         It "Detects docker availability correctly" {
@@ -198,6 +186,8 @@ Describe "Container Functions" {
 
     Context "Start-ContainerCompose" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Start-ContainerCompose } | Should -Not -Throw
         }
 
@@ -207,42 +197,30 @@ Describe "Container Functions" {
         }
 
         It "Provides installation recommendation when no container engine is available" {
-            # Clear cache to ensure fresh evaluation
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force
-            }
-            
-            # Mock all container commands as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also mock Test-HasCommand to ensure it returns false
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
-            
-            # Capture warning output correctly
+            Initialize-ContainerEngineUnavailableMocks
+
             $warningOutput = Start-ContainerCompose 2>&1 3>&1 | Out-String
-            $warningOutput | Should -Match 'scoop install (docker|podman)'
+            Assert-TestMissingToolWarning -Output $warningOutput -Pattern 'Neither docker nor podman found'
+            Assert-TestOutputContainsInstallCommand -Output $warningOutput -ToolNames @('docker', 'podman')
         }
     }
 
     Context "Stop-ContainerCompose" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Stop-ContainerCompose } | Should -Not -Throw
         }
 
         It "Has dcd alias for Stop-ContainerCompose" {
-            Get-Alias -Name dcd -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            (Get-Alias dcd).ResolvedCommandName | Should -Be 'Stop-ContainerCompose'
+            Assert-ProfileCommandAlias -AliasName 'dcd' -FunctionName 'Stop-ContainerCompose'
         }
     }
 
     Context "Get-ContainerComposeLogs" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Get-ContainerComposeLogs } | Should -Not -Throw
         }
 
@@ -254,6 +232,8 @@ Describe "Container Functions" {
 
     Context "Clear-ContainerSystem" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Clear-ContainerSystem } | Should -Not -Throw
         }
 
@@ -265,6 +245,7 @@ Describe "Container Functions" {
 
     Context "Start-ContainerComposePodman" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Start-ContainerComposePodman } | Should -Not -Throw
         }
 
@@ -276,6 +257,7 @@ Describe "Container Functions" {
 
     Context "Stop-ContainerComposePodman" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Stop-ContainerComposePodman } | Should -Not -Throw
         }
 
@@ -287,6 +269,7 @@ Describe "Container Functions" {
 
     Context "Get-ContainerComposeLogsPodman" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Get-ContainerComposeLogsPodman } | Should -Not -Throw
         }
 
@@ -298,6 +281,7 @@ Describe "Container Functions" {
 
     Context "Clear-ContainerSystemPodman" {
         It "Executes without error when function exists" {
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
             { Clear-ContainerSystemPodman } | Should -Not -Throw
         }
 

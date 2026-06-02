@@ -2,9 +2,8 @@
 # Utility script dependency error handling tests.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:TempRoot = New-TestTempDirectory -Prefix 'ScriptError'
 }
 

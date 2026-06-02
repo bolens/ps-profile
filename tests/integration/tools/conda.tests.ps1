@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Conda Tools Integration Tests' {
     BeforeAll {
         try {
@@ -114,6 +116,38 @@ Describe 'Conda Tools Integration Tests' {
             Update-CondaSelf
             Should -Invoke -CommandName 'conda' -Times 1 -Exactly
             Get-Command Update-CondaSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when conda is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Test-CondaOutdated', 'Update-CondaPackages', 'Update-CondaSelf'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'conda' -Available $false
+            $script:MissingCondaOutput = & { . (Join-Path $script:ProfileDir 'conda.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when conda is unavailable' {
+            Get-Command Test-CondaOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when conda is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingCondaOutput -Pattern 'conda not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingCondaOutput -ToolName 'conda'
         }
     }
 }

@@ -16,10 +16,10 @@ if (-not (Test-Path Function:Start-ContainerComposePodman)) {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
         switch ($info.Engine) {
-            'podman' { podman compose up -D @args }
-            'podman-compose' { podman-compose up -D @args }
-            'docker' { docker compose up -D @args }
-            'docker-compose' { docker-compose up -D @args }
+            'podman' { podman compose up -d @args }
+            'podman-compose' { podman-compose up -d @args }
+            'docker' { docker compose up -d @args }
+            'docker-compose' { docker-compose up -d @args }
             default { 
                 $engineInfo = Get-ContainerEnginePreference
                 if ($engineInfo.InstallationCommand) {

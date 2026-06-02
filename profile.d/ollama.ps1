@@ -47,7 +47,7 @@ function Invoke-Ollama {
         ollama @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'ollama' -InstallHint 'Install with: scoop install ollama'
+        Invoke-MissingToolWarning -ToolName 'ollama'
     }
 }
 
@@ -70,7 +70,7 @@ function Get-OllamaModelList {
         ollama list
     }
     else {
-        Write-MissingToolWarning -Tool 'ollama' -InstallHint 'Install with: scoop install ollama'
+        Invoke-MissingToolWarning -ToolName 'ollama'
     }
 }
 
@@ -102,7 +102,7 @@ function Start-OllamaModel {
         ollama run $Model
     }
     else {
-        Write-MissingToolWarning -Tool 'ollama' -InstallHint 'Install with: scoop install ollama'
+        Invoke-MissingToolWarning -ToolName 'ollama'
     }
 }
 
@@ -134,7 +134,7 @@ function Get-OllamaModel {
         ollama pull $Model
     }
     else {
-        Write-MissingToolWarning -Tool 'ollama' -InstallHint 'Install with: scoop install ollama'
+        Invoke-MissingToolWarning -ToolName 'ollama'
     }
 }
 

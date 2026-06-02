@@ -128,7 +128,7 @@ try {
         else {
             $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
         }
-        Invoke-MissingToolWarning -ToolName 'pip' -DefaultInstallCommand 'Install pip or uv: python -m ensurepip --upgrade (or scoop install uv)'
+        Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         return $null
     }
 

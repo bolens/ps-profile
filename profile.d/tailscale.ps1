@@ -47,7 +47,7 @@ function Invoke-Tailscale {
         tailscale @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'tailscale' -InstallHint 'Install with: scoop install tailscale'
+        Invoke-MissingToolWarning -ToolName 'tailscale'
     }
 }
 
@@ -79,7 +79,7 @@ function Connect-TailscaleNetwork {
         tailscale up @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'tailscale' -InstallHint 'Install with: scoop install tailscale'
+        Invoke-MissingToolWarning -ToolName 'tailscale'
     }
 }
 
@@ -102,7 +102,7 @@ function Disconnect-TailscaleNetwork {
         tailscale down
     }
     else {
-        Write-MissingToolWarning -Tool 'tailscale' -InstallHint 'Install with: scoop install tailscale'
+        Invoke-MissingToolWarning -ToolName 'tailscale'
     }
 }
 
@@ -125,7 +125,7 @@ function Get-TailscaleStatus {
         tailscale status
     }
     else {
-        Write-MissingToolWarning -Tool 'tailscale' -InstallHint 'Install with: scoop install tailscale'
+        Invoke-MissingToolWarning -ToolName 'tailscale'
     }
 }
 

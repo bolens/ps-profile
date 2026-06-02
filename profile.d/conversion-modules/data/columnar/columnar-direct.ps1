@@ -61,7 +61,7 @@ const fs = require('fs');
         process.exit(1);
     } catch (error) {
         if (error.code === 'MODULE_NOT_FOUND') {
-            console.error('Error: Required packages not installed. Install with: pnpm add -g parquetjs apache-arrow');
+            console.error('Error: Required packages not installed. Install with: __NODE_INSTALL_CMD__');
         } else {
             console.error('Error:', error.message);
         }
@@ -70,6 +70,7 @@ const fs = require('fs');
 })();
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "parquet-to-arrow-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'apache-arrow', 'parquetjs' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -107,7 +108,7 @@ try {
     process.exit(1);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: Required packages not installed. Install with: pnpm add -g apache-arrow parquetjs');
+        console.error('Error: Required packages not installed. Install with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -115,6 +116,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "arrow-to-parquet-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'apache-arrow', 'parquetjs' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath

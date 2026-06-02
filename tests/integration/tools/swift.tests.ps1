@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'swift Tools Integration Tests' {
     BeforeAll {
         try {
@@ -90,6 +92,39 @@ Describe 'swift Tools Integration Tests' {
             Resolve-SwiftPackages
             Should -Invoke -CommandName 'swift' -Times 1 -Exactly
             Get-Command Resolve-SwiftPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when swift is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Update-SwiftPackages', 'Resolve-SwiftPackages',
+                'Add-SwiftPackage', 'Remove-SwiftPackage'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'swift' -Available $false
+            $script:MissingSwiftOutput = & { . (Join-Path $script:ProfileDir 'swift.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when swift is unavailable' {
+            Get-Command Update-SwiftPackages -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when swift is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingSwiftOutput -Pattern 'swift not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingSwiftOutput -ToolName 'swift'
         }
     }
 }

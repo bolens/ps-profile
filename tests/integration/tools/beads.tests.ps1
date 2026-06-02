@@ -71,7 +71,7 @@ Describe 'beads.ps1 - Integration Tests' {
             $result | Should -BeNullOrEmpty
         }
     }
-}
+
     Context 'Helper Function Registration' {
         It 'Registers Initialize-Beads function' {
             Get-Command Initialize-Beads -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty

@@ -3,13 +3,32 @@
 # Unit tests for terminal multiplexer functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+function global:Get-TestCommandCaptureFlatAt {
+    param(
+        [int]$Index = 0
+    )
 
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
+    if (-not $global:TestCommandInvocationCaptures -or $global:TestCommandInvocationCaptures.Count -le $Index) {
+        return @()
+    }
+
+    $flatArgs = [System.Collections.Generic.List[object]]::new()
+    foreach ($arg in $global:TestCommandInvocationCaptures[$Index]) {
+        if ($arg -is [System.Array]) {
+            foreach ($nestedArg in $arg) {
+                $flatArgs.Add($nestedArg)
+            }
+        }
+        else {
+            $flatArgs.Add($arg)
+        }
+    }
+
+    return ,@($flatArgs.ToArray())
+}
 
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'terminal-enhanced.ps1')
@@ -17,157 +36,141 @@ BeforeAll {
 
 Describe 'terminal-enhanced.ps1 - Multiplexer Functions' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('tmux', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'tmux' -Available $false
+        Remove-Item -Path 'Function:\tmux' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:tmux' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Start-Tmux' {
         It 'Returns null when tmux is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'tmux' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'tmux' } -MockWith { return $null }
-            
             $result = Start-Tmux -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Creates new tmux session when no session name provided' {
-            Setup-AvailableCommandMock -CommandName 'tmux'
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'tmux' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Session created'
-            }
-            
-            Start-Tmux -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'tmux' -Times 2 -Exactly
-            $script:capturedArgs | Should -Contain 'new-session'
-            $script:capturedArgs | Should -Contain '-d'
+            Setup-CapturingCommandMock -CommandName 'tmux' -Output 'Session created'
+
+            Start-Tmux -ErrorAction SilentlyContinue | Out-Null
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 2
+            $firstArgs = Get-TestCommandCaptureFlatAt -Index 0
+            $firstArgs | Should -Contain 'new-session'
+            $firstArgs | Should -Contain '-d'
         }
-        
+
         It 'Creates named tmux session' {
-            Setup-AvailableCommandMock -CommandName 'tmux'
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'tmux' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Session created'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'tmux' -Output 'Session created'
+
             $result = Start-Tmux -SessionName 'dev' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'tmux' -Times 2 -Exactly
-            $script:capturedArgs | Should -Contain 'new-session'
-            $script:capturedArgs | Should -Contain '-s'
-            $script:capturedArgs | Should -Contain 'dev'
-            $result | Should -Be 'dev'
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 2
+            $firstArgs = Get-TestCommandCaptureFlatAt -Index 0
+            $firstArgs | Should -Contain 'new-session'
+            $firstArgs | Should -Contain '-s'
+            $firstArgs | Should -Contain 'dev'
+            @($result)[-1] | Should -Be 'dev'
         }
-        
+
         It 'Attaches to existing session when Attach specified' {
-            Setup-AvailableCommandMock -CommandName 'tmux'
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'tmux' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                if ($args[0] -eq 'list-sessions') {
-                    return 'dev: 1 windows'
+            Setup-CapturingCommandMock -CommandName 'tmux' -OnInvoke {
+                $flatArgs = Get-TestCommandInvocationArgsFlat
+                if ($flatArgs -contains 'list-sessions') {
+                    return 'dev'
                 }
+
                 return 'Session attached'
             }
-            
+
             $result = Start-Tmux -SessionName 'dev' -Attach -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'tmux' -Times 2 -Exactly
-            $script:capturedArgs | Should -Contain 'attach-session'
-            $result | Should -Be 'dev'
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 2
+            $lastArgs = Get-TestCommandCaptureFlatAt -Index 1
+            $lastArgs | Should -Contain 'attach-session'
+            @($result)[-1] | Should -Be 'dev'
         }
-        
+
         It 'Creates new session when Attach specified but session does not exist' {
-            Setup-AvailableCommandMock -CommandName 'tmux'
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'tmux' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                if ($args[0] -eq 'list-sessions') {
+            Setup-CapturingCommandMock -CommandName 'tmux' -OnInvoke {
+                $flatArgs = Get-TestCommandInvocationArgsFlat
+                if ($flatArgs -contains 'list-sessions') {
                     return ''
                 }
+
                 return 'Session created'
             }
-            
+
             $result = Start-Tmux -SessionName 'dev' -Attach -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'tmux' -Times 2 -Exactly
-            $script:capturedArgs | Should -Contain 'new-session'
-            $result | Should -Be 'dev'
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 3
+            $createArgs = Get-TestCommandCaptureFlatAt -Index 1
+            $createArgs | Should -Contain 'new-session'
+            @($result)[-1] | Should -Be 'dev'
         }
-        
+
         It 'Executes command in new session' {
-            Setup-AvailableCommandMock -CommandName 'tmux'
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'tmux' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Session created'
-            }
-            
-            Start-Tmux -SessionName 'dev' -Command 'npm start' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'npm start'
+            Setup-CapturingCommandMock -CommandName 'tmux' -Output 'Session created'
+
+            Start-Tmux -SessionName 'dev' -Command 'npm start' -ErrorAction SilentlyContinue | Out-Null
+
+            $firstArgs = Get-TestCommandCaptureFlatAt -Index 0
+            $firstArgs | Should -Contain 'npm start'
         }
     }
-    
+
     Context 'Get-TerminalInfo' {
-        It 'Returns empty array when no terminals are available' {
-            # Mock all commands as unavailable
-            $allCommands = @('alacritty', 'kitty', 'wezterm-nightly', 'wezterm', 'tabby', 'tmux')
-            foreach ($cmd in $allCommands) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
+
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
             }
-            
+
+            $terminalCommands = @(
+                'alacritty', 'kitty', 'wezterm-nightly', 'wezterm', 'tabby',
+                'wt', 'windows-terminal', 'hyper', 'terminator', 'tmux', 'screen'
+            )
+
+            Mark-TestCommandsUnavailable -CommandNames $terminalCommands
+        }
+
+        It 'Returns empty array when no terminals are available' {
             $result = Get-TerminalInfo
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Returns list of available terminals' {
             Setup-AvailableCommandMock -CommandName 'alacritty'
             Setup-AvailableCommandMock -CommandName 'kitty'
             Setup-AvailableCommandMock -CommandName 'tmux'
-            
+
             $result = Get-TerminalInfo
-            
+
             $result | Should -Not -BeNullOrEmpty
             $result.Count | Should -BeGreaterThan 0
-            
+
             $alacritty = $result | Where-Object { $_.Name -eq 'Alacritty' }
             $alacritty | Should -Not -BeNullOrEmpty
             $alacritty.Command | Should -Be 'alacritty'
             $alacritty.Available | Should -Be $true
         }
-        
+
         It 'Prefers preferred command variants' {
             Setup-AvailableCommandMock -CommandName 'wezterm-nightly'
             Setup-AvailableCommandMock -CommandName 'wezterm'
-            
+
             $result = Get-TerminalInfo
-            
+
             $wezterm = $result | Where-Object { $_.Name -eq 'WezTerm' }
             $wezterm | Should -Not -BeNullOrEmpty
             $wezterm.Command | Should -Be 'wezterm-nightly'
         }
     }
 }
-

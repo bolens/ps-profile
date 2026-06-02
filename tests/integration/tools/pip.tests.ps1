@@ -83,8 +83,10 @@ Describe 'pip Tools Integration Tests' {
 
         It 'Update-PipPackages calls pip list --outdated and upgrades packages' {
             $mockFreezeOutput = @('package1==1.0.0', 'package2==2.0.0')
+            $script:callCount = 0
             Mock -CommandName pip -MockWith {
                 param([string[]]$ArgumentList)
+                $script:callCount++
                 $args = $ArgumentList
                 if ($args -contains 'freeze') {
                     $mockFreezeOutput | ForEach-Object { Write-Output $_ }
@@ -98,9 +100,25 @@ Describe 'pip Tools Integration Tests' {
                 }
             }
 
-            Update-PipPackages
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
             Get-Command Update-PipPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            { Update-PipPackages | Out-Null } | Should -Not -Throw
+            $script:callCount | Should -BeGreaterOrEqual 2
+        }
+
+        It 'Update-PipPackages handles empty package list gracefully' {
+            Mock -CommandName pip -MockWith {
+                param([string[]]$ArgumentList)
+                $args = $ArgumentList
+                if ($args -contains 'freeze') {
+                    Write-Output @()
+                }
+                elseif ($args -contains 'list' -and $args -contains '--outdated') {
+                    Write-Output @('Package    Version  Latest')
+                }
+            }
+
+            $output = Update-PipPackages 6>&1 | Out-String
+            $output | Should -Match 'No packages found to upgrade'
         }
 
         It 'Creates Update-PipSelf function' {
@@ -338,19 +356,16 @@ Describe 'pip Tools Integration Tests' {
 
     Context 'pip graceful degradation' {
         BeforeAll {
-            # Clear command cache if available
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:TestCachedCommandCache.TryRemove('pip', [ref]$null)
-                $null = $global:TestCachedCommandCache.TryRemove('PIP', [ref]$null)
-            }
-            if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-                $global:AssumedAvailableCommands = $global:AssumedAvailableCommands | Where-Object { $_ -ne 'pip' -and $_ -ne 'PIP' }
-            }
 
-            # Remove functions/aliases from previous context
             Remove-Item Function:Install-PipPackage -ErrorAction SilentlyContinue
             Remove-Item Function:Remove-PipPackage -ErrorAction SilentlyContinue
             Remove-Item Function:Test-PipOutdated -ErrorAction SilentlyContinue
@@ -358,40 +373,40 @@ Describe 'pip Tools Integration Tests' {
             Remove-Item Function:Update-PipSelf -ErrorAction SilentlyContinue
             Remove-Item Function:Export-PipPackages -ErrorAction SilentlyContinue
             Remove-Item Function:Import-PipPackages -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipinstall -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipadd -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipuninstall -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipremove -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipoutdated -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipupdate -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipupgrade -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipexport -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipbackup -ErrorAction SilentlyContinue
-            Remove-Item Alias:pipimport -ErrorAction SilentlyContinue
-            Remove-Item Alias:piprestore -ErrorAction SilentlyContinue
+            Remove-Item Function:pip -ErrorAction SilentlyContinue
+            Remove-Item Function:global:pip -ErrorAction SilentlyContinue
 
-            # Mock pip as unavailable
             Mock-CommandAvailabilityPester -CommandName 'pip' -Available $false
-            . (Join-Path $script:ProfileDir 'pip.ps1')
+            $script:MissingPipOutput = & { . (Join-Path $script:ProfileDir 'pip.ps1') } 2>&1 3>&1 | Out-String
         }
 
-        It 'pip fragment handles missing tool gracefully and recommends installation' {
-            # Note: Due to mocking limitations with external commands, the fragment may still create functions
-            # if Test-CachedCommand returns true due to cache or other factors. This is a best-effort test.
-            $functionsExist = @(
-                (Get-Command Install-PipPackage -ErrorAction SilentlyContinue),
-                (Get-Command Remove-PipPackage -ErrorAction SilentlyContinue),
-                (Get-Command Test-PipOutdated -ErrorAction SilentlyContinue),
-                (Get-Command Update-PipPackages -ErrorAction SilentlyContinue),
-                (Get-Command Update-PipSelf -ErrorAction SilentlyContinue),
-                (Get-Command Export-PipPackages -ErrorAction SilentlyContinue),
-                (Get-Command Import-PipPackages -ErrorAction SilentlyContinue)
-            ) | Where-Object { $null -ne $_ }
+        It 'Functions are not created when pip is unavailable' {
+            if (Get-Command pip -CommandType Application -ErrorAction SilentlyContinue) {
+                Set-ItResult -Inconclusive -Because 'pip on PATH can prevent fragment guard from skipping registration in this environment'
+                return
+            }
 
-            # Verify that the fragment loaded without errors
-            # The exact behavior depends on whether the mock successfully made pip unavailable
-            $fragmentLoaded = $true
-            $fragmentLoaded | Should -Be $true
+            Get-Command Install-PipPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when pip is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingPipOutput -Pattern 'pip not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingPipOutput -ToolName 'pip'
+        }
+
+        It 'Install-PipPackage emits missing-tool warning when pip is unavailable' {
+            if (-not (Get-Command Install-PipPackage -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Inconclusive -Because 'Install-PipPackage was not registered in this environment'
+                return
+            }
+
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('pip', [ref]$null)
+            }
+            Mock-CommandAvailabilityPester -CommandName 'pip' -Available $false
+
+            $output = Install-PipPackage requests 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pip not found'
         }
     }
 }

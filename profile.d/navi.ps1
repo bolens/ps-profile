@@ -68,5 +68,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-Alias -Name navip -Value Invoke-NaviPrint -Option AllScope -Force
 }
 else {
-    Write-MissingToolWarning -Tool 'navi' -InstallHint 'Install with: scoop install navi'
+    Invoke-MissingToolWarning -ToolName 'navi'
 }

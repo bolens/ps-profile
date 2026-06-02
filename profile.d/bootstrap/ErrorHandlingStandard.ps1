@@ -35,12 +35,12 @@ try {
     }
 
     # Initialize event collection for wide events
-    if (-not $global:WideEvents) {
+    if (-not (Get-Variable -Name WideEvents -Scope Global -ErrorAction SilentlyContinue) -or $null -eq $global:WideEvents) {
         $global:WideEvents = [System.Collections.Generic.List[hashtable]]::new()
     }
 
     # Initialize error tracking for tail sampling
-    if (-not $global:ErrorEventTracking) {
+    if (-not (Get-Variable -Name ErrorEventTracking -Scope Global -ErrorAction SilentlyContinue) -or $null -eq $global:ErrorEventTracking) {
         $global:ErrorEventTracking = @{
             ErrorCount          = 0
             SlowRequestCount    = 0
@@ -164,13 +164,14 @@ try {
 
         # Add error details if ErrorRecord provided (OpenTelemetry exception recording)
         if ($ErrorRecord) {
+            $invocationInfo = $ErrorRecord.InvocationInfo
             $event.error = @{
                 type        = $ErrorRecord.Exception.GetType().FullName
                 message     = $ErrorRecord.Exception.Message
                 code        = if ($ErrorRecord.Exception.HResult) { $ErrorRecord.Exception.HResult } else { $null }
                 stack_trace = $ErrorRecord.ScriptStackTrace
-                source      = $ErrorRecord.InvocationInfo.ScriptName
-                line_number = $ErrorRecord.InvocationInfo.ScriptLineNumber
+                source      = if ($null -ne $invocationInfo) { $invocationInfo.ScriptName } else { $null }
+                line_number = if ($null -ne $invocationInfo) { $invocationInfo.ScriptLineNumber } else { $null }
             }
             
             # OpenTelemetry: Set status to error
@@ -192,7 +193,13 @@ try {
 
         # Tail sampling decision (from loggingsucks.com)
         $shouldKeep = $false
-        
+        $slowThreshold = if ($env:PS_PROFILE_SLOW_THRESHOLD_MS) {
+            [int]$env:PS_PROFILE_SLOW_THRESHOLD_MS
+        }
+        else {
+            2000
+        }
+
         if ($AlwaysKeep) {
             $shouldKeep = $true
         }
@@ -203,19 +210,11 @@ try {
         }
         elseif ($DurationMs -gt 0) {
             # Check if slow request (above p99 threshold)
-            # Default threshold: 2000ms (configurable via env var)
-            $slowThreshold = if ($env:PS_PROFILE_SLOW_THRESHOLD_MS) { 
-                [int]$env:PS_PROFILE_SLOW_THRESHOLD_MS 
-            }
-            else { 
-                2000 
-            }
-            
             if ($DurationMs -gt $slowThreshold) {
                 $shouldKeep = $true
                 $global:ErrorEventTracking.SlowRequestCount++
             }
-            elseif ($Context.user_id -or $Context.user_id) {
+            elseif ($Context.ContainsKey('user_id') -and -not [string]::IsNullOrWhiteSpace([string]$Context['user_id'])) {
                 # Check for VIP users (configurable via env var)
                 $vipUsers = if ($env:PS_PROFILE_VIP_USERS) {
                     $env:PS_PROFILE_VIP_USERS -split ','
@@ -223,12 +222,12 @@ try {
                 else {
                     @()
                 }
-                
-                if ($Context.user_id -in $vipUsers) {
+
+                if ($Context['user_id'] -in $vipUsers) {
                     $shouldKeep = $true
                 }
             }
-            
+
             # Random sample successful operations
             if (-not $shouldKeep) {
                 $shouldKeep = (Get-Random -Minimum 0.0 -Maximum 1.0) -lt $SampleRate
@@ -249,7 +248,7 @@ try {
         if ($shouldKeep) {
             $event.sampled = $false
             $event.retention_reason = if ($ErrorRecord) { 'error' }
-            elseif ($DurationMs -gt 2000) { 'slow' }
+            elseif ($DurationMs -gt $slowThreshold) { 'slow' }
             elseif ($AlwaysKeep) { 'explicit' }
             else { 'sampled' }
             
@@ -345,7 +344,7 @@ try {
         $errorContext.retriable = $Retriable.IsPresent
 
         # Emit as wide event (errors are always kept)
-        Write-WideEvent -EventName $OperationName -Level ERROR -Context $errorContext -ErrorRecord $ErrorRecord -AlwaysKeep
+        $null = Write-WideEvent -EventName $OperationName -Level ERROR -Context $errorContext -ErrorRecord $ErrorRecord -AlwaysKeep
     }
 
     # ===============================================
@@ -479,9 +478,9 @@ try {
             $duration = ((Get-Date) - $startTime).TotalMilliseconds
             $eventContext.duration_ms = [math]::Round($duration, 2)
 
-            # Emit wide event
+            # Emit wide event (suppress output so finally does not override the try return value)
             $eventLevel = if ($errorRecord) { 'ERROR' } else { $Level }
-            Write-WideEvent -EventName $OperationName -Level $eventLevel -Context $eventContext -ErrorRecord $errorRecord -DurationMs $eventContext.duration_ms -AlwaysKeep:$AlwaysKeep
+            $null = Write-WideEvent -EventName $OperationName -Level $eventLevel -Context $eventContext -ErrorRecord $errorRecord -DurationMs $eventContext.duration_ms -AlwaysKeep:$AlwaysKeep
         }
     }
 

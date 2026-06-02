@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'julia Tools Integration Tests' {
     BeforeAll {
         try {
@@ -57,9 +59,9 @@ Describe 'julia Tools Integration Tests' {
 
         It 'Update-JuliaPackages calls julia -e "using Pkg; Pkg.update()"' {
             Mock -CommandName julia -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains '-e' -and $args -match 'Pkg\.update') {
+                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$ArgumentList)
+                $args = @($ArgumentList)
+                if ($args -contains '-e' -and ($args -join ' ') -match 'Pkg\.update') {
                     Write-Output 'Packages updated successfully'
                 }
             }
@@ -80,9 +82,9 @@ Describe 'julia Tools Integration Tests' {
 
         It 'Get-JuliaPackages calls julia -e "using Pkg; Pkg.status()"' {
             Mock -CommandName julia -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains '-e' -and $args -match 'Pkg\.status') {
+                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$ArgumentList)
+                $args = @($ArgumentList)
+                if ($args -contains '-e' -and ($args -join ' ') -match 'Pkg\.status') {
                     Write-Output 'Package    Version'
                     Write-Output 'package1  1.0.0'
                 }
@@ -91,6 +93,39 @@ Describe 'julia Tools Integration Tests' {
             Get-JuliaPackages
             Should -Invoke -CommandName 'julia' -Times 1 -Exactly
             Get-Command Get-JuliaPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when julia is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Update-JuliaPackages', 'Get-JuliaPackages',
+                'Add-JuliaPackage', 'Remove-JuliaPackage'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'julia' -Available $false
+            $script:MissingJuliaOutput = & { . (Join-Path $script:ProfileDir 'julia.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when julia is unavailable' {
+            Get-Command Update-JuliaPackages -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when julia is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingJuliaOutput -Pattern 'julia not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingJuliaOutput -ToolName 'julia'
         }
     }
 }

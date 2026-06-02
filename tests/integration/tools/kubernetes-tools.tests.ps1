@@ -45,7 +45,6 @@ Describe 'Kubernetes Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'helm' } -MockWith { $null }
             # Mock helm command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'helm' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'helm' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'helm.ps1')
         }
 
@@ -63,10 +62,9 @@ Describe 'Kubernetes Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('helm', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'helm' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'helm' } -MockWith { $false }
             $output = helm --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'helm not found'
-            $output | Should -Match 'scoop install helm'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'helm not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'helm'
         }
 
         It 'Creates Install-HelmChart function' {
@@ -103,7 +101,6 @@ Describe 'Kubernetes Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'minikube' } -MockWith { $null }
             # Mock minikube command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'minikube' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'minikube' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'kube.ps1')
         }
 
@@ -121,10 +118,9 @@ Describe 'Kubernetes Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('minikube', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'minikube' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'minikube' } -MockWith { $false }
             $output = minikube-start 2>&1 3>&1 | Out-String
-            $output | Should -Match 'minikube not found'
-            $output | Should -Match 'scoop install minikube'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'minikube not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'minikube'
         }
 
         It 'Creates Stop-MinikubeCluster function' {

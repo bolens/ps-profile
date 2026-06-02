@@ -111,7 +111,7 @@ if ($executionConfigPath -and -not [string]::IsNullOrWhiteSpace($executionConfig
 #>
 function New-PesterTestConfiguration {
     param(
-        [PesterVerbosity]$OutputFormat = [PesterVerbosity]::Detailed
+        [PesterVerbosity]$OutputFormat = [PesterVerbosity]::Detailed,
 
         [switch]$CI,
 

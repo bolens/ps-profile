@@ -159,18 +159,18 @@ function New-Directory {
     }
 
     if ($dirPaths.Count -eq 0) {
+        $missingOperandError = [System.Management.Automation.ErrorRecord]::new(
+            [System.ArgumentException]::new('mkdir: missing operand'),
+            'MissingOperand',
+            [System.Management.Automation.ErrorCategory]::InvalidArgument,
+            $null
+        )
+
         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
-                    [System.ArgumentException]::new("mkdir: missing operand"),
-                    'MissingOperand',
-                    [System.Management.Automation.ErrorCategory]::InvalidArgument,
-                    $null
-                )) -OperationName 'fileoperations.mkdir' -Context @{}
+            Write-StructuredError -ErrorRecord $missingOperandError -OperationName 'fileoperations.mkdir' -Context @{}
         }
-        else {
-            Write-Error "mkdir: missing operand"
-        }
-        return
+
+        $PSCmdlet.ThrowTerminatingError($missingOperandError)
     }
 
     foreach ($dirPath in $dirPaths) {

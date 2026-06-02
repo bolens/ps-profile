@@ -47,7 +47,7 @@ function Invoke-Rustup {
         & rustup
     }
     else {
-        Write-MissingToolWarning -Tool 'rustup' -InstallHint 'Install with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup'
     }
 }
 
@@ -70,7 +70,7 @@ function Update-RustupToolchain {
         & rustup update
     }
     else {
-        Write-MissingToolWarning -Tool 'rustup' -InstallHint 'Install with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup'
     }
 }
 
@@ -102,7 +102,7 @@ function Install-RustupToolchain {
         & rustup install @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'rustup' -InstallHint 'Install with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup'
     }
 }
 
@@ -127,7 +127,7 @@ function Test-RustupUpdates {
         & rustup check
     }
     else {
-        Write-MissingToolWarning -Tool 'rustup' -InstallHint 'Install with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup'
     }
 }
 
@@ -176,7 +176,7 @@ function Add-CargoDependency {
         & cargo add @args @Packages
     }
     else {
-        Write-MissingToolWarning -Tool 'cargo' -InstallHint 'Install Rust toolchain with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo'
     }
 }
 
@@ -219,7 +219,7 @@ function Remove-CargoDependency {
         & cargo remove @args @Packages
     }
     else {
-        Write-MissingToolWarning -Tool 'cargo' -InstallHint 'Install Rust toolchain with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo'
     }
 }
 
@@ -255,7 +255,7 @@ function Install-CargoPackage {
         }
     }
     else {
-        Write-MissingToolWarning -Tool 'cargo' -InstallHint 'Install Rust toolchain with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo'
     }
 }
 
@@ -282,7 +282,7 @@ function Remove-CargoPackage {
         & cargo uninstall @Packages
     }
     else {
-        Write-MissingToolWarning -Tool 'cargo' -InstallHint 'Install Rust toolchain with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo'
     }
 }
 
@@ -308,7 +308,7 @@ function Update-CargoPackages {
         & cargo install-update --all
     }
     else {
-        Write-MissingToolWarning -Tool 'cargo' -InstallHint 'Install Rust toolchain with: scoop install rustup'
+        Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo'
     }
 }
 

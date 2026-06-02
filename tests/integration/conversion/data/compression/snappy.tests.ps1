@@ -57,7 +57,10 @@ Describe 'Snappy Compression Tests' {
 
         It 'Snappy compression functions require snappy command or Python' {
             if (-not $script:SnappyAvailable -and -not $script:PythonAvailable) {
-                Set-ItResult -Skipped -Because "snappy command and Python are not available"
+                Set-ItResult -Skipped -Because (Get-TestToolsSkipMessage -Context 'snappy command and Python are not available' -Tools @(
+                        @{ Name = 'snappy' }
+                        @{ Name = 'python'; ToolType = 'python-runtime' }
+                    ))
                 return
             }
             # Test that function exists and would require snappy or Python

@@ -22,7 +22,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         [CmdletBinding()]
         param()
         
-        & julia -e "using Pkg; Pkg.update()"
+        & julia @('-e', 'using Pkg; Pkg.update()')
     }
     Set-AgentModeAlias -Name 'julia-update' -Target 'Update-JuliaPackages'
     # Julia Pkg status - check package status
@@ -37,7 +37,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         [CmdletBinding()]
         param()
         
-        & julia -e "using Pkg; Pkg.status()"
+        & julia @('-e', 'using Pkg; Pkg.status()')
     }
     Set-AgentModeAlias -Name 'julia-status' -Target 'Get-JuliaPackages'
     # Julia Pkg add - add packages
@@ -61,7 +61,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         )
         
         $packagesList = $Packages | ForEach-Object { "`"$_`"" } | Join-String -Separator ','
-        & julia -e "using Pkg; Pkg.add([$packagesList])"
+        & julia @('-e', "using Pkg; Pkg.add([$packagesList])")
     }
     Set-AgentModeAlias -Name 'julia-add' -Target 'Add-JuliaPackage'
     # Julia Pkg rm - remove packages
@@ -85,10 +85,10 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
         )
         
         $packagesList = $Packages | ForEach-Object { "`"$_`"" } | Join-String -Separator ','
-        & julia -e "using Pkg; Pkg.rm([$packagesList])"
+        & julia @('-e', "using Pkg; Pkg.rm([$packagesList])")
     }
     Set-AgentModeAlias -Name 'julia-remove' -Target 'Remove-JuliaPackage'
 }
 else {
-    Write-MissingToolWarning -Tool 'julia' -InstallHint 'Install Julia from: https://julialang.org/downloads/ or use: scoop install julia'
+    Invoke-MissingToolWarning -ToolName 'julia'
 }

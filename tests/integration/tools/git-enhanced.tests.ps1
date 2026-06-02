@@ -110,24 +110,56 @@ Describe 'git-enhanced.ps1 - Alias Registration' {
 }
 
 Describe 'git-enhanced.ps1 - Graceful Degradation' {
+    BeforeEach {
+        foreach ($cmd in @('git-cliff', 'git-tower', 'gitkraken', 'gitbutler', 'gitbutler-nightly', 'jj', 'git')) {
+            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        }
+    }
+
     It 'New-GitChangelog handles missing tool gracefully' {
-        { New-GitChangelog -ErrorAction SilentlyContinue } | Should -Not -Throw
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('git-cliff', [ref]$null)
+        }
+        $output = New-GitChangelog 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'git-cliff not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'git-cliff'
     }
-    
+
     It 'Invoke-GitTower handles missing tool gracefully' {
-        { Invoke-GitTower -ErrorAction SilentlyContinue } | Should -Not -Throw
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('git-tower', [ref]$null)
+        }
+        $output = Invoke-GitTower 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'git-tower not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'git-tower'
     }
-    
+
     It 'Invoke-GitKraken handles missing tool gracefully' {
-        { Invoke-GitKraken -ErrorAction SilentlyContinue } | Should -Not -Throw
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('gitkraken', [ref]$null)
+        }
+        $output = Invoke-GitKraken 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'gitkraken not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gitkraken'
     }
-    
+
     It 'Invoke-GitButler handles missing tool gracefully' {
-        { Invoke-GitButler -ErrorAction SilentlyContinue } | Should -Not -Throw
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('gitbutler', [ref]$null)
+            $null = $global:MissingToolWarnings.TryRemove('gitbutler-nightly', [ref]$null)
+        }
+        $output = Invoke-GitButler 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'gitbutler not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gitbutler'
     }
-    
+
     It 'Invoke-Jujutsu handles missing tool gracefully' {
-        { Invoke-Jujutsu -ErrorAction SilentlyContinue } | Should -Not -Throw
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('jj', [ref]$null)
+        }
+        $output = Invoke-Jujutsu 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'jj not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'jj'
     }
 }
 

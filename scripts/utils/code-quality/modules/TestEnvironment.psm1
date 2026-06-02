@@ -32,7 +32,7 @@ function Get-TestEnvironment {
         OS                = $PSVersionTable.OS
         Platform          = $PSVersionTable.Platform
         AvailableMemoryGB = $null
-        ProcessorCount    = $env:NUMBER_OF_PROCESSORS
+        ProcessorCount    = if ($env:NUMBER_OF_PROCESSORS) { [int]$env:NUMBER_OF_PROCESSORS } else { [Environment]::ProcessorCount }
     }
 
     # Detect CI environment
@@ -119,8 +119,19 @@ function Test-TestEnvironmentHealth {
     param(
         [switch]$CheckModules,
         [switch]$CheckPaths,
-        [switch]$CheckTools
+        [switch]$CheckTools,
+
+        [string]$RepoRoot
     )
+
+    if (-not $RepoRoot -and (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue)) {
+        try {
+            $RepoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+        }
+        catch {
+            $RepoRoot = $null
+        }
+    }
 
     $results = @{
         Passed = $true
@@ -166,7 +177,14 @@ function Test-TestEnvironmentHealth {
                 Message = $null
             }
 
-            if ($path -and -not [string]::IsNullOrWhiteSpace($path) -and (Test-Path -LiteralPath $path)) {
+            $literalPath = if ($RepoRoot -and -not [string]::IsNullOrWhiteSpace($RepoRoot)) {
+                Join-Path $RepoRoot $path
+            }
+            else {
+                $path
+            }
+
+            if ($literalPath -and -not [string]::IsNullOrWhiteSpace($literalPath) -and (Test-Path -LiteralPath $literalPath)) {
                 $check.Passed = $true
                 $check.Message = "Path $path exists"
             }

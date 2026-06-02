@@ -84,13 +84,18 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Edit-WithCursor handles missing tool gracefully' {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('cursor', [ref]$null)
+            }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            
+
             Mock-CommandAvailabilityPester -CommandName 'cursor' -Available $false
-            
-            { Edit-WithCursor -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = Edit-WithCursor 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'cursor not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cursor'
         }
         
         It 'Edit-WithNeovim handles missing tools gracefully' {
@@ -106,13 +111,18 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Launch-Emacs handles missing tool gracefully' {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('emacs', [ref]$null)
+            }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            
+
             Mock-CommandAvailabilityPester -CommandName 'emacs' -Available $false
-            
-            { Launch-Emacs -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = Launch-Emacs 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'emacs not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'emacs'
         }
         
         It 'Launch-Lapce handles missing tools gracefully' {
@@ -144,15 +154,8 @@ Describe 'editors.ps1 - Integration Tests' {
             
             # Note: This test verifies the function works, but may return results
             # if editors are actually installed on the system
-            $result = Get-EditorInfo
-            
-            # Function should return an array (may be empty or populated)
-            # Handle both null and array cases
-            if ($null -eq $result) {
-                $result = @()
-            }
-            # Verify it's an array type or can be treated as one
-            , $result | Should -BeOfType [System.Array]
+            $result = @(Get-EditorInfo)
+            ($result -is [System.Array]) | Should -Be $true
         }
     }
     
@@ -162,23 +165,18 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Get-EditorInfo returns array of editor objects' {
-            $result = Get-EditorInfo
-            
-            # Function should return an array (may be empty or populated)
-            # Handle both null and array cases - ensure it's always an array
-            if ($null -eq $result) {
-                $result = @()
+            $result = @(Get-EditorInfo)
+
+            ($result -is [System.Array]) | Should -Be $true
+            if ($result.Count -eq 0) {
+                Set-ItResult -Inconclusive -Because 'No editors detected on PATH in this environment'
+                return
             }
-            
-            # Verify it can be treated as an array (has Count property and can be indexed)
-            $result | Should -HaveMember 'Count'
-            
-            # If there are results, verify structure
-            if ($null -ne $result -and $result.Count -gt 0) {
-                $result[0] | Should -HaveMember 'Name'
-                $result[0] | Should -HaveMember 'Command'
-                $result[0] | Should -HaveMember 'Available'
-            }
+
+            $first = $result | Select-Object -First 1
+            $first.Name | Should -Not -BeNullOrEmpty
+            $first.Command | Should -Not -BeNullOrEmpty
+            $first.Available | Should -BeTrue
         }
     }
 }

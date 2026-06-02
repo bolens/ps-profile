@@ -52,7 +52,7 @@ try {
     fs.writeFileSync(process.argv[3], buffer);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: avsc package is not installed. Install it with: pnpm add -g avsc');
+        console.error('Error: avsc package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -60,6 +60,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "avro-encode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'avsc' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath, $SchemaPath
@@ -103,7 +104,7 @@ try {
     fs.writeFileSync(process.argv[3], json);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: avsc package is not installed. Install it with: pnpm add -g avsc');
+        console.error('Error: avsc package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -111,6 +112,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "avro-decode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'avsc' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath, $SchemaPath
@@ -182,7 +184,7 @@ try {
     fs.writeFileSync(process.argv[3], json);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: avsc package is not installed. Install it with: pnpm add -g avsc');
+        console.error('Error: avsc package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -190,6 +192,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "avro-evolve-decode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'avsc' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $args = @($InputPath, $OutputPath)
@@ -258,7 +261,7 @@ try {
     console.log(JSON.stringify(result));
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: avsc package is not installed. Install it with: pnpm add -g avsc');
+        console.error('Error: avsc package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -266,6 +269,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "avro-compat-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'avsc' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $WriterSchemaPath, $ReaderSchemaPath

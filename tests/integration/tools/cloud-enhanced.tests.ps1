@@ -53,26 +53,32 @@ Describe 'cloud-enhanced.ps1 - Function Registration' {
 
 Describe 'cloud-enhanced.ps1 - Graceful Degradation' {
     It 'Set-AzureSubscription handles missing tool gracefully' {
+        Mock-CommandAvailabilityPester -CommandName 'az' -Available $false
         { Set-AzureSubscription -List -ErrorAction SilentlyContinue } | Should -Not -Throw
     }
     
     It 'Set-GcpProject handles missing tool gracefully' {
+        Mock-CommandAvailabilityPester -CommandName 'gcloud' -Available $false
         { Set-GcpProject -List -ErrorAction SilentlyContinue } | Should -Not -Throw
     }
     
     It 'Get-DopplerSecrets handles missing tool gracefully' {
+        Mock-CommandAvailabilityPester -CommandName 'doppler' -Available $false
         { Get-DopplerSecrets -Project 'test' -ErrorAction SilentlyContinue } | Should -Not -Throw
     }
     
     It 'Deploy-Heroku handles missing tool gracefully' {
+        Mock-CommandAvailabilityPester -CommandName 'heroku' -Available $false
         { Deploy-Heroku -AppName 'test' -ErrorAction SilentlyContinue } | Should -Not -Throw
     }
     
     It 'Deploy-Vercel handles missing tool gracefully' {
+        Mock-CommandAvailabilityPester -CommandName 'vercel' -Available $false
         { Deploy-Vercel -ErrorAction SilentlyContinue } | Should -Not -Throw
     }
     
     It 'Deploy-Netlify handles missing tool gracefully' {
+        Mock-CommandAvailabilityPester -CommandName 'netlify' -Available $false
         { Deploy-Netlify -ErrorAction SilentlyContinue } | Should -Not -Throw
     }
 }

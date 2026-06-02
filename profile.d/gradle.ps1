@@ -95,5 +95,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'gradle-remove' -Target 'Remove-GradleDependency'
 }
 else {
-    Write-MissingToolWarning -Tool 'gradle' -InstallHint 'Install Gradle from: https://gradle.org/install/ or use: scoop install gradle'
+    Invoke-MissingToolWarning -ToolName 'gradle' -ToolType 'java-build-tool'
 }

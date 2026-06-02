@@ -114,7 +114,7 @@ function Get-TestList {
         }
     }
 
-    $result.TestFiles = $result.TestFiles | Select-Object -Unique | Sort-Object
+    $result.TestFiles = @($result.TestFiles | Select-Object -Unique | Sort-Object)
     return $result
 }
 
@@ -147,17 +147,10 @@ function Show-TestList {
     Write-Host "Total Tests: $($TestList.TestCount)" -ForegroundColor Green
     Write-Host ""
 
-    if ($TestList.TestFiles.Count -gt 0) {
+    if (@($TestList.TestFiles).Count -gt 0) {
         Write-Host "Test Files:" -ForegroundColor Yellow
-        foreach ($file in $TestList.TestFiles) {
-            $relativePath = if ($file -like "*$($TestList.TestFiles[0].Split([IO.Path]::DirectorySeparatorChar)[-3])*") {
-                # Try to make relative
-                $file
-            }
-            else {
-                $file
-            }
-            Write-Host "  - $relativePath" -ForegroundColor Gray
+        foreach ($file in @($TestList.TestFiles)) {
+            Write-Host "  - $file" -ForegroundColor Gray
         }
         Write-Host ""
     }

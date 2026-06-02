@@ -174,7 +174,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToCsv -Value {
         }
         catch {
             $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|bson package') {
-                "BSON package is not installed. Install it with: pnpm add -g bson"
+                Resolve-NodeInstallHintMessage -Message "BSON package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'bson' -Global
             }
             else {
                 "Failed to convert BSON to CSV: $_"
@@ -220,7 +220,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToCsv -Value {
         }
         catch {
             $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|@msgpack/msgpack') {
-                "@msgpack/msgpack package is not installed. Install it with: pnpm add -g @msgpack/msgpack"
+                Resolve-NodeInstallHintMessage -Message "@msgpack/msgpack package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames '@msgpack/msgpack' -Global
             }
             else {
                 "Failed to convert MessagePack to CSV: $_"
@@ -266,7 +266,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToCsv -Value {
         }
         catch {
             $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|cbor package') {
-                "cbor package is not installed. Install it with: pnpm add -g cbor"
+                Resolve-NodeInstallHintMessage -Message "cbor package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'cbor' -Global
             }
             else {
                 "Failed to convert CBOR to CSV: $_"
@@ -308,7 +308,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToYaml -Value {
         }
         catch {
             $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|bson package') {
-                "BSON package is not installed. Install it with: pnpm add -g bson"
+                Resolve-NodeInstallHintMessage -Message "BSON package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'bson' -Global
             }
             elseif ($_.Exception.Message -match 'yq.*not available|yq command failed') {
                 "yq is not available. Install yq to use YAML conversions."
@@ -353,7 +353,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToYaml -Value {
         }
         catch {
             $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|@msgpack/msgpack') {
-                "@msgpack/msgpack package is not installed. Install it with: pnpm add -g @msgpack/msgpack"
+                Resolve-NodeInstallHintMessage -Message "@msgpack/msgpack package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames '@msgpack/msgpack' -Global
             }
             elseif ($_.Exception.Message -match 'yq.*not available|yq command failed') {
                 "yq is not available. Install yq to use YAML conversions."
@@ -398,7 +398,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToYaml -Value {
         }
         catch {
             $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|cbor package') {
-                "cbor package is not installed. Install it with: pnpm add -g cbor"
+                Resolve-NodeInstallHintMessage -Message "cbor package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'cbor' -Global
             }
             elseif ($_.Exception.Message -match 'yq.*not available|yq command failed') {
                 "yq is not available. Install yq to use YAML conversions."

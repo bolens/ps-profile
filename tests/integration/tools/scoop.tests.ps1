@@ -43,6 +43,15 @@ Describe 'Scoop Tools Integration Tests' {
 
     Context 'Scoop package manager functions' {
         BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
             # Mock scoop as available before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'scoop' -Available $true
             . (Join-Path $script:ProfileDir 'scoop.ps1')
@@ -191,8 +200,7 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Creates ss alias for Find-ScoopPackage' {
-            Get-Alias ss -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            (Get-Alias ss).ResolvedCommandName | Should -Be 'Find-ScoopPackage'
+            Assert-ProfileShadowedAlias -AliasName 'ss' -FunctionName 'Find-ScoopPackage'
         }
 
         It 'Update-ScoopPackage calls scoop update' {
@@ -212,8 +220,7 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Creates su alias for Update-ScoopPackage' {
-            Get-Alias su -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            (Get-Alias su).ResolvedCommandName | Should -Be 'Update-ScoopPackage'
+            Assert-ProfileShadowedAlias -AliasName 'su' -FunctionName 'Update-ScoopPackage'
         }
 
         It 'Update-ScoopAll calls scoop update *' {
@@ -275,8 +282,7 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Creates slist alias for Get-ScoopPackage' {
-            Get-Alias slist -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            (Get-Alias slist).ResolvedCommandName | Should -Be 'Get-ScoopPackage'
+            Assert-ProfileShadowedAlias -AliasName 'slist' -FunctionName 'Get-ScoopPackage'
         }
 
         It 'Get-ScoopPackageInfo calls scoop info' {
@@ -297,8 +303,7 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Creates sh alias for Get-ScoopPackageInfo' {
-            Get-Alias sh -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            (Get-Alias sh).ResolvedCommandName | Should -Be 'Get-ScoopPackageInfo'
+            Assert-ProfileShadowedAlias -AliasName 'sh' -FunctionName 'Get-ScoopPackageInfo'
         }
 
         It 'Clear-ScoopCache calls scoop cleanup and cache rm' {
@@ -324,70 +329,52 @@ Describe 'Scoop Tools Integration Tests' {
         }
     }
 
-    Context 'Scoop graceful degradation' {
-        BeforeAll {
-            # Clear command cache if available
+}
+
+Describe 'Scoop unavailable graceful degradation' {
+    BeforeAll {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    }
+
+    It 'Functions are not created when scoop is unavailable' {
+        $installCommand = & {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:TestCachedCommandCache.TryRemove('scoop', [ref]$null)
-                $null = $global:TestCachedCommandCache.TryRemove('SCOOP', [ref]$null)
-            }
-            if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:AssumedAvailableCommands.TryRemove('scoop', [ref]$null)
-                $null = $global:AssumedAvailableCommands.TryRemove('SCOOP', [ref]$null)
-            }
 
-            # Remove functions/aliases from previous context
-            Remove-Item Function:Install-ScoopPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Find-ScoopPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-ScoopPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-ScoopAll -ErrorAction SilentlyContinue
-            Remove-Item Function:Uninstall-ScoopPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Get-ScoopPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Get-ScoopPackageInfo -ErrorAction SilentlyContinue
-            Remove-Item Function:Clear-ScoopCache -ErrorAction SilentlyContinue
-            Remove-Item Function:Export-ScoopPackages -ErrorAction SilentlyContinue
-            Remove-Item Function:Import-ScoopPackages -ErrorAction SilentlyContinue
-            Remove-Item Alias:sinstall -ErrorAction SilentlyContinue
-            Remove-Item Alias:ss -ErrorAction SilentlyContinue
-            Remove-Item Alias:su -ErrorAction SilentlyContinue
-            Remove-Item Alias:suu -ErrorAction SilentlyContinue
-            Remove-Item Alias:sr -ErrorAction SilentlyContinue
-            Remove-Item Alias:slist -ErrorAction SilentlyContinue
-            Remove-Item Alias:sh -ErrorAction SilentlyContinue
-            Remove-Item Alias:scleanup -ErrorAction SilentlyContinue
-            Remove-Item Alias:scoopexport -ErrorAction SilentlyContinue
-            Remove-Item Alias:scoopbackup -ErrorAction SilentlyContinue
-            Remove-Item Alias:scoopimport -ErrorAction SilentlyContinue
-            Remove-Item Alias:scooprestore -ErrorAction SilentlyContinue
-
-            # Mock scoop as unavailable
             Mock-CommandAvailabilityPester -CommandName 'scoop' -Available $false
             . (Join-Path $script:ProfileDir 'scoop.ps1')
+            Get-Command Install-ScoopPackage -ErrorAction SilentlyContinue
         }
 
-        It 'Scoop fragment handles missing tool gracefully and recommends installation' {
-            # Note: Due to mocking limitations with external commands, the fragment may still create functions
-            # if Test-CachedCommand returns true due to cache or other factors. This is a best-effort test.
-            $functionsExist = @(
-                (Get-Command Install-ScoopPackage -ErrorAction SilentlyContinue),
-                (Get-Command Find-ScoopPackage -ErrorAction SilentlyContinue),
-                (Get-Command Update-ScoopPackage -ErrorAction SilentlyContinue),
-                (Get-Command Uninstall-ScoopPackage -ErrorAction SilentlyContinue),
-                (Get-Command Get-ScoopPackage -ErrorAction SilentlyContinue),
-                (Get-Command Get-ScoopPackageInfo -ErrorAction SilentlyContinue),
-                (Get-Command Clear-ScoopCache -ErrorAction SilentlyContinue),
-                (Get-Command Export-ScoopPackages -ErrorAction SilentlyContinue),
-                (Get-Command Import-ScoopPackages -ErrorAction SilentlyContinue)
-            ) | Where-Object { $null -ne $_ }
+        $installCommand | Should -BeNullOrEmpty
+    }
 
-            # Verify that the fragment loaded without errors
-            # The exact behavior depends on whether the mock successfully made scoop unavailable
-            $fragmentLoaded = $true
-            $fragmentLoaded | Should -Be $true
-        }
+    It 'Emits missing-tool warning when scoop is unavailable' {
+        $output = & {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'scoop' -Available $false
+            . (Join-Path $script:ProfileDir 'scoop.ps1')
+        } 2>&1 3>&1 | Out-String
+
+        Assert-TestMissingToolWarning -Output $output -Pattern 'Scoop not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'scoop'
     }
 }
 

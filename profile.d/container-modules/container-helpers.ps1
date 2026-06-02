@@ -76,18 +76,26 @@ function Get-ContainerEnginePreference {
     $anyAvailable = $dockerAvailable -or $podmanAvailable -or $dockerComposeAvailable -or $podmanComposeAvailable
     
     # Build installation command recommendations
-    $installCommands = @()
-    if (-not $dockerAvailable) {
-        $installCommands += 'scoop install docker'
-    }
-    if (-not $podmanAvailable) {
-        $installCommands += 'scoop install podman'
-    }
-    $installationCommand = if ($installCommands.Count -gt 0) {
-        $installCommands -join ' or '
+    $installationCommand = $null
+    if (-not $dockerAvailable -and -not $podmanAvailable) {
+        if (Get-Command Get-ContainerInstallationCommand -ErrorAction SilentlyContinue) {
+            $installationCommand = Get-ContainerInstallationCommand
+        }
+        elseif (Get-Command Get-ContainerEngineInstallHint -ErrorAction SilentlyContinue) {
+            $installationCommand = (Get-ContainerEngineInstallHint) -replace '^Install with: ', ''
+        }
     }
     else {
-        $null
+        $installCommands = @()
+        if (-not $dockerAvailable -and (Get-Command Get-ToolInstallationCommand -ErrorAction SilentlyContinue)) {
+            $installCommands += Get-ToolInstallationCommand -ToolName 'docker'
+        }
+        if (-not $podmanAvailable -and (Get-Command Get-ToolInstallationCommand -ErrorAction SilentlyContinue)) {
+            $installCommands += Get-ToolInstallationCommand -ToolName 'podman'
+        }
+        if ($installCommands.Count -gt 0) {
+            $installationCommand = $installCommands -join ' or '
+        }
     }
     
     # Check user preference

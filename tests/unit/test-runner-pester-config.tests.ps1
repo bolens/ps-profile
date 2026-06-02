@@ -12,6 +12,9 @@ BeforeAll {
     # Import the modules to test
     $modulePath = Join-Path $PSScriptRoot '../../scripts/utils/code-quality/modules'
     Import-Module (Join-Path $modulePath 'PesterConfig.psm1') -Force
+    Import-Module (Join-Path $modulePath 'PesterOutputConfig.psm1') -Force
+    Import-Module (Join-Path $modulePath 'PesterCoverageConfig.psm1') -Force
+    Import-Module (Join-Path $modulePath 'PesterExecutionConfig.psm1') -Force
     # Import TestDiscovery submodules (barrel file removed)
     Import-Module (Join-Path $modulePath 'TestPathResolution.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestPathUtilities.psm1') -Force
@@ -74,8 +77,13 @@ Describe 'PesterConfig Module Tests' {
         It 'Configures parallel execution' {
             $config = New-PesterTestConfiguration -Parallel 4
 
-            $config.Run.Parallel.Value | Should -Be $true
-            $config.Run.MaximumThreadCount.Value | Should -Be 4
+            if ($config.Run.PSObject.Properties.Name -contains 'Parallel') {
+                $config.Run.Parallel.Value | Should -Be $true
+                $config.Run.MaximumThreadCount.Value | Should -Be 4
+            }
+            else {
+                Set-ItResult -Skipped -Because 'Pester Run.Parallel is not available in this Pester version'
+            }
         }
 
         It 'Configures randomization' {
@@ -175,8 +183,13 @@ Describe 'PesterConfig Module Tests' {
 
             $config = Set-PesterExecutionOptions -Config $config -Parallel 8
 
-            $config.Run.Parallel.Value | Should -Be $true
-            $config.Run.MaximumThreadCount.Value | Should -Be 8
+            if ($config.Run.PSObject.Properties.Name -contains 'Parallel') {
+                $config.Run.Parallel.Value | Should -Be $true
+                $config.Run.MaximumThreadCount.Value | Should -Be 8
+            }
+            else {
+                Set-ItResult -Skipped -Because 'Pester Run.Parallel is not available in this Pester version'
+            }
         }
 
         It 'Configures randomization and timeout' {

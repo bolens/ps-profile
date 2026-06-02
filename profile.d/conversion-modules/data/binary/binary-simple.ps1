@@ -50,7 +50,7 @@ try {
     fs.writeFileSync(process.argv[3], bson);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: bson package is not installed. Install it with: pnpm add -g bson');
+        console.error('Error: bson package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -58,6 +58,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "bson-encode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames '@msgpack/msgpack', 'bson', 'cbor' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -100,7 +101,7 @@ try {
     fs.writeFileSync(process.argv[3], json);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: bson package is not installed. Install it with: pnpm add -g bson');
+        console.error('Error: bson package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -108,6 +109,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "bson-decode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames '@msgpack/msgpack', 'bson', 'cbor' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -141,7 +143,7 @@ try {
     fs.writeFileSync(process.argv[3], packed);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: @msgpack/msgpack package is not installed. Install it with: pnpm add -g @msgpack/msgpack');
+        console.error('Error: @msgpack/msgpack package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -149,6 +151,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "msgpack-encode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames '@msgpack/msgpack', 'bson', 'cbor' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -187,7 +190,7 @@ try {
     fs.writeFileSync(process.argv[3], json);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: @msgpack/msgpack package is not installed. Install it with: pnpm add -g @msgpack/msgpack');
+        console.error('Error: @msgpack/msgpack package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -195,6 +198,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "msgpack-decode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames '@msgpack/msgpack', 'bson', 'cbor' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -227,7 +231,7 @@ try {
     fs.writeFileSync(process.argv[3], cborBuffer);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: cbor package is not installed. Install it with: pnpm add -g cbor');
+        console.error('Error: cbor package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -235,6 +239,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "cbor-encode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames '@msgpack/msgpack', 'bson', 'cbor' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -269,7 +274,7 @@ try {
     fs.writeFileSync(process.argv[3], json);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: cbor package is not installed. Install it with: pnpm add -g cbor');
+        console.error('Error: cbor package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -277,6 +282,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "cbor-decode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames '@msgpack/msgpack', 'bson', 'cbor' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath

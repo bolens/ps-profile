@@ -47,7 +47,7 @@ function Find-RipgrepText {
         rg --line-number --hidden -s $Pattern
     }
     else {
-        Write-MissingToolWarning -Tool 'rg' -InstallHint 'Install with: scoop install ripgrep'
+        Invoke-MissingToolWarning -ToolName 'rg'
     }
 }
 

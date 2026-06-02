@@ -5,9 +5,8 @@ Unit tests for functions that were previously in Common.psm1 but are now in sepa
 These functions are now distributed across multiple modules for better organization.
 #>
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     try {
         # Import the modules that contain the functions previously in Common.psm1
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
@@ -35,6 +34,15 @@ BeforeAll {
                 throw "Module file not found: $($module.Path)"
             }
             Import-Module $module.Path -DisableNameChecking -ErrorAction Stop
+        }
+
+        $platformPathsModule = Join-Path $libPath 'core' 'PlatformPaths.psm1'
+        if (Test-Path -LiteralPath $platformPathsModule) {
+            Import-Module $platformPathsModule -DisableNameChecking -ErrorAction Stop
+            $script:TestTempRoot = Get-TempDirectory
+        }
+        else {
+            $script:TestTempRoot = [System.IO.Path]::GetTempPath()
         }
     }
     catch {
@@ -141,7 +149,7 @@ Describe 'Get-PowerShellScripts' {
     Context 'Error handling' {
         It 'Throws error for non-existent path' {
             # Use a path that's guaranteed not to exist
-            $nonExistentPath = Join-Path $env:TEMP "NonExistentPath_$([System.Guid]::NewGuid().ToString())"
+            $nonExistentPath = Join-Path $script:TestTempRoot "NonExistentPath_$([System.Guid]::NewGuid().ToString())"
             { Get-PowerShellScripts -Path $nonExistentPath } | Should -Throw
         }
     }
@@ -174,8 +182,8 @@ Describe 'Resolve-DefaultPath' {
     Context 'Error handling' {
         It 'Throws error when provided path does not exist' {
             # Use a path that's guaranteed not to exist
-            $nonExistentPath = Join-Path $env:TEMP "NonExistentPath_$([System.Guid]::NewGuid().ToString())"
-            $defaultPath = Join-Path $env:TEMP 'DefaultPath'
+            $nonExistentPath = Join-Path $script:TestTempRoot "NonExistentPath_$([System.Guid]::NewGuid().ToString())"
+            $defaultPath = Join-Path $script:TestTempRoot 'DefaultPath'
             { Resolve-DefaultPath -Path $nonExistentPath -DefaultPath $defaultPath } | Should -Throw
         }
     }
@@ -198,7 +206,7 @@ Describe 'Test-PathExists' {
     Context 'Error handling' {
         It 'Throws error for non-existent path' {
             # Use a path that's guaranteed not to exist
-            $nonExistentPath = Join-Path $env:TEMP "NonExistentPath_$([System.Guid]::NewGuid().ToString())"
+            $nonExistentPath = Join-Path $script:TestTempRoot "NonExistentPath_$([System.Guid]::NewGuid().ToString())"
             { Test-PathExists -Path $nonExistentPath } | Should -Throw
         }
 

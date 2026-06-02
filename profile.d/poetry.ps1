@@ -270,12 +270,12 @@ if (Test-CachedCommand poetry) {
             }
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'poetryimport' -Target 'Import-PoetryDependencies'
     Set-AgentModeAlias -Name 'poetryrestore' -Target 'Import-PoetryDependencies'
 }
 else {
-    Invoke-MissingToolWarning -ToolName 'poetry' -ToolType 'python-package' -DefaultInstallCommand 'scoop install poetry (or uv tool install poetry, or pip install poetry, or curl -sSL https://install.python-poetry.org | python -)'
+    Invoke-MissingToolWarning -ToolName 'poetry' -ToolType 'python-package'
 }

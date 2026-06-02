@@ -88,7 +88,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'python' -DefaultInstallCommand 'Install Python from python.org or use: scoop install python'
+            Invoke-MissingToolWarning -ToolName 'python' -ToolType 'python-runtime'
             return $null
         }
 
@@ -230,7 +230,7 @@ try {
         else {
             $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
         }
-        Invoke-MissingToolWarning -ToolName 'python' -DefaultInstallCommand 'Install Python from python.org or use: scoop install python (or uv)'
+        Invoke-MissingToolWarning -ToolName 'python' -ToolType 'python-runtime'
         return $null
     }
 
@@ -305,14 +305,14 @@ try {
             # Create README.md
             $readmePath = Join-Path $projectPath 'README.md'
             if (-not (Test-Path -LiteralPath $readmePath)) {
-                $readmeContent = @"
-# $Name
+                $readmeContent = @'
+# {0}
 
 Python project created with lang-python.ps1
 
 ## Setup
 
-\`\`\`bash
+```bash
 # Create virtual environment
 python -m venv .venv
 
@@ -326,21 +326,21 @@ source .venv/bin/activate.fish
 
 # Install dependencies
 uv pip install -r requirements.txt
-\`\`\`
+```
 
 ## Usage
 
-\`\`\`bash
+```bash
 python main.py
-\`\`\`
-"@
+```
+'@ -f $Name
                 Set-Content -Path $readmePath -Value $readmeContent
             }
 
             # Create .gitignore
             $gitignorePath = Join-Path $projectPath '.gitignore'
             if (-not (Test-Path -LiteralPath $gitignorePath)) {
-                $gitignoreContent = @"
+                $gitignoreContent = @'
 # Python
 __pycache__/
 *.py[cod]
@@ -384,7 +384,7 @@ htmlcov/
 # Distribution / packaging
 dist/
 *.egg-info/
-"@
+'@
                 Set-Content -Path $gitignorePath -Value $gitignoreContent
             }
 
@@ -410,10 +410,10 @@ dist/
             # Create main.py
             $mainPath = Join-Path $projectPath 'main.py'
             if (-not (Test-Path -LiteralPath $mainPath)) {
-                $mainContent = @"
+                $mainContent = @'
 #!/usr/bin/env python3
 """
-Main entry point for $Name
+Main entry point for {0}
 """
 
 def main():
@@ -422,7 +422,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-"@
+'@ -f $Name
                 Set-Content -Path $mainPath -Value $mainContent
             }
 
@@ -431,7 +431,7 @@ if __name__ == "__main__":
         catch {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 Write-StructuredError -ErrorRecord $_ -OperationName 'python.project.create' -Context @{
-                    project_name = $ProjectName
+                    project_name = $Name
                     project_path = $projectPath
                 }
             }

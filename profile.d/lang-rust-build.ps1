@@ -76,7 +76,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'cargo' -DefaultInstallCommand 'Install Rust toolchain with: scoop install rustup'
+            Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo' -ToolType 'rust-package'
             return $null
         }
 
@@ -166,7 +166,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'cargo' -DefaultInstallCommand 'Install Rust toolchain with: scoop install rustup'
+            Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo' -ToolType 'rust-package'
             return $null
         }
 
@@ -265,7 +265,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'cargo' -DefaultInstallCommand 'Install Rust toolchain with: scoop install rustup'
+            Invoke-MissingToolWarning -ToolName 'rustup' -Tool 'cargo' -ToolType 'rust-package'
             return $null
         }
 

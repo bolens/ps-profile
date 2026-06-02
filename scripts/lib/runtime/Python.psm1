@@ -587,7 +587,7 @@ function Get-DataFrameLibraryPreference {
     
     # Check pandas
     $checkPandas = "import sys; import importlib.util; spec = importlib.util.find_spec('pandas'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-pandas-$(Get-Random).py"
+    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-pandas-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkPandas -Encoding UTF8
     try {
         & $PythonCmd $tempCheck 2>&1 | Out-Null
@@ -602,7 +602,7 @@ function Get-DataFrameLibraryPreference {
     
     # Check polars
     $checkPolars = "import sys; import importlib.util; spec = importlib.util.find_spec('polars'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-polars-$(Get-Random).py"
+    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-polars-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkPolars -Encoding UTF8
     try {
         & $PythonCmd $tempCheck 2>&1 | Out-Null
@@ -902,7 +902,7 @@ function Get-ParquetLibraryPreference {
     
     # Check pyarrow
     $checkPyarrow = "import sys; import importlib.util; spec = importlib.util.find_spec('pyarrow'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-pyarrow-$(Get-Random).py"
+    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-pyarrow-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkPyarrow -Encoding UTF8
     try {
         & $PythonCmd $tempCheck 2>&1 | Out-Null
@@ -917,7 +917,7 @@ function Get-ParquetLibraryPreference {
     
     # Check fastparquet
     $checkFastparquet = "import sys; import importlib.util; spec = importlib.util.find_spec('fastparquet'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-fastparquet-$(Get-Random).py"
+    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-fastparquet-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkFastparquet -Encoding UTF8
     try {
         & $PythonCmd $tempCheck 2>&1 | Out-Null
@@ -1030,7 +1030,7 @@ function Get-ScientificLibraryPreference {
     
     # Check xarray
     $checkXarray = "import sys; import importlib.util; spec = importlib.util.find_spec('xarray'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-xarray-$(Get-Random).py"
+    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-xarray-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkXarray -Encoding UTF8
     try {
         & $PythonCmd $tempCheck 2>&1 | Out-Null
@@ -1045,7 +1045,7 @@ function Get-ScientificLibraryPreference {
     
     # Check netCDF4
     $checkNetcdf4 = "import sys; import importlib.util; spec = importlib.util.find_spec('netCDF4'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-netcdf4-$(Get-Random).py"
+    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-netcdf4-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkNetcdf4 -Encoding UTF8
     try {
         & $PythonCmd $tempCheck 2>&1 | Out-Null
@@ -1060,7 +1060,7 @@ function Get-ScientificLibraryPreference {
     
     # Check h5py
     $checkH5py = "import sys; import importlib.util; spec = importlib.util.find_spec('h5py'); sys.exit(0 if spec else 1)"
-    $tempCheck = Join-Path $env:TEMP "python-check-h5py-$(Get-Random).py"
+    $tempCheck = Join-Path ([System.IO.Path]::GetTempPath()) "python-check-h5py-$(Get-Random).py"
     Set-Content -Path $tempCheck -Value $checkH5py -Encoding UTF8
     try {
         & $PythonCmd $tempCheck 2>&1 | Out-Null
@@ -1172,5 +1172,76 @@ function Get-PythonPackageInstallRecommendation {
     }
     
     return $installCmd
+}
+
+<#
+.SYNOPSIS
+    Placeholder token replaced in embedded Python scripts with a preference-aware install command.
+#>
+$script:EmbeddedPythonInstallPlaceholder = '__PYTHON_INSTALL_CMD__'
+
+<#
+.SYNOPSIS
+    Injects preference-aware Python package install commands into embedded script text.
+.DESCRIPTION
+    Replaces __PYTHON_INSTALL_CMD__ placeholders in embedded Python scripts with the
+    output of Get-PythonPackageInstallRecommendation.
+.PARAMETER Script
+    Embedded Python script text that may contain __PYTHON_INSTALL_CMD__ placeholders.
+.PARAMETER PackageNames
+    Python package names to include in the install recommendation.
+.PARAMETER Global
+    Recommend global/system installation when supported by the active package manager.
+.EXAMPLE
+    $script = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas','polars' -Global
+.OUTPUTS
+    System.String
+#>
+function Expand-EmbeddedPythonInstallHints {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Script,
+
+        [Parameter(Mandatory)]
+        [string[]]$PackageNames,
+
+        [switch]$Global
+    )
+
+    if ($Script -notmatch [regex]::Escape($script:EmbeddedPythonInstallPlaceholder)) {
+        return $Script
+    }
+
+    $installCmd = Get-PythonPackageInstallRecommendation -PackageNames $PackageNames -Global:$Global
+    return $Script.Replace($script:EmbeddedPythonInstallPlaceholder, $installCmd)
+}
+
+<#
+.SYNOPSIS
+    Replaces __PYTHON_INSTALL_CMD__ in a PowerShell error message at runtime.
+#>
+function Resolve-PythonInstallHintMessage {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Message,
+
+        [Parameter(Mandatory)]
+        [string[]]$PackageNames,
+
+        [switch]$Global,
+
+        [string]$PythonCmd
+    )
+
+    if ($Message -notmatch [regex]::Escape($script:EmbeddedPythonInstallPlaceholder)) {
+        return $Message
+    }
+
+    $installCmd = Get-PythonPackageInstallRecommendation -PackageNames $PackageNames -Global:$Global -PythonCmd $PythonCmd
+    return $Message.Replace($script:EmbeddedPythonInstallPlaceholder, $installCmd)
 }
 

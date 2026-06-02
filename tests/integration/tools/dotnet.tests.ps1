@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'dotnet Tools Integration Tests' {
     BeforeAll {
         try {
@@ -100,6 +102,39 @@ Describe 'dotnet Tools Integration Tests' {
             Update-DotnetTools
             Should -Invoke -CommandName 'dotnet' -Times 1 -Exactly
             Get-Command Update-DotnetTools -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when dotnet is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Test-DotnetOutdated', 'Update-DotnetPackages', 'Update-DotnetTools',
+                'Restore-DotnetPackages', 'Add-DotnetPackage', 'Remove-DotnetPackage'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'dotnet' -Available $false
+            $script:MissingDotnetOutput = & { . (Join-Path $script:ProfileDir 'dotnet.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when dotnet is unavailable' {
+            Get-Command Test-DotnetOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when dotnet is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingDotnetOutput -Pattern 'dotnet not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingDotnetOutput -ToolName 'dotnet'
         }
     }
 }

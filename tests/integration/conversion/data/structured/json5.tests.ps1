@@ -32,7 +32,7 @@ Describe 'JSON5 Format Conversion Tests' {
     Context 'JSON5 conversion utilities' {
         It 'ConvertFrom-Json5ToJson converts JSON5 to JSON' {
             Get-Command ConvertFrom-Json5ToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -42,7 +42,7 @@ Describe 'JSON5 Format Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'json5')) {
-                Set-ItResult -Skipped -Because "json5 package not installed. Install with: pnpm add -g json5"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'json5' -ToolType 'node-package' -Context 'json5 package not installed')
                 return
             }
             $json5 = @'
@@ -66,7 +66,7 @@ Describe 'JSON5 Format Conversion Tests' {
 
         It 'ConvertTo-Json5FromJson converts JSON to JSON5' {
             Get-Command ConvertTo-Json5FromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -76,7 +76,7 @@ Describe 'JSON5 Format Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'json5')) {
-                Set-ItResult -Skipped -Because "json5 package not installed. Install with: pnpm add -g json5"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'json5' -ToolType 'node-package' -Context 'json5 package not installed')
                 return
             }
             $json = '{"name": "test", "value": 42}'
@@ -122,7 +122,7 @@ Describe 'JSON5 Format Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match 'json5.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'json5') {
-                    $installCommand = 'pnpm add -g json5'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'json5' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))
@@ -164,7 +164,7 @@ Describe 'JSON5 Format Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match 'json5.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'json5') {
-                    $installCommand = 'pnpm add -g json5'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'json5' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))

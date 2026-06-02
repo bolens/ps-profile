@@ -23,7 +23,7 @@ Describe 'Binary Format Conversion Integration Tests' {
         It 'ConvertTo-BsonFromJson converts JSON to BSON' {
             Get-Command ConvertTo-BsonFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -34,7 +34,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if bson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'bson')) {
-                Set-ItResult -Skipped -Because "bson package not installed. Install with: pnpm add -g bson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'bson' -ToolType 'node-package' -Context 'bson package not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -51,7 +51,7 @@ Describe 'Binary Format Conversion Integration Tests' {
         It 'ConvertFrom-BsonToJson converts BSON to JSON' {
             Get-Command ConvertFrom-BsonToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -62,7 +62,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if bson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'bson')) {
-                Set-ItResult -Skipped -Because "bson package not installed. Install with: pnpm add -g bson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'bson' -ToolType 'node-package' -Context 'bson package not installed')
                 return
             }
             # First create a BSON file
@@ -85,7 +85,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             Get-Command ConvertTo-BsonFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-BsonToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -96,7 +96,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if bson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'bson')) {
-                Set-ItResult -Skipped -Because "bson package not installed. Install with: pnpm add -g bson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'bson' -ToolType 'node-package' -Context 'bson package not installed')
                 return
             }
             $originalJson = '{"name": "test", "value": 123, "array": [1, 2, 3]}'
@@ -114,7 +114,7 @@ Describe 'Binary Format Conversion Integration Tests' {
         It 'ConvertTo-MessagePackFromJson converts JSON to MessagePack' {
             Get-Command ConvertTo-MessagePackFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -125,7 +125,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if @msgpack/msgpack is available
             if (-not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack')) {
-                Set-ItResult -Skipped -Because "@msgpack/msgpack package not installed. Install with: pnpm add -g @msgpack/msgpack"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName '@msgpack/msgpack' -ToolType 'node-package' -Context '@msgpack/msgpack package not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -142,7 +142,7 @@ Describe 'Binary Format Conversion Integration Tests' {
         It 'ConvertFrom-MessagePackToJson converts MessagePack to JSON' {
             Get-Command ConvertFrom-MessagePackToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -153,7 +153,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if @msgpack/msgpack is available
             if (-not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack')) {
-                Set-ItResult -Skipped -Because "@msgpack/msgpack package not installed. Install with: pnpm add -g @msgpack/msgpack"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName '@msgpack/msgpack' -ToolType 'node-package' -Context '@msgpack/msgpack package not installed')
                 return
             }
             # First create a MessagePack file
@@ -176,7 +176,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             Get-Command ConvertTo-MessagePackFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-MessagePackToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -187,7 +187,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if @msgpack/msgpack is available
             if (-not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack')) {
-                Set-ItResult -Skipped -Because "@msgpack/msgpack package not installed. Install with: pnpm add -g @msgpack/msgpack"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName '@msgpack/msgpack' -ToolType 'node-package' -Context '@msgpack/msgpack package not installed')
                 return
             }
             $originalJson = '{"name": "test", "value": 123, "array": [1, 2, 3]}'
@@ -205,7 +205,7 @@ Describe 'Binary Format Conversion Integration Tests' {
         It 'ConvertTo-AvroFromJson converts JSON to Avro' {
             Get-Command ConvertTo-AvroFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -216,7 +216,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if avsc is available
             if (-not (Test-NpmPackageAvailable -PackageName 'avsc')) {
-                Set-ItResult -Skipped -Because "avsc package not installed. Install with: pnpm add -g avsc"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'avsc' -ToolType 'node-package' -Context 'avsc package not installed')
                 return
             }
             # Create a simple Avro schema
@@ -237,7 +237,7 @@ Describe 'Binary Format Conversion Integration Tests' {
         It 'ConvertFrom-AvroToJson converts Avro to JSON' {
             Get-Command ConvertFrom-AvroToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -248,7 +248,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if avsc is available
             if (-not (Test-NpmPackageAvailable -PackageName 'avsc')) {
-                Set-ItResult -Skipped -Because "avsc package not installed. Install with: pnpm add -g avsc"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'avsc' -ToolType 'node-package' -Context 'avsc package not installed')
                 return
             }
             # Create a simple Avro schema
@@ -275,7 +275,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             Get-Command ConvertTo-AvroFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-AvroToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -286,7 +286,7 @@ Describe 'Binary Format Conversion Integration Tests' {
             }
             # Check if avsc is available
             if (-not (Test-NpmPackageAvailable -PackageName 'avsc')) {
-                Set-ItResult -Skipped -Because "avsc package not installed. Install with: pnpm add -g avsc"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'avsc' -ToolType 'node-package' -Context 'avsc package not installed')
                 return
             }
             # Create a simple Avro schema

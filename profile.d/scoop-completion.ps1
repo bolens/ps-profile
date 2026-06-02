@@ -47,8 +47,8 @@ try {
         }
         
         # Check default user location (cross-platform compatible)
-        if (-not $scoopRoot -and ($env:USERPROFILE -or $env:HOME)) {
-            $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
+        if (-not $scoopRoot -and (Get-Command Get-UserHome -ErrorAction SilentlyContinue)) {
+            $userHome = Get-UserHome
             $defaultScoop = Join-Path $userHome 'scoop'
             if ($defaultScoop -and -not [string]::IsNullOrWhiteSpace($defaultScoop) -and (Test-Path -LiteralPath $defaultScoop -PathType Container -ErrorAction SilentlyContinue)) {
                 $scoopRoot = $defaultScoop

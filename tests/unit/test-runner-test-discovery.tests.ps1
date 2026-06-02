@@ -36,7 +36,20 @@ BeforeAll {
 
     # Set up test repository root (two levels up from tests/unit)
     $script:TestRepoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'TestDiscovery'
     Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
+}
+
+function global:Assert-TestPathsUnderDirectory {
+    param(
+        [string[]]$Paths,
+        [string]$Directory
+    )
+
+    $normalizedDirectory = (Resolve-Path -LiteralPath $Directory).Path
+    @($Paths | Where-Object {
+            $_ -and $_.StartsWith($normalizedDirectory, [System.StringComparison]::Ordinal)
+        }).Count | Should -BeGreaterThan 0
 }
 
 Describe 'TestDiscovery Module Tests' {
@@ -45,14 +58,14 @@ Describe 'TestDiscovery Module Tests' {
             $paths = Get-TestPaths -Suite 'Unit' -RepoRoot $script:TestRepoRoot
 
             $expectedPath = Join-Path $script:TestRepoRoot 'tests/unit'
-            $paths | Should -Contain $expectedPath
+            Assert-TestPathsUnderDirectory -Paths $paths -Directory $expectedPath
         }
 
         It 'Returns integration test paths for Integration suite' {
             $paths = Get-TestPaths -Suite 'Integration' -RepoRoot $script:TestRepoRoot
 
             $expectedPath = Join-Path $script:TestRepoRoot 'tests/integration'
-            $paths | Should -Contain $expectedPath
+            Assert-TestPathsUnderDirectory -Paths $paths -Directory $expectedPath
         }
 
         It 'Returns all test paths for All suite' {
@@ -61,9 +74,9 @@ Describe 'TestDiscovery Module Tests' {
             $expectedUnitPath = Join-Path $script:TestRepoRoot 'tests/unit'
             $expectedIntegrationPath = Join-Path $script:TestRepoRoot 'tests/integration'
             $expectedPerformancePath = Join-Path $script:TestRepoRoot 'tests/performance'
-            $paths | Should -Contain $expectedUnitPath
-            $paths | Should -Contain $expectedIntegrationPath
-            $paths | Should -Contain $expectedPerformancePath
+            Assert-TestPathsUnderDirectory -Paths $paths -Directory $expectedUnitPath
+            Assert-TestPathsUnderDirectory -Paths $paths -Directory $expectedIntegrationPath
+            Assert-TestPathsUnderDirectory -Paths $paths -Directory $expectedPerformancePath
         }
 
         It 'Returns specific test file when TestFile is provided' {
@@ -79,23 +92,23 @@ Describe 'TestDiscovery Module Tests' {
         It 'Returns correct paths for each suite' {
             $unitPaths = Get-TestSuitePaths -Suite 'Unit' -RepoRoot $script:TestRepoRoot
             $expectedUnitPath = Join-Path $script:TestRepoRoot 'tests/unit'
-            $unitPaths | Should -Contain $expectedUnitPath
+            Assert-TestPathsUnderDirectory -Paths $unitPaths -Directory $expectedUnitPath
 
             $integrationPaths = Get-TestSuitePaths -Suite 'Integration' -RepoRoot $script:TestRepoRoot
             $expectedIntegrationPath = Join-Path $script:TestRepoRoot 'tests/integration'
-            $integrationPaths | Should -Contain $expectedIntegrationPath
+            Assert-TestPathsUnderDirectory -Paths $integrationPaths -Directory $expectedIntegrationPath
 
             $performancePaths = Get-TestSuitePaths -Suite 'Performance' -RepoRoot $script:TestRepoRoot
             $expectedPerformancePath = Join-Path $script:TestRepoRoot 'tests/performance'
-            $performancePaths | Should -Contain $expectedPerformancePath
+            Assert-TestPathsUnderDirectory -Paths $performancePaths -Directory $expectedPerformancePath
         }
 
-        It 'Filters to existing directories' {
+        It 'Filters to existing test files' {
             $paths = Get-TestSuitePaths -Suite 'Unit' -RepoRoot $script:TestRepoRoot
 
             foreach ($path in $paths) {
                 if ($null -ne $path -and -not [string]::IsNullOrWhiteSpace($path)) {
-                    Test-Path -LiteralPath $path | Should -Be $true -Because "Path should exist: $path"
+                    Test-Path -LiteralPath $path -PathType Leaf | Should -Be $true -Because "Path should exist: $path"
                 }
             }
         }
@@ -137,7 +150,7 @@ Describe 'TestDiscovery Module Tests' {
 
         It 'Returns directory if no test files found' {
             # Create a temporary directory without test files
-            $tempDir = Join-Path $TestDrive 'empty-test-dir'
+            $tempDir = Join-Path $script:TestTempRoot 'empty-test-dir'
             New-Item -ItemType Directory -Path $tempDir -Force
 
             $result = Get-TestFilesFromDirectory -Directory $tempDir

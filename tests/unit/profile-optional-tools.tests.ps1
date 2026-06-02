@@ -2,9 +2,8 @@
 # Tests for optional tool helper fragments (navi, gum).
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     try {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
@@ -26,6 +25,16 @@ BeforeAll {
         $script:NaviFragmentPath = Join-Path $script:ProfileDir 'navi.ps1'
         $script:GumFragmentPath = Join-Path $script:ProfileDir 'gum.ps1'
         $script:OriginalTestHasCommand = Get-Command Test-HasCommand -ErrorAction SilentlyContinue
+
+        function script:Set-TestNaviCaptureMock {
+            $global:TestNaviCallHistory = $script:naviCallHistory
+            Set-TestCommandAvailabilityState -CommandName 'navi' -Available $true
+            Set-Item -Path Function:\global:navi -Value {
+                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                $argsToAdd = @($Arguments | Where-Object { $null -ne $_ })
+                $null = $global:TestNaviCallHistory.Add($argsToAdd)
+            } -Force
+        }
     }
     catch {
         $errorDetails = @{
@@ -51,6 +60,13 @@ Describe 'Profile optional tool helpers' {
     Context 'navi fragment' {
         BeforeEach {
             $script:naviCallHistory = [System.Collections.ArrayList]::new()
+
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Set-TestCommandAvailabilityState -CommandName 'navi' -Available $false
+
             foreach ($aliasName in 'cheats', 'navis', 'navib', 'navip') {
                 if (Get-Alias -Name $aliasName -ErrorAction SilentlyContinue) {
                     Remove-Item -Path "Alias:$aliasName" -Force
@@ -90,26 +106,20 @@ Describe 'Profile optional tool helpers' {
 
         It 'Invoke-NaviSearch forwards query when available' {
             try {
-                Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
-                function global:navi {
-                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                    # Ensure Arguments is not null before adding
-                    $argsToAdd = if ($null -eq $Arguments) { @() } else { $Arguments }
-                    $null = $script:naviCallHistory.Add($argsToAdd)
-                }
+                Set-TestNaviCaptureMock
 
                 . $script:NaviFragmentPath
 
                 Invoke-NaviSearch -Query 'git status'
-                $script:naviCallHistory.Count | Should -Be 1 -Because "First call should be recorded"
+                @($script:naviCallHistory).Count | Should -Be 1 -Because 'First call should be recorded'
                 $firstCall = [object[]]$script:naviCallHistory[0]
-                $firstCall | Should -Contain '--query' -Because "First call should contain --query flag"
-                $firstCall | Should -Contain 'git status' -Because "First call should contain the query string"
+                $firstCall | Should -Contain '--query' -Because 'First call should contain --query flag'
+                $firstCall | Should -Contain 'git status' -Because 'First call should contain the query string'
 
                 Invoke-NaviSearch
-                $script:naviCallHistory.Count | Should -Be 2 -Because "Second call should be recorded"
+                @($script:naviCallHistory).Count | Should -Be 2 -Because 'Second call should be recorded'
                 $secondCall = [object[]]$script:naviCallHistory[1]
-                $secondCall.Count | Should -Be 0 -Because "Second call without query should have no arguments"
+                @($secondCall | Where-Object { $null -ne $_ }).Count | Should -Be 0 -Because 'Second call without query should have no arguments'
             }
             catch {
                 $errorDetails = @{
@@ -124,26 +134,20 @@ Describe 'Profile optional tool helpers' {
 
         It 'Invoke-NaviBest toggles best flag and optional query' {
             try {
-                Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
-                function global:navi {
-                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                    # Ensure Arguments is not null before adding
-                    $argsToAdd = if ($null -eq $Arguments) { @() } else { $Arguments }
-                    $null = $script:naviCallHistory.Add($argsToAdd)
-                }
+                Set-TestNaviCaptureMock
 
                 . $script:NaviFragmentPath
 
                 Invoke-NaviBest -Query 'deploy'
                 $firstCall = [object[]]$script:naviCallHistory[0]
-                $firstCall | Should -Contain '--best' -Because "NaviBest should include --best flag"
-                $firstCall | Should -Contain '--query' -Because "NaviBest should include --query flag"
-                $firstCall | Should -Contain 'deploy' -Because "NaviBest should include the query string"
+                $firstCall | Should -Contain '--best' -Because 'NaviBest should include --best flag'
+                $firstCall | Should -Contain '--query' -Because 'NaviBest should include --query flag'
+                $firstCall | Should -Contain 'deploy' -Because 'NaviBest should include the query string'
 
                 Invoke-NaviBest
                 $secondCall = [object[]]$script:naviCallHistory[1]
-                $secondCall | Should -Contain '--best' -Because "NaviBest without query should still include --best flag"
-                $secondCall.Count | Should -Be 1 -Because "NaviBest without query should have only --best flag"
+                $secondCall | Should -Contain '--best' -Because 'NaviBest without query should still include --best flag'
+                @($secondCall).Count | Should -Be 1 -Because 'NaviBest without query should have only --best flag'
             }
             catch {
                 $errorDetails = @{
@@ -158,26 +162,20 @@ Describe 'Profile optional tool helpers' {
 
         It 'Invoke-NaviPrint honours optional query' {
             try {
-                Set-Item -Path Function:Test-HasCommand -Value { param($Name) $Name -eq 'navi' } -Force
-                function global:navi {
-                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                    # Ensure Arguments is not null before adding
-                    $argsToAdd = if ($null -eq $Arguments) { @() } else { $Arguments }
-                    $null = $script:naviCallHistory.Add($argsToAdd)
-                }
+                Set-TestNaviCaptureMock
 
                 . $script:NaviFragmentPath
 
                 Invoke-NaviPrint -Query 'status'
                 $firstCall = [object[]]$script:naviCallHistory[0]
-                $firstCall | Should -Contain '--print' -Because "NaviPrint should include --print flag"
-                $firstCall | Should -Contain '--query' -Because "NaviPrint should include --query flag when query provided"
-                $firstCall | Should -Contain 'status' -Because "NaviPrint should include the query string"
+                $firstCall | Should -Contain '--print' -Because 'NaviPrint should include --print flag'
+                $firstCall | Should -Contain '--query' -Because 'NaviPrint should include --query flag when query provided'
+                $firstCall | Should -Contain 'status' -Because 'NaviPrint should include the query string'
 
                 Invoke-NaviPrint
                 $secondCall = [object[]]$script:naviCallHistory[1]
-                $secondCall | Should -Contain '--print' -Because "NaviPrint without query should still include --print flag"
-                $secondCall.Count | Should -Be 1 -Because "NaviPrint without query should have only --print flag"
+                $secondCall | Should -Contain '--print' -Because 'NaviPrint without query should still include --print flag'
+                @($secondCall).Count | Should -Be 1 -Because 'NaviPrint without query should have only --print flag'
             }
             catch {
                 $errorDetails = @{
@@ -191,18 +189,21 @@ Describe 'Profile optional tool helpers' {
         }
 
         It 'warns when navi is unavailable' {
-            function global:Test-HasCommand { param($Name) return $false }
+            Set-TestCommandAvailabilityState -CommandName 'navi' -Available $false
 
-            if (Get-Command -Name Clear-MissingToolWarnings -ErrorAction SilentlyContinue) {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+
+            if (Get-Command Clear-MissingToolWarnings -ErrorAction SilentlyContinue) {
                 Clear-MissingToolWarnings -Tool 'navi' | Out-Null
             }
 
-            $warnings = & {
-                $WarningPreference = 'Continue'
-                . $script:NaviFragmentPath
-            } 3>&1
+            . $script:NaviFragmentPath
 
-            ($warnings | ForEach-Object { $_.Message }) | Should -Contain 'navi not found. Install with: scoop install navi'
+            $entry = @($global:CollectedMissingToolWarnings | Where-Object { $_.Tool -eq 'navi' }) | Select-Object -First 1
+            $entry | Should -Not -BeNullOrEmpty
+            $entry.Message | Should -Match 'navi not found\. Install with:'
             Get-Command Invoke-NaviSearch -ErrorAction SilentlyContinue | Should -Be $null
         }
     }

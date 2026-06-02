@@ -1,7 +1,6 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 Describe 'JsonUtilities Module Functions' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Import the JsonUtilities module (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         Import-Module (Join-Path $libPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -ErrorAction Stop

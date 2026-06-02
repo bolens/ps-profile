@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Pipenv Tools Integration Tests' {
     BeforeAll {
         try {
@@ -148,16 +150,37 @@ Describe 'Pipenv Tools Integration Tests' {
             Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
-        It 'Pipenv fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('pipenv', [ref]$null)
+    }
+
+    Context 'Graceful degradation when pipenv is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Install-PipenvPackage', 'Remove-PipenvPackage', 'Update-PipenvPackages'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'pipenv' -Available $false
-            Remove-Item Function:Install-PipenvPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Remove-PipenvPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-PipenvPackages -ErrorAction SilentlyContinue
-            . (Join-Path $script:ProfileDir 'pipenv.ps1')
+            $script:MissingPipenvOutput = & { . (Join-Path $script:ProfileDir 'pipenv.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when pipenv is unavailable' {
             Get-Command Install-PipenvPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when pipenv is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingPipenvOutput -Pattern 'pipenv not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingPipenvOutput -ToolName 'pipenv'
         }
     }
 }

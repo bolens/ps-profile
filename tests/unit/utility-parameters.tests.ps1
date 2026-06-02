@@ -2,9 +2,8 @@
 # Required parameter and exit code helper tests.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     # Test-RequiredParameters lives in FileSystem.psm1
     $fileSystemModulePath = Join-Path $repoRoot 'scripts' 'lib' 'file' 'FileSystem.psm1'

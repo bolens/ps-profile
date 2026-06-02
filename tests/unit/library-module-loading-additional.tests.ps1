@@ -38,8 +38,8 @@ BeforeAll {
         throw "ModuleLoading.ps1 not found at: $moduleLoadingPath"
     }
     
-    # Create test directory structure
-    $script:TestFragmentRoot = Join-Path $TestDrive 'TestFragmentRoot'
+    # Create test directory structure (avoid TestDrive - conflicts when Pester reuses session scope)
+    $script:TestFragmentRoot = New-TestTempDirectory -Prefix 'ModuleLoadingTests'
     $script:TestModulesDir = Join-Path $script:TestFragmentRoot 'test-modules'
     $script:TestSubDir = Join-Path $script:TestModulesDir 'subdir'
     
@@ -75,6 +75,10 @@ AfterAll {
     }
     else {
         Remove-Item Env:PS_PROFILE_DEBUG_SYNTAX_CHECK -ErrorAction SilentlyContinue
+    }
+
+    if ($null -ne $script:TestFragmentRoot -and (Test-Path -LiteralPath $script:TestFragmentRoot)) {
+        Remove-Item -Path $script:TestFragmentRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -466,12 +470,12 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             $result | Should -Be $false
         }
         
-        It "Handles empty FragmentRoot" {
-            $result = Test-FragmentModulePath `
-                -FragmentRoot '' `
-                -ModulePath @('test-modules', 'valid-module.ps1')
-            
-            $result | Should -Be $false
+        It "Rejects empty FragmentRoot" {
+            {
+                Test-FragmentModulePath `
+                    -FragmentRoot '' `
+                    -ModulePath @('test-modules', 'valid-module.ps1')
+            } | Should -Throw
         }
         
         It "Handles empty ModulePath array" {

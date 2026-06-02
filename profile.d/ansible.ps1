@@ -23,8 +23,13 @@
 $script:_ansibleIsLinux = $IsLinux -or $IsMacOS
 $script:_ansibleHasWsl  = -not $script:_ansibleIsLinux -and (Test-CachedCommand 'wsl')
 
-# On Windows without WSL there is nothing to register — bail out early
-if (-not $script:_ansibleIsLinux -and -not $script:_ansibleHasWsl) { return }
+# On Windows without WSL there is nothing to register — show install hint and bail out
+if (-not $script:_ansibleIsLinux -and -not $script:_ansibleHasWsl) {
+    if (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+        Invoke-MissingToolWarning -ToolName 'ansible' -Tool 'ansible (requires WSL on Windows)'
+    }
+    return
+}
 
 # Private helper: invoke an ansible binary with the right strategy
 function script:Invoke-AnsibleBin {

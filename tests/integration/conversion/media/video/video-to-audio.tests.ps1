@@ -44,7 +44,7 @@ Describe 'Video to Audio Extraction Tests' {
 
         It 'ConvertFrom-VideoToAudio supports all audio formats' {
             # Skip if ffmpeg not available
-            $ffmpeg = Test-ToolAvailable -ToolName 'ffmpeg' -InstallCommand 'scoop install ffmpeg' -Silent
+            $ffmpeg = Test-ToolAvailable -ToolName 'ffmpeg' -Silent
             if (-not $ffmpeg.Available) {
                 $skipMessage = "ffmpeg command not available"
                 if ($ffmpeg.InstallCommand) {

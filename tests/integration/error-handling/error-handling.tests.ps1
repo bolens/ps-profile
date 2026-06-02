@@ -168,7 +168,7 @@ Describe 'Error Handling Module' {
 
                 $result = Invoke-SafeFragmentLoad -FragmentPath $tempFragment -FragmentName "TestFragment"
 
-                $result | Should -Be $true
+                @($result)[-1] | Should -Be $true
                 $global:TestFragmentLoaded | Should -Be $true
             }
             finally {
@@ -192,7 +192,7 @@ $global:TestRetryFragmentLoaded = $true
 
                 $result = Invoke-SafeFragmentLoad -FragmentPath $tempFragment -FragmentName "TestRetryFragment" -MaxRetries 2
 
-                $result | Should -Be $true
+                @($result)[-1] | Should -Be $true
                 $global:TestRetryFragmentLoaded | Should -Be $true
                 $global:TestRetryFragmentAttempts | Should -Be 2
             }
@@ -211,7 +211,7 @@ $global:TestRetryFragmentLoaded = $true
 
                 $result = Invoke-SafeFragmentLoad -FragmentPath $tempFragment -FragmentName "TestFailFragment" -MaxRetries 1
 
-                $result | Should -Be $false
+                @($result)[-1] | Should -Be $false
             }
             finally {
                 if ($tempFragment -and -not [string]::IsNullOrWhiteSpace($tempFragment) -and (Test-Path -LiteralPath $tempFragment)) { Remove-Item $tempFragment -Force }
@@ -219,9 +219,10 @@ $global:TestRetryFragmentLoaded = $true
         }
 
         It 'handles non-existent fragment file' {
-            $result = Invoke-SafeFragmentLoad -FragmentPath "C:\NonExistentFragment.ps1" -FragmentName "NonExistent" -MaxRetries 1
+            $nonExistentPath = Join-Path $TestDrive 'NonExistentFragment.ps1'
+            $result = Invoke-SafeFragmentLoad -FragmentPath $nonExistentPath -FragmentName "NonExistent" -MaxRetries 1
 
-            $result | Should -Be $false
+            @($result)[-1] | Should -Be $false
         }
     }
 }

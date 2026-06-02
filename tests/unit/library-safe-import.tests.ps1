@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:SafeImportPath = Join-Path $script:LibPath 'core' 'SafeImport.psm1'
@@ -23,7 +22,7 @@ AfterAll {
 Describe 'SafeImport Module Functions' {
     Context 'Test-ModulePath' {
         BeforeEach {
-            $script:TestDir = Join-Path $TestDrive 'TestSafeImport'
+            $script:TestDir = New-TestTempDirectory -Prefix 'TestSafeImport'
             $script:TestModule = Join-Path $script:TestDir 'TestModule.psm1'
             New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
             Set-Content -Path $script:TestModule -Value '# Test module'
@@ -61,7 +60,7 @@ Describe 'SafeImport Module Functions' {
 
     Context 'Import-ModuleSafely' {
         BeforeEach {
-            $script:TestDir = Join-Path $TestDrive 'TestImportSafely'
+            $script:TestDir = New-TestTempDirectory -Prefix 'TestImportSafely'
             $script:TestModule = Join-Path $script:TestDir 'TestModule.psm1'
             New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
             
@@ -143,7 +142,7 @@ Export-ModuleMember -Function 'Test-ExportedFunction'
 
     Context 'Get-ModulePath' {
         BeforeEach {
-            $script:TestDir = Join-Path $TestDrive 'TestGetModulePath'
+            $script:TestDir = New-TestTempDirectory -Prefix 'TestGetModulePath'
             $script:TestModule = Join-Path $script:TestDir 'TestModule.psm1'
             New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
             Set-Content -Path $script:TestModule -Value '# Test module'
@@ -190,7 +189,12 @@ Export-ModuleMember -Function 'Test-ExportedFunction'
 
         It 'Normalizes path separators' {
             $result = Get-ModulePath -ModulePath $script:TestModule
-            $result | Should -Not -Match '/'
+            if ($IsWindows) {
+                $result | Should -Not -Match '/'
+            }
+            else {
+                $result | Should -Not -Match '\\'
+            }
         }
     }
 }

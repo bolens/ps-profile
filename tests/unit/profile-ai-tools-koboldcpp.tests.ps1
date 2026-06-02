@@ -3,13 +3,8 @@
 # Unit tests for Invoke-KoboldCpp function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'ai-tools.ps1')
@@ -17,64 +12,44 @@ BeforeAll {
 
 Describe 'ai-tools.ps1 - Invoke-KoboldCpp' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('koboldcpp', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('KOBOLDCPP', [ref]$null)
-        }
-        
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('koboldcpp', [ref]$null)
-            $null = $global:AssumedAvailableCommands.TryRemove('KOBOLDCPP', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'koboldcpp' -Available $false
+        Remove-Item -Path Function:\koboldcpp -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Function:\global:koboldcpp -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Alias:\koboldcpp -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Alias:\global:koboldcpp -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when koboldcpp is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'koboldcpp' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'koboldcpp' } -MockWith { return $null }
-            
+            Set-TestCommandAvailabilityState -CommandName 'koboldcpp' -Available $false
+
             $result = Invoke-KoboldCpp -Arguments @('--help') -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls koboldcpp with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'koboldcpp'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'koboldcpp' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'KoboldCpp help' 
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'koboldcpp' -Output 'KoboldCpp help'
+
             $result = Invoke-KoboldCpp -Arguments @('--help')
-            
+
             $result | Should -Not -BeNullOrEmpty
-            Should -Invoke -CommandName 'koboldcpp' -Times 1 -Exactly
-            $script:capturedArgs | Should -Contain '--help'
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain '--help'
         }
-        
+
         It 'Handles koboldcpp execution errors' {
-            Setup-AvailableCommandMock -CommandName 'koboldcpp'
-            
-            Mock -CommandName 'koboldcpp' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('koboldcpp: command failed')
-            }
-            Mock Write-Error { }
-            
-            $result = Invoke-KoboldCpp -Arguments @('invalid-command') -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'koboldcpp' -Message 'koboldcpp: command failed'
+
+            { Invoke-KoboldCpp -Arguments @('invalid-command') } | Should -Throw '*koboldcpp*'
         }
     }
 }
-

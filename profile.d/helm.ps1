@@ -48,7 +48,7 @@ function Invoke-Helm {
         helm @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'helm' -InstallHint 'Install with: scoop install helm'
+        Invoke-MissingToolWarning -ToolName 'helm'
     }
 }
 
@@ -80,7 +80,7 @@ function Install-HelmChart {
         helm install @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'helm' -InstallHint 'Install with: scoop install helm'
+        Invoke-MissingToolWarning -ToolName 'helm'
     }
 }
 
@@ -112,7 +112,7 @@ function Update-HelmRelease {
         helm upgrade @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'helm' -InstallHint 'Install with: scoop install helm'
+        Invoke-MissingToolWarning -ToolName 'helm'
     }
 }
 
@@ -144,7 +144,7 @@ function Get-HelmReleases {
         helm list @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'helm' -InstallHint 'Install with: scoop install helm'
+        Invoke-MissingToolWarning -ToolName 'helm'
     }
 }
 

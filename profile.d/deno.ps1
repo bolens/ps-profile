@@ -47,7 +47,7 @@ function Invoke-Deno {
         & deno @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package'
     }
 }
 
@@ -79,7 +79,7 @@ function Invoke-DenoRun {
         & deno run @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package'
     }
 }
 
@@ -111,7 +111,7 @@ function Invoke-DenoTask {
         & deno task @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package'
     }
 }
 
@@ -133,7 +133,7 @@ function Update-DenoSelf {
         & deno upgrade
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package' -DefaultInstallCommand 'scoop install deno'
+        Invoke-MissingToolWarning -ToolName 'deno' -ToolType 'node-package'
     }
 }
 

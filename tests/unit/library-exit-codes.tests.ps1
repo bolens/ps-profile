@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
         $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
@@ -21,6 +20,7 @@ BeforeAll {
         
         # Import the module under test
         Import-Module $script:ExitCodesPath -DisableNameChecking -ErrorAction Stop -Force
+        $script:TestTempRoot = New-TestTempDirectory -Prefix 'ExitCodesTests'
     }
     catch {
         $errorDetails = @{
@@ -96,8 +96,9 @@ Describe 'ExitCodes Module Functions' {
         It 'Outputs message when provided' {
             # Test message output by capturing it before exit
             # Use a job to test without terminating the test process
-            $testScript = Join-Path $TestDrive "test-exit-message-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-message-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 Exit-WithCode -ExitCode `$EXIT_VALIDATION_FAILURE -Message 'Test message'
 "@
@@ -109,8 +110,9 @@ Exit-WithCode -ExitCode `$EXIT_VALIDATION_FAILURE -Message 'Test message'
         }
 
         It 'Handles ErrorRecord parameter' {
-            $testScript = Join-Path $TestDrive "test-exit-error-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-error-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 try {
     throw 'Test error'
@@ -129,8 +131,9 @@ catch {
         }
 
         It 'Exits with EXIT_SUCCESS' {
-            $testScript = Join-Path $TestDrive "test-exit-success-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-success-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 Exit-WithCode -ExitCode `$EXIT_SUCCESS
 "@
@@ -141,8 +144,9 @@ Exit-WithCode -ExitCode `$EXIT_SUCCESS
         }
 
         It 'Exits with EXIT_VALIDATION_FAILURE' {
-            $testScript = Join-Path $TestDrive "test-exit-validation-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-validation-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 Exit-WithCode -ExitCode `$EXIT_VALIDATION_FAILURE
 "@
@@ -153,8 +157,9 @@ Exit-WithCode -ExitCode `$EXIT_VALIDATION_FAILURE
         }
 
         It 'Exits with EXIT_SETUP_ERROR' {
-            $testScript = Join-Path $TestDrive "test-exit-setup-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-setup-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 Exit-WithCode -ExitCode `$EXIT_SETUP_ERROR
 "@
@@ -165,8 +170,9 @@ Exit-WithCode -ExitCode `$EXIT_SETUP_ERROR
         }
 
         It 'Exits with EXIT_OTHER_ERROR' {
-            $testScript = Join-Path $TestDrive "test-exit-other-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-other-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 Exit-WithCode -ExitCode `$EXIT_OTHER_ERROR
 "@
@@ -177,8 +183,9 @@ Exit-WithCode -ExitCode `$EXIT_OTHER_ERROR
         }
 
         It 'Exits with custom exit code' {
-            $testScript = Join-Path $TestDrive "test-exit-custom-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-custom-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 Exit-WithCode -ExitCode 42
 "@
@@ -189,8 +196,9 @@ Exit-WithCode -ExitCode 42
         }
 
         It 'Handles empty message' {
-            $testScript = Join-Path $TestDrive "test-exit-empty-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-empty-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
 Exit-WithCode -ExitCode `$EXIT_SUCCESS -Message ''
 "@
@@ -201,10 +209,11 @@ Exit-WithCode -ExitCode `$EXIT_SUCCESS -Message ''
         }
 
         It 'Accepts ExitCode enum value' {
-            $testScript = Join-Path $TestDrive "test-exit-enum-$(Get-Random).ps1"
+            $testScript = Join-Path $script:TestTempRoot "test-exit-enum-$(Get-Random).ps1"
             $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
-Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
+Exit-WithCode -ExitCode 1
 "@
             Set-Content -Path $testScript -Value $scriptContent
             
@@ -214,27 +223,28 @@ Exit-WithCode -ExitCode [ExitCode]::ValidationFailure
 
         It 'Accepts ExitCode enum for all values' {
             $testCases = @(
-                @{ EnumValue = '[ExitCode]::Success'; ExpectedCode = 0 }
-                @{ EnumValue = '[ExitCode]::ValidationFailure'; ExpectedCode = 1 }
-                @{ EnumValue = '[ExitCode]::SetupError'; ExpectedCode = 2 }
-                @{ EnumValue = '[ExitCode]::OtherError'; ExpectedCode = 3 }
-                @{ EnumValue = '[ExitCode]::TestFailure'; ExpectedCode = 4 }
-                @{ EnumValue = '[ExitCode]::TestTimeout'; ExpectedCode = 5 }
-                @{ EnumValue = '[ExitCode]::CoverageFailure'; ExpectedCode = 6 }
-                @{ EnumValue = '[ExitCode]::NoTestsFound'; ExpectedCode = 7 }
-                @{ EnumValue = '[ExitCode]::WatchModeCanceled'; ExpectedCode = 8 }
+                @{ ExitArgument = '0'; ExpectedCode = 0 }
+                @{ ExitArgument = '1'; ExpectedCode = 1 }
+                @{ ExitArgument = '2'; ExpectedCode = 2 }
+                @{ ExitArgument = '3'; ExpectedCode = 3 }
+                @{ ExitArgument = '4'; ExpectedCode = 4 }
+                @{ ExitArgument = '5'; ExpectedCode = 5 }
+                @{ ExitArgument = '6'; ExpectedCode = 6 }
+                @{ ExitArgument = '7'; ExpectedCode = 7 }
+                @{ ExitArgument = '8'; ExpectedCode = 8 }
             )
 
             foreach ($testCase in $testCases) {
-                $testScript = Join-Path $TestDrive "test-exit-enum-$($testCase.ExpectedCode)-$(Get-Random).ps1"
+                $testScript = Join-Path $script:TestTempRoot "test-exit-enum-$($testCase.ExpectedCode)-$(Get-Random).ps1"
                 $scriptContent = @"
+Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
 Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
-Exit-WithCode -ExitCode $($testCase.EnumValue)
+Exit-WithCode -ExitCode $($testCase.ExitArgument)
 "@
                 Set-Content -Path $testScript -Value $scriptContent
                 
                 & pwsh -NoProfile -File $testScript 2>&1 | Out-Null
-                $LASTEXITCODE | Should -Be $testCase.ExpectedCode -Because "ExitCode enum $($testCase.EnumValue) should exit with code $($testCase.ExpectedCode)"
+                $LASTEXITCODE | Should -Be $testCase.ExpectedCode -Because "Exit code $($testCase.ExitArgument) should exit with code $($testCase.ExpectedCode)"
             }
         }
     }

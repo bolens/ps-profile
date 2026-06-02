@@ -65,12 +65,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'alacritty')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'alacritty'
             return
         }
@@ -157,12 +151,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'kitty')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kitty'
             return
         }
@@ -259,12 +247,6 @@ try {
         }
 
         if (-not $tool) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'wezterm-nightly'
             return
         }
@@ -334,12 +316,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'tabby')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'tabby'
             return
         }
@@ -417,12 +393,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'tmux')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'tmux'
             return
         }
@@ -538,7 +508,8 @@ try {
             }
         }
         
-        return $terminals
+        # Preserve array type when a single terminal is detected (PowerShell unwraps one-element arrays)
+        return ,@($terminals)
     }
 
     # Register functions

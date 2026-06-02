@@ -1,7 +1,6 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 Describe 'CodeAnalysis Module Functions' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Import the modules that contain the functions (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         # Import dependencies first

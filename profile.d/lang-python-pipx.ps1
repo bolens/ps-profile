@@ -79,7 +79,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'pipx' -DefaultInstallCommand 'pip install pipx (or python -m pip install pipx)'
+            Invoke-MissingToolWarning -ToolName 'pipx' -ToolType 'python-package'
             return $null
         }
 
@@ -173,7 +173,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'pipx' -DefaultInstallCommand 'pip install pipx (or python -m pip install pipx)'
+            Invoke-MissingToolWarning -ToolName 'pipx' -ToolType 'python-package'
             return $null
         }
 

@@ -55,7 +55,6 @@ Describe 'Testing Frameworks Integration Tests' {
             Mock-CommandAvailabilityPester -CommandName 'cypress' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'mocha' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -in @('jest', 'vitest', 'playwright', 'cypress', 'mocha', 'npx') } -MockWith { $false }
             . $testingFrameworksPath
         }
 
@@ -74,11 +73,9 @@ Describe 'Testing Frameworks Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'jest' -Available $false -Scope It
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'jest' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
             $output = jest --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'jest or npx not found'
-            $output | Should -Match 'npm install -g jest or npm install -g npm'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'jest or npx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('jest', 'nodejs') -ToolType 'node-package'
         }
 
         It 'Creates Invoke-Vitest function' {

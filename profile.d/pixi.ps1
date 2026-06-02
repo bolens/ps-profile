@@ -129,5 +129,5 @@ if (Test-CachedCommand pixi) {
     Set-AgentModeAlias -Name 'pixi-remove' -Target 'Remove-PixiPackage'
 }
 else {
-    Write-MissingToolWarning -Tool 'pixi' -InstallHint 'Install with: scoop install pixi'
+    Invoke-MissingToolWarning -ToolName 'pixi'
 }

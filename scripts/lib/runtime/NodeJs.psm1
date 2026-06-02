@@ -172,15 +172,30 @@ function Get-PnpmGlobalPath {
         }
     }
     
-    # If pnpm global path not found, try common location
+    # If pnpm global path not found, try common locations
     if (-not $pnpmGlobalPath) {
-        $commonPnpmPath = "$env:LOCALAPPDATA\pnpm\global\5\node_modules"
-        if ($commonPnpmPath -and -not [string]::IsNullOrWhiteSpace($commonPnpmPath) -and (Test-Path -LiteralPath $commonPnpmPath)) {
-            $pnpmGlobalPath = $commonPnpmPath
-            # Level 3: Log common location found
-            $debugLevel = 0
-            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
-                Write-Verbose "[nodejs.get-pnpm-global-path] Found pnpm global path at common location: $commonPnpmPath"
+        $commonPnpmPaths = @()
+        if ($env:LOCALAPPDATA) {
+            $commonPnpmPaths += Join-Path $env:LOCALAPPDATA 'pnpm' 'global' '5' 'node_modules'
+        }
+
+        $userHome = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { $null }
+        if ($userHome) {
+            $commonPnpmPaths += Join-Path $userHome '.local' 'share' 'pnpm' 'global' '5' 'node_modules'
+        }
+
+        if ($env:PNPM_HOME) {
+            $commonPnpmPaths += Join-Path $env:PNPM_HOME 'global' '5' 'node_modules'
+        }
+
+        foreach ($commonPnpmPath in $commonPnpmPaths) {
+            if ($commonPnpmPath -and -not [string]::IsNullOrWhiteSpace($commonPnpmPath) -and (Test-Path -LiteralPath $commonPnpmPath)) {
+                $pnpmGlobalPath = $commonPnpmPath
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                    Write-Verbose "[nodejs.get-pnpm-global-path] Found pnpm global path at common location: $commonPnpmPath"
+                }
+                break
             }
         }
     }
@@ -657,5 +672,74 @@ function Get-NodePackageInstallRecommendation {
         $packages = $PackageNames -join ' '
         return $baseCmd -f $packages
     }
+}
+
+<#
+.SYNOPSIS
+    Placeholder token replaced in embedded Node.js scripts with a preference-aware install command.
+#>
+$script:EmbeddedNodeInstallPlaceholder = '__NODE_INSTALL_CMD__'
+
+<#
+.SYNOPSIS
+    Injects preference-aware Node.js package install commands into embedded script text.
+.DESCRIPTION
+    Replaces __NODE_INSTALL_CMD__ placeholders in embedded JavaScript scripts with the
+    output of Get-NodePackageInstallRecommendation.
+.PARAMETER Script
+    Embedded JavaScript script text that may contain __NODE_INSTALL_CMD__ placeholders.
+.PARAMETER PackageNames
+    Node package names to include in the install recommendation.
+.PARAMETER Global
+    Recommend global installation when supported by the active package manager.
+.EXAMPLE
+    $script = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'superjson' -Global
+.OUTPUTS
+    System.String
+#>
+function Expand-EmbeddedNodeInstallHints {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Script,
+
+        [Parameter(Mandatory)]
+        [string[]]$PackageNames,
+
+        [switch]$Global
+    )
+
+    if ($Script -notmatch [regex]::Escape($script:EmbeddedNodeInstallPlaceholder)) {
+        return $Script
+    }
+
+    $installCmd = Get-NodePackageInstallRecommendation -PackageNames $PackageNames -Global:$Global
+    return $Script.Replace($script:EmbeddedNodeInstallPlaceholder, $installCmd)
+}
+
+<#
+.SYNOPSIS
+    Replaces __NODE_INSTALL_CMD__ in a PowerShell error message at runtime.
+#>
+function Resolve-NodeInstallHintMessage {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Message,
+
+        [Parameter(Mandatory)]
+        [string[]]$PackageNames,
+
+        [switch]$Global
+    )
+
+    if ($Message -notmatch [regex]::Escape($script:EmbeddedNodeInstallPlaceholder)) {
+        return $Message
+    }
+
+    $installCmd = Get-NodePackageInstallRecommendation -PackageNames $PackageNames -Global:$Global
+    return $Message.Replace($script:EmbeddedNodeInstallPlaceholder, $installCmd)
 }
 

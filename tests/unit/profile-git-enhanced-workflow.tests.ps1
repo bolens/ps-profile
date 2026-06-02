@@ -3,13 +3,8 @@
 # Unit tests for Invoke-GitButler and Invoke-Jujutsu functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
@@ -17,155 +12,102 @@ BeforeAll {
 
 Describe 'git-enhanced.ps1 - Invoke-GitButler' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('gitbutler', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('GITBUTLER', [ref]$null)
-        }
-        
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('gitbutler', [ref]$null)
-            $null = $global:AssumedAvailableCommands.TryRemove('GITBUTLER', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'gitbutler' -Available $false
+        Remove-Item -Path 'Function:\gitbutler' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:gitbutler' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when gitbutler is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'gitbutler' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'gitbutler' } -MockWith { return $null }
-            
             $result = Invoke-GitButler -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls gitbutler without arguments' {
-            Setup-AvailableCommandMock -CommandName 'gitbutler'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'gitbutler' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Git Butler output'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'gitbutler' -Output 'Git Butler output'
+
             $result = Invoke-GitButler -ErrorAction SilentlyContinue
-            
-            Should -Invoke -CommandName 'gitbutler' -Times 1 -Exactly
-            $script:capturedArgs | Should -BeNullOrEmpty
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'Git Butler output'
         }
-        
+
         It 'Calls gitbutler with arguments' {
-            Setup-AvailableCommandMock -CommandName 'gitbutler'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'gitbutler' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Git Butler output'
-            }
-            
-            $result = Invoke-GitButler -Arguments @('status', 'sync') -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'status'
-            $script:capturedArgs | Should -Contain 'sync'
+            Setup-CapturingCommandMock -CommandName 'gitbutler' -Output 'Git Butler output'
+
+            Invoke-GitButler 'status', 'sync' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'status'
+            $args | Should -Contain 'sync'
         }
-        
+
         It 'Handles gitbutler execution errors' {
-            Setup-AvailableCommandMock -CommandName 'gitbutler'
-            
-            Mock -CommandName 'gitbutler' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('gitbutler: command failed')
-            }
-            Mock Write-Error { }
-            
-            $result = Invoke-GitButler -Arguments @('invalid') -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'gitbutler' -Message 'gitbutler: command failed'
+
+            { Invoke-GitButler 'invalid' -ErrorAction Stop } | Should -Throw '*gitbutler*'
         }
     }
 }
 
 Describe 'git-enhanced.ps1 - Invoke-Jujutsu' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('jj', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('JJ', [ref]$null)
-        }
-        
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('jj', [ref]$null)
-            $null = $global:AssumedAvailableCommands.TryRemove('JJ', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'jj' -Available $false
+        Remove-Item -Path 'Function:\jj' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:jj' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when jj is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'jj' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'jj' } -MockWith { return $null }
-            
             $result = Invoke-Jujutsu -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls jj without arguments' {
-            Setup-AvailableCommandMock -CommandName 'jj'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'jj' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Jujutsu output'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'jj' -Output 'Jujutsu output'
+
             $result = Invoke-Jujutsu -ErrorAction SilentlyContinue
-            
-            Should -Invoke -CommandName 'jj' -Times 1 -Exactly
-            $script:capturedArgs | Should -BeNullOrEmpty
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'Jujutsu output'
         }
-        
+
         It 'Calls jj with arguments' {
-            Setup-AvailableCommandMock -CommandName 'jj'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'jj' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Jujutsu output'
-            }
-            
-            $result = Invoke-Jujutsu -Arguments @('init', 'status') -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'init'
-            $script:capturedArgs | Should -Contain 'status'
+            Setup-CapturingCommandMock -CommandName 'jj' -Output 'Jujutsu output'
+
+            Invoke-Jujutsu 'init', 'status' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'init'
+            $args | Should -Contain 'status'
         }
-        
+
         It 'Handles jj execution errors' {
-            Setup-AvailableCommandMock -CommandName 'jj'
-            
-            Mock -CommandName 'jj' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('jj: command failed')
-            }
-            Mock Write-Error { }
-            
-            $result = Invoke-Jujutsu -Arguments @('invalid') -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'jj' -Message 'jj: command failed'
+
+            { Invoke-Jujutsu 'invalid' -ErrorAction Stop } | Should -Throw '*jj*'
         }
     }
 }
-

@@ -76,13 +76,14 @@ try:
         else:
             store_data('data', data, nc)
 except ImportError:
-    print('Error: netCDF4 package is not installed. Install it with: uv pip install netCDF4', file=sys.stderr)
+    print('Error: netCDF4 package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "netcdf-encode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'netCDF4' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -143,13 +144,14 @@ try:
         with open(sys.argv[2], 'w') as out:
             json.dump(result, out, indent=2, default=str)
 except ImportError:
-    print('Error: netCDF4 package is not installed. Install it with: uv pip install netCDF4', file=sys.stderr)
+    print('Error: netCDF4 package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "netcdf-decode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'netCDF4' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1

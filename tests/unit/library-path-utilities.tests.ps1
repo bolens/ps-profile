@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:PathUtilitiesPath = Join-Path $script:LibPath 'path' 'PathUtilities.psm1'
@@ -9,7 +8,7 @@ BeforeAll {
     Import-Module $script:PathUtilitiesPath -DisableNameChecking -ErrorAction Stop -Force
     
     # Create test directory structure
-    $script:TestDir = Join-Path $env:TEMP "test-path-utilities-$(Get-Random)"
+    $script:TestDir = New-TestTempDirectory -Prefix 'PathUtilitiesTests'
     New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
     
     $script:BaseDir = Join-Path $script:TestDir 'base'
@@ -65,7 +64,7 @@ Describe 'PathUtilities Module Functions' {
         }
 
         It 'Handles paths outside base directory' {
-            $outsidePath = Join-Path $env:TEMP "outside-$(Get-Random)"
+            $outsidePath = Join-Path $script:TestDir "outside-$(Get-Random)"
             $relative = Get-RelativePath -From $script:BaseDir -To $outsidePath
             $relative | Should -Not -BeNullOrEmpty
         }
@@ -85,7 +84,7 @@ Describe 'PathUtilities Module Functions' {
         }
 
         It 'Returns original path when outside repository' {
-            $outsidePath = Join-Path $env:TEMP "outside-$(Get-Random).txt"
+            $outsidePath = Join-Path (Split-Path -Parent $script:TestDir) "outside-$(Get-Random).txt"
             $relative = ConvertTo-RepoRelativePath -Path $outsidePath -RepoRoot $script:TestDir
             $relative | Should -Be $outsidePath
         }
@@ -151,7 +150,7 @@ Describe 'PathUtilities Module Functions' {
         }
 
         It 'Returns original path when outside repository' {
-            $outsidePath = Join-Path $env:TEMP "outside-$(Get-Random).txt"
+            $outsidePath = Join-Path (Split-Path -Parent $script:TestDir) "outside-$(Get-Random).txt"
             $normalized = Normalize-Path -Path $outsidePath -RepoRoot $script:TestDir
             $normalized | Should -Be $outsidePath
         }
@@ -164,7 +163,7 @@ Describe 'PathUtilities Module Functions' {
         }
 
         It 'Handles RepoRoot that does not exist' {
-            $nonExistentRepoRoot = Join-Path $env:TEMP "nonexistent-repo-$(Get-Random)"
+            $nonExistentRepoRoot = Join-Path $script:TestDir "nonexistent-repo-$(Get-Random)"
             $targetPath = Join-Path $script:TestDir 'target' 'file.txt'
             $normalized = Normalize-Path -Path $targetPath -RepoRoot $nonExistentRepoRoot
             # Should resolve path but not convert to relative

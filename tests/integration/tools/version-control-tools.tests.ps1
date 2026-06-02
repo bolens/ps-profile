@@ -45,7 +45,6 @@ Describe 'Version Control Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'gh' } -MockWith { $null }
             # Mock gh command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'gh' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'gh.ps1')
         }
 
@@ -63,10 +62,9 @@ Describe 'Version Control Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('gh', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'gh' } -MockWith { $false }
             $output = gh-open 2>&1 3>&1 | Out-String
-            $output | Should -Match 'gh not found'
-            $output | Should -Match 'scoop install gh'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'gh not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gh'
         }
 
         It 'Creates Invoke-GitHubPullRequest function' {

@@ -28,5 +28,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-Alias -Name diskusage -Value dust -Option AllScope -Force
 }
 else {
-    Write-MissingToolWarning -Tool 'dust' -InstallHint 'Install with: scoop install dust'
+    Invoke-MissingToolWarning -ToolName 'dust'
 }

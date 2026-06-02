@@ -2,47 +2,15 @@
 
 Describe 'Path Management Integration Tests' {
     BeforeAll {
-        try {
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-                throw "Get-TestPath returned null or empty value for ProfileDir"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-                throw "Profile directory not found at: $script:ProfileDir"
-            }
-            
-            $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-            if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
-                throw "BootstrapPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $bootstrapPath)) {
-                throw "Bootstrap file not found at: $bootstrapPath"
-            }
-            . $bootstrapPath
-            
-            $systemPath = Join-Path $script:ProfileDir 'system.ps1'
-            if ($systemPath -and (Test-Path -LiteralPath $systemPath)) {
-                . $systemPath
-            }
-            
-            $utilitiesPath = Join-Path $script:ProfileDir 'utilities.ps1'
-            if ($null -eq $utilitiesPath -or [string]::IsNullOrWhiteSpace($utilitiesPath)) {
-                throw "UtilitiesPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $utilitiesPath)) {
-                throw "Utilities fragment not found at: $utilitiesPath"
-            }
-            . $utilitiesPath
+        $testSupportPath = Get-TestSupportPath -StartPath $PSScriptRoot
+        if (-not (Test-Path -LiteralPath $testSupportPath)) {
+            throw "TestSupport file not found at: $testSupportPath"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize path management tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
-        }
+        . $testSupportPath
+
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        $script:PathSeparator = [System.IO.Path]::PathSeparator
+        Initialize-SystemUtilityIntegration -ProfileDir $script:ProfileDir -IncludeUtilities
     }
 
     Context 'Utility functions edge cases' {
@@ -55,7 +23,7 @@ Describe 'Path Management Integration Tests' {
                 New-Item -ItemType Directory -Path $testPath -Force | Out-Null
 
                 Add-Path -Path $testPath
-                $pathArray = $env:PATH -split ';'
+                $pathArray = $env:PATH -split $script:PathSeparator
                 $pathArray[0] | Should -Be $testPath -Because "Add-Path should add path to beginning when specified"
             }
             catch {
@@ -79,7 +47,7 @@ Describe 'Path Management Integration Tests' {
 
             try {
                 Add-Path -Path $testPath
-                $pathArray = $env:PATH -split ';'
+                $pathArray = $env:PATH -split $script:PathSeparator
                 $pathArray[0] | Should -Be $testPath
             }
             finally {
@@ -94,12 +62,12 @@ Describe 'Path Management Integration Tests' {
 
             try {
                 Add-Path -Path $testPath
-                $beforeCount = ($env:PATH -split ';' | Where-Object { $_ -eq $testPath }).Count
+                $beforeCount = @($env:PATH -split $script:PathSeparator | Where-Object { $_ -eq $testPath }).Count
 
                 Add-Path -Path $testPath
-                $afterCount = ($env:PATH -split ';' | Where-Object { $_ -eq $testPath }).Count
+                $afterCount = @($env:PATH -split $script:PathSeparator | Where-Object { $_ -eq $testPath }).Count
 
-                $afterCount | Should -BeGreaterOrEqual $beforeCount
+                $afterCount | Should -Be $beforeCount
             }
             finally {
                 $env:PATH = $originalPath
@@ -128,7 +96,7 @@ Describe 'Path Management Integration Tests' {
         It 'Remove-Path handles non-existent path' {
             $originalPath = $env:PATH
             try {
-                Remove-Path -Path 'C:\NonExistentPath'
+                Remove-Path -Path (Join-Path $TestDrive 'NonExistentPath')
                 $env:PATH | Should -Be $originalPath
             }
             finally {
@@ -140,7 +108,7 @@ Describe 'Path Management Integration Tests' {
     Context 'Path safety tests' {
         It 'Test-SafePath accepts valid paths within base directory' {
             $basePath = Join-Path $TestDrive 'BaseDir'
-            $safePath = Join-Path $basePath 'subdir\file.txt'
+            $safePath = Join-Path $basePath 'subdir' 'file.txt'
             New-Item -ItemType Directory -Path $basePath -Force | Out-Null
 
             $result = Test-SafePath -Path $safePath -BasePath $basePath
@@ -149,7 +117,7 @@ Describe 'Path Management Integration Tests' {
 
         It 'Test-SafePath rejects paths outside base directory' {
             $basePath = Join-Path $TestDrive 'BaseDir'
-            $unsafePath = Join-Path $TestDrive 'OutsideDir\file.txt'
+            $unsafePath = Join-Path $TestDrive 'OutsideDir' 'file.txt'
             New-Item -ItemType Directory -Path $basePath -Force | Out-Null
             New-Item -ItemType Directory -Path (Split-Path $unsafePath -Parent) -Force | Out-Null
 
@@ -174,7 +142,7 @@ Describe 'Path Management Integration Tests' {
 
         It 'Test-SafePath rejects path traversal attempts' {
             $basePath = Join-Path $TestDrive 'BaseDir'
-            $traversalPath = Join-Path $basePath '..\..\..\Windows\System32\cmd.exe'
+            $traversalPath = Join-Path $basePath '..' '..' '..' 'etc' 'passwd'
             New-Item -ItemType Directory -Path $basePath -Force | Out-Null
 
             $result = Test-SafePath -Path $traversalPath -BasePath $basePath

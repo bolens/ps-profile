@@ -46,9 +46,7 @@ function Initialize-FileConversion-MediaImagesCommon {
             return @{ Name = 'gm'; Type = 'GraphicsMagick' }
         }
         
-        throw "ImageMagick or GraphicsMagick command not found. Please install one of them to use image conversion functions. " +
-        "ImageMagick: scoop install imagemagick (Windows), apt install imagemagick (Linux), or brew install imagemagick (macOS). " +
-        "GraphicsMagick: scoop install graphicsmagick (Windows), apt install graphicsmagick (Linux), or brew install graphicsmagick (macOS)"
+        throw (Get-ImageConversionToolMissingMessage)
     } -Force
 
     # Helper function for generic image conversion

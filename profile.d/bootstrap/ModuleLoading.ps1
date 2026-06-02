@@ -51,6 +51,38 @@
         -Dependencies @('bootstrap', 'env') `
         -Required
 #>
+function global:Invoke-GlobalProfileScript {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+
+    $resolvedPath = (Resolve-Path -LiteralPath $Path -ErrorAction Stop).Path
+    $existingFunctions = @{}
+    Get-Command -CommandType Function -ErrorAction SilentlyContinue | ForEach-Object {
+        $existingFunctions[$_.Name] = $true
+    }
+
+    $existingAliases = @{}
+    Get-Command -CommandType Alias -ErrorAction SilentlyContinue | ForEach-Object {
+        $existingAliases[$_.Name] = $true
+    }
+
+    $null = . $resolvedPath
+
+    Get-Command -CommandType Function -ErrorAction SilentlyContinue | ForEach-Object {
+        if (-not $existingFunctions.ContainsKey($_.Name)) {
+            Set-Item -Path ("Function:\global:" + $_.Name) -Value $_.ScriptBlock -Force | Out-Null
+        }
+    }
+
+    Get-Command -CommandType Alias -ErrorAction SilentlyContinue | ForEach-Object {
+        if (-not $existingAliases.ContainsKey($_.Name)) {
+            Set-Alias -Name $_.Name -Value $_.Definition -Scope Global -Force | Out-Null
+        }
+    }
+}
+
 function global:Import-FragmentModule {
     [CmdletBinding()]
     [OutputType([bool])]
@@ -178,7 +210,7 @@ function global:Import-FragmentModule {
     }
 
     # Check dependencies
-    if ($Dependencies.Count -gt 0) {
+    if (@($Dependencies).Count -gt 0) {
         $missingDeps = @()
         foreach ($dep in $Dependencies) {
             # Check if dependency module/function is loaded
@@ -205,7 +237,7 @@ function global:Import-FragmentModule {
             }
         }
 
-        if ($missingDeps.Count -gt 0) {
+        if (@($missingDeps).Count -gt 0) {
             $errorMsg = "$Context : Missing dependencies: $($missingDeps -join ', ')"
             if ($Required) {
                 throw $errorMsg
@@ -243,7 +275,7 @@ function global:Import-FragmentModule {
                 (Get-Content -Path $moduleFilePath -Raw),
                 [ref]$parseErrors
             )
-            if ($parseErrors.Count -gt 0) {
+            if (@($parseErrors).Count -gt 0) {
                 $errorMsg = "$Context : PowerShell syntax errors in $moduleFilePath : $($parseErrors[0].Message)"
                 if ($Required) {
                     throw $errorMsg
@@ -284,9 +316,8 @@ function global:Import-FragmentModule {
                 }
             }
             else {
-                # Fallback: direct dot-sourcing
-                # Dot-source the module file
-                . $moduleFilePath
+                # Fallback: dot-source in global scope so functions/aliases persist
+                $null = Invoke-GlobalProfileScript -Path $moduleFilePath
                 return $true
             }
         }
@@ -314,7 +345,15 @@ function global:Import-FragmentModule {
     # Final error handling
     $errorMsg = "$Context : Failed to load module '$moduleFilePath'"
     if ($lastError) {
-        $errorMsg += ": $($lastError.Exception.Message)"
+        if ($lastError -is [System.Management.Automation.ErrorRecord]) {
+            $errorMsg += ": $($lastError.Exception.Message)"
+        }
+        elseif ($lastError -is [Exception]) {
+            $errorMsg += ": $($lastError.Message)"
+        }
+        else {
+            $errorMsg += ": $lastError"
+        }
     }
     if ($attempt -gt 1) {
         $errorMsg += " (after $attempt attempts)"
@@ -326,7 +365,7 @@ function global:Import-FragmentModule {
 
     # Use standard error handling
     if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-        if ($lastError) {
+        if ($lastError -is [System.Management.Automation.ErrorRecord]) {
             Write-ProfileError -ErrorRecord $lastError -Context $Context -Category 'Fragment'
         }
         else {
@@ -409,8 +448,8 @@ function global:Import-FragmentModules {
     # Phase 1: Validate all paths first (fast validation)
     $validModules = @()
     foreach ($module in $Modules) {
-        $modulePath = $module.ModulePath
-        $context = $module.Context
+        $modulePath = $module['ModulePath']
+        $context = $module['Context']
 
         if (-not $modulePath -or -not $context) {
             $errorMsg = "Module definition missing ModulePath or Context"
@@ -445,11 +484,19 @@ function global:Import-FragmentModules {
             }
 
             if ($pathExists) {
+                $moduleDependencies = $module['Dependencies']
+                if ($null -eq $moduleDependencies) {
+                    $moduleDependencies = [string[]]@()
+                }
+                else {
+                    $moduleDependencies = @($moduleDependencies)
+                }
+
                 $validModules += @{
                     ModulePath   = $modulePath
                     Context      = $context
                     FullPath     = $currentPath
-                    Dependencies = if ($module.Dependencies) { $module.Dependencies } else { @() }
+                    Dependencies = $moduleDependencies
                 }
             }
             else {
@@ -471,20 +518,20 @@ function global:Import-FragmentModules {
 
     # Phase 2: Load valid modules
     foreach ($module in $validModules) {
-        if ($StopOnError -and $failed.Count -gt 0) {
+        if ($StopOnError -and @($failed).Count -gt 0) {
             break
         }
 
         $success = Import-FragmentModule `
             -FragmentRoot $FragmentRoot `
-            -ModulePath $module.ModulePath `
-            -Context $module.Context `
-            -Dependencies $module.Dependencies `
+            -ModulePath $module['ModulePath'] `
+            -Context $module['Context'] `
+            -Dependencies $module['Dependencies'] `
             -CacheResults
 
-        $results[$module.Context] = @{ Success = $success }
+        $results[$module['Context']] = @{ Success = $success }
         if (-not $success) {
-            $failed += $module.Context
+            $failed += $module['Context']
             if ($StopOnError) {
                 break
             }
@@ -494,8 +541,8 @@ function global:Import-FragmentModules {
     $result = [ModuleImportResult]@{
         Results      = $results
         Failed       = $failed
-        SuccessCount = ($results.Values | Where-Object { $_.Success }).Count
-        FailureCount = $failed.Count
+        SuccessCount = @($results.Values | Where-Object { $_.Success }).Count
+        FailureCount = @($failed).Count
     }
 
     return $result

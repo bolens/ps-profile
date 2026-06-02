@@ -21,7 +21,7 @@ Describe 'CBOR to CSV Conversion Tests' {
     Context 'CBOR to CSV Conversions' {
         It 'ConvertFrom-CborToCsv converts CBOR to CSV' {
             Get-Command ConvertFrom-CborToCsv -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -31,7 +31,7 @@ Describe 'CBOR to CSV Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'cbor')) {
-                Set-ItResult -Skipped -Because "cbor package not installed. Install with: pnpm add -g cbor"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'cbor' -ToolType 'node-package' -Context 'cbor package not installed')
                 return
             }
             $json = '[{"name":"test1","value":123},{"name":"test2","value":456}]'

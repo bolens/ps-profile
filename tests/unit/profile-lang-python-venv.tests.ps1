@@ -3,44 +3,26 @@
 # Unit tests for New-PythonVirtualEnv function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-python.ps1')
+    . (Join-Path $script:ProfileDir 'lang-python-env.ps1')
 }
 
 Describe 'lang-python.ps1 - New-PythonVirtualEnv' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('uv', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('python3', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('python', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('uv', [ref]$null)
-            $null = $global:AssumedAvailableCommands.TryRemove('python3', [ref]$null)
-            $null = $global:AssumedAvailableCommands.TryRemove('python', [ref]$null)
-        }
+        Mark-TestCommandsUnavailable -CommandNames @('uv', 'python3', 'python')
     }
 
     Context 'Tool not available' {
         It 'Returns null when neither uv nor python is available' {
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'python3' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'python' -Available $false
-
             $result = New-PythonVirtualEnv -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -49,95 +31,68 @@ Describe 'lang-python.ps1 - New-PythonVirtualEnv' {
 
     Context 'Tool available' {
         It 'Prefers uv when available' {
-            Setup-AvailableCommandMock -CommandName 'uv'
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Virtual environment created'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'uv' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Virtual environment created' 
-            }
+            $result = New-PythonVirtualEnv -ErrorAction SilentlyContinue
 
-            $result = New-PythonVirtualEnv
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'venv'
-            $script:capturedArgs | Should -Contain '.venv'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'venv'
+            $args | Should -Contain '.venv'
+            $result | Should -Be 'Virtual environment created'
         }
 
         It 'Falls back to python -m venv when uv is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
-            Setup-AvailableCommandMock -CommandName 'python3'
+            Setup-CapturingCommandMock -CommandName 'python3' -Output 'Virtual environment created'
+            Mark-TestCommandsUnavailable -CommandNames 'uv'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'python3' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Virtual environment created' 
-            }
+            $result = New-PythonVirtualEnv -ErrorAction SilentlyContinue
 
-            $result = New-PythonVirtualEnv
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '-m'
-            $script:capturedArgs | Should -Contain 'venv'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-m'
+            $args | Should -Contain 'venv'
+            $result | Should -Be 'Virtual environment created'
         }
 
         It 'Uses custom path when specified' {
-            Setup-AvailableCommandMock -CommandName 'uv'
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Virtual environment created'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'uv' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Virtual environment created' 
-            }
+            New-PythonVirtualEnv -Path 'venv' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = New-PythonVirtualEnv -Path 'venv'
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'venv'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'venv'
         }
 
         It 'Uses Python version when specified (uv only)' {
-            Setup-AvailableCommandMock -CommandName 'uv'
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Virtual environment created'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'uv' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Virtual environment created' 
-            }
+            New-PythonVirtualEnv -PythonVersion '3.11' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = New-PythonVirtualEnv -PythonVersion '3.11'
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '--python'
-            $script:capturedArgs | Should -Contain '3.11'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--python'
+            $args | Should -Contain '3.11'
         }
     }
 
     Context 'Error handling' {
         It 'Falls back to python when uv fails' {
-            Setup-AvailableCommandMock -CommandName 'uv'
-            Setup-AvailableCommandMock -CommandName 'python3'
+            Setup-CapturingCommandMock -CommandName 'python3' -Output 'Virtual environment created'
 
-            Mock -CommandName 'uv' -MockWith {
+            $global:AssumedAvailableCommands['uv'] = $true
+            $global:TestCachedCommandCache['uv'] = [pscustomobject]@{
+                Result  = $true
+                Expires = (Get-Date).AddHours(24)
+            }
+            $throwingUv = {
                 throw [System.Management.Automation.CommandNotFoundException]::new('uv: command failed')
             }
-
-            $script:capturedArgs = $null
-            Mock -CommandName 'python3' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Virtual environment created' 
-            }
+            Set-Item -Path 'Function:\global:uv' -Value $throwingUv -Force
+            Set-Item -Path 'Function:\uv' -Value $throwingUv -Force
 
             $result = New-PythonVirtualEnv -ErrorAction SilentlyContinue
 
             $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '-m'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-m'
         }
     }
 }
-

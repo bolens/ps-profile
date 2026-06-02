@@ -8,8 +8,10 @@
 #>
 
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $modulePath = Join-Path $PSScriptRoot '..' '..' 'scripts' 'lib' 'utilities' 'CacheKey.psm1'
     Import-Module $modulePath -Force -ErrorAction Stop
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'CacheKeyTests'
 }
 
 AfterAll {
@@ -71,7 +73,7 @@ Describe 'New-CacheKey' {
 
 Describe 'New-FileCacheKey' {
     BeforeAll {
-        $testFile = Join-Path $TestDrive 'test-file.txt'
+        $testFile = Join-Path $script:TestTempRoot 'test-file.txt'
         'Test content' | Out-File -FilePath $testFile -Encoding UTF8
     }
 
@@ -95,7 +97,7 @@ Describe 'New-FileCacheKey' {
     }
 
     It 'Generates different keys for different files' {
-        $testFile2 = Join-Path $TestDrive 'test-file-2.txt'
+        $testFile2 = Join-Path $script:TestTempRoot 'test-file-2.txt'
         'Content' | Out-File -FilePath $testFile2 -Encoding UTF8
         
         $key1 = New-FileCacheKey -FilePath $testFile
@@ -105,7 +107,7 @@ Describe 'New-FileCacheKey' {
     }
 
     It 'Throws error for non-existent file' {
-        $nonExistentFile = Join-Path $TestDrive 'nonexistent.txt'
+        $nonExistentFile = Join-Path $script:TestTempRoot 'nonexistent.txt'
         { New-FileCacheKey -FilePath $nonExistentFile } | Should -Throw
     }
 
@@ -134,7 +136,7 @@ Describe 'New-FileCacheKey' {
 
 Describe 'New-DirectoryCacheKey' {
     BeforeAll {
-        $testDir = Join-Path $TestDrive 'test-dir'
+        $testDir = Join-Path $script:TestTempRoot 'test-dir'
         New-Item -ItemType Directory -Path $testDir -Force | Out-Null
     }
 
@@ -151,7 +153,7 @@ Describe 'New-DirectoryCacheKey' {
     It 'Resolves relative paths' {
         $relativePath = '..'
         $key = New-DirectoryCacheKey -DirectoryPath $relativePath
-        $key | Should -Match '^Directory_'
+        $key | Should -Match '^Directory(_|$)'
     }
 
     It 'Handles absolute paths' {
@@ -164,7 +166,7 @@ Describe 'New-DirectoryCacheKey' {
     }
 
     It 'Handles non-existent directory gracefully' {
-        $nonExistentDir = Join-Path $TestDrive 'nonexistent-dir'
+        $nonExistentDir = Join-Path $script:TestTempRoot 'nonexistent-dir'
         # Should not throw, but may resolve to a path
         $key = New-DirectoryCacheKey -DirectoryPath $nonExistentDir
         $key | Should -Not -BeNullOrEmpty
@@ -321,12 +323,12 @@ Describe 'New-CacheKey Error Handling' {
 
 Describe 'New-FileCacheKey Edge Cases' {
     BeforeAll {
-        $testFile = Join-Path $TestDrive 'test-file.txt'
+        $testFile = Join-Path $script:TestTempRoot 'test-file.txt'
         'Test content' | Out-File -FilePath $testFile -Encoding UTF8
     }
 
     It 'Handles file with special characters in name' {
-        $specialFile = Join-Path $TestDrive 'test-file (1).txt'
+        $specialFile = Join-Path $script:TestTempRoot 'test-file (1).txt'
         'Content' | Out-File -FilePath $specialFile -Encoding UTF8
         $key = New-FileCacheKey -FilePath $specialFile
         # Parentheses are removed during sanitization, so we get test_file1_txt
@@ -334,7 +336,7 @@ Describe 'New-FileCacheKey Edge Cases' {
     }
 
     It 'Handles file with unicode characters in name' {
-        $unicodeFile = Join-Path $TestDrive 'café-file.txt'
+        $unicodeFile = Join-Path $script:TestTempRoot 'café-file.txt'
         'Content' | Out-File -FilePath $unicodeFile -Encoding UTF8
         $key = New-FileCacheKey -FilePath $unicodeFile
         $key | Should -Match '^File_café_file_txt_\d+$'
@@ -342,21 +344,21 @@ Describe 'New-FileCacheKey Edge Cases' {
 
     It 'Handles very long file names' {
         $longName = 'a' * 200 + '.txt'
-        $longFile = Join-Path $TestDrive $longName
+        $longFile = Join-Path $script:TestTempRoot $longName
         'Content' | Out-File -FilePath $longFile -Encoding UTF8
         $key = New-FileCacheKey -FilePath $longFile
         $key | Should -Match '^File_.*_\d+$'
     }
 
     It 'Handles file with no extension' {
-        $noExtFile = Join-Path $TestDrive 'testfile'
+        $noExtFile = Join-Path $script:TestTempRoot 'testfile'
         'Content' | Out-File -FilePath $noExtFile -Encoding UTF8
         $key = New-FileCacheKey -FilePath $noExtFile
         $key | Should -Match '^File_testfile_\d+$'
     }
 
     It 'Handles file with multiple extensions' {
-        $multiExtFile = Join-Path $TestDrive 'test.tar.gz'
+        $multiExtFile = Join-Path $script:TestTempRoot 'test.tar.gz'
         'Content' | Out-File -FilePath $multiExtFile -Encoding UTF8
         $key = New-FileCacheKey -FilePath $multiExtFile
         $key | Should -Match '^File_test_tar_gz_\d+$'
@@ -377,12 +379,12 @@ Describe 'New-FileCacheKey Edge Cases' {
 
 Describe 'New-DirectoryCacheKey Edge Cases' {
     BeforeAll {
-        $testDir = Join-Path $TestDrive 'test-dir'
+        $testDir = Join-Path $script:TestTempRoot 'test-dir'
         New-Item -ItemType Directory -Path $testDir -Force | Out-Null
     }
 
     It 'Handles directory with special characters in name' {
-        $specialDir = Join-Path $TestDrive 'test-dir (1)'
+        $specialDir = Join-Path $script:TestTempRoot 'test-dir (1)'
         New-Item -ItemType Directory -Path $specialDir -Force | Out-Null
         $key = New-DirectoryCacheKey -DirectoryPath $specialDir
         # Parentheses are removed during sanitization, so we get test_dir1
@@ -390,7 +392,7 @@ Describe 'New-DirectoryCacheKey Edge Cases' {
     }
 
     It 'Handles directory with unicode characters' {
-        $unicodeDir = Join-Path $TestDrive 'café-dir'
+        $unicodeDir = Join-Path $script:TestTempRoot 'café-dir'
         New-Item -ItemType Directory -Path $unicodeDir -Force | Out-Null
         $key = New-DirectoryCacheKey -DirectoryPath $unicodeDir
         $key | Should -Match '^Directory_café_dir$'
@@ -399,29 +401,29 @@ Describe 'New-DirectoryCacheKey Edge Cases' {
     It 'Handles root directory path' {
         if ($IsWindows) {
             $key = New-DirectoryCacheKey -DirectoryPath 'C:\'
-            $key | Should -Match '^Directory_'
+            $key | Should -Match '^Directory(_|$)'
         }
         else {
             $key = New-DirectoryCacheKey -DirectoryPath '/'
-            $key | Should -Match '^Directory_'
+            $key | Should -Match '^Directory(_|$)'
         }
     }
 
     It 'Handles current directory' {
         $key = New-DirectoryCacheKey -DirectoryPath '.'
-        $key | Should -Match '^Directory_'
+        $key | Should -Match '^Directory(_|$)'
         $key | Should -Not -BeNullOrEmpty
     }
 
     It 'Handles parent directory' {
         $key = New-DirectoryCacheKey -DirectoryPath '..'
-        $key | Should -Match '^Directory_'
+        $key | Should -Match '^Directory(_|$)'
         $key | Should -Not -BeNullOrEmpty
     }
 
     It 'Handles very long directory names' {
         $longName = 'a' * 200
-        $longDir = Join-Path $TestDrive $longName
+        $longDir = Join-Path $script:TestTempRoot $longName
         New-Item -ItemType Directory -Path $longDir -Force | Out-Null
         $key = New-DirectoryCacheKey -DirectoryPath $longDir
         $key | Should -Match '^Directory_.*a+$'

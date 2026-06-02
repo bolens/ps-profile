@@ -52,7 +52,7 @@ function Find-FileFuzzy {
         }
     }
     else {
-        Write-MissingToolWarning -Tool 'fzf' -InstallHint 'Install with: scoop install fzf'
+        Invoke-MissingToolWarning -ToolName 'fzf'
     }
 }
 
@@ -75,7 +75,7 @@ function Find-CommandFuzzy {
         Get-Command | Out-String | fzf
     }
     else {
-        Write-MissingToolWarning -Tool 'fzf' -InstallHint 'Install with: scoop install fzf'
+        Invoke-MissingToolWarning -ToolName 'fzf'
     }
 }
 

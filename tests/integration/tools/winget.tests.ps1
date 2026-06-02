@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'winget Tools Integration Tests' {
     BeforeAll {
         try {
@@ -518,6 +520,50 @@ Describe 'winget Tools Integration Tests' {
 
             # Cleanup
             Remove-Item -Path $testFile -ErrorAction SilentlyContinue
+        }
+    }
+
+    Context 'Graceful degradation when winget is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Install-WingetPackage', 'Remove-WingetPackage', 'Update-WingetPackages',
+                'Test-WingetOutdated', 'Update-WingetSelf', 'Export-WingetPackages',
+                'Import-WingetPackages'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Remove-Item Function:winget -ErrorAction SilentlyContinue
+            Remove-Item Function:global:winget -ErrorAction SilentlyContinue
+            Mock-CommandAvailabilityPester -CommandName 'winget' -Available $false
+
+            $script:MissingWingetOutput = & { . (Join-Path $script:ProfileDir 'winget.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when winget is unavailable' {
+            Get-Command Install-WingetPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when winget is unavailable' {
+            if (Get-Command Test-ToolAvailableOnPlatform -ErrorAction SilentlyContinue) {
+                if (-not (Test-ToolAvailableOnPlatform -Tool 'winget')) {
+                    Set-ItResult -Inconclusive -Because 'winget install hints are only emitted on Windows'
+                    return
+                }
+            }
+
+            Assert-TestMissingToolWarning -Output $script:MissingWingetOutput -Pattern 'winget not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingWingetOutput -ToolName 'winget'
         }
     }
 }

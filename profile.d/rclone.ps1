@@ -53,7 +53,7 @@ function Copy-RcloneFile {
         rclone copy $Source $Destination
     }
     else {
-        Write-MissingToolWarning -Tool 'rclone' -InstallHint 'Install with: scoop install rclone'
+        Invoke-MissingToolWarning -ToolName 'rclone'
     }
 }
 
@@ -85,7 +85,7 @@ function Get-RcloneFileList {
         rclone ls $Path
     }
     else {
-        Write-MissingToolWarning -Tool 'rclone' -InstallHint 'Install with: scoop install rclone'
+        Invoke-MissingToolWarning -ToolName 'rclone'
     }
 }
 

@@ -48,7 +48,7 @@ function Invoke-Ngrok {
         ngrok @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'ngrok' -InstallHint 'Install with: scoop install ngrok'
+        Invoke-MissingToolWarning -ToolName 'ngrok'
     }
 }
 
@@ -80,7 +80,7 @@ function Start-NgrokHttpTunnel {
         ngrok http $Port
     }
     else {
-        Write-MissingToolWarning -Tool 'ngrok' -InstallHint 'Install with: scoop install ngrok'
+        Invoke-MissingToolWarning -ToolName 'ngrok'
     }
 }
 
@@ -112,7 +112,7 @@ function Start-NgrokTcpTunnel {
         ngrok tcp $Port
     }
     else {
-        Write-MissingToolWarning -Tool 'ngrok' -InstallHint 'Install with: scoop install ngrok'
+        Invoke-MissingToolWarning -ToolName 'ngrok'
     }
 }
 

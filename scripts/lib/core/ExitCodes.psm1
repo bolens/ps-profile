@@ -108,6 +108,20 @@ function Exit-WithCode {
         Write-Error $ErrorRecord
     }
 
+    if ($env:PS_PROFILE_TEST_MODE -eq '1') {
+        if ($ErrorRecord) {
+            throw $ErrorRecord
+        }
+
+        if ($exitCodeInt -ne 0) {
+            $exitMessage = if ($Message) { $Message } else { "Exit requested with code $exitCodeInt" }
+            throw [System.Management.Automation.RuntimeException]::new($exitMessage)
+        }
+
+        # Success exits are safe when invoked via `& script.ps1` and avoid false throws in callers.
+        exit 0
+    }
+
     exit $exitCodeInt
 }
 

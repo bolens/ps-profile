@@ -12,8 +12,7 @@
 .NOTES
     This is an internal initialization function and should not be called directly.
     Requires snappy command-line tool or Python with python-snappy package to be installed.
-    Install snappy: Windows (scoop install snappy), Linux (apt install snappy-tools), macOS (brew install snappy)
-    Alternative: Python package (uv pip install python-snappy)
+    Install hint resolved via Get-ConversionToolMissingMessage -ToolName snappy.
 #>
 function Initialize-FileConversion-CoreCompressionSnappy {
     # Snappy compress
@@ -61,13 +60,14 @@ try:
     with open(sys.argv[2], 'wb') as f:
         f.write(compressed)
 except ImportError:
-    print('Error: python-snappy package is not installed. Install with: uv pip install python-snappy', file=sys.stderr)
+    print('Error: python-snappy package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
                     $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "snappy-compress-$(Get-Random).py"
+                    $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'python-snappy' -Global
                     Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
                     try {
                         $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -82,7 +82,8 @@ except Exception as e:
                 }
             }
             
-            throw "snappy is not available. Install snappy: Windows (scoop install snappy), Linux (apt install snappy-tools), macOS (brew install snappy), or Python package (uv pip install python-snappy)"
+            $pyHint = Get-PythonPackageInstallRecommendation -PackageNames 'python-snappy' -Global
+            throw (Get-ConversionToolMissingMessage -ToolName 'snappy' -AdditionalHint "Alternatively: $pyHint")
         }
         catch {
             Write-Error "Failed to compress file with Snappy: $_"
@@ -146,13 +147,14 @@ try:
     with open(sys.argv[2], 'wb') as f:
         f.write(data)
 except ImportError:
-    print('Error: python-snappy package is not installed. Install with: uv pip install python-snappy', file=sys.stderr)
+    print('Error: python-snappy package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
                     $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "snappy-decompress-$(Get-Random).py"
+                    $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'python-snappy' -Global
                     Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
                     try {
                         $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -167,7 +169,8 @@ except Exception as e:
                 }
             }
             
-            throw "snappy is not available. Install snappy: Windows (scoop install snappy), Linux (apt install snappy-tools), macOS (brew install snappy), or Python package (uv pip install python-snappy)"
+            $pyHint = Get-PythonPackageInstallRecommendation -PackageNames 'python-snappy' -Global
+            throw (Get-ConversionToolMissingMessage -ToolName 'snappy' -AdditionalHint "Alternatively: $pyHint")
         }
         catch {
             Write-Error "Failed to decompress Snappy file: $_"

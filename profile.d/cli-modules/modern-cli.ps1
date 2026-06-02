@@ -9,28 +9,28 @@ This replaces the previous repetitive pattern with a clean, maintainable approac
 #>
 
 # bat - cat clone with syntax highlighting and Git integration
-Register-ToolWrapper -FunctionName 'bat' -CommandName 'bat' -InstallHint 'Install with: scoop install bat'
+Register-ToolWrapper -FunctionName 'bat' -CommandName 'bat'
 
 # fd - find files and directories
-Register-ToolWrapper -FunctionName 'fd' -CommandName 'fd' -InstallHint 'Install with: scoop install fd'
+Register-ToolWrapper -FunctionName 'fd' -CommandName 'fd'
 
 # http - command-line HTTP client
-Register-ToolWrapper -FunctionName 'http' -CommandName 'http' -WarningMessage 'httpie (http) not found' -InstallHint 'Install with: scoop install httpie'
+Register-ToolWrapper -FunctionName 'http' -CommandName 'http' -InstallPackageName 'httpie' -WarningMessage 'httpie (http) not found'
 
 # zoxide - smarter cd command
-Register-ToolWrapper -FunctionName 'zoxide' -CommandName 'zoxide' -InstallHint 'Install with: scoop install zoxide'
+Register-ToolWrapper -FunctionName 'zoxide' -CommandName 'zoxide'
 
 # delta - syntax-highlighting pager for git
-Register-ToolWrapper -FunctionName 'delta' -CommandName 'delta' -InstallHint 'Install with: scoop install delta'
+Register-ToolWrapper -FunctionName 'delta' -CommandName 'delta'
 
 # tldr - simplified man pages
-Register-ToolWrapper -FunctionName 'tldr' -CommandName 'tldr' -InstallHint 'Install with: scoop install tldr'
+Register-ToolWrapper -FunctionName 'tldr' -CommandName 'tldr'
 
 # procs - modern replacement for ps
-Register-ToolWrapper -FunctionName 'procs' -CommandName 'procs' -InstallHint 'Install with: scoop install procs'
+Register-ToolWrapper -FunctionName 'procs' -CommandName 'procs'
 
 # dust - more intuitive du command
-Register-ToolWrapper -FunctionName 'dust' -CommandName 'dust' -InstallHint 'Install with: scoop install dust'
+Register-ToolWrapper -FunctionName 'dust' -CommandName 'dust'
 
 # ===============================================
 # Enhanced Modern CLI Wrapper Functions
@@ -106,7 +106,7 @@ function Find-WithFd {
     )
     
     if (-not (Test-CachedCommand fd)) {
-        Write-MissingToolWarning -Tool 'fd' -InstallHint 'Install with: scoop install fd'
+        Invoke-MissingToolWarning -ToolName 'fd'
         return
     }
     
@@ -279,12 +279,13 @@ function Grep-WithRipgrep {
     )
     
     if (-not (Test-CachedCommand rg)) {
-        Write-MissingToolWarning -Tool 'rg' -InstallHint 'Install with: scoop install ripgrep'
+        Invoke-MissingToolWarning -ToolName 'ripgrep' -Tool 'rg'
         return
     }
     
     # Use standardized error handling if available
     if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+        $contextLines = $Context
         return Invoke-WithWideEvent -OperationName "cli.ripgrep.grep" -Context @{
             pattern            = $Pattern
             path               = $Path
@@ -301,8 +302,8 @@ function Grep-WithRipgrep {
                 $args += '--ignore-case'
             }
             
-            if ($Context -gt 0) {
-                $args += '-C', $Context.ToString()
+            if ($contextLines -gt 0) {
+                $args += '-C', $contextLines.ToString()
             }
             
             if ($OnlyMatching) {
@@ -450,7 +451,7 @@ function Navigate-WithZoxide {
     )
     
     if (-not (Test-CachedCommand zoxide)) {
-        Write-MissingToolWarning -Tool 'zoxide' -InstallHint 'Install with: scoop install zoxide'
+        Invoke-MissingToolWarning -ToolName 'zoxide'
         return
     }
     
@@ -645,7 +646,7 @@ function View-WithBat {
     )
     
     if (-not (Test-CachedCommand bat)) {
-        Write-MissingToolWarning -Tool 'bat' -InstallHint 'Install with: scoop install bat'
+        Invoke-MissingToolWarning -ToolName 'bat'
         return
     }
     

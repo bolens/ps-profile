@@ -27,6 +27,18 @@ Describe 'Profile Quality Integration Tests' {
             Write-Error "Failed to initialize profile quality tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
             throw
         }
+
+        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
+        if (-not (Test-Path -LiteralPath $bootstrapPath)) {
+            throw "Bootstrap file not found at: $bootstrapPath"
+        }
+        $null = . $bootstrapPath
+
+        $script:UtilitiesEnvPath = Join-Path $script:ProfileDir 'utilities-modules' 'system' 'utilities-env.ps1'
+        if (-not (Test-Path -LiteralPath $script:UtilitiesEnvPath)) {
+            throw "Utilities env module not found at: $($script:UtilitiesEnvPath)"
+        }
+        $null = . $script:UtilitiesEnvPath
     }
 
     Context 'Cross-platform compatibility' {
@@ -43,8 +55,6 @@ Describe 'Profile Quality Integration Tests' {
 
     Context 'Cross-platform PATH manipulation' {
         It 'Add-Path uses platform-appropriate separator' {
-            . (Join-Path $script:ProfileDir 'utilities.ps1')
-
             $testPath = Join-Path $TestDrive 'test-path'
             New-Item -ItemType Directory -Path $testPath -Force | Out-Null
 
@@ -59,8 +69,6 @@ Describe 'Profile Quality Integration Tests' {
         }
 
         It 'Remove-Path uses platform-appropriate separator' {
-            . (Join-Path $script:ProfileDir 'utilities.ps1')
-
             $testPath = Join-Path $TestDrive 'test-remove-path'
             New-Item -ItemType Directory -Path $testPath -Force | Out-Null
 

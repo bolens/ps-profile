@@ -65,15 +65,26 @@ function Test-DocumentLatexEngineAvailable {
 .OUTPUTS
     [string] - The detected LaTeX engine name.
 .NOTES
-    The project assumes Scoop is installed; MiKTeX can be installed via `scoop install miktex`.
+    The project supports MiKTeX on Windows and TeX Live / MacTeX on Linux/macOS.
 #>
 function Ensure-DocumentLatexEngine {
     $engine = Test-DocumentLatexEngineAvailable
     if (-not $engine) {
-        if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
-            Write-MissingToolWarning -Tool 'MiKTeX (pdflatex)' -InstallHint "scoop install miktex"
+        $hint = if (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue) {
+            Get-PlatformInstallHint -ToolName 'miktex'
         }
-        throw "LaTeX engine (pdflatex/xelatex/luatex) not found. Install MiKTeX via 'scoop install miktex' or configure pandoc with --pdf-engine."
+        else {
+            'Install with: scoop install miktex'
+        }
+
+        if (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+            Invoke-MissingToolWarning -ToolName 'miktex' -Tool 'LaTeX (pdflatex)'
+        }
+        elseif (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
+            Write-MissingToolWarning -Tool 'LaTeX (pdflatex)' -InstallHint $hint
+        }
+
+        throw "LaTeX engine (pdflatex/xelatex/luatex) not found. $hint (or configure pandoc with --pdf-engine)."
     }
 
     return $engine

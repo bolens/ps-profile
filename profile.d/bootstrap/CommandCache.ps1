@@ -111,7 +111,21 @@ function global:Test-CachedCommand {
         # If still not found and Scoop might be involved, check Scoop app directories
         # This handles cases where Scoop installed an app but shims weren't created
         if (-not $result) {
-            $scoopLocal = if ($env:SCOOP) { $env:SCOOP } elseif ($env:USERPROFILE) { "$env:USERPROFILE\scoop" } else { $null }
+            $scoopLocal = if ($env:SCOOP) {
+                $env:SCOOP
+            }
+            elseif (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+                Join-Path (Get-UserHome) 'scoop'
+            }
+            elseif ($env:HOME) {
+                Join-Path $env:HOME 'scoop'
+            }
+            elseif ($env:USERPROFILE) {
+                Join-Path $env:USERPROFILE 'scoop'
+            }
+            else {
+                $null
+            }
             $scoopGlobal = $env:SCOOP_GLOBAL
             
             $extensions = @('.cmd', '.exe', '.bat')
@@ -193,7 +207,18 @@ function global:Test-CachedCommand {
                 # Check user gem directories (cross-platform)
                                 # Linux/macOS: ~/.local/share/gem/ruby/<ver>/bin or ~/.gem/ruby/<ver>/bin
                                 # Windows: same paths relative to USERPROFILE
-                                $userHomeForGems = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { $null }
+                                $userHomeForGems = if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+                                    Get-UserHome
+                                }
+                                elseif ($env:HOME) {
+                                    $env:HOME
+                                }
+                                elseif ($env:USERPROFILE) {
+                                    $env:USERPROFILE
+                                }
+                                else {
+                                    $null
+                                }
                                 if (-not $result -and $userHomeForGems) {
                                     $userGemPaths = @(
                                         Join-Path $userHomeForGems '.local' 'share' 'gem' 'ruby',
@@ -290,5 +315,33 @@ function global:Remove-TestCachedCommandCacheEntry {
     $cacheKey = $Name.ToLowerInvariant()
     $removedEntry = $null
     return $global:TestCachedCommandCache.TryRemove($cacheKey, [ref]$removedEntry)
+}
+
+<#
+.SYNOPSIS
+    Tests whether a command is available (deprecated).
+.DESCRIPTION
+    Deprecated compatibility wrapper for Test-CachedCommand.
+    Prefer Test-CachedCommand for new code.
+.PARAMETER Name
+    The name of the command to check.
+.PARAMETER CacheTTLMinutes
+    Cache duration in minutes. Defaults to 5 minutes.
+.OUTPUTS
+    System.Boolean
+#>
+function global:Test-HasCommand {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Name,
+
+        [Parameter()]
+        [ValidateRange(0, 1440)]
+        [int]$CacheTTLMinutes = 5
+    )
+
+    Test-CachedCommand -Name $Name -CacheTTLMinutes $CacheTTLMinutes
 }
 

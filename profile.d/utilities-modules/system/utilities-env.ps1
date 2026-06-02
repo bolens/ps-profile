@@ -1,6 +1,6 @@
 # ===============================================
 # Environment variable management functions
-# Registry-based environment variable operations (Windows)
+# Cross-platform persistent and session env var operations
 # ===============================================
 
 # Import Platform module for Test-IsWindows
@@ -16,17 +16,71 @@ if ($platformModulePath -and -not [string]::IsNullOrWhiteSpace($platformModulePa
     }
 }
 
+function script:Test-RunningOnWindows {
+    if (Get-Command Test-IsWindows -ErrorAction SilentlyContinue) {
+        return Test-IsWindows
+    }
+
+    return ($PSVersionTable.Platform -eq 'Win32NT') -or ($IsWindows -eq $true)
+}
+
+function script:Get-EnvironmentVariableScope {
+    param(
+        [switch]$Global
+    )
+
+    if ($Global) {
+        return [System.EnvironmentVariableTarget]::Machine
+    }
+
+    return [System.EnvironmentVariableTarget]::User
+}
+
+function script:Split-PathEnvironmentValue {
+    param(
+        [string]$PathValue
+    )
+
+    if ([string]::IsNullOrWhiteSpace($PathValue)) {
+        return @()
+    }
+
+    if ($PathValue.Contains(';')) {
+        return ($PathValue -split ';' | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    }
+
+    if ($PathValue -match '^[A-Za-z]:\\') {
+        return @($PathValue.Trim())
+    }
+
+    $pathSeparator = [System.IO.Path]::PathSeparator
+    if ($PathValue.Contains($pathSeparator)) {
+        return ($PathValue -split [regex]::Escape($pathSeparator) | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    }
+
+    return @($PathValue.Trim())
+}
+
+function script:Join-PathEnvironmentValue {
+    param(
+        [string[]]$PathEntries
+    )
+
+    $pathSeparator = [System.IO.Path]::PathSeparator
+    return ($PathEntries | Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_.Trim()) }) -join $pathSeparator
+}
+
 <#
 .SYNOPSIS
-    Gets an environment variable value from the registry.
+    Gets an environment variable value.
 .DESCRIPTION
-    Retrieves the value of an environment variable from the Windows registry.
-    Works with both user and system-wide environment variables.
+    Retrieves a persisted user or machine environment variable using the .NET API.
+    Falls back to the current process environment when no persisted value exists.
 .PARAMETER Name
     The name of the environment variable to retrieve.
     Type: [string]. Should be a valid environment variable name.
 .PARAMETER Global
-    If specified, retrieves from system-wide registry; otherwise, from user registry.
+    If specified, retrieves the machine-wide value; otherwise, the user value.
 .OUTPUTS
     String. The environment variable value, or null if not found.
 #>
@@ -39,56 +93,49 @@ function Get-EnvVar {
         [switch]$Global
     )
 
-    # Registry operations only work on Windows
-    # Use fallback if Test-IsWindows is not available
-    $isWindows = if (Get-Command Test-IsWindows -ErrorAction SilentlyContinue) {
-        Test-IsWindows
+    $scope = Get-EnvironmentVariableScope -Global:$Global
+
+    if (Test-RunningOnWindows) {
+        try {
+            $persistedValue = [System.Environment]::GetEnvironmentVariable($Name, $scope)
+            if ($null -ne $persistedValue) {
+                return $persistedValue
+            }
+        }
+        catch [System.UnauthorizedAccessException] {
+            Write-Verbose "Access denied reading environment variable '$Name' from $scope scope. Run with elevated permissions for machine-wide variables."
+        }
+        catch [System.Security.SecurityException] {
+            Write-Verbose "Security exception reading environment variable '$Name' from $scope scope: $($_.Exception.Message)"
+        }
+        catch {
+            Write-Verbose "Failed to read environment variable '$Name' from $scope scope: $($_.Exception.Message)"
+        }
     }
-    else {
-        $PSVersionTable.Platform -eq 'Win32NT' -or $IsWindows
-    }
-    
-    if (-not $isWindows) {
-        Write-Warning "Get-EnvVar requires Windows. Use `$env:$Name on other platforms."
-        # Return current session value as fallback
-        return (Get-Item -Path "env:$Name" -ErrorAction SilentlyContinue).Value
+    elseif ($Global) {
+        Write-Verbose "Machine-wide environment variables are not supported on this platform."
+        return $null
     }
 
-    try {
-        $registerKey = if ($Global) {
-            Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager'
-        }
-        else {
-            Get-Item -Path 'HKCU:'
-        }
-        $envRegisterKey = $registerKey.OpenSubKey('Environment')
-        if ($null -eq $envRegisterKey) {
-            # Registry key doesn't exist, return null
-            return $null
-        }
-        $registryValueOption = [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames
-        return $envRegisterKey.GetValue($Name, $null, $registryValueOption)
+    $processValue = [System.Environment]::GetEnvironmentVariable($Name, [System.EnvironmentVariableTarget]::Process)
+    if ($null -ne $processValue) {
+        return $processValue
     }
-    catch [System.UnauthorizedAccessException] {
-        Write-Verbose "Access denied accessing registry for Get-EnvVar '$Name'. Run with elevated permissions for system-wide variables."
-        return $null
+
+    $envItem = Get-Item -Path "env:$Name" -ErrorAction SilentlyContinue
+    if ($null -ne $envItem) {
+        return $envItem.Value
     }
-    catch [System.Security.SecurityException] {
-        Write-Verbose "Security exception accessing registry for Get-EnvVar '$Name': $($_.Exception.Message)"
-        return $null
-    }
-    catch {
-        # Handle other registry access errors gracefully
-        Write-Verbose "Failed to access registry for Get-EnvVar '$Name': $($_.Exception.Message)"
-        return $null
-    }
+
+    return $null
 }
 
 <#
 .SYNOPSIS
-    Sets an environment variable value in the registry.
+    Sets an environment variable value.
 .DESCRIPTION
-    Sets the value of an environment variable in the Windows registry and broadcasts the change.
+    Sets a persisted user or machine environment variable using the .NET API and
+    updates the current process environment. On Windows, broadcasts the change.
 .PARAMETER Name
     The name of the environment variable.
     Type: [string]. Should be a valid environment variable name.
@@ -96,7 +143,7 @@ function Get-EnvVar {
     The value to set. If null or empty, the variable is removed.
     Type: [string]. Can be null or empty to remove the variable.
 .PARAMETER Global
-    If specified, sets the variable in the system-wide registry; otherwise, in user registry.
+    If specified, sets the machine-wide value; otherwise, the user value.
 .OUTPUTS
     None. This function does not return a value.
 #>
@@ -110,52 +157,36 @@ function Set-EnvVar {
         [switch]$Global
     )
 
-    # Registry operations only work on Windows
-    # Use fallback if Test-IsWindows is not available
-    $isWindows = if (Get-Command Test-IsWindows -ErrorAction SilentlyContinue) {
-        Test-IsWindows
-    }
-    else {
-        $PSVersionTable.Platform -eq 'Win32NT' -or $IsWindows
-    }
-    
-    if (-not $isWindows) {
-        Write-Warning "Set-EnvVar requires Windows. Use `$env:$Name = '$Value' on other platforms."
-        # Set session value as fallback
-        Set-Item -Path "env:$Name" -Value $Value -ErrorAction SilentlyContinue
-        return
-    }
+    $scope = Get-EnvironmentVariableScope -Global:$Global
+    $shouldRemove = $null -eq $Value -or $Value -eq ''
 
     try {
-        $registerKey = if ($Global) {
-            Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager'
-        }
-        else {
-            Get-Item -Path 'HKCU:'
-        }
-        $envRegisterKey = $registerKey.OpenSubKey('Environment', $true)
-        if ($null -eq $envRegisterKey) {
-            Write-Warning "Failed to open Environment registry key"
-            return
-        }
-        if ($null -eq $Value -or $Value -eq '') {
-            if ($envRegisterKey.GetValue($Name)) {
-                $envRegisterKey.DeleteValue($Name)
-            }
-        }
-        else {
-            $registryValueKind = if ($Value.Contains('%')) {
-                [Microsoft.Win32.RegistryValueKind]::ExpandString
-            }
-            elseif ($envRegisterKey.GetValue($Name)) {
-                $envRegisterKey.GetValueKind($Name)
+        if (Test-RunningOnWindows) {
+            if ($shouldRemove) {
+                [System.Environment]::SetEnvironmentVariable($Name, $null, $scope)
+                Remove-Item -Path "env:$Name" -Force -ErrorAction SilentlyContinue
             }
             else {
-                [Microsoft.Win32.RegistryValueKind]::String
+                [System.Environment]::SetEnvironmentVariable($Name, $Value, $scope)
+                Set-Item -Path "env:$Name" -Value $Value -Force
             }
-            $envRegisterKey.SetValue($Name, $Value, $registryValueKind)
+
+            Publish-EnvVar
         }
-        Publish-EnvVar
+        else {
+            if ($Global) {
+                Write-Warning "Set-EnvVar -Global is not supported on this platform. Updating the current session only."
+            }
+
+            if ($shouldRemove) {
+                [System.Environment]::SetEnvironmentVariable($Name, $null, [System.EnvironmentVariableTarget]::Process)
+                Remove-Item -Path "env:$Name" -Force -ErrorAction SilentlyContinue
+            }
+            else {
+                [System.Environment]::SetEnvironmentVariable($Name, $Value, [System.EnvironmentVariableTarget]::Process)
+                Set-Item -Path "env:$Name" -Value $Value -Force
+            }
+        }
     }
     catch [System.UnauthorizedAccessException] {
         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
@@ -165,7 +196,7 @@ function Set-EnvVar {
             }
         }
         else {
-            Write-Error "Access denied setting environment variable '$Name'. Run with elevated permissions for system-wide variables."
+            Write-Error "Access denied setting environment variable '$Name'. Run with elevated permissions for machine-wide variables."
         }
         throw
     }
@@ -201,17 +232,7 @@ function Set-EnvVar {
     Sends a WM_SETTINGCHANGE message to notify all windows of environment variable changes.
 #>
 function Publish-EnvVar {
-    # Windows-only function for broadcasting environment variable changes
-    # Use fallback if Test-IsWindows is not available
-    $isWindows = if (Get-Command Test-IsWindows -ErrorAction SilentlyContinue) {
-        Test-IsWindows
-    }
-    else {
-        $PSVersionTable.Platform -eq 'Win32NT' -or $IsWindows
-    }
-    
-    if (-not $isWindows) {
-        # On non-Windows platforms, environment variable changes are session-only
+    if (-not (Test-RunningOnWindows)) {
         return
     }
 
@@ -257,7 +278,6 @@ function Remove-Path {
         [switch]$Global
     )
 
-    # Get current PATH
     $currentPath = if ($Global) {
         Get-EnvVar -Name 'PATH' -Global
     }
@@ -270,15 +290,9 @@ function Remove-Path {
         return
     }
 
-    # Split PATH into array and remove the specified path
-    # Use platform-appropriate path separator
-    $pathSeparator = [System.IO.Path]::PathSeparator
-    $pathArray = $currentPath -split [regex]::Escape($pathSeparator) | Where-Object { $_ -and $_.Trim() -ne $Path.Trim() }
+    $pathArray = Split-PathEnvironmentValue -PathValue $currentPath | Where-Object { $_.Trim() -ne $Path.Trim() }
+    $newPath = Join-PathEnvironmentValue -PathEntries $pathArray
 
-    # Join back into PATH string
-    $newPath = $pathArray -join $pathSeparator
-
-    # Update PATH
     if ($Global) {
         Set-EnvVar -Name 'PATH' -Value $newPath -Global
     }
@@ -311,7 +325,6 @@ function Add-Path {
         [switch]$Global
     )
 
-    # Get current PATH
     $currentPath = if ($Global) {
         Get-EnvVar -Name 'PATH' -Global
     }
@@ -320,27 +333,21 @@ function Add-Path {
     }
 
     if (-not $currentPath) {
-        # If PATH doesn't exist, create it with the new path
         $newPath = $Path
     }
     else {
-        # Split PATH into array using platform-appropriate separator
-        $pathSeparator = [System.IO.Path]::PathSeparator
-        $pathArray = $currentPath -split [regex]::Escape($pathSeparator) | Where-Object { $_ -and $_.Trim() }
+        $pathArray = Split-PathEnvironmentValue -PathValue $currentPath
 
-        # Check if path already exists
         $normalizedPath = $Path.Trim()
         if ($pathArray -contains $normalizedPath) {
             Write-Verbose "Path '$normalizedPath' is already in PATH"
             return
         }
 
-        # Add the new path
         $pathArray = @($normalizedPath) + $pathArray
-        $newPath = $pathArray -join $pathSeparator
+        $newPath = Join-PathEnvironmentValue -PathEntries $pathArray
     }
 
-    # Update PATH
     if ($Global) {
         Set-EnvVar -Name 'PATH' -Value $newPath -Global
     }
@@ -348,4 +355,3 @@ function Add-Path {
         $env:PATH = $newPath
     }
 }
-

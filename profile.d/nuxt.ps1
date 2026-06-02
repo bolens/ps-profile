@@ -48,7 +48,7 @@ function Invoke-Nuxt {
         npx nuxi @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'nuxi' -InstallHint 'Install with: npm install -g nuxi'
+        Invoke-MissingToolWarning -ToolName 'nuxi' -ToolType 'node-package'
     }
 }
 
@@ -80,7 +80,7 @@ function Start-NuxtDev {
         npx nuxi dev @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 
@@ -112,7 +112,7 @@ function Build-NuxtApp {
         npx nuxi build @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 
@@ -144,7 +144,7 @@ function New-NuxtApp {
         npx nuxi@latest init @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 

@@ -1,5 +1,3 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 <#
 .SYNOPSIS
     Resolves bootstrap resources for platform helper tests.
@@ -22,6 +20,7 @@ function Set-TestBootstrapContext {
 
 Describe 'Platform Detection Helpers' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Define function locally if not available
         if (-not (Get-Command Set-TestBootstrapContext -ErrorAction SilentlyContinue)) {
             function Set-TestBootstrapContext {
@@ -131,10 +130,392 @@ Describe 'Platform Detection Helpers' {
             }
         }
     }
+
+    Context 'Platform Path Helpers' {
+        It 'Get-TempDirectory returns a non-empty path' {
+            if (-not (Get-Command Get-TempDirectory -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-TempDirectory not loaded'
+                return
+            }
+
+            $result = Get-TempDirectory
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Get-ConfigDirectory returns a non-empty path' {
+            if (-not (Get-Command Get-ConfigDirectory -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-ConfigDirectory not loaded'
+                return
+            }
+
+            $result = Get-ConfigDirectory
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Get-CacheDirectory returns a non-empty path' {
+            if (-not (Get-Command Get-CacheDirectory -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-CacheDirectory not loaded'
+                return
+            }
+
+            $result = Get-CacheDirectory
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Get-DataDirectory returns a non-empty path' {
+            if (-not (Get-Command Get-DataDirectory -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-DataDirectory not loaded'
+                return
+            }
+
+            $result = Get-DataDirectory
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Get-UserDirectory returns a non-empty path' {
+            if (-not (Get-Command Get-UserDirectory -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-UserDirectory not loaded'
+                return
+            }
+
+            $result = Get-UserDirectory -Name 'Desktop'
+            $result | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Get-UserDirectory works with Join-Path' {
+            if (-not (Get-Command Get-UserDirectory -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-UserDirectory not loaded'
+                return
+            }
+
+            $downloads = Get-UserDirectory -Name 'Downloads'
+            $downloads | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Get-WranglerConfigPaths returns config paths' {
+            if (-not (Get-Command Get-WranglerConfigPaths -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-WranglerConfigPaths not loaded'
+                return
+            }
+
+            $paths = Get-WranglerConfigPaths
+            $paths.Dir | Should -Not -BeNullOrEmpty
+            $paths.File | Should -Match 'default\.toml$'
+        }
+
+        It 'Get-PlatformInstallHint returns platform-aware text' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $hint = Get-PlatformInstallHint -ToolName 'fd'
+            $hint | Should -Match '^Install with:'
+        }
+
+        It 'Get-PlatformInstallHint resolves cloud CLI package names' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $hint = Get-PlatformInstallHint -ToolName 'az'
+            $hint | Should -Match '^Install with:'
+            $hint | Should -Not -Match 'scoop install az\b'
+        }
+
+        It 'Get-PlatformInstallHint maps command aliases to package names' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $hint = Get-PlatformInstallHint -ToolName 'rg'
+            $hint | Should -Match '^Install with:'
+            $hint | Should -Match 'ripgrep'
+        }
+
+        It 'Get-ContainerEngineInstallHint combines docker and podman hints' {
+            if (-not (Get-Command Get-ContainerEngineInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-ContainerEngineInstallHint not loaded'
+                return
+            }
+
+            $hint = Get-ContainerEngineInstallHint
+            $hint | Should -Match 'docker'
+            $hint | Should -Match 'podman'
+        }
+
+        It 'Get-ConversionToolMissingMessage returns platform-aware text' {
+            if (-not (Get-Command Get-ConversionToolMissingMessage -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-ConversionToolMissingMessage not loaded'
+                return
+            }
+
+            $message = Get-ConversionToolMissingMessage -ToolName 'ffmpeg'
+            $message | Should -Match 'ffmpeg'
+            $message | Should -Match 'Install with:'
+        }
+
+        It 'Get-PlatformInstallHint resolves content and media tool aliases' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $ytHint = Get-PlatformInstallHint -ToolName 'yt-dlp-nightly'
+            $ytHint | Should -Match '^Install with:'
+            $ytHint | Should -Match 'yt-dlp'
+
+            $handbrakeHint = Get-PlatformInstallHint -ToolName 'handbrake-cli'
+            $handbrakeHint | Should -Match '^Install with:'
+            $handbrakeHint | Should -Match 'handbrake'
+        }
+
+        It 'Get-PlatformInstallHint returns hints for RE and network analysis tools' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $wiresharkHint = Get-PlatformInstallHint -ToolName 'wireshark'
+            $wiresharkHint | Should -Match '^Install with:'
+            $wiresharkHint | Should -Match 'wireshark'
+
+            $cloudflaredHint = Get-PlatformInstallHint -ToolName 'cloudflared'
+            $cloudflaredHint | Should -Match '^Install with:'
+            $cloudflaredHint | Should -Match 'cloudflared'
+        }
+
+        It 'Get-PlatformInstallHint resolves editor and database client aliases' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $neovimHint = Get-PlatformInstallHint -ToolName 'neovim-nightly'
+            $neovimHint | Should -Match '^Install with:'
+            $neovimHint | Should -Match 'neovim'
+
+            $psqlHint = Get-PlatformInstallHint -ToolName 'psql'
+            $psqlHint | Should -Match '^Install with:'
+            $psqlHint | Should -Match 'postgresql|psql|libpq|PostgreSQL'
+        }
+
+        It 'Get-PlatformInstallHint returns hints for dev tools and mobile utilities' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $godotHint = Get-PlatformInstallHint -ToolName 'godot'
+            $godotHint | Should -Match '^Install with:'
+            $godotHint | Should -Match 'godot'
+
+            $adbHint = Get-PlatformInstallHint -ToolName 'adb'
+            $adbHint | Should -Match '^Install with:'
+            $adbHint | Should -Match 'adb|android'
+        }
+
+        It 'Get-PlatformInstallHint resolves git-enhanced and modern CLI tools' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $batHint = Get-PlatformInstallHint -ToolName 'bat'
+            $batHint | Should -Match '^Install with:'
+            $batHint | Should -Match 'bat'
+
+            $jjHint = Get-PlatformInstallHint -ToolName 'jj'
+            $jjHint | Should -Match '^Install with:'
+            $jjHint | Should -Match 'jj'
+
+            $gitbutlerHint = Get-PlatformInstallHint -ToolName 'gitbutler-nightly'
+            $gitbutlerHint | Should -Match '^Install with:'
+            $gitbutlerHint | Should -Match 'gitbutler'
+        }
+
+        It 'Get-PlatformInstallHint returns hints for build and container utilities' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $vcpkgHint = Get-PlatformInstallHint -ToolName 'vcpkg'
+            $vcpkgHint | Should -Match '^Install with:'
+            $vcpkgHint | Should -Match 'vcpkg'
+
+            $komposeHint = Get-PlatformInstallHint -ToolName 'kompose'
+            $komposeHint | Should -Match '^Install with:'
+            $komposeHint | Should -Match 'kompose'
+        }
+
+        It 'Get-PlatformInstallHint returns hints for prompt and language tools' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $starshipHint = Get-PlatformInstallHint -ToolName 'starship'
+            $starshipHint | Should -Match '^Install with:'
+            $starshipHint | Should -Match 'starship'
+
+            $mageHint = Get-PlatformInstallHint -ToolName 'mage' -ToolType 'go-package'
+            $mageHint | Should -Match '^Install with:'
+            $mageHint | Should -Match 'mage'
+        }
+
+        It 'Resolve-InstallPackageName maps package manager and CLI aliases' {
+            if (-not (Get-Command Resolve-InstallPackageName -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Resolve-InstallPackageName not loaded'
+                return
+            }
+
+            Resolve-InstallPackageName -ToolName 'comfy' | Should -Be 'comfy-cli'
+            Resolve-InstallPackageName -ToolName 'ng' | Should -Be '@angular/cli'
+            Resolve-InstallPackageName -ToolName 'brew' | Should -Be 'homebrew'
+            Resolve-InstallPackageName -ToolName 'choco' | Should -Be 'chocolatey'
+        }
+
+        It 'Resolve-CommandInstallToolType infers package manager categories' {
+            if (-not (Get-Command Resolve-CommandInstallToolType -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Resolve-CommandInstallToolType not loaded'
+                return
+            }
+
+            Resolve-CommandInstallToolType -CommandName 'npm' | Should -Be 'node-package'
+            Resolve-CommandInstallToolType -CommandName 'pip' | Should -Be 'python-package'
+            Resolve-CommandInstallToolType -CommandName 'cargo' | Should -Be 'rust-package'
+            Resolve-CommandInstallToolType -CommandName 'go' | Should -Be 'go-package'
+            Resolve-CommandInstallToolType -CommandName 'docker' | Should -Be 'generic'
+        }
+
+        It 'Invoke-ContainerEngineMissingWarning emits combined docker and podman hints' {
+            if (-not (Get-Command Invoke-ContainerEngineMissingWarning -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Invoke-ContainerEngineMissingWarning not loaded'
+                return
+            }
+
+            $script:MissingToolWarningCaptures = [System.Collections.Generic.List[hashtable]]::new()
+            $originalWriteMissingToolWarning = Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue
+
+            function global:Write-MissingToolWarning {
+                param(
+                    [string]$Tool,
+                    [string]$InstallHint
+                )
+                $null = $script:MissingToolWarningCaptures.Add(@{
+                        Tool        = $Tool
+                        InstallHint = $InstallHint
+                    })
+            }
+
+            try {
+                Invoke-ContainerEngineMissingWarning
+
+                $script:MissingToolWarningCaptures.Count | Should -Be 1
+                $script:MissingToolWarningCaptures[0].Tool | Should -Be 'docker/podman'
+                $script:MissingToolWarningCaptures[0].InstallHint | Should -Match 'docker'
+                $script:MissingToolWarningCaptures[0].InstallHint | Should -Match 'podman'
+            }
+            finally {
+                Remove-Item Function:\Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                if ($originalWriteMissingToolWarning) {
+                    Set-Item -Path Function:\global:Write-MissingToolWarning -Value $originalWriteMissingToolWarning.ScriptBlock -Force
+                }
+            }
+        }
+
+        It 'Get-PlatformInstallHint returns hints for JavaScript testing tools' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $jestHint = Get-PlatformInstallHint -ToolName 'jest' -ToolType 'node-package'
+            $jestHint | Should -Match '^Install with:'
+            $jestHint | Should -Match 'jest'
+
+            $typescriptHint = Get-PlatformInstallHint -ToolName 'typescript' -ToolType 'node-package'
+            $typescriptHint | Should -Match '^Install with:'
+            $typescriptHint | Should -Match 'typescript'
+        }
+
+        It 'Get-PlatformInstallHint resolves package aliases in registry lookup' {
+            if (-not (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PreferenceAwareInstallHint not loaded'
+                return
+            }
+
+            $hint = Get-PreferenceAwareInstallHint -ToolName 'rg' -ToolType 'generic'
+            $hint | Should -Match 'ripgrep'
+        }
+
+        It 'Resolve-InstallPackageName maps runtime command aliases' {
+            if (-not (Get-Command Resolve-InstallPackageName -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Resolve-InstallPackageName not loaded'
+                return
+            }
+
+            Resolve-InstallPackageName -ToolName 'node' | Should -Be 'nodejs'
+            Resolve-InstallPackageName -ToolName 'ssh' | Should -Be 'openssh'
+            Resolve-InstallPackageName -ToolName 'pdflatex' | Should -Be 'miktex'
+        }
+
+        It 'Get-PlatformInstallHint returns hints for document and SSH utilities' {
+            if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-PlatformInstallHint not loaded'
+                return
+            }
+
+            $djvuHint = Get-PlatformInstallHint -ToolName 'djvulibre'
+            $djvuHint | Should -Match '^Install with:'
+            $djvuHint | Should -Match 'djvulibre'
+
+            $sshHint = Get-PlatformInstallHint -ToolName 'ssh'
+            $sshHint | Should -Match '^Install with:'
+            $sshHint | Should -Match 'openssh'
+        }
+
+        It 'Invoke-DangerzoneMissingWarning appends Docker requirement when needed' {
+            if (-not (Get-Command Invoke-DangerzoneMissingWarning -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Invoke-DangerzoneMissingWarning not loaded'
+                return
+            }
+
+            Mock Get-PlatformInstallHint { return 'Install with: scoop install dangerzone' }
+            Mock Write-MissingToolWarning -MockWith { } -Verifiable
+
+            Invoke-DangerzoneMissingWarning
+
+            Should -Invoke Write-MissingToolWarning -Times 1 -ParameterFilter {
+                $Tool -eq 'dangerzone' -and $InstallHint -match 'Docker'
+            }
+        }
+
+        It 'Invoke-MissingToolWarning supports AdditionalHint parameter' {
+            if (-not (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Invoke-MissingToolWarning not loaded'
+                return
+            }
+
+            Mock Get-PlatformInstallHint { return 'Install with: scoop install example' }
+            Mock Write-MissingToolWarning -MockWith { } -Verifiable
+
+            Invoke-MissingToolWarning -ToolName 'example' -AdditionalHint '(requires extra setup)'
+
+            Should -Invoke Write-MissingToolWarning -Times 1 -ParameterFilter {
+                $InstallHint -match 'extra setup'
+            }
+        }
+    }
 }
 
 Describe 'Register-LazyFunction Helper' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Define function locally if not available
         if (-not (Get-Command Set-TestBootstrapContext -ErrorAction SilentlyContinue)) {
             function Set-TestBootstrapContext {
@@ -225,6 +606,7 @@ Describe 'Register-LazyFunction Helper' {
 
 Describe 'Test-CachedCommand with TTL' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Define function locally if not available
         if (-not (Get-Command Set-TestBootstrapContext -ErrorAction SilentlyContinue)) {
             function Set-TestBootstrapContext {
@@ -268,17 +650,19 @@ Describe 'Test-CachedCommand with TTL' {
 
 Describe 'Test-SafePath Security Helper' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         $script:UtilitiesPath = Get-TestPath -RelativePath 'profile.d\utilities.ps1' -StartPath $PSScriptRoot -EnsureExists
-    }
-
-    BeforeEach {
+        $script:TestTempRoot = New-TestTempDirectory -Prefix 'ProfilePlatformPath'
+        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+        . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
         . $script:UtilitiesPath
+        Ensure-Utilities
     }
 
     Context 'Path Validation' {
         It 'Test-SafePath returns boolean' {
-            $testBase = $TestDrive
+            $testBase = $script:TestTempRoot
             $testPath = Join-Path $testBase 'test.txt'
             New-Item -ItemType File -Path $testPath -Force | Out-Null
 
@@ -287,7 +671,7 @@ Describe 'Test-SafePath Security Helper' {
         }
 
         It 'Test-SafePath allows paths within base directory' {
-            $testBase = $TestDrive
+            $testBase = $script:TestTempRoot
             $testPath = Join-Path $testBase 'subdir' 'test.txt'
             New-Item -ItemType File -Path $testPath -Force | Out-Null
 
@@ -296,7 +680,7 @@ Describe 'Test-SafePath Security Helper' {
         }
 
         It 'Test-SafePath rejects paths outside base directory' {
-            $testBase = $TestDrive
+            $testBase = $script:TestTempRoot
             $outsidePath = Join-Path (Split-Path $testBase -Parent) 'outside.txt'
 
             $result = Test-SafePath -Path $outsidePath -BasePath $testBase
@@ -304,7 +688,7 @@ Describe 'Test-SafePath Security Helper' {
         }
 
         It 'Test-SafePath handles path traversal attempts' {
-            $testBase = $TestDrive
+            $testBase = $script:TestTempRoot
             $traversalPath = Join-Path $testBase '..' '..' 'etc' 'passwd'
 
             $result = Test-SafePath -Path $traversalPath -BasePath $testBase
@@ -312,12 +696,59 @@ Describe 'Test-SafePath Security Helper' {
         }
 
         It 'Test-SafePath handles invalid paths gracefully' {
-            $testBase = $TestDrive
+            $testBase = $script:TestTempRoot
             $invalidPath = "C:\Invalid<>Path|Test"
 
             { Test-SafePath -Path $invalidPath -BasePath $testBase } | Should -Not -Throw
             $result = Test-SafePath -Path $invalidPath -BasePath $testBase
             $result | Should -Be $false
+        }
+    }
+
+    Context 'EmbeddedInstallHints helpers' {
+        It 'Expand-EmbeddedNodeInstallHints replaces placeholders' {
+            if (-not (Get-Command Expand-EmbeddedNodeInstallHints -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Expand-EmbeddedNodeInstallHints not loaded'
+                return
+            }
+
+            $script = "console.error('Install with: __NODE_INSTALL_CMD__');"
+            $expanded = Expand-EmbeddedNodeInstallHints -Script $script -PackageNames 'json5' -Global
+            $expanded | Should -Not -Match '__NODE_INSTALL_CMD__'
+            $expanded | Should -Match 'json5'
+        }
+
+        It 'Expand-EmbeddedNodeInstallHints combines multiple packages' {
+            if (-not (Get-Command Expand-EmbeddedNodeInstallHints -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Expand-EmbeddedNodeInstallHints not loaded'
+                return
+            }
+
+            $expanded = Expand-EmbeddedNodeInstallHints -Script '__NODE_INSTALL_CMD__' -PackageNames @('bson', 'cbor') -Global
+            $expanded | Should -Match 'bson'
+            $expanded | Should -Match 'cbor'
+        }
+
+        It 'Expand-EmbeddedPythonInstallHints replaces placeholders' {
+            if (-not (Get-Command Expand-EmbeddedPythonInstallHints -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Expand-EmbeddedPythonInstallHints not loaded'
+                return
+            }
+
+            $expanded = Expand-EmbeddedPythonInstallHints -Script '__PYTHON_INSTALL_CMD__' -PackageNames 'h5py' -Global
+            $expanded | Should -Not -Match '__PYTHON_INSTALL_CMD__'
+            $expanded | Should -Match 'h5py'
+        }
+
+        It 'Resolve-NodeInstallHintMessage resolves embedded messages' {
+            if (-not (Get-Command Resolve-NodeInstallHintMessage -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Resolve-NodeInstallHintMessage not loaded'
+                return
+            }
+
+            $message = Resolve-NodeInstallHintMessage -Message 'Install it with: __NODE_INSTALL_CMD__' -PackageNames 'cbor' -Global
+            $message | Should -Not -Match '__NODE_INSTALL_CMD__'
+            $message | Should -Match 'cbor'
         }
     }
 }

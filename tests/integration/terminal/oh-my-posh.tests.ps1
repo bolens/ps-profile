@@ -70,7 +70,6 @@ Describe "Oh My Posh Module" {
         It "Should handle oh-my-posh not available gracefully" {
             # Mock oh-my-posh as unavailable using standardized mocking pattern
             Mock-CommandAvailabilityPester -CommandName 'oh-my-posh' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'oh-my-posh' } -MockWith { $false }
             { Initialize-OhMyPosh } | Should -Not -Throw
         }
     }
@@ -85,7 +84,6 @@ Describe "Oh My Posh Module" {
 
             # Mock oh-my-posh as unavailable using standardized mocking pattern
             Mock-CommandAvailabilityPester -CommandName 'oh-my-posh' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'oh-my-posh' } -MockWith { $false }
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'oh-my-posh' } -MockWith { $null }
 
             # Remove any existing prompt function and variables

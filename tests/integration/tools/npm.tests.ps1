@@ -375,7 +375,12 @@ Describe 'npm Tools Integration Tests' {
 
     Context 'npm graceful degradation' {
         BeforeAll {
-            # Clear command cache if available
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
@@ -407,28 +412,20 @@ Describe 'npm Tools Integration Tests' {
             Remove-Item Alias:npmimport -ErrorAction SilentlyContinue
             Remove-Item Alias:npmrestore -ErrorAction SilentlyContinue
 
-            # Mock npm as unavailable
+            Remove-Item Function:npm -ErrorAction SilentlyContinue
+            Remove-Item Function:global:npm -ErrorAction SilentlyContinue
             Mock-CommandAvailabilityPester -CommandName 'npm' -Available $false
-            . (Join-Path $script:ProfileDir 'npm.ps1')
+
+            $script:MissingNpmOutput = & { . (Join-Path $script:ProfileDir 'npm.ps1') } 2>&1 3>&1 | Out-String
         }
 
-        It 'npm fragment handles missing tool gracefully and recommends installation' {
-            # Note: Due to mocking limitations with external commands, the fragment may still create functions
-            # if Test-CachedCommand returns true due to cache or other factors. This is a best-effort test.
-            $functionsExist = @(
-                (Get-Command Install-NpmPackage -ErrorAction SilentlyContinue),
-                (Get-Command Remove-NpmPackage -ErrorAction SilentlyContinue),
-                (Get-Command Test-NpmOutdated -ErrorAction SilentlyContinue),
-                (Get-Command Update-NpmPackages -ErrorAction SilentlyContinue),
-                (Get-Command Update-NpmSelf -ErrorAction SilentlyContinue),
-                (Get-Command Export-NpmGlobalPackages -ErrorAction SilentlyContinue),
-                (Get-Command Import-NpmGlobalPackages -ErrorAction SilentlyContinue)
-            ) | Where-Object { $null -ne $_ }
+        It 'Functions are not created when npm is unavailable' {
+            Get-Command Install-NpmPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
 
-            # Verify that the fragment loaded without errors
-            # The exact behavior depends on whether the mock successfully made npm unavailable
-            $fragmentLoaded = $true
-            $fragmentLoaded | Should -Be $true
+        It 'Emits missing-tool warning when npm is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingNpmOutput -Pattern 'npm not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingNpmOutput -ToolName 'npm'
         }
     }
 }

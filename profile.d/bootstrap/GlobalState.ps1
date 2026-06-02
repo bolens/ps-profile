@@ -88,6 +88,26 @@ if (-not (Get-Variable -Name 'SuppressAllFragmentWarnings' -Scope Global -ErrorA
     $global:SuppressAllFragmentWarnings = $false
 }
 
+# Lazy-loading initialization flags (must exist before strict-mode reads in Ensure-* helpers)
+$lazyInitializationFlags = @(
+    'GitInitialized'
+    'UtilitiesInitialized'
+    'SystemInitialized'
+    'FileUtilitiesInitialized'
+    'FileConversionDataInitialized'
+    'FileConversionDocumentsInitialized'
+    'FileConversionMediaInitialized'
+    'FileConversionSpecializedInitialized'
+    'DevToolsInitialized'
+    'OhMyPoshStarshipInitialized'
+)
+
+foreach ($flagName in $lazyInitializationFlags) {
+    if (-not (Get-Variable -Name $flagName -Scope Global -ErrorAction SilentlyContinue)) {
+        Set-Variable -Name $flagName -Scope Global -Value $false -Force
+    }
+}
+
 <#
 .SYNOPSIS
     Converts an environment variable value to a boolean.

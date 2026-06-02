@@ -169,7 +169,7 @@ function Initialize-FileConversion-CoreBasicCsv {
             $yaml = $json | & yq eval -P 2>&1
             
             if ($LASTEXITCODE -ne 0) {
-                throw "yq command failed with exit code $LASTEXITCODE: $yaml"
+                throw "yq command failed with exit code ${LASTEXITCODE}: $yaml"
             }
             
             $yaml | Out-File -FilePath $outputPath -Encoding UTF8

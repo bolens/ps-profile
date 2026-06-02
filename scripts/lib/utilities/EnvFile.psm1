@@ -132,7 +132,8 @@ function Load-EnvFile {
                 $matches = [regex]::Matches($value, '\$\{?(\w+)\}?')
                 foreach ($match in $matches) {
                     $varName = $match.Groups[1].Value
-                    $varValue = (Get-Item -Path "env:$varName" -ErrorAction SilentlyContinue).Value
+                    $envItem = Get-Item -Path "env:$varName" -ErrorAction SilentlyContinue
+                    $varValue = if ($null -ne $envItem) { $envItem.Value } else { $null }
                     if ($null -ne $varValue) {
                         $expandedValue = $expandedValue -replace [regex]::Escape($match.Value), $varValue
                     }
@@ -141,7 +142,8 @@ function Load-EnvFile {
             }
             
             # Set environment variable (only if not exists or Overwrite is specified)
-            if ($Overwrite -or -not (Get-Item -Path "env:$key" -ErrorAction SilentlyContinue)) {
+            $existingEnvItem = Get-Item -Path "env:$key" -ErrorAction SilentlyContinue
+            if ($Overwrite -or $null -eq $existingEnvItem) {
                 Set-Item -Path "env:$key" -Value $value
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {

@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'gem Tools Integration Tests' {
     BeforeAll {
         try {
@@ -114,5 +116,40 @@ Describe 'gem Tools Integration Tests' {
             Should -Invoke -CommandName 'gem' -Times 1 -Exactly
             Get-Command Update-GemSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
+    }
+}
+
+Describe 'gem unavailable graceful degradation' {
+    BeforeAll {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    }
+
+    It 'Functions are not created when gem is unavailable' {
+        $installCommand = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'gem' -Available $false
+            . (Join-Path $script:ProfileDir 'gem.ps1')
+            Get-Command Install-GemPackage -ErrorAction SilentlyContinue
+        }
+        $installCommand | Should -BeNullOrEmpty
+    }
+
+    It 'Emits missing-tool warning when gem is unavailable' {
+        $output = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'gem' -Available $false
+            . (Join-Path $script:ProfileDir 'gem.ps1')
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'gem not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gem'
     }
 }

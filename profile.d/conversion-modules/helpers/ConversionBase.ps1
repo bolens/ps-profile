@@ -156,8 +156,15 @@ try {
 
         # Check tool availability
         if (-not (Test-CachedCommand $ToolCommand)) {
-            $hint = if ($InstallHint) { $InstallHint } else { "Install $ToolCommand to use this conversion" }
-            Write-MissingToolWarning -Tool $ToolCommand -InstallHint $hint
+            if ($InstallHint) {
+                Write-MissingToolWarning -Tool $ToolCommand -InstallHint $InstallHint
+            }
+            elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                Invoke-MissingToolWarning -ToolName $ToolCommand -Tool $ToolCommand
+            }
+            else {
+                Write-MissingToolWarning -Tool $ToolCommand -InstallHint "Install $ToolCommand to use this conversion"
+            }
             return $false
         }
 
@@ -300,6 +307,9 @@ try {
 
         if (-not $available -and $InstallHint) {
             Write-MissingToolWarning -Tool $ToolCommand -InstallHint $InstallHint
+        }
+        elseif (-not $available -and (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue)) {
+            Invoke-MissingToolWarning -ToolName $ToolCommand -Tool $ToolCommand
         }
 
         return $available

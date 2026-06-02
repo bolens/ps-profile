@@ -36,7 +36,7 @@ Describe 'JWT Conversion Tests' {
 
         It 'ConvertTo-JwtFromJson converts JSON to JWT' {
             # Skip if Node.js or jsonwebtoken package not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -72,7 +72,7 @@ Describe 'JWT Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match 'jsonwebtoken.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'jsonwebtoken') {
-                    $installCommand = 'pnpm add -g jsonwebtoken'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'jsonwebtoken' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))

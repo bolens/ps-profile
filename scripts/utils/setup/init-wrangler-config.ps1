@@ -63,79 +63,9 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 # Import required modules using Import-LibModule
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PlatformPaths' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
-<#
-.SYNOPSIS
-    Gets the target path for the Wrangler config file.
-
-.DESCRIPTION
-    Resolves the cross-platform path for the Wrangler config file based on:
-    - XDG_CONFIG_HOME environment variable (Unix standard)
-    - APPDATA environment variable (Windows)
-    - Fallback to home directory with appropriate structure
-    
-    On Windows, uses the xdg.config subdirectory style within APPDATA.
-    On Unix, uses standard XDG config structure.
-
-.OUTPUTS
-    System.Hashtable. A hashtable with 'Dir' and 'File' keys containing the directory
-    and file paths respectively.
-
-.EXAMPLE
-    $paths = Get-TargetPath
-    Write-Output "Config directory: $($paths.Dir)"
-    Write-Output "Config file: $($paths.File)"
-#>
-function Get-TargetPath {
-    [CmdletBinding()]
-    [OutputType([hashtable])]
-    param()
-    
-    # Cross-platform config directory resolution:
-    # 1. Use XDG_CONFIG_HOME if set (Unix standard)
-    # 2. Use APPDATA on Windows
-    # 3. Fallback to home directory + .config (Unix) or APPDATA equivalent (Windows)
-    
-    $configBase = $null
-    
-    if ($env:XDG_CONFIG_HOME) {
-        # XDG_CONFIG_HOME is set (Unix standard)
-        $configBase = $env:XDG_CONFIG_HOME
-    }
-    elseif ($env:APPDATA) {
-        # Windows: Use APPDATA
-        $configBase = $env:APPDATA
-    }
-    else {
-        # Fallback: Use home directory
-        if ($env:HOME) {
-            $configBase = Join-Path $env:HOME '.config'
-        }
-        elseif ($env:USERPROFILE) {
-            # Windows fallback
-            $configBase = Join-Path $env:USERPROFILE 'AppData' 'Roaming'
-        }
-        else {
-            throw 'Unable to determine config directory. Neither XDG_CONFIG_HOME, APPDATA, HOME, nor USERPROFILE are set.'
-        }
-    }
-
-    # On Windows with APPDATA, use the xdg.config subdirectory style
-    # On Unix, use standard XDG structure
-    if ($env:APPDATA -and $configBase -eq $env:APPDATA) {
-        # Windows: match the path style from the original implementation
-        $dir = Join-Path -Path $configBase -ChildPath 'xdg.config\.wrangler\config'
-    }
-    else {
-        # Unix: standard XDG config structure
-        $dir = Join-Path -Path $configBase -ChildPath '.wrangler' 'config'
-    }
-    
-    $file = Join-Path -Path $dir -ChildPath 'default.toml'
-    return @{ Dir = $dir; File = $file }
-}
-
-$paths = Get-TargetPath
+$paths = Get-WranglerConfigPaths
 $dir = $paths.Dir
 $file = $paths.File
 

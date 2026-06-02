@@ -153,13 +153,12 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
             }
             # Mock gh command availability as missing
             Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope 'It'
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'gh' } -MockWith { $false }
             # Function should still exist even if gh is not available
             Get-Command Open-GitHubRepository -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             # Verify installation recommendation is provided
             $output = gh-open 2>&1 3>&1 | Out-String
-            $output | Should -Match 'gh not found'
-            $output | Should -Match 'scoop install gh'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'gh not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gh'
         }
 
         It 'Creates Invoke-GitHubPullRequest function' {
@@ -178,13 +177,12 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
             }
             # Mock gh command availability as missing
             Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope 'It'
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'gh' } -MockWith { $false }
             # Function should still exist even if gh is not available
             Get-Command Invoke-GitHubPullRequest -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             # Verify installation recommendation is provided
             $output = gh-pr 2>&1 3>&1 | Out-String
-            $output | Should -Match 'gh not found'
-            $output | Should -Match 'scoop install gh'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'gh not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gh'
         }
     }
 }

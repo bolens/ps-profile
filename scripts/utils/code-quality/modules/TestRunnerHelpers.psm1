@@ -34,7 +34,6 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 #>
 function Invoke-TestDryRun {
     param(
-        [Parameter(Mandatory)]
         $Config,
 
         [Parameter(Mandatory)]
@@ -43,30 +42,22 @@ function Invoke-TestDryRun {
 
     Write-ScriptMessage -Message "DRY RUN MODE: Showing test discovery without execution"
 
-    # Create a separate configuration for dry run
-    # In Pester 5, Path must be set on config object (cannot use both -Configuration and -Path together)
-    $dryRunConfig = New-PesterConfiguration
-    $dryRunConfig.Run.PassThru = $false
-    $dryRunConfig.Output.Verbosity = 'Detailed'
-    $dryRunConfig.Run.Path = $TestPaths
-    if ($Config.Filter.FullName.Value) {
-        $dryRunConfig.Filter.FullName = $Config.Filter.FullName.Value
-    }
-    if ($Config.Filter.Tag.Value) {
-        $dryRunConfig.Filter.Tag = $Config.Filter.Tag.Value
-    }
-    if ($Config.Filter.ExcludeTag.Value) {
-        $dryRunConfig.Filter.ExcludeTag = $Config.Filter.ExcludeTag.Value
+    foreach ($testPath in @($TestPaths)) {
+        if ([string]::IsNullOrWhiteSpace($testPath)) {
+            continue
+        }
+
+        if (Test-Path -LiteralPath $testPath -PathType Container) {
+            $files = Get-ChildItem -Path $testPath -Filter '*.tests.ps1' -Recurse -File -ErrorAction SilentlyContinue
+            foreach ($file in @($files)) {
+                Write-Host "Discovered test file: $($file.FullName)"
+            }
+        }
+        else {
+            Write-Host "Discovered test file: $testPath"
+        }
     }
 
-    $dryRunConfig.Run.ScriptBlock = {
-        param($Context)
-        # This will show discovered tests without running them
-        Write-Host "Discovered test file: $($Context.TestFile)"
-    }
-
-    # Use only -Configuration (path is set in config, cannot use both -Configuration and -Path)
-    Invoke-Pester -Configuration $dryRunConfig
     Write-ScriptMessage -Message "Dry run completed. Use -Verbose for more details."
 }
 

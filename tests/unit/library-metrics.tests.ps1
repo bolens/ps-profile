@@ -1,7 +1,6 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 Describe 'Metrics Module Functions' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Import the Metrics modules (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         Import-Module (Join-Path $libPath 'metrics' 'MetricsTrendAnalysis.psm1') -DisableNameChecking -ErrorAction Stop

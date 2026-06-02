@@ -46,7 +46,7 @@ function Invoke-GCloud {
     
     # Use base module if available, otherwise fallback to direct execution
     if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
-        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false
     }
     else {
         # Fallback to original implementation
@@ -54,7 +54,7 @@ function Invoke-GCloud {
             gcloud @Arguments
         }
         else {
-            Write-MissingToolWarning -Tool 'gcloud' -InstallHint 'Install with: scoop install gcloud'
+            Invoke-MissingToolWarning -ToolName 'gcloud'
         }
     }
 }
@@ -86,7 +86,7 @@ function Set-GCloudAuth {
     # Use base module if available
     if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
         $allArgs = @('auth') + $Arguments
-        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.auth" -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.auth" -ParseJson $false -ErrorOnNonZeroExit $false
     }
     else {
         # Fallback to original implementation
@@ -94,7 +94,7 @@ function Set-GCloudAuth {
             gcloud auth @Arguments
         }
         else {
-            Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+            Invoke-MissingToolWarning -ToolName 'gcloud' -Tool 'Google Cloud CLI (gcloud)'
         }
     }
 }
@@ -126,7 +126,7 @@ function Set-GCloudConfig {
     # Use base module if available
     if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
         $allArgs = @('config') + $Arguments
-        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.config" -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.config" -ParseJson $false -ErrorOnNonZeroExit $false
     }
     else {
         # Fallback to original implementation
@@ -134,7 +134,7 @@ function Set-GCloudConfig {
             gcloud config @Arguments
         }
         else {
-            Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+            Invoke-MissingToolWarning -ToolName 'gcloud' -Tool 'Google Cloud CLI (gcloud)'
         }
     }
 }
@@ -170,7 +170,7 @@ function Get-GCloudProjects {
     }
     elseif (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
         $allArgs = @('projects') + $Arguments
-        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.projects" -ParseJson $true -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install gcloud'
+        return Invoke-CloudCommand -CommandName 'gcloud' -Arguments $allArgs -OperationName "gcloud.projects" -ParseJson $true -ErrorOnNonZeroExit $false
     }
     else {
         # Fallback to original implementation
@@ -178,7 +178,7 @@ function Get-GCloudProjects {
             gcloud projects @Arguments
         }
         else {
-            Write-MissingToolWarning -Tool 'Google Cloud CLI (gcloud)' -InstallHint 'Install with: scoop install gcloud'
+            Invoke-MissingToolWarning -ToolName 'gcloud' -Tool 'Google Cloud CLI (gcloud)'
         }
     }
 }

@@ -50,7 +50,7 @@ function Start-MinikubeCluster {
         minikube start @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'minikube' -InstallHint 'Install with: scoop install minikube'
+        Invoke-MissingToolWarning -ToolName 'minikube'
     }
 }
 
@@ -82,7 +82,7 @@ function Stop-MinikubeCluster {
         minikube stop @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'minikube' -InstallHint 'Install with: scoop install minikube'
+        Invoke-MissingToolWarning -ToolName 'minikube'
     }
 }
 

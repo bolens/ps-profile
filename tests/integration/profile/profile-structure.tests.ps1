@@ -26,12 +26,15 @@ Describe 'Profile Structure Integration Tests' {
         It 'fragments load in correct order' {
             $fragDir = $script:ProfileDir
             $files = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
-            $fileNames = $files | Select-Object -ExpandProperty Name
+            $fileNames = @($files | Select-Object -ExpandProperty Name)
 
-            $fileNames[0] | Should -Match '^00-'
+            $fileNames | Should -Contain 'bootstrap.ps1' -Because 'bootstrap must be present for first-load ordering'
 
-            $sorted = $fileNames | Sort-Object
-            $fileNames | Should -Be $sorted
+            $nonBootstrap = @($fileNames | Where-Object { $_ -ne 'bootstrap.ps1' })
+            $nonBootstrap | Should -Be ($nonBootstrap | Sort-Object) -Because 'non-bootstrap fragments use lexical ordering'
+
+            # ProfileFragmentDiscovery loads bootstrap first, then remaining fragments alphabetically
+            $nonBootstrap[0] | Should -Be '3d-cad.ps1'
         }
     }
 }

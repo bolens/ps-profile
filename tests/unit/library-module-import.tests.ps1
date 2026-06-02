@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ModuleImportPath = Join-Path $script:LibPath 'ModuleImport.psm1'
@@ -55,7 +54,7 @@ Describe 'ModuleImport Module Functions' {
             $result = Get-LibPath -ScriptPath $script:TestScriptPath
             $result | Should -Not -BeNullOrEmpty
             Test-Path $result | Should -Be $true
-            $result | Should -BeLike '*scripts\lib'
+            ($result -replace '\\', '/') | Should -BeLike '*/scripts/lib'
         }
 
         It 'Returns absolute path' {
@@ -154,7 +153,7 @@ Describe 'ModuleImport Module Functions' {
         It 'Imports multiple modules successfully' {
             $modules = Import-LibModules -ModuleNames @('ExitCodes', 'Logging') -ScriptPath $script:TestScriptPath -ErrorAction Stop
             $modules | Should -Not -BeNullOrEmpty
-            $modules.Count | Should -BeGreaterOrEqual 2
+            @($modules).Count | Should -BeGreaterOrEqual 2
             $modules | Should -BeOfType [System.Management.Automation.PSModuleInfo]
         }
 
@@ -170,7 +169,7 @@ Describe 'ModuleImport Module Functions' {
         It 'Continues when optional modules fail to import' {
             $modules = Import-LibModules -ModuleNames @('ExitCodes', 'NonExistentModule') -ScriptPath $script:TestScriptPath -Required:$false -ErrorAction SilentlyContinue
             $modules | Should -Not -BeNullOrEmpty
-            $modules.Count | Should -Be 1
+            @($modules).Count | Should -Be 1
         }
 
         It 'Auto-detects script path from call stack' {
@@ -186,7 +185,7 @@ Describe 'ModuleImport Module Functions' {
             Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
             $modules = Import-LibModules -ModuleNames @('ExitCodes') -ScriptPath $script:TestScriptPath
             $modules | Should -Not -BeNullOrEmpty
-            $modules.Count | Should -BeGreaterOrEqual 1
+            @($modules).Count | Should -BeGreaterOrEqual 1
         }
     }
 
@@ -218,7 +217,7 @@ Describe 'ModuleImport Module Functions' {
         It 'Imports requested modules' {
             $env = Initialize-ScriptEnvironment -ScriptPath $script:TestScriptPath -ImportModules @('ExitCodes', 'Logging')
             $env.ImportedModules | Should -Not -BeNullOrEmpty
-            $env.ImportedModules.Count | Should -BeGreaterOrEqual 2
+            @($env.ImportedModules).Count | Should -BeGreaterOrEqual 2
         }
 
         It 'Imports modules with DisableNameChecking' {
@@ -249,9 +248,7 @@ Describe 'ModuleImport Module Functions' {
         }
 
         It 'Handles ExitOnError when script path cannot be detected' {
-            # This is difficult to test without mocking, but we can verify the structure
-            # The function should handle errors appropriately
-            { Initialize-ScriptEnvironment -ScriptPath '' -ExitOnError } | Should -Throw
+            { Initialize-ScriptEnvironment -ScriptPath '' -ExitOnError } | Should -Throw '*Failed to resolve*'
         }
 
         It 'Handles ExitOnError when module import fails' {

@@ -67,7 +67,7 @@ try {
     fs.writeFileSync(process.argv[3], json);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: json5 package is not installed. Install it with: pnpm add -g json5');
+        console.error('Error: json5 package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -75,6 +75,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json5-parse-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'json5' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             
             # Level 1: Conversion execution
@@ -88,7 +89,7 @@ try {
                 $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
                 
                 if ($LASTEXITCODE -ne 0) {
-                    throw "Node.js script failed with exit code $LASTEXITCODE: $result"
+                    throw "Node.js script failed with exit code ${LASTEXITCODE}: $result"
                 }
                 
                 # Level 2: Timing information
@@ -168,7 +169,7 @@ try {
     fs.writeFileSync(process.argv[3], json5);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: json5 package is not installed. Install it with: pnpm add -g json5');
+        console.error('Error: json5 package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -176,6 +177,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json5-stringify-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'json5' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             
             # Level 1: Conversion execution
@@ -189,7 +191,7 @@ try {
                 $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
                 
                 if ($LASTEXITCODE -ne 0) {
-                    throw "Node.js script failed with exit code $LASTEXITCODE: $result"
+                    throw "Node.js script failed with exit code ${LASTEXITCODE}: $result"
                 }
                 
                 # Level 2: Timing information

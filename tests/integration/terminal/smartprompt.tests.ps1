@@ -1,3 +1,4 @@
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
 
 BeforeAll {
     try {
@@ -60,7 +61,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'uv' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -87,7 +87,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'uv' } -MockWith { $true }
                 
                 # Mock uv python list to return a version
                 Mock -CommandName uv -MockWith {
@@ -125,7 +124,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path ".python-version" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'uv' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -153,7 +151,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType Directory -Path ".venv" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'uv' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -181,7 +178,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'uv' } -MockWith { $false }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -209,7 +205,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'uv' } -MockWith { $true }
                 
                 # Mock uv python list to fail
                 Mock -CommandName uv -MockWith {
@@ -250,7 +245,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "package.json" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'npm' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -278,7 +272,6 @@ Describe "SmartPrompt Detection Tests" {
                 
                 Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
                 Mock-CommandAvailabilityPester -CommandName 'node' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'npm' } -MockWith { $true }
                 
                 # Mock node --version to return a version
                 Mock -CommandName node -MockWith {
@@ -316,7 +309,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "package.json" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'npm' -Available $false -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'npm' } -MockWith { $false }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -344,7 +336,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "package.json" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'npm' } -MockWith { $true }
                 
                 # Mock node --version to fail
                 Mock -CommandName node -MockWith {
@@ -385,7 +376,6 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 
                 Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'npm' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -444,7 +434,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "Cargo.toml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'rustc' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'rustc' } -MockWith { $true }
                 
                 Mock -CommandName rustc -MockWith {
                     param([string[]]$ArgumentList)
@@ -480,7 +469,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "Cargo.toml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'rustc' -Available $false -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'rustc' } -MockWith { $false }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -539,7 +527,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "go.mod" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'go' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'go' } -MockWith { $true }
                 
                 Mock -CommandName go -MockWith {
                     param([string[]]$ArgumentList)
@@ -575,7 +562,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "go.mod" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'go' -Available $false -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'go' } -MockWith { $false }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -691,7 +677,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "poetry.lock" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'poetry' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -718,7 +703,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "poetry.lock" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'poetry' } -MockWith { $true }
                 
                 Mock -CommandName poetry -MockWith {
                     param([string[]]$ArgumentList)
@@ -754,7 +738,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'poetry' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -782,7 +765,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "poetry.lock" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $false -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'poetry' } -MockWith { $false }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -817,7 +799,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pnpm-lock.yaml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'pnpm' } -MockWith { $true }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {
@@ -844,7 +825,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pnpm-lock.yaml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'pnpm' } -MockWith { $true }
                 
                 Mock -CommandName pnpm -MockWith {
                     param([string[]]$ArgumentList)
@@ -880,7 +860,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "yarn.lock" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'yarn' -Available $true -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'yarn' } -MockWith { $true }
                 
                 Mock -CommandName yarn -MockWith {
                     param([string[]]$ArgumentList)
@@ -916,7 +895,6 @@ Describe "SmartPrompt Detection Tests" {
                 New-Item -ItemType File -Path "pnpm-lock.yaml" -Force | Out-Null
                 
                 Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $false -Scope It
-                Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'pnpm' } -MockWith { $false }
                 
                 $script:capturedOutput = @()
                 Mock -CommandName Write-Host -MockWith {

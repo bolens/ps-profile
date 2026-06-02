@@ -152,7 +152,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
             Installs specific MSYS2 components.
         .NOTES
             This command is only available on Windows when Ruby is installed via Scoop.
-            After installing Ruby with 'scoop install ruby', run this command to set up
+            After installing Ruby (see `Get-PlatformInstallHint -ToolName ruby`), run this command to set up
             the development environment for building native gems.
         #>
         function Install-RubyDevKit {
@@ -174,5 +174,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     }
 }
 else {
-    Invoke-MissingToolWarning -ToolName 'gem' -ToolType 'ruby-package' -DefaultInstallCommand 'scoop install ruby'
+    Invoke-MissingToolWarning -ToolName 'gem' -ToolType 'ruby-package'
 }

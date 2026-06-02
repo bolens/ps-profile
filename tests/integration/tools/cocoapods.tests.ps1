@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'CocoaPods Tools Integration Tests' {
     BeforeAll {
         try {
@@ -125,16 +127,40 @@ Describe 'CocoaPods Tools Integration Tests' {
             Should -Invoke -CommandName 'pod' -Times 1 -Exactly
         }
 
-        It 'CocoaPods fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('pod', [ref]$null)
+    }
+}
+
+Describe 'CocoaPods unavailable graceful degradation' {
+    BeforeAll {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    }
+
+    It 'Functions are not created when pod is unavailable' {
+        $installCommand = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
             }
             Mock-CommandAvailabilityPester -CommandName 'pod' -Available $false
-            Remove-Item Function:Install-CocoaPodsDependencies -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-CocoaPodsDependencies -ErrorAction SilentlyContinue
-            Remove-Item Function:Remove-CocoaPodsIntegration -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'cocoapods.ps1')
-            Get-Command Install-CocoaPodsDependencies -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            Get-Command Install-CocoaPodsDependencies -ErrorAction SilentlyContinue
         }
+        $installCommand | Should -BeNullOrEmpty
+    }
+
+    It 'Emits missing-tool warning when pod is unavailable' {
+        $output = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'pod' -Available $false
+            . (Join-Path $script:ProfileDir 'cocoapods.ps1')
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'pod not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cocoapods'
     }
 }

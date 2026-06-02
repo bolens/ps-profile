@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:EnvFilePath = Join-Path $script:LibPath 'utilities' 'EnvFile.psm1'
@@ -379,6 +378,9 @@ TEST_VAR=overwrite_value
         }
 
         It 'Handles variable expansion when variable does not exist' {
+            Remove-Item -Path Env:\TEST_VAR -ErrorAction SilentlyContinue
+            Remove-Item -Path Env:\ANOTHER_VAR -ErrorAction SilentlyContinue
+
             $envFile = Join-Path $script:TestTempDir 'expand-test.env'
             @'
 TEST_VAR=$NONEXISTENT_VAR

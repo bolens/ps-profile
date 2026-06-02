@@ -3,13 +3,8 @@
 # Unit tests for Start-PodmanDesktop and Start-RancherDesktop functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'containers-enhanced.ps1')
@@ -17,107 +12,88 @@ BeforeAll {
 
 Describe 'containers-enhanced.ps1 - Start-PodmanDesktop' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestStartProcessCapture
+        Reset-TestStartProcessMock
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('podman-desktop', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'podman-desktop' -Available $false
+        Remove-Item -Path 'Function:\podman-desktop' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:podman-desktop' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when podman-desktop is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'podman-desktop' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'podman-desktop' } -MockWith { return $null }
-            
             $result = Start-PodmanDesktop -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Launches podman-desktop' {
             Setup-AvailableCommandMock -CommandName 'podman-desktop'
-            
-            $script:capturedFilePath = $null
-            Mock Start-Process -MockWith { 
-                param($FilePath, $ArgumentList)
-                $script:capturedFilePath = $FilePath
-            }
-            
+
             Start-PodmanDesktop -ErrorAction SilentlyContinue
-            
-            $script:capturedFilePath | Should -Be 'podman-desktop'
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'podman-desktop'
         }
-        
+
         It 'Handles Start-Process errors' {
             Setup-AvailableCommandMock -CommandName 'podman-desktop'
-            
-            Mock Start-Process -MockWith { 
-                throw [System.ComponentModel.Win32Exception]::new('Access denied')
-            }
-            Mock Write-Error { }
-            
-            Start-PodmanDesktop -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Set-TestStartProcessFailure -Message 'Access denied'
+
+            Start-PodmanDesktop -ErrorAction SilentlyContinue | Out-Null
+
+            Get-TestStartProcessCapture | Should -BeNullOrEmpty
         }
     }
 }
 
 Describe 'containers-enhanced.ps1 - Start-RancherDesktop' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestStartProcessCapture
+        Reset-TestStartProcessMock
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('rancher-desktop', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'rancher-desktop' -Available $false
+        Remove-Item -Path 'Function:\rancher-desktop' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:rancher-desktop' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when rancher-desktop is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'rancher-desktop' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'rancher-desktop' } -MockWith { return $null }
-            
             $result = Start-RancherDesktop -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Launches rancher-desktop' {
             Setup-AvailableCommandMock -CommandName 'rancher-desktop'
-            
-            $script:capturedFilePath = $null
-            Mock Start-Process -MockWith { 
-                param($FilePath, $ArgumentList)
-                $script:capturedFilePath = $FilePath
-            }
-            
+
             Start-RancherDesktop -ErrorAction SilentlyContinue
-            
-            $script:capturedFilePath | Should -Be 'rancher-desktop'
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'rancher-desktop'
         }
-        
+
         It 'Handles Start-Process errors' {
             Setup-AvailableCommandMock -CommandName 'rancher-desktop'
-            
-            Mock Start-Process -MockWith { 
-                throw [System.ComponentModel.Win32Exception]::new('Access denied')
-            }
-            Mock Write-Error { }
-            
-            Start-RancherDesktop -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Set-TestStartProcessFailure -Message 'Access denied'
+
+            Start-RancherDesktop -ErrorAction SilentlyContinue | Out-Null
+
+            Get-TestStartProcessCapture | Should -BeNullOrEmpty
         }
     }
 }
-

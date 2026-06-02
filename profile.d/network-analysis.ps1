@@ -74,12 +74,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'wireshark')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'wireshark'
             return
         }
@@ -173,12 +167,6 @@ try {
 
         if ($Tool -eq 'sniffnet') {
             if (-not (Test-CachedCommand 'sniffnet')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
                 Invoke-MissingToolWarning -ToolName 'sniffnet'
                 return
             }
@@ -204,12 +192,6 @@ try {
         }
         elseif ($Tool -eq 'trippy') {
             if (-not (Test-CachedCommand 'trippy')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
                 Invoke-MissingToolWarning -ToolName 'trippy'
                 return
             }
@@ -303,12 +285,6 @@ try {
 
         if ($Tool -eq 'nali') {
             if (-not (Test-CachedCommand 'nali')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
                 Invoke-MissingToolWarning -ToolName 'nali'
                 return
             }
@@ -366,12 +342,6 @@ try {
         }
         elseif ($Tool -eq 'ipinfo') {
             if (-not (Test-CachedCommand 'ipinfo')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
                 Invoke-MissingToolWarning -ToolName 'ipinfo-cli' -Tool 'ipinfo'
                 return
             }
@@ -460,12 +430,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'cloudflared')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'cloudflared'
             return
         }
@@ -561,12 +525,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'ntfy')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'ntfy'
             return
         }

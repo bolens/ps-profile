@@ -46,7 +46,7 @@ function Invoke-Aws {
     
     # Use base module if available, otherwise fallback to direct execution
     if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
-        return Invoke-CloudCommand -CommandName 'aws' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install aws'
+        return Invoke-CloudCommand -CommandName 'aws' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false
     }
     else {
         # Fallback to original implementation
@@ -54,7 +54,7 @@ function Invoke-Aws {
             aws @Arguments
         }
         else {
-            Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+            Invoke-MissingToolWarning -ToolName 'aws'
         }
     }
 }
@@ -85,7 +85,7 @@ function Set-AwsProfile {
     
     # Use base module if available
     if (Get-Command Set-CloudProfile -ErrorAction SilentlyContinue) {
-        return Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value $ProfileName -EnvVarName 'AWS_PROFILE' -CommandName 'aws' -DisplayName 'AWS profile' -InstallHint 'Install with: scoop install aws'
+        return Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value $ProfileName -EnvVarName 'AWS_PROFILE' -CommandName 'aws' -DisplayName 'AWS profile'
     }
     else {
         # Fallback to original implementation
@@ -94,7 +94,7 @@ function Set-AwsProfile {
             Write-Host "AWS profile set to: $ProfileName"
         }
         else {
-            Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+            Invoke-MissingToolWarning -ToolName 'aws'
         }
     }
 }
@@ -125,7 +125,7 @@ function Set-AwsRegion {
     
     # Use base module if available
     if (Get-Command Set-CloudProfile -ErrorAction SilentlyContinue) {
-        return Set-CloudProfile -ProviderName 'aws' -ProfileType 'Region' -Value $Region -EnvVarName 'AWS_REGION' -CommandName 'aws' -DisplayName 'AWS region' -InstallHint 'Install with: scoop install aws'
+        return Set-CloudProfile -ProviderName 'aws' -ProfileType 'Region' -Value $Region -EnvVarName 'AWS_REGION' -CommandName 'aws' -DisplayName 'AWS region'
     }
     else {
         # Fallback to original implementation
@@ -134,7 +134,7 @@ function Set-AwsRegion {
             Write-Host "AWS region set to: $Region"
         }
         else {
-            Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+            Invoke-MissingToolWarning -ToolName 'aws'
         }
     }
 }
@@ -175,13 +175,24 @@ function Get-AwsCredentials {
     )
     
     if (-not (Test-CachedCommand aws)) {
-        Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+        Invoke-MissingToolWarning -ToolName 'aws'
         return
     }
     
     try {
         $profiles = @()
-        $userHome = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { '~' }
+        $userHome = if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+            Get-UserHome
+        }
+        elseif ($env:HOME) {
+            $env:HOME
+        }
+        elseif ($env:USERPROFILE) {
+            $env:USERPROFILE
+        }
+        else {
+            '~'
+        }
         $credentialsPath = Join-Path $userHome '.aws' 'credentials'
         
         if (Test-Path -LiteralPath $credentialsPath) {
@@ -279,7 +290,7 @@ function Test-AwsConnection {
     )
     
     if (-not (Test-CachedCommand aws)) {
-        Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+        Invoke-MissingToolWarning -ToolName 'aws'
         return $false
     }
     
@@ -292,8 +303,8 @@ function Test-AwsConnection {
         
         $result = Test-CloudConnection -CommandName 'aws' -TestCommand $testCommand -SuccessIndicator 'Account' -OperationName "aws.connection.test" -Context @{
             profile = $Profile
-        } -InstallHint 'Install with: scoop install aws'
-        
+        }
+
         return $result
     }
     else {
@@ -371,7 +382,7 @@ function Get-AwsResources {
     )
     
     if (-not (Test-CachedCommand aws)) {
-        Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+        Invoke-MissingToolWarning -ToolName 'aws'
         return
     }
     
@@ -448,7 +459,7 @@ function Export-AwsCredentials {
     )
     
     if (-not (Test-CachedCommand aws)) {
-        Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+        Invoke-MissingToolWarning -ToolName 'aws'
         return
     }
     
@@ -553,7 +564,7 @@ function Switch-AwsAccount {
     )
     
     if (-not (Test-CachedCommand aws)) {
-        Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+        Invoke-MissingToolWarning -ToolName 'aws'
         return $false
     }
     
@@ -618,7 +629,7 @@ function Get-AwsCosts {
     )
     
     if (-not (Test-CachedCommand aws)) {
-        Write-MissingToolWarning -Tool 'aws' -InstallHint 'Install with: scoop install aws'
+        Invoke-MissingToolWarning -ToolName 'aws'
         return
     }
     

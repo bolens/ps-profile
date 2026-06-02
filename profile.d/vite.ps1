@@ -48,7 +48,7 @@ function Invoke-Vite {
         npx vite @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'vite' -InstallHint 'Install with: npm install -g vite'
+        Invoke-MissingToolWarning -ToolName 'vite' -ToolType 'node-package'
     }
 }
 
@@ -80,7 +80,7 @@ function New-ViteProject {
         npx create-vite @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 
@@ -112,7 +112,7 @@ function Start-ViteDev {
         npx vite dev @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 
@@ -144,7 +144,7 @@ function Build-ViteApp {
         npx vite build @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 

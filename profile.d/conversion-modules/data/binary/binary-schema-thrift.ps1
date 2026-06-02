@@ -54,7 +54,7 @@ try {
     process.exit(1);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: thrift package is not installed. Install it with: pnpm add -g thrift');
+        console.error('Error: thrift package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -62,6 +62,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "thrift-encode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'thrift' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath, $SchemaPath
@@ -98,7 +99,7 @@ try {
     process.exit(1);
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: thrift package is not installed. Install it with: pnpm add -g thrift');
+        console.error('Error: thrift package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -106,6 +107,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "thrift-decode-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'thrift' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath, $SchemaPath

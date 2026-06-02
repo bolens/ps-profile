@@ -82,12 +82,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git-cliff')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-            }
             Invoke-MissingToolWarning -ToolName 'git-cliff'
             return
         }
@@ -174,12 +168,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git-tower')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-            }
             Invoke-MissingToolWarning -ToolName 'git-tower'
             return
         }
@@ -235,12 +223,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'gitkraken')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-            }
             Invoke-MissingToolWarning -ToolName 'gitkraken'
             return
         }
@@ -301,12 +283,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'gitbutler')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-            }
             Invoke-MissingToolWarning -ToolName 'gitbutler-nightly' -Tool 'gitbutler'
             return
         }
@@ -377,12 +353,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'jj')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-            }
             Invoke-MissingToolWarning -ToolName 'jj'
             return
         }
@@ -469,7 +439,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
+            Invoke-MissingToolWarning -ToolName 'git'
             return
         }
 
@@ -583,7 +553,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
+            Invoke-MissingToolWarning -ToolName 'git'
             return @{}
         }
 
@@ -684,7 +654,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
+            Invoke-MissingToolWarning -ToolName 'git'
             return @()
         }
 
@@ -805,7 +775,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
+            Invoke-MissingToolWarning -ToolName 'git'
             return
         }
 
@@ -983,7 +953,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'git')) {
-            Invoke-MissingToolWarning -ToolName 'git' -DefaultInstallCommand 'scoop install git'
+            Invoke-MissingToolWarning -ToolName 'git'
             return @()
         }
 

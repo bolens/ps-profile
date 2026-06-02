@@ -39,7 +39,7 @@
 .PARAMETER ConnectionString
     Database connection string or connection parameters.
 
-.PARAMETER Host
+.PARAMETER ServerHost
     Database host name or IP address.
 
 .PARAMETER Port
@@ -56,7 +56,7 @@
 
 .EXAMPLE
     $cred = Get-Credential
-    Connect-Database -DatabaseType PostgreSQL -Host localhost -Database mydb -Credential $cred
+    Connect-Database -DatabaseType PostgreSQL -ServerHost localhost -Database mydb -Credential $cred
     
     Connects to PostgreSQL database using GUI client.
 
@@ -78,7 +78,7 @@ function Connect-Database {
         
         [string]$ConnectionString,
         
-        [string]$Host,
+        [string]$ServerHost,
         
         [int]$Port,
         
@@ -103,14 +103,14 @@ function Connect-Database {
                 }
                 elseif (Test-CachedCommand 'psql') {
                     $args = @()
-                    if ($Host) { $args += '-h', $Host }
+                    if ($ServerHost) { $args += '-h', $ServerHost }
                     if ($Port) { $args += '-p', $Port }
                     if ($Database) { $args += '-d', $Database }
                     if ($Credential) { $args += '-U', $Credential.UserName }
                     & psql $args
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'psql' -InstallHint 'Install PostgreSQL client or DBeaver'
+                    Invoke-MissingToolWarning -ToolName 'psql'
                 }
             }
             'MySQL' {
@@ -125,7 +125,7 @@ function Connect-Database {
                 }
                 elseif (Test-CachedCommand 'mysql') {
                     $args = @()
-                    if ($Host) { $args += '-h', $Host }
+                    if ($ServerHost) { $args += '-h', $ServerHost }
                     if ($Port) { $args += '-P', $Port }
                     if ($Database) { $args += '-D', $Database }
                     if ($Credential) {
@@ -136,7 +136,7 @@ function Connect-Database {
                     & mysql $args
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mysql' -InstallHint 'Install MySQL client or DBeaver'
+                    Invoke-MissingToolWarning -ToolName 'mysql'
                 }
             }
             'SQLite' {
@@ -157,7 +157,7 @@ function Connect-Database {
                     }
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'sqlite3' -InstallHint 'Install SQLite or DBeaver'
+                    Invoke-MissingToolWarning -ToolName 'sqlite3'
                 }
             }
             'MongoDB' {
@@ -169,13 +169,13 @@ function Connect-Database {
                     if ($ConnectionString) {
                         $args += $ConnectionString
                     }
-                    elseif ($Host) {
+                    elseif ($ServerHost) {
                         $connection = "mongodb://"
                         if ($Credential) {
                             $securePassword = $Credential.GetNetworkCredential().Password
                             $connection += "$($Credential.UserName):${securePassword}@"
                         }
-                        $connection += $Host
+                        $connection += $ServerHost
                         if ($Port) {
                             $connection += ":$Port"
                         }
@@ -187,7 +187,7 @@ function Connect-Database {
                     & mongosh $args
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mongosh' -InstallHint 'Install MongoDB Shell or MongoDB Compass'
+                    Invoke-MissingToolWarning -ToolName 'mongosh'
                 }
             }
             default {
@@ -212,7 +212,7 @@ function Connect-Database {
         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
             Write-StructuredError -ErrorRecord $_ -OperationName "database.connect" -Context @{
                 database_type = $DatabaseType
-                host          = $Host
+                host          = $ServerHost
                 port          = $Port
                 database      = $Database
             }
@@ -291,7 +291,7 @@ function Query-Database {
                     return $output
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'psql' -InstallHint 'Install PostgreSQL client'
+                    Invoke-MissingToolWarning -ToolName 'psql'
                 }
             }
             'MySQL' {
@@ -303,7 +303,7 @@ function Query-Database {
                     return $output
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mysql' -InstallHint 'Install MySQL client'
+                    Invoke-MissingToolWarning -ToolName 'mysql'
                 }
             }
             'SQLite' {
@@ -329,7 +329,7 @@ function Query-Database {
                     return $output
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'sqlite3' -InstallHint 'Install SQLite'
+                    Invoke-MissingToolWarning -ToolName 'sqlite3'
                 }
             }
             'MongoDB' {
@@ -342,7 +342,7 @@ function Query-Database {
                     return $output
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mongosh' -InstallHint 'Install MongoDB Shell'
+                    Invoke-MissingToolWarning -ToolName 'mongosh'
                 }
             }
         }
@@ -425,7 +425,7 @@ function Export-Database {
                     }
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'pg_dump' -InstallHint 'Install PostgreSQL client tools'
+                    Invoke-MissingToolWarning -ToolName 'pg_dump'
                 }
             }
             'MySQL' {
@@ -440,7 +440,7 @@ function Export-Database {
                     }
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mysqldump' -InstallHint 'Install MySQL client tools'
+                    Invoke-MissingToolWarning -ToolName 'mysqldump'
                 }
             }
             'SQLite' {
@@ -463,7 +463,7 @@ function Export-Database {
                     }
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'sqlite3' -InstallHint 'Install SQLite'
+                    Invoke-MissingToolWarning -ToolName 'sqlite3'
                 }
             }
             'MongoDB' {
@@ -478,7 +478,7 @@ function Export-Database {
                     }
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mongoexport' -InstallHint 'Install MongoDB Database Tools'
+                    Invoke-MissingToolWarning -ToolName 'mongoexport'
                 }
             }
         }
@@ -550,7 +550,7 @@ function Import-Database {
                     return $LASTEXITCODE -eq 0
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'psql' -InstallHint 'Install PostgreSQL client tools'
+                    Invoke-MissingToolWarning -ToolName 'psql'
                     return $false
                 }
             }
@@ -560,7 +560,7 @@ function Import-Database {
                     return $LASTEXITCODE -eq 0
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mysql' -InstallHint 'Install MySQL client tools'
+                    Invoke-MissingToolWarning -ToolName 'mysql'
                     return $false
                 }
             }
@@ -570,7 +570,7 @@ function Import-Database {
                     return $LASTEXITCODE -eq 0
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'sqlite3' -InstallHint 'Install SQLite'
+                    Invoke-MissingToolWarning -ToolName 'sqlite3'
                     return $false
                 }
             }
@@ -582,7 +582,7 @@ function Import-Database {
                     return $LASTEXITCODE -eq 0
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mongoimport' -InstallHint 'Install MongoDB Database Tools'
+                    Invoke-MissingToolWarning -ToolName 'mongoimport'
                     return $false
                 }
             }
@@ -833,7 +833,7 @@ WHERE table_schema = 'public'
                     return $result
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'psql' -InstallHint 'Install PostgreSQL client'
+                    Invoke-MissingToolWarning -ToolName 'psql'
                 }
             }
             'MySQL' {
@@ -846,7 +846,7 @@ WHERE table_schema = 'public'
                     return $result
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mysql' -InstallHint 'Install MySQL client'
+                    Invoke-MissingToolWarning -ToolName 'mysql'
                 }
             }
             'SQLite' {
@@ -859,7 +859,7 @@ WHERE table_schema = 'public'
                     return $result
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'sqlite3' -InstallHint 'Install SQLite'
+                    Invoke-MissingToolWarning -ToolName 'sqlite3'
                 }
             }
             'MongoDB' {
@@ -872,7 +872,7 @@ WHERE table_schema = 'public'
                     return $result
                 }
                 else {
-                    Write-MissingToolWarning -Tool 'mongosh' -InstallHint 'Install MongoDB Shell'
+                    Invoke-MissingToolWarning -ToolName 'mongosh'
                 }
             }
         }

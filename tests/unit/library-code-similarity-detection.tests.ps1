@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     
@@ -33,7 +32,7 @@ BeforeAll {
     Import-Module $script:CodeSimilarityDetectionPath -DisableNameChecking -ErrorAction Stop -Force
     
     # Create test directory and files
-    $script:TestDir = Join-Path $env:TEMP "test-code-similarity-$(Get-Random)"
+    $script:TestDir = New-TestTempDirectory -Prefix 'CodeSimilarityTests'
     New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
     
     # Create similar scripts
@@ -124,7 +123,7 @@ Describe 'CodeSimilarityDetection Module Functions' {
             # With very high threshold and different code, ideally should find no matches
             # But normalization and fallback similarity calculation might find some commonality
             # So we verify the function completes and returns an array (empty or with low similarity results)
-            $result | Should -Not -BeNull
+            $null -ne $result | Should -Be $true
             $result.Count -ge 0 | Should -Be $true
             # If results are found, verify they meet the threshold (they should be >= 0.95 if found)
             if ($result.Count -gt 0) {

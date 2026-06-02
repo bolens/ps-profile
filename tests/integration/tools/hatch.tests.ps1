@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Hatch Tools Integration Tests' {
     BeforeAll {
         try {
@@ -129,17 +131,38 @@ Describe 'Hatch Tools Integration Tests' {
             Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
         }
 
-        It 'Hatch fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('hatch', [ref]$null)
+    }
+
+    Context 'Graceful degradation when hatch is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'New-HatchEnvironment', 'Build-HatchProject',
+                'Get-HatchVersion', 'Set-HatchVersion'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'hatch' -Available $false
-            Remove-Item Function:New-HatchEnvironment -ErrorAction SilentlyContinue
-            Remove-Item Function:Build-HatchProject -ErrorAction SilentlyContinue
-            Remove-Item Function:Get-HatchVersion -ErrorAction SilentlyContinue
-            Remove-Item Function:Set-HatchVersion -ErrorAction SilentlyContinue
-            . (Join-Path $script:ProfileDir 'hatch.ps1')
+            $script:MissingHatchOutput = & { . (Join-Path $script:ProfileDir 'hatch.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when hatch is unavailable' {
             Get-Command New-HatchEnvironment -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when hatch is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingHatchOutput -Pattern 'hatch not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingHatchOutput -ToolName 'hatch'
         }
     }
 }

@@ -3,94 +3,61 @@
 # Unit tests for Audit-RustProject function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-rust.ps1')
+    . (Join-Path $script:ProfileDir 'lang-rust-audit.ps1')
 }
 
 Describe 'lang-rust.ps1 - Audit-RustProject' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('cargo-audit', [ref]$null)
-        }
-        
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('cargo-audit', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'cargo-audit' -Available $false
+        Remove-Item -Path 'Function:\cargo-audit' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:cargo-audit' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when cargo-audit is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo-audit' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'cargo-audit' } -MockWith { return $null }
-            
             $result = Audit-RustProject -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls cargo-audit without arguments' {
-            Setup-AvailableCommandMock -CommandName 'cargo-audit'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo-audit' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'No vulnerabilities found' 
-            }
-            
-            $result = Audit-RustProject
-            
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -BeNullOrEmpty
+            Setup-CapturingCommandMock -CommandName 'cargo-audit' -Output 'No vulnerabilities found'
+
+            $result = Audit-RustProject -ErrorAction SilentlyContinue
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'No vulnerabilities found'
         }
-        
+
         It 'Calls cargo-audit with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'cargo-audit'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo-audit' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Audit complete' 
-            }
-            
-            $result = Audit-RustProject -Arguments @('--deny', 'warnings')
-            
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '--deny'
-            $script:capturedArgs | Should -Contain 'warnings'
+            Setup-CapturingCommandMock -CommandName 'cargo-audit' -Output 'Audit complete'
+
+            Audit-RustProject '--deny', 'warnings' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--deny'
+            $args | Should -Contain 'warnings'
         }
     }
-    
+
     Context 'Error handling' {
         It 'Handles cargo-audit execution errors' {
-            Setup-AvailableCommandMock -CommandName 'cargo-audit'
-            
-            Mock -CommandName 'cargo-audit' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('cargo-audit: command failed')
-            }
-            Mock Write-Error { }
-            
-            $result = Audit-RustProject -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'cargo-audit' -Message 'cargo-audit: command failed'
+
+            { Audit-RustProject -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

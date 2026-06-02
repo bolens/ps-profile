@@ -170,7 +170,7 @@ function New-CacheKey {
             if ($null -ne $sanitized) {
                 $result += $sanitized
             }
-            return $result
+            return @($result)
         }
         
         # For non-strings, try to iterate to see if it's a collection
@@ -245,7 +245,7 @@ function New-CacheKey {
                         # Recursively process each element
                         foreach ($element in $Item) {
                             $processed = Process-Component -Item $element
-                            if ($processed.Count -gt 0) {
+                            if (@($processed).Count -gt 0) {
                                 $result += $processed
                             }
                         }
@@ -293,7 +293,7 @@ function New-CacheKey {
             Write-Host "  [cache-key.process] Final result count: $($result.Count), Values: [$($result -join ', ')]" -ForegroundColor DarkGray
         }
         
-        return $result
+        return @($result)
     }
     
     # Debug logging (level 3 for very verbose cache key debugging, or use special flag)
@@ -353,7 +353,7 @@ function New-CacheKey {
             if ($debugEnabled) {
                 Write-Host "  [cache-key.new] Processed result count: $($processed.Count), Values: [$($processed -join ', ')]" -ForegroundColor DarkGray
             }
-            if ($processed.Count -gt 0) {
+            if (@($processed).Count -gt 0) {
                 $sanitizedComponents += $processed
             }
         }

@@ -1,4 +1,4 @@
-﻿# Load TestSupport.ps1 - ensure it's loaded before using its functions
+# Load TestSupport.ps1 - ensure it's loaded before using its functions
 $testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
 if (Test-Path $testSupportPath) {
     . $testSupportPath
@@ -38,8 +38,8 @@ BeforeAll {
         throw "ModuleLoading.ps1 not found at: $moduleLoadingPath"
     }
     
-    # Create test directory structure
-    $script:TestFragmentRoot = Join-Path $TestDrive 'TestFragmentRoot'
+    # Create test directory structure (avoid TestDrive - conflicts when Pester reuses session scope)
+    $script:TestFragmentRoot = New-TestTempDirectory -Prefix 'ModuleLoadingTests'
     $script:TestModulesDir = Join-Path $script:TestFragmentRoot 'test-modules'
     $script:TestSubDir = Join-Path $script:TestModulesDir 'subdir'
     
@@ -108,16 +108,18 @@ Describe 'ModuleLoading Functions' {
             $result | Should -Be $false
         }
         
-        It 'Returns false for null FragmentRoot' {
-            $result = Test-FragmentModulePath -FragmentRoot $null `
-                -ModulePath @('test-modules', 'valid-module.ps1')
-            $result | Should -Be $false
+        It 'Rejects null FragmentRoot' {
+            {
+                Test-FragmentModulePath -FragmentRoot $null `
+                    -ModulePath @('test-modules', 'valid-module.ps1')
+            } | Should -Throw
         }
         
-        It 'Returns false for empty FragmentRoot' {
-            $result = Test-FragmentModulePath -FragmentRoot '' `
-                -ModulePath @('test-modules', 'valid-module.ps1')
-            $result | Should -Be $false
+        It 'Rejects empty FragmentRoot' {
+            {
+                Test-FragmentModulePath -FragmentRoot '' `
+                    -ModulePath @('test-modules', 'valid-module.ps1')
+            } | Should -Throw
         }
         
         It 'Returns false for empty ModulePath segment' {
@@ -703,7 +705,7 @@ function Test-RetryFunction {
         It 'Retries on transient failures when RetryCount is specified' {
             # Create a module that fails first time, succeeds second time
             $flakyModule = Join-Path $script:TestModulesDir 'flaky-module.ps1'
-            $attempt = 0
+            $script:attempt = 0
             Set-Content -Path $flakyModule -Value @"
 `$script:attempt = `$script:attempt + 1
 if (`$script:attempt -eq 1) {

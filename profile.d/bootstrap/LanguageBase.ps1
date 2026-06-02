@@ -104,8 +104,7 @@ try {
 
         # Register base wrapper
         if (Get-Command Register-ToolWrapper -ErrorAction SilentlyContinue) {
-            Register-ToolWrapper -FunctionName "Invoke-$LanguageName" -CommandName $CommandName `
-                -InstallHint "Install $LanguageName runtime"
+            Register-ToolWrapper -FunctionName "Invoke-$LanguageName" -CommandName $CommandName
         }
         else {
             # Fallback: use Set-AgentModeFunction directly
@@ -120,7 +119,15 @@ try {
                         & $capturedWrapper.CommandName @Arguments
                     }
                     else {
-                        Write-MissingToolWarning -Tool $capturedWrapper.CommandName -InstallHint "Install $($capturedWrapper.LanguageName) runtime"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $capturedWrapper.CommandName
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $capturedWrapper.CommandName
+                    }
+                        else {
+                            Write-MissingToolWarning -Tool $capturedWrapper.CommandName -InstallHint "Install $($capturedWrapper.LanguageName) runtime"
+                        }
                     }
                 }
                 Set-AgentModeFunction -Name "Invoke-$LanguageName" -Body $wrapperBody
@@ -130,8 +137,7 @@ try {
         # Register version manager if specified
         if ($VersionManager) {
             if (Get-Command Register-ToolWrapper -ErrorAction SilentlyContinue) {
-                Register-ToolWrapper -FunctionName "Invoke-$VersionManager" -CommandName $VersionManager `
-                    -InstallHint "Install $VersionManager version manager"
+                Register-ToolWrapper -FunctionName "Invoke-$VersionManager" -CommandName $VersionManager
             }
         }
 
@@ -162,7 +168,16 @@ try {
                     & $captured.CommandName @cmdArgs @Arguments
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.LanguageName) runtime"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.LanguageName) runtime"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.LanguageName) runtime"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Build-${LanguageName}Project" -Body $buildBody
@@ -177,7 +192,16 @@ try {
                     & $captured.CommandName @cmdArgs @Arguments
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.LanguageName) runtime"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.LanguageName) runtime"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.LanguageName) runtime"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Test-${LanguageName}Project" -Body $testBody
@@ -192,7 +216,16 @@ try {
                     & $captured.CommandName @cmdArgs @Arguments
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.LanguageName) runtime"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.LanguageName) runtime"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.LanguageName) runtime"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Run-${LanguageName}Project" -Body $runBody
@@ -201,8 +234,7 @@ try {
         # Register package manager if specified
         if ($PackageManager) {
             if (Get-Command Register-ToolWrapper -ErrorAction SilentlyContinue) {
-                Register-ToolWrapper -FunctionName "Invoke-$PackageManager" -CommandName $PackageManager `
-                    -InstallHint "Install $PackageManager package manager"
+                Register-ToolWrapper -FunctionName "Invoke-$PackageManager" -CommandName $PackageManager
             }
         }
 

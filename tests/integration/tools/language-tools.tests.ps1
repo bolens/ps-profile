@@ -62,10 +62,9 @@ Describe 'Language Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('go', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'go' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'go' } -MockWith { $false }
             $output = go-run main.go 2>&1 3>&1 | Out-String
-            $output | Should -Match 'go not found'
-            $output | Should -Match 'scoop install go'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'go not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'go'
         }
 
         It 'Creates Build-GoProgram function' {

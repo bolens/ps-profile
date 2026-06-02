@@ -13,6 +13,7 @@ if (-not (Test-Path $_ewcLibPath)) {
 if (Test-Path $_ewcLibPath) {
     Import-Module $_ewcLibPath -DisableNameChecking -ErrorAction Stop
     Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+    Import-LibModule -ModuleName 'PlatformPaths' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 } else {
     function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
     enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
@@ -62,6 +63,9 @@ if ($env:PS_PROFILE_CACHE_DIR) {
         $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
         $cacheDir = Join-Path $repoRoot $cacheDir
     }
+}
+elseif (Get-Command Get-CacheDirectory -ErrorAction SilentlyContinue) {
+    $cacheDir = Get-CacheDirectory
 }
 elseif ($env:LOCALAPPDATA) {
     $cacheDir = Join-Path $env:LOCALAPPDATA 'PowerShellProfile'

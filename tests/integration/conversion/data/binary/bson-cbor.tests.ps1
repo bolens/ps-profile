@@ -32,7 +32,7 @@ Describe 'BSON and CBOR Conversion Tests' {
     Context 'BSON and CBOR Conversions' {
         It 'ConvertTo-CborFromBson converts BSON to CBOR' {
             Get-Command ConvertTo-CborFromBson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -42,7 +42,7 @@ Describe 'BSON and CBOR Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'bson') -or -not (Test-NpmPackageAvailable -PackageName 'cbor')) {
-                Set-ItResult -Skipped -Because "Required packages not installed. Install with: pnpm add -g bson cbor"
+                Set-ItResult -Skipped -Because (Get-TestNodePackageSkipMessage -PackageNames @('bson','cbor') -Context 'Required packages not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -60,7 +60,7 @@ Describe 'BSON and CBOR Conversion Tests' {
 
         It 'ConvertTo-BsonFromCbor converts CBOR to BSON' {
             Get-Command ConvertTo-BsonFromCbor -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -70,7 +70,7 @@ Describe 'BSON and CBOR Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'bson') -or -not (Test-NpmPackageAvailable -PackageName 'cbor')) {
-                Set-ItResult -Skipped -Because "Required packages not installed. Install with: pnpm add -g bson cbor"
+                Set-ItResult -Skipped -Because (Get-TestNodePackageSkipMessage -PackageNames @('bson','cbor') -Context 'Required packages not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -111,7 +111,7 @@ Describe 'BSON and CBOR Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match '(bson|cbor).*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match '(bson|cbor)') {
-                    $installCommand = 'pnpm add -g bson cbor'
+                    $installCommand = Resolve-TestNodePackageInstallCommand -PackageNames @('bson', 'cbor')
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))

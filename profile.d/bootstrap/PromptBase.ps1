@@ -124,6 +124,9 @@ try {
             elseif ($InstallHint) {
                 Write-MissingToolWarning -Tool $CommandName -InstallHint $InstallHint
             }
+            elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                Invoke-MissingToolWarning -ToolName $CommandName -Tool $CommandName
+            }
 
             if ($FallbackPrompt) {
                 try {
@@ -267,6 +270,9 @@ try {
 
         if (-not $available -and $InstallHint) {
             Write-MissingToolWarning -Tool $CommandName -InstallHint $InstallHint
+        }
+        elseif (-not $available -and (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue)) {
+            Invoke-MissingToolWarning -ToolName $CommandName -Tool $CommandName
         }
 
         return $available

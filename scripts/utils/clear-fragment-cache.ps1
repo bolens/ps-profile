@@ -82,6 +82,16 @@ try {
     }
     
     Import-Module (Join-Path $corePath 'ExitCodes.psm1') -DisableNameChecking -ErrorAction Stop -Global -Force
+
+    $platformPathsPath = Join-Path $corePath 'PlatformPaths.psm1'
+    if (Test-Path -LiteralPath $platformPathsPath) {
+        Import-Module $platformPathsPath -DisableNameChecking -ErrorAction SilentlyContinue -Global -Force
+    }
+
+    $fragmentPathModule = Join-Path $libPath 'fragment' 'FragmentCachePath.psm1'
+    if (Test-Path -LiteralPath $fragmentPathModule) {
+        Import-Module $fragmentPathModule -DisableNameChecking -ErrorAction SilentlyContinue -Global -Force
+    }
     
     # Logging.psm1 is optional - script works without it (uses fallback error/warning functions)
     # But if available, import it (CommonEnums is already loaded above)
@@ -342,15 +352,23 @@ if ($IncludeDatabase -and ($stats.DatabaseCleared -eq 0)) {
             }
             
             if (-not $dbPath) {
-                # Try to determine path manually
-                $cacheDir = if ($env:PS_PROFILE_CACHE_DIR) {
+                $cacheDir = if (Get-Command Get-CacheDirectory -ErrorAction SilentlyContinue) {
+                    Get-CacheDirectory
+                }
+                elseif ($env:PS_PROFILE_CACHE_DIR) {
                     $env:PS_PROFILE_CACHE_DIR
                 }
                 elseif ($env:LOCALAPPDATA) {
                     Join-Path $env:LOCALAPPDATA 'PowerShellProfile'
                 }
-                else {
+                elseif ($env:XDG_CACHE_HOME) {
+                    Join-Path $env:XDG_CACHE_HOME 'powershell-profile'
+                }
+                elseif ($env:HOME) {
                     Join-Path $env:HOME '.cache' 'powershell-profile'
+                }
+                else {
+                    $null
                 }
                 
                 if ($cacheDir -and (Test-Path -LiteralPath $cacheDir)) {

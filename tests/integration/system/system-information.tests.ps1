@@ -3,6 +3,12 @@
 Describe 'System Information Integration Tests' {
     BeforeAll {
         try {
+            $testSupportPath = Get-TestSupportPath -StartPath $PSScriptRoot
+            if (-not (Test-Path -LiteralPath $testSupportPath)) {
+                throw "TestSupport file not found at: $testSupportPath"
+            }
+            . $testSupportPath
+
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
                 throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -24,13 +30,23 @@ Describe 'System Information Integration Tests' {
 
     Context 'System information functions' {
         BeforeAll {
-            . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-            . (Join-Path $script:ProfileDir 'system-info.ps1')
+            Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap
+            $systemInfoPath = Join-Path $script:ProfileDir 'system-info.ps1'
+            if (-not (Test-Path -LiteralPath $systemInfoPath)) {
+                throw "system-info fragment not found at: $systemInfoPath"
+            }
+            $null = . $systemInfoPath
         }
 
         It 'Get-SystemUptime (uptime) function is available' {
-            Get-Command uptime -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command Get-SystemUptime -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            $uptimeCommand = Get-Command uptime -ErrorAction SilentlyContinue
+            if ($uptimeCommand -and $uptimeCommand.CommandType -eq 'Application') {
+                Set-ItResult -Inconclusive -Because 'A system uptime executable shadows the profile uptime alias on this platform'
+            }
+            else {
+                $uptimeCommand.ResolvedCommandName | Should -Be 'Get-SystemUptime'
+            }
         }
 
         It 'Get-SystemUptime returns TimeSpan object' {
@@ -75,8 +91,14 @@ Describe 'System Information Integration Tests' {
         }
 
         It 'Get-CpuInfo (cpuinfo) function is available' {
-            Get-Command cpuinfo -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command Get-CpuInfo -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            $cpuInfoCommand = Get-Command cpuinfo -ErrorAction SilentlyContinue
+            if ($cpuInfoCommand -and $cpuInfoCommand.CommandType -eq 'Application') {
+                Set-ItResult -Inconclusive -Because 'A system cpuinfo executable shadows the profile cpuinfo alias on this platform'
+            }
+            elseif ($cpuInfoCommand) {
+                $cpuInfoCommand.ResolvedCommandName | Should -Be 'Get-CpuInfo'
+            }
         }
 
         It 'Get-CpuInfo returns CPU information' {

@@ -149,7 +149,8 @@ function Filter-Files {
     }
 
     end {
-        return $filteredFiles.ToArray()
+        # Comma prefix prevents PowerShell from unwrapping single-element arrays
+        return ,$filteredFiles.ToArray()
     }
 }
 

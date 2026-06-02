@@ -46,7 +46,6 @@ Describe 'LazyDocker Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'ld' } -MockWith { $null }
             # Mock lazydocker command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'lazydocker' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'lazydocker' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'lazydocker.ps1')
         }
 
@@ -64,10 +63,9 @@ Describe 'LazyDocker Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('lazydocker', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'lazydocker' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'lazydocker' } -MockWith { $false }
             $output = ld 2>&1 3>&1 | Out-String
-            $output | Should -Match 'lazydocker not found'
-            $output | Should -Match 'scoop install lazydocker'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'lazydocker not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'lazydocker'
         }
     }
 }

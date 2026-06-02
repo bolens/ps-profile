@@ -26,6 +26,10 @@
     Loads system modules from the system subdirectory.
 #>
 function Ensure-System {
+    if (-not (Get-Variable -Name 'SystemInitialized' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:SystemInitialized = $false
+    }
+
     if ($global:SystemInitialized) { return }
 
     # Load modules from registry (deferred loading - only loads when this function is called)

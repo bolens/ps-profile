@@ -48,7 +48,7 @@ function Invoke-Kubectl {
         kubectl @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'kubectl' -InstallHint 'Install with: scoop install kubectl'
+        Invoke-MissingToolWarning -ToolName 'kubectl'
     }
 }
 
@@ -77,7 +77,7 @@ function Set-KubectlContext {
         kubectl config use-context $ContextName
     }
     else {
-        Write-MissingToolWarning -Tool 'kubectl' -InstallHint 'Install with: scoop install kubectl'
+        Invoke-MissingToolWarning -ToolName 'kubectl'
     }
 }
 
@@ -109,7 +109,7 @@ function Get-KubectlResource {
         kubectl get @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'kubectl' -InstallHint 'Install with: scoop install kubectl'
+        Invoke-MissingToolWarning -ToolName 'kubectl'
     }
 }
 
@@ -141,7 +141,7 @@ function Describe-KubectlResource {
         kubectl describe @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'kubectl' -InstallHint 'Install with: scoop install kubectl'
+        Invoke-MissingToolWarning -ToolName 'kubectl'
     }
 }
 
@@ -164,7 +164,7 @@ function Get-KubectlContext {
         kubectl config current-context
     }
     else {
-        Write-MissingToolWarning -Tool 'kubectl' -InstallHint 'Install with: scoop install kubectl'
+        Invoke-MissingToolWarning -ToolName 'kubectl'
     }
 }
 

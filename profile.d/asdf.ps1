@@ -116,5 +116,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'asdfselfupdate' -Target 'Update-AsdfSelf'
 }
 else {
-    Write-MissingToolWarning -Tool 'asdf' -InstallHint 'Install from: https://asdf-vm.com/guide/getting-started.html'
+    Invoke-MissingToolWarning -ToolName 'asdf'
 }

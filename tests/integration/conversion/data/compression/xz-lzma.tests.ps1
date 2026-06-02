@@ -51,7 +51,7 @@ Describe 'XZ/LZMA Compression Tests' {
 
         It 'XZ compression functions require xz command' {
             if (-not $script:XzAvailable) {
-                Set-ItResult -Skipped -Because "xz command is not available"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'xz' -Context 'xz command is not available')
                 return
             }
             # Test that function exists and would require xz
@@ -60,7 +60,7 @@ Describe 'XZ/LZMA Compression Tests' {
 
         It 'Compress-Xz accepts CompressionLevel parameter' {
             if (-not $script:XzAvailable) {
-                Set-ItResult -Skipped -Because "xz command is not available"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'xz' -Context 'xz command is not available')
                 return
             }
             $func = Get-Command Compress-Xz -ErrorAction SilentlyContinue

@@ -244,7 +244,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'ant' -DefaultInstallCommand 'scoop install ant'
+            Invoke-MissingToolWarning -ToolName 'ant' -ToolType 'java-build-tool'
             return $null
         }
 

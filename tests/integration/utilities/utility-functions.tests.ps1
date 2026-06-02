@@ -3,7 +3,6 @@
 Describe 'Utility Functions Integration Tests' {
     BeforeAll {
         try {
-            # Load TestSupport to ensure network mocking functions are available
             $testSupportPath = Get-TestSupportPath -StartPath $PSScriptRoot
             if ($null -eq $testSupportPath -or [string]::IsNullOrWhiteSpace($testSupportPath)) {
                 throw "Get-TestSupportPath returned null or empty value"
@@ -20,29 +19,23 @@ Describe 'Utility Functions Integration Tests' {
             if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
                 throw "Profile directory not found at: $script:ProfileDir"
             }
-            
-            $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-            if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
-                throw "BootstrapPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $bootstrapPath)) {
-                throw "Bootstrap file not found at: $bootstrapPath"
-            }
-            . $bootstrapPath
-            
-            $systemPath = Join-Path $script:ProfileDir 'system.ps1'
-            if ($systemPath -and -not [string]::IsNullOrWhiteSpace($systemPath) -and (Test-Path -LiteralPath $systemPath)) {
-                . $systemPath
-            }
-            
+
+            # files.ps1 loads files-module-registry.ps1 (Load-EnsureModules) required by Ensure-Utilities
+            Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadFilesFragment
+
             $utilitiesPath = Join-Path $script:ProfileDir 'utilities.ps1'
-            if ($null -eq $utilitiesPath -or [string]::IsNullOrWhiteSpace($utilitiesPath)) {
-                throw "UtilitiesPath is null or empty"
-            }
             if (-not (Test-Path -LiteralPath $utilitiesPath)) {
                 throw "Utilities fragment not found at: $utilitiesPath"
             }
-            . $utilitiesPath
+            $null = . $utilitiesPath
+
+            if (-not (Get-Command Load-EnsureModules -ErrorAction SilentlyContinue)) {
+                throw 'Load-EnsureModules is not available after loading files fragment'
+            }
+            if (-not (Get-Command Ensure-Utilities -ErrorAction SilentlyContinue)) {
+                throw 'Ensure-Utilities is not available after loading utilities fragment'
+            }
+            Ensure-Utilities
         }
         catch {
             $errorDetails = @{
@@ -57,20 +50,26 @@ Describe 'Utility Functions Integration Tests' {
 
     Context 'Utility functions additional tests' {
 
-        It 'Reload-Profile function exists and can be called' {
+        It 'Reload-Profile function exists' {
             Get-Command Reload-Profile -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            { Reload-Profile -ErrorAction SilentlyContinue } | Should -Not -Throw
+            # Do not invoke Reload-Profile here: it dotsources $PROFILE and is environment-dependent.
         }
 
         It 'Edit-Profile function exists and can be called' {
             Get-Command Edit-Profile -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            Get-Command edit-profile -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Note: Calling the function may fail in test environment due to external dependencies
+            # edit-profile resolves to Edit-Profile; Set-AgentModeAlias may skip when the name already resolves.
+            (Get-Command edit-profile -ErrorAction SilentlyContinue).Name | Should -Be 'Edit-Profile'
         }
 
         It 'Get-Weather function exists and handles no arguments' {
             Get-Command Get-Weather -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            Get-Command weather -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
+            $weatherCommand = Get-Command weather -ErrorAction SilentlyContinue
+            if ($weatherCommand -and $weatherCommand.CommandType -eq 'Application') {
+                Set-ItResult -Inconclusive -Because 'A system weather executable shadows the profile weather alias on this platform'
+            }
+            else {
+                $weatherCommand | Should -Not -Be $null
+            }
             # Mock Invoke-WebRequest to avoid network dependency in tests using network mocking helper
             Mock-WebRequestSuccess -Content "Mocked weather data"
             { Get-Weather -ErrorAction SilentlyContinue } | Should -Not -Throw

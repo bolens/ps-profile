@@ -60,7 +60,7 @@ if (Test-CachedCommand pnpm) {
             & pnpm outdated
         }
         else {
-            Write-MissingToolWarning -Tool 'pnpm' -InstallHint 'Install with: scoop install pnpm'
+            Invoke-MissingToolWarning -ToolName 'pnpm' -ToolType 'node-package'
         }
     }
     Set-Alias -Name pnoutdated -Value Test-PnpmOutdated -Option AllScope -Force
@@ -84,7 +84,7 @@ if (Test-CachedCommand pnpm) {
             & pnpm update
         }
         else {
-            Write-MissingToolWarning -Tool 'pnpm' -InstallHint 'Install with: scoop install pnpm'
+            Invoke-MissingToolWarning -ToolName 'pnpm' -ToolType 'node-package'
         }
     }
     Set-Alias -Name pnupdate -Value Update-PnpmPackages -Option AllScope -Force
@@ -107,7 +107,7 @@ if (Test-CachedCommand pnpm) {
             & pnpm add -g pnpm@latest
         }
         else {
-            Write-MissingToolWarning -Tool 'pnpm' -InstallHint 'Install with: scoop install pnpm'
+            Invoke-MissingToolWarning -ToolName 'pnpm' -ToolType 'node-package'
         }
     }
     Set-Alias -Name pnupgrade -Value Update-PnpmSelf -Option AllScope -Force
@@ -157,7 +157,7 @@ if (Test-CachedCommand pnpm) {
             & pnpm remove @args @Packages
         }
         else {
-            Write-MissingToolWarning -Tool 'pnpm' -InstallHint 'Install with: scoop install pnpm'
+            Invoke-MissingToolWarning -ToolName 'pnpm' -ToolType 'node-package'
         }
     }
     Set-Alias -Name pnremove -Value Remove-PnpmPackage -Option AllScope -Force
@@ -206,7 +206,7 @@ if (Test-CachedCommand pnpm) {
             & pnpm add @args @Packages
         }
         else {
-            Write-MissingToolWarning -Tool 'pnpm' -InstallHint 'Install with: scoop install pnpm'
+            Invoke-MissingToolWarning -ToolName 'pnpm' -ToolType 'node-package'
         }
     }
     Set-Alias -Name pnadd -Value Invoke-PnpmInstall -Option AllScope -Force

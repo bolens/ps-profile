@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'mix Tools Integration Tests' {
     BeforeAll {
         try {
@@ -91,6 +93,39 @@ Describe 'mix Tools Integration Tests' {
             Update-MixDependencies
             Should -Invoke -CommandName 'mix' -Times 1 -Exactly
             Get-Command Update-MixDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when mix is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Test-MixOutdated', 'Update-MixDependencies',
+                'Install-MixDependencies', 'Add-MixDependency', 'Remove-MixDependency'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'mix' -Available $false
+            $script:MissingMixOutput = & { . (Join-Path $script:ProfileDir 'mix.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when mix is unavailable' {
+            Get-Command Test-MixOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when mix is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingMixOutput -Pattern 'mix not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingMixOutput -ToolName 'mix'
         }
     }
 }

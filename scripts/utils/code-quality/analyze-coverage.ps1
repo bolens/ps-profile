@@ -67,6 +67,8 @@ $ErrorActionPreference = 'Stop'
 # This script should never require user input - always run non-interactively
 $ConfirmPreference = 'None'
 $global:ConfirmPreference = 'None'
+$env:PS_PROFILE_TEST_MODE = '1'
+$env:PS_PROFILE_NONINTERACTIVE = '1'
 
 # Set default parameter values to suppress prompts for Remove-Item
 if (-not $PSDefaultParameterValues) {

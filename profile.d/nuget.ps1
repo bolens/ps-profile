@@ -126,5 +126,5 @@ if (Test-CachedCommand nuget) {
     Set-AgentModeAlias -Name 'nugetupdate' -Target 'Update-NuGetPackages'
 }
 else {
-    Write-MissingToolWarning -Tool 'nuget' -InstallHint 'Install from: https://www.nuget.org/downloads or use: scoop install nuget (or: choco install nuget.commandline, or: winget install Microsoft.NuGet)'
+    Invoke-MissingToolWarning -ToolName 'nuget' -ToolType 'dotnet-package'
 }

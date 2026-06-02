@@ -93,13 +93,14 @@ try:
         with open(sys.argv[2], 'w') as f:
             json.dump(result, f, indent=2, default=str)
 except ImportError:
-    print('Error: astropy package is not installed. Install it with: uv pip install astropy', file=sys.stderr)
+    print('Error: astropy package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "fits-decode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'astropy' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -177,13 +178,14 @@ try:
     
     hdul.writeto(sys.argv[2], overwrite=True)
 except ImportError:
-    print('Error: astropy package is not installed. Install it with: uv pip install astropy', file=sys.stderr)
+    print('Error: astropy package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "fits-encode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'astropy' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -252,13 +254,14 @@ try:
                 for row in table_hdu.data:
                     writer.writerow([row[col] for col in table_hdu.data.columns.names])
 except ImportError:
-    print('Error: astropy package is not installed. Install it with: uv pip install astropy', file=sys.stderr)
+    print('Error: astropy package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "fits-to-csv-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'astropy' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1

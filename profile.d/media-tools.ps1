@@ -114,12 +114,6 @@ try {
 
         if ($UseHandbrake) {
             if (-not (Test-CachedCommand 'handbrake-cli') -and -not (Test-CachedCommand 'HandBrakeCLI')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
                 Invoke-MissingToolWarning -ToolName 'handbrake-cli'
                 return
             }
@@ -174,12 +168,6 @@ try {
         }
         else {
             if (-not (Test-CachedCommand 'ffmpeg')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
                 Invoke-MissingToolWarning -ToolName 'ffmpeg'
                 return
             }
@@ -275,12 +263,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'ffmpeg')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'ffmpeg'
             return
         }
@@ -402,12 +384,6 @@ try {
         }
 
         if (-not (Test-CachedCommand $toolName)) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName $toolName
             return
         }
@@ -478,12 +454,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'cyanrip')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'cyanrip'
             return
         }
@@ -602,12 +572,6 @@ try {
             $mediainfoCmd = 'MediaInfo'
         }
         else {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'mediainfo'
             return
         }
@@ -702,12 +666,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'mkvmerge')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'mkvtoolnix' -Tool 'mkvmerge'
             return
         }

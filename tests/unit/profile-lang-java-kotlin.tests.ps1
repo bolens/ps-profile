@@ -3,39 +3,28 @@
 # Unit tests for Compile-Kotlin function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-java.ps1')
+    . (Join-Path $script:ProfileDir 'lang-java-compilers.ps1')
 }
 
 Describe 'lang-java.ps1 - Compile-Kotlin' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('kotlinc', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('kotlinc', [ref]$null)
-        }
+        Set-TestCommandAvailabilityState -CommandName 'kotlinc' -Available $false
+        Remove-Item -Path 'Function:\kotlinc' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:kotlinc' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
         It 'Returns null when kotlinc is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'kotlinc' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'kotlinc' } -MockWith { return $null }
-
             $result = Compile-Kotlin -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,40 +33,21 @@ Describe 'lang-java.ps1 - Compile-Kotlin' {
 
     Context 'Tool available' {
         It 'Calls kotlinc with arguments' {
-            Setup-AvailableCommandMock -CommandName 'kotlinc'
+            Setup-CapturingCommandMock -CommandName 'kotlinc' -Output 'Compilation complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'kotlinc' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Compilation complete' 
-            }
+            $result = Compile-Kotlin 'Main.kt' -ErrorAction SilentlyContinue
 
-            $result = Compile-Kotlin -Arguments @('Main.kt')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'Main.kt'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'Main.kt'
+            $result | Should -Be 'Compilation complete'
         }
     }
 
     Context 'Error handling' {
         It 'Handles kotlinc execution errors' {
-            Setup-AvailableCommandMock -CommandName 'kotlinc'
+            Set-TestCommandThrowingMock -CommandName 'kotlinc' -Message 'kotlinc: command failed'
 
-            Mock -CommandName 'kotlinc' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('kotlinc: command failed')
-            }
-            Mock Write-Error { }
-
-            try {
-                $result = Compile-Kotlin -Arguments @('Main.kt') -ErrorAction SilentlyContinue
-            }
-            catch {
-                # Exception may propagate in test environment
-            }
-
-            $result | Should -BeNullOrEmpty
+            { Compile-Kotlin 'Main.kt' -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

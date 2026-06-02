@@ -163,7 +163,7 @@ Describe 'TestExecution Module Tests' {
         }
 
         It 'Checks path existence' {
-            $health = Test-TestEnvironmentHealth -CheckPaths
+            $health = Test-TestEnvironmentHealth -CheckPaths -RepoRoot $script:TestRepoRoot
 
             $health.Checks | Should -Not -BeNullOrEmpty
 

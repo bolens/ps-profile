@@ -15,22 +15,20 @@ BeforeAll {
     . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
 }
 
-AfterEach {
-    # Clear events after each test
-    if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
-        Clear-EventCollection | Out-Null
-    }
-    
-    # Reset tracking
-    if ($global:ErrorEventTracking) {
-        $global:ErrorEventTracking.ErrorCount = 0
-        $global:ErrorEventTracking.SlowRequestCount = 0
-        $global:ErrorEventTracking.SampledSuccessCount = 0
-        $global:ErrorEventTracking.TotalEvents = 0
-    }
-}
-
 Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
+    AfterEach {
+        if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
+            Clear-EventCollection | Out-Null
+        }
+
+        if ($global:ErrorEventTracking) {
+            $global:ErrorEventTracking.ErrorCount = 0
+            $global:ErrorEventTracking.SlowRequestCount = 0
+            $global:ErrorEventTracking.SampledSuccessCount = 0
+            $global:ErrorEventTracking.TotalEvents = 0
+        }
+    }
+
     Context 'Module Loading' {
         It 'Loads without errors' {
             { . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1') } | Should -Not -Throw
@@ -55,16 +53,17 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
     
     Context 'OpenTelemetry Compliance' {
         It 'Follows OpenTelemetry semantic conventions' {
-            Write-WideEvent -EventName 'otel.test' -Level INFO -Context @{ test = 'value' }
+            Write-WideEvent -EventName 'otel.test' -Level INFO -Context @{ test = 'value' } -AlwaysKeep
             
-            $event = $global:WideEvents[-1]
+            $global:WideEvents.Count | Should -BeGreaterThan 0
+            $event = $global:WideEvents[$global:WideEvents.Count - 1]
             
-            # Required OpenTelemetry fields
-            $event.PSObject.Properties['timestamp'] | Should -Not -BeNullOrEmpty
-            $event.PSObject.Properties['severity'] | Should -Not -BeNullOrEmpty
-            $event.PSObject.Properties['severity_number'] | Should -Not -BeNullOrEmpty
-            $event.PSObject.Properties['service_name'] | Should -Not -BeNullOrEmpty
-            $event.PSObject.Properties['status_code'] | Should -Not -BeNullOrEmpty
+            # Required OpenTelemetry fields (events are stored as hashtables)
+            $event['timestamp'] | Should -Not -BeNullOrEmpty
+            $event['severity'] | Should -Not -BeNullOrEmpty
+            $event['severity_number'] | Should -Not -BeNullOrEmpty
+            $event['service_name'] | Should -Not -BeNullOrEmpty
+            $event['status_code'] | Should -Not -BeNullOrEmpty
         }
         
         It 'Records exceptions following OpenTelemetry format' {
@@ -77,7 +76,8 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
             
             Write-WideEvent -EventName 'otel.error' -Level ERROR -ErrorRecord $errorRecord -Context @{}
             
-            $event = $global:WideEvents[-1]
+            $global:WideEvents.Count | Should -BeGreaterThan 0
+            $event = $global:WideEvents[$global:WideEvents.Count - 1]
             $event.error.type | Should -Not -BeNullOrEmpty
             $event.error.message | Should -Be 'OTel test error'
             $event.status_code | Should -Be 'ERROR'
@@ -94,9 +94,10 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
                 business_context = 'important-operation'
             }
             
-            Write-WideEvent -EventName 'wide.test' -Level INFO -Context $context -DurationMs 150
+            Write-WideEvent -EventName 'wide.test' -Level INFO -Context $context -DurationMs 150 -AlwaysKeep
             
-            $event = $global:WideEvents[-1]
+            $global:WideEvents.Count | Should -BeGreaterThan 0
+            $event = $global:WideEvents[$global:WideEvents.Count - 1]
             $event.context.user_id | Should -Be 'user123'
             $event.context.request_id | Should -Be 'req456'
             $event.context.feature_flag | Should -Be 'new-feature'
@@ -112,9 +113,10 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
                 execution_time_ms = 250
             }
             
-            Write-WideEvent -EventName 'wide.db.query' -Level INFO -Context $context
+            Write-WideEvent -EventName 'wide.db.query' -Level INFO -Context $context -AlwaysKeep
             
-            $event = $global:WideEvents[-1]
+            $global:WideEvents.Count | Should -BeGreaterThan 0
+            $event = $global:WideEvents[$global:WideEvents.Count - 1]
             # Business context
             $event.context.user_id | Should -Be 'user123'
             # Technical context
@@ -173,12 +175,13 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
                 database   = 'production'
                 query      = 'SELECT * FROM users WHERE id = ?'
                 parameters = @('user123')
-            } -ScriptBlock {
+            } -AlwaysKeep -ScriptBlock {
                 Start-Sleep -Milliseconds 50
                 return @{ count = 1 }
             }
             
-            $event = $global:WideEvents[-1]
+            $global:WideEvents.Count | Should -BeGreaterThan 0
+            $event = $global:WideEvents[$global:WideEvents.Count - 1]
             $event.event_name | Should -Be 'database.query'
             $event.context.user_id | Should -Be 'user123'
             $event.context.database | Should -Be 'production'
@@ -201,7 +204,8 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
             }
             
             $errorThrown | Should -Be $true
-            $event = $global:WideEvents[-1]
+            $global:WideEvents.Count | Should -BeGreaterThan 0
+            $event = $global:WideEvents[$global:WideEvents.Count - 1]
             $event.event_name | Should -Be 'aws.s3.upload'
             $event.context.bucket | Should -Be 'my-bucket'
             $event.severity | Should -Be 'ERROR'

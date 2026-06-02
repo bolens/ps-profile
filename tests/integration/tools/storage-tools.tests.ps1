@@ -46,7 +46,6 @@ Describe 'Storage Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rls' } -MockWith { $null }
             # Mock rclone command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'rclone' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'rclone' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'rclone.ps1')
         }
 
@@ -64,10 +63,9 @@ Describe 'Storage Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('rclone', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'rclone' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'rclone' } -MockWith { $false }
             $output = rcopy source dest 2>&1 3>&1 | Out-String
-            $output | Should -Match 'rclone not found'
-            $output | Should -Match 'scoop install rclone'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'rclone not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'rclone'
         }
 
         It 'Creates Get-RcloneFileList function' {
@@ -86,7 +84,6 @@ Describe 'Storage Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'mc' } -MockWith { $null }
             # Mock mc command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'mc' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'mc' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'minio.ps1')
         }
 
@@ -104,10 +101,9 @@ Describe 'Storage Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('mc', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'mc' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'mc' } -MockWith { $false }
             $output = mc-ls path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'mc not found'
-            $output | Should -Match 'scoop install minio-client'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'mc not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'minio-client'
         }
 
         It 'Creates Copy-MinioFile function' {

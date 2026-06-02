@@ -65,13 +65,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'mongodb-compass')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'mongodb-compass' -DefaultInstallCommand 'scoop install mongodb-compass'
+            Invoke-MissingToolWarning -ToolName 'mongodb-compass'
             return $null
         }
 
@@ -139,13 +133,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'sql-workbench')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'sql-workbench' -DefaultInstallCommand 'scoop install sql-workbench'
+            Invoke-MissingToolWarning -ToolName 'sql-workbench'
             return $null
         }
 
@@ -220,13 +208,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'dbeaver')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'dbeaver' -DefaultInstallCommand 'scoop install dbeaver'
+            Invoke-MissingToolWarning -ToolName 'dbeaver'
             return $null
         }
 
@@ -301,13 +283,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'tableplus')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'tableplus' -DefaultInstallCommand 'scoop install tableplus'
+            Invoke-MissingToolWarning -ToolName 'tableplus'
             return $null
         }
 
@@ -380,13 +356,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'hasura-cli')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'hasura-cli' -DefaultInstallCommand 'scoop install hasura-cli'
+            Invoke-MissingToolWarning -ToolName 'hasura-cli'
             return $null
         }
 
@@ -459,13 +429,7 @@ try {
         }
 
         if (-not $supabaseCmd) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'supabase' -DefaultInstallCommand 'scoop install supabase-beta'
+            Invoke-MissingToolWarning -ToolName 'supabase'
             return $null
         }
 

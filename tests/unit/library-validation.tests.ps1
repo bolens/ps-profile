@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ValidationPath = Join-Path $script:LibPath 'core' 'Validation.psm1'
@@ -47,7 +46,7 @@ Describe 'Validation Module Functions' {
 
     Context 'Test-ValidPath' {
         BeforeEach {
-            $script:TestDir = Join-Path $TestDrive 'TestValidation'
+            $script:TestDir = New-TestTempDirectory -Prefix 'TestValidation'
             $script:TestFile = Join-Path $script:TestDir 'test.txt'
             New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
             New-Item -ItemType File -Path $script:TestFile -Force | Out-Null
@@ -104,7 +103,7 @@ Describe 'Validation Module Functions' {
 
     Context 'Assert-ValidPath' {
         BeforeEach {
-            $script:TestDir = Join-Path $TestDrive 'TestAssert'
+            $script:TestDir = New-TestTempDirectory -Prefix 'TestAssert'
             $script:TestFile = Join-Path $script:TestDir 'test.txt'
             New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
             New-Item -ItemType File -Path $script:TestFile -Force | Out-Null

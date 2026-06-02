@@ -3,13 +3,8 @@
 # Unit tests for Set-GcpProject function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'cloud-enhanced.ps1')
@@ -17,98 +12,65 @@ BeforeAll {
 
 Describe 'cloud-enhanced.ps1 - Set-GcpProject' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('gcloud', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'gcloud' -Available $false
+        Remove-Item -Path 'Function:\gcloud' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:gcloud' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when gcloud is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'gcloud' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'gcloud' } -MockWith { return $null }
-            
             $result = Set-GcpProject -List -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Lists projects when List is specified' {
-            Setup-AvailableCommandMock -CommandName 'gcloud'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'gcloud' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Project list'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'gcloud' -Output 'Project list'
+
             $result = Set-GcpProject -List -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'projects'
-            $script:capturedArgs | Should -Contain 'list'
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'projects'
+            $args | Should -Contain 'list'
             $result | Should -Not -BeNullOrEmpty
         }
-        
+
         It 'Switches project when ProjectId is specified' {
-            Setup-AvailableCommandMock -CommandName 'gcloud'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'gcloud' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            Mock Write-Host { }
-            
-            $result = Set-GcpProject -ProjectId 'my-project' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'config'
-            $script:capturedArgs | Should -Contain 'set'
-            $script:capturedArgs | Should -Contain 'project'
-            $script:capturedArgs | Should -Contain 'my-project'
+            Setup-CapturingCommandMock -CommandName 'gcloud' -Output ''
+
+            Set-GcpProject -ProjectId 'my-project' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'config'
+            $args | Should -Contain 'set'
+            $args | Should -Contain 'project'
+            $args | Should -Contain 'my-project'
         }
-        
+
         It 'Shows current project when no parameters' {
-            Setup-AvailableCommandMock -CommandName 'gcloud'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'gcloud' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'my-project'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'gcloud' -Output 'my-project'
+
             $result = Set-GcpProject -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'config'
-            $script:capturedArgs | Should -Contain 'get-value'
-            $script:capturedArgs | Should -Contain 'project'
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'config'
+            $args | Should -Contain 'get-value'
+            $args | Should -Contain 'project'
             $result | Should -Not -BeNullOrEmpty
         }
-        
+
         It 'Handles gcloud execution errors' {
-            Setup-AvailableCommandMock -CommandName 'gcloud'
-            
-            Mock -CommandName 'gcloud' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
-            $result = Set-GcpProject -List -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Setup-CapturingCommandMock -CommandName 'gcloud' -Output '' -ExitCode 1
+
+            { Set-GcpProject -List -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

@@ -5,9 +5,8 @@ tests/unit/library-fragment-idempotency.tests.ps1
     Unit tests for FragmentIdempotency.psm1 module functions.
 #>
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     # Import the FragmentIdempotency module
     $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop

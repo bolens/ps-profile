@@ -3,6 +3,12 @@
 Describe 'System Utility Functions Edge Cases' {
     BeforeAll {
         try {
+            $testSupportPath = Get-TestSupportPath -StartPath $PSScriptRoot
+            if (-not (Test-Path -LiteralPath $testSupportPath)) {
+                throw "TestSupport file not found at: $testSupportPath"
+            }
+            . $testSupportPath
+
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
@@ -28,8 +34,7 @@ Describe 'System Utility Functions Edge Cases' {
 
     Context 'System utility functions edge cases' {
         BeforeAll {
-            . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-            . (Join-Path $script:ProfileDir 'system.ps1')
+            Initialize-SystemUtilityIntegration -ProfileDir $script:ProfileDir -IncludeUtilities
         }
 
         It 'which handles non-existent commands' {

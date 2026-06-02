@@ -96,5 +96,5 @@ if (Test-CachedCommand swift) {
     Set-AgentModeAlias -Name 'swift-remove' -Target 'Remove-SwiftPackage'
 }
 else {
-    Write-MissingToolWarning -Tool 'swift' -InstallHint 'Install Swift from: https://swift.org/download/ or use: scoop install swift'
+    Invoke-MissingToolWarning -ToolName 'swift'
 }

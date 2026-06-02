@@ -1,4 +1,5 @@
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
 
 BeforeAll {
     try {
@@ -56,11 +57,8 @@ Describe "Starship Module Tests" {
         Remove-Variable -Name LastCommandDuration -Scope Global -ErrorAction SilentlyContinue
         Remove-Variable -Name LastCommandSucceeded -Scope Global -ErrorAction SilentlyContinue
 
-        # Mock external commands using standardized mocking pattern
-        Mock-CommandAvailabilityPester -CommandName 'starship' -Available $false -Scope It
-        Mock-CommandAvailabilityPester -CommandName 'git' -Available $false -Scope It
-        Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'starship' } -MockWith { $false }
-        Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'git' } -MockWith { $false }
+        Mock-CommandAvailabilityPester -CommandName 'starship' -Available $false
+        Mock-CommandAvailabilityPester -CommandName 'git' -Available $false
     }
 
     Context "Test-StarshipInitialized" {
@@ -83,7 +81,12 @@ Describe "Starship Module Tests" {
     Context "Test-PromptNeedsReplacement" {
         It "Function exists and is callable" {
             Get-Command Test-PromptNeedsReplacement -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            { Test-PromptNeedsReplacement } | Should -Not -Throw
+            if (-not (Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue)) {
+                Set-Item -Path Function:\global:prompt -Value { 'PS> ' } -Force
+            }
+            $promptCmd = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
+            $promptCmd | Should -Not -BeNullOrEmpty
+            { Test-PromptNeedsReplacement -PromptCmd $promptCmd } | Should -Not -Throw
         }
     }
 
@@ -104,15 +107,16 @@ Describe "Starship Module Tests" {
             Remove-Variable -Name StarshipCommand -Scope Global -ErrorAction SilentlyContinue
         }
 
-        It "Creates a global prompt function" {
-            New-StarshipPromptFunction -StarshipCommandPath $tempPath
-            Get-Command prompt -CommandType Function | Should -Not -BeNullOrEmpty
+        It "Returns a fallback prompt string when starship command is unavailable" {
+            Remove-Variable -Name StarshipCommand -Scope Global -ErrorAction SilentlyContinue
+            $result = New-StarshipPromptFunction -StarshipCommandPath $tempPath
+            $result | Should -Match 'PS.*>'
         }
 
-        It "Returns fallback prompt when starship command not found" {
+        It "Returns a fallback prompt string when starship path is missing" {
             Remove-Variable -Name StarshipCommand -Scope Global -ErrorAction SilentlyContinue
-            $result = prompt
-            $result | Should -Match "PS.*>"
+            $result = New-StarshipPromptFunction -StarshipCommandPath 'nonexistent-starship'
+            $result | Should -Match 'PS.*>'
         }
     }
 
@@ -151,7 +155,7 @@ Describe "Starship Module Tests" {
     Context "Initialize-Starship" {
         It "Uses smart prompt when starship not available" {
             Mock Get-Command { $null } -ParameterFilter { $Name -eq 'starship' }
-            Mock Test-HasCommand { $false } -ParameterFilter { $Command -eq 'starship' }
+            Mock-CommandAvailabilityPester -CommandName 'starship' -Available $false
             { Initialize-Starship } | Should -Not -Throw
             # Should initialize smart prompt as fallback
             $global:SmartPromptInitialized | Should -Be $true
@@ -186,8 +190,18 @@ Describe "Starship Module Tests" {
 
         It "Does not reinitialize if already done" {
             $global:SmartPromptInitialized = $true
-            Initialize-SmartPrompt
-            $script:capturedOutput += $Object
-                
+            $originalPrompt = $function:prompt
+
             $script:capturedOutput = @()
             Mock -CommandName Write-Host -MockWith {
+                param($Object)
+                $script:capturedOutput += $Object
+            }
+
+            Initialize-SmartPrompt
+
+            @($script:capturedOutput).Count | Should -Be 0
+            $function:prompt | Should -Be $originalPrompt
+        }
+    }
+}

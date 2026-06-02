@@ -48,24 +48,30 @@ Describe 'network-analysis.ps1 - Function Registration' {
 }
 
 Describe 'network-analysis.ps1 - Graceful Degradation' {
+    BeforeEach {
+        foreach ($cmd in @('wireshark', 'sniffnet', 'trippy', 'nali', 'ipinfo', 'cloudflared', 'ntfy')) {
+            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        }
+    }
+
     It 'Start-Wireshark handles missing tool gracefully' {
         { Start-Wireshark -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Invoke-NetworkScan handles missing tool gracefully' {
         { Invoke-NetworkScan -Target '192.168.1.1' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Get-IpInfo handles missing tool gracefully' {
         { Get-IpInfo -IpAddress '8.8.8.8' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Start-CloudflareTunnel handles missing tool gracefully' {
         { Start-CloudflareTunnel -Url 'http://localhost:8080' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Send-NtfyNotification handles missing tool gracefully' {
         { Send-NtfyNotification -Message 'Test' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
 }
 

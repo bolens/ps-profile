@@ -52,7 +52,7 @@ try {
     console.log(JSON.stringify(serialized));
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: superjson package is not installed. Install it with: pnpm add -g superjson');
+        console.error('Error: superjson package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -60,6 +60,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "superjson-serialize-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'superjson' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath
@@ -96,7 +97,7 @@ try {
     console.log(JSON.stringify(data, null, 2));
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: superjson package is not installed. Install it with: pnpm add -g superjson');
+        console.error('Error: superjson package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -104,6 +105,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "superjson-deserialize-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'superjson' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath

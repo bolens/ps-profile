@@ -48,7 +48,7 @@ function Start-NextJsDev {
         npx next dev @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 
@@ -80,7 +80,7 @@ function Build-NextJsApp {
         npx next build @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 
@@ -112,7 +112,7 @@ function Start-NextJsProduction {
         npx next start @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 
@@ -144,7 +144,7 @@ function New-NextJsApp {
         npx create-next-app @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx' -InstallHint 'Install with: npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx'
     }
 }
 

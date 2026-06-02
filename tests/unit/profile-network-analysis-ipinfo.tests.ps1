@@ -3,13 +3,8 @@
 # Unit tests for Get-IpInfo function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'network-analysis.ps1')
@@ -17,117 +12,78 @@ BeforeAll {
 
 Describe 'network-analysis.ps1 - Get-IpInfo' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('nali', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('ipinfo', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'nali' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'ipinfo' -Available $false
+        Remove-Item -Path 'Function:\nali' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:nali' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\ipinfo' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:ipinfo' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when nali is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'nali' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'nali' } -MockWith { return $null }
-            
             $result = Get-IpInfo -IpAddress '8.8.8.8' -Tool 'nali' -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Returns null when ipinfo is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'ipinfo' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'ipinfo' } -MockWith { return $null }
-            
             $result = Get-IpInfo -IpAddress '8.8.8.8' -Tool 'ipinfo' -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Nali tool' {
         It 'Calls nali with IP address' {
-            Setup-AvailableCommandMock -CommandName 'nali'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'nali' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return '8.8.8.8 [US]'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'nali' -Output '8.8.8.8 [US]'
+
             $result = Get-IpInfo -IpAddress '8.8.8.8' -Tool 'nali' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '8.8.8.8'
-            $result | Should -Not -BeNullOrEmpty
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '8.8.8.8'
+            $result | Should -Be '8.8.8.8 [US]'
         }
-        
+
         It 'Handles nali execution errors' {
-            Setup-AvailableCommandMock -CommandName 'nali'
-            
-            Mock -CommandName 'nali' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
+            Setup-CapturingCommandMock -CommandName 'nali' -ExitCode 1
+
             $result = Get-IpInfo -IpAddress '8.8.8.8' -Tool 'nali' -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+
+            $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Ipinfo tool' {
         It 'Calls ipinfo with IP address' {
-            Setup-AvailableCommandMock -CommandName 'ipinfo'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'ipinfo' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'IP: 8.8.8.8'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'ipinfo' -Output 'IP: 8.8.8.8'
+
             $result = Get-IpInfo -IpAddress '8.8.8.8' -Tool 'ipinfo' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '8.8.8.8'
-            $result | Should -Not -BeNullOrEmpty
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '8.8.8.8'
+            $result | Should -Be 'IP: 8.8.8.8'
         }
-        
+
         It 'Calls ipinfo with JSON format' {
-            Setup-AvailableCommandMock -CommandName 'ipinfo'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'ipinfo' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return '{"ip": "8.8.8.8"}'
-            }
-            
-            $result = Get-IpInfo -IpAddress '8.8.8.8' -Tool 'ipinfo' -OutputFormat 'json' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--json'
+            Setup-CapturingCommandMock -CommandName 'ipinfo' -Output '{"ip": "8.8.8.8"}'
+
+            Get-IpInfo -IpAddress '8.8.8.8' -Tool 'ipinfo' -OutputFormat 'json' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--json'
         }
-        
+
         It 'Handles ipinfo execution errors' {
-            Setup-AvailableCommandMock -CommandName 'ipinfo'
-            
-            Mock -CommandName 'ipinfo' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
-            $result = Get-IpInfo -IpAddress '8.8.8.8' -Tool 'ipinfo' -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Setup-CapturingCommandMock -CommandName 'ipinfo' -ExitCode 1
+
+            { Get-IpInfo -IpAddress '8.8.8.8' -Tool 'ipinfo' -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

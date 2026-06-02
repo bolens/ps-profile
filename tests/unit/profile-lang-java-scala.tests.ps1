@@ -3,39 +3,28 @@
 # Unit tests for Compile-Scala function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-java.ps1')
+    . (Join-Path $script:ProfileDir 'lang-java-compilers.ps1')
 }
 
 Describe 'lang-java.ps1 - Compile-Scala' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('scalac', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('scalac', [ref]$null)
-        }
+        Set-TestCommandAvailabilityState -CommandName 'scalac' -Available $false
+        Remove-Item -Path 'Function:\scalac' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:scalac' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
         It 'Returns null when scalac is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'scalac' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'scalac' } -MockWith { return $null }
-
             $result = Compile-Scala -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,40 +33,21 @@ Describe 'lang-java.ps1 - Compile-Scala' {
 
     Context 'Tool available' {
         It 'Calls scalac with arguments' {
-            Setup-AvailableCommandMock -CommandName 'scalac'
+            Setup-CapturingCommandMock -CommandName 'scalac' -Output 'Compilation complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'scalac' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Compilation complete' 
-            }
+            $result = Compile-Scala 'Main.scala' -ErrorAction SilentlyContinue
 
-            $result = Compile-Scala -Arguments @('Main.scala')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'Main.scala'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'Main.scala'
+            $result | Should -Be 'Compilation complete'
         }
     }
 
     Context 'Error handling' {
         It 'Handles scalac execution errors' {
-            Setup-AvailableCommandMock -CommandName 'scalac'
+            Set-TestCommandThrowingMock -CommandName 'scalac' -Message 'scalac: command failed'
 
-            Mock -CommandName 'scalac' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('scalac: command failed')
-            }
-            Mock Write-Error { }
-
-            try {
-                $result = Compile-Scala -Arguments @('Main.scala') -ErrorAction SilentlyContinue
-            }
-            catch {
-                # Exception may propagate in test environment
-            }
-
-            $result | Should -BeNullOrEmpty
+            { Compile-Scala 'Main.scala' -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

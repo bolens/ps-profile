@@ -57,7 +57,7 @@ function Get-DocumentedCommands {
 
     Get-ChildItem -Path $ProfilePath -Filter '*.ps1' | ForEach-Object {
         $file = $_.FullName
-        Write-Output "Scanning $file for functions..."
+        Write-Verbose "Scanning $file for functions..."
 
         # Parse the file content to find functions using AST
         $content = Get-Content $file -Raw

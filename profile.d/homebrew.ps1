@@ -385,12 +385,12 @@ if (Test-CachedCommand brew) {
             return
         }
         
-        $args = @('bundle', '--file', $Path)
+        $brewArgs = @('bundle', '--file', $Path)
         if ($NoLock) {
-            $args += '--no-lock'
+            $brewArgs += '--no-lock'
         }
         if ($NoUpgrade) {
-            $args += '--no-upgrade'
+            $brewArgs += '--no-upgrade'
         }
         
         if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
@@ -399,16 +399,16 @@ if (Test-CachedCommand brew) {
                 no_lock    = $NoLock.IsPresent
                 no_upgrade = $NoUpgrade.IsPresent
             } -ScriptBlock {
-                & brew @args
+                & brew @brewArgs
             } | Out-Null
         }
         else {
-            & brew @args
+            & brew @brewArgs
         }
     }
     Set-AgentModeAlias -Name 'brewimport' -Target 'Import-BrewPackages'
     Set-AgentModeAlias -Name 'brewrestore' -Target 'Import-BrewPackages'
 }
 else {
-    Write-MissingToolWarning -Tool 'brew' -InstallHint 'Install from: https://brew.sh/'
+    Invoke-MissingToolWarning -ToolName 'homebrew' -Tool 'brew'
 }

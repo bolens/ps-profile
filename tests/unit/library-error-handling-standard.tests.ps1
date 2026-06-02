@@ -3,9 +3,8 @@
 # Unit tests for ErrorHandlingStandard.ps1
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     
     # Load bootstrap first
@@ -28,14 +27,18 @@ BeforeAll {
     }
 }
 
-AfterEach {
-    # Clear events after each test
-    if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
-        Clear-EventCollection | Out-Null
-    }
-}
-
 Describe 'ErrorHandlingStandard.ps1 - Write-WideEvent' {
+    BeforeEach {
+        if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
+            Clear-EventCollection | Out-Null
+        }
+    }
+
+    AfterEach {
+        if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
+            Clear-EventCollection | Out-Null
+        }
+    }
     Context 'Basic Event Creation' {
         It 'Creates a wide event with required parameters' {
             $result = Write-WideEvent -EventName 'test.operation' -Level INFO -Context @{ test = 'value' }
@@ -50,13 +53,13 @@ Describe 'ErrorHandlingStandard.ps1 - Write-WideEvent' {
         }
         
         It 'Includes OpenTelemetry standard fields' {
-            Write-WideEvent -EventName 'test.otel' -Level INFO -Context @{}
+            Write-WideEvent -EventName 'test.otel' -Level INFO -Context @{} -AlwaysKeep
             
             $event = $global:WideEvents[-1]
-            $event.PSObject.Properties['timestamp'] | Should -Not -BeNullOrEmpty
-            $event.PSObject.Properties['service_name'] | Should -Not -BeNullOrEmpty
-            $event.PSObject.Properties['severity_number'] | Should -Not -BeNullOrEmpty
-            $event.PSObject.Properties['status_code'] | Should -Not -BeNullOrEmpty
+            $event['timestamp'] | Should -Not -BeNullOrEmpty
+            $event['service_name'] | Should -Not -BeNullOrEmpty
+            $event['severity_number'] | Should -Not -BeNullOrEmpty
+            $event['status_code'] | Should -Not -BeNullOrEmpty
         }
         
         It 'Maps severity levels to numbers correctly' {
@@ -211,6 +214,12 @@ Describe 'ErrorHandlingStandard.ps1 - Write-StructuredError' {
 }
 
 Describe 'ErrorHandlingStandard.ps1 - Write-StructuredWarning' {
+    BeforeEach {
+        if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
+            Clear-EventCollection | Out-Null
+        }
+    }
+
     Context 'Warning Recording' {
         It 'Records warning with message' {
             Write-StructuredWarning -Message 'Test warning' -OperationName 'test.warning' -Context @{}
@@ -231,9 +240,15 @@ Describe 'ErrorHandlingStandard.ps1 - Write-StructuredWarning' {
 }
 
 Describe 'ErrorHandlingStandard.ps1 - Invoke-WithWideEvent' {
+    BeforeEach {
+        if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
+            Clear-EventCollection | Out-Null
+        }
+    }
+
     Context 'Successful Operations' {
         It 'Executes script block and records success' {
-            $result = Invoke-WithWideEvent -OperationName 'test.success' -Context @{ test = 'value' } -ScriptBlock {
+            $result = Invoke-WithWideEvent -OperationName 'test.success' -Context @{ test = 'value' } -AlwaysKeep -ScriptBlock {
                 return 'success'
             }
             
@@ -247,7 +262,7 @@ Describe 'ErrorHandlingStandard.ps1 - Invoke-WithWideEvent' {
         It 'Includes context in event' {
             $context = @{ user_id = 'user123' }
             
-            Invoke-WithWideEvent -OperationName 'test.context' -Context $context -ScriptBlock {
+            Invoke-WithWideEvent -OperationName 'test.context' -Context $context -AlwaysKeep -ScriptBlock {
                 return 'ok'
             }
             
@@ -287,7 +302,7 @@ Describe 'ErrorHandlingStandard.ps1 - Invoke-WithWideEvent' {
     
     Context 'Timing' {
         It 'Records operation duration' {
-            Invoke-WithWideEvent -OperationName 'test.timing' -Context @{} -ScriptBlock {
+            Invoke-WithWideEvent -OperationName 'test.timing' -Context @{} -AlwaysKeep -ScriptBlock {
                 Start-Sleep -Milliseconds 50
             }
             

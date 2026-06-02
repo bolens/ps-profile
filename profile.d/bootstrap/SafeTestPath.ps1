@@ -25,13 +25,13 @@
     System.Boolean. True if the path exists, false otherwise (including when path is null/empty).
 
 .EXAMPLE
-    if (Test-SafePath -Path $modulePath) {
+    if (Test-NullSafePath -Path $modulePath) {
         Import-Module $modulePath
     }
 
     Safely checks if a module path exists before importing it.
 #>
-function global:Test-SafePath {
+function global:Test-NullSafePath {
     [CmdletBinding(DefaultParameterSetName = 'Path')]
     [OutputType([bool])]
     param(
@@ -63,7 +63,7 @@ function global:Test-SafePath {
             $caller = if ($callStack.Count -gt 1) { $callStack[1] } else { $callStack[0] }
             $location = "$($caller.ScriptName):$($caller.ScriptLineNumber)"
             $function = $caller.FunctionName
-            Write-Warning "Test-SafePath called with null/empty path at $location in function $function"
+            Write-Warning "Test-NullSafePath called with null/empty path at $location in function $function"
             if ($env:PS_PROFILE_DEBUG_TESTPATH -eq 'verbose') {
                 Write-Host "Call stack:" -ForegroundColor Yellow
                 $callStack | Select-Object -Skip 1 -First 5 | ForEach-Object {

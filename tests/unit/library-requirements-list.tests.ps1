@@ -1,8 +1,10 @@
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
     $script:LibPath = Join-Path $script:RepoRoot 'scripts' 'lib'
     $script:RequirementsListPath = Join-Path $script:LibPath 'utilities' 'RequirementsList.psm1'
     Import-Module $script:RequirementsListPath -DisableNameChecking -ErrorAction Stop -Force
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'RequirementsListTests'
 }
 
 AfterAll {
@@ -23,7 +25,7 @@ Describe 'RequirementsList module' {
 
     Context 'Get-PythonRequirementsFromFile' {
         It 'Parses package names and strips version specifiers' {
-            $file = Join-Path $TestDrive 'requirements.txt'
+            $file = Join-Path $script:TestTempRoot 'requirements.txt'
             @'
 # comment
 h5py>=3.11.0
@@ -33,7 +35,7 @@ numpy>=2.0.0
             $result = Get-PythonRequirementsFromFile -Path $file
             $result | Should -Contain 'h5py'
             $result | Should -Contain 'numpy'
-            $result.Count | Should -Be 2
+            @($result).Count | Should -Be 2
         }
     }
 
@@ -72,7 +74,7 @@ numpy>=2.0.0
             $result = Get-RequirementsListFromFile -Path $file
             $result | Should -Contain 'bat'
             $result | Should -Contain 'ripgrep'
-            ($result | Where-Object { $_ -eq 'imagemagick' }).Count | Should -Be 1
+            @($result | Where-Object { $_ -eq 'imagemagick' }).Count | Should -Be 1
         }
     }
 

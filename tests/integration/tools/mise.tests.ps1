@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'mise Tools Integration Tests' {
     BeforeAll {
         try {
@@ -139,6 +141,38 @@ Describe 'mise Tools Integration Tests' {
             Get-MiseRuntimes
             Should -Invoke -CommandName 'mise' -Times 1 -Exactly
             Get-Command Get-MiseRuntimes -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when mise is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Test-MiseOutdated', 'Update-MiseRuntimes', 'Update-MiseSelf', 'Get-MiseRuntimes'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'mise' -Available $false
+            $script:MissingMiseOutput = & { . (Join-Path $script:ProfileDir 'mise.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when mise is unavailable' {
+            Get-Command Test-MiseOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when mise is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingMiseOutput -Pattern 'mise not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingMiseOutput -ToolName 'mise'
         }
     }
 }

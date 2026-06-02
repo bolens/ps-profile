@@ -5,14 +5,14 @@
 
 BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap\MissingToolWarnings.ps1' -StartPath $PSScriptRoot -EnsureExists
-    if ($null -eq $script:BootstrapPath -or [string]::IsNullOrWhiteSpace($script:BootstrapPath)) {
-        throw "Get-TestPath returned null or empty value for BootstrapPath"
+    $bootstrapDir = Join-Path $script:ProfileDir 'bootstrap'
+    foreach ($file in @('MissingToolWarnings.ps1', 'ToolInstallRegistry.ps1', 'InstallHintResolver.ps1')) {
+        $path = Join-Path $bootstrapDir $file
+        if (-not (Test-Path -LiteralPath $path)) {
+            throw "Bootstrap file not found at: $path"
+        }
+        $null = . $path
     }
-    if (-not (Test-Path -LiteralPath $script:BootstrapPath)) {
-        throw "Bootstrap file not found at: $script:BootstrapPath"
-    }
-    . $script:BootstrapPath
 }
 
 Describe 'Preference-Aware Install Hints - Integration Tests (Fallback Chains)' {

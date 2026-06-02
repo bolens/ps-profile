@@ -45,7 +45,6 @@ Describe 'Fuzzy Finder Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'fzf' } -MockWith { $null }
             # Mock fzf command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'fzf' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'fzf' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'fzf.ps1')
         }
 
@@ -63,10 +62,9 @@ Describe 'Fuzzy Finder Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('fzf', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'fzf' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'fzf' } -MockWith { $false }
             $output = ff 2>&1 3>&1 | Out-String
-            $output | Should -Match 'fzf not found'
-            $output | Should -Match 'scoop install fzf'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'fzf not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'fzf'
         }
 
         It 'Creates Find-CommandFuzzy function' {
@@ -83,10 +81,9 @@ Describe 'Fuzzy Finder Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('fzf', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'fzf' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'fzf' } -MockWith { $false }
             $output = fcmd 2>&1 3>&1 | Out-String
-            $output | Should -Match 'fzf not found'
-            $output | Should -Match 'scoop install fzf'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'fzf not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'fzf'
         }
     }
 }

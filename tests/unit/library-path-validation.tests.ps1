@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:PathValidationPath = Join-Path $script:LibPath 'path' 'PathValidation.psm1'
@@ -15,7 +14,7 @@ BeforeAll {
     Import-Module $script:PathValidationPath -DisableNameChecking -ErrorAction Stop -Force
     
     # Create test directory and files
-    $script:TestDir = Join-Path $env:TEMP "test-path-validation-$(Get-Random)"
+    $script:TestDir = New-TestTempDirectory -Prefix 'PathValidationTests'
     New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
     
     $script:TestFile = Join-Path $script:TestDir 'test-file.txt'
@@ -64,7 +63,7 @@ Describe 'PathValidation Module Functions' {
         It 'Validates provided path exists' {
             $defaultPath = $script:TestDir
             $nonExistentPath = Join-Path $script:TestDir 'nonexistent.txt'
-            { Resolve-DefaultPath -Path $nonExistentPath -DefaultPath $defaultPath } | Should -Throw "*not exist*"
+            { Resolve-DefaultPath -Path $nonExistentPath -DefaultPath $defaultPath } | Should -Throw "*not found*"
         }
 
         It 'Validates file type when PathType is File' {

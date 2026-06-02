@@ -329,6 +329,9 @@ scripts/data/coverage/
 scripts/data/performance-baseline.json
 scripts/data/psscriptanalyzer-report.json
 
+# Ephemeral test fixtures created under scripts/ for path-resolution tests
+scripts/.test-fixtures/
+
 # =============================================================================
 # Environment and Configuration Files
 # =============================================================================

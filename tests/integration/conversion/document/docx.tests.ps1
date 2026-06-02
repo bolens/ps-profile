@@ -53,7 +53,7 @@ Describe 'DOCX and Office Document Conversion Tests' {
     Context 'PDF conversion utilities' {
         It 'ConvertFrom-PdfToText extracts text from PDF' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -99,7 +99,7 @@ Describe 'DOCX and Office Document Conversion Tests' {
     Context 'Office document conversion utilities - DOCX' {
         It 'ConvertFrom-DocxToMarkdown converts DOCX to Markdown' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {

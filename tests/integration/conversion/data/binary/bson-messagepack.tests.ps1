@@ -21,7 +21,7 @@ Describe 'BSON and MessagePack Conversion Tests' {
     Context 'BSON and MessagePack Conversions' {
         It 'ConvertTo-MessagePackFromBson converts BSON to MessagePack' {
             Get-Command ConvertTo-MessagePackFromBson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -31,7 +31,7 @@ Describe 'BSON and MessagePack Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'bson') -or -not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack')) {
-                Set-ItResult -Skipped -Because "Required packages not installed. Install with: pnpm add -g bson @msgpack/msgpack"
+                Set-ItResult -Skipped -Because (Get-TestNodePackageSkipMessage -PackageNames @('bson','@msgpack/msgpack') -Context 'Required packages not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -49,7 +49,7 @@ Describe 'BSON and MessagePack Conversion Tests' {
 
         It 'ConvertTo-BsonFromMessagePack converts MessagePack to BSON' {
             Get-Command ConvertTo-BsonFromMessagePack -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -59,7 +59,7 @@ Describe 'BSON and MessagePack Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'bson') -or -not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack')) {
-                Set-ItResult -Skipped -Because "Required packages not installed. Install with: pnpm add -g bson @msgpack/msgpack"
+                Set-ItResult -Skipped -Because (Get-TestNodePackageSkipMessage -PackageNames @('bson','@msgpack/msgpack') -Context 'Required packages not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'

@@ -21,14 +21,7 @@ Describe 'Environment Variable Integration Tests' {
                 throw "Profile directory not found at: $script:ProfileDir"
             }
             
-            $utilitiesPath = Join-Path $script:ProfileDir 'utilities.ps1'
-            if ($null -eq $utilitiesPath -or [string]::IsNullOrWhiteSpace($utilitiesPath)) {
-                throw "UtilitiesPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $utilitiesPath)) {
-                throw "Utilities fragment not found at: $utilitiesPath"
-            }
-            . $utilitiesPath
+            Initialize-SystemUtilityIntegration -ProfileDir $script:ProfileDir -IncludeUtilities
         }
         catch {
             $errorDetails = @{
@@ -49,7 +42,9 @@ Describe 'Environment Variable Integration Tests' {
     }
 
     BeforeEach {
-        . (Join-Path $script:ProfileDir 'env.ps1')
+        if (Get-Command Clear-AllFragmentLoadedState -ErrorAction SilentlyContinue) {
+            Clear-AllFragmentLoadedState
+        }
     }
 
     Context 'Environment defaults and helpers' {

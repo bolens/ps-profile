@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
         $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
@@ -23,7 +22,7 @@ BeforeAll {
         Import-Module $script:LoggingPath -DisableNameChecking -ErrorAction Stop -Force
         
         # Create temporary directory for test log files
-        $script:TestLogDir = Join-Path $env:TEMP "test-logs-$(Get-Random)"
+        $script:TestLogDir = New-TestTempDirectory -Prefix 'LoggingTests'
         New-Item -ItemType Directory -Path $script:TestLogDir -Force | Out-Null
     }
     catch {
@@ -156,7 +155,13 @@ Describe 'Logging Module Functions' {
         It 'Handles log file write errors gracefully' {
             # Try to write to an invalid path (read-only directory or similar)
             # This should not throw, but should write a warning
-            $invalidLogFile = Join-Path 'C:\Invalid\Path\That\Does\Not\Exist' 'test.log'
+            $invalidRoot = if ($IsWindows) {
+                'C:\Invalid\Path\That\Does\Not\Exist'
+            }
+            else {
+                Join-Path (Split-Path -Parent $script:TestLogDir) "invalid-log-root-$(Get-Random)"
+            }
+            $invalidLogFile = Join-Path $invalidRoot 'test.log'
             { Write-ScriptMessage -Message 'Test' -LogFile $invalidLogFile } | Should -Not -Throw
         }
     }

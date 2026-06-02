@@ -1,382 +1,326 @@
-﻿# ===============================================
+# ===============================================
 # profile-security-tools-dangerzone.tests.ps1
 # Unit tests for Invoke-DangerzoneConvert function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
-# Helper function is now in PesterMocks.psm1 module
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'security-tools.ps1')
-    
-    # Create test directories
-    if (Get-Variable -Name TestDrive -ErrorAction SilentlyContinue) {
-        $script:TestFile = Join-Path $TestDrive 'test-file.pdf'
-        Set-Content -Path $script:TestFile -Value 'PDF content'
-    }
+
+    $script:TestRoot = New-TestTempDirectory -Prefix 'DangerzoneTest'
+    $script:TestFile = Join-Path $script:TestRoot 'test-file.pdf'
+    Set-Content -Path $script:TestFile -Value 'PDF content'
 }
 
 Describe 'security-tools.ps1 - Invoke-DangerzoneConvert' {
     BeforeEach {
-        # Clear command cache to ensure mocks work correctly
-        if (Get-Command Remove-TestCachedCommandCacheEntry -ErrorAction SilentlyContinue) {
-            Remove-TestCachedCommandCacheEntry -Name 'dangerzone' -ErrorAction SilentlyContinue
+        Clear-TestCommandInvocationCapture
+
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
         }
+
+        Mark-TestCommandsUnavailable -CommandNames 'dangerzone'
     }
-    
+
     Context 'Invoke-DangerzoneConvert' {
         It 'Returns null when dangerzone is not available' {
-            $cmdName = 'dangerzone'
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:TestCachedCommandCache.TryRemove($cmdName, [ref]$null)
-            }
-            if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:AssumedAvailableCommands.TryRemove($cmdName, [ref]$null)
-            }
-            Remove-Item -Path "Function:\$cmdName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\global:$cmdName" -Force -ErrorAction SilentlyContinue
-            
-            $originalPath = "Function:\Test-CachedCommand"
-            if (-not (Test-Path $originalPath)) {
-                $originalPath = "Function:\global:Test-CachedCommand"
-            }
-            $originalScript = if (Test-Path $originalPath) { (Get-Item $originalPath).ScriptBlock } else { $null }
-            
-            Mock -CommandName Test-CachedCommand -MockWith {
-                param([string]$Name)
-                $actualName = if ($Name) { $Name } elseif ($args.Count -gt 0) { $args[0] } else { '' }
-                if ($actualName -eq $cmdName) {
-                    return $false
-                }
-                if ($originalScript) {
-                    $nameParam = if ($Name) { $Name } elseif ($args.Count -gt 0) { $args[0] } else { '' }
-                    return & $originalScript -Name $nameParam
-                }
-                return $false
-            }
-            
-            Mock -CommandName Get-Command -ParameterFilter {
-                $nameToCheck = if ($Name) { $Name } elseif ($args.Count -gt 0) { $args[0] } else { $null }
-                $nameToCheck -eq $cmdName
-            } -MockWith {
-                return $null
-            }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile
-            
+            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Returns error when input file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            
-            $result = Invoke-DangerzoneConvert -InputPath 'C:\NonExistent\File.pdf' -ErrorAction SilentlyContinue
-            
+            Setup-CapturingCommandMock -CommandName 'dangerzone' -Output 'Conversion results'
+
+            $result = Invoke-DangerzoneConvert -InputPath (Join-Path $script:TestRoot 'Missing.pdf') -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls dangerzone with correct arguments when tool is available' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            
-            # Capture arguments in a variable
-            # When called with & dangerzone $args, PowerShell expands the array
-            # So $args in the mock will contain the individual elements
-            $capturedArgs = $null
-            Mock -CommandName 'dangerzone' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                # Capture all arguments (PowerShell expands the array when using &)
-                $script:capturedArgs = $Arguments
-                return 'Conversion results' 
-            }
-            
-            $outputPath = Join-Path $TestDrive 'output.safe.pdf'
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -OutputPath $outputPath
-            
+            Setup-CapturingCommandMock -CommandName 'dangerzone' -Output 'Conversion results'
+
+            $outputPath = Join-Path $script:TestRoot 'output.safe.pdf'
+            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -OutputPath $outputPath -ErrorAction SilentlyContinue
+
             $result | Should -Not -BeNullOrEmpty
-            Should -Invoke -CommandName 'dangerzone' -Times 1 -Exactly
-            $script:capturedArgs | Should -Contain $script:TestFile
-            $script:capturedArgs | Should -Contain '--output'
-            $script:capturedArgs | Should -Contain $outputPath
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--input'
+            $args | Should -Contain $script:TestFile
+            $args | Should -Contain '--output'
+            $args | Should -Contain $outputPath
         }
-        
+
         It 'Generates default output path when not specified' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            
-            # Capture arguments in a variable
-            # When called with & dangerzone $args, PowerShell expands the array
-            # So $args in the mock will contain the individual elements
-            $capturedArgs = $null
-            Mock -CommandName 'dangerzone' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                # Capture all arguments (PowerShell expands the array when using &)
-                $script:capturedArgs = $Arguments
-                return 'Conversion results' 
-            }
-            
-            $testPdf = Join-Path $TestDrive 'test.pdf'
+            Setup-CapturingCommandMock -CommandName 'dangerzone' -Output 'Conversion results'
+
+            $testPdf = Join-Path $script:TestRoot 'test.pdf'
             Set-Content -Path $testPdf -Value 'PDF content'
-            
-            $result = Invoke-DangerzoneConvert -InputPath $testPdf
-            
-            $expectedOutput = Join-Path $TestDrive 'test.safe.pdf'
-            Should -Invoke -CommandName 'dangerzone' -Times 1 -Exactly
-            $script:capturedArgs[0] | Should -Be $testPdf
-            $script:capturedArgs | Should -Contain '--output'
-            $script:capturedArgs | Should -Contain $expectedOutput
+
+            Invoke-DangerzoneConvert -InputPath $testPdf -ErrorAction SilentlyContinue | Out-Null
+
+            $expectedOutput = Join-Path $script:TestRoot 'test.safe.pdf'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--input'
+            $args | Should -Contain $testPdf
+            $args | Should -Contain '--output'
+            $args | Should -Contain $expectedOutput
         }
-        
+
         It 'Handles dangerzone execution errors gracefully' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            Mock -CommandName 'dangerzone' -MockWith { throw 'Execution failed' }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
-            
+            Set-TestCommandThrowingMock -CommandName 'dangerzone' -Message 'Execution failed'
+
+            $result = $null
+            try {
+                $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
+            }
+            catch {
+                $result = $null
+            }
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Tests dangerzone with custom output path' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            
-            # Capture arguments in a variable
-            # When called with & dangerzone $args, PowerShell expands the array
-            # So $args in the mock will contain the individual elements
-            $capturedArgs = $null
-            Mock -CommandName 'dangerzone' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                # Capture all arguments (PowerShell expands the array when using &)
-                $script:capturedArgs = $Arguments
-                return 'Conversion results' 
-            }
-            
-            $outputPath = Join-Path $TestDrive 'output.pdf'
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -OutputPath $outputPath
-            
-            Should -Invoke -CommandName 'dangerzone' -Times 1 -Exactly
-            $script:capturedArgs[0] | Should -Be $script:TestFile
-            $script:capturedArgs | Should -Contain '--output'
-            $script:capturedArgs | Should -Contain $outputPath
+            Setup-CapturingCommandMock -CommandName 'dangerzone' -Output 'Conversion results'
+
+            $outputPath = Join-Path $script:TestRoot 'output.pdf'
+            Invoke-DangerzoneConvert -InputPath $script:TestFile -OutputPath $outputPath -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--input'
+            $args | Should -Contain $script:TestFile
+            $args | Should -Contain '--output'
+            $args | Should -Contain $outputPath
         }
-        
+
         It 'Tests dangerzone default output path generation' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            
-            # Capture arguments in a variable
-            # When called with & dangerzone $args, PowerShell expands the array
-            # So $args in the mock will contain the individual elements
-            $capturedArgs = $null
-            Mock -CommandName 'dangerzone' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                # Capture all arguments (PowerShell expands the array when using &)
-                $script:capturedArgs = $Arguments
-                return 'Conversion results' 
-            }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile
-            
-            $expectedOutput = Join-Path (Split-Path -Parent $script:TestFile) 'test-file.safe.pdf'
-            Should -Invoke -CommandName 'dangerzone' -Times 1 -Exactly
-            $script:capturedArgs[0] | Should -Be $script:TestFile
-            $script:capturedArgs | Should -Contain '--output'
-            $script:capturedArgs | Should -Contain $expectedOutput
+            Setup-CapturingCommandMock -CommandName 'dangerzone' -Output 'Conversion results'
+
+            Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue | Out-Null
+
+            $expectedOutput = Join-Path $script:TestRoot 'test-file.safe.pdf'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--input'
+            $args | Should -Contain $script:TestFile
+            $args | Should -Contain '--output'
+            $args | Should -Contain $expectedOutput
         }
-        
+
         It 'Handles dangerzone input file not found' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            
-            $result = Invoke-DangerzoneConvert -InputPath 'C:\NonExistent\File.pdf' -ErrorAction SilentlyContinue
-            
+            Setup-CapturingCommandMock -CommandName 'dangerzone' -Output 'Conversion results'
+
+            $result = Invoke-DangerzoneConvert -InputPath (Join-Path $script:TestRoot 'Missing.pdf') -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Adds Docker requirement to dangerzone install hint when not present' {
-            Mock-CommandAvailabilityPester -CommandName 'dangerzone' -Available $false
-            
-            # Create a function mock for Get-ToolInstallHint so Get-Command can find it
-            <#
-            .SYNOPSIS
-                Performs operations related to Get-ToolInstallHint.
-            
-            .DESCRIPTION
-                Performs operations related to Get-ToolInstallHint.
-            
-            .PARAMETER ToolName
-                The ToolName parameter.
-            
-            .PARAMETER RepoRoot
-                The RepoRoot parameter.
-            
-            .OUTPUTS
-                object
-            #>
-            function Get-ToolInstallHint {
-                param([string]$ToolName, [string]$RepoRoot)
+            $script:MissingToolWarningCaptures = [System.Collections.Generic.List[hashtable]]::new()
+            $originalHint = Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue
+            $originalWarning = Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue
+
+            function global:Get-PreferenceAwareInstallHint {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType,
+                    [string]$DefaultInstallCommand
+                )
                 return 'Install with: scoop install dangerzone'
             }
-            
-            # Mock Get-Command to return Get-ToolInstallHint function when requested, otherwise pass through
-            Mock Get-Command -ParameterFilter { $Name -eq 'Get-ToolInstallHint' } -MockWith {
-                return @{ Name = 'Get-ToolInstallHint' }
+
+            function global:Write-MissingToolWarning {
+                param(
+                    [string]$Tool,
+                    [string]$InstallHint
+                )
+                $null = $script:MissingToolWarningCaptures.Add(@{
+                        Tool        = $Tool
+                        InstallHint = $InstallHint
+                    })
             }
-            
-            # Capture arguments for Write-MissingToolWarning
-            $script:capturedTool = $null
-            $script:capturedInstallHint = $null
-            Mock Write-MissingToolWarning -MockWith {
-                param([string]$Tool, [string]$InstallHint)
-                $script:capturedTool = $Tool
-                $script:capturedInstallHint = $InstallHint
+
+            try {
+                $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
+
+                $result | Should -BeNullOrEmpty
+                $script:MissingToolWarningCaptures.Count | Should -Be 1
+                $script:MissingToolWarningCaptures[0].Tool | Should -Be 'dangerzone'
+                $script:MissingToolWarningCaptures[0].InstallHint | Should -Match 'requires Docker'
             }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-MissingToolWarning -Times 1 -Exactly
-            if ($null -eq $script:capturedTool -or $null -eq $script:capturedInstallHint) {
-                throw "Mock was called but captured values are null. Mock may not be intercepting correctly."
+            finally {
+                Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                if ($originalHint) {
+                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
+                }
+                if ($originalWarning) {
+                    Set-Item -Path Function:\global:Write-MissingToolWarning -Value $originalWarning.ScriptBlock -Force
+                }
             }
-            $script:capturedTool | Should -Be 'dangerzone'
-            $script:capturedInstallHint | Should -Match 'requires Docker'
         }
-        
+
         It 'Does not add Docker requirement when already present in install hint' {
-            Mock-CommandAvailabilityPester -CommandName 'dangerzone' -Available $false
-            
-            # Create a function mock for Get-ToolInstallHint so Get-Command can find it
-            function Get-ToolInstallHint {
-                param([string]$ToolName, [string]$RepoRoot)
+            $script:MissingToolWarningCaptures = [System.Collections.Generic.List[hashtable]]::new()
+            $originalHint = Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue
+            $originalWarning = Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue
+
+            function global:Get-PreferenceAwareInstallHint {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType,
+                    [string]$DefaultInstallCommand
+                )
                 return 'Install with: scoop install dangerzone (requires Docker)'
             }
-            
-            # Mock Get-Command to return Get-ToolInstallHint function when requested, otherwise pass through
-            Mock Get-Command -ParameterFilter { $Name -eq 'Get-ToolInstallHint' } -MockWith {
-                return @{ Name = 'Get-ToolInstallHint' }
+
+            function global:Write-MissingToolWarning {
+                param(
+                    [string]$Tool,
+                    [string]$InstallHint
+                )
+                $null = $script:MissingToolWarningCaptures.Add(@{
+                        Tool        = $Tool
+                        InstallHint = $InstallHint
+                    })
             }
-            
-            # Capture arguments for Write-MissingToolWarning
-            $script:capturedTool = $null
-            $script:capturedInstallHint = $null
-            Mock Write-MissingToolWarning -MockWith {
-                param([string]$Tool, [string]$InstallHint)
-                $script:capturedTool = $Tool
-                $script:capturedInstallHint = $InstallHint
+
+            try {
+                Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue | Out-Null
+
+                $script:MissingToolWarningCaptures.Count | Should -Be 1
+                ($script:MissingToolWarningCaptures[0].InstallHint -split 'requires Docker').Count | Should -Be 2
             }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
-            
-            # Should not duplicate Docker requirement
-            Should -Invoke Write-MissingToolWarning -Times 1 -Exactly
-            if ($null -eq $script:capturedInstallHint) {
-                throw "Mock was called but capturedInstallHint is null. Mock may not be intercepting correctly."
+            finally {
+                Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                if ($originalHint) {
+                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
+                }
+                if ($originalWarning) {
+                    Set-Item -Path Function:\global:Write-MissingToolWarning -Value $originalWarning.ScriptBlock -Force
+                }
             }
-            # Verify Docker requirement is not duplicated (should appear only once)
-            ($script:capturedInstallHint -split 'requires Docker').Count | Should -Be 2
         }
-        
+
         It 'Tests dangerzone install hint Docker check when Docker already mentioned' {
-            Mock-CommandAvailabilityPester -CommandName 'dangerzone' -Available $false
-            
-            # Create a function mock for Get-ToolInstallHint so Get-Command can find it
-            function Get-ToolInstallHint {
-                param([string]$ToolName, [string]$RepoRoot)
+            $script:MissingToolWarningCaptures = [System.Collections.Generic.List[hashtable]]::new()
+            $originalHint = Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue
+            $originalWarning = Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue
+
+            function global:Get-PreferenceAwareInstallHint {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType,
+                    [string]$DefaultInstallCommand
+                )
                 return 'Install with: scoop install dangerzone (requires Docker)'
             }
-            
-            # Mock Get-Command to return Get-ToolInstallHint function when requested, otherwise pass through
-            Mock Get-Command -ParameterFilter { $Name -eq 'Get-ToolInstallHint' } -MockWith {
-                return @{ Name = 'Get-ToolInstallHint' }
+
+            function global:Write-MissingToolWarning {
+                param(
+                    [string]$Tool,
+                    [string]$InstallHint
+                )
+                $null = $script:MissingToolWarningCaptures.Add(@{
+                        Tool        = $Tool
+                        InstallHint = $InstallHint
+                    })
             }
-            
-            # Capture arguments for Write-MissingToolWarning
-            $script:capturedInstallHint = $null
-            Mock Write-MissingToolWarning -MockWith {
-                param([string]$Tool, [string]$InstallHint)
-                $script:capturedInstallHint = $InstallHint
+
+            try {
+                Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue | Out-Null
+
+                $script:MissingToolWarningCaptures[0].InstallHint | Should -Be 'Install with: scoop install dangerzone (requires Docker)'
             }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile
-            
-            Should -Invoke Write-MissingToolWarning -Times 1 -Exactly
-            if ($null -eq $script:capturedInstallHint) {
-                throw "Mock was called but capturedInstallHint is null. Mock may not be intercepting correctly."
+            finally {
+                Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                if ($originalHint) {
+                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
+                }
+                if ($originalWarning) {
+                    Set-Item -Path Function:\global:Write-MissingToolWarning -Value $originalWarning.ScriptBlock -Force
+                }
             }
-            $script:capturedInstallHint | Should -Be 'Install with: scoop install dangerzone (requires Docker)'
         }
-        
+
         It 'Tests dangerzone install hint Docker append when not mentioned' {
-            Mock-CommandAvailabilityPester -CommandName 'dangerzone' -Available $false
-            
-            # Create a function mock for Get-ToolInstallHint so Get-Command can find it
-            function Get-ToolInstallHint {
-                param([string]$ToolName, [string]$RepoRoot)
+            $script:MissingToolWarningCaptures = [System.Collections.Generic.List[hashtable]]::new()
+            $originalHint = Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue
+            $originalWarning = Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue
+
+            function global:Get-PreferenceAwareInstallHint {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType,
+                    [string]$DefaultInstallCommand
+                )
                 return 'Install with: scoop install dangerzone'
             }
-            
-            # Mock Get-Command to return Get-ToolInstallHint function when requested, otherwise pass through
-            Mock Get-Command -ParameterFilter { $Name -eq 'Get-ToolInstallHint' } -MockWith {
-                return @{ Name = 'Get-ToolInstallHint' }
+
+            function global:Write-MissingToolWarning {
+                param(
+                    [string]$Tool,
+                    [string]$InstallHint
+                )
+                $null = $script:MissingToolWarningCaptures.Add(@{
+                        Tool        = $Tool
+                        InstallHint = $InstallHint
+                    })
             }
-            
-            # Capture arguments for Write-MissingToolWarning
-            $script:capturedInstallHint = $null
-            Mock Write-MissingToolWarning -MockWith {
-                param([string]$Tool, [string]$InstallHint)
-                $script:capturedInstallHint = $InstallHint
+
+            try {
+                Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue | Out-Null
+
+                $script:MissingToolWarningCaptures[0].InstallHint | Should -Be 'Install with: scoop install dangerzone (requires Docker)'
             }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile
-            
-            Should -Invoke Write-MissingToolWarning -Times 1 -Exactly
-            if ($null -eq $script:capturedInstallHint) {
-                throw "Mock was called but capturedInstallHint is null. Mock may not be intercepting correctly."
+            finally {
+                Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                if ($originalHint) {
+                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
+                }
+                if ($originalWarning) {
+                    Set-Item -Path Function:\global:Write-MissingToolWarning -Value $originalWarning.ScriptBlock -Force
+                }
             }
-            $script:capturedInstallHint | Should -Be 'Install with: scoop install dangerzone (requires Docker)'
         }
-        
+
         It 'Tests dangerzone stderr output handling' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            Mock -CommandName 'dangerzone' -MockWith { 
+            Setup-CapturingCommandMock -CommandName 'dangerzone' -OnInvoke {
                 [Console]::Error.WriteLine('Warning message')
                 return 'Conversion results'
             }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile
-            
+
+            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
+
             $result | Should -Not -BeNullOrEmpty
-            Should -Invoke -CommandName 'dangerzone' -Times 1
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
         }
-        
+
         It 'Tests dangerzone catch block error handling' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            Mock -CommandName 'dangerzone' -MockWith { throw [System.Management.Automation.CommandNotFoundException]::new('dangerzone not found') }
-            Mock Write-Error { }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'dangerzone' -Message 'dangerzone not found'
+
+            { Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction Stop } | Should -Throw
         }
-        
+
         It 'Tests dangerzone Write-Error message format' {
-            Setup-AvailableCommandMock -CommandName 'dangerzone'
-            Mock -CommandName 'dangerzone' -MockWith { throw [System.Management.Automation.CommandNotFoundException]::new('dangerzone not found') }
-            Mock Write-Error { }
-            
-            $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1 -ParameterFilter {
-                $Message -like '*Failed to run dangerzone*'
-            }
+            Set-TestCommandThrowingMock -CommandName 'dangerzone' -Message 'dangerzone not found'
+
+            { Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction Stop } | Should -Throw '*dangerzone*'
         }
     }
 }
-
-

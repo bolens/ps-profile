@@ -1,7 +1,6 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 Describe 'FileFiltering Module Functions' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Import the FileFiltering module (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         Import-Module (Join-Path $libPath 'file' 'FileFiltering.psm1') -DisableNameChecking -ErrorAction Stop
@@ -65,9 +64,9 @@ Describe 'FileFiltering Module Functions' {
         It 'Handles null input gracefully' {
             $nullInput = @($null, $script:TestFiles[0], $null)
             # Use -ExcludeTests:$false to ensure the test file isn't filtered out
-            $filtered = $nullInput | Filter-Files -ExcludeTests:$false -ExcludeGit:$false -ExcludeNodeModules:$false
+            $filtered = @($nullInput | Filter-Files -ExcludeTests:$false -ExcludeGit:$false -ExcludeNodeModules:$false)
             # Verify nulls are filtered out
-            $nullCount = ($filtered | Where-Object { $null -eq $_ }).Count
+            $nullCount = @($filtered | Where-Object { $null -eq $_ }).Count
             $nullCount | Should -Be 0
             # Verify valid files are still present
             $filtered.Count | Should -BeGreaterThan 0

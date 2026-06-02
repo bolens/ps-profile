@@ -65,19 +65,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'ollama')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'ollama' -DefaultInstallCommand 'scoop install ollama'
+            Invoke-MissingToolWarning -ToolName 'ollama'
             return $null
         }
 
@@ -151,28 +139,54 @@ try {
         if (Test-CachedCommand 'lms') {
             $lmsCmd = 'lms'
         }
-        # Also check for lms.exe in common Windows locations
-        elseif (($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') -and $env:USERPROFILE -and (Test-Path -LiteralPath "$env:USERPROFILE\.lmstudio\bin\lms.exe")) {
-            $lmsCmd = "$env:USERPROFILE\.lmstudio\bin\lms.exe"
-        }
-        elseif (($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') -and $env:USERPROFILE -and (Test-Path -LiteralPath "$env:USERPROFILE\.cache\lm-studio\bin\lms.exe")) {
-            $lmsCmd = "$env:USERPROFILE\.cache\lm-studio\bin\lms.exe"
+        else {
+            $userHome = if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+                Get-UserHome
+            }
+            elseif ($env:HOME) {
+                $env:HOME
+            }
+            elseif ($env:USERPROFILE) {
+                $env:USERPROFILE
+            }
+            else {
+                $null
+            }
+
+            $lmsCandidates = @()
+            if ($userHome) {
+                $lmsCandidates += Join-Path $userHome '.lmstudio' 'bin' 'lms'
+                $lmsCandidates += Join-Path $userHome '.cache' 'lm-studio' 'bin' 'lms'
+            }
+
+            $runningOnWindows = $IsWindows -or $PSVersionTable.Platform -eq 'Win32NT'
+            foreach ($candidate in $lmsCandidates) {
+                if (-not $candidate) {
+                    continue
+                }
+
+                $pathsToCheck = if ($runningOnWindows) {
+                    @($candidate, "$candidate.exe")
+                }
+                else {
+                    @($candidate)
+                }
+
+                foreach ($pathToCheck in $pathsToCheck) {
+                    if (Test-Path -LiteralPath $pathToCheck) {
+                        $lmsCmd = $pathToCheck
+                        break
+                    }
+                }
+
+                if ($lmsCmd) {
+                    break
+                }
+            }
         }
 
         if (-not $lmsCmd) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'lmstudio' -DefaultInstallCommand 'Install LM Studio from https://lmstudio.ai/ and run 'lms bootstrap' to enable CLI' -Tool 'lms'
+            Invoke-MissingToolWarning -ToolName 'lmstudio' -Tool 'lms'
             return $null
         }
 
@@ -243,19 +257,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'koboldcpp')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'koboldcpp' -DefaultInstallCommand 'scoop install koboldcpp'
+            Invoke-MissingToolWarning -ToolName 'koboldcpp'
             return $null
         }
 
@@ -336,19 +338,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'llamafile')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'llamafile' -DefaultInstallCommand 'scoop install llamafile'
+            Invoke-MissingToolWarning -ToolName 'llamafile'
             return $null
         }
 
@@ -447,19 +437,7 @@ try {
         }
 
         if (-not $llamaCmd) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'llama-cpp' -DefaultInstallCommand 'scoop install llama-cpp-cuda (or llama-cpp)'
+            Invoke-MissingToolWarning -ToolName 'llama-cpp'
             return $null
         }
 
@@ -537,19 +515,7 @@ try {
         # Check for comfy command (ComfyUI CLI)
         # Note: comfy-cli is installed via pip/pipx, not Scoop
         if (-not (Test-CachedCommand 'comfy')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'comfy-cli' -DefaultInstallCommand 'pip install comfy-cli (or pipx install comfy-cli)' -Tool 'comfy'
+            Invoke-MissingToolWarning -ToolName 'comfy-cli' -ToolType 'python-package' -Tool 'comfy'
             return $null
         }
 

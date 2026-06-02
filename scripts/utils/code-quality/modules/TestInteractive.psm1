@@ -57,6 +57,12 @@ function Select-TestsInteractively {
         return $result
     }
 
+    if ($env:PS_PROFILE_NONINTERACTIVE -eq '1' -or $env:CI -eq 'true' -or $env:GITHUB_ACTIONS -eq 'true') {
+        Write-Warning 'Interactive test selection is disabled in non-interactive mode.'
+        $result.Canceled = $true
+        return $result
+    }
+
     Write-Host "`n=== Interactive Test Selection ===" -ForegroundColor Cyan
     Write-Host "Total tests available: $($TestList.Tests.Count)" -ForegroundColor Green
     Write-Host ""

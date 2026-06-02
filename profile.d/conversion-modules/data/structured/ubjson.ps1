@@ -61,14 +61,14 @@ try {
         fs.writeFileSync(process.argv[3], json);
     } catch (e) {
         if (e.code === 'MODULE_NOT_FOUND') {
-            throw new Error('ubjson package is not installed. Install with: pnpm add -g ubjson');
+            throw new Error('ubjson package is not installed. Install with: __NODE_INSTALL_CMD__');
         } else {
             throw e;
         }
     }
 } catch (error) {
     if (error.message.includes('ubjson')) {
-        console.error('Error: ubjson package is not installed. Install it with: pnpm add -g ubjson');
+        console.error('Error: ubjson package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -76,6 +76,7 @@ try {
 }
 "@
                 $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "ubjson-to-json-$(Get-Random).js"
+                $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'ubjson' -Global
                 Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
                 try {
                     $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -89,7 +90,8 @@ try {
                 }
             }
             
-            throw "Node.js is not available. Install Node.js and ubjson package (pnpm add -g ubjson) to use UBJSON conversions."
+            $installCmd = Get-NodePackageInstallRecommendation -PackageNames 'ubjson' -Global
+            throw "Node.js is not available. Install Node.js and ubjson package ($installCmd) to use UBJSON conversions."
         }
         catch {
             Write-Error "Failed to convert UBJSON to JSON: $_"
@@ -126,14 +128,14 @@ try {
         fs.writeFileSync(process.argv[3], buffer);
     } catch (e) {
         if (e.code === 'MODULE_NOT_FOUND') {
-            throw new Error('ubjson package is not installed. Install with: pnpm add -g ubjson');
+            throw new Error('ubjson package is not installed. Install with: __NODE_INSTALL_CMD__');
         } else {
             throw e;
         }
     }
 } catch (error) {
     if (error.message.includes('ubjson')) {
-        console.error('Error: ubjson package is not installed. Install it with: pnpm add -g ubjson');
+        console.error('Error: ubjson package is not installed. Install it with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -141,6 +143,7 @@ try {
 }
 "@
                 $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json-to-ubjson-$(Get-Random).js"
+                $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'ubjson' -Global
                 Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
                 try {
                     $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -154,7 +157,8 @@ try {
                 }
             }
             
-            throw "Node.js is not available. Install Node.js and ubjson package (pnpm add -g ubjson) to use UBJSON conversions."
+            $installCmd = Get-NodePackageInstallRecommendation -PackageNames 'ubjson' -Global
+            throw "Node.js is not available. Install Node.js and ubjson package ($installCmd) to use UBJSON conversions."
         }
         catch {
             Write-Error "Failed to convert JSON to UBJSON: $_"

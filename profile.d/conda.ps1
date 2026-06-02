@@ -130,5 +130,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'conda-uninstall' -Target 'Remove-CondaPackage'
 }
 else {
-    Write-MissingToolWarning -Tool 'conda' -InstallHint 'Install with: scoop install miniconda3 or download from https://docs.conda.io/en/latest/miniconda.html'
+    Invoke-MissingToolWarning -ToolName 'conda'
 }

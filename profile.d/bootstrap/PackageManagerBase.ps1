@@ -126,8 +126,7 @@ try {
 
         # Register base wrapper
         if (Get-Command Register-ToolWrapper -ErrorAction SilentlyContinue) {
-            Register-ToolWrapper -FunctionName "Invoke-$ManagerName" -CommandName $CommandName `
-                -InstallHint "Install $ManagerName package manager"
+            Register-ToolWrapper -FunctionName "Invoke-$ManagerName" -CommandName $CommandName
         }
 
         # Register install command
@@ -146,7 +145,16 @@ try {
                     & $captured.CommandName @args @Packages
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.ManagerName) package manager"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName -ToolType (Resolve-CommandInstallToolType -CommandName $captured.CommandName)
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Install-${ManagerName}Package" -Body $installBody
@@ -168,7 +176,16 @@ try {
                     & $captured.CommandName @args @Packages
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.ManagerName) package manager"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName -ToolType (Resolve-CommandInstallToolType -CommandName $captured.CommandName)
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Remove-${ManagerName}Package" -Body $uninstallBody
@@ -188,7 +205,16 @@ try {
                     & $captured.CommandName @args
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.ManagerName) package manager"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName -ToolType (Resolve-CommandInstallToolType -CommandName $captured.CommandName)
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Get-${ManagerName}Packages" -Body $listBody
@@ -210,7 +236,16 @@ try {
                     & $captured.CommandName @args @Packages
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.ManagerName) package manager"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName -ToolType (Resolve-CommandInstallToolType -CommandName $captured.CommandName)
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Update-${ManagerName}Packages" -Body $updateBody
@@ -229,7 +264,16 @@ try {
                     & $captured.CommandName $captured.RunCommand $ScriptName @Arguments
                 }
                 else {
-                    Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    if (Get-Command Invoke-CommandMissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-CommandMissingToolWarning -CommandName $captured.CommandName `
+                            -DefaultInstallCommand "Install $($captured.ManagerName) package manager"
+                    }
+                    elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                        Invoke-MissingToolWarning -ToolName $captured.CommandName -ToolType (Resolve-CommandInstallToolType -CommandName $captured.CommandName)
+                    }
+                    else {
+                        Write-MissingToolWarning -Tool $captured.CommandName -InstallHint "Install $($captured.ManagerName) package manager"
+                    }
                 }
             }
             Register-FragmentFunction -Name "Invoke-${ManagerName}Script" -Body $runBody

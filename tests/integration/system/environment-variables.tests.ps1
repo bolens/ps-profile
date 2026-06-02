@@ -21,28 +21,7 @@ Describe 'Environment Variables Integration Tests' {
                 throw "Profile directory not found at: $script:ProfileDir"
             }
             
-            $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-            if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
-                throw "BootstrapPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $bootstrapPath)) {
-                throw "Bootstrap file not found at: $bootstrapPath"
-            }
-            . $bootstrapPath
-            
-            $systemPath = Join-Path $script:ProfileDir 'system.ps1'
-            if ($systemPath -and (Test-Path -LiteralPath $systemPath)) {
-                . $systemPath
-            }
-            
-            $utilitiesPath = Join-Path $script:ProfileDir 'utilities.ps1'
-            if ($null -eq $utilitiesPath -or [string]::IsNullOrWhiteSpace($utilitiesPath)) {
-                throw "UtilitiesPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $utilitiesPath)) {
-                throw "Utilities fragment not found at: $utilitiesPath"
-            }
-            . $utilitiesPath
+            Initialize-SystemUtilityIntegration -ProfileDir $script:ProfileDir -IncludeUtilities
         }
         catch {
             $errorDetails = @{
@@ -136,7 +115,7 @@ Describe 'Environment Variables Integration Tests' {
                 $testValue = 'test_value_set'
                 
                 Set-EnvVar -Name $testName -Value $testValue
-                $result = [Environment]::GetEnvironmentVariable($testName, 'User')
+                $result = Get-EnvVar -Name $testName
                 $result | Should -Be $testValue -Because "Set-EnvVar should set the environment variable value"
             }
             catch {
@@ -150,7 +129,7 @@ Describe 'Environment Variables Integration Tests' {
             }
             finally {
                 # Clean up user environment variable (Set-EnvVar sets User-level, not Process-level)
-                [Environment]::SetEnvironmentVariable('TEST_VAR_SET', $null, 'User')
+                Set-EnvVar -Name 'TEST_VAR_SET' -Value $null
             }
         }
 
@@ -158,11 +137,11 @@ Describe 'Environment Variables Integration Tests' {
             $testName = 'TEST_VAR_NULL'
             try {
                 Set-EnvVar -Name $testName -Value $null
-                $result = [Environment]::GetEnvironmentVariable($testName, 'User')
+                $result = Get-EnvVar -Name $testName
                 ($result -eq $null -or $result -eq '') | Should -Be $true
             }
             finally {
-                [Environment]::SetEnvironmentVariable($testName, $null, 'User')
+                Set-EnvVar -Name $testName -Value $null
             }
         }
 
@@ -170,11 +149,11 @@ Describe 'Environment Variables Integration Tests' {
             $testName = 'TEST_VAR_EMPTY'
             try {
                 Set-EnvVar -Name $testName -Value ''
-                $result = [Environment]::GetEnvironmentVariable($testName, 'User')
+                $result = Get-EnvVar -Name $testName
                 ($result -eq $null -or $result -eq '') | Should -Be $true
             }
             finally {
-                [Environment]::SetEnvironmentVariable($testName, $null, 'User')
+                Set-EnvVar -Name $testName -Value $null
             }
         }
 
@@ -200,7 +179,7 @@ Describe 'Environment Variables Integration Tests' {
                 { Publish-EnvVar } | Should -Not -Throw
             }
             finally {
-                [Environment]::SetEnvironmentVariable($testName, $null, 'User')
+                Set-EnvVar -Name $testName -Value $null
             }
         }
 
@@ -212,7 +191,7 @@ Describe 'Environment Variables Integration Tests' {
                 { Publish-EnvVar } | Should -Not -Throw
             }
             finally {
-                [Environment]::SetEnvironmentVariable($testName, $null, 'User')
+                Set-EnvVar -Name $testName -Value $null
             }
         }
     }

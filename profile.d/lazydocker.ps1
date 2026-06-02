@@ -47,7 +47,7 @@ function Invoke-LazyDocker {
         lazydocker @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'lazydocker' -InstallHint 'Install with: scoop install lazydocker'
+        Invoke-MissingToolWarning -ToolName 'lazydocker'
     }
 }
 

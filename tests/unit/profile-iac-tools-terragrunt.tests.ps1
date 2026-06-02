@@ -3,13 +3,8 @@
 # Unit tests for Invoke-Terragrunt and Invoke-OpenTofu functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'iac-tools.ps1')
@@ -17,146 +12,99 @@ BeforeAll {
 
 Describe 'iac-tools.ps1 - Invoke-Terragrunt' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('terragrunt', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'terragrunt' -Available $false
+        Remove-Item -Path 'Function:\terragrunt' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:terragrunt' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when terragrunt is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'terragrunt' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'terragrunt' } -MockWith { return $null }
-            
             $result = Invoke-Terragrunt plan -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls terragrunt with arguments' {
-            Setup-AvailableCommandMock -CommandName 'terragrunt'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'terragrunt' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Plan output'
-            }
-            
-            $result = Invoke-Terragrunt plan -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'plan'
-            $result | Should -Not -BeNullOrEmpty
+            Setup-CapturingCommandMock -CommandName 'terragrunt' -Output 'Plan output'
+
+            Invoke-Terragrunt plan -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'plan'
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
         }
-        
+
         It 'Calls terragrunt with multiple arguments' {
-            Setup-AvailableCommandMock -CommandName 'terragrunt'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'terragrunt' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Apply output'
-            }
-            
-            $result = Invoke-Terragrunt apply -auto-approve -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'apply'
-            $script:capturedArgs | Should -Contain '-auto-approve'
+            Setup-CapturingCommandMock -CommandName 'terragrunt' -Output 'Apply output'
+
+            Invoke-Terragrunt apply -auto-approve -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'apply'
+            $args | Should -Contain '-auto-approve'
         }
-        
+
         It 'Handles terragrunt execution errors' {
-            Setup-AvailableCommandMock -CommandName 'terragrunt'
-            
-            Mock -CommandName 'terragrunt' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('Command not found')
-            }
-            Mock Write-Error { }
-            
-            $result = Invoke-Terragrunt plan -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'terragrunt' -Message 'Command not found'
+
+            { Invoke-Terragrunt plan -ErrorAction Stop } | Should -Throw
         }
     }
 }
 
 Describe 'iac-tools.ps1 - Invoke-OpenTofu' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('tofu', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'tofu' -Available $false
+        Remove-Item -Path 'Function:\tofu' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:tofu' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when opentofu is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'tofu' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'tofu' } -MockWith { return $null }
-            
             $result = Invoke-OpenTofu init -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls tofu with arguments' {
-            Setup-AvailableCommandMock -CommandName 'tofu'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'tofu' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Init output'
-            }
-            
-            $result = Invoke-OpenTofu init -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'init'
-            $result | Should -Not -BeNullOrEmpty
+            Setup-CapturingCommandMock -CommandName 'tofu' -Output 'Init output'
+
+            Invoke-OpenTofu init -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'init'
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
         }
-        
+
         It 'Calls tofu with plan command' {
-            Setup-AvailableCommandMock -CommandName 'tofu'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'tofu' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Plan output'
-            }
-            
-            $result = Invoke-OpenTofu plan -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'plan'
+            Setup-CapturingCommandMock -CommandName 'tofu' -Output 'Plan output'
+
+            Invoke-OpenTofu plan -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'plan'
         }
-        
+
         It 'Handles opentofu execution errors' {
-            Setup-AvailableCommandMock -CommandName 'tofu'
-            
-            Mock -CommandName 'tofu' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('Command not found')
-            }
-            Mock Write-Error { }
-            
-            $result = Invoke-OpenTofu plan -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'tofu' -Message 'Command not found'
+
+            { Invoke-OpenTofu plan -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

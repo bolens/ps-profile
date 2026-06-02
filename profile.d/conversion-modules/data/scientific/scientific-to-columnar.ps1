@@ -76,10 +76,10 @@ function Initialize-FileConversion-ScientificToColumnar {
             }
             catch {
                 $errorMsg = if ($_.Exception.Message -match 'h5py.*not installed|h5py package') {
-                    "h5py package is not installed. Install it with: uv pip install h5py"
+                    Resolve-PythonInstallHintMessage -Message "h5py package is not installed. Install it with: __PYTHON_INSTALL_CMD__" -PackageNames 'h5py' -Global
                 }
                 elseif ($_.Exception.Message -match 'parquetjs.*not installed|parquetjs package|MODULE_NOT_FOUND') {
-                    "parquetjs package is not installed. Install it with: pnpm add -g parquetjs"
+                    Resolve-NodeInstallHintMessage -Message "parquetjs package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'parquetjs' -Global
                 }
                 else {
                     "Failed to convert HDF5 to Parquet: $_"
@@ -124,10 +124,10 @@ function Initialize-FileConversion-ScientificToColumnar {
             }
             catch {
                 $errorMsg = if ($_.Exception.Message -match 'parquetjs.*not installed|parquetjs package|MODULE_NOT_FOUND') {
-                    "parquetjs package is not installed. Install it with: pnpm add -g parquetjs"
+                    Resolve-NodeInstallHintMessage -Message "parquetjs package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'parquetjs' -Global
                 }
                 elseif ($_.Exception.Message -match 'h5py.*not installed|h5py package') {
-                    "h5py package is not installed. Install it with: uv pip install h5py"
+                    Resolve-PythonInstallHintMessage -Message "h5py package is not installed. Install it with: __PYTHON_INSTALL_CMD__" -PackageNames 'h5py' -Global
                 }
                 else {
                     "Failed to convert Parquet to HDF5: $_"
@@ -172,10 +172,10 @@ function Initialize-FileConversion-ScientificToColumnar {
             }
             catch {
                 $errorMsg = if ($_.Exception.Message -match 'netCDF4.*not installed|netCDF4 package') {
-                    "netCDF4 package is not installed. Install it with: uv pip install netCDF4"
+                    Resolve-PythonInstallHintMessage -Message "netCDF4 package is not installed. Install it with: __PYTHON_INSTALL_CMD__" -PackageNames 'netCDF4' -Global
                 }
                 elseif ($_.Exception.Message -match 'parquetjs.*not installed|parquetjs package|MODULE_NOT_FOUND') {
-                    "parquetjs package is not installed. Install it with: pnpm add -g parquetjs"
+                    Resolve-NodeInstallHintMessage -Message "parquetjs package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'parquetjs' -Global
                 }
                 else {
                     "Failed to convert NetCDF to Parquet: $_"
@@ -220,10 +220,10 @@ function Initialize-FileConversion-ScientificToColumnar {
             }
             catch {
                 $errorMsg = if ($_.Exception.Message -match 'parquetjs.*not installed|parquetjs package|MODULE_NOT_FOUND') {
-                    "parquetjs package is not installed. Install it with: pnpm add -g parquetjs"
+                    Resolve-NodeInstallHintMessage -Message "parquetjs package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'parquetjs' -Global
                 }
                 elseif ($_.Exception.Message -match 'netCDF4.*not installed|netCDF4 package') {
-                    "netCDF4 package is not installed. Install it with: uv pip install netCDF4"
+                    Resolve-PythonInstallHintMessage -Message "netCDF4 package is not installed. Install it with: __PYTHON_INSTALL_CMD__" -PackageNames 'netCDF4' -Global
                 }
                 else {
                     "Failed to convert Parquet to NetCDF: $_"

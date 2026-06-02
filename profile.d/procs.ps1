@@ -27,5 +27,5 @@ if (Test-CachedCommand procs) {
     Set-Alias -Name psgrep -Value procs -Option AllScope -Force
 }
 else {
-    Write-MissingToolWarning -Tool 'procs' -InstallHint 'Install with: scoop install procs'
+    Invoke-MissingToolWarning -ToolName 'procs'
 }

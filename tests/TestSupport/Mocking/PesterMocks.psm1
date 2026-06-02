@@ -218,9 +218,10 @@ function Mock-CommandAvailabilityPester {
 
         [bool]$Available = $true,
 
-        [string]$CommandType = 'Application'
-        # Note: Scope parameter removed - Pester 5 mocks are automatically scoped to current block
-        # The Scope parameter is only used with Should -Invoke, not with Mock
+        [string]$CommandType = 'Application',
+
+        # Backward compatibility: ignored in Pester 5 (mocks are scoped to the current block)
+        [string]$Scope
     )
 
     # CRITICAL: Check call depth FIRST before doing anything that might trigger recursion
@@ -379,7 +380,7 @@ function Mock-CommandAvailabilityPester {
             # This ensures the mock intercepts BEFORE the real function executes (and before cache checks)
             # CRITICAL: Pester mocks intercept at the function call level, so they should intercept
             # before any code in the real function executes, including cache checks
-            Mock -CommandName Test-CachedCommand -MockWith {
+            $testCachedCommandMock = {
                 param(
                     [Parameter(Position = 0)]
                     [string]$Name
@@ -423,29 +424,11 @@ function Mock-CommandAvailabilityPester {
                     }
                 }
                 
-                # Not our command - we need to call the real function
-                # CRITICAL: We can't use Get-Command here because it will return the mock (recursion)
-                # We also can't easily get the original function from the function provider because
-                # Pester replaces the function with the mock
-                # 
-                # Solution: Use Pester's built-in mechanism to call the original function
-                # In Pester 5, we can use the -Verifiable parameter and Should -Invoke to verify calls
-                # But for actually calling the original, we need to use a different approach
-                #
-                # For now, we'll use a workaround: temporarily remove the mock, call the original, then restore
-                # But that's complex and might not work reliably
-                #
-                # Actually, a better approach: don't mock Test-CachedCommand for other commands at all
-                # Only mock it when it's called for our specific command. But Pester mocks intercept all calls.
-                #
-                # The simplest solution: return false for other commands as a safe default
-                # Tests that need Test-CachedCommand for other commands should set up their own mocks
-                # This is acceptable because:
-                # 1. Most tests only test one command at a time
-                # 2. Tests can set up multiple mocks if needed
-                # 3. It avoids recursion and complexity
+                # Not our command - return false as safe default for unrelated commands
                 return $false
-            }
+            }.GetNewClosure()
+
+            Mock -CommandName Test-CachedCommand -MockWith $testCachedCommandMock
         }
         
         # Also create a function mock for the command itself so it can be called
@@ -817,15 +800,4 @@ if ('$escapedOutput') {
     
     return $result
 }
-
-# Export functions
-Export-ModuleMember -Function @(
-    'Use-PesterMock',
-    'Assert-MockCalled',
-    'Mock-CommandAvailabilityPester',
-    'Initialize-PesterMocks',
-    'Setup-AvailableCommandMock',
-    'New-CommandArgumentCaptureMock'
-)
-
 

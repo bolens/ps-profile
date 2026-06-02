@@ -3,183 +3,110 @@
 # Unit tests for Analyze-PE function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 're-tools.ps1')
+    $script:TestWorkDir = New-TestTempDirectory -Prefix 'AnalyzePE'
+    $script:TestExeFile = Join-Path $script:TestWorkDir 'test.exe'
+    Set-Content -Path $script:TestExeFile -Value 'fake exe' -Encoding utf8
 }
 
 Describe 're-tools.ps1 - Analyze-PE' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('pe-bear', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('exeinfo-pe', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('detect-it-easy', [ref]$null)
-        }
+
+        Mark-TestCommandsUnavailable -CommandNames @('pe-bear', 'exeinfo-pe', 'detect-it-easy')
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when no PE analysis tools are available' {
-            Mock-CommandAvailabilityPester -CommandName 'pe-bear' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'exeinfo-pe' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'detect-it-easy' -Available $false
-            
-            $result = Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue
-            
+            $result = Analyze-PE -InputFile $script:TestExeFile -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool preference' {
         It 'Prefers pe-bear over other tools' {
-            Setup-AvailableCommandMock -CommandName 'pe-bear'
-            Setup-AvailableCommandMock -CommandName 'exeinfo-pe'
-            Setup-AvailableCommandMock -CommandName 'detect-it-easy'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'test.exe' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'pe-bear' -MockWith { 
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Analysis started'
-            }
-            Mock -CommandName 'exeinfo-pe' -MockWith { 
-                $global:LASTEXITCODE = 0
-                return 'Analysis results'
-            }
-            Mock -CommandName 'detect-it-easy' -MockWith { 
-                $global:LASTEXITCODE = 0
-                return 'Analysis started'
-            }
-            
-            $result = Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'pe-bear' -Times 1 -Exactly
-            Should -Not -Invoke 'exeinfo-pe'
-            Should -Not -Invoke 'detect-it-easy'
+            Setup-CapturingCommandMock -CommandName 'pe-bear' -Output 'Analysis started'
+            Set-TestCommandAvailabilityState -CommandName 'exeinfo-pe' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'detect-it-easy' -Available $true
+
+            Analyze-PE -InputFile $script:TestExeFile -ErrorAction SilentlyContinue | Out-Null
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain $script:TestExeFile
         }
-        
+
         It 'Falls back to exeinfo-pe when pe-bear is not available' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            Mock-CommandAvailabilityPester -CommandName 'pe-bear' -Available $false
-            Setup-AvailableCommandMock -CommandName 'exeinfo-pe'
-            
-            # Verify Test-CachedCommand returns true for exeinfo-pe
+            Setup-CapturingCommandMock -CommandName 'exeinfo-pe' -Output 'Analysis results'
+            Mark-TestCommandsUnavailable -CommandNames @('pe-bear', 'detect-it-easy')
+
             Test-CachedCommand 'exeinfo-pe' | Should -Be $true
-            
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'test.exe' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'exeinfo-pe' -MockWith { 
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Analysis results'
-            }
-            
-            $result = Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'exeinfo-pe' -Times 1 -Exactly
+
+            Analyze-PE -InputFile $script:TestExeFile -ErrorAction SilentlyContinue | Out-Null
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
         }
-        
+
         It 'Falls back to detect-it-easy when pe-bear and exeinfo-pe are not available' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            Mock-CommandAvailabilityPester -CommandName 'pe-bear' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'exeinfo-pe' -Available $false
-            Setup-AvailableCommandMock -CommandName 'detect-it-easy'
-            
-            # Verify Test-CachedCommand returns true for detect-it-easy
+            Setup-CapturingCommandMock -CommandName 'detect-it-easy' -Output 'Analysis started'
+            Mark-TestCommandsUnavailable -CommandNames @('pe-bear', 'exeinfo-pe')
+
             Test-CachedCommand 'detect-it-easy' | Should -Be $true
-            
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'test.exe' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'detect-it-easy' -MockWith { 
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Analysis started'
-            }
-            
-            $result = Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'detect-it-easy' -Times 1 -Exactly
+
+            Analyze-PE -InputFile $script:TestExeFile -ErrorAction SilentlyContinue | Out-Null
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls pe-bear with input file' {
-            Setup-AvailableCommandMock -CommandName 'pe-bear'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'test.exe' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'pe-bear' -MockWith { 
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Analysis started'
-            }
-            
-            $result = Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue
-            
-            # Verify pe-bear was called
-            Should -Invoke 'pe-bear' -Times 1 -Exactly
-            $script:capturedArgs | Should -Not -BeNullOrEmpty
-            # When using & command $array, PowerShell splats the array
-            $allArgs = $script:capturedArgs | ForEach-Object { if ($_ -is [System.Array]) { $_ } else { $_ } } | ForEach-Object { $_ }
-            $allArgs | Should -Contain 'test.exe'
+            Setup-CapturingCommandMock -CommandName 'pe-bear' -Output 'Analysis started'
+
+            $result = Analyze-PE -InputFile $script:TestExeFile -ErrorAction SilentlyContinue
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain $script:TestExeFile
             $result | Should -Match 'GUI tool'
         }
-        
+
         It 'Calls exeinfo-pe with output path when specified' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
+            $script:OutputFile = Join-Path $script:TestWorkDir 'output.txt'
+            if (Test-Path -LiteralPath $script:OutputFile) {
+                Remove-Item -LiteralPath $script:OutputFile -Force
             }
-            Mock-CommandAvailabilityPester -CommandName 'pe-bear' -Available $false
-            Setup-AvailableCommandMock -CommandName 'exeinfo-pe'
-            
-            # Verify Test-CachedCommand returns true for exeinfo-pe
-            Test-CachedCommand 'exeinfo-pe' | Should -Be $true
-            
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'test.exe' } -MockWith { return $true }
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'output.txt' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'exeinfo-pe' -MockWith { 
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Analysis results'
+
+            Setup-CapturingCommandMock -CommandName 'exeinfo-pe' -Output 'Analysis results' -OnInvoke {
+                Set-Content -Path $script:OutputFile -Value 'analysis' -Force
             }
-            
-            $result = Analyze-PE -InputFile 'test.exe' -OutputPath 'output.txt' -ErrorAction SilentlyContinue
-            
-            # Verify exeinfo-pe was called
-            Should -Invoke 'exeinfo-pe' -Times 1 -Exactly
-            $script:capturedArgs | Should -Not -BeNullOrEmpty
-            # When using & command $array, PowerShell splats the array
-            $allArgs = $script:capturedArgs | ForEach-Object { if ($_ -is [System.Array]) { $_ } else { $_ } } | ForEach-Object { $_ }
-            $allArgs | Should -Contain '-o'
-            $allArgs | Should -Contain 'output.txt'
+            Mark-TestCommandsUnavailable -CommandNames @('pe-bear', 'detect-it-easy')
+
+            $result = Analyze-PE -InputFile $script:TestExeFile -OutputPath $script:OutputFile -ErrorAction SilentlyContinue
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-o'
+            $args | Should -Contain $script:OutputFile
+            $result | Should -Be $script:OutputFile
         }
-        
+
         It 'Handles missing input file' {
-            Setup-AvailableCommandMock -CommandName 'pe-bear'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'missing.exe' } -MockWith { return $false }
-            
-            { Analyze-PE -InputFile 'missing.exe' -ErrorAction Stop } | Should -Throw
+            Setup-CapturingCommandMock -CommandName 'pe-bear'
+            $missingFile = Join-Path $script:TestWorkDir 'missing.exe'
+
+            $result = Analyze-PE -InputFile $missingFile -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
     }
 }
-

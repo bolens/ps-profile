@@ -68,6 +68,12 @@ Describe 'kubernetes-enhanced.ps1 - Function Registration' {
 }
 
 Describe 'kubernetes-enhanced.ps1 - Graceful Degradation' {
+    BeforeEach {
+        foreach ($cmd in @('kubectx', 'kubectl', 'kubens', 'stern', 'minikube', 'k9s')) {
+            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        }
+    }
+
     It 'Set-KubeContext handles missing tool gracefully' {
         { Set-KubeContext -List -ErrorAction SilentlyContinue } | Should -Not -Throw
     }

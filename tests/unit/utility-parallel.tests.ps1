@@ -2,9 +2,8 @@
 # Parallel execution helper tests.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     # Import the Parallel module (Common.psm1 no longer exists)
     $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     Import-Module (Join-Path $libPath 'parallel' 'Parallel.psm1') -DisableNameChecking -ErrorAction Stop -Global

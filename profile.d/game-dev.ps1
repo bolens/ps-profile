@@ -61,12 +61,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'blockbench')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'blockbench'
             return
         }
@@ -143,12 +137,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'tiled')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'tiled'
             return
         }
@@ -230,12 +218,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'godot')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'godot'
             return
         }
@@ -334,12 +316,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'godot')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'godot'
             return
         }
@@ -459,12 +435,6 @@ try {
         }
 
         if (-not $tool) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'unity-hub'
             return
         }

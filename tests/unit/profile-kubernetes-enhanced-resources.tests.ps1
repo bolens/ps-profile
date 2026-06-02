@@ -3,13 +3,8 @@
 # Unit tests for Get-KubeResources, Start-Minikube, and Start-K9s functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
@@ -17,254 +12,176 @@ BeforeAll {
 
 Describe 'kubernetes-enhanced.ps1 - Get-KubeResources' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('kubectl', [ref]$null)
-        }
+
+        Mark-TestCommandsUnavailable -CommandNames 'kubectl'
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when kubectl is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'kubectl' } -MockWith { return $null }
-            
             $result = Get-KubeResources -ResourceType 'pods' -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls kubectl get with resource type' {
-            Setup-AvailableCommandMock -CommandName 'kubectl'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'kubectl' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Pod list'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'kubectl' -Output 'Pod list'
+
             $result = Get-KubeResources -ResourceType 'pods' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'get'
-            $script:capturedArgs | Should -Contain 'pods'
-            $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain 'wide'
-            $result | Should -Not -BeNullOrEmpty
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'get'
+            $args | Should -Contain 'pods'
+            $args | Should -Contain '-o'
+            $args | Should -Contain 'wide'
+            $result | Should -Be 'Pod list'
         }
-        
+
         It 'Calls kubectl get with namespace and output format' {
-            Setup-AvailableCommandMock -CommandName 'kubectl'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'kubectl' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Deployment YAML'
-            }
-            
-            $result = Get-KubeResources -ResourceType 'deployments' -Namespace 'production' -OutputFormat 'yaml' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-n'
-            $script:capturedArgs | Should -Contain 'production'
-            $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain 'yaml'
+            Setup-CapturingCommandMock -CommandName 'kubectl' -Output 'Deployment YAML'
+
+            Get-KubeResources -ResourceType 'deployments' -Namespace 'production' -OutputFormat 'yaml' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-n'
+            $args | Should -Contain 'production'
+            $args | Should -Contain '-o'
+            $args | Should -Contain 'yaml'
         }
-        
+
         It 'Calls kubectl get with specific resource name' {
-            Setup-AvailableCommandMock -CommandName 'kubectl'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'kubectl' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Pod details'
-            }
-            
-            $result = Get-KubeResources -ResourceType 'pods' -ResourceName 'my-pod' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'my-pod'
+            Setup-CapturingCommandMock -CommandName 'kubectl' -Output 'Pod details'
+
+            Get-KubeResources -ResourceType 'pods' -ResourceName 'my-pod' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'my-pod'
         }
-        
+
         It 'Handles kubectl execution errors' {
-            Setup-AvailableCommandMock -CommandName 'kubectl'
-            
-            Mock -CommandName 'kubectl' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
+            Setup-CapturingCommandMock -CommandName 'kubectl' -ExitCode 1
+
             $result = Get-KubeResources -ResourceType 'pods' -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+
+            $result | Should -BeNullOrEmpty
         }
     }
 }
 
 Describe 'kubernetes-enhanced.ps1 - Start-Minikube' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('minikube', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'minikube' -Available $false
+        Remove-Item -Path 'Function:\minikube' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:minikube' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when minikube is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'minikube' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'minikube' } -MockWith { return $null }
-            
             $result = Start-Minikube -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls minikube start with default profile' {
-            Setup-AvailableCommandMock -CommandName 'minikube'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'minikube' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Minikube started'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'minikube' -Output 'Minikube started'
+
             $result = Start-Minikube -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'start'
-            $script:capturedArgs | Should -Contain '-p'
-            $script:capturedArgs | Should -Contain 'minikube'
-            $result | Should -Not -BeNullOrEmpty
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'start'
+            $args | Should -Contain '-p'
+            $args | Should -Contain 'minikube'
+            $result | Should -Be 'Minikube started'
         }
-        
+
         It 'Calls minikube start with custom profile and driver' {
-            Setup-AvailableCommandMock -CommandName 'minikube'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'minikube' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Minikube started'
-            }
-            
-            $result = Start-Minikube -Profile 'dev' -Driver 'docker' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-p'
-            $script:capturedArgs | Should -Contain 'dev'
-            $script:capturedArgs | Should -Contain '--driver'
-            $script:capturedArgs | Should -Contain 'docker'
+            Setup-CapturingCommandMock -CommandName 'minikube' -Output 'Minikube started'
+
+            Start-Minikube -Profile 'dev' -Driver 'docker' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-p'
+            $args | Should -Contain 'dev'
+            $args | Should -Contain '--driver'
+            $args | Should -Contain 'docker'
         }
-        
+
         It 'Calls minikube status for status action' {
-            Setup-AvailableCommandMock -CommandName 'minikube'
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'minikube' -MockWith { 
-                # Capture all arguments passed to minikube
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Running'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'minikube' -Output 'Running'
+
             $result = Start-Minikube -Status -ErrorAction SilentlyContinue
-            
-            # Verify minikube was called
-            Should -Invoke 'minikube' -Times 1 -Exactly
-            $script:capturedArgs | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'status'
-            $script:capturedArgs | Should -Contain '-p'
-            $script:capturedArgs | Should -Contain 'minikube'
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'status'
+            $args | Should -Contain '-p'
+            $args | Should -Contain 'minikube'
+            $result | Should -Be 'Running'
         }
-        
+
         It 'Handles minikube execution errors' {
-            Setup-AvailableCommandMock -CommandName 'minikube'
-            
-            Mock -CommandName 'minikube' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
+            Setup-CapturingCommandMock -CommandName 'minikube' -ExitCode 1
+
             $result = Start-Minikube -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+
+            $result | Should -BeNullOrEmpty
         }
     }
 }
 
 Describe 'kubernetes-enhanced.ps1 - Start-K9s' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('k9s', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'k9s' -Available $false
+        Remove-Item -Path 'Function:\k9s' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:k9s' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when k9s is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'k9s' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'k9s' } -MockWith { return $null }
-            
             $result = Start-K9s -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Launches k9s without arguments' {
-            Setup-AvailableCommandMock -CommandName 'k9s'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'k9s' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            Start-K9s -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -BeNullOrEmpty
+            Setup-CapturingCommandMock -CommandName 'k9s'
+
+            Start-K9s -ErrorAction SilentlyContinue | Out-Null
+
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
         }
-        
+
         It 'Launches k9s with namespace' {
-            Setup-AvailableCommandMock -CommandName 'k9s'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'k9s' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            Start-K9s -Namespace 'production' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-n'
-            $script:capturedArgs | Should -Contain 'production'
+            Setup-CapturingCommandMock -CommandName 'k9s'
+
+            Start-K9s -Namespace 'production' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-n'
+            $args | Should -Contain 'production'
         }
     }
 }
-

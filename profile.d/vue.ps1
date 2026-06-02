@@ -52,7 +52,7 @@ function Invoke-Vue {
         vue @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx or vue' -InstallHint 'Install with: npm install -g npm or npm install -g @vue/cli'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx or vue'
     }
 }
 
@@ -87,7 +87,7 @@ function New-VueApp {
         vue create @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx or vue' -InstallHint 'Install with: npm install -g npm or npm install -g @vue/cli'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx or vue'
     }
 }
 
@@ -122,7 +122,7 @@ function Start-VueDev {
         vue serve @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'npx or vue' -InstallHint 'Install with: npm install -g npm or npm install -g @vue/cli'
+        Invoke-MissingToolWarning -ToolName 'npm' -ToolType 'node-package' -Tool 'npx or vue'
     }
 }
 

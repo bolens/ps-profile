@@ -75,12 +75,6 @@ try {
         $useKubectl = Test-CachedCommand 'kubectl'
 
         if (-not $useKubectx -and -not $useKubectl) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
@@ -175,12 +169,6 @@ try {
         $useKubectl = Test-CachedCommand 'kubectl'
 
         if (-not $useKubens -and -not $useKubectl) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
@@ -285,12 +273,6 @@ try {
         $useKubectl = Test-CachedCommand 'kubectl'
 
         if (-not $useStern -and -not $useKubectl) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
@@ -395,12 +377,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'kubectl')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
@@ -495,12 +471,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'minikube')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'minikube'
             return
         }
@@ -577,12 +547,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'k9s')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'k9s'
             return
         }
@@ -663,12 +627,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'kubectl')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
@@ -778,12 +736,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'kubectl')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
@@ -897,12 +849,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'kubectl')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }
@@ -1051,12 +997,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'kubectl')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kubectl'
             return
         }

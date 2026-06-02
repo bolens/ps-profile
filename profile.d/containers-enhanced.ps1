@@ -50,12 +50,6 @@ try {
         param()
 
         if (-not (Test-CachedCommand 'podman-desktop')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'podman-desktop'
             return
         }
@@ -95,12 +89,6 @@ try {
         param()
 
         if (-not (Test-CachedCommand 'rancher-desktop')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'rancher-desktop'
             return
         }
@@ -165,12 +153,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'kompose')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'kompose'
             return
         }
@@ -264,12 +246,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'balena')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'balena-cli' -Tool 'balena'
             return
         }
@@ -403,7 +379,7 @@ try {
         }
 
         if (-not $engineInfo.Available) {
-            Write-MissingToolWarning -Tool 'docker/podman' -InstallHint 'Install with: scoop install docker or scoop install podman'
+            Invoke-ContainerEngineMissingWarning
             return
         }
 
@@ -525,7 +501,7 @@ try {
         }
 
         if (-not $engineInfo.Available) {
-            Write-MissingToolWarning -Tool 'docker/podman' -InstallHint 'Install with: scoop install docker or scoop install podman'
+            Invoke-ContainerEngineMissingWarning
             return
         }
 
@@ -641,7 +617,7 @@ try {
         }
 
         if (-not $engineInfo.Available) {
-            Write-MissingToolWarning -Tool 'docker/podman' -InstallHint 'Install with: scoop install docker or scoop install podman'
+            Invoke-ContainerEngineMissingWarning
             return
         }
 
@@ -732,7 +708,7 @@ try {
         }
 
         if (-not $engineInfo.Available) {
-            Write-MissingToolWarning -Tool 'docker/podman' -InstallHint 'Install with: scoop install docker or scoop install podman'
+            Invoke-ContainerEngineMissingWarning
             return
         }
 
@@ -872,7 +848,7 @@ try {
         }
 
         if (-not $engineInfo.Available) {
-            Write-MissingToolWarning -Tool 'docker/podman' -InstallHint 'Install with: scoop install docker or scoop install podman'
+            Invoke-ContainerEngineMissingWarning
             return
         }
 
@@ -978,7 +954,7 @@ try {
         }
 
         if (-not $engineInfo.Available) {
-            Write-MissingToolWarning -Tool 'docker/podman' -InstallHint 'Install with: scoop install docker or scoop install podman'
+            Invoke-ContainerEngineMissingWarning
             return
         }
 

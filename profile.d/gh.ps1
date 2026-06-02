@@ -52,7 +52,7 @@ function Open-GitHubRepository {
         }
     }
     else {
-        Write-MissingToolWarning -Tool 'gh' -InstallHint 'Install with: scoop install gh'
+        Invoke-MissingToolWarning -ToolName 'gh'
     }
 }
 
@@ -84,7 +84,7 @@ function Invoke-GitHubPullRequest {
         gh pr @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'gh' -InstallHint 'Install with: scoop install gh'
+        Invoke-MissingToolWarning -ToolName 'gh'
     }
 }
 

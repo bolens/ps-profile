@@ -43,7 +43,7 @@ Describe 'FLAC Audio Format Conversion Tests' {
 
         It 'ConvertFrom-FlacToWav uses default output path when not specified' {
             # Skip if ffmpeg not available
-            $ffmpeg = Test-ToolAvailable -ToolName 'ffmpeg' -InstallCommand 'scoop install ffmpeg' -Silent
+            $ffmpeg = Test-ToolAvailable -ToolName 'ffmpeg' -Silent
             if (-not $ffmpeg.Available) {
                 $skipMessage = "ffmpeg command not available"
                 if ($ffmpeg.InstallCommand) {

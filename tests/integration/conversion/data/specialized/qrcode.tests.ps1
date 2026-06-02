@@ -25,7 +25,7 @@ Describe 'QR Code Conversion Tests' {
 
         It 'ConvertTo-QrCodeFromText generates QR code from text' {
             # Skip if Node.js or qrcode package not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {

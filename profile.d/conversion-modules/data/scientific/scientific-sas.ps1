@@ -113,7 +113,7 @@ try:
         json.dump(result, f, indent=2, default=str)
 except ImportError as e:
     if 'pyreadstat' in str(e) or 'pandas' in str(e) or 'polars' in str(e):
-        print('Error: pyreadstat and pandas/polars packages are required. Install with: uv pip install pyreadstat pandas polars', file=sys.stderr)
+        print('Error: pyreadstat and pandas/polars packages are required. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
@@ -123,7 +123,8 @@ except Exception as e:
 "@
             $installCmd = Get-PythonPackageInstallRecommendation -PackageNames 'pyreadstat', 'pandas', 'polars' -PythonCmd $pythonCmd
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "sas-decode-$(Get-Random).py"
-            Set-Content -LiteralPath $tempScript -Value ($pythonScript -replace 'sys\.argv\[4\]', "'$installCmd'") -Encoding UTF8
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars', 'pyreadstat' -Global
+            Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1
                 if ($LASTEXITCODE -ne 0) {
@@ -206,11 +207,11 @@ try:
         pyreadstat.write_sas7bdat(df, sys.argv[2])
     except ImportError:
         # Fallback: pandas doesn't have write_sas, so we'll save as CSV and suggest using SAS
-        install_cmd = sys.argv[4] if len(sys.argv) > 4 else 'uv pip install pyreadstat'
+        install_cmd = sys.argv[4] if len(sys.argv) > 4 else '__PYTHON_INSTALL_CMD__'
         raise ImportError(f"pyreadstat is required for writing SAS files. Install with: {install_cmd}")
 except ImportError as e:
     if 'pyreadstat' in str(e) or 'pandas' in str(e) or 'polars' in str(e):
-        install_cmd = sys.argv[4] if len(sys.argv) > 4 else 'uv pip install pyreadstat pandas polars'
+        install_cmd = sys.argv[4] if len(sys.argv) > 4 else '__PYTHON_INSTALL_CMD__'
         print(f'Error: pyreadstat and pandas/polars packages are required. Install with: {install_cmd}', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
@@ -220,7 +221,8 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "sas-encode-$(Get-Random).py"
-            Set-Content -LiteralPath $tempScript -Value ($pythonScript -replace 'sys\.argv\[4\]', "'$installCmd'") -Encoding UTF8
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars', 'pyreadstat' -Global
+            Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1
                 if ($LASTEXITCODE -ne 0) {
@@ -289,7 +291,7 @@ try:
         df_pandas.to_csv(sys.argv[2], index=False)
 except ImportError as e:
     if 'pyreadstat' in str(e) or 'pandas' in str(e) or 'polars' in str(e):
-        install_cmd = sys.argv[4] if len(sys.argv) > 4 else 'uv pip install pyreadstat pandas polars'
+        install_cmd = sys.argv[4] if len(sys.argv) > 4 else '__PYTHON_INSTALL_CMD__'
         print(f'Error: pyreadstat and pandas/polars packages are required. Install with: {install_cmd}', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
@@ -299,7 +301,8 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "sas-to-csv-$(Get-Random).py"
-            Set-Content -LiteralPath $tempScript -Value ($pythonScript -replace 'sys\.argv\[4\]', "'$installCmd'") -Encoding UTF8
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars', 'pyreadstat' -Global
+            Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1
                 if ($LASTEXITCODE -ne 0) {

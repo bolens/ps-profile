@@ -101,7 +101,7 @@ Describe 'UBJSON Format Conversion Tests' {
                 # If conversion fails, verify it's due to missing ubjson package
                 if ($errorMessage -match 'ubjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'ubjson') {
                     # Verify installation command is present in error message
-                    $installCommand = 'pnpm add -g ubjson'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'ubjson' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))
@@ -154,7 +154,7 @@ Describe 'UBJSON Format Conversion Tests' {
                 # If conversion fails, verify it's due to missing ubjson package or invalid file format
                 if ($errorMessage -match 'ubjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'ubjson') {
                     # Verify installation command is present in error message
-                    $installCommand = 'pnpm add -g ubjson'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'ubjson' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))

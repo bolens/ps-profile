@@ -364,7 +364,7 @@ else {
     }
     
     if ($generationErrors.Count -gt 0) {
-        $successCount = ($generationSuccess.Values | Where-Object { $_ }).Count
+        $successCount = @($generationSuccess.Values | Where-Object { $_ }).Count
         if ($successCount -gt 0) {
             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
                 Write-StructuredWarning -Message "Documentation generation completed with some failures" -OperationName 'docs.generate' -Context @{
@@ -398,23 +398,23 @@ $oldDocsPath = Split-Path -Parent $docsPath
 if ($oldDocsPath -and -not [string]::IsNullOrWhiteSpace($oldDocsPath) -and (Test-Path -LiteralPath $oldDocsPath)) {
     # Get all markdown files in root docs/ that look like function or alias docs
     # Exclude README.md and files in subdirectories (api/, fragments/, guides/)
-    $oldDocFiles = Get-ChildItem -Path $oldDocsPath -Filter '*.md' -File -ErrorAction SilentlyContinue | 
-    Where-Object { 
-        $_.Name -ne 'README.md' -and
-        $_.DirectoryName -eq $oldDocsPath -and
-        ($_.Name -match '^[A-Z]' -or $_.Name -match '^[a-z]')
-    }
-    
-    if ($oldDocFiles.Count -gt 0) {
+    $oldDocFiles = @(Get-ChildItem -Path $oldDocsPath -Filter '*.md' -File -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.Name -ne 'README.md' -and
+            $_.DirectoryName -eq $oldDocsPath -and
+            ($_.Name -match '^[A-Z]' -or $_.Name -match '^[a-z]')
+        })
+
+    if (@($oldDocFiles).Count -gt 0) {
         if ($DryRun) {
-            Write-ScriptMessage -Message "`n[DRY RUN] Would remove $($oldDocFiles.Count) old documentation file(s) from root docs/ directory:" -ForegroundColor Yellow
+            Write-ScriptMessage -Message "`n[DRY RUN] Would remove $(@($oldDocFiles).Count) old documentation file(s) from root docs/ directory:" -ForegroundColor Yellow
             foreach ($oldFile in $oldDocFiles) {
                 Write-ScriptMessage -Message "  - Would remove $($oldFile.Name)" -ForegroundColor Yellow
             }
         }
         else {
             Write-ScriptMessage -Message "`nCleaning up old function and alias documentation files from root docs/ directory (moved to docs/api/)..."
-            Write-ScriptMessage -Message "Removing $($oldDocFiles.Count) old documentation file(s) from root docs/ directory (now in docs/api/):"
+            Write-ScriptMessage -Message "Removing $(@($oldDocFiles).Count) old documentation file(s) from root docs/ directory (now in docs/api/):"
             foreach ($oldFile in $oldDocFiles) {
                 Write-ScriptMessage -Message "  - Removing $($oldFile.Name)"
                 Remove-Item -Path $oldFile.FullName -Force
@@ -429,9 +429,21 @@ if ($oldDocsPath -and -not [string]::IsNullOrWhiteSpace($oldDocsPath) -and (Test
 if ($DryRun) {
     Write-ScriptMessage -Message "`n[DRY RUN] Would generate API documentation in: $docsPath" -ForegroundColor Yellow
     Write-ScriptMessage -Message "Run without -DryRun to apply changes." -ForegroundColor Yellow
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would generate documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+    $successMessage = "DRY RUN: Would generate documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+    if ($ProfilePath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        Write-ScriptMessage -Message $successMessage
+    }
+    else {
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+    }
 }
 else {
     Write-ScriptMessage -Message "`nAPI documentation generated in: $docsPath"
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Generated documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+    $successMessage = "Generated documentation for $($functions.Count) functions and $($aliases.Count) aliases."
+    if ($ProfilePath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        Write-ScriptMessage -Message $successMessage
+    }
+    else {
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+    }
 }

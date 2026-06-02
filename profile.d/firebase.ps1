@@ -48,7 +48,7 @@ function Invoke-Firebase {
         firebase @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'firebase' -InstallHint 'Install with: scoop install firebase-tools'
+        Invoke-MissingToolWarning -ToolName 'firebase'
     }
 }
 
@@ -80,7 +80,7 @@ function Publish-FirebaseDeployment {
         firebase deploy @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'firebase' -InstallHint 'Install with: scoop install firebase-tools'
+        Invoke-MissingToolWarning -ToolName 'firebase'
     }
 }
 
@@ -112,7 +112,7 @@ function Start-FirebaseServer {
         firebase serve @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'firebase' -InstallHint 'Install with: scoop install firebase-tools'
+        Invoke-MissingToolWarning -ToolName 'firebase'
     }
 }
 

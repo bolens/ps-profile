@@ -86,9 +86,9 @@ Describe 'API Tools Integration Tests' {
                 Clear-CommandCache -CommandName 'bruno' -ErrorAction SilentlyContinue
             }
             Mock-CommandAvailabilityPester -CommandName 'bruno' -Available $false
-            Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'bruno' } -MockWith { $false }
             $output = bruno -CollectionPath (Get-Location).Path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'bruno'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'bruno not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'bruno'
         }
     }
 
@@ -128,39 +128,28 @@ Describe 'API Tools Integration Tests' {
                 Clear-CommandCache -CommandName 'hurl' -ErrorAction SilentlyContinue
             }
             Mock-CommandAvailabilityPester -CommandName 'hurl' -Available $false
-            Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'hurl' } -MockWith { $false }
             $testFile = Join-Path (Get-Location).Path 'test.hurl'
             $output = hurl -TestFile $testFile 2>&1 3>&1 | Out-String
-            $output | Should -Match 'hurl'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'hurl not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'hurl'
         }
     }
 
     Context 'Httpie helpers (Invoke-Httpie)' {
-        BeforeAll {
-            # Mock Get-Command to return null for 'http' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'http' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
-            Remove-Item Function:\Invoke-Httpie -ErrorAction SilentlyContinue
-            Remove-Item Alias:\httpie -ErrorAction SilentlyContinue
-            . (Join-Path $script:ProfileDir 'api-tools.ps1') -ErrorAction SilentlyContinue
-        }
-
         It 'Creates Invoke-Httpie function' {
             Get-Command Invoke-Httpie -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates httpie alias for Invoke-Httpie' {
+            Get-Command Invoke-Httpie -CommandType Function -ErrorAction SilentlyContinue |
+                Should -Not -BeNullOrEmpty
             $alias = Get-Alias httpie -ErrorAction SilentlyContinue
-            if (-not $alias) {
-                if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
-                    Set-AgentModeAlias -Name 'httpie' -Target 'Invoke-Httpie' | Out-Null
-                }
-                $alias = Get-Alias httpie -ErrorAction SilentlyContinue
+            if ($alias -and $alias.ResolvedCommandName -eq 'Invoke-Httpie') {
+                return
             }
-            $alias | Should -Not -BeNullOrEmpty
-            if ($alias) {
-                $alias.ResolvedCommandName | Should -Be 'Invoke-Httpie'
-            }
+            # When /usr/bin/httpie shadows the profile alias, the wrapper function must still exist
+            Get-Command httpie -CommandType Application -ErrorAction SilentlyContinue |
+                Should -Not -BeNullOrEmpty
         }
 
         It 'httpie alias handles missing tool gracefully and recommends installation' {
@@ -170,10 +159,13 @@ Describe 'API Tools Integration Tests' {
             if (Get-Command Clear-CommandCache -ErrorAction SilentlyContinue) {
                 Clear-CommandCache -CommandName 'http' -ErrorAction SilentlyContinue
             }
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('http', [ref]$null)
+            }
             Mock-CommandAvailabilityPester -CommandName 'http' -Available $false
-            Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'http' } -MockWith { $false }
-            $output = httpie -Url 'https://api.example.com/test' 2>&1 3>&1 | Out-String
-            $output | Should -Match 'httpie'
+            $output = Invoke-Httpie -Url 'https://api.example.com/test' 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'httpie not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'httpie'
         }
     }
 
@@ -213,9 +205,9 @@ Describe 'API Tools Integration Tests' {
                 Clear-CommandCache -CommandName 'httptoolkit' -ErrorAction SilentlyContinue
             }
             Mock-CommandAvailabilityPester -CommandName 'httptoolkit' -Available $false
-            Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'httptoolkit' } -MockWith { $false }
             $output = httptoolkit 2>&1 3>&1 | Out-String
-            $output | Should -Match 'httptoolkit'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'httptoolkit not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'httptoolkit'
         }
     }
 
@@ -240,8 +232,9 @@ Describe 'API Tools Integration Tests' {
             # Verify function still exists and is callable (idempotency means no errors on reload)
             $afterFunction = Get-Command Invoke-Bruno -ErrorAction SilentlyContinue
             $afterFunction | Should -Not -BeNullOrEmpty -Because "Function should still exist after reload"
-            # Function should still be callable (idempotency means no errors on reload)
-            { Invoke-Bruno -CollectionPath (Get-Location).Path -ErrorAction SilentlyContinue } | Should -Not -Throw
+            # Callable without executing external bruno (profile alias would satisfy Test-CachedCommand)
+            Mock-CommandAvailabilityPester -CommandName 'bruno' -Available $false
+            { Invoke-Bruno -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }
 }

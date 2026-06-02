@@ -3,13 +3,8 @@
 # Unit tests for Build-GoProject and Test-GoProject functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'lang-go.ps1')
@@ -17,25 +12,17 @@ BeforeAll {
 
 Describe 'lang-go.ps1 - Build-GoProject' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('go', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('go', [ref]$null)
-        }
+        Mark-TestCommandsUnavailable -CommandNames 'go'
     }
 
     Context 'Tool not available' {
         It 'Returns null when go is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'go' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'go' } -MockWith { return $null }
-
             $result = Build-GoProject -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,101 +31,66 @@ Describe 'lang-go.ps1 - Build-GoProject' {
 
     Context 'Tool available' {
         It 'Calls go build without arguments' {
-            Setup-AvailableCommandMock -CommandName 'go'
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'go' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            $result = Build-GoProject -ErrorAction SilentlyContinue
 
-            $result = Build-GoProject
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'build'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'build'
+            $result | Should -Be 'Build complete'
         }
 
         It 'Calls go build with output flag' {
-            Setup-AvailableCommandMock -CommandName 'go'
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'go' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            Build-GoProject -Output 'myapp' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Build-GoProject -Output 'myapp'
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'build'
-            $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain 'myapp'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'build'
+            $args | Should -Contain '-o'
+            $args | Should -Contain 'myapp'
         }
 
         It 'Calls go build with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'go'
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'go' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            Build-GoProject -Output $null '-ldflags', '-s -w' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Build-GoProject -Arguments @('-ldflags', '-s -w')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'build'
-            $script:capturedArgs | Should -Contain '-ldflags'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'build'
+            $args | Should -Contain '-ldflags'
         }
     }
 
     Context 'Error handling' {
         It 'Handles go build execution errors' {
-            Setup-AvailableCommandMock -CommandName 'go'
-
-            Mock -CommandName 'go' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('go: command failed')
-            }
-            Mock Write-Error { }
+            Set-TestCommandThrowingMock -CommandName 'go' -Message 'go: command failed'
 
             try {
                 $result = Build-GoProject -ErrorAction SilentlyContinue
             }
             catch {
-                # Exception may propagate in test environment
+                $result = $null
             }
 
             $result | Should -BeNullOrEmpty
-            # Write-Error may or may not be called depending on how PowerShell handles the exception
-            # The important thing is that the function handles the error gracefully
         }
     }
 }
 
 Describe 'lang-go.ps1 - Test-GoProject' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('go', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('go', [ref]$null)
-        }
+        Mark-TestCommandsUnavailable -CommandNames 'go'
     }
 
     Context 'Tool not available' {
         It 'Returns null when go is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'go' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'go' } -MockWith { return $null }
-
             $result = Test-GoProject -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -147,93 +99,58 @@ Describe 'lang-go.ps1 - Test-GoProject' {
 
     Context 'Tool available' {
         It 'Calls go test without flags' {
-            Setup-AvailableCommandMock -CommandName 'go'
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Tests passed'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'go' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Tests passed' 
-            }
+            $result = Test-GoProject -ErrorAction SilentlyContinue
 
-            $result = Test-GoProject
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'test'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'test'
+            $result | Should -Be 'Tests passed'
         }
 
         It 'Calls go test with verbose flag' {
-            Setup-AvailableCommandMock -CommandName 'go'
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Tests passed'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'go' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Tests passed' 
-            }
+            Test-GoProject -VerboseOutput -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Test-GoProject -VerboseOutput
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'test'
-            $script:capturedArgs | Should -Contain '-v'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'test'
+            $args | Should -Contain '-v'
         }
 
         It 'Calls go test with coverage flag' {
-            Setup-AvailableCommandMock -CommandName 'go'
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Tests passed'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'go' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Tests passed' 
-            }
+            Test-GoProject -Coverage -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Test-GoProject -Coverage
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'test'
-            $script:capturedArgs | Should -Contain '-cover'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'test'
+            $args | Should -Contain '-cover'
         }
 
         It 'Calls go test with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'go'
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Tests passed'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'go' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Tests passed' 
-            }
+            Test-GoProject './...' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Test-GoProject -Arguments @('./...')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'test'
-            $script:capturedArgs | Should -Contain './...'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'test'
+            $args | Should -Contain './...'
         }
     }
 
     Context 'Error handling' {
         It 'Handles go test execution errors' {
-            Setup-AvailableCommandMock -CommandName 'go'
-
-            Mock -CommandName 'go' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('go: command failed')
-            }
-            Mock Write-Error { }
+            Set-TestCommandThrowingMock -CommandName 'go' -Message 'go: command failed'
 
             try {
                 $result = Test-GoProject -ErrorAction SilentlyContinue
             }
             catch {
-                # Exception may propagate in test environment
+                $result = $null
             }
 
             $result | Should -BeNullOrEmpty
-            # Write-Error may or may not be called depending on how PowerShell handles the exception
-            # The important thing is that the function handles the error gracefully
         }
     }
 }
-

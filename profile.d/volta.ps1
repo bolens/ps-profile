@@ -113,5 +113,5 @@ if (Test-CachedCommand volta) {
     Set-AgentModeAlias -Name 'voltaselfupdate' -Target 'Update-VoltaSelf'
 }
 else {
-    Write-MissingToolWarning -Tool 'volta' -InstallHint 'Install from: https://volta.sh/'
+    Invoke-MissingToolWarning -ToolName 'volta'
 }

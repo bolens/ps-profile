@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Bun Tools Integration Tests' {
     BeforeAll {
         try {
@@ -58,16 +60,6 @@ Describe 'Bun Tools Integration Tests' {
             (Get-Alias bunx).ResolvedCommandName | Should -Be 'Invoke-Bunx'
         }
 
-        It 'bunx alias handles missing tool gracefully and recommends installation' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('bun', [ref]$null)
-            }
-            Mock-CommandAvailabilityPester -CommandName 'bun' -Available $false
-            $output = bunx --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'bun not found'
-            $output | Should -Match 'scoop install bun'
-        }
-
         It 'Creates Invoke-BunRun function' {
             Get-Command Invoke-BunRun -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
@@ -96,17 +88,43 @@ Describe 'Bun Tools Integration Tests' {
         }
 
         It 'Update-BunSelf calls bun upgrade' {
-            Mock -CommandName bun -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'upgrade') {
-                    Write-Output 'Bun updated successfully'
-                }
+            Mock-CommandAvailabilityPester -CommandName 'bun' -Available $true
+
+            $script:capturedArgs = $null
+            Mock -CommandName 'bun' -MockWith {
+                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                $script:capturedArgs = $Arguments
+                Write-Output 'Bun updated successfully'
             }
 
             Update-BunSelf
+
             Should -Invoke -CommandName 'bun' -Times 1 -Exactly
-            Get-Command Update-BunSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            if ($null -eq $script:capturedArgs) {
+                throw 'Mock was called but capturedArgs is null.'
+            }
+            $script:capturedArgs | Should -Contain 'upgrade'
+        }
+    }
+
+    Context 'Graceful degradation when bun is unavailable' {
+        BeforeAll {
+            Mock-CommandAvailabilityPester -CommandName 'bun' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'bunx' -Available $false
+            . (Join-Path $script:ProfileDir 'bun.ps1')
+        }
+
+        It 'bunx alias handles missing tool gracefully and recommends installation' {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('bun', [ref]$null)
+            }
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+
+            $output = bunx --version 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'bun not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'bun'
         }
     }
 }

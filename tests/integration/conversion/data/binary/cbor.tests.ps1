@@ -32,7 +32,7 @@ Describe 'CBOR Format Conversion Tests' {
     Context 'CBOR conversion utilities' {
         It 'ConvertTo-CborFromJson converts JSON to CBOR' {
             Get-Command ConvertTo-CborFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -42,7 +42,7 @@ Describe 'CBOR Format Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'cbor')) {
-                Set-ItResult -Skipped -Because "cbor package not installed. Install with: pnpm add -g cbor"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'cbor' -ToolType 'node-package' -Context 'cbor package not installed')
                 return
             }
             $json = '{"name": "test", "value": 42, "nested": {"key": "value"}}'
@@ -57,7 +57,7 @@ Describe 'CBOR Format Conversion Tests' {
         }
 
         It 'Handles roundtrip JSON to CBOR to JSON' {
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -67,7 +67,7 @@ Describe 'CBOR Format Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'cbor')) {
-                Set-ItResult -Skipped -Because "cbor package not installed. Install with: pnpm add -g cbor"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'cbor' -ToolType 'node-package' -Context 'cbor package not installed')
                 return
             }
             $json = '{"name": "test", "value": 42}'
@@ -111,7 +111,7 @@ Describe 'CBOR Format Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match 'cbor.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'cbor') {
-                    $installCommand = 'pnpm add -g cbor'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'cbor' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))
@@ -152,7 +152,7 @@ Describe 'CBOR Format Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match 'cbor.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'cbor') {
-                    $installCommand = 'pnpm add -g cbor'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'cbor' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))

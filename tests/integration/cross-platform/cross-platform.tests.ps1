@@ -29,6 +29,23 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
         }
     }
 
+    Context 'Platform path helpers' {
+        BeforeAll {
+            . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+        }
+
+        It 'Get-WranglerConfigPaths returns config paths' {
+            if (-not (Get-Command Get-WranglerConfigPaths -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Get-WranglerConfigPaths not loaded'
+                return
+            }
+
+            $paths = Get-WranglerConfigPaths
+            $paths.Dir | Should -Not -BeNullOrEmpty
+            $paths.File | Should -Match 'default\.toml$'
+        }
+    }
+
     Context 'Cross-platform compatibility' {
         It 'path separators are handled correctly' {
             $profileContent = Get-Content $script:ProfilePath -Raw
@@ -39,7 +56,6 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
         It 'functions work with both Windows and Unix-style paths' {
             . (Join-Path $script:ProfileDir 'bootstrap.ps1')
             . (Join-Path $script:ProfileDir 'files.ps1')
-            # Ensure file navigation is initialized
             if (Get-Command Ensure-FileNavigation -ErrorAction SilentlyContinue) {
                 Ensure-FileNavigation
             }
@@ -49,7 +65,6 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
 
             Push-Location $testPath
             try {
-                # Test the .. function (up one directory)
                 if (Get-Command '..' -CommandType Function -ErrorAction SilentlyContinue) {
                     ..
                     $parent = Get-Location
@@ -65,4 +80,3 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
         }
     }
 }
-

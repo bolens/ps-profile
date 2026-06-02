@@ -1,11 +1,51 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 Describe 'DataFile Module Functions' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Import the DataFile module (Common.psm1 no longer exists)
         $script:libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         Import-Module (Join-Path $script:libPath 'utilities' 'DataFile.psm1') -DisableNameChecking -ErrorAction Stop
         $script:TestTempDir = New-TestTempDirectory -Prefix 'DataFileTests'
+    }
+
+    function Install-TestGetCachedValueStub {
+        param(
+            [Parameter(Mandatory)]
+            [object]$ReturnValue
+        )
+
+        $script:OriginalGetCachedValueCommand = Get-Command Get-CachedValue -ErrorAction SilentlyContinue
+
+        function global:Get-CachedValue {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory)]
+                [ValidateNotNullOrEmpty()]
+                [string]$Key,
+
+                [object]$Value,
+
+                [int]$ExpirationSeconds = 300,
+
+                [switch]$Clear
+            )
+
+            if ($PSBoundParameters.ContainsKey('Value') -or $Clear) {
+                if ($script:OriginalGetCachedValueCommand) {
+                    return & $script:OriginalGetCachedValueCommand @PSBoundParameters
+                }
+            }
+
+            return $ReturnValue
+        }
+    }
+
+    function Restore-TestGetCachedValue {
+        Remove-Item Function:\Get-CachedValue -Force -ErrorAction SilentlyContinue
+        Remove-Item Function:\global:Get-CachedValue -Force -ErrorAction SilentlyContinue
+
+        if ($script:OriginalGetCachedValueCommand) {
+            Set-Item -Path Function:\global:Get-CachedValue -Value $script:OriginalGetCachedValueCommand.ScriptBlock -Force
+        }
     }
 
     AfterAll {
@@ -733,11 +773,10 @@ Describe 'DataFile Module Functions' {
             $testFile = Join-Path $script:TestTempDir 'cache-non-hashtable-test.psd1'
             $testData | Set-Content -Path $testFile -Encoding UTF8
 
-            # Mock Get-CachedValue to return a string instead of hashtable
+            # Stub Get-CachedValue to return a string instead of hashtable
             if (Get-Command Get-CachedValue -ErrorAction SilentlyContinue) {
-                $originalGetCached = Get-Command Get-CachedValue
-                Mock -CommandName Get-CachedValue -MockWith { return "not-a-hashtable" }
-                
+                Install-TestGetCachedValueStub -ReturnValue 'not-a-hashtable'
+
                 try {
                     $originalVerbosePreference = $VerbosePreference
                     try {
@@ -753,11 +792,7 @@ Describe 'DataFile Module Functions' {
                     }
                 }
                 finally {
-                    Remove-Module Pester -ErrorAction SilentlyContinue
-                    # Restore original command if needed
-                    if ($originalGetCached) {
-                        # Command will be restored when module is reloaded
-                    }
+                    Restore-TestGetCachedValue
                 }
             }
             else {
@@ -916,10 +951,10 @@ Describe 'DataFile Module Functions' {
             $testFile = Join-Path $script:TestTempDir 'verbose-non-hashtable-test.psd1'
             $testData | Set-Content -Path $testFile -Encoding UTF8
 
-            # Mock Get-CachedValue to return a string
+            # Stub Get-CachedValue to return a string
             if (Get-Command Get-CachedValue -ErrorAction SilentlyContinue) {
-                Mock -CommandName Get-CachedValue -MockWith { return "not-a-hashtable" }
-                
+                Install-TestGetCachedValueStub -ReturnValue 'not-a-hashtable'
+
                 try {
                     $originalVerbosePreference = $VerbosePreference
                     try {
@@ -935,7 +970,7 @@ Describe 'DataFile Module Functions' {
                     }
                 }
                 finally {
-                    # Clear mock
+                    Restore-TestGetCachedValue
                 }
             }
             else {

@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Rye Tools Integration Tests' {
     BeforeAll {
         try {
@@ -170,16 +172,35 @@ Describe 'Rye Tools Integration Tests' {
             Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
-        It 'Rye fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('rye', [ref]$null)
+    }
+
+    Context 'Graceful degradation when rye is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @('Add-RyePackage', 'Remove-RyePackage', 'Update-RyePackages') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'rye' -Available $false
-            Remove-Item Function:Add-RyePackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Remove-RyePackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-RyePackages -ErrorAction SilentlyContinue
-            . (Join-Path $script:ProfileDir 'rye.ps1')
+            $script:MissingRyeOutput = & { . (Join-Path $script:ProfileDir 'rye.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when rye is unavailable' {
             Get-Command Add-RyePackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when rye is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingRyeOutput -Pattern 'rye not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingRyeOutput -ToolName 'rye'
         }
     }
 }

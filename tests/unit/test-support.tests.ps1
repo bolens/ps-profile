@@ -1,7 +1,6 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 Describe 'TestSupport Modules' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         try {
             $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
             if ($null -eq $script:RepoRoot -or [string]::IsNullOrWhiteSpace($script:RepoRoot)) {
@@ -49,7 +48,7 @@ Describe 'TestSupport Modules' {
                 # Create a temporary directory that is NOT in a git repository
                 # Use system temp directory to ensure it's outside the repo
                 $tempBase = [System.IO.Path]::GetTempPath()
-                $tempDir = Join-Path $tempBase "NoGitRepo-$(New-Guid)"
+                $tempDir = Join-Path $tempBase "NoGitRepo-$([Guid]::NewGuid())"
                 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
                 try {
                     { Get-TestRepoRoot -StartPath $tempDir } | Should -Throw
@@ -113,7 +112,7 @@ Describe 'TestSupport Modules' {
                     if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
                         Test-Path -LiteralPath $result | Should -Be $true -Because "Unit test suite path should exist"
                     }
-                    $result | Should -BeLike "*tests\unit" -Because "Path should contain 'tests\unit'"
+                    ($result -replace '\\', '/') | Should -BeLike '*/tests/unit' -Because "Path should contain 'tests/unit'"
                 }
                 catch {
                     $errorDetails = @{
@@ -133,7 +132,7 @@ Describe 'TestSupport Modules' {
                     if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
                         Test-Path -LiteralPath $result | Should -Be $true -Because "Integration test suite path should exist"
                     }
-                    $result | Should -BeLike "*tests\integration" -Because "Path should contain 'tests\integration'"
+                    ($result -replace '\\', '/') | Should -BeLike '*/tests/integration' -Because "Path should contain 'tests/integration'"
                 }
                 catch {
                     $errorDetails = @{
@@ -153,7 +152,7 @@ Describe 'TestSupport Modules' {
                     if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
                         Test-Path -LiteralPath $result | Should -Be $true -Because "Performance test suite path should exist"
                     }
-                    $result | Should -BeLike "*tests\performance" -Because "Path should contain 'tests\performance'"
+                    ($result -replace '\\', '/') | Should -BeLike '*/tests/performance' -Because "Path should contain 'tests/performance'"
                 }
                 catch {
                     $errorDetails = @{
@@ -372,20 +371,17 @@ Describe 'TestSupport Modules' {
                 $coreConfig | Should -BeOfType [hashtable]
                 $coreConfig.Count | Should -BeGreaterThan 0
 
-                $encodingSubModules = Get-DataEncodingSubModulesConfig
-                $encodingSubModules | Should -BeOfType [array]
-                $encodingSubModules.Count | Should -BeGreaterThan 0
+                $encodingSubModules = @(Get-DataEncodingSubModulesConfig)
+                @($encodingSubModules).Count | Should -BeGreaterThan 0
 
-                $helpers = Get-ConversionHelpersConfig
-                $helpers | Should -BeOfType [array]
-                $helpers.Count | Should -BeGreaterThan 0
+                $helpers = @(Get-ConversionHelpersConfig)
+                @($helpers).Count | Should -BeGreaterThan 0
             }
         }
 
         Context 'Import-TestModule' {
             It 'Loads module file successfully' {
-                # Create a temporary test module
-                $testModulePath = Join-Path $env:TEMP "test-module-$(Get-Random).ps1"
+                $testModulePath = Join-Path ([System.IO.Path]::GetTempPath()) "test-module-$(Get-Random).ps1"
                 $moduleContent = @'
 function Test-MyFunction {
     Write-Output "Test function"
@@ -404,8 +400,280 @@ function Test-MyFunction {
             }
 
             It 'Handles missing module file gracefully' {
-                $nonexistentPath = Join-Path $env:TEMP "nonexistent-module-$(Get-Random).ps1"
+                $nonexistentPath = Join-Path ([System.IO.Path]::GetTempPath()) "nonexistent-module-$(Get-Random).ps1"
                 { Import-TestModule -ModulePath $nonexistentPath } | Should -Not -Throw
+            }
+        }
+    }
+
+    Describe 'TestMocks Module' {
+        Context 'Reset-TestIsolationState' {
+            BeforeEach {
+                $script:OriginalTestMode = $env:PS_PROFILE_TEST_MODE
+                $env:PS_PROFILE_TEST_MODE = '1'
+            }
+
+            AfterEach {
+                if ($null -ne $script:OriginalTestMode) {
+                    $env:PS_PROFILE_TEST_MODE = $script:OriginalTestMode
+                }
+
+                Set-TestCommandAvailabilityState -CommandName 'isolation-test-cmd' -Available $false -ErrorAction SilentlyContinue
+                Set-TestCommandAvailabilityState -CommandName 'isolation-mock-cmd' -Available $false -ErrorAction SilentlyContinue
+                Set-TestCommandAvailabilityState -CommandName 'isolation-capture-cmd' -Available $false -ErrorAction SilentlyContinue
+            }
+
+            It 'returns without clearing state when test mode is disabled' {
+                Set-TestCommandAvailabilityState -CommandName 'isolation-test-cmd' -Available $true
+                Get-Command isolation-test-cmd -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+
+                $env:PS_PROFILE_TEST_MODE = '0'
+                Reset-TestIsolationState
+
+                Get-Command isolation-test-cmd -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            }
+
+            It 'clears registered mock commands' {
+                Set-TestCommandAvailabilityState -CommandName 'isolation-mock-cmd' -Available $true
+                Get-Command isolation-mock-cmd -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+                @($global:TestRegisteredMockCommands).Count | Should -BeGreaterThan 0
+
+                Reset-TestIsolationState
+
+                Get-Command isolation-mock-cmd -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+                @($global:TestRegisteredMockCommands).Count | Should -Be 0
+            }
+
+            It 'clears command invocation captures' {
+                Setup-CapturingCommandMock -CommandName 'isolation-capture-cmd' -Output 'captured'
+                & isolation-capture-cmd 'arg1'
+                @($global:TestCommandInvocationCaptures).Count | Should -BeGreaterThan 0
+
+                Reset-TestIsolationState
+
+                @($global:TestCommandInvocationCaptures).Count | Should -Be 0
+                $global:TestCommandCaptureState | Should -BeNullOrEmpty
+            }
+
+            It 'clears assumed available command pollution' {
+                if (-not (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue)) {
+                    $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+                }
+
+                $global:AssumedAvailableCommands['isolation-pollution-cmd'] = $true
+                Reset-TestIsolationState
+
+                $global:AssumedAvailableCommands.ContainsKey('isolation-pollution-cmd') | Should -Be $false
+            }
+
+            It 'clears missing tool warning collections' {
+                if (-not (Get-Variable -Name 'MissingToolWarnings' -Scope Global -ErrorAction SilentlyContinue)) {
+                    $global:MissingToolWarnings = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+                }
+
+                if (-not (Get-Variable -Name 'CollectedMissingToolWarnings' -Scope Global -ErrorAction SilentlyContinue)) {
+                    $global:CollectedMissingToolWarnings = [System.Collections.Generic.List[hashtable]]::new()
+                }
+
+                $global:MissingToolWarnings['isolation-tool'] = $true
+                $global:CollectedMissingToolWarnings.Add(@{
+                        Tool    = 'isolation-tool'
+                        Message = 'isolation-tool not found.'
+                    })
+
+                Reset-TestIsolationState
+
+                $global:MissingToolWarnings.ContainsKey('isolation-tool') | Should -Be $false
+                @($global:CollectedMissingToolWarnings).Count | Should -Be 0
+            }
+
+            It 'resets lazy initialization flags' {
+                $global:GitInitialized = $true
+                $global:UtilitiesInitialized = $true
+
+                Reset-TestIsolationState
+
+                $global:GitInitialized | Should -Be $false
+                $global:UtilitiesInitialized | Should -Be $false
+            }
+
+            It 'clears available command mock registry' {
+                $global:__AvailableCommandMocks = @{ 'isolation-registry-cmd' = $true }
+                Reset-TestIsolationState
+                if (Get-Variable -Name '__AvailableCommandMocks' -Scope Global -ErrorAction SilentlyContinue) {
+                    $global:__AvailableCommandMocks.ContainsKey('isolation-registry-cmd') | Should -Be $false
+                }
+            }
+
+            It 'restores Mark-TestCommandsUnavailable after global override pollution' {
+                function global:Mark-TestCommandsUnavailable {
+                    param([string[]]$CommandNames)
+                    throw 'polluted'
+                }
+
+                Restore-TestSupportFunctions
+
+                { Mark-TestCommandsUnavailable -CommandNames 'isolation-restore-cmd' } | Should -Not -Throw
+            }
+
+            It 'clears fragment loaded state so fragments can reload' {
+                Set-Variable -Name 'editorsLoaded' -Scope Global -Value $true -Force
+                Set-Variable -Name 'databaseLoaded' -Scope Global -Value $true -Force
+
+                Reset-TestIsolationState
+
+                Get-Variable -Name 'editorsLoaded' -Scope Global -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+                Get-Variable -Name 'databaseLoaded' -Scope Global -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            }
+        }
+    }
+
+    Describe 'ToolDetection Module' {
+        BeforeAll {
+            $bootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
+            . $bootstrapPath
+        }
+
+        Context 'Resolve-TestToolInstallCommand' {
+            It 'Returns platform-aware install commands for common tools' {
+                if (-not (Get-Command Resolve-TestToolInstallCommand -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Resolve-TestToolInstallCommand not loaded'
+                    return
+                }
+
+                $dockerCmd = Resolve-TestToolInstallCommand -ToolName 'docker'
+                $dockerCmd | Should -Not -BeNullOrEmpty
+                $dockerCmd | Should -Match 'docker'
+
+                $nodeCmd = Resolve-TestToolInstallCommand -ToolName 'node' -ToolType 'node-package'
+                $nodeCmd | Should -Not -BeNullOrEmpty
+                $nodeCmd | Should -Match 'node'
+            }
+
+            It 'Resolves command aliases to package names' {
+                if (-not (Get-Command Resolve-TestToolInstallCommand -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Resolve-TestToolInstallCommand not loaded'
+                    return
+                }
+
+                $httpCmd = Resolve-TestToolInstallCommand -ToolName 'http'
+                $httpCmd | Should -Match 'httpie'
+
+                $sshCmd = Resolve-TestToolInstallCommand -ToolName 'ssh'
+                $sshCmd | Should -Match 'openssh'
+            }
+        }
+
+        Context 'Test-ToolAvailable auto-resolution' {
+            It 'Resolves install command when InstallCommand is omitted' {
+                if (-not (Get-Command Test-ToolAvailable -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Test-ToolAvailable not loaded'
+                    return
+                }
+
+                $result = Test-ToolAvailable -ToolName '__definitely_missing_tool_xyz__' -Silent
+                $result.InstallCommand | Should -Not -BeNullOrEmpty
+                $result.Available | Should -Be $false
+            }
+        }
+
+        Context 'Get-TestToolSkipMessage helpers' {
+            BeforeAll {
+                $bootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
+                . $bootstrapPath
+            }
+
+            It 'Get-TestToolSkipMessage includes platform-aware install commands' {
+                if (-not (Get-Command Get-TestToolSkipMessage -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Get-TestToolSkipMessage not loaded'
+                    return
+                }
+
+                $message = Get-TestToolSkipMessage -ToolName 'zstd' -Context 'zstd command is not available'
+                $message | Should -Match 'zstd command is not available'
+                $message | Should -Match 'Install with:'
+                $message | Should -Match 'zstd'
+            }
+
+            It 'Get-TestNodePackageSkipMessage resolves node package install commands' {
+                if (-not (Get-Command Get-TestNodePackageSkipMessage -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Get-TestNodePackageSkipMessage not loaded'
+                    return
+                }
+
+                $message = Get-TestNodePackageSkipMessage -PackageNames @('superjson') -Context 'superjson package not installed'
+                $message | Should -Match 'superjson'
+                $message | Should -Match 'Install with:'
+            }
+
+            It 'Get-TestToolsSkipMessage combines multiple tool hints' {
+                if (-not (Get-Command Get-TestToolsSkipMessage -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Get-TestToolsSkipMessage not loaded'
+                    return
+                }
+
+                $message = Get-TestToolsSkipMessage -Context 'snappy command and Python are not available' -Tools @(
+                    @{ Name = 'snappy' }
+                    @{ Name = 'python'; ToolType = 'python-runtime' }
+                )
+                $message | Should -Match 'snappy'
+                $message | Should -Match 'Install with:'
+            }
+        }
+
+        Context 'Install command assertion helpers' {
+            BeforeAll {
+                $bootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
+                . $bootstrapPath
+            }
+
+            It 'Get-TestInstallCommandCandidates splits fallback chains' {
+                if (-not (Get-Command Get-TestInstallCommandCandidates -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Get-TestInstallCommandCandidates not loaded'
+                    return
+                }
+
+                $candidates = Get-TestInstallCommandCandidates -InstallCommand 'sudo apt install fzf (or: sudo pacman -S fzf)'
+                $candidates.Count | Should -BeGreaterOrEqual 2
+                $candidates[0] | Should -Match 'apt install fzf'
+                $candidates[1] | Should -Match 'pacman -S fzf'
+            }
+
+            It 'Resolve-TestNodePackageInstallCommand combines multiple packages' {
+                if (-not (Get-Command Resolve-TestNodePackageInstallCommand -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Resolve-TestNodePackageInstallCommand not loaded'
+                    return
+                }
+
+                $command = Resolve-TestNodePackageInstallCommand -PackageNames @('bson', 'cbor')
+                $command | Should -Not -BeNullOrEmpty
+                $command | Should -Match 'bson'
+                $command | Should -Match 'cbor'
+            }
+
+            It 'Assert-TestOutputContainsInstallCommand matches platform-aware hints' {
+                if (-not (Get-Command Assert-TestOutputContainsInstallCommand -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'Assert-TestOutputContainsInstallCommand not loaded'
+                    return
+                }
+
+                $installCommand = Resolve-TestToolInstallCommand -ToolName 'fzf'
+                $output = "fzf not found. Install with: $installCommand"
+                { Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'fzf' } | Should -Not -Throw
+
+                if (-not $global:CollectedMissingToolWarnings) {
+                    $global:CollectedMissingToolWarnings = [System.Collections.Generic.List[hashtable]]::new()
+                }
+                else {
+                    $global:CollectedMissingToolWarnings.Clear()
+                }
+
+                $null = $global:CollectedMissingToolWarnings.Add(@{
+                        Tool        = 'fzf'
+                        Message     = "fzf not found. Install with: $installCommand"
+                        InstallHint = "Install with: $installCommand"
+                    })
+                { Assert-TestOutputContainsInstallCommand -Output '' -ToolName 'fzf' } | Should -Not -Throw
             }
         }
     }

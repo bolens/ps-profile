@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Mojo Tools Integration Tests' {
     BeforeAll {
         try {
@@ -85,6 +87,36 @@ Describe 'Mojo Tools Integration Tests' {
             Update-MojoSelf
             Should -Invoke -CommandName 'mojo' -Times 1 -Exactly
             Get-Command Update-MojoSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when mojo is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @('Invoke-MojoRun', 'Build-MojoProgram', 'Update-MojoSelf') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'mojo' -Available $false
+            $script:MissingMojoOutput = & { . (Join-Path $script:ProfileDir 'mojo.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when mojo is unavailable' {
+            Get-Command Invoke-MojoRun -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when mojo is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingMojoOutput -Pattern 'mojo not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingMojoOutput -ToolName 'mojo'
         }
     }
 }

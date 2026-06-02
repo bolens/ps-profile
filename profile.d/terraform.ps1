@@ -48,7 +48,7 @@ function Invoke-Terraform {
         terraform @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'terraform' -InstallHint 'Install with: scoop install terraform'
+        Invoke-MissingToolWarning -ToolName 'terraform'
     }
 }
 
@@ -80,7 +80,7 @@ function Initialize-Terraform {
         terraform init @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'terraform' -InstallHint 'Install with: scoop install terraform'
+        Invoke-MissingToolWarning -ToolName 'terraform'
     }
 }
 
@@ -112,7 +112,7 @@ function Get-TerraformPlan {
         terraform plan @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'terraform' -InstallHint 'Install with: scoop install terraform'
+        Invoke-MissingToolWarning -ToolName 'terraform'
     }
 }
 
@@ -144,7 +144,7 @@ function Invoke-TerraformApply {
         terraform apply @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'terraform' -InstallHint 'Install with: scoop install terraform'
+        Invoke-MissingToolWarning -ToolName 'terraform'
     }
 }
 
@@ -176,7 +176,7 @@ function Remove-TerraformInfrastructure {
         terraform destroy @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'terraform' -InstallHint 'Install with: scoop install terraform'
+        Invoke-MissingToolWarning -ToolName 'terraform'
     }
 }
 

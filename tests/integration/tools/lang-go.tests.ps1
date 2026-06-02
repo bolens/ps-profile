@@ -27,7 +27,7 @@ BeforeAll {
 Describe 'lang-go.ps1 - Integration Tests' {
     Context 'Fragment loading' {
         It 'Loads lang-go fragment without errors' {
-            { . $script:FragmentPath -ErrorAction Stop } | Should -Not -Throw
+            { . $script:FragmentPath } | Should -Not -Throw
         }
 
         It 'Registers Release-GoProject function' {
@@ -55,8 +55,6 @@ Describe 'lang-go.ps1 - Integration Tests' {
         It 'Creates goreleaser alias' {
             $alias = Get-Alias -Name 'goreleaser' -ErrorAction SilentlyContinue
             if (-not $alias) {
-                # Alias might not be created if Set-AgentModeAlias is not available
-                # This is acceptable in test environments
                 Set-ItResult -Inconclusive -Because 'Set-AgentModeAlias may not be available in test environment'
             }
             else {
@@ -105,58 +103,79 @@ Describe 'lang-go.ps1 - Integration Tests' {
         }
     }
 
-    Context 'Function behavior' {
+    Context 'Graceful degradation - tool unavailable' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            foreach ($cmd in @('go', 'goreleaser', 'mage', 'golangci-lint')) {
+                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            }
+        }
+
         It 'Release-GoProject handles missing tool gracefully' {
-            $result = Release-GoProject -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
-            # (actual behavior depends on whether goreleaser is installed)
-            $result | Should -Not -Throw
+            $output = & { Release-GoProject -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'goreleaser not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'goreleaser'
         }
 
         It 'Invoke-Mage handles missing tool gracefully' {
-            $result = Invoke-Mage -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
-            $result | Should -Not -Throw
+            $output = & { Invoke-Mage -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'mage not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'mage'
         }
 
         It 'Lint-GoProject handles missing tool gracefully' {
-            $result = Lint-GoProject -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
-            $result | Should -Not -Throw
+            $output = & { Lint-GoProject -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'golangci-lint not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'golangci-lint'
         }
 
         It 'Build-GoProject handles missing tool gracefully' {
-            $result = Build-GoProject -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
-            $result | Should -Not -Throw
+            $output = & { Build-GoProject -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'go not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'go'
         }
 
         It 'Test-GoProject handles missing tool gracefully' {
-            $result = Test-GoProject -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
-            $result | Should -Not -Throw
+            $output = & { Test-GoProject -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'go not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'go'
         }
     }
 
     Context 'Idempotency' {
         It 'Can be loaded multiple times without errors' {
-            { . $script:FragmentPath -ErrorAction Stop } | Should -Not -Throw
-            { . $script:FragmentPath -ErrorAction Stop } | Should -Not -Throw
+            { . $script:FragmentPath } | Should -Not -Throw
+            { . $script:FragmentPath } | Should -Not -Throw
         }
 
         It 'Functions remain available after multiple loads' {
-            . $script:FragmentPath -ErrorAction SilentlyContinue
-            . $script:FragmentPath -ErrorAction SilentlyContinue
+            . $script:FragmentPath
+            . $script:FragmentPath
 
             Get-Command Release-GoProject -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            Get-Command Invoke-Mage -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            Get-Command Lint-GoProject -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            Get-Command Build-GoProject -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            Get-Command Test-GoProject -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Get-Command Invoke-Mage       -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Get-Command Lint-GoProject    -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Get-Command Build-GoProject   -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Get-Command Test-GoProject    -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
 
     Context 'Parameter validation' {
+        BeforeEach {
+            foreach ($cmd in @('go', 'goreleaser', 'mage', 'golangci-lint')) {
+                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            }
+        }
+
         It 'Release-GoProject accepts Arguments parameter' {
             { Release-GoProject -Arguments @('--snapshot') -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
@@ -194,4 +213,3 @@ Describe 'lang-go.ps1 - Integration Tests' {
         }
     }
 }
-

@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'pnpm Tools Integration Tests' {
     BeforeAll {
         try {
@@ -489,72 +491,61 @@ Describe 'pnpm Tools Integration Tests' {
             }
         }
 
-        It 'pnpm fragment handles missing tool gracefully and recommends installation' {
-            # Clear command cache if available
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:TestCachedCommandCache.TryRemove('pnpm', [ref]$null)
-                $null = $global:TestCachedCommandCache.TryRemove('PNPM', [ref]$null)
-            }
-            if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-                $global:AssumedAvailableCommands = $global:AssumedAvailableCommands | Where-Object { $_ -ne 'pnpm' -and $_ -ne 'PNPM' }
-            }
-
-            # Test the warning when tool is not available
+        It 'Invoke-PnpmInstall emits missing-tool warning when pnpm is unavailable' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('pnpm', [ref]$null)
             }
-            # Create a new context where pnpm is not available
-            Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $false
-            # Clear any existing functions/aliases
-            Remove-Item Function:Invoke-PnpmInstall -ErrorAction SilentlyContinue
-            Remove-Item Function:Invoke-PnpmDevInstall -ErrorAction SilentlyContinue
-            Remove-Item Function:Invoke-PnpmRun -ErrorAction SilentlyContinue
-            Remove-Item Function:Remove-PnpmPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Install-PnpmPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Add-PnpmPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Add-PnpmDevPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Invoke-PnpmScript -ErrorAction SilentlyContinue
-            Remove-Item Function:Start-PnpmProject -ErrorAction SilentlyContinue
-            Remove-Item Function:Build-PnpmProject -ErrorAction SilentlyContinue
-            Remove-Item Function:Test-PnpmProject -ErrorAction SilentlyContinue
-            Remove-Item Function:Start-PnpmDev -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnadd -ErrorAction SilentlyContinue
-            Remove-Item Alias:pndev -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnrun -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnremove -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnuninstall -ErrorAction SilentlyContinue
-            Remove-Item Alias:pni -ErrorAction SilentlyContinue
-            Remove-Item Alias:pna -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnd -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnr -ErrorAction SilentlyContinue
-            Remove-Item Alias:pns -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnb -ErrorAction SilentlyContinue
-            Remove-Item Alias:pnt -ErrorAction SilentlyContinue
-            Remove-Item Alias:pndevserver -ErrorAction SilentlyContinue
-            # Reload fragment to trigger warning
-            . (Join-Path $script:ProfileDir 'pnpm.ps1')
-            # Note: Due to mocking limitations with external commands, the fragment may still create functions
-            # if Test-CachedCommand returns true due to cache or other factors. This is a best-effort test.
-            $functionsExist = @(
-                (Get-Command Invoke-PnpmInstall -ErrorAction SilentlyContinue),
-                (Get-Command Remove-PnpmPackage -ErrorAction SilentlyContinue),
-                (Get-Command Install-PnpmPackage -ErrorAction SilentlyContinue),
-                (Get-Command Add-PnpmPackage -ErrorAction SilentlyContinue),
-                (Get-Command Add-PnpmDevPackage -ErrorAction SilentlyContinue),
-                (Get-Command Invoke-PnpmScript -ErrorAction SilentlyContinue),
-                (Get-Command Start-PnpmProject -ErrorAction SilentlyContinue),
-                (Get-Command Build-PnpmProject -ErrorAction SilentlyContinue),
-                (Get-Command Test-PnpmProject -ErrorAction SilentlyContinue),
-                (Get-Command Start-PnpmDev -ErrorAction SilentlyContinue)
-            ) | Where-Object { $null -ne $_ }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
 
-            # Verify that the fragment loaded without errors
-            # The exact behavior depends on whether the mock successfully made pnpm unavailable
-            $fragmentLoaded = $true
-            $fragmentLoaded | Should -Be $true
+            Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $false
+
+            $output = Invoke-PnpmInstall install 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pnpm not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pnpm'
+        }
+    }
+
+    Context 'Graceful degradation when pnpm is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            if ($global:TestCachedCommandCache) {
+                $null = $global:TestCachedCommandCache.TryRemove('pnpm', [ref]$null)
+            }
+            if ($global:AssumedAvailableCommands) {
+                $null = $global:AssumedAvailableCommands.TryRemove('pnpm', [ref]$null)
+            }
+
+            @(
+                'Invoke-PnpmInstall', 'Invoke-PnpmDevInstall', 'Invoke-PnpmRun',
+                'Remove-PnpmPackage', 'Install-PnpmPackage', 'Add-PnpmPackage',
+                'Add-PnpmDevPackage', 'Invoke-PnpmScript', 'Start-PnpmProject',
+                'Build-PnpmProject', 'Test-PnpmProject', 'Start-PnpmDev',
+                'Test-PnpmOutdated', 'Update-PnpmPackages'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $false
+            $script:MissingPnpmOutput = & { . (Join-Path $script:ProfileDir 'pnpm.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when pnpm is unavailable' {
+            Get-Command Invoke-PnpmInstall -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when pnpm is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingPnpmOutput -Pattern 'pnpm not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingPnpmOutput -ToolName 'pnpm'
         }
     }
 }

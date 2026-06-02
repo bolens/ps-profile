@@ -106,5 +106,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'ltime' -Target 'Get-ChildItemEzaByTime'
 }
 else {
-    Write-MissingToolWarning -Tool 'eza' -InstallHint 'Install with: scoop install eza'
+    Invoke-MissingToolWarning -ToolName 'eza'
 }

@@ -33,7 +33,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
         It 'ConvertFrom-SuperJsonToYaml converts SuperJSON to YAML' {
             Get-Command ConvertFrom-SuperJsonToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -49,7 +49,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -65,7 +65,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
         It 'ConvertTo-SuperJsonFromYaml converts YAML to SuperJSON' {
             Get-Command ConvertTo-SuperJsonFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -81,7 +81,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $yaml = "name: test`nvalue: 123"
@@ -94,7 +94,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
             Get-Command ConvertFrom-SuperJsonToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-SuperJsonFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -110,7 +110,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $originalYaml = "name: test`nvalue: 123"

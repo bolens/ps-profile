@@ -29,6 +29,81 @@ try {
         if (Test-FragmentLoaded -FragmentName 'cloud-provider-base') { return }
     }
 
+    function Resolve-CloudInstallHint {
+        [CmdletBinding()]
+        [OutputType([string])]
+        param(
+            [Parameter(Mandatory)]
+            [string]$CommandName,
+
+            [string]$InstallHint,
+
+            [string]$InstallPackageName
+        )
+
+        if ($InstallHint) {
+            return $InstallHint
+        }
+
+        if (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue) {
+            $splat = @{ ToolName = $CommandName }
+            if ($InstallPackageName) {
+                $splat['InstallPackageName'] = $InstallPackageName
+            }
+            return Get-PlatformInstallHint @splat
+        }
+
+        $package = if ($InstallPackageName) {
+            $InstallPackageName
+        }
+        elseif (Get-Command Resolve-InstallPackageName -ErrorAction SilentlyContinue) {
+            Resolve-InstallPackageName -ToolName $CommandName
+        }
+        else {
+            $CommandName
+        }
+        return "Install with: scoop install $package"
+    }
+
+    function Invoke-CloudMissingToolWarning {
+        [CmdletBinding()]
+        param(
+            [Parameter(Mandatory)]
+            [string]$CommandName,
+
+            [string]$InstallHint,
+
+            [string]$InstallPackageName
+        )
+
+        if ($InstallHint) {
+            if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
+                Write-MissingToolWarning -Tool $CommandName -InstallHint $InstallHint
+            }
+            else {
+                Write-Warning "$CommandName is not installed. $InstallHint"
+            }
+            return
+        }
+
+        if (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+            $splat = @{ ToolName = $CommandName; Tool = $CommandName }
+            if ($InstallPackageName) {
+                $splat['InstallPackageName'] = $InstallPackageName
+            }
+            Invoke-MissingToolWarning @splat
+            return
+        }
+
+        $hint = Resolve-CloudInstallHint -CommandName $CommandName -InstallPackageName $InstallPackageName
+        if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
+            Write-MissingToolWarning -Tool $CommandName -InstallHint $hint
+        }
+        else {
+            Write-Warning "$CommandName is not installed. $hint"
+        }
+    }
+
     # ===============================================
     # Invoke-CloudCommand - Base command execution
     # ===============================================
@@ -88,6 +163,8 @@ try {
             [hashtable]$Context = @{},
             
             [string]$InstallHint,
+
+            [string]$InstallPackageName,
             
             [bool]$ParseJson = $true,
             
@@ -96,8 +173,7 @@ try {
 
         # Check for command availability
         if (-not (Test-CachedCommand $CommandName)) {
-            $hint = if ($InstallHint) { $InstallHint } else { "Install with: scoop install $CommandName" }
-            Write-MissingToolWarning -Tool $CommandName -InstallHint $hint
+            Invoke-CloudMissingToolWarning -CommandName $CommandName -InstallHint $InstallHint -InstallPackageName $InstallPackageName
             return $null
         }
 
@@ -116,7 +192,12 @@ try {
         if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
             return Invoke-WithWideEvent -OperationName $OperationName -Context $eventContext -ScriptBlock {
                 $output = & $CommandName @Arguments 2>&1
-                $exitCode = $LASTEXITCODE
+                $exitCode = if (Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue) {
+                    [int]$global:LASTEXITCODE
+                }
+                else {
+                    0
+                }
                 
                 if ($exitCode -ne 0 -and $ErrorOnNonZeroExit) {
                     $errorMessage = if ($output -is [string]) { $output } else { ($output | Out-String) }
@@ -124,7 +205,7 @@ try {
                 }
                 
                 # Parse JSON if requested and output looks like JSON
-                if ($ParseJson -and $output -is [string] -and $output.Trim().StartsWith('{') -or $output.Trim().StartsWith('[')) {
+                if ($ParseJson -and $output -is [string] -and ($output.Trim().StartsWith('{') -or $output.Trim().StartsWith('['))) {
                     try {
                         return $output | ConvertFrom-Json
                     }
@@ -141,7 +222,12 @@ try {
             # Fallback: execute without wide event tracking
             try {
                 $output = & $CommandName @Arguments 2>&1
-                $exitCode = $LASTEXITCODE
+                $exitCode = if (Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue) {
+                    [int]$global:LASTEXITCODE
+                }
+                else {
+                    0
+                }
                 
                 if ($exitCode -ne 0 -and $ErrorOnNonZeroExit) {
                     $errorMessage = if ($output -is [string]) { $output } else { ($output | Out-String) }
@@ -230,12 +316,16 @@ try {
             
             [string]$DisplayName,
             
-            [string]$ValidateCommand
+            [string]$ValidateCommand,
+
+            [string]$InstallHint,
+
+            [string]$InstallPackageName
         )
 
         # Check command availability if specified
         if ($CommandName -and -not (Test-CachedCommand $CommandName)) {
-            Write-MissingToolWarning -Tool $CommandName -InstallHint "Install with: scoop install $CommandName"
+            Invoke-CloudMissingToolWarning -CommandName $CommandName -InstallHint $InstallHint -InstallPackageName $InstallPackageName
             return $false
         }
 

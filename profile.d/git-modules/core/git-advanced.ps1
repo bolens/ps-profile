@@ -4,6 +4,8 @@
 # ===============================================
 
 # Extras: register heavier helpers lazily so dot-sourcing this fragment remains cheap
+$script:__GitHelpersInitialized = $false
+
 if (-not (Test-Path Function:Ensure-GitHelper)) {
     <#
     .SYNOPSIS

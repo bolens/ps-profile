@@ -112,7 +112,7 @@ function New-LaravelApp {
         composer create-project laravel/laravel $Name
     }
     else {
-        Write-MissingToolWarning -Tool 'composer' -InstallHint 'Install with: scoop install composer'
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package'
     }
 }
 

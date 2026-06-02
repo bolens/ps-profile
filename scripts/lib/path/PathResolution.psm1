@@ -149,9 +149,14 @@ function Get-RepoRoot {
     while ($currentDir -and $currentDir -ne [System.IO.Path]::GetDirectoryName($currentDir)) {
         $dirName = [System.IO.Path]::GetFileName($currentDir)
         if ($dirName -eq 'scripts') {
-            # Found scripts directory: parent is repository root
-            $repoRoot = [System.IO.Path]::GetDirectoryName($currentDir)
-            break
+            # Found scripts directory: parent is repository root when it looks like the repo root
+            $candidateRoot = [System.IO.Path]::GetDirectoryName($currentDir)
+            $hasGit = Test-Path -LiteralPath (Join-Path $candidateRoot '.git')
+            $hasProfileDir = Test-Path -LiteralPath (Join-Path $candidateRoot 'profile.d')
+            if ($hasGit -or $hasProfileDir) {
+                $repoRoot = $candidateRoot
+                break
+            }
         }
         $currentDir = [System.IO.Path]::GetDirectoryName($currentDir)
     }

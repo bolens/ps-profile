@@ -50,19 +50,43 @@ try {
     }
 
     # Set editor defaults only if not already configured (respects user/system preferences)
-    if (-not $env:EDITOR) { $env:EDITOR = 'code' }
-    if (-not $env:GIT_EDITOR) { $env:GIT_EDITOR = 'code --wait' }
-    if (-not $env:VISUAL) { $env:VISUAL = 'code' }
+    $defaultEditor = $null
+    $defaultGitEditor = $null
+    foreach ($editorCandidate in @(
+            @{ Command = 'code'; Editor = 'code'; GitEditor = 'code --wait' }
+            @{ Command = 'nvim'; Editor = 'nvim'; GitEditor = 'nvim' }
+            @{ Command = 'vim'; Editor = 'vim'; GitEditor = 'vim' }
+            @{ Command = 'nano'; Editor = 'nano'; GitEditor = 'nano' }
+        )) {
+        $commandAvailable = if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) {
+            Test-CachedCommand -Name $editorCandidate.Command
+        }
+        else {
+            $null -ne (Get-Command $editorCandidate.Command -ErrorAction SilentlyContinue)
+        }
+
+        if ($commandAvailable) {
+            $defaultEditor = $editorCandidate.Editor
+            $defaultGitEditor = $editorCandidate.GitEditor
+            break
+        }
+    }
+
+    if (-not $defaultEditor) {
+        $defaultEditor = 'nano'
+        $defaultGitEditor = 'nano'
+    }
+
+    if (-not $env:EDITOR) { $env:EDITOR = $defaultEditor }
+    if (-not $env:GIT_EDITOR) { $env:GIT_EDITOR = $defaultGitEditor }
+    if (-not $env:VISUAL) { $env:VISUAL = $defaultEditor }
 
     # Add user-local bin directory to PATH if it exists (cross-platform home directory resolution)
-    $userHome = if (Test-Path Function:\Get-UserHome) {
+    $userHome = if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
         Get-UserHome
     }
-    elseif ($env:HOME) {
-        $env:HOME
-    }
     else {
-        $env:USERPROFILE
+        $null
     }
     
     if ($userHome) {

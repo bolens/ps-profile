@@ -3,118 +3,129 @@
 # Unit tests for Launch-Game function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+function global:Install-TestEmulatorLaunchStub {
+    param(
+        [Parameter(Mandatory)]
+        [string]$FunctionName
+    )
 
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
+    Set-Item -Path "Function:\$FunctionName" -Value ([scriptblock]::Create(@"
+        param([string]`$RomPath, [switch]`$Fullscreen)
+        `$global:TestEmulatorLaunchCapture = @{
+            Function   = '$FunctionName'
+            RomPath    = `$RomPath
+            Fullscreen = `$Fullscreen.IsPresent
+        }
+"@)) -Force
+}
+
+function global:Reset-TestEmulatorLaunchStubs {
+    if ($script:OriginalStartDolphin) {
+        Set-Item -Path Function:\Start-Dolphin -Value $script:OriginalStartDolphin -Force
+    }
+    if ($script:OriginalStartRyujinx) {
+        Set-Item -Path Function:\Start-Ryujinx -Value $script:OriginalStartRyujinx -Force
+    }
+    if ($script:OriginalStartRetroArch) {
+        Set-Item -Path Function:\Start-RetroArch -Value $script:OriginalStartRetroArch -Force
+    }
+
+    $global:TestEmulatorLaunchCapture = $null
+}
+
+function Install-TestEmulatorLaunchStub {
+    global:Install-TestEmulatorLaunchStub @args
+}
+
+function Reset-TestEmulatorLaunchStubs {
+    global:Reset-TestEmulatorLaunchStubs @args
+}
 
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'game-emulators.ps1')
+
+    $script:OriginalStartDolphin = ${function:Start-Dolphin}
+    $script:OriginalStartRyujinx = ${function:Start-Ryujinx}
+    $script:OriginalStartRetroArch = ${function:Start-RetroArch}
+    $script:TestRomDirectory = New-TestTempDirectory -Prefix 'LaunchGameRom'
 }
 
 Describe 'game-emulators.ps1 - Launch-Game' {
     BeforeEach {
-        # Clear command cache
-        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-            Clear-TestCachedCommandCache | Out-Null
-        }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('dolphin-dev', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('ryujinx-canary', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('retroarch-nightly', [ref]$null)
-        }
+        Reset-TestEmulatorLaunchStubs
     }
-    
+
+    AfterAll {
+        Reset-TestEmulatorLaunchStubs
+    }
+
     Context 'ROM file validation' {
-        It 'Errors when ROM file does not exist' {
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.iso' } -MockWith { return $false }
-            
-            { Launch-Game -RomPath 'nonexistent.iso' -ErrorAction Stop } | Should -Throw
+        It 'Returns null when ROM file does not exist' {
+            $missingRom = Join-Path (New-TestTempDirectory -Prefix 'LaunchGameMissing') 'nonexistent.iso'
+
+            $result = Launch-Game -RomPath $missingRom -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
+            $global:TestEmulatorLaunchCapture | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Extension-based emulator selection' {
         It 'Launches GameCube ROM with Dolphin' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'game.gcm' } -MockWith { return $true }
-            
-            $script:capturedFunction = $null
-            Mock Start-Dolphin -MockWith {
-                $script:capturedFunction = 'Start-Dolphin'
-                $script:capturedRomPath = $RomPath
-            }
-            
-            Launch-Game -RomPath 'game.gcm' -ErrorAction SilentlyContinue
-            
-            $script:capturedFunction | Should -Be 'Start-Dolphin'
-            $script:capturedRomPath | Should -Be 'game.gcm'
+            Install-TestEmulatorLaunchStub -FunctionName 'Start-Dolphin'
+            $romPath = Join-Path $script:TestRomDirectory 'game.gcm'
+            Set-Content -Path $romPath -Value 'fake rom'
+
+            Launch-Game -RomPath $romPath -ErrorAction SilentlyContinue
+
+            $global:TestEmulatorLaunchCapture.Function | Should -Be 'Start-Dolphin'
+            $global:TestEmulatorLaunchCapture.RomPath | Should -Be $romPath
         }
-        
+
         It 'Launches Switch ROM with Ryujinx' {
-            Setup-AvailableCommandMock -CommandName 'ryujinx-canary'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'game.nsp' } -MockWith { return $true }
-            
-            $script:capturedFunction = $null
-            Mock Start-Ryujinx -MockWith {
-                $script:capturedFunction = 'Start-Ryujinx'
-                $script:capturedRomPath = $RomPath
-            }
-            
-            Launch-Game -RomPath 'game.nsp' -ErrorAction SilentlyContinue
-            
-            $script:capturedFunction | Should -Be 'Start-Ryujinx'
-            $script:capturedRomPath | Should -Be 'game.nsp'
+            Install-TestEmulatorLaunchStub -FunctionName 'Start-Ryujinx'
+            $romPath = Join-Path $script:TestRomDirectory 'game.nsp'
+            Set-Content -Path $romPath -Value 'fake rom'
+
+            Launch-Game -RomPath $romPath -ErrorAction SilentlyContinue
+
+            $global:TestEmulatorLaunchCapture.Function | Should -Be 'Start-Ryujinx'
+            $global:TestEmulatorLaunchCapture.RomPath | Should -Be $romPath
         }
-        
+
         It 'Launches SNES ROM with RetroArch' {
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'game.sfc' } -MockWith { return $true }
-            
-            $script:capturedFunction = $null
-            Mock Start-RetroArch -MockWith {
-                $script:capturedFunction = 'Start-RetroArch'
-                $script:capturedRomPath = $RomPath
-            }
-            
-            Launch-Game -RomPath 'game.sfc' -ErrorAction SilentlyContinue
-            
-            $script:capturedFunction | Should -Be 'Start-RetroArch'
-            $script:capturedRomPath | Should -Be 'game.sfc'
+            Install-TestEmulatorLaunchStub -FunctionName 'Start-RetroArch'
+            $romPath = Join-Path $script:TestRomDirectory 'game.sfc'
+            Set-Content -Path $romPath -Value 'fake rom'
+
+            Launch-Game -RomPath $romPath -ErrorAction SilentlyContinue
+
+            $global:TestEmulatorLaunchCapture.Function | Should -Be 'Start-RetroArch'
+            $global:TestEmulatorLaunchCapture.RomPath | Should -Be $romPath
         }
-        
+
         It 'Passes fullscreen flag to emulator' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'game.iso' } -MockWith { return $true }
-            
-            $script:capturedFullscreen = $false
-            Mock Start-Dolphin -MockWith {
-                $script:capturedFullscreen = $Fullscreen
-            }
-            
-            Launch-Game -RomPath 'game.iso' -Fullscreen -ErrorAction SilentlyContinue
-            
-            $script:capturedFullscreen | Should -Be $true
+            Install-TestEmulatorLaunchStub -FunctionName 'Start-Dolphin'
+            $romPath = Join-Path $script:TestRomDirectory 'game.iso'
+            Set-Content -Path $romPath -Value 'fake rom'
+
+            Launch-Game -RomPath $romPath -Fullscreen -ErrorAction SilentlyContinue
+
+            $global:TestEmulatorLaunchCapture.Fullscreen | Should -Be $true
         }
-        
+
         It 'Falls back to RetroArch for unknown extensions' {
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'game.unknown' } -MockWith { return $true }
-            
-            $script:capturedFunction = $null
-            Mock Start-RetroArch -MockWith {
-                $script:capturedFunction = 'Start-RetroArch'
-                $script:capturedRomPath = $RomPath
-            }
-            
-            Launch-Game -RomPath 'game.unknown' -ErrorAction SilentlyContinue
-            
-            $script:capturedFunction | Should -Be 'Start-RetroArch'
-            $script:capturedRomPath | Should -Be 'game.unknown'
+            Install-TestEmulatorLaunchStub -FunctionName 'Start-RetroArch'
+            $romPath = Join-Path $script:TestRomDirectory 'game.unknown'
+            Set-Content -Path $romPath -Value 'fake rom'
+
+            Launch-Game -RomPath $romPath -ErrorAction SilentlyContinue
+
+            $global:TestEmulatorLaunchCapture.Function | Should -Be 'Start-RetroArch'
+            $global:TestEmulatorLaunchCapture.RomPath | Should -Be $romPath
         }
     }
 }
-

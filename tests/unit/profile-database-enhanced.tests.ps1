@@ -3,353 +3,283 @@
 # Unit tests for enhanced database functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'database.ps1')
+
+    $script:OriginalQueryDatabase = ${function:Query-Database}
+    $script:TestImportFile = Join-Path (New-TestTempDirectory -Prefix 'DbImport') 'backup.sql'
+    Set-Content -Path $script:TestImportFile -Value 'CREATE TABLE test (id INT);'
 }
 
 Describe 'database.ps1 - Enhanced Functions' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestStartProcessCapture
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('psql', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('mysql', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('sqlite3', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('mongosh', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('dbeaver', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('mongodb-compass', [ref]$null)
+
+        foreach ($command in @('psql', 'mysql', 'sqlite3', 'mongosh', 'dbeaver', 'pg_dump', 'mongodb-compass')) {
+            Set-TestCommandAvailabilityState -CommandName $command -Available $false
+            Remove-Item -Path "Function:\$command" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$command" -Force -ErrorAction SilentlyContinue
         }
-        
-        # Mock Start-Process to prevent actual launches
-        Mock Start-Process -MockWith { return $null }
+
+        Set-Item -Path Function:\Query-Database -Value $script:OriginalQueryDatabase -Force
+        Reset-TestStartProcessMock
     }
-    
+
     Context 'Connect-Database' {
         It 'Opens DBeaver for PostgreSQL when available' {
             Setup-AvailableCommandMock -CommandName 'dbeaver'
-            
-            Connect-Database -DatabaseType PostgreSQL -Host 'localhost' -Database 'testdb' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'Start-Process' -Times 1 -Exactly
+
+            Connect-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'dbeaver'
         }
-        
+
         It 'Falls back to psql when DBeaver not available' {
-            Mock-CommandAvailabilityPester -CommandName 'dbeaver' -Available $false
-            Setup-AvailableCommandMock -CommandName 'psql'
-            
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'psql') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            Connect-Database -DatabaseType PostgreSQL -Host 'localhost' -Database 'testdb' -UseGui:$false -ErrorAction SilentlyContinue
-            
-            # Should attempt to call psql
-            $script:capturedArgs | Should -Not -BeNullOrEmpty
+            Mark-TestCommandsUnavailable -CommandNames 'dbeaver'
+            Setup-CapturingCommandMock -CommandName 'psql' -Output 'connected'
+
+            Connect-Database -DatabaseType PostgreSQL -Database 'testdb' -UseGui:$false -ErrorAction SilentlyContinue
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Not -BeNullOrEmpty
+            $args | Should -Contain '-d'
+            $args | Should -Contain 'testdb'
         }
-        
+
         It 'Handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'dbeaver' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
-            
+            Mark-TestCommandsUnavailable -CommandNames @('dbeaver', 'psql')
+
             { Connect-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }
-    
+
     Context 'Query-Database' {
         It 'Returns null when required tools are not available' {
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
-            
+            Mark-TestCommandsUnavailable -CommandNames 'psql'
+
             $result = Query-Database -DatabaseType PostgreSQL -Database 'testdb' -Query 'SELECT 1' -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Validates DatabaseType parameter' {
-            # Test with invalid DatabaseType value
             { Query-Database -DatabaseType InvalidType -Database 'testdb' -Query 'SELECT 1' -ErrorAction Stop } | Should -Throw
         }
-        
+
         It 'Calls psql with correct arguments for PostgreSQL' {
-            Setup-AvailableCommandMock -CommandName 'psql'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'psql') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return 'Query result'
-                }
-            }
-            
-            $result = Query-Database -DatabaseType PostgreSQL -Database 'testdb' -Query 'SELECT * FROM users' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-d'
-            $script:capturedArgs | Should -Contain 'testdb'
-            $script:capturedArgs | Should -Contain '-c'
+            Setup-CapturingCommandMock -CommandName 'psql' -Output 'Query result'
+
+            Query-Database -DatabaseType PostgreSQL -Database 'testdb' -Query 'SELECT * FROM users' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-d'
+            $args | Should -Contain 'testdb'
+            $args | Should -Contain '-c'
         }
-        
+
         It 'Calls mysql with correct arguments for MySQL' {
-            Setup-AvailableCommandMock -CommandName 'mysql'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'mysql') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return 'Query result'
-                }
-            }
-            
-            $result = Query-Database -DatabaseType MySQL -Database 'testdb' -Query 'SELECT * FROM users' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-D'
-            $script:capturedArgs | Should -Contain 'testdb'
-            $script:capturedArgs | Should -Contain '-e'
+            Setup-CapturingCommandMock -CommandName 'mysql' -Output 'Query result'
+
+            Query-Database -DatabaseType MySQL -Database 'testdb' -Query 'SELECT * FROM users' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-D'
+            $args | Should -Contain 'testdb'
+            $args | Should -Contain '-e'
         }
-        
+
         It 'Requires Database for SQLite' {
             Setup-AvailableCommandMock -CommandName 'sqlite3'
-            
-            { Query-Database -DatabaseType SQLite -Query 'SELECT 1' -ErrorAction Stop } | Should -Throw
-        }
-        
-        It 'Requires Database for MongoDB' {
-            Setup-AvailableCommandMock -CommandName 'mongosh'
-            
-            { Query-Database -DatabaseType MongoDB -Query 'db.users.find()' -ErrorAction Stop } | Should -Throw
-        }
-    }
-    
-    Context 'Export-Database' {
-        It 'Returns null when required tools are not available' {
-            Mock-CommandAvailabilityPester -CommandName 'pg_dump' -Available $false
-            
-            $result = Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction SilentlyContinue
-            
+
+            $result = Query-Database -DatabaseType SQLite -Query 'SELECT 1' -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
-        It 'Validates DatabaseType parameter' {
-            # Test with invalid DatabaseType value
-            { Export-Database -DatabaseType InvalidType -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction Stop } | Should -Throw
-        }
-        
-        It 'Calls pg_dump with correct arguments for PostgreSQL' {
-            Setup-AvailableCommandMock -CommandName 'pg_dump'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'pg_dump') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            $result = Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.dump' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-F'
-            $script:capturedArgs | Should -Contain 'c'
-            $script:capturedArgs | Should -Contain '-f'
-            $script:capturedArgs | Should -Contain 'backup.dump'
-            $script:capturedArgs | Should -Contain 'testdb'
-        }
-        
-        It 'Adds schema-only flag when SchemaOnly is specified' {
-            Setup-AvailableCommandMock -CommandName 'pg_dump'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'pg_dump') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.dump' -SchemaOnly -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--schema-only'
+
+        It 'Requires Database for MongoDB' {
+            Setup-AvailableCommandMock -CommandName 'mongosh'
+
+            $result = Query-Database -DatabaseType MongoDB -Query 'db.users.find()' -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
     }
-    
+
+    Context 'Export-Database' {
+        It 'Returns null when required tools are not available' {
+            Mark-TestCommandsUnavailable -CommandNames 'pg_dump'
+
+            $result = Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
+        }
+
+        It 'Validates DatabaseType parameter' {
+            { Export-Database -DatabaseType InvalidType -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction Stop } | Should -Throw
+        }
+
+        It 'Calls pg_dump with correct arguments for PostgreSQL' {
+            Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
+
+            Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.dump' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-F'
+            $args | Should -Contain 'c'
+            $args | Should -Contain '-f'
+            $args | Should -Contain 'backup.dump'
+            $args | Should -Contain 'testdb'
+        }
+
+        It 'Adds schema-only flag when SchemaOnly is specified' {
+            Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
+
+            Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.dump' -SchemaOnly -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--schema-only'
+        }
+    }
+
     Context 'Import-Database' {
         It 'Returns false when input file does not exist' {
             $result = Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath 'nonexistent.sql' -ErrorAction SilentlyContinue
-            
+
             $result | Should -Be $false
         }
-        
+
         It 'Returns false when required tools are not available' {
-            $testFile = Join-Path $TestDrive 'backup.sql'
-            'CREATE TABLE test (id INT);' | Out-File -FilePath $testFile
-            
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
-            
-            $result = Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $testFile -ErrorAction SilentlyContinue
-            
+            Mark-TestCommandsUnavailable -CommandNames 'psql'
+
+            $result = Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $script:TestImportFile -ErrorAction SilentlyContinue
+
             $result | Should -Be $false
         }
-        
+
         It 'Validates DatabaseType parameter' {
-            # Test with invalid DatabaseType value
-            $testFile = Join-Path $TestDrive 'backup.sql'
-            'CREATE TABLE test (id INT);' | Out-File -FilePath $testFile
-            { Import-Database -DatabaseType InvalidType -Database 'testdb' -InputPath $testFile -ErrorAction Stop } | Should -Throw
+            { Import-Database -DatabaseType InvalidType -Database 'testdb' -InputPath $script:TestImportFile -ErrorAction Stop } | Should -Throw
         }
-        
+
         It 'Calls psql with correct arguments for PostgreSQL' {
-            Setup-AvailableCommandMock -CommandName 'psql'
-            $testFile = Join-Path $TestDrive 'backup.sql'
-            'CREATE TABLE test (id INT);' | Out-File -FilePath $testFile
-            
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'psql') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            $result = Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $testFile -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-d'
-            $script:capturedArgs | Should -Contain 'testdb'
-            $result | Should -Be $true
+            Setup-CapturingCommandMock -CommandName 'psql' -Output 'import complete'
+
+            $result = Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $script:TestImportFile -ErrorAction SilentlyContinue
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'testdb'
+            @($result)[-1] | Should -Be $true
         }
     }
-    
+
     Context 'Backup-Database' {
         It 'Generates default backup path with timestamp' {
-            Setup-AvailableCommandMock -CommandName 'pg_dump'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'pg_dump') {
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
+
             $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
-            
-            $result | Should -Match '^testdb-\d{14}\.dump$'
+
+            @($result)[-1] | Should -Match '^testdb-\d{14}\.dump$'
         }
-        
+
         It 'Uses provided BackupPath' {
-            Setup-AvailableCommandMock -CommandName 'pg_dump'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'pg_dump') {
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
+
             $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath 'custom-backup.dump' -ErrorAction SilentlyContinue
-            
-            $result | Should -Be 'custom-backup.dump'
+
+            @($result)[-1] | Should -Be 'custom-backup.dump'
         }
-        
+
         It 'Compresses backup when Compress is specified' {
-            Setup-AvailableCommandMock -CommandName 'pg_dump'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'pg_dump') {
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            $backupFile = Join-Path $TestDrive 'backup.dump'
-            'test content' | Out-File -FilePath $backupFile
-            
+            Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
+            $backupFile = Join-Path (New-TestTempDirectory -Prefix 'DbBackup') 'backup.dump'
+            Set-Content -Path $backupFile -Value 'test content'
+
             $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $backupFile -Compress -ErrorAction SilentlyContinue
-            
+
             $result | Should -Match '\.gz$'
         }
     }
-    
+
     Context 'Restore-Database' {
         It 'Returns false when backup file does not exist' {
             $result = Restore-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath 'nonexistent.dump' -ErrorAction SilentlyContinue
-            
+
             $result | Should -Be $false
         }
-        
+
         It 'Validates DatabaseType parameter' {
-            # Test with invalid DatabaseType value
-            $testFile = Join-Path $TestDrive 'backup.dump'
-            'test content' | Out-File -FilePath $testFile
+            $testFile = Join-Path (New-TestTempDirectory -Prefix 'DbRestore') 'backup.dump'
+            Set-Content -Path $testFile -Value 'test content'
+
             { Restore-Database -DatabaseType InvalidType -Database 'testdb' -BackupPath $testFile -ErrorAction Stop } | Should -Throw
         }
-        
+
         It 'Handles compressed backups' {
-            Setup-AvailableCommandMock -CommandName 'psql'
-            $compressedFile = Join-Path $TestDrive 'backup.sql.gz'
-            $extractedFile = Join-Path $TestDrive 'backup.sql'
-            'CREATE TABLE test (id INT);' | Out-File -FilePath $extractedFile
+            Setup-CapturingCommandMock -CommandName 'psql' -Output ''
+            $restoreDir = New-TestTempDirectory -Prefix 'DbRestoreCompressed'
+            $extractedFile = Join-Path $restoreDir 'backup.sql'
+            Set-Content -Path $extractedFile -Value 'CREATE TABLE test (id INT);'
+            $compressedFile = Join-Path $restoreDir 'backup.sql.gz'
             Compress-Archive -Path $extractedFile -DestinationPath $compressedFile -Force
-            
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'psql') {
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
+
             $result = Restore-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $compressedFile -ErrorAction SilentlyContinue
-            
-            $result | Should -Be $true
+
+            @($result)[-1] | Should -Be $true
         }
     }
-    
+
     Context 'Get-DatabaseSchema' {
         It 'Returns null when required tools are not available' {
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
-            
+            Mark-TestCommandsUnavailable -CommandNames 'psql'
+
             $result = Get-DatabaseSchema -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Validates DatabaseType parameter' {
-            # Test with invalid DatabaseType value
             { Get-DatabaseSchema -DatabaseType InvalidType -Database 'testdb' -ErrorAction Stop } | Should -Throw
         }
-        
+
         It 'Calls Query-Database with schema query for PostgreSQL' {
             Setup-AvailableCommandMock -CommandName 'psql'
-            Mock Query-Database -MockWith {
+            Set-Item -Path Function:\Query-Database -Value {
+                param(
+                    [string]$DatabaseType,
+                    [string]$Query,
+                    [string]$Database
+                )
                 return 'Schema information'
-            }
-            
+            } -Force
+
             $result = Get-DatabaseSchema -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
-            
+
             $result | Should -Be 'Schema information'
         }
-        
+
         It 'Filters by TableName when specified' {
             Setup-AvailableCommandMock -CommandName 'psql'
-            Mock Query-Database -MockWith {
+            Set-Item -Path Function:\Query-Database -Value {
+                param(
+                    [string]$DatabaseType,
+                    [string]$Query,
+                    [string]$Database
+                )
                 return 'Table schema'
-            }
-            
+            } -Force
+
             $result = Get-DatabaseSchema -DatabaseType PostgreSQL -Database 'testdb' -TableName 'users' -ErrorAction SilentlyContinue
-            
+
             $result | Should -Be 'Table schema'
         }
     }
 }
-

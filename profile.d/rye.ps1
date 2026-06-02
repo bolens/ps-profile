@@ -132,5 +132,5 @@ if (Test-CachedCommand rye) {
     Set-AgentModeAlias -Name 'ryeupdate' -Target 'Update-RyePackages'
 }
 else {
-    Invoke-MissingToolWarning -ToolName 'rye' -ToolType 'python-package' -DefaultInstallCommand 'Install from: https://rye-up.com/'
+    Invoke-MissingToolWarning -ToolName 'rye' -ToolType 'python-package'
 }

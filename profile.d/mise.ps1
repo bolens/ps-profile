@@ -118,5 +118,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'mise-remove' -Target 'Remove-MiseRuntime'
 }
 else {
-    Write-MissingToolWarning -Tool 'mise' -InstallHint 'Install with: scoop install mise or curl https://mise.run | sh'
+    Invoke-MissingToolWarning -ToolName 'mise'
 }

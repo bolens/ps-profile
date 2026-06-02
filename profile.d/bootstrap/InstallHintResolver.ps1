@@ -81,11 +81,17 @@ function global:Get-PreferenceAwareInstallHint {
     
     # Check tool-specific installation method registry first
     # If found, generate a fallback chain from all available methods
-    $toolSpecificMethod = Get-ToolSpecificInstallMethod -ToolName $ToolName
+    $packageName = if (Get-Command Resolve-InstallPackageName -ErrorAction SilentlyContinue) {
+        Resolve-InstallPackageName -ToolName $ToolName
+    }
+    else {
+        $ToolName
+    }
+    $toolSpecificMethod = Get-ToolSpecificInstallMethod -ToolName $packageName
     if ($toolSpecificMethod) {
         # Get all available methods for this tool to build a fallback chain
         $registry = Get-ToolInstallMethodRegistry
-        $toolLower = $ToolName.ToLower()
+        $toolLower = $packageName.ToLower()
         
         if ($registry.ContainsKey($toolLower)) {
             $toolMethods = $registry[$toolLower]
@@ -1147,11 +1153,11 @@ function global:Invoke-MissingToolWarning {
     .PARAMETER Tool
         Display name override for the warning message.  Defaults to ToolName.
 
-    .EXAMPLE
-        Invoke-MissingToolWarning -ToolName 'bun' -ToolType 'node-package' -DefaultInstallCommand 'scoop install bun'
+    .PARAMETER InstallPackageName
+        Package name override for system package managers when it differs from ToolName.
 
-    .EXAMPLE
-        Invoke-MissingToolWarning -ToolName 'kubectl' -DefaultInstallCommand 'scoop install kubectl'
+    .PARAMETER AdditionalHint
+        Optional text appended to the resolved install hint when not already present.
     #>
     [CmdletBinding()]
     param(
@@ -1162,12 +1168,21 @@ function global:Invoke-MissingToolWarning {
 
         [string]$DefaultInstallCommand,
 
-        [string]$Tool
+        [string]$Tool,
+
+        [string]$InstallPackageName,
+
+        [string]$AdditionalHint
     )
 
     $displayTool = if ($Tool) { $Tool } else { $ToolName }
 
-    $installHint = if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+    $installHint = if (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue) {
+        $splat = @{ ToolName = $ToolName; ToolType = $ToolType }
+        if ($InstallPackageName) { $splat['InstallPackageName'] = $InstallPackageName }
+        Get-PlatformInstallHint @splat
+    }
+    elseif (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
         $splat = @{ ToolName = $ToolName; ToolType = $ToolType }
         if ($DefaultInstallCommand) { $splat['DefaultInstallCommand'] = $DefaultInstallCommand }
         Get-PreferenceAwareInstallHint @splat
@@ -1179,6 +1194,10 @@ function global:Invoke-MissingToolWarning {
         $null
     }
 
+    if ($AdditionalHint -and $installHint -and $installHint -notmatch [regex]::Escape($AdditionalHint.Trim())) {
+        $installHint += " $AdditionalHint"
+    }
+
     if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
         Write-MissingToolWarning -Tool $displayTool -InstallHint $installHint
     }
@@ -1186,4 +1205,350 @@ function global:Invoke-MissingToolWarning {
         $hint = if ($installHint) { " $installHint" } else { '' }
         Write-Warning "$displayTool is not installed.$hint"
     }
+}
+
+<#
+.SYNOPSIS
+    Maps command names to package names used by system package managers.
+#>
+function global:Resolve-InstallPackageName {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName
+    )
+
+    $aliases = @{
+        'http'     = 'httpie'
+        'rg'       = 'ripgrep'
+        'clamscan' = 'clamav'
+        'az'       = 'azure-cli'
+        'azd'      = 'azure-developer-cli'
+        'mc'       = 'minio-client'
+        'dotnet'   = 'dotnet-sdk'
+        'mvn'      = 'maven'
+        'dart'     = 'dart-sdk'
+        'firebase' = 'firebase-tools'
+        'supabase' = 'supabase-beta'
+        'conda'    = 'miniconda3'
+        'btm'      = 'bottom'
+        'heroku'   = 'heroku-cli'
+        'tofu'     = 'opentofu'
+        'fly'      = 'flyctl'
+        'magick'               = 'imagemagick'
+        'pdflatex'             = 'miktex'
+        'yt-dlp-nightly'       = 'yt-dlp'
+        'twitchdownloader-cli' = 'twitchdownloader'
+        'ipinfo-cli'           = 'ipinfo'
+        'handbrake-cli'        = 'handbrake'
+        'mkvmerge'             = 'mkvtoolnix'
+        'neovim-nightly'       = 'neovim'
+        'wezterm-nightly'      = 'wezterm'
+        'zed-nightly'          = 'zed'
+        'lapce-nightly'        = 'lapce'
+        'android-studio-canary' = 'android-studio'
+        'openscad-dev'         = 'openscad'
+        'dolphin-dev'          = 'dolphin'
+        'ryujinx-canary'       = 'ryujinx'
+        'retroarch-nightly'    = 'retroarch'
+        'psql'                 = 'postgresql'
+        'pg_dump'              = 'postgresql'
+        'mysqldump'            = 'mysql'
+        'mongoexport'          = 'mongodb-database-tools'
+        'mongoimport'          = 'mongodb-database-tools'
+        'sqlite'               = 'sqlite3'
+        'gitbutler-nightly'    = 'gitbutler'
+        'balena'               = 'balena-cli'
+        'pod'                  = 'cocoapods'
+        'comfy'                = 'comfy-cli'
+        'ng'                   = '@angular/cli'
+        'brew'                 = 'homebrew'
+        'choco'                = 'chocolatey'
+        'node'                 = 'nodejs'
+        'ssh'                  = 'openssh'
+        'gm'                   = 'graphicsmagick'
+        'convert'              = 'imagemagick'
+        'xelatex'              = 'miktex'
+        'luatex'               = 'miktex'
+        'djvutxt'              = 'djvulibre'
+        'djvups'               = 'djvulibre'
+        'ddjvu'                = 'djvulibre'
+    }
+
+    $toolLower = $ToolName.ToLower().Trim()
+    if ($aliases.ContainsKey($toolLower)) {
+        return $aliases[$toolLower]
+    }
+
+    return $ToolName
+}
+
+<#
+.SYNOPSIS
+    Infers install hint tool type from a command name.
+#>
+function global:Resolve-CommandInstallToolType {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$CommandName
+    )
+
+    switch -Regex ($CommandName.ToLower().Trim()) {
+        '^(npm|pnpm|yarn|bun|npx)$' { return 'node-package' }
+        '^(pip|pip3|uv|poetry|pipenv|hatch|pdm|rye|conda)$' { return 'python-package' }
+        '^(python|python3)$' { return 'python-runtime' }
+        '^(cargo|rustup)$' { return 'rust-package' }
+        '^(go)$' { return 'go-package' }
+        '^(gem|bundle)$' { return 'ruby-package' }
+        '^(composer|php)$' { return 'php-package' }
+        '^(dotnet|nuget)$' { return 'dotnet-package' }
+        '^(mvn|gradle|ant)$' { return 'java-build-tool' }
+        default { return 'generic' }
+    }
+}
+
+<#
+.SYNOPSIS
+    Emits a missing-tool warning with inferred tool type for a command.
+#>
+function global:Invoke-CommandMissingToolWarning {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$CommandName,
+
+        [string]$Tool,
+
+        [string]$DefaultInstallCommand
+    )
+
+    $splat = @{
+        ToolName = $CommandName
+        ToolType = (Resolve-CommandInstallToolType -CommandName $CommandName)
+    }
+    if ($Tool) { $splat['Tool'] = $Tool }
+    if ($DefaultInstallCommand) { $splat['DefaultInstallCommand'] = $DefaultInstallCommand }
+
+    if (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+        Invoke-MissingToolWarning @splat
+    }
+    elseif (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
+        $hint = if ($DefaultInstallCommand) {
+            "Install with: $DefaultInstallCommand"
+        }
+        else {
+            "Install $CommandName"
+        }
+        Write-MissingToolWarning -Tool $(if ($Tool) { $Tool } else { $CommandName }) -InstallHint $hint
+    }
+    else {
+        Write-Warning "$CommandName is not installed."
+    }
+}
+
+<#
+.SYNOPSIS
+    Gets a platform-aware install hint for a tool.
+#>
+function global:Get-PlatformInstallHint {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName,
+
+        [ValidateSet('python-package', 'node-package', 'python-runtime', 'rust-package', 'go-package', 'java-build-tool', 'ruby-package', 'php-package', 'dotnet-package', 'dart-package', 'elixir-package', 'generic')]
+        [string]$ToolType = 'generic',
+
+        [string]$InstallPackageName
+    )
+
+    $packageName = if ($InstallPackageName) {
+        $InstallPackageName
+    }
+    else {
+        Resolve-InstallPackageName -ToolName $ToolName
+    }
+
+    if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+        return Get-PreferenceAwareInstallHint -ToolName $packageName -ToolType $ToolType
+    }
+
+    return "Install with: scoop install $packageName"
+}
+
+<#
+.SYNOPSIS
+    Gets a combined install hint for Docker or Podman container engines.
+#>
+function global:Get-ContainerEngineInstallHint {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+        return 'Install with: scoop install docker (or: scoop install podman)'
+    }
+
+    $dockerCmd = ((Get-PlatformInstallHint -ToolName 'docker') -replace '^Install with: ', '')
+    $podmanCmd = ((Get-PlatformInstallHint -ToolName 'podman') -replace '^Install with: ', '')
+    return "Install with: $dockerCmd (or: $podmanCmd)"
+}
+
+<#
+.SYNOPSIS
+    Gets a platform-aware installation command string for container engines (without "Install with:" prefix).
+#>
+function global:Get-ContainerInstallationCommand {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    if (Get-Command Get-ContainerEngineInstallHint -ErrorAction SilentlyContinue) {
+        return ((Get-ContainerEngineInstallHint) -replace '^Install with: ', '')
+    }
+
+    return 'scoop install docker or scoop install podman'
+}
+
+<#
+.SYNOPSIS
+    Emits a missing container engine warning with platform-aware install hints.
+#>
+function global:Invoke-ContainerEngineMissingWarning {
+    [CmdletBinding()]
+    param(
+        [string]$Tool = 'docker/podman'
+    )
+
+    $hint = if (Get-Command Get-ContainerEngineInstallHint -ErrorAction SilentlyContinue) {
+        Get-ContainerEngineInstallHint
+    }
+    elseif (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue) {
+        Get-PlatformInstallHint -ToolName 'docker'
+    }
+    else {
+        'Install with: scoop install docker (or: scoop install podman)'
+    }
+
+    if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
+        Write-MissingToolWarning -Tool $Tool -InstallHint $hint
+    }
+    else {
+        Write-Warning "$Tool is not available. $hint"
+    }
+}
+
+<#
+.SYNOPSIS
+    Emits a missing-tool warning for dangerzone with Docker requirement note.
+#>
+function global:Invoke-DangerzoneMissingWarning {
+    [CmdletBinding()]
+    param()
+
+    $additionalHint = '(requires Docker)'
+    $hint = if (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue) {
+        Get-PlatformInstallHint -ToolName 'dangerzone'
+    }
+    elseif (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+        Get-PreferenceAwareInstallHint -ToolName 'dangerzone' -ToolType 'generic'
+    }
+    else {
+        $null
+    }
+
+    if ($hint -and $hint -match 'Docker') {
+        $additionalHint = $null
+    }
+
+    if (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+        $splat = @{ ToolName = 'dangerzone'; Tool = 'dangerzone' }
+        if ($additionalHint) { $splat['AdditionalHint'] = $additionalHint }
+        Invoke-MissingToolWarning @splat
+    }
+    elseif (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
+        if ($additionalHint -and $hint) {
+            $hint += " $additionalHint"
+        }
+        Write-MissingToolWarning -Tool 'dangerzone' -InstallHint $hint
+    }
+    else {
+        Write-Warning 'dangerzone is not installed.'
+    }
+}
+
+function global:Get-ToolInstallationCommand {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName
+    )
+
+    if (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue) {
+        return ((Get-PlatformInstallHint -ToolName $ToolName) -replace '^Install with: ', '')
+    }
+
+    return "scoop install $ToolName"
+}
+
+<#
+.SYNOPSIS
+    Builds a missing-tool error message for conversion CLI dependencies.
+#>
+function global:Get-ConversionToolMissingMessage {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName,
+
+        [string]$InstallPackageName,
+
+        [string]$Context,
+
+        [string]$AdditionalHint
+    )
+
+    $hint = if (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue) {
+        $splat = @{ ToolName = $ToolName }
+        if ($InstallPackageName) { $splat['InstallPackageName'] = $InstallPackageName }
+        Get-PlatformInstallHint @splat
+    }
+    elseif (Get-Command Get-ToolInstallationCommand -ErrorAction SilentlyContinue) {
+        "Install with: $(Get-ToolInstallationCommand -ToolName $ToolName)"
+    }
+    else {
+        "Install with: scoop install $ToolName"
+    }
+
+    $subject = if ($Context) { $Context } else { "$ToolName command" }
+    $message = "${subject} is not available. $hint"
+    if ($AdditionalHint) {
+        $message += " $AdditionalHint"
+    }
+
+    return $message
+}
+
+<#
+.SYNOPSIS
+    Builds a missing-tool error message when ImageMagick or GraphicsMagick is required.
+#>
+function global:Get-ImageConversionToolMissingMessage {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
+        return 'ImageMagick or GraphicsMagick command not found. Install imagemagick or graphicsmagick via your platform package manager.'
+    }
+
+    $imHint = (Get-PlatformInstallHint -ToolName 'imagemagick') -replace '^Install with: ', ''
+    $gmHint = (Get-PlatformInstallHint -ToolName 'graphicsmagick') -replace '^Install with: ', ''
+    return "ImageMagick or GraphicsMagick command not found. ImageMagick: $imHint. GraphicsMagick: $gmHint."
 }

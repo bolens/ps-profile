@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Yarn Tools Integration Tests' {
     BeforeAll {
         try {
@@ -55,18 +57,6 @@ Describe 'Yarn Tools Integration Tests' {
         It 'Creates yarn alias for Invoke-Yarn' {
             Get-Alias yarn -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             (Get-Alias yarn).ResolvedCommandName | Should -Be 'Invoke-Yarn'
-        }
-
-        It 'yarn alias handles missing tool gracefully and recommends installation' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('yarn', [ref]$null)
-            }
-            # Verify the function exists
-            # Note: Testing missing tool scenario with aliases can cause recursion issues
-            # due to alias resolution, so we verify function existence instead
-            Get-Command Invoke-Yarn -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            # Verify the alias exists
-            Get-Alias yarn -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates Add-YarnPackage function' {
@@ -178,6 +168,35 @@ Describe 'Yarn Tools Integration Tests' {
             Update-YarnSelf
             Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
             Get-Command Update-YarnSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Invoke-Yarn emits missing-tool warning when yarn is unavailable' {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('yarn', [ref]$null)
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'yarn' -Available $false
+
+            $output = Invoke-Yarn --version 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'yarn not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'yarn'
+        }
+
+        It 'Add-YarnPackage emits missing-tool warning when yarn is unavailable' {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('yarn', [ref]$null)
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'yarn' -Available $false
+
+            $output = Add-YarnPackage 'lodash' 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'yarn not found'
         }
     }
 }

@@ -81,7 +81,8 @@ Describe 'Security Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'gitleaks' -Available $false
             $output = gitleaks-scan -RepositoryPath (Get-Location).Path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'gitleaks'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'gitleaks not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gitleaks'
         }
     }
 
@@ -121,7 +122,8 @@ Describe 'Security Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'trufflehog' -Available $false
             $output = trufflehog-scan -Path (Get-Location).Path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'trufflehog'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'trufflehog not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'trufflehog'
         }
     }
 
@@ -161,7 +163,8 @@ Describe 'Security Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'osv-scanner' -Available $false
             $output = osv-scan -Path (Get-Location).Path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'osv-scanner'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'osv-scanner not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'osv-scanner'
         }
     }
 
@@ -201,7 +204,8 @@ Describe 'Security Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'yara' -Available $false
             $output = yara-scan -File (Get-Location).Path -Rules (Get-Location).Path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'yara'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'yara not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'yara'
         }
     }
 
@@ -241,7 +245,8 @@ Describe 'Security Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'clamscan' -Available $false
             $output = clamav-scan -Path (Get-Location).Path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'clamav|clamscan'
+            Assert-TestMissingToolWarning -Output $output -Pattern '(clamav|clamscan) not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'clamav'
         }
     }
 
@@ -284,10 +289,9 @@ Describe 'Security Tools Integration Tests' {
                 Clear-CommandCache -CommandName 'dangerzone' -ErrorAction SilentlyContinue
             }
             Mock-CommandAvailabilityPester -CommandName 'dangerzone' -Available $false
-            # Also mock Test-CachedCommand to ensure it returns false
-            Mock -CommandName Test-CachedCommand -ParameterFilter { $Name -eq 'dangerzone' } -MockWith { $false }
             $output = dangerzone -InputPath (Get-Location).Path -OutputPath (Get-Location).Path 2>&1 3>&1 | Out-String
-            $output | Should -Match 'dangerzone'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'dangerzone not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'dangerzone'
         }
     }
 
@@ -312,7 +316,8 @@ Describe 'Security Tools Integration Tests' {
             # Verify function still exists and is callable (idempotency means no errors on reload)
             $afterFunction = Get-Command Invoke-GitLeaksScan -ErrorAction SilentlyContinue
             $afterFunction | Should -Not -BeNullOrEmpty -Because "Function should still exist after reload"
-            # Function should still be callable (idempotency means no errors on reload)
+            # Function should still be callable with tool unavailable (idempotency)
+            Mock-CommandAvailabilityPester -CommandName 'gitleaks' -Available $false
             { Invoke-GitLeaksScan -RepositoryPath (Get-Location).Path -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }

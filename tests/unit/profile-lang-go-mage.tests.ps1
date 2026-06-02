@@ -3,13 +3,8 @@
 # Unit tests for Invoke-Mage function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'lang-go.ps1')
@@ -17,25 +12,19 @@ BeforeAll {
 
 Describe 'lang-go.ps1 - Invoke-Mage' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('mage', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('mage', [ref]$null)
-        }
+        Set-TestCommandAvailabilityState -CommandName 'mage' -Available $false
+        Remove-Item -Path 'Function:\mage' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:mage' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
         It 'Returns null when mage is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'mage' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'mage' } -MockWith { return $null }
-
             $result = Invoke-Mage -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,75 +33,47 @@ Describe 'lang-go.ps1 - Invoke-Mage' {
 
     Context 'Tool available' {
         It 'Calls mage without target (lists targets)' {
-            Setup-AvailableCommandMock -CommandName 'mage'
+            Setup-CapturingCommandMock -CommandName 'mage' -Output 'Available targets: build, test'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'mage' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Available targets: build, test' 
-            }
+            $result = Invoke-Mage -ErrorAction SilentlyContinue
 
-            $result = Invoke-Mage
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'Available targets: build, test'
         }
 
         It 'Calls mage with target' {
-            Setup-AvailableCommandMock -CommandName 'mage'
+            Setup-CapturingCommandMock -CommandName 'mage' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'mage' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            Invoke-Mage -Target 'build' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Invoke-Mage -Target 'build'
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'build'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'build'
         }
 
         It 'Calls mage with target and additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'mage'
+            Setup-CapturingCommandMock -CommandName 'mage' -Output 'Test complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'mage' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Test complete' 
-            }
+            Invoke-Mage -Target 'test' '-v' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Invoke-Mage -Target 'test' -Arguments @('-v')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'test'
-            $script:capturedArgs | Should -Contain '-v'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'test'
+            $args | Should -Contain '-v'
         }
     }
 
     Context 'Error handling' {
         It 'Handles mage execution errors' {
-            Setup-AvailableCommandMock -CommandName 'mage'
-
-            Mock -CommandName 'mage' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('mage: command failed')
-            }
-            Mock Write-Error { }
+            Set-TestCommandThrowingMock -CommandName 'mage' -Message 'mage: command failed'
 
             try {
                 $result = Invoke-Mage -Target 'invalid' -ErrorAction SilentlyContinue
             }
             catch {
-                # Exception may propagate in test environment
+                $result = $null
             }
 
             $result | Should -BeNullOrEmpty
-            # Write-Error may or may not be called depending on how PowerShell handles the exception
-            # The important thing is that the function handles the error gracefully
         }
     }
 }
-

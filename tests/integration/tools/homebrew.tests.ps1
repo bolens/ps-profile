@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Homebrew Tools Integration Tests' {
     BeforeAll {
         try {
@@ -627,99 +629,111 @@ Describe 'Homebrew Tools Integration Tests' {
         }
 
         It 'Import-BrewPackages calls brew bundle' {
-            $script:capturedArgs = $null
-            $testFile = 'test-Brewfile'
-            'brew "git"' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages imported successfully'
+            $testDir = New-TestTempDirectory -Prefix 'BrewImport'
+            $testFile = Join-Path $testDir 'Brewfile'
+            'brew "git"' | Set-Content -Path $testFile
+            Test-Path -LiteralPath $testFile | Should -Be $true
+
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Mock Invoke-WithWideEvent -MockWith {
+                    param(
+                        [Parameter(Mandatory)]
+                        [string]$OperationName,
+                        [Parameter(Mandatory)]
+                        [scriptblock]$ScriptBlock,
+                        [hashtable]$Context,
+                        [string]$Level,
+                        [switch]$AlwaysKeep
+                    )
+                    & $ScriptBlock
+                }
             }
 
-            # Execute
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Packages imported successfully'
+
             { Import-BrewPackages -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'bundle'
-            $script:capturedArgs | Should -Contain '--file'
-            $script:capturedArgs | Should -Contain $testFile
-
-            # Cleanup
-            Remove-Item -Path $testFile -ErrorAction SilentlyContinue
+            $capturedArgs = Get-TestCommandInvocationArgsFlat
+            $capturedArgs | Should -Not -BeNullOrEmpty
+            $capturedArgs | Should -Contain 'bundle'
+            $capturedArgs | Should -Contain '--file'
+            $capturedArgs | Should -Contain $testFile
         }
 
         It 'Import-BrewPackages with NoLock passes --no-lock flag' {
-            $script:capturedArgs = $null
-            $testFile = 'test-Brewfile'
-            'brew "git"' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages imported'
+            $testDir = New-TestTempDirectory -Prefix 'BrewImportNoLock'
+            $testFile = Join-Path $testDir 'Brewfile'
+            'brew "git"' | Set-Content -Path $testFile
+            Test-Path -LiteralPath $testFile | Should -Be $true
+
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Mock Invoke-WithWideEvent -MockWith {
+                    param(
+                        [Parameter(Mandatory)]
+                        [string]$OperationName,
+                        [Parameter(Mandatory)]
+                        [scriptblock]$ScriptBlock,
+                        [hashtable]$Context,
+                        [string]$Level,
+                        [switch]$AlwaysKeep
+                    )
+                    & $ScriptBlock
+                }
             }
 
-            # Execute
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Packages imported successfully'
+
             { Import-BrewPackages -Path $testFile -NoLock -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'bundle'
-            $script:capturedArgs | Should -Contain '--no-lock'
-
-            # Cleanup
-            Remove-Item -Path $testFile -ErrorAction SilentlyContinue
+            $capturedArgs = Get-TestCommandInvocationArgsFlat
+            $capturedArgs | Should -Not -BeNullOrEmpty
+            $capturedArgs | Should -Contain 'bundle'
+            $capturedArgs | Should -Contain '--no-lock'
         }
 
-        It 'Homebrew fragment handles missing tool gracefully' {
-            BeforeAll {
-                if ($global:MissingToolWarnings) {
-                    $null = $global:MissingToolWarnings.TryRemove('brew', [ref]$null)
-                }
-                if ($null -ne $global:TestCachedCommandCache) {
-                    $global:TestCachedCommandCache = @{}
-                }
-                if ($null -ne $global:AssumedAvailableCommands) {
-                    $null = $global:AssumedAvailableCommands.TryRemove('brew', [ref]$null)
-                    $null = $global:AssumedAvailableCommands.TryRemove('brew'.ToLowerInvariant(), [ref]$null)
-                }
-                
-                # Clear any function mocks that might exist
-                Remove-Item Function:brew -ErrorAction SilentlyContinue
-                Remove-Item Function:global:brew -ErrorAction SilentlyContinue
-                
-                # Mock brew as unavailable BEFORE loading the fragment
-                Mock-CommandAvailabilityPester -CommandName 'brew' -Available $false
-                
-                # Remove any existing Homebrew functions
-                Remove-Item Function:Install-BrewPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Remove-BrewPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Update-BrewPackages -ErrorAction SilentlyContinue
-                Remove-Item Function:Test-BrewOutdated -ErrorAction SilentlyContinue
-                Remove-Item Function:Update-BrewSelf -ErrorAction SilentlyContinue
-                Remove-Item Function:Clear-BrewCache -ErrorAction SilentlyContinue
-                Remove-Item Function:Find-BrewPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Get-BrewPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Get-BrewPackageInfo -ErrorAction SilentlyContinue
-                Remove-Item Function:Export-BrewPackages -ErrorAction SilentlyContinue
-                Remove-Item Function:Import-BrewPackages -ErrorAction SilentlyContinue
-                
-                # Reload the fragment - functions should not be created since brew is unavailable
-                . (Join-Path $script:ProfileDir 'homebrew.ps1')
+    }
+
+    Context 'Graceful degradation when brew is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Remove-Item Function:brew -ErrorAction SilentlyContinue
+            Remove-Item Function:global:brew -ErrorAction SilentlyContinue
+            Mock-CommandAvailabilityPester -CommandName 'brew' -Available $false
+
+            @(
+                'Install-BrewPackage', 'Remove-BrewPackage', 'Update-BrewPackages',
+                'Test-BrewOutdated', 'Update-BrewSelf', 'Clear-BrewCache',
+                'Find-BrewPackage', 'Get-BrewPackage', 'Get-BrewPackageInfo',
+                'Export-BrewPackages', 'Import-BrewPackages'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            It 'Functions are not created when brew is unavailable' {
-                # Verify functions were not created
-                Get-Command Install-BrewPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            $script:MissingBrewOutput = & { . (Join-Path $script:ProfileDir 'homebrew.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when brew is unavailable' {
+            Get-Command Install-BrewPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when brew is unavailable' {
+            if (Get-Command Test-ToolAvailableOnPlatform -ErrorAction SilentlyContinue) {
+                if (-not (Test-ToolAvailableOnPlatform -Tool 'homebrew')) {
+                    Set-ItResult -Inconclusive -Because 'Homebrew install hints are only emitted on supported platforms'
+                    return
+                }
             }
+
+            Assert-TestMissingToolWarning -Output $script:MissingBrewOutput -Pattern 'brew not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingBrewOutput -ToolName 'homebrew'
         }
     }
 }

@@ -194,7 +194,7 @@ if (-not (Test-Path Function:project-root)) {
         try {
             # Check if git is available
             if (-not (Test-CachedCommand git)) {
-                Write-MissingToolWarning -Tool 'git' -InstallHint 'Install git to use this function.'
+                Invoke-MissingToolWarning -ToolName 'git'
                 return
             }
             

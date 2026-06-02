@@ -75,13 +75,14 @@ try:
         else:
             store_data('data', data, f)
 except ImportError:
-    print('Error: h5py package is not installed. Install it with: uv pip install h5py', file=sys.stderr)
+    print('Error: h5py package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "hdf5-encode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'h5py' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -140,13 +141,14 @@ try:
         with open(sys.argv[2], 'w') as out:
             json.dump(result, out, indent=2, default=str)
 except ImportError:
-    print('Error: h5py package is not installed. Install it with: uv pip install h5py', file=sys.stderr)
+    print('Error: h5py package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "hdf5-decode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'h5py' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1

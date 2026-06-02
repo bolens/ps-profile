@@ -3,6 +3,10 @@
 # Module loading utilities for test environment
 # ===============================================
 
+# Pre-initialize script-scoped caches for Set-StrictMode compatibility
+$script:ModuleLoadCache = @{}
+$script:ProfileLoadCache = @{}
+
 #region Core Module Loading Functions
 
 <#
@@ -52,8 +56,8 @@ function Import-TestModule {
     }
 
     try {
-        # Dot-source the module
-        . $ModulePath
+        # Dot-source the module (suppress registration return values)
+        $null = . $ModulePath
 
         # Promote initialization function to global scope if specified
         if ($InitFunctionName) {
@@ -182,7 +186,7 @@ function Import-ModuleGroup {
     }
 
     # If no modules to load, return early
-    if ($modules.Count -eq 0) {
+    if (@($modules).Count -eq 0) {
         return
     }
 
@@ -641,7 +645,7 @@ function Import-DataConversionModules {
 
     # If SelectiveModules is specified, only load minimal core dependencies
     # These are often required by structured modules and Ensure-FileConversion-Data
-    if ($SelectiveModules -and $SelectiveModules.Count -gt 0) {
+    if ($SelectiveModules -and @($SelectiveModules).Count -gt 0) {
         # Load minimal core dependencies needed by most structured modules and Ensure-FileConversion-Data
         $coreDir = Join-Path $dataDir 'core'
         $minimalCoreModules = @{
@@ -663,7 +667,7 @@ function Import-DataConversionModules {
         Import-ModuleGroup -BaseDir $encodingDir -ModuleConfig @{ 'encoding.ps1' = 'Initialize-FileConversion-CoreEncoding' } -DefaultFunctionPatterns @('^(Convert|Format)')
     }
     # If SelectiveModules is NOT specified, load all core modules
-    elseif (-not $SelectiveModules -or $SelectiveModules.Count -eq 0) {
+    elseif (-not $SelectiveModules -or @($SelectiveModules).Count -eq 0) {
         # Core modules - load these first as they're required by Ensure-FileConversion-Data
         $coreDir = Join-Path $dataDir 'core'
         $coreModules = Get-DataCoreModulesConfig
@@ -894,7 +898,7 @@ function Ensure-ConversionModulesLoaded {
     $cacheKey = "ConversionModules_$ModuleType"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if (-not $script:ModuleLoadCache) {
+    if ($null -eq $script:ModuleLoadCache) {
         $script:ModuleLoadCache = @{}
     }
     
@@ -1009,7 +1013,7 @@ function Initialize-TestProfile {
     $cacheKey = "Profile_$(if ($LoadBootstrap) { 'Bootstrap' })_$(if ($LoadConversionModules) { $LoadConversionModules })_$(if ($LoadFilesFragment) { 'Files' })_$(if ($EnsureFileConversion) { 'EnsureData' })_$(if ($EnsureFileConversionMedia) { 'EnsureMedia' })_$(if ($EnsureFileConversionDocuments) { 'EnsureDocs' })"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if (-not $script:ProfileLoadCache) {
+    if ($null -eq $script:ProfileLoadCache) {
         $script:ProfileLoadCache = @{}
     }
     
@@ -1021,7 +1025,7 @@ function Initialize-TestProfile {
     if ($LoadBootstrap) {
         $bootstrapPath = Join-Path $ProfileDir 'bootstrap.ps1'
         if ($bootstrapPath -and (Test-Path -LiteralPath $bootstrapPath)) {
-            . $bootstrapPath
+            $null = . $bootstrapPath
         }
     }
     
@@ -1034,13 +1038,13 @@ function Initialize-TestProfile {
     if ($LoadFilesFragment) {
         $filesPath = Join-Path $ProfileDir 'files.ps1'
         if ($filesPath -and (Test-Path -LiteralPath $filesPath)) {
-            . $filesPath
+            $null = . $filesPath
         }
     }
     
     # Ensure file conversion if requested
     # Skip if SelectiveModules is specified (Ensure-FileConversion-Data initializes all modules)
-    if ($EnsureFileConversion -and (-not $SelectiveModules -or $SelectiveModules.Count -eq 0)) {
+    if ($EnsureFileConversion -and (-not $SelectiveModules -or @($SelectiveModules).Count -eq 0)) {
         if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
             Ensure-FileConversion-Data
         }
@@ -1060,6 +1064,81 @@ function Initialize-TestProfile {
     
     # Mark as loaded
     $script:ProfileLoadCache[$cacheKey] = $true
+}
+
+<#
+.SYNOPSIS
+    Loads bootstrap, files registry, and system/utility fragments for integration tests.
+#>
+function Initialize-SystemUtilityIntegration {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ProfileDir,
+
+        [switch]$IncludeUtilities,
+
+        [switch]$IncludeSystemInfo,
+
+        [switch]$IncludeEnvFragment
+    )
+
+    Initialize-TestProfile -ProfileDir $ProfileDir -LoadBootstrap -LoadFilesFragment
+
+    $systemFragment = Join-Path $ProfileDir 'system.ps1'
+    if (Test-Path -LiteralPath $systemFragment) {
+        $null = . $systemFragment
+    }
+
+    $global:SystemInitialized = $false
+    if (Get-Command Ensure-System -ErrorAction SilentlyContinue) {
+        Ensure-System
+    }
+
+    if ($IncludeUtilities) {
+        $utilitiesFragment = Join-Path $ProfileDir 'utilities.ps1'
+        if (Test-Path -LiteralPath $utilitiesFragment) {
+            $null = . $utilitiesFragment
+        }
+
+        $global:UtilitiesInitialized = $false
+        if (Get-Command Ensure-Utilities -ErrorAction SilentlyContinue) {
+            Ensure-Utilities
+        }
+
+        if (-not (Get-Command Get-EnvVar -ErrorAction SilentlyContinue)) {
+            $utilityModules = @(
+                @{ Dir = 'utilities-modules/system'; File = 'utilities-env.ps1' }
+                @{ Dir = 'utilities-modules/system'; File = 'utilities-security.ps1' }
+                @{ Dir = 'utilities-modules/filesystem'; File = 'utilities-filesystem.ps1' }
+            )
+            foreach ($module in $utilityModules) {
+                $modulePath = Join-Path $ProfileDir $module.Dir $module.File
+                if (Test-Path -LiteralPath $modulePath) {
+                    if (Get-Command Invoke-GlobalProfileScript -ErrorAction SilentlyContinue) {
+                        Invoke-GlobalProfileScript -Path $modulePath
+                    }
+                    else {
+                        $null = . $modulePath
+                    }
+                }
+            }
+        }
+    }
+
+    if ($IncludeSystemInfo) {
+        $systemInfoPath = Join-Path $ProfileDir 'system-info.ps1'
+        if (Test-Path -LiteralPath $systemInfoPath) {
+            $null = . $systemInfoPath
+        }
+    }
+
+    if ($IncludeEnvFragment) {
+        $envPath = Join-Path $ProfileDir 'env.ps1'
+        if (Test-Path -LiteralPath $envPath) {
+            $null = . $envPath
+        }
+    }
 }
 
 

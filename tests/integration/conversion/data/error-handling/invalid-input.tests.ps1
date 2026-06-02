@@ -35,7 +35,7 @@ Describe 'Invalid Input Handling Tests' {
         It 'ConvertTo-SuperJsonFromJson handles invalid JSON gracefully' {
             Get-Command ConvertTo-SuperJsonFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -53,7 +53,7 @@ Describe 'Invalid Input Handling Tests' {
         It 'ConvertFrom-SuperJsonToJson handles invalid SuperJSON gracefully' {
             Get-Command ConvertFrom-SuperJsonToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {

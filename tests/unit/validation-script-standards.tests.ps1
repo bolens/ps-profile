@@ -2,9 +2,8 @@
 # Validation script standards tests.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ScriptsChecksPath = Get-TestPath -RelativePath 'scripts\checks' -StartPath $PSScriptRoot -EnsureExists
     $script:TempRoot = New-TestTempDirectory -Prefix 'ValidationStandards'
 }
@@ -43,7 +42,7 @@ Exit-WithCode -ExitCode 0 -Message "Success"
 
             $checkScript = Join-Path $script:ScriptsChecksPath 'check-script-standards.ps1'
             if (Test-Path $checkScript) {
-                $null = pwsh -NoProfile -File $checkScript -Path $script:TempRoot 2>&1
+                $null = pwsh -NoProfile -Command "Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue; & '$checkScript' -Path '$script:TempRoot'" 2>&1
                 $LASTEXITCODE | Should -Be 0
             }
             else {

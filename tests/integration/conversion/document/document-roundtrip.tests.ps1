@@ -20,7 +20,7 @@ Describe 'Document Roundtrip Conversion Tests' {
     Context 'Cross-format document roundtrip conversions' {
         It 'Markdown -> HTML -> Markdown roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -46,7 +46,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'DOCX -> Markdown -> DOCX roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -63,7 +63,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'EPUB -> Markdown -> EPUB roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -80,7 +80,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'ODT -> DOCX -> ODT roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -97,7 +97,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'Textile -> Markdown -> Textile roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -114,7 +114,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'LaTeX -> Markdown -> LaTeX roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -131,7 +131,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'RST -> Markdown -> RST roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -148,7 +148,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'AsciiDoc -> Markdown -> AsciiDoc roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -165,7 +165,7 @@ Describe 'Document Roundtrip Conversion Tests' {
 
         It 'Org-mode -> Markdown -> Org-mode roundtrip' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {

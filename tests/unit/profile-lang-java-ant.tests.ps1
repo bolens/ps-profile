@@ -3,39 +3,28 @@
 # Unit tests for Build-Ant function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-java.ps1')
+    . (Join-Path $script:ProfileDir 'lang-java-build.ps1')
 }
 
 Describe 'lang-java.ps1 - Build-Ant' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('ant', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('ant', [ref]$null)
-        }
+        Set-TestCommandAvailabilityState -CommandName 'ant' -Available $false
+        Remove-Item -Path 'Function:\ant' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:ant' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
         It 'Returns null when ant is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'ant' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'ant' } -MockWith { return $null }
-
             $result = Build-Ant -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,57 +33,31 @@ Describe 'lang-java.ps1 - Build-Ant' {
 
     Context 'Tool available' {
         It 'Calls ant without arguments' {
-            Setup-AvailableCommandMock -CommandName 'ant'
+            Setup-CapturingCommandMock -CommandName 'ant' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'ant' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            $result = Build-Ant -ErrorAction SilentlyContinue
 
-            $result = Build-Ant
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'Build complete'
         }
 
         It 'Calls ant with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'ant'
+            Setup-CapturingCommandMock -CommandName 'ant' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'ant' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            Build-Ant 'clean', 'build' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Build-Ant -Arguments @('clean', 'build')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'clean'
-            $script:capturedArgs | Should -Contain 'build'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'clean'
+            $args | Should -Contain 'build'
         }
     }
 
     Context 'Error handling' {
         It 'Handles ant execution errors' {
-            Setup-AvailableCommandMock -CommandName 'ant'
+            Set-TestCommandThrowingMock -CommandName 'ant' -Message 'ant: command failed'
 
-            Mock -CommandName 'ant' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('ant: command failed')
-            }
-            Mock Write-Error { }
-
-            try {
-                $result = Build-Ant -ErrorAction SilentlyContinue
-            }
-            catch {
-                # Exception may propagate in test environment
-            }
-
-            $result | Should -BeNullOrEmpty
+            { Build-Ant -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

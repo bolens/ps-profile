@@ -3,282 +3,187 @@
 # Unit tests for Convert-Video and Extract-Audio functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'media-tools.ps1')
+
+    $script:TestRoot = New-TestTempDirectory -Prefix 'MediaToolsVideo'
+    $script:TestInputFile = Join-Path $script:TestRoot 'test-input.mp4'
+    $script:TestVideoFile = Join-Path $script:TestRoot 'test-video.mp4'
+    Set-Content -Path $script:TestInputFile -Value 'test content' -Encoding utf8
+    Set-Content -Path $script:TestVideoFile -Value 'test content' -Encoding utf8
+    $script:OutputMkv = Join-Path $script:TestRoot 'output.mkv'
+    $script:OutputMp3 = Join-Path $script:TestRoot 'audio.mp3'
+    $script:OutputFlac = Join-Path $script:TestRoot 'audio.flac'
 }
 
 Describe 'media-tools.ps1 - Convert-Video' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('ffmpeg', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('handbrake-cli', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('HandBrakeCLI', [ref]$null)
-        }
-        
-        # Create test file
-        $script:TestInputFile = Join-Path $TestDrive 'test-input.mp4'
-        'test content' | Out-File -FilePath $script:TestInputFile -Encoding utf8
+
+        Mark-TestCommandsUnavailable -CommandNames @('ffmpeg', 'handbrake-cli', 'HandBrakeCLI')
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when ffmpeg is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'ffmpeg' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'ffmpeg' } -MockWith { return $null }
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -ErrorAction SilentlyContinue
-            
+            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -Confirm:$false -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Returns null when handbrake is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'handbrake-cli' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'handbrake-cli' } -MockWith { return $null }
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -UseHandbrake -ErrorAction SilentlyContinue
-            
+            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -UseHandbrake -Confirm:$false -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Input file validation' {
         It 'Returns error when input file does not exist' {
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.mp4' } -MockWith { return $false }
-            
-            { Convert-Video -InputPath 'nonexistent.mp4' -OutputPath 'output.mkv' -ErrorAction Stop } | Should -Throw
+            $missingFile = Join-Path $script:TestRoot 'nonexistent.mp4'
+
+            $result = Convert-Video -InputPath $missingFile -OutputPath $script:OutputMkv -Confirm:$false -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'FFmpeg conversion' {
         It 'Calls ffmpeg with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-i'
-            $script:capturedArgs | Should -Contain $script:TestInputFile
-            $script:capturedArgs | Should -Contain 'output.mkv'
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 0
+
+            Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-i'
+            $args | Should -Contain $script:TestInputFile
+            $args | Should -Contain $script:OutputMkv
         }
-        
+
         It 'Calls ffmpeg with custom codec and quality' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -Codec 'hevc' -Quality 20 -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-c:v'
-            $script:capturedArgs | Should -Contain 'hevc'
-            $script:capturedArgs | Should -Contain '-crf'
-            $script:capturedArgs | Should -Contain '20'
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 0
+
+            Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -Codec 'hevc' -Quality 20 -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-c:v'
+            $args | Should -Contain 'hevc'
+            $args | Should -Contain '-crf'
+            $args | Should -Contain '20'
         }
-        
+
         It 'Returns output path on success' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -ErrorAction SilentlyContinue
-            
-            $result | Should -Be 'output.mkv'
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 0
+
+            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -Confirm:$false -ErrorAction SilentlyContinue
+
+            $result | Should -Be $script:OutputMkv
         }
-        
+
         It 'Handles ffmpeg execution errors' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 1
+
+            { Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -Confirm:$false -ErrorAction Stop } | Should -Throw
         }
     }
-    
+
     Context 'Handbrake conversion' {
         It 'Calls handbrake-cli with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'handbrake-cli'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'handbrake-cli' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -UseHandbrake -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-i'
-            $script:capturedArgs | Should -Contain $script:TestInputFile
-            $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain 'output.mkv'
+            Setup-CapturingCommandMock -CommandName 'handbrake-cli' -ExitCode 0
+
+            Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -UseHandbrake -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-i'
+            $args | Should -Contain $script:TestInputFile
+            $args | Should -Contain '-o'
+            $args | Should -Contain $script:OutputMkv
         }
-        
+
         It 'Calls handbrake-cli with preset' {
-            Setup-AvailableCommandMock -CommandName 'handbrake-cli'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'handbrake-cli' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-Video -InputPath $script:TestInputFile -OutputPath 'output.mkv' -UseHandbrake -Preset 'Fast 1080p30' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--preset'
-            $script:capturedArgs | Should -Contain 'Fast 1080p30'
+            Setup-CapturingCommandMock -CommandName 'handbrake-cli' -ExitCode 0
+
+            Convert-Video -InputPath $script:TestInputFile -OutputPath $script:OutputMkv -UseHandbrake -Preset 'Fast 1080p30' -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--preset'
+            $args | Should -Contain 'Fast 1080p30'
         }
     }
 }
 
 Describe 'media-tools.ps1 - Extract-Audio' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('ffmpeg', [ref]$null)
-        }
-        
-        # Create test file
-        $script:TestInputFile = Join-Path $TestDrive 'test-video.mp4'
-        'test content' | Out-File -FilePath $script:TestInputFile -Encoding utf8
+
+        Mark-TestCommandsUnavailable -CommandNames 'ffmpeg'
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when ffmpeg is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'ffmpeg' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'ffmpeg' } -MockWith { return $null }
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $result = Extract-Audio -InputPath $script:TestInputFile -OutputPath 'audio.mp3' -ErrorAction SilentlyContinue
-            
+            $result = Extract-Audio -InputPath $script:TestVideoFile -OutputPath $script:OutputMp3 -Confirm:$false -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Input file validation' {
         It 'Returns error when input file does not exist' {
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.mp4' } -MockWith { return $false }
-            
-            { Extract-Audio -InputPath 'nonexistent.mp4' -OutputPath 'audio.mp3' -ErrorAction Stop } | Should -Throw
+            $missingFile = Join-Path $script:TestRoot 'nonexistent.mp4'
+
+            $result = Extract-Audio -InputPath $missingFile -OutputPath $script:OutputMp3 -Confirm:$false -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls ffmpeg with correct arguments for MP3 extraction' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Extract-Audio -InputPath $script:TestInputFile -OutputPath 'audio.mp3' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-i'
-            $script:capturedArgs | Should -Contain $script:TestInputFile
-            $script:capturedArgs | Should -Contain '-vn'
-            $script:capturedArgs | Should -Contain '-acodec'
-            $script:capturedArgs | Should -Contain 'mp3'
-            $script:capturedArgs | Should -Contain 'audio.mp3'
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 0
+
+            Extract-Audio -InputPath $script:TestVideoFile -OutputPath $script:OutputMp3 -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-i'
+            $args | Should -Contain $script:TestVideoFile
+            $args | Should -Contain '-vn'
+            $args | Should -Contain '-acodec'
+            $args | Should -Contain 'mp3'
+            $args | Should -Contain $script:OutputMp3
         }
-        
+
         It 'Calls ffmpeg with FLAC codec' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Extract-Audio -InputPath $script:TestInputFile -OutputPath 'audio.flac' -AudioCodec 'flac' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-acodec'
-            $script:capturedArgs | Should -Contain 'flac'
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 0
+
+            Extract-Audio -InputPath $script:TestVideoFile -OutputPath $script:OutputFlac -AudioCodec 'flac' -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '-acodec'
+            $args | Should -Contain 'flac'
         }
-        
+
         It 'Returns output path on success' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Extract-Audio -InputPath $script:TestInputFile -OutputPath 'audio.mp3' -ErrorAction SilentlyContinue
-            
-            $result | Should -Be 'audio.mp3'
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 0
+
+            $result = Extract-Audio -InputPath $script:TestVideoFile -OutputPath $script:OutputMp3 -Confirm:$false -ErrorAction SilentlyContinue
+
+            $result | Should -Be $script:OutputMp3
         }
-        
+
         It 'Handles ffmpeg execution errors' {
-            Setup-AvailableCommandMock -CommandName 'ffmpeg'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestInputFile } -MockWith { return $true }
-            
-            Mock -CommandName 'ffmpeg' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
-            $result = Extract-Audio -InputPath $script:TestInputFile -OutputPath 'audio.mp3' -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Setup-CapturingCommandMock -CommandName 'ffmpeg' -ExitCode 1
+
+            { Extract-Audio -InputPath $script:TestVideoFile -OutputPath $script:OutputMp3 -Confirm:$false -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

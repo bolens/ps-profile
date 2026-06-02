@@ -54,5 +54,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'mojo-update' -Target 'Update-MojoSelf'
 }
 else {
-    Write-MissingToolWarning -Tool 'mojo' -InstallHint 'Install with: Follow instructions at https://www.modular.com/mojo'
+    Invoke-MissingToolWarning -ToolName 'mojo' -Tool 'mojo'
 }

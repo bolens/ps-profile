@@ -71,7 +71,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'kotlin' -DefaultInstallCommand 'scoop install kotlin' -Tool 'kotlinc'
+            Invoke-MissingToolWarning -ToolName 'kotlin' -ToolType 'java-build-tool' -Tool 'kotlinc'
             return $null
         }
 
@@ -151,7 +151,7 @@ try {
             else {
                 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             }
-            Invoke-MissingToolWarning -ToolName 'scala' -DefaultInstallCommand 'scoop install scala' -Tool 'scalac'
+            Invoke-MissingToolWarning -ToolName 'scala' -ToolType 'java-build-tool' -Tool 'scalac'
             return $null
         }
 

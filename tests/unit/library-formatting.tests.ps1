@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:FormattingPath = Join-Path $script:LibPath 'core' 'Formatting.psm1'
@@ -16,11 +15,9 @@ AfterAll {
 Describe 'Formatting Module Functions' {
     Context 'Format-DateWithFallback' {
         BeforeEach {
-            # Ensure Format-LocaleDate is not available by default for these tests
             $script:originalFormatLocaleDate = Get-Command Format-LocaleDate -ErrorAction SilentlyContinue
-            if ($script:originalFormatLocaleDate) {
-                Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
-            }
+            Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path Function:\Format-LocaleDate -Force -ErrorAction SilentlyContinue
         }
         
         AfterEach {
@@ -35,6 +32,8 @@ Describe 'Formatting Module Functions' {
         }
         
         It 'Formats date with standard formatting when Format-LocaleDate is not available' {
+            Get-Command Format-LocaleDate -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+
             $date = Get-Date '2024-01-15 14:30:00'
             $result = Format-DateWithFallback -Date $date -Format 'yyyy-MM-dd HH:mm:ss'
             $result | Should -Be '2024-01-15 14:30:00'

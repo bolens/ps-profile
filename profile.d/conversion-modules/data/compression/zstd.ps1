@@ -12,7 +12,7 @@
 .NOTES
     This is an internal initialization function and should not be called directly.
     Requires zstd command-line tool to be installed and available in PATH.
-    Install zstd: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)
+    Install hint resolved via Get-ConversionToolMissingMessage -ToolName zstd.
 #>
 function Initialize-FileConversion-CoreCompressionZstd {
     # Zstd compress
@@ -27,7 +27,7 @@ function Initialize-FileConversion-CoreCompressionZstd {
             # Check if zstd command is available (Get-Command finds it regardless of extension)
             $zstdCmd = Test-CachedCommand 'zstd'
             if (-not $zstdCmd) {
-                throw "zstd command is not available. Install zstd: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'zstd')
             }
             
             if (-not $OutputPath) {
@@ -67,7 +67,7 @@ function Initialize-FileConversion-CoreCompressionZstd {
             # Check if zstd command is available (Get-Command finds it regardless of extension)
             $zstdCmd = Test-CachedCommand 'zstd'
             if (-not $zstdCmd) {
-                throw "zstd command is not available. Install zstd: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'zstd')
             }
             
             if (-not $OutputPath) {
@@ -124,10 +124,7 @@ function Initialize-FileConversion-CoreCompressionZstd {
     
     Compresses data.txt with compression level 10.
 .NOTES
-    Requires zstd command-line tool:
-    - Windows: scoop install zstd
-    - Linux: apt install zstd (or equivalent)
-    - macOS: brew install zstd
+    Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd).
 .OUTPUTS
     System.String
     Returns the path to the compressed file.
@@ -161,10 +158,7 @@ Set-Alias -Name zstd -Value Compress-Zstd -Scope Global -ErrorAction SilentlyCon
     
     Decompresses data.txt.zst to data.txt.
 .NOTES
-    Requires zstd command-line tool:
-    - Windows: scoop install zstd
-    - Linux: apt install zstd (or equivalent)
-    - macOS: brew install zstd
+    Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd).
 .OUTPUTS
     System.String
     Returns the path to the decompressed file.

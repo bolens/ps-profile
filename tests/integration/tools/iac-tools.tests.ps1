@@ -52,6 +52,12 @@ Describe 'iac-tools.ps1 - Function Registration' {
 }
 
 Describe 'iac-tools.ps1 - Graceful Degradation' {
+    BeforeEach {
+        foreach ($cmd in @('terragrunt', 'tofu', 'terraform', 'pulumi')) {
+            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        }
+    }
+
     It 'Invoke-Terragrunt handles missing tool gracefully' {
         { Invoke-Terragrunt plan -ErrorAction SilentlyContinue } | Should -Not -Throw
     }

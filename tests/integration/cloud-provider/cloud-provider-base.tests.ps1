@@ -1,4 +1,4 @@
-﻿# ===============================================
+# ===============================================
 # cloud-provider-base.tests.ps1
 # Integration tests for CloudProviderBase.ps1
 # ===============================================
@@ -48,31 +48,13 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
                 Clear-EventCollection | Out-Null
             }
             
-            # Mock command execution
-            Mock -CommandName '&' -MockWith {
-                param($CommandName)
+            # Stub command (Pester cannot mock the call operator)
+            Mock-CommandAvailabilityPester -CommandName 'test-cloud-cmd' -Available $true
+
+            function test-cloud-cmd {
                 $script:LASTEXITCODE = 0
                 return '{"test":"value"}'
-            } -ParameterFilter { $CommandName -eq 'test-cloud-cmd' }
-            
-            # Mock Test-CachedCommand
-            Mock -CommandName 'Test-CachedCommand' -MockWith {
-                param($CommandName)
-                return $CommandName -eq 'test-cloud-cmd'
             }
-            
-            # Create a temporary command for testing
-            <#
-            .SYNOPSIS
-                Performs operations related to test-cloud-cmd.
-            
-            .DESCRIPTION
-                Performs operations related to test-cloud-cmd.
-            
-            .OUTPUTS
-                object
-            #>
-            function test-cloud-cmd { & 'test-cloud-cmd' @args }
             
             $result = Invoke-CloudCommand -CommandName 'test-cloud-cmd' -Arguments @('test', 'arg')
             
@@ -89,7 +71,7 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
     Context 'Provider-Specific Usage Patterns' {
         It 'Supports AWS-style service/action pattern' {
             # Verifies Get-CloudResources handles missing aws CLI without throwing
-            Mock -CommandName Test-CachedCommand -MockWith { $false } -ParameterFilter { $CommandName -eq 'aws' }
+            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
             $result = Get-CloudResources -CommandName 'aws' -Service 's3' -Action 'list-buckets' -ErrorAction SilentlyContinue
             # When aws is not available, result should be null/empty (graceful degradation)
             $result | Should -BeNullOrEmpty
@@ -97,7 +79,7 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
         
         It 'Supports Azure-style direct arguments pattern' {
             # Verifies Get-CloudResources handles missing az CLI without throwing
-            Mock -CommandName Test-CachedCommand -MockWith { $false } -ParameterFilter { $CommandName -eq 'az' }
+            Mock-CommandAvailabilityPester -CommandName 'az' -Available $false
             $result = Get-CloudResources -CommandName 'az' -Arguments @('account', 'show') -ErrorAction SilentlyContinue
             # When az is not available, result should be null/empty (graceful degradation)
             $result | Should -BeNullOrEmpty
@@ -145,11 +127,12 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
             }
             
             try {
-                # Mock command
-                Mock -CommandName 'Test-CachedCommand' -MockWith { return $true }
-                Mock -CommandName '&' -MockWith { return 'test output' } -ParameterFilter { $CommandName -eq 'test-cmd' }
-                
-                function test-cmd { & 'test-cmd' @args }
+                Mock-CommandAvailabilityPester -CommandName 'test-cmd' -Available $true
+
+                function test-cmd {
+                    $script:LASTEXITCODE = 0
+                    return 'test output'
+                }
                 
                 $result = Invoke-CloudCommand -CommandName 'test-cmd' -Arguments @('test') -ErrorAction SilentlyContinue
                 

@@ -90,10 +90,10 @@ function Save-TestConfig {
             $config | ConvertTo-Json -Depth 10 | Set-Content -Path $ConfigPath -Encoding UTF8
         }
 
-        Write-ScriptMessage -Message "Configuration saved to: $ConfigPath"
+        $null = Write-ScriptMessage -Message "Configuration saved to: $ConfigPath"
     }
     catch {
-        Write-ScriptMessage -Message "Failed to save configuration: $($_.Exception.Message)" -LogLevel 'Error'
+        $null = Write-ScriptMessage -Message "Failed to save configuration: $($_.Exception.Message)" -LogLevel 'Error'
         throw
     }
 }
@@ -131,23 +131,27 @@ function Load-TestConfig {
             $config = Read-JsonFile -Path $ConfigPath
         }
         else {
-            $config = $configContent | ConvertFrom-Json | ConvertTo-Hashtable
+            $config = $configContent | ConvertFrom-Json
         }
+
+        $config = ConvertTo-Hashtable -InputObject $config
 
         # Convert back to proper types
         $parameters = @{}
-        foreach ($key in $config.Keys) {
-            $value = $config[$key]
+        if ($null -ne $config) {
+            foreach ($key in $config.Keys) {
+                $value = $config[$key]
             
-            # Convert boolean back to switch if needed (handled in parameter binding)
-            $parameters[$key] = $value
+                # Convert boolean back to switch if needed (handled in parameter binding)
+                $parameters[$key] = $value
+            }
         }
 
-        Write-ScriptMessage -Message "Configuration loaded from: $ConfigPath"
+        $null = Write-ScriptMessage -Message "Configuration loaded from: $ConfigPath"
         return $parameters
     }
     catch {
-        Write-ScriptMessage -Message "Failed to load configuration: $($_.Exception.Message)" -LogLevel 'Error'
+        $null = Write-ScriptMessage -Message "Failed to load configuration: $($_.Exception.Message)" -LogLevel 'Error'
         throw
     }
 }

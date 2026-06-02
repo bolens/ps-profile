@@ -68,16 +68,12 @@ function ConvertTo-FileMetricsArray {
     param([object]$InputList)
     
     if ($null -eq $InputList) {
-        $empty = [object[]]@()
-        Write-Output -NoEnumerate $empty
-        return
+        return [object[]]::new(0)
     }
     
     if ($InputList -is [System.Collections.IList]) {
         if ($InputList.Count -eq 0) {
-            $empty = [object[]]@()
-            Write-Output -NoEnumerate $empty
-            return
+            return [object[]]::new(0)
         }
         $result = [object[]]::new($InputList.Count)
         for ($i = 0; $i -lt $InputList.Count; $i++) {

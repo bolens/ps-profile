@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     
@@ -24,7 +23,7 @@ BeforeAll {
     Import-Module $script:MetricsSnapshotPath -DisableNameChecking -ErrorAction Stop -Force
     
     # Create test directory
-    $script:TestDir = Join-Path $env:TEMP "test-metrics-snapshot-$(Get-Random)"
+    $script:TestDir = New-TestTempDirectory -Prefix 'MetricsSnapshotTests'
     New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
 }
 

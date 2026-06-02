@@ -32,7 +32,7 @@ Describe 'MessagePack and CBOR Conversion Tests' {
     Context 'MessagePack and CBOR Conversions' {
         It 'ConvertTo-CborFromMessagePack converts MessagePack to CBOR' {
             Get-Command ConvertTo-CborFromMessagePack -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -42,7 +42,7 @@ Describe 'MessagePack and CBOR Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack') -or -not (Test-NpmPackageAvailable -PackageName 'cbor')) {
-                Set-ItResult -Skipped -Because "Required packages not installed. Install with: pnpm add -g @msgpack/msgpack cbor"
+                Set-ItResult -Skipped -Because (Get-TestNodePackageSkipMessage -PackageNames @('@msgpack/msgpack','cbor') -Context 'Required packages not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -60,7 +60,7 @@ Describe 'MessagePack and CBOR Conversion Tests' {
 
         It 'ConvertTo-MessagePackFromCbor converts CBOR to MessagePack' {
             Get-Command ConvertTo-MessagePackFromCbor -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -70,7 +70,7 @@ Describe 'MessagePack and CBOR Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack') -or -not (Test-NpmPackageAvailable -PackageName 'cbor')) {
-                Set-ItResult -Skipped -Because "Required packages not installed. Install with: pnpm add -g @msgpack/msgpack cbor"
+                Set-ItResult -Skipped -Because (Get-TestNodePackageSkipMessage -PackageNames @('@msgpack/msgpack','cbor') -Context 'Required packages not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -111,7 +111,7 @@ Describe 'MessagePack and CBOR Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match '(@msgpack/msgpack|cbor).*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match '(@msgpack/msgpack|cbor)') {
-                    $installCommand = 'pnpm add -g @msgpack/msgpack cbor'
+                    $installCommand = Resolve-TestNodePackageInstallCommand -PackageNames @('@msgpack/msgpack', 'cbor')
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))

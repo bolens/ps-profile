@@ -212,10 +212,10 @@ function Get-TestFilesForSourceFiles {
 
         # Strategy 1: Look for test file with same name in tests directory
         $possibleTestPaths = @(
-            Join-Path $testsDir 'unit' "$sourceName.tests.ps1",
-            Join-Path $testsDir 'integration' "$sourceName.tests.ps1",
-            Join-Path $testsDir 'performance' "$sourceName.tests.ps1",
-            Join-Path $testsDir "$sourceName.tests.ps1"
+            (Join-Path (Join-Path $testsDir 'unit') "$sourceName.tests.ps1"),
+            (Join-Path (Join-Path $testsDir 'integration') "$sourceName.tests.ps1"),
+            (Join-Path (Join-Path $testsDir 'performance') "$sourceName.tests.ps1"),
+            (Join-Path $testsDir "$sourceName.tests.ps1")
         )
 
         foreach ($testPath in $possibleTestPaths) {
@@ -231,8 +231,8 @@ function Get-TestFilesForSourceFiles {
             $testRelativePath = $relativePath -replace '\.ps1$', '.tests.ps1'
             
             $possibleTestPaths = @(
-                Join-Path $testsDir 'integration' $testRelativePath,
-                Join-Path $testsDir 'unit' $testRelativePath
+                (Join-Path (Join-Path $testsDir 'integration') $testRelativePath),
+                (Join-Path (Join-Path $testsDir 'unit') $testRelativePath)
             )
 
             foreach ($testPath in $possibleTestPaths) {
@@ -249,8 +249,8 @@ function Get-TestFilesForSourceFiles {
             $testRelativePath = $relativePath -replace '\.ps1$', '.tests.ps1'
             
             $possibleTestPaths = @(
-                Join-Path $testsDir 'unit' $testRelativePath,
-                Join-Path $testsDir 'integration' $testRelativePath
+                (Join-Path (Join-Path $testsDir 'unit') $testRelativePath),
+                (Join-Path (Join-Path $testsDir 'integration') $testRelativePath)
             )
 
             foreach ($testPath in $possibleTestPaths) {
@@ -267,7 +267,7 @@ function Get-TestFilesForSourceFiles {
         }
     }
 
-    return $testFiles | Select-Object -Unique | Sort-Object
+    return @($testFiles | Select-Object -Unique | Sort-Object)
 }
 
 Export-ModuleMember -Function @(

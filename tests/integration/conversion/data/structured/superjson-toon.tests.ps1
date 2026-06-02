@@ -22,7 +22,7 @@ Describe 'SuperJSON to/from TOON Conversion Tests' {
         It 'ConvertFrom-SuperJsonToToon converts SuperJSON to TOON' {
             Get-Command ConvertFrom-SuperJsonToToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -33,7 +33,7 @@ Describe 'SuperJSON to/from TOON Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -49,7 +49,7 @@ Describe 'SuperJSON to/from TOON Conversion Tests' {
         It 'ConvertTo-SuperJsonFromToon converts TOON to SuperJSON' {
             Get-Command ConvertTo-SuperJsonFromToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -60,7 +60,7 @@ Describe 'SuperJSON to/from TOON Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $toon = "name `"test`"`nvalue 123"
@@ -73,7 +73,7 @@ Describe 'SuperJSON to/from TOON Conversion Tests' {
             Get-Command ConvertFrom-SuperJsonToToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-SuperJsonFromToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -84,7 +84,7 @@ Describe 'SuperJSON to/from TOON Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'

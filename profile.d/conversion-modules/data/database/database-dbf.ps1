@@ -79,7 +79,7 @@ try:
         json.dump(result, f, indent=2, default=str, ensure_ascii=False)
 except ImportError as e:
     if 'dbfread' in str(e) or 'dbf' in str(e):
-        print('Error: dbfread or dbf package is not installed. Install with: uv pip install dbfread', file=sys.stderr)
+        print('Error: dbfread or dbf package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
@@ -88,6 +88,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "dbf-decode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'dbf', 'dbfread' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -165,10 +166,10 @@ try:
         else:
             raise ValueError("No data to write")
     except ImportError:
-        raise ImportError("dbf package is required for writing DBF files. Install with: uv pip install dbf")
+        raise ImportError("dbf package is required for writing DBF files. Install with: __PYTHON_INSTALL_CMD__")
 except ImportError as e:
     if 'dbf' in str(e):
-        print('Error: dbf package is not installed. Install with: uv pip install dbf', file=sys.stderr)
+        print('Error: dbf package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
@@ -177,6 +178,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "dbf-encode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'dbf', 'dbfread' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -248,7 +250,7 @@ try:
             raise ImportError("Neither dbfread nor dbf package is available")
 except ImportError as e:
     if 'dbfread' in str(e) or 'dbf' in str(e):
-        print('Error: dbfread or dbf package is not installed. Install with: uv pip install dbfread', file=sys.stderr)
+        print('Error: dbfread or dbf package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
@@ -257,6 +259,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "dbf-to-csv-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'dbf', 'dbfread' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1

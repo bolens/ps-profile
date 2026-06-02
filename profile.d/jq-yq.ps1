@@ -47,7 +47,7 @@ function Convert-JqToJson {
         jq -c . $File
     }
     else {
-        Write-MissingToolWarning -Tool 'jq' -InstallHint 'Install with: scoop install jq'
+        Invoke-MissingToolWarning -ToolName 'jq'
     }
 }
 
@@ -79,7 +79,7 @@ function Convert-YqToJson {
         yq eval -o=json $File
     }
     else {
-        Write-MissingToolWarning -Tool 'yq' -InstallHint 'Install with: scoop install yq'
+        Invoke-MissingToolWarning -ToolName 'yq'
     }
 }
 

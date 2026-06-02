@@ -102,5 +102,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'maven-remove' -Target 'Remove-MavenDependency'
 }
 else {
-    Write-MissingToolWarning -Tool 'mvn' -InstallHint 'Install Maven from: https://maven.apache.org/download.cgi or use: scoop install maven'
+    Invoke-MissingToolWarning -ToolName 'maven' -ToolType 'java-build-tool' -Tool 'mvn'
 }

@@ -35,7 +35,6 @@ Describe 'Developer Tools Integration Tests' {
             }
             . $bootstrapPath
             
-            # Load dev-tools modules BEFORE dot-sourcing files.ps1 so initialization functions are available
             Ensure-DevToolsModulesLoaded -ProfileDir $script:ProfileDir
             
             $filesPath = Join-Path $script:ProfileDir 'files.ps1'
@@ -85,7 +84,7 @@ Describe 'Developer Tools Integration Tests' {
 
         It 'Encode-Jwt requires Node.js' {
             Get-Command Encode-Jwt -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -127,7 +126,7 @@ Describe 'Developer Tools Integration Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match 'jsonwebtoken.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'jsonwebtoken') {
-                    $installCommand = 'pnpm add -g jsonwebtoken'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'jsonwebtoken' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))
@@ -336,9 +335,7 @@ Describe 'Developer Tools Integration Tests' {
 
     Context 'Error handling' {
         It 'Handles invalid JWT token gracefully' {
-            # JWT decoder writes errors but doesn't throw by default
-            $result = Decode-Jwt -Token "invalid" -ErrorAction SilentlyContinue 2>&1
-            $result | Should -Not -BeNullOrEmpty
+            { Decode-Jwt -Token 'invalid' -ErrorAction Stop } | Should -Throw '*JWT*'
         }
 
         It 'Handles invalid regex pattern gracefully' {
@@ -348,9 +345,7 @@ Describe 'Developer Tools Integration Tests' {
         }
 
         It 'Handles invalid number base conversion gracefully' {
-            # Number base converter writes errors but doesn't throw by default
-            $result = Convert-NumberBase -Number "invalid" -FromBase Decimal -ToBase Hexadecimal -ErrorAction SilentlyContinue 2>&1
-            $result | Should -Not -BeNullOrEmpty
+            { Convert-NumberBase -Number 'invalid' -FromBase Decimal -ToBase Hexadecimal -ErrorAction Stop } | Should -Throw
         }
     }
 }

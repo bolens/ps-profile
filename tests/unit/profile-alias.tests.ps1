@@ -1,6 +1,6 @@
-
 Describe 'Alias helper' {
     BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
         # Resolve bootstrap path directly
         $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
         $script:BootstrapPath = Join-Path $repoRoot 'profile.d\bootstrap.ps1'
@@ -401,27 +401,25 @@ Describe 'Alias helper' {
 
         It 'Register-ToolWrapper wrapper shows warning when command not found' {
             . $script:BootstrapPath
+            if (Get-Command Clear-MissingToolWarnings -ErrorAction SilentlyContinue) {
+                Clear-MissingToolWarnings | Out-Null
+            }
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+
             $funcName = "test_wrapper_warn_$(Get-Random)"
             $nonexistentCmd = "NonexistentCommand_$(Get-Random)"
             $result = Register-ToolWrapper -FunctionName $funcName -CommandName $nonexistentCmd -InstallHint 'Install with: test'
             $result | Should -Be $true
-            
-            # Execute the wrapper - should show warning
-            # Capture warnings by redirecting warning stream
-            $warningPreference = $WarningPreference
-            $WarningPreference = 'Continue'
-            try {
-                $output = & $funcName 3>&1 2>&1
-                # Check if any output contains the command name (warnings are in the output)
-                $hasWarning = $output | Where-Object { 
-                    $_.ToString() -match [regex]::Escape($nonexistentCmd)
-                }
-                $hasWarning | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                $WarningPreference = $warningPreference
-            }
-            
+
+            & $funcName | Out-Null
+
+            $hasWarning = @($global:CollectedMissingToolWarnings | Where-Object {
+                    $_.Normalized -eq $nonexistentCmd -or $_.Tool -eq $nonexistentCmd
+                })
+            $hasWarning | Should -Not -BeNullOrEmpty
+
             # Cleanup
             Remove-Item "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
         }
@@ -455,25 +453,38 @@ Describe 'Alias helper' {
 
         It 'Register-ToolWrapper wrapper uses default warning when no hint or message' {
             . $script:BootstrapPath
+            if (Get-Command Clear-MissingToolWarnings -ErrorAction SilentlyContinue) {
+                Clear-MissingToolWarnings | Out-Null
+            }
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+
             $funcName = "test_wrapper_default_$(Get-Random)"
             $nonexistentCmd = "NonexistentCommand_$(Get-Random)"
             $result = Register-ToolWrapper -FunctionName $funcName -CommandName $nonexistentCmd
             $result | Should -Be $true
-            
-            # Execute the wrapper - should show default warning
-            $warningPreference = $WarningPreference
-            $WarningPreference = 'Continue'
-            try {
-                $output = & $funcName 3>&1 2>&1
-                # Check if output contains the command name
-                $hasWarning = $output | Where-Object { 
-                    $_.ToString() -match [regex]::Escape($nonexistentCmd)
+
+            & $funcName | Out-Null
+
+            $hasWarning = @($global:CollectedMissingToolWarnings | Where-Object {
+                    $_.Normalized -eq $nonexistentCmd -or $_.Tool -eq $nonexistentCmd
+                })
+            if ($hasWarning.Count -eq 0) {
+                $warningPreference = $WarningPreference
+                $WarningPreference = 'Continue'
+                try {
+                    $output = & $funcName 3>&1 2>&1
+                    $hasWarning = @($output | Where-Object {
+                            $_.ToString() -match [regex]::Escape($nonexistentCmd)
+                        })
                 }
-                $hasWarning | Should -Not -BeNullOrEmpty
+                finally {
+                    $WarningPreference = $warningPreference
+                }
             }
-            finally {
-                $WarningPreference = $warningPreference
-            }
+
+            $hasWarning | Should -Not -BeNullOrEmpty
             
             # Cleanup
             Remove-Item "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
@@ -603,15 +614,10 @@ Describe 'Alias helper' {
 
 Describe 'Documentation Generation' {
     BeforeAll {
-        # Resolve scripts utils docs path directly
-        $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-        $script:ScriptsUtilsDocsPath = Join-Path $repoRoot 'scripts\utils\docs'
-        if (-not (Test-Path $script:ScriptsUtilsDocsPath)) {
-            throw "Scripts utils docs path not found: $script:ScriptsUtilsDocsPath"
-        }
-
-        # Cache compiled regex for comment parsing
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+        $script:ScriptsUtilsDocsPath = Get-TestPath -RelativePath 'scripts\utils\docs' -StartPath $PSScriptRoot -EnsureExists
         $script:CommentBlockRegex = [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $script:TestTempRoot = New-TestTempDirectory -Prefix 'ProfileAliasDocs'
     }
 
     Context 'Comment parsing' {
@@ -634,14 +640,14 @@ function Test-Function {
 }
 '@
 
-            $tempFile = Join-Path $TestDrive 'test_function.ps1'
+            $tempFile = Join-Path $script:TestTempRoot 'test_function.ps1'
             Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
 
             # Test that the script can parse the function
             $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
             $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 
-            $functionAsts.Count | Should -Be 1
+            @($functionAsts).Count | Should -Be 1
             $functionAsts[0].Name | Should -Be 'Test-Function'
         }
 
@@ -658,13 +664,13 @@ function Test-Function {
 function Simple-Function { }
 '@
 
-            $tempFile = Join-Path $TestDrive 'simple_function.ps1'
+            $tempFile = Join-Path $script:TestTempRoot 'simple_function.ps1'
             Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
 
             $ast = [System.Management.Automation.Language.Parser]::ParseFile($tempFile, [ref]$null, [ref]$null)
             $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 
-            $functionAsts.Count | Should -Be 1
+            @($functionAsts).Count | Should -Be 1
             $functionAsts[0].Name | Should -Be 'Simple-Function'
         }
 
@@ -679,7 +685,7 @@ function Simple-Function { }
 function Test-Synopsis { }
 '@
 
-            $tempFile = Join-Path $TestDrive 'test_synopsis.ps1'
+            $tempFile = Join-Path $script:TestTempRoot 'test_synopsis.ps1'
             Set-Content -Path $tempFile -Value $testFunction -Encoding UTF8
 
             $content = Get-Content $tempFile -Raw
@@ -703,7 +709,7 @@ function Test-Synopsis { }
 
     Context 'File generation' {
         It 'creates markdown files with correct structure' {
-            $tempDir = Join-Path $TestDrive 'docs_test'
+            $tempDir = Join-Path $script:TestTempRoot 'docs_test'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
             # Create a test profile.d directory with a test function
@@ -731,19 +737,20 @@ function Test-Function {
 
             # Run the documentation generator with custom profile path
             $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
-            $result = & $scriptPath -OutputPath $tempDir 2>&1
+            $outputPath = Join-Path $tempDir 'api'
+            & $scriptPath -OutputPath $outputPath -ProfilePath $testProfileDir 2>&1 | Out-Null
 
-            # The script should run without throwing an exception
-            $result | Should -Not -BeNullOrEmpty
+            Test-Path (Join-Path $outputPath 'functions') | Should -Be $true
+            Test-Path (Join-Path $outputPath 'aliases') | Should -Be $true
         }
 
         It 'generates index with functions and aliases sections' {
-            $tempDir = Join-Path $TestDrive 'docs_index'
+            $tempDir = Join-Path $script:TestTempRoot 'docs_index'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
             $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
             $outputPath = Join-Path $tempDir 'api'
-            $result = & $scriptPath -OutputPath $outputPath 2>&1
+            & $scriptPath -OutputPath $outputPath 2>&1 | Out-Null
 
             $readmePath = Join-Path $outputPath 'README.md'
             if (Test-Path $readmePath) {

@@ -21,7 +21,7 @@
 # ===============================================
 # Write to a log file immediately to track where profile execution stops
 # This works even if console output is blocked or profile hangs
-$profileLogFile = Join-Path $env:TEMP "powershell-profile-load.log"
+$profileLogFile = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
 try {
     $logEntry = "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Profile execution started"
     $logEntry | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
@@ -31,12 +31,44 @@ catch {
 }
 
 # ===============================================
+# PROFILE REPOSITORY ROOT RESOLUTION
+# ===============================================
+# Supports normal startup, dot-sourcing from tests, and PS_PROFILE_REPO_ROOT override.
+function script:Get-ProfileRepositoryDirectory {
+    if ($script:ProfileRepositoryDirectory) {
+        return $script:ProfileRepositoryDirectory
+    }
+
+    $resolved = $null
+    if (-not [string]::IsNullOrWhiteSpace($env:PS_PROFILE_REPO_ROOT)) {
+        $resolved = $env:PS_PROFILE_REPO_ROOT.Trim()
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        $resolved = $PSScriptRoot
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace($PSCommandPath)) {
+        $resolved = Split-Path -Parent $PSCommandPath
+    }
+
+    if ($resolved -and -not [string]::IsNullOrWhiteSpace($resolved)) {
+        try {
+            $script:ProfileRepositoryDirectory = (Resolve-Path -LiteralPath $resolved).Path
+        }
+        catch {
+            $script:ProfileRepositoryDirectory = $resolved
+        }
+    }
+
+    return $script:ProfileRepositoryDirectory
+}
+
+# ===============================================
 # LOAD .ENV FILES FIRST (BEFORE DEBUG CHECKS)
 # ===============================================
 # Load .env files BEFORE checking debug level so that PS_PROFILE_DEBUG from .env is available
 # This ensures debug output works on initial startup when PS_PROFILE_DEBUG is set in .env
-if (-not [string]::IsNullOrWhiteSpace($PSCommandPath)) {
-    $profileDir = Split-Path -Parent $PSCommandPath
+$profileDir = Get-ProfileRepositoryDirectory
+if (-not [string]::IsNullOrWhiteSpace($profileDir)) {
     $profileEnvFilesModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileEnvFiles.psm1'
     if ($profileEnvFilesModule -and -not [string]::IsNullOrWhiteSpace($profileEnvFilesModule) -and (Test-Path -LiteralPath $profileEnvFilesModule)) {
         try {
@@ -230,7 +262,11 @@ try {
         }
         catch { }
         
-        $interceptScriptPath = Join-Path (Split-Path -Parent $PSCommandPath) 'scripts' 'utils' 'debug' 'intercept-testpath.ps1'
+        $interceptProfileRoot = Get-ProfileRepositoryDirectory
+        if ([string]::IsNullOrWhiteSpace($interceptProfileRoot) -and -not [string]::IsNullOrWhiteSpace($PSCommandPath)) {
+            $interceptProfileRoot = Split-Path -Parent $PSCommandPath
+        }
+        $interceptScriptPath = Join-Path $interceptProfileRoot 'scripts' 'utils' 'debug' 'intercept-testpath.ps1'
         
         try {
             "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff')] Intercept script path: $interceptScriptPath" | Out-File -FilePath $profileLogFile -Append -Encoding UTF8 -ErrorAction SilentlyContinue
@@ -307,7 +343,9 @@ try {
     }
     catch { }
     
-    $profileDir = Split-Path -Parent $PSCommandPath
+    if (-not $profileDir) {
+        $profileDir = Get-ProfileRepositoryDirectory
+    }
     $profileVersionModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileVersion.psm1'
     
     try {
@@ -440,7 +478,7 @@ catch {
 # Import CommonEnums before any module that uses FileSystemPathType or other enums
 # This ensures types are available at parse time for modules like Validation
 if (-not $profileDir) {
-    $profileDir = Split-Path -Parent $PSCommandPath
+    $profileDir = Get-ProfileRepositoryDirectory
 }
 $commonEnumsModule = Join-Path $profileDir 'scripts' 'lib' 'core' 'CommonEnums.psm1'
 if ($commonEnumsModule -and -not [string]::IsNullOrWhiteSpace($commonEnumsModule) -and (Test-Path -LiteralPath $commonEnumsModule)) {
@@ -470,7 +508,7 @@ if ($commonEnumsModule -and -not [string]::IsNullOrWhiteSpace($commonEnumsModule
 # Dynamically detect and configure Scoop package manager if installed
 # Uses ProfileScoop module for detection and configuration
 if (-not $profileDir) {
-    $profileDir = Split-Path -Parent $PSCommandPath
+    $profileDir = Get-ProfileRepositoryDirectory
 }
 $profileScoopModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileScoop.psm1'
 if ($profileScoopModule -and -not [string]::IsNullOrWhiteSpace($profileScoopModule) -and (Test-Path -LiteralPath $profileScoopModule)) {
@@ -492,7 +530,7 @@ if ($profileScoopModule -and -not [string]::IsNullOrWhiteSpace($profileScoopModu
 # ===============================================
 # Initialize timing tracking for performance profiling (only when debug mode enabled)
 if (-not $profileDir) {
-    $profileDir = Split-Path -Parent $PSCommandPath
+    $profileDir = Get-ProfileRepositoryDirectory
 }
 $profileFragmentTimingModule = Join-Path $profileDir 'scripts' 'lib' 'profile' 'ProfileFragmentTiming.psm1'
 if ($profileFragmentTimingModule -and -not [string]::IsNullOrWhiteSpace($profileFragmentTimingModule) -and (Test-Path -LiteralPath $profileFragmentTimingModule)) {
@@ -544,7 +582,7 @@ $profileD = Join-Path $profileDir 'profile.d'
 # Cache module paths to avoid repeated Join-Path operations
 # Initialize $profileDir if not already set (reuse from Scoop section if available)
 if (-not $profileDir) {
-    $profileDir = Split-Path -Parent $PSCommandPath
+    $profileDir = Get-ProfileRepositoryDirectory
 }
 $scriptsLibDir = Join-Path $profileDir 'scripts' 'lib'
 $fragmentLibDir = Join-Path $scriptsLibDir 'fragment'

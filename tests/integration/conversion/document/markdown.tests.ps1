@@ -32,7 +32,7 @@ Describe 'Markdown Document Conversion Tests' {
     Context 'Markdown conversion utilities' {
         It 'ConvertFrom-DocxToMarkdown converts DOCX to Markdown' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -80,7 +80,7 @@ Describe 'Markdown Document Conversion Tests' {
 
         It 'ConvertFrom-TextileToMarkdown converts Textile to Markdown' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -136,7 +136,7 @@ This is a *bold* and _italic_ text.
 
         It 'ConvertFrom-Fb2ToMarkdown converts FB2 to Markdown' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -182,7 +182,7 @@ This is a *bold* and _italic_ text.
 
         It 'Textile conversion functions handle .tx extension' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -209,7 +209,7 @@ This is a *bold* and _italic_ text.
 
         It 'Textile conversion functions handle custom output path' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {

@@ -21,7 +21,7 @@ Describe 'BSON to YAML Conversion Tests' {
     Context 'BSON to YAML Conversions' {
         It 'ConvertFrom-BsonToYaml converts BSON to YAML' {
             Get-Command ConvertFrom-BsonToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -35,7 +35,7 @@ Describe 'BSON to YAML Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'bson')) {
-                Set-ItResult -Skipped -Because "bson package not installed. Install with: pnpm add -g bson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'bson' -ToolType 'node-package' -Context 'bson package not installed')
                 return
             }
             $json = '{"name":"test","value":123}'

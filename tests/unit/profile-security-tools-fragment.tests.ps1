@@ -3,24 +3,21 @@
 # Unit tests for fragment loading, registration, and requirements
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:SecurityToolsPath = Join-Path $script:ProfileDir 'security-tools.ps1'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . $script:SecurityToolsPath
 
-    # Create test directories
-    if (Get-Variable -Name TestDrive -ErrorAction SilentlyContinue) {
-        $script:TestRepoPath = Join-Path $TestDrive 'TestRepo'
-        $script:TestFile = Join-Path $TestDrive 'test-file.txt'
-        $script:TestRulesPath = Join-Path $TestDrive 'test-rules.yar'
+    $script:TestWorkDir = New-TestTempDirectory -Prefix 'SecurityToolsFragment'
+    $script:TestRepoPath = Join-Path $script:TestWorkDir 'TestRepo'
+    $script:TestFile = Join-Path $script:TestWorkDir 'test-file.txt'
+    $script:TestRulesPath = Join-Path $script:TestWorkDir 'test-rules.yar'
 
-        New-Item -ItemType Directory -Path $script:TestRepoPath -Force | Out-Null
-        Set-Content -Path $script:TestFile -Value 'Test content'
-        Set-Content -Path $script:TestRulesPath -Value 'rule TestRule { condition: true }'
-    }
+    New-Item -ItemType Directory -Path $script:TestRepoPath -Force | Out-Null
+    Set-Content -Path $script:TestFile -Value 'Test content'
+    Set-Content -Path $script:TestRulesPath -Value 'rule TestRule { condition: true }'
 }
 
 Describe 'security-tools.ps1 - Fragment Loading and Registration' {
@@ -85,7 +82,7 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
             if (Test-Path -LiteralPath $script:SecurityToolsPath) {
                 . $script:SecurityToolsPath
             }
-            # Functions should still be available after a second load
+
             Get-Command Invoke-GitLeaksScan -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -104,39 +101,43 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
             if (Test-Path -LiteralPath $script:SecurityToolsPath) {
                 . $script:SecurityToolsPath
             }
+
             $alias = Get-Alias gitleaks-scan -ErrorAction SilentlyContinue
             $alias | Should -Not -BeNullOrEmpty
             $alias.ResolvedCommandName | Should -Be 'Invoke-GitLeaksScan'
         }
 
         It 'Calls Test-FragmentLoaded when the helper is available' {
-            function Test-FragmentLoaded {
+            $script:TestFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
+            $originalTestFragmentLoaded = Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue
+
+            function global:Test-FragmentLoaded {
                 param([string]$FragmentName)
+                $null = $script:TestFragmentLoadedCalls.Add($FragmentName)
                 return $true
             }
 
-            Mock Get-Command -ParameterFilter { $Name -eq 'Test-FragmentLoaded' } -MockWith {
-                return @{ Name = 'Test-FragmentLoaded' }
-            }
-            Mock Test-FragmentLoaded -MockWith {
-                param([string]$FragmentName)
-                return $true
-            }
+            try {
+                if (Test-Path -LiteralPath $script:SecurityToolsPath) {
+                    Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
+                    . $script:SecurityToolsPath
+                }
 
-            if (Test-Path -LiteralPath $script:SecurityToolsPath) {
-                Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
-                . $script:SecurityToolsPath
+                $script:TestFragmentLoadedCalls.Count | Should -Be 1
+                $script:TestFragmentLoadedCalls[0] | Should -Be 'security-tools'
             }
-
-            Should -Invoke Test-FragmentLoaded -Times 1 -ParameterFilter { $FragmentName -eq 'security-tools' }
+            finally {
+                Remove-Item Function:\Test-FragmentLoaded -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Test-FragmentLoaded -Force -ErrorAction SilentlyContinue
+                if ($originalTestFragmentLoaded) {
+                    Set-Item -Path Function:\global:Test-FragmentLoaded -Value $originalTestFragmentLoaded.ScriptBlock -Force
+                }
+            }
         }
 
         It 'Still loads all functions when Test-FragmentLoaded is not available' {
             Remove-Item -Path 'Function:\Test-FragmentLoaded' -Force -ErrorAction SilentlyContinue
-
-            Mock Get-Command -ParameterFilter { $Name -eq 'Test-FragmentLoaded' } -MockWith {
-                return $null
-            }
+            Remove-Item -Path 'Function:\global:Test-FragmentLoaded' -Force -ErrorAction SilentlyContinue
 
             if (Test-Path -LiteralPath $script:SecurityToolsPath) {
                 Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
@@ -149,48 +150,49 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
 
     Context 'Requirements Loading' {
         It 'Calls Set-FragmentLoaded when fragment loads successfully' {
-            function Set-FragmentLoaded {
+            $script:SetFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
+            $originalSetFragmentLoaded = Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue
+
+            function global:Set-FragmentLoaded {
                 param([string]$FragmentName)
+                $null = $script:SetFragmentLoadedCalls.Add($FragmentName)
             }
 
-            Mock Get-Command -ParameterFilter { $Name -eq 'Set-FragmentLoaded' } -MockWith {
-                return @{ Name = 'Set-FragmentLoaded' }
-            }
-            Mock Set-FragmentLoaded -MockWith {
-                param([string]$FragmentName)
-            }
+            Remove-Item -Path 'Function:\Test-FragmentLoaded' -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path 'Function:\global:Test-FragmentLoaded' -Force -ErrorAction SilentlyContinue
 
-            if (Test-Path -LiteralPath $script:SecurityToolsPath) {
-                Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
-                . $script:SecurityToolsPath
-            }
+            try {
+                if (Test-Path -LiteralPath $script:SecurityToolsPath) {
+                    Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
+                    . $script:SecurityToolsPath
+                }
 
-            Should -Invoke Set-FragmentLoaded -Times 1 -ParameterFilter { $FragmentName -eq 'security-tools' }
+                $script:SetFragmentLoadedCalls | Should -Contain 'security-tools'
+            }
+            finally {
+                Remove-Item Function:\Set-FragmentLoaded -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Set-FragmentLoaded -Force -ErrorAction SilentlyContinue
+                if ($originalSetFragmentLoaded) {
+                    Set-Item -Path Function:\global:Set-FragmentLoaded -Value $originalSetFragmentLoaded.ScriptBlock -Force
+                }
+            }
         }
 
         It 'Calls Write-ProfileError when a fragment error occurs' {
-            function Write-ProfileError {
+            $script:WriteProfileErrorCallCount = 0
+            $originalWriteProfileError = Get-Command Write-ProfileError -ErrorAction SilentlyContinue
+
+            function global:Write-ProfileError {
                 param(
                     [Parameter(Mandatory)]
                     [System.Management.Automation.ErrorRecord]$ErrorRecord,
                     [string]$Context,
                     [string]$Category
                 )
+                $script:WriteProfileErrorCallCount++
             }
 
-            Mock Get-Command -ParameterFilter { $Name -eq 'Write-ProfileError' } -MockWith {
-                return @{ Name = 'Write-ProfileError' }
-            }
-            Mock Write-ProfileError -MockWith {
-                param(
-                    [Parameter(Mandatory)]
-                    [System.Management.Automation.ErrorRecord]$ErrorRecord,
-                    [string]$Context,
-                    [string]$Category
-                )
-            }
-
-            $tempFragment = Join-Path $TestDrive 'temp-security-tools.ps1'
+            $tempFragment = Join-Path $script:TestWorkDir 'temp-security-tools.ps1'
             $fragmentContent = @'
 try {
     throw "Test error"
@@ -206,16 +208,34 @@ catch {
 '@
             Set-Content -Path $tempFragment -Value $fragmentContent
 
-            . $tempFragment -ErrorAction SilentlyContinue
+            try {
+                . $tempFragment -ErrorAction SilentlyContinue
 
-            Should -Invoke Write-ProfileError -Times 1
+                $script:WriteProfileErrorCallCount | Should -Be 1
+            }
+            finally {
+                Remove-Item Function:\Write-ProfileError -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-ProfileError -Force -ErrorAction SilentlyContinue
+                if ($originalWriteProfileError) {
+                    Set-Item -Path Function:\global:Write-ProfileError -Value $originalWriteProfileError.ScriptBlock -Force
+                }
+            }
         }
 
         It 'Falls back to Write-Warning when Write-ProfileError is not available' {
-            Mock Write-Warning { }
-            Mock Get-Command { return $null } -ParameterFilter { $Name -eq 'Write-ProfileError' }
+            $script:CapturedWarnings = [System.Collections.Generic.List[string]]::new()
 
-            $tempFragment = Join-Path $TestDrive 'temp-security-tools-warn.ps1'
+            Remove-Item -Path 'Function:\Write-ProfileError' -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path 'Function:\global:Write-ProfileError' -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path 'Function:\Write-Warning' -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path 'Function:\global:Write-Warning' -Force -ErrorAction SilentlyContinue
+
+            function global:Write-Warning {
+                param([string]$Message)
+                $null = $script:CapturedWarnings.Add($Message)
+            }
+
+            $tempFragment = Join-Path $script:TestWorkDir 'temp-security-tools-warn.ps1'
             $fragmentContent = @'
 try {
     throw "Test error"
@@ -231,9 +251,15 @@ catch {
 '@
             Set-Content -Path $tempFragment -Value $fragmentContent
 
-            . $tempFragment -ErrorAction SilentlyContinue
+            try {
+                . $tempFragment -ErrorAction SilentlyContinue
 
-            Should -Invoke Write-Warning -Times 1 -ParameterFilter { $Message -like '*Failed to load security-tools fragment*' }
+                @($script:CapturedWarnings | Where-Object { $_ -like '*Failed to load security-tools fragment*' }).Count | Should -Be 1
+            }
+            finally {
+                Remove-Item Function:\Write-Warning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-Warning -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 }

@@ -200,6 +200,24 @@ try {
             }
         }
 
+        # Load EmbeddedInstallHints (depends on InstallHintResolver)
+        $embeddedInstallHintsPath = Join-Path $bootstrapModulesDir 'EmbeddedInstallHints.ps1'
+        if ($embeddedInstallHintsPath -and -not [string]::IsNullOrWhiteSpace($embeddedInstallHintsPath) -and (Test-Path -LiteralPath $embeddedInstallHintsPath)) {
+            try {
+                . $embeddedInstallHintsPath
+            }
+            catch {
+                if ($env:PS_PROFILE_DEBUG) {
+                    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                        Write-ProfileError -ErrorRecord $_ -Context "Fragment: bootstrap (EmbeddedInstallHints.ps1)" -Category 'Fragment'
+                    }
+                    else {
+                        Write-Warning "Failed to load bootstrap module EmbeddedInstallHints.ps1 : $($_.Exception.Message)"
+                    }
+                }
+            }
+        }
+
         # Load BatchLoadingSummary (depends on global state)
         $batchLoadingSummaryPath = Join-Path $bootstrapModulesDir 'BatchLoadingSummary.ps1'
         if ($batchLoadingSummaryPath -and -not [string]::IsNullOrWhiteSpace($batchLoadingSummaryPath) -and (Test-Path -LiteralPath $batchLoadingSummaryPath)) {

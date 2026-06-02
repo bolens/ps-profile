@@ -45,7 +45,6 @@ Describe 'Advanced Development Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'ollama' } -MockWith { $null }
             # Mock ollama command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'ollama' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'ollama' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'ollama.ps1')
         }
 
@@ -63,10 +62,9 @@ Describe 'Advanced Development Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('ollama', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'ollama' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'ollama' } -MockWith { $false }
             $output = ol --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'ollama not found'
-            $output | Should -Match 'scoop install ollama'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'ollama not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ollama'
         }
 
         It 'Creates Get-OllamaModelList function' {
@@ -103,7 +101,6 @@ Describe 'Advanced Development Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'ngrok' } -MockWith { $null }
             # Mock ngrok command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'ngrok' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'ngrok' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'ngrok.ps1')
         }
 
@@ -121,10 +118,9 @@ Describe 'Advanced Development Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('ngrok', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'ngrok' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'ngrok' } -MockWith { $false }
             $output = ngrok version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'ngrok not found'
-            $output | Should -Match 'scoop install ngrok'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'ngrok not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ngrok'
         }
 
         It 'Creates Start-NgrokHttpTunnel function' {
@@ -152,7 +148,6 @@ Describe 'Advanced Development Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'firebase' } -MockWith { $null }
             # Mock firebase command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'firebase' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'firebase' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'firebase.ps1')
         }
 
@@ -170,10 +165,9 @@ Describe 'Advanced Development Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('firebase', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'firebase' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'firebase' } -MockWith { $false }
             $output = fb --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'firebase not found'
-            $output | Should -Match 'scoop install firebase-tools'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'firebase not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'firebase-tools'
         }
 
         It 'Creates Publish-FirebaseDeployment function' {
@@ -298,7 +292,6 @@ Describe 'Advanced Development Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'tailscale' } -MockWith { $null }
             # Mock tailscale command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'tailscale' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'tailscale' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'tailscale.ps1')
         }
 
@@ -316,10 +309,9 @@ Describe 'Advanced Development Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('tailscale', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'tailscale' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'tailscale' } -MockWith { $false }
             $output = tailscale status 2>&1 3>&1 | Out-String
-            $output | Should -Match 'tailscale not found'
-            $output | Should -Match 'scoop install tailscale'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'tailscale not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'tailscale'
         }
 
         It 'Creates Connect-TailscaleNetwork function' {

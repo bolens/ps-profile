@@ -82,13 +82,14 @@ try:
     with open(sys.argv[2], 'w') as f:
         json.dump(json_data, f, indent=2)
 except ImportError:
-    print('Error: ion-python package is not installed. Install with: uv pip install ion-python', file=sys.stderr)
+    print('Error: ion-python package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
                     $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "ion-to-json-$(Get-Random).py"
+                    $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'ion-python' -Global
                     Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
                     try {
                         $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -103,7 +104,8 @@ except Exception as e:
                 }
             }
             
-            throw "Python is not available. Install Python and ion-python package (uv pip install ion-python) to use Ion conversions."
+            $installCmd = Get-PythonPackageInstallRecommendation -PackageNames 'ion-python' -Global
+            throw "Python is not available. Install Python and ion-python package ($installCmd) to use Ion conversions."
         }
         catch {
             Write-Error "Failed to convert Ion to JSON: $_"
@@ -160,13 +162,14 @@ try:
         else:
             simpleion.dump(ion_data, f, binary=False)
 except ImportError:
-    print('Error: ion-python package is not installed. Install with: uv pip install ion-python', file=sys.stderr)
+    print('Error: ion-python package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
                     $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json-to-ion-$(Get-Random).py"
+                    $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'ion-python' -Global
                     Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
                     try {
                         $result = & $pythonCmd $tempScript $InputPath $OutputPath $binaryFlag 2>&1
@@ -181,7 +184,8 @@ except Exception as e:
                 }
             }
             
-            throw "Python is not available. Install Python and ion-python package (uv pip install ion-python) to use Ion conversions."
+            $installCmd = Get-PythonPackageInstallRecommendation -PackageNames 'ion-python' -Global
+            throw "Python is not available. Install Python and ion-python package ($installCmd) to use Ion conversions."
         }
         catch {
             Write-Error "Failed to convert JSON to Ion: $_"

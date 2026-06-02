@@ -39,7 +39,11 @@ function Enable-Aliases {
             Set-Item -Path Function:\global:Get-ChildItemEnhancedAll -Value { param([Parameter(ValueFromRemainingArguments = $true)] $a) Get-ChildItem -Force @a } -Force | Out-Null
             Set-Alias -Name la -Value Get-ChildItemEnhancedAll -Scope Global -ErrorAction SilentlyContinue
             # Show PATH entries as an array
-            Set-Item -Path Function:\global:Show-Path -Value { $env:Path -split ';' | Where-Object { $_ } } -Force | Out-Null
+            Set-Item -Path Function:\global:Show-Path -Value {
+                $pathValue = if ($null -ne $env:PATH) { $env:PATH } else { $env:Path }
+                $pathSeparator = [System.IO.Path]::PathSeparator
+                @($pathValue -split $pathSeparator | Where-Object { $_ })
+            } -Force | Out-Null
             Set-Variable -Name 'AliasesLoaded' -Value $true -Scope Global -Force
         }
     }

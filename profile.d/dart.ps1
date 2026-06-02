@@ -95,7 +95,7 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'dart-remove' -Target 'Remove-DartPackage'
 }
 else {
-    Invoke-MissingToolWarning -ToolName 'dart' -ToolType 'dart-package' -DefaultInstallCommand 'Install Dart from: https://dart.dev/get-dart or use: scoop install dart-sdk'
+    Invoke-MissingToolWarning -ToolName 'dart' -ToolType 'dart-package'
 }
 
 # Flutter-specific helpers (if flutter is available but dart is not)
@@ -186,5 +186,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'flutter-remove' -Target 'Remove-FlutterPackage'
 }
 else {
-    Invoke-MissingToolWarning -ToolName 'flutter' -ToolType 'dart-package' -DefaultInstallCommand 'Install Flutter from: https://flutter.dev/docs/get-started/install or use: scoop install flutter'
+    Invoke-MissingToolWarning -ToolName 'flutter' -ToolType 'dart-package'
 }

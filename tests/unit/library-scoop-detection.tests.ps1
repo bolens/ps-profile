@@ -5,9 +5,8 @@ tests/unit/library-scoop-detection.tests.ps1
     Unit tests for ScoopDetection.psm1 module functions.
 #>
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     # Import the ScoopDetection module
     $scoopDetectionPath = Get-TestPath -RelativePath 'scripts\lib\runtime\ScoopDetection.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $scoopDetectionPath -DisableNameChecking -ErrorAction Stop

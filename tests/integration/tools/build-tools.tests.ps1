@@ -55,7 +55,6 @@ Describe 'Build Tools Integration Tests' {
             Mock-CommandAvailabilityPester -CommandName 'serve' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'http-server' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -in @('turbo', 'esbuild', 'rollup', 'serve', 'http-server', 'npx') } -MockWith { $false }
             . $buildToolsPath
         }
 
@@ -74,11 +73,9 @@ Describe 'Build Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'turbo' -Available $false -Scope It
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'turbo' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
             $output = turbo --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'turbo or npx not found'
-            $output | Should -Match 'npm install -g turbo or npm install -g npm'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'turbo or npx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('turbo', 'nodejs') -ToolType 'node-package'
         }
 
         It 'Creates Invoke-Esbuild function' {

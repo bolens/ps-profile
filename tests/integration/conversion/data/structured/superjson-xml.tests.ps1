@@ -33,7 +33,7 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
         It 'ConvertFrom-SuperJsonToXml converts SuperJSON to XML' {
             Get-Command ConvertFrom-SuperJsonToXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -44,7 +44,7 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -60,7 +60,7 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
         It 'ConvertTo-SuperJsonFromXml converts XML to SuperJSON' {
             Get-Command ConvertTo-SuperJsonFromXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -71,7 +71,7 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $xml = '<root><item name="test" value="123"/></root>'
@@ -84,7 +84,7 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
             Get-Command ConvertFrom-SuperJsonToXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-SuperJsonFromXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -95,7 +95,7 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $originalXml = '<root><item name="test" value="123"/></root>'
@@ -144,7 +144,7 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
                 $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
                 
                 if ($errorMessage -match 'superjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'superjson') {
-                    $installCommand = 'pnpm add -g superjson'
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'superjson' -ToolType 'node-package'
                     if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
                         Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
                         $errorMessage | Should -Match ([regex]::Escape($installCommand))

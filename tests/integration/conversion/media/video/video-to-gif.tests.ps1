@@ -21,7 +21,7 @@ Describe 'Video to GIF Conversion Tests' {
     Context 'Video conversion utilities' {
         It 'ConvertFrom-VideoToGif converts video to GIF' {
             # Skip if ffmpeg not available
-            $ffmpeg = Test-ToolAvailable -ToolName 'ffmpeg' -InstallCommand 'scoop install ffmpeg' -Silent
+            $ffmpeg = Test-ToolAvailable -ToolName 'ffmpeg' -Silent
             if (-not $ffmpeg.Available) {
                 $skipMessage = "ffmpeg command not available"
                 if ($ffmpeg.InstallCommand) {

@@ -5,9 +5,8 @@ tests/unit/library-fragment-config.tests.ps1
     Unit tests for FragmentConfig.psm1 module functions.
 #>
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     # Import PathResolution first (FragmentConfig depends on it)
     $pathResolutionModulePath = Get-TestPath -RelativePath 'scripts\lib\path\PathResolution.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $pathResolutionModulePath -DisableNameChecking -ErrorAction Stop

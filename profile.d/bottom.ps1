@@ -43,5 +43,5 @@ if ($bottomCmd) {
     Set-Alias -Name monitor -Value $bottomCmd -Option AllScope -Force
 }
 else {
-    Write-MissingToolWarning -Tool 'bottom' -Message 'bottom (btm) not found. Install with: scoop install bottom'
+    Invoke-MissingToolWarning -ToolName 'bottom' -Tool 'bottom (btm)'
 }

@@ -90,12 +90,6 @@ try {
         }
 
         if (-not $tool) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'vscode'
             return
         }
@@ -103,7 +97,7 @@ try {
         if (-not (Test-Path -LiteralPath $Path)) {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
-                        [System.IO.PathNotFoundException]::new("Path not found: $Path"),
+                        [System.IO.FileNotFoundException]::new("Path not found: $Path"),
                         'PathNotFound',
                         [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                         $Path
@@ -202,12 +196,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'cursor')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'cursor'
             return
         }
@@ -215,7 +203,7 @@ try {
         if (-not (Test-Path -LiteralPath $Path)) {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
-                        [System.IO.PathNotFoundException]::new("Path not found: $Path"),
+                        [System.IO.FileNotFoundException]::new("Path not found: $Path"),
                         'PathNotFound',
                         [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                         $Path
@@ -322,12 +310,6 @@ try {
         }
 
         if (-not $tool) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'neovim-nightly'
             return
         }
@@ -386,12 +368,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'emacs')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'emacs'
             return
         }
@@ -462,12 +438,6 @@ try {
         }
 
         if (-not $tool) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'lapce-nightly'
             return
         }
@@ -531,12 +501,6 @@ try {
         }
 
         if (-not $tool) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'zed-nightly'
             return
         }
@@ -618,7 +582,7 @@ try {
             }
         }
         
-        return $editors
+        return , @($editors)
     }
 
     # Register functions

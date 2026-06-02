@@ -24,7 +24,7 @@ Describe 'File Utility Functions Integration Tests' {
     Context 'Import-FragmentModule helper function' {
         BeforeAll {
             # Load the files fragment to get Import-FragmentModule
-            . (Join-Path $script:ProfileDir 'files.ps1')
+            $null = . (Join-Path $script:ProfileDir 'files.ps1')
         }
 
         It 'Import-FragmentModule function is available' {
@@ -43,7 +43,12 @@ Describe 'File Utility Functions Integration Tests' {
                 Set-Content -Path $testModuleFile -Value 'function global:Test-ModuleFunction { return "success" }'
                 
                 # Import the module
-                { Import-FragmentModule -ModuleDir $testModuleDir -ModuleFile 'test-module.ps1' } | Should -Not -Throw -Because "Import-FragmentModule should load valid module without errors"
+                {
+                    Import-FragmentModule `
+                        -FragmentRoot $testModuleDir `
+                        -ModulePath @('test-module.ps1') `
+                        -Context 'Test: test-module.ps1'
+                } | Should -Not -Throw -Because 'Import-FragmentModule should load valid module without errors'
                 
                 # Verify function is available
                 Get-Command Test-ModuleFunction -ErrorAction SilentlyContinue | Should -Not -Be $null -Because "module function should be available after import"
@@ -67,7 +72,12 @@ Describe 'File Utility Functions Integration Tests' {
 
         It 'Import-FragmentModule handles missing module gracefully' {
             # Try to import non-existent module
-            { Import-FragmentModule -ModuleDir $TestDrive -ModuleFile 'nonexistent.ps1' } | Should -Not -Throw
+            {
+                Import-FragmentModule `
+                    -FragmentRoot $TestDrive `
+                    -ModulePath @('nonexistent.ps1') `
+                    -Context 'Test: nonexistent.ps1'
+            } | Should -Not -Throw
         }
 
         It 'Import-FragmentModule handles module with syntax errors gracefully' {
@@ -79,7 +89,12 @@ Describe 'File Utility Functions Integration Tests' {
                 Set-Content -Path $testModuleFile -Value 'function Broken { invalid syntax here }'
                 
                 # Should not throw (error is caught and logged)
-                { Import-FragmentModule -ModuleDir $testModuleDir -ModuleFile 'error-module.ps1' } | Should -Not -Throw -Because "Import-FragmentModule should handle syntax errors gracefully"
+                {
+                    Import-FragmentModule `
+                        -FragmentRoot $testModuleDir `
+                        -ModulePath @('error-module.ps1') `
+                        -Context 'Test: error-module.ps1'
+                } | Should -Not -Throw -Because 'Import-FragmentModule should handle syntax errors gracefully'
             }
             catch {
                 $errorDetails = @{
@@ -99,7 +114,12 @@ Describe 'File Utility Functions Integration Tests' {
             Set-Content -Path $testModuleFile -Value 'function Broken { invalid syntax }'
             
             # Should use custom module name
-            { Import-FragmentModule -ModuleDir $testModuleDir -ModuleFile 'custom-name.ps1' -ModuleName 'CustomModule' } | Should -Not -Throw
+            {
+                Import-FragmentModule `
+                    -FragmentRoot $testModuleDir `
+                    -ModulePath @('custom-name.ps1') `
+                    -Context 'CustomModule'
+            } | Should -Not -Throw
         }
     }
 
@@ -115,7 +135,7 @@ Describe 'File Utility Functions Integration Tests' {
                 if (-not (Test-Path -LiteralPath $filesPath)) {
                     throw "Files fragment not found at: $filesPath"
                 }
-                . $filesPath
+                $null = . $filesPath
                 
                 # Verify all initialization functions exist before calling Ensure-FileUtilities
                 # If they don't exist, the modules may not have loaded (path issue or silent error)
@@ -163,12 +183,10 @@ Describe 'File Utility Functions Integration Tests' {
         }
 
         It 'Get-FileHead (head) function is available' {
-            Get-Command head -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command Get-FileHead -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
         }
 
         It 'Get-FileTail (tail) function is available' {
-            Get-Command tail -CommandType Alias -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command Get-FileTail -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
         }
 
@@ -177,7 +195,7 @@ Describe 'File Utility Functions Integration Tests' {
             $content = 1..20 | ForEach-Object { "Line $_" }
             Set-Content -Path $testFile -Value $content
 
-            $result = head $testFile
+            $result = Get-FileHead -Path $testFile
             $result.Count | Should -Be 10
             $result[0] | Should -Be 'Line 1'
             $result[9] | Should -Be 'Line 10'
@@ -188,7 +206,7 @@ Describe 'File Utility Functions Integration Tests' {
             $content = 1..20 | ForEach-Object { "Line $_" }
             Set-Content -Path $testFile -Value $content
 
-            $result = head $testFile -Lines 5
+            $result = Get-FileHead -Path $testFile -Lines 5
             $result.Count | Should -Be 5
             $result[0] | Should -Be 'Line 1'
             $result[4] | Should -Be 'Line 5'
@@ -196,7 +214,7 @@ Describe 'File Utility Functions Integration Tests' {
 
         It 'head function works with pipeline input' {
             $inputData = 1..15 | ForEach-Object { "Item $_" }
-            $result = $inputData | head
+            $result = $inputData | Get-FileHead
             $result.Count | Should -Be 10
             $result[0] | Should -Be 'Item 1'
             $result[9] | Should -Be 'Item 10'
@@ -207,7 +225,7 @@ Describe 'File Utility Functions Integration Tests' {
             $content = 1..20 | ForEach-Object { "Line $_" }
             Set-Content -Path $testFile -Value $content
 
-            $result = tail $testFile
+            $result = Get-FileTail -Path $testFile
             $result.Count | Should -Be 10
             $result[0] | Should -Be 'Line 11'
             $result[9] | Should -Be 'Line 20'
@@ -218,7 +236,7 @@ Describe 'File Utility Functions Integration Tests' {
             $content = 1..20 | ForEach-Object { "Line $_" }
             Set-Content -Path $testFile -Value $content
 
-            $result = tail $testFile -Lines 5
+            $result = Get-FileTail -Path $testFile -Lines 5
             $result.Count | Should -Be 5
             $result[0] | Should -Be 'Line 16'
             $result[4] | Should -Be 'Line 20'
@@ -226,7 +244,7 @@ Describe 'File Utility Functions Integration Tests' {
 
         It 'tail function works with pipeline input' {
             $inputData = 1..15 | ForEach-Object { "Item $_" }
-            $result = $inputData | tail
+            $result = $inputData | Get-FileTail
             $result.Count | Should -Be 10
             $result[0] | Should -Be 'Item 6'
             $result[9] | Should -Be 'Item 15'

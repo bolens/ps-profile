@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'NuGet Tools Integration Tests' {
     BeforeAll {
         try {
@@ -130,16 +132,40 @@ Describe 'NuGet Tools Integration Tests' {
             Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
         }
 
-        It 'NuGet fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('nuget', [ref]$null)
+    }
+}
+
+Describe 'NuGet unavailable graceful degradation' {
+    BeforeAll {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    }
+
+    It 'Functions are not created when nuget is unavailable' {
+        $installCommand = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
             }
             Mock-CommandAvailabilityPester -CommandName 'nuget' -Available $false
-            Remove-Item Function:Install-NuGetPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Restore-NuGetPackages -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-NuGetPackages -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'nuget.ps1')
-            Get-Command Install-NuGetPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            Get-Command Install-NuGetPackage -ErrorAction SilentlyContinue
         }
+        $installCommand | Should -BeNullOrEmpty
+    }
+
+    It 'Emits missing-tool warning when nuget is unavailable' {
+        $output = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'nuget' -Available $false
+            . (Join-Path $script:ProfileDir 'nuget.ps1')
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'nuget not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nuget'
     }
 }

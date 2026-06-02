@@ -3,148 +3,100 @@
 # Unit tests for Invoke-Hurl function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'api-tools.ps1')
-    
-    # Create test files
-    if (Get-Variable -Name TestDrive -ErrorAction SilentlyContinue) {
-        $script:TestHurlFile = Join-Path $TestDrive 'test.hurl'
-        Set-Content -Path $script:TestHurlFile -Value 'GET https://api.example.com/test'
-    }
+
+    $script:TestDataDir = New-TestTempDirectory -Prefix 'HurlTest'
+    $script:TestHurlFile = Join-Path $script:TestDataDir 'test.hurl'
+    Set-Content -Path $script:TestHurlFile -Value 'GET https://api.example.com/test'
 }
 
 Describe 'api-tools.ps1 - Invoke-Hurl' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('hurl', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('HURL', [ref]$null)
-        }
-        
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('hurl', [ref]$null)
-            $null = $global:AssumedAvailableCommands.TryRemove('HURL', [ref]$null)
-        }
-        
-        Remove-Item -Path "Function:\hurl" -Force -ErrorAction SilentlyContinue
+
+        Set-TestCommandAvailabilityState -CommandName 'hurl' -Available $false
+        Remove-Item -Path Function:\hurl -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Function:\global:hurl -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Alias:\hurl -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Alias:\global:hurl -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when hurl is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'hurl' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'hurl' } -MockWith { return $null }
-            
+            Set-TestCommandAvailabilityState -CommandName 'hurl' -Available $false
+
             $result = Invoke-Hurl -TestFile $script:TestHurlFile -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls hurl with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'hurl'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'hurl' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Test executed' 
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'hurl' -Output 'Test executed'
+
             $result = Invoke-Hurl -TestFile $script:TestHurlFile
-            
+
             $result | Should -Not -BeNullOrEmpty
-            Should -Invoke -CommandName 'hurl' -Times 1 -Exactly
-            $script:capturedArgs | Should -Contain $script:TestHurlFile
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain $script:TestHurlFile
         }
-        
+
         It 'Includes variable parameters when specified' {
-            Setup-AvailableCommandMock -CommandName 'hurl'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'hurl' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Test executed' 
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'hurl' -Output 'Test executed'
+
             $result = Invoke-Hurl -TestFile $script:TestHurlFile -Variable 'base_url=https://api.example.com', 'token=abc123'
-            
+
             $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '--variable'
-            $script:capturedArgs | Should -Contain 'base_url=https://api.example.com'
-            $script:capturedArgs | Should -Contain '--variable'
-            $script:capturedArgs | Should -Contain 'token=abc123'
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain '--variable'
+            $args | Should -Contain 'base_url=https://api.example.com'
+            $args | Should -Contain 'token=abc123'
         }
-        
+
         It 'Includes output parameter when specified' {
-            Setup-AvailableCommandMock -CommandName 'hurl'
-            
-            $script:capturedArgs = $null
-            $outputFile = Join-Path $TestDrive 'output.json'
-            Mock -CommandName 'hurl' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Test executed' 
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'hurl' -Output 'Test executed'
+
+            $outputFile = Join-Path (New-TestTempDirectory -Prefix 'HurlOutput') 'output.json'
             $result = Invoke-Hurl -TestFile $script:TestHurlFile -Output $outputFile
-            
+
             $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '--output'
-            $script:capturedArgs | Should -Contain $outputFile
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain '--output'
+            $args | Should -Contain $outputFile
         }
-        
+
         It 'Returns error when test file does not exist' {
             Setup-AvailableCommandMock -CommandName 'hurl'
-            Mock -CommandName 'hurl' -MockWith { return 'Test executed' }
-            
-            $result = Invoke-Hurl -TestFile 'C:\NonExistent\test.hurl' -ErrorAction SilentlyContinue
-            
+            $missingFile = Join-Path (New-TestTempDirectory -Prefix 'HurlMissingParent') 'test.hurl'
+
+            $result = Invoke-Hurl -TestFile $missingFile -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Handles pipeline input for TestFile' {
-            Setup-AvailableCommandMock -CommandName 'hurl'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'hurl' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Test executed' 
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'hurl' -Output 'Test executed'
+
             $result = $script:TestHurlFile | Invoke-Hurl
-            
+
             $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain $script:TestHurlFile
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain $script:TestHurlFile
         }
-        
+
         It 'Handles command execution errors' {
-            Setup-AvailableCommandMock -CommandName 'hurl'
-            
-            Mock -CommandName 'hurl' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('hurl failed')
-            }
-            Mock Write-Error { }
-            
-            $result = Invoke-Hurl -TestFile $script:TestHurlFile -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'hurl' -Message 'hurl failed'
+
+            { Invoke-Hurl -TestFile $script:TestHurlFile } | Should -Throw '*hurl*'
         }
     }
 }
-

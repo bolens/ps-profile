@@ -47,7 +47,8 @@ function Initialize-FileConversion-ScientificSpss {
             # Get preferred data frame library
             $libInfo = Get-DataFrameLibraryPreference -PythonCmd $pythonCmd
             if (-not $libInfo.Available) {
-                throw "Neither pandas nor polars is available. Install at least one: uv pip install pandas or uv pip install polars"
+                $installCmd = Get-PythonPackageInstallRecommendation -PackageNames 'pandas', 'polars' -PythonCmd $pythonCmd -Global
+                throw "Neither pandas nor polars is available. Install at least one: $installCmd"
             }
             $usePolars = ($libInfo.Library -eq 'polars')
             
@@ -106,7 +107,7 @@ try:
         json.dump(result, f, indent=2, default=str)
 except ImportError as e:
     if 'pyreadstat' in str(e) or 'pandas' in str(e) or 'polars' in str(e):
-        print('Error: pyreadstat and pandas/polars packages are required. Install with: uv pip install pyreadstat pandas polars', file=sys.stderr)
+        print('Error: pyreadstat and pandas/polars packages are required. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
@@ -115,6 +116,8 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "spss-decode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars', 'pyreadstat' -Global
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1
@@ -146,7 +149,8 @@ except Exception as e:
             # Get preferred data frame library
             $libInfo = Get-DataFrameLibraryPreference -PythonCmd $pythonCmd
             if (-not $libInfo.Available) {
-                throw "Neither pandas nor polars is available. Install at least one: uv pip install pandas or uv pip install polars"
+                $installCmd = Get-PythonPackageInstallRecommendation -PackageNames 'pandas', 'polars' -PythonCmd $pythonCmd -Global
+                throw "Neither pandas nor polars is available. Install at least one: $installCmd"
             }
             $usePolars = ($libInfo.Library -eq 'polars')
                 
@@ -195,10 +199,10 @@ try:
         import pyreadstat
         pyreadstat.write_sav(df, sys.argv[2])
     except ImportError:
-        raise ImportError("pyreadstat is required for writing SPSS files. Install with: uv pip install pyreadstat")
+        raise ImportError("pyreadstat is required for writing SPSS files. Install with: __PYTHON_INSTALL_CMD__")
 except ImportError as e:
     if 'pyreadstat' in str(e) or 'pandas' in str(e) or 'polars' in str(e):
-        print('Error: pyreadstat and pandas/polars packages are required. Install with: uv pip install pyreadstat pandas polars', file=sys.stderr)
+        print('Error: pyreadstat and pandas/polars packages are required. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
@@ -207,6 +211,8 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "spss-encode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars', 'pyreadstat' -Global
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1
@@ -238,7 +244,8 @@ except Exception as e:
             # Get preferred data frame library
             $libInfo = Get-DataFrameLibraryPreference -PythonCmd $pythonCmd
             if (-not $libInfo.Available) {
-                throw "Neither pandas nor polars is available. Install at least one: uv pip install pandas or uv pip install polars"
+                $installCmd = Get-PythonPackageInstallRecommendation -PackageNames 'pandas', 'polars' -PythonCmd $pythonCmd -Global
+                throw "Neither pandas nor polars is available. Install at least one: $installCmd"
             }
             $usePolars = ($libInfo.Library -eq 'polars')
             
@@ -269,7 +276,7 @@ try:
         df_pandas.to_csv(sys.argv[2], index=False)
 except ImportError as e:
     if 'pyreadstat' in str(e) or 'pandas' in str(e) or 'polars' in str(e):
-        print('Error: pyreadstat and pandas/polars packages are required. Install with: uv pip install pyreadstat pandas polars', file=sys.stderr)
+        print('Error: pyreadstat and pandas/polars packages are required. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     else:
         print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
@@ -278,6 +285,8 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "spss-to-csv-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars', 'pyreadstat' -Global
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas', 'polars' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath $usePolars 2>&1

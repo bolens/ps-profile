@@ -43,7 +43,7 @@ Describe 'LZ4 Compression Tests' {
 
         It 'LZ4 compression functions require lz4 command' {
             if (-not $script:Lz4Available) {
-                Set-ItResult -Skipped -Because "lz4 command is not available"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'lz4' -Context 'lz4 command is not available')
                 return
             }
             # Test that function exists and would require lz4
@@ -52,7 +52,7 @@ Describe 'LZ4 Compression Tests' {
 
         It 'Compress-Lz4 accepts CompressionLevel parameter' {
             if (-not $script:Lz4Available) {
-                Set-ItResult -Skipped -Because "lz4 command is not available"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'lz4' -Context 'lz4 command is not available')
                 return
             }
             $func = Get-Command Compress-Lz4 -ErrorAction SilentlyContinue

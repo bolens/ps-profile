@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     
@@ -9,7 +8,7 @@ BeforeAll {
     Import-Module $script:MetricsHistoryPath -DisableNameChecking -ErrorAction Stop -Force
     
     # Create test directory and files
-    $script:TestDir = Join-Path $env:TEMP "test-metrics-history-$(Get-Random)"
+    $script:TestDir = New-TestTempDirectory -Prefix 'MetricsHistoryTests'
     New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
     
     # Create historical snapshot files

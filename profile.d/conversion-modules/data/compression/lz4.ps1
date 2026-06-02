@@ -12,7 +12,7 @@
 .NOTES
     This is an internal initialization function and should not be called directly.
     Requires lz4 command-line tool to be installed and available in PATH.
-    Install lz4: Windows (scoop install lz4), Linux (apt install lz4), macOS (brew install lz4)
+    Install hint resolved via Get-ConversionToolMissingMessage -ToolName lz4.
 #>
 function Initialize-FileConversion-CoreCompressionLz4 {
     # LZ4 compress
@@ -27,7 +27,7 @@ function Initialize-FileConversion-CoreCompressionLz4 {
             # Check if lz4 command is available
             $lz4Cmd = Test-CachedCommand 'lz4'
             if (-not $lz4Cmd) {
-                throw "lz4 command is not available. Install lz4: Windows (scoop install lz4), Linux (apt install lz4), macOS (brew install lz4)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'lz4')
             }
             
             if (-not $OutputPath) {
@@ -65,7 +65,7 @@ function Initialize-FileConversion-CoreCompressionLz4 {
             # Check if lz4 command is available
             $lz4Cmd = Test-CachedCommand 'lz4'
             if (-not $lz4Cmd) {
-                throw "lz4 command is not available. Install lz4: Windows (scoop install lz4), Linux (apt install lz4), macOS (brew install lz4)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'lz4')
             }
             
             if (-not $OutputPath) {

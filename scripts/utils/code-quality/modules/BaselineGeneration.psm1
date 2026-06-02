@@ -118,14 +118,14 @@ function New-PerformanceBaseline {
     }
 
     if (Get-Command Write-JsonFile -ErrorAction SilentlyContinue) {
-        Write-JsonFile -Path $OutputPath -InputObject $jsonObject -Depth 10 -EnsureDirectory
+        $null = Write-JsonFile -Path $OutputPath -InputObject $jsonObject -Depth 10 -EnsureDirectory
     }
     else {
-        $jsonObject | ConvertTo-Json -Depth 10 | Out-File -FilePath $OutputPath -Encoding UTF8
+        $null = ($jsonObject | ConvertTo-Json -Depth 10 | Out-File -FilePath $OutputPath -Encoding UTF8)
     }
 
     if (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
-        Write-ScriptMessage -Message "Performance baseline saved to: $OutputPath"
+        $null = Write-ScriptMessage -Message "Performance baseline saved to: $OutputPath"
     }
 
     return $baseline

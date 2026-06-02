@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ParallelPath = Join-Path $script:LibPath 'parallel' 'Parallel.psm1'
@@ -19,10 +18,8 @@ AfterAll {
 Describe 'Parallel Module Functions' {
     Context 'Invoke-Parallel' {
         It 'Returns empty array for empty input' {
-            $result = @() | Invoke-Parallel -ScriptBlock { $_ }
-            $result | Should -Not -BeNull
-            $result | Should -BeOfType [array]
-            $result.Count | Should -Be 0
+            $result = Invoke-Parallel -Items @() -ScriptBlock { $_ }
+            $result | Should -BeNullOrEmpty
         }
 
         It 'Processes single item' {

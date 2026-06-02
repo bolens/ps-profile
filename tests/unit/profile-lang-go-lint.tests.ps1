@@ -3,13 +3,8 @@
 # Unit tests for Lint-GoProject function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'lang-go.ps1')
@@ -17,25 +12,19 @@ BeforeAll {
 
 Describe 'lang-go.ps1 - Lint-GoProject' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('golangci-lint', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('golangci-lint', [ref]$null)
-        }
+        Set-TestCommandAvailabilityState -CommandName 'golangci-lint' -Available $false
+        Remove-Item -Path 'Function:\golangci-lint' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:golangci-lint' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
         It 'Returns null when golangci-lint is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'golangci-lint' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'golangci-lint' } -MockWith { return $null }
-
             $result = Lint-GoProject -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,59 +33,31 @@ Describe 'lang-go.ps1 - Lint-GoProject' {
 
     Context 'Tool available' {
         It 'Calls golangci-lint without arguments' {
-            Setup-AvailableCommandMock -CommandName 'golangci-lint'
+            Setup-CapturingCommandMock -CommandName 'golangci-lint' -Output 'Linting complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'golangci-lint' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Linting complete' 
-            }
+            $result = Lint-GoProject -ErrorAction SilentlyContinue
 
-            $result = Lint-GoProject
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'Linting complete'
         }
 
         It 'Calls golangci-lint with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'golangci-lint'
+            Setup-CapturingCommandMock -CommandName 'golangci-lint' -Output 'Linting complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'golangci-lint' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Linting complete' 
-            }
+            Lint-GoProject '--fix', './...' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Lint-GoProject -Arguments @('--fix', './...')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '--fix'
-            $script:capturedArgs | Should -Contain './...'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--fix'
+            $args | Should -Contain './...'
         }
     }
 
     Context 'Error handling' {
         It 'Handles golangci-lint execution errors' {
-            Setup-AvailableCommandMock -CommandName 'golangci-lint'
+            Set-TestCommandThrowingMock -CommandName 'golangci-lint' -Message 'golangci-lint: command failed'
 
-            Mock -CommandName 'golangci-lint' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('golangci-lint: command failed')
-            }
-            Mock Write-Error { }
-
-            try {
-                $result = Lint-GoProject -ErrorAction SilentlyContinue
-            }
-            catch {
-                # Exception may propagate in test environment
-            }
-
-            $result | Should -BeNullOrEmpty
-            # Write-Error may or may not be called depending on how PowerShell handles the exception
-            # The important thing is that the function handles the error gracefully
+            { Lint-GoProject -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

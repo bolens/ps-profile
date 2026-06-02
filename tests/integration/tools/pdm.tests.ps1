@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'PDM Tools Integration Tests' {
     BeforeAll {
         try {
@@ -148,16 +150,35 @@ Describe 'PDM Tools Integration Tests' {
             Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
-        It 'PDM fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('pdm', [ref]$null)
+    }
+
+    Context 'Graceful degradation when pdm is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @('Add-PdmPackage', 'Remove-PdmPackage', 'Update-PdmPackages') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'pdm' -Available $false
-            Remove-Item Function:Add-PdmPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Remove-PdmPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-PdmPackages -ErrorAction SilentlyContinue
-            . (Join-Path $script:ProfileDir 'pdm.ps1')
+            $script:MissingPdmOutput = & { . (Join-Path $script:ProfileDir 'pdm.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when pdm is unavailable' {
             Get-Command Add-PdmPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when pdm is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingPdmOutput -Pattern 'pdm not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingPdmOutput -ToolName 'pdm'
         }
     }
 }

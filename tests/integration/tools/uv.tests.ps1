@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'uv Tools Integration Tests' {
     BeforeAll {
         try {
@@ -52,8 +54,14 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Creates pip alias for Invoke-Pip' {
-            Get-Alias pip -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            (Get-Alias pip).ResolvedCommandName | Should -Be 'Invoke-Pip'
+            $pipAlias = Get-Alias -Name 'pip' -ErrorAction SilentlyContinue
+            if ($pipAlias) {
+                $pipAlias.ResolvedCommandName | Should -Be 'Invoke-Pip'
+                return
+            }
+
+            Get-Command -Name 'Invoke-Pip' -Scope Global -ErrorAction SilentlyContinue |
+                Should -Not -BeNullOrEmpty
         }
 
         It 'Invoke-Pip calls uv pip with arguments' {
@@ -193,16 +201,9 @@ Describe 'uv Tools Integration Tests' {
                 }
             }
 
-            # Function should exist and be callable
             Get-Command Update-UVOutdatedPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            # Try to call the function - it may call real uv if mock doesn't work, but should not throw
-            Update-UVOutdatedPackages
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            # If mock was called, verify it was called at least for list --outdated and freeze
-            # Note: Mock may not work for external commands, so this is a best-effort check
-            if ($callCount -gt 0) {
-                $callCount | Should -BeGreaterOrEqual 2
-            }
+            { Update-UVOutdatedPackages | Out-Null } | Should -Not -Throw
+            $script:callCount | Should -BeGreaterOrEqual 2
         }
 
         It 'Update-UVOutdatedPackages handles empty package list gracefully' {
@@ -256,60 +257,19 @@ Describe 'uv Tools Integration Tests' {
             }
         }
 
-        It 'uv fragment handles missing tool gracefully and recommends installation' {
-            # Test the warning when tool is not available
-            # Note: This test verifies that the fragment handles missing tools gracefully
-            # Due to mocking limitations with external commands, we verify the function exists
-            # and that the fragment structure is correct rather than verifying exact behavior
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('uv', [ref]$null)
-            }
-            # Clear command cache and assumed commands if available
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:TestCachedCommandCache.TryRemove('uv', [ref]$null)
-                $null = $global:TestCachedCommandCache.TryRemove('UV', [ref]$null)
-            }
-            if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:AssumedAvailableCommands.TryRemove('uv', [ref]$null)
-                $null = $global:AssumedAvailableCommands.TryRemove('UV', [ref]$null)
-            }
-            # Clear any existing functions/aliases BEFORE setting up mock
-            Remove-Item Function:Invoke-Pip -ErrorAction SilentlyContinue
-            Remove-Item Function:Invoke-UVRun -ErrorAction SilentlyContinue
-            Remove-Item Function:Install-UVTool -ErrorAction SilentlyContinue
-            Remove-Item Function:New-UVVenv -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-UVOutdatedPackages -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-UVTools -ErrorAction SilentlyContinue
-            Remove-Item Alias:pip -ErrorAction SilentlyContinue
-            Remove-Item Alias:uvrun -ErrorAction SilentlyContinue
-            Remove-Item Alias:uvtool -ErrorAction SilentlyContinue
-            Remove-Item Alias:uvvenv -ErrorAction SilentlyContinue
-            Remove-Item Alias:uvupgrade -ErrorAction SilentlyContinue
-            Remove-Item Alias:uvtoolupgrade -ErrorAction SilentlyContinue
-            # Create a new context where uv is not available
-            # Mock-CommandAvailabilityPester handles Test-CachedCommand mocking internally
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
-            # Reload fragment to trigger warning
-            # Note: Due to mocking limitations, the fragment may still create functions
-            # if Test-CachedCommand returns true due to cache or other factors
-            . (Join-Path $script:ProfileDir 'uv.ps1')
-            # Verify that the fragment loaded without errors
-            # The exact behavior depends on whether the mock successfully made uv unavailable
-            # This is a best-effort test given mocking limitations with external commands
-            $fragmentLoaded = $true
-            $fragmentLoaded | Should -Be $true
-        }
-
         It 'Creates Invoke-UVTool function' {
             Get-Command Invoke-UVTool -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates uvx alias for Invoke-UVTool' {
-            Get-Alias uvx -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            (Get-Alias uvx).ResolvedCommandName | Should -Be 'Invoke-UVTool'
+            $uvxAlias = Get-Alias -Name 'uvx' -ErrorAction SilentlyContinue
+            if ($uvxAlias) {
+                $uvxAlias.ResolvedCommandName | Should -Be 'Invoke-UVTool'
+                return
+            }
+
+            Get-Command -Name 'Invoke-UVTool' -Scope Global -ErrorAction SilentlyContinue |
+                Should -Not -BeNullOrEmpty
         }
 
         It 'Invoke-UVTool calls uv tool run with arguments' {
@@ -376,6 +336,38 @@ Describe 'uv Tools Integration Tests' {
             if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
                 $script:capturedArgs | Should -Contain 'sync'
             }
+        }
+    }
+
+    Context 'Graceful degradation' {
+        BeforeEach {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('uv', [ref]$null)
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            @(
+                'Invoke-Pip', 'Invoke-UVRun', 'Install-UVTool', 'New-UVVenv',
+                'Update-UVOutdatedPackages', 'Update-UVTools', 'Invoke-UVTool',
+                'Add-UVDependency', 'Sync-UVDependencies'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+            @(
+                'pip', 'uvrun', 'uvtool', 'uvvenv', 'uvupgrade', 'uvtoolupgrade',
+                'uvx', 'uva', 'uvs'
+            ) | ForEach-Object {
+                Remove-Item "Alias:$_" -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'uv fragment handles missing tool gracefully and recommends installation' {
+            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
+            $output = & { . (Join-Path $script:ProfileDir 'uv.ps1') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'uv not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'uv'
+            Get-Command Invoke-Pip -CommandType Function -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
         }
     }
 }

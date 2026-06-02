@@ -76,19 +76,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'poddeintegrate' -Target 'Remove-CocoaPodsIntegration'
 }
 else {
-    # Check if gem is available - if not, suggest installing ruby first
-    $hasGem = Test-CachedCommand gem
-    $hasScoop = Test-CachedCommand scoop
-    
-    $defaultHint = if ($hasGem) {
-        'gem install cocoapods'
-    }
-    elseif ($hasScoop) {
-        'scoop install ruby (then: gem install cocoapods)'
-    }
-    else {
-        'gem install cocoapods (requires Ruby: https://www.ruby-lang.org/ or scoop install ruby)'
-    }
-    
-    Invoke-MissingToolWarning -ToolName 'cocoapods' -ToolType 'ruby-package' -DefaultInstallCommand $defaultHint -Tool 'pod'
+    Invoke-MissingToolWarning -ToolName 'cocoapods' -ToolType 'ruby-package' -Tool 'pod'
 }

@@ -148,7 +148,7 @@ function Get-TestSuitePaths {
     }
 
     # Remove duplicates and return sorted paths
-    return $allTestFiles | Sort-Object -Unique
+    return @($allTestFiles | Sort-Object -Unique)
 }
 
 <#
@@ -178,8 +178,18 @@ function Get-SpecificTestPaths {
             continue
         }
 
+        $candidatePath = if ([System.IO.Path]::IsPathRooted($testPath)) {
+            $testPath
+        }
+        elseif ($RepoRoot -and -not [string]::IsNullOrWhiteSpace($RepoRoot)) {
+            Join-Path $RepoRoot $testPath
+        }
+        else {
+            $testPath
+        }
+
         try {
-            $resolvedTestPath = (Resolve-Path -Path $testPath -ErrorAction Stop).ProviderPath
+            $resolvedTestPath = (Resolve-Path -Path $candidatePath -ErrorAction Stop).ProviderPath
         }
         catch [System.Management.Automation.ItemNotFoundException] {
             throw "Test file or directory not found: $testPath"
@@ -198,7 +208,7 @@ function Get-SpecificTestPaths {
     }
 
     # Remove duplicates and return sorted paths
-    return $allPaths | Sort-Object -Unique
+    return @($allPaths | Sort-Object -Unique)
 }
 
 <#

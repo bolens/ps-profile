@@ -575,6 +575,36 @@ $global:PSDefaultParameterValues['Remove-Item:Recurse'] = $true
 $global:PSDefaultParameterValues['Clear-Item:Confirm'] = $false
 $global:PSDefaultParameterValues['Clear-Item:Force'] = $true
 
+function Get-NormalizedPesterResult {
+    param([object]$Result)
+
+    if ($null -eq $Result) {
+        return [PSCustomObject]@{
+            PassedCount       = 0
+            FailedCount       = 1
+            SkippedCount      = 0
+            TotalCount        = 0
+            InconclusiveCount = 0
+        }
+    }
+
+    if ($Result.PSObject.Properties.Name -contains 'PassedCount') {
+        return $Result
+    }
+
+    if (($Result.PSObject.Properties.Name -contains 'Result') -and $null -ne $Result.Result -and ($Result.Result.PSObject.Properties.Name -contains 'PassedCount')) {
+        return $Result.Result
+    }
+
+    return [PSCustomObject]@{
+        PassedCount       = 0
+        FailedCount       = 1
+        SkippedCount      = 0
+        TotalCount        = 0
+        InconclusiveCount = 0
+    }
+}
+
 # Set environment variables to suppress confirmations in profile fragments
 $env:PS_PROFILE_SUPPRESS_CONFIRMATIONS = '1'
 $env:PS_PROFILE_FORCE = '1'
@@ -767,7 +797,7 @@ if ($ConfigFile) {
         $configLoadDuration = ((Get-Date) - $configLoadStartTime).TotalMilliseconds
         
         # Apply config file parameters, but command-line parameters take precedence
-        foreach ($key in $configParams.Keys) {
+        foreach ($key in @($configParams.Keys)) {
             if (-not $PSBoundParameters.ContainsKey($key)) {
                 # Set variable if not already set via command line
                 Set-Variable -Name $key -Value $configParams[$key] -Scope Script
@@ -864,7 +894,7 @@ if ($HealthCheck) {
     
     Write-ScriptMessage -Message "Performing environment health check..."
     $healthCheckStartTime = Get-Date
-    $healthResults = Test-TestEnvironmentHealth -CheckModules -CheckPaths -CheckTools
+    $healthResults = Test-TestEnvironmentHealth -CheckModules -CheckPaths -CheckTools -RepoRoot $repoRoot
     $healthCheckDuration = ((Get-Date) - $healthCheckStartTime).TotalMilliseconds
 
     if (-not $healthResults.Passed) {
@@ -900,6 +930,7 @@ $environmentInfo = Get-TestEnvironment
 
 # Set test mode for profile fragments that need it
 $env:PS_PROFILE_TEST_MODE = '1'
+$env:PS_PROFILE_NONINTERACTIVE = '1'
 
 # Ensure confirmation suppression is still active (in case it was reset)
 $ConfirmPreference = 'None'
@@ -1118,7 +1149,7 @@ try {
     # Get test paths first (before creating config to avoid read-only issues)
     Write-Host "Discovering test files..." -ForegroundColor Yellow
     $discoveryStartTime = Get-Date
-    $testPaths = Get-TestPaths -Suite $Suite -TestFile $TestFile -RepoRoot $repoRoot
+    $testPaths = @(Get-TestPaths -Suite $Suite -TestFile $TestFile -RepoRoot $repoRoot)
     $discoveryDuration = ((Get-Date) - $discoveryStartTime).TotalMilliseconds
     
     # Level 2: Test discovery timing
@@ -1128,7 +1159,7 @@ try {
 
     # Filter test paths to exclude test-runner test files
     $filterStartTime = Get-Date
-    $filteredTestPaths = Filter-TestPaths -TestPaths $testPaths -TestRunnerScriptPath $PSCommandPath
+    $filteredTestPaths = @(Filter-TestPaths -TestPaths $testPaths -TestRunnerScriptPath $PSCommandPath)
     $filterDuration = ((Get-Date) - $filterStartTime).TotalMilliseconds
     
     # Level 2: Test path filtering timing
@@ -1137,32 +1168,52 @@ try {
     }
 
     # Apply test file pattern filter if specified
-    if ($TestFilePattern -and $filteredTestPaths.Count -gt 0) {
-        $originalCount = $filteredTestPaths.Count
-        $filteredTestPaths = $filteredTestPaths | Where-Object {
+    if ($TestFilePattern -and @($filteredTestPaths).Count -gt 0) {
+        $originalCount = @($filteredTestPaths).Count
+        $filteredTestPaths = @($filteredTestPaths | Where-Object {
             $fileName = Split-Path $_ -Leaf
             $fileName -like $TestFilePattern
-        }
-    
-        if ($filteredTestPaths.Count -eq 0) {
+        })
+
+        if (@($filteredTestPaths).Count -eq 0) {
             Write-Host "ERROR: No test files match pattern: $TestFilePattern" -ForegroundColor Red
             Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No test files match pattern: $TestFilePattern"
         }
     
-        Write-Host "Filtered to $($filteredTestPaths.Count) test file(s) matching pattern: $TestFilePattern" -ForegroundColor Green
+        Write-Host "Filtered to $(@($filteredTestPaths).Count) test file(s) matching pattern: $TestFilePattern" -ForegroundColor Green
     }
 
-    if ($filteredTestPaths.Count -eq 0) {
+    if (@($filteredTestPaths).Count -eq 0) {
         Write-Host "ERROR: No valid test paths found after filtering" -ForegroundColor Red
         Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No valid test paths found after filtering"
     }
 
     # Handle Interactive mode
     if ($Interactive) {
+        $interactiveInputAvailable = $false
+        if ($env:PS_PROFILE_NONINTERACTIVE -ne '1' -and $env:CI -ne 'true' -and $env:GITHUB_ACTIONS -ne 'true') {
+            try {
+                $interactiveInputAvailable = -not [Console]::IsInputRedirected
+            }
+            catch {
+                $interactiveInputAvailable = $false
+            }
+        }
+
+        if (-not $interactiveInputAvailable) {
+            Exit-WithCleanup -ExitCode $EXIT_VALIDATION_FAILURE -Message 'Interactive mode requires a TTY. Run without -Interactive in CI or automated environments.'
+        }
+
+        if ($DryRun) {
+            Write-Host "DRY RUN MODE - Interactive mode would prompt for test selection" -ForegroundColor Yellow
+            Invoke-TestDryRun -TestPaths $filteredTestPaths
+            Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "Dry run completed"
+        }
+
         Write-Host "`n=== Interactive Test Selection ===" -ForegroundColor Cyan
         $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
     
-        if ($testList.Tests.Count -eq 0) {
+        if (@($testList.Tests).Count -eq 0) {
             Write-Host "No tests found to select." -ForegroundColor Yellow
             Exit-WithCleanup -ExitCode $EXIT_NO_TESTS_FOUND -Message "No tests found for interactive selection"
         }
@@ -1226,45 +1277,47 @@ try {
     }
     
     # Enhanced test count summary
-    Write-Host "Found $($filteredTestPaths.Count) test file(s) to run" -ForegroundColor Green
-    if ($Verbose) {
-        Write-Host "Test files: $($filteredTestPaths -join ', ')" -ForegroundColor Cyan
-    
-        # Try to get test count estimate
-        $countStartTime = Get-Date
-        try {
-            $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
-            $countDuration = ((Get-Date) - $countStartTime).TotalMilliseconds
-            
-            # Level 2: Test count timing
-            if ($debugLevel -ge 2) {
-                Write-Verbose "[test.run-pester] Test count estimation completed in ${countDuration}ms - Count: $($testList.TestCount)"
-            }
-            
-            Write-Host "Estimated test count: $($testList.TestCount) test(s)" -ForegroundColor Cyan
-        }
-        catch {
-            # Ignore errors in test counting - it's just a nice-to-have
-        }
-    }
-    else {
-        # Even in non-verbose mode, try to show test count
-        $countStartTime = Get-Date
-        try {
-            $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
-            $countDuration = ((Get-Date) - $countStartTime).TotalMilliseconds
-            
-            # Level 2: Test count timing
-            if ($debugLevel -ge 2) {
-                Write-Verbose "[test.run-pester] Test count estimation completed in ${countDuration}ms - Count: $($testList.TestCount)"
-            }
-            
-            if ($testList.TestCount -gt 0) {
+    Write-Host "Found $(@($filteredTestPaths).Count) test file(s) to run" -ForegroundColor Green
+    if (-not $DryRun) {
+        if ($Verbose) {
+            Write-Host "Test files: $($filteredTestPaths -join ', ')" -ForegroundColor Cyan
+        
+            # Try to get test count estimate
+            $countStartTime = Get-Date
+            try {
+                $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
+                $countDuration = ((Get-Date) - $countStartTime).TotalMilliseconds
+                
+                # Level 2: Test count timing
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[test.run-pester] Test count estimation completed in ${countDuration}ms - Count: $($testList.TestCount)"
+                }
+                
                 Write-Host "Estimated test count: $($testList.TestCount) test(s)" -ForegroundColor Cyan
             }
+            catch {
+                # Ignore errors in test counting - it's just a nice-to-have
+            }
         }
-        catch {
-            # Ignore errors
+        else {
+            # Even in non-verbose mode, try to show test count
+            $countStartTime = Get-Date
+            try {
+                $testList = Get-TestList -TestPaths $filteredTestPaths -RepoRoot $repoRoot
+                $countDuration = ((Get-Date) - $countStartTime).TotalMilliseconds
+                
+                # Level 2: Test count timing
+                if ($debugLevel -ge 2) {
+                    Write-Verbose "[test.run-pester] Test count estimation completed in ${countDuration}ms - Count: $($testList.TestCount)"
+                }
+                
+                if ($testList.TestCount -gt 0) {
+                    Write-Host "Estimated test count: $($testList.TestCount) test(s)" -ForegroundColor Cyan
+                }
+            }
+            catch {
+                # Ignore errors
+            }
         }
     }
 
@@ -1305,15 +1358,15 @@ try {
     $validationStartTime = Get-Date
     try {
         # Validate that at least some test paths exist
-        $existingPaths = $filteredTestPaths | Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) }
+        $existingPaths = @($filteredTestPaths | Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) })
         $validationDuration = ((Get-Date) - $validationStartTime).TotalMilliseconds
         
         # Level 2: Validation timing
         if ($debugLevel -ge 2) {
-            Write-Verbose "[test.run-pester] Configuration validation completed in ${validationDuration}ms - Existing paths: $($existingPaths.Count)"
+            Write-Verbose "[test.run-pester] Configuration validation completed in ${validationDuration}ms - Existing paths: $(@($existingPaths).Count)"
         }
         
-        if ($existingPaths.Count -eq 0) {
+        if (@($existingPaths).Count -eq 0) {
             Write-ScriptMessage -Message "Warning: None of the configured test paths exist: $($filteredTestPaths -join ', ')" -LogLevel 'Warning'
         }
     }
@@ -1392,6 +1445,12 @@ try {
 
     # Handle watch mode
     if ($Watch) {
+        if ($DryRun) {
+            Write-Host "DRY RUN MODE - Watch mode would monitor test and source file changes" -ForegroundColor Yellow
+            Invoke-TestDryRun -TestPaths $filteredTestPaths
+            Exit-WithCleanup -ExitCode $EXIT_SUCCESS -Message "Dry run completed"
+        }
+
         Write-Host "`n=== Watch Mode ===" -ForegroundColor Cyan
         Write-Host "Watching for file changes. Tests will re-run automatically." -ForegroundColor Yellow
         Write-Host "Press Ctrl+C to stop watching.`n" -ForegroundColor Yellow
@@ -1567,7 +1626,7 @@ try {
                     Write-ScriptMessage -Message "Test run $run of $Repeat" -LogLevel 'Info'
                 }
                 Write-Host "Running tests..." -ForegroundColor Yellow
-                $result = & $executionScript $config $run $Repeat
+                $result = Get-NormalizedPesterResult (& $executionScript $config $run $Repeat)
                 Write-Host "Tests completed: Passed=$($result.PassedCount), Failed=$($result.FailedCount), Skipped=$($result.SkippedCount)" -ForegroundColor $(if ($result.FailedCount -eq 0) { 'Green' } else { 'Red' })
 
                 # Handle performance tracking results
@@ -1586,6 +1645,7 @@ try {
         }
 
         $result = $finalResult
+        $result = Get-NormalizedPesterResult $result
 
         # Show enhanced summary statistics if requested
         if ($ShowSummaryStats) {

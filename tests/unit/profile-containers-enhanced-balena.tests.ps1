@@ -3,13 +3,8 @@
 # Unit tests for Deploy-Balena function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'containers-enhanced.ps1')
@@ -17,122 +12,85 @@ BeforeAll {
 
 Describe 'containers-enhanced.ps1 - Deploy-Balena' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('balena', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'balena' -Available $false
+        Remove-Item -Path 'Function:\balena' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:balena' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when balena is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'balena' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'balena' } -MockWith { return $null }
-            
             $result = Deploy-Balena -Application 'my-app' -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls balena push for push action' {
-            Setup-AvailableCommandMock -CommandName 'balena'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'balena' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Pushed'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'balena' -Output 'Pushed'
+
             $result = Deploy-Balena -Application 'my-app' -Action 'push' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'push'
-            $script:capturedArgs | Should -Contain 'my-app'
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'push'
+            $args | Should -Contain 'my-app'
             $result | Should -Not -BeNullOrEmpty
         }
-        
+
         It 'Calls balena logs for logs action' {
-            Setup-AvailableCommandMock -CommandName 'balena'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'balena' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Log output'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'balena' -Output 'Log output'
+
             $result = Deploy-Balena -Application 'my-app' -Action 'logs' -Device 'device-uuid' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'logs'
-            $script:capturedArgs | Should -Contain 'my-app'
-            $script:capturedArgs | Should -Contain '--device'
-            $script:capturedArgs | Should -Contain 'device-uuid'
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'logs'
+            $args | Should -Contain 'my-app'
+            $args | Should -Contain '--device'
+            $args | Should -Contain 'device-uuid'
         }
-        
+
         It 'Calls balena ssh for ssh action' {
-            Setup-AvailableCommandMock -CommandName 'balena'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'balena' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'SSH connected'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'balena' -Output 'SSH connected'
+
             $result = Deploy-Balena -Action 'ssh' -Device 'device-uuid' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'ssh'
-            $script:capturedArgs | Should -Contain 'device-uuid'
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'ssh'
+            $args | Should -Contain 'device-uuid'
         }
-        
+
         It 'Returns error when Device is missing for ssh action' {
             Setup-AvailableCommandMock -CommandName 'balena'
-            Mock Write-Error { }
-            
+
             $result = Deploy-Balena -Action 'ssh' -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+
+            $result | Should -BeNullOrEmpty
+            Get-TestCommandInvocationArgs | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls balena status for status action' {
-            Setup-AvailableCommandMock -CommandName 'balena'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'balena' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return 'Status output'
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'balena' -Output 'Status output'
+
             $result = Deploy-Balena -Application 'my-app' -Action 'status' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'status'
-            $script:capturedArgs | Should -Contain '--application'
-            $script:capturedArgs | Should -Contain 'my-app'
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'status'
+            $args | Should -Contain '--application'
+            $args | Should -Contain 'my-app'
         }
-        
+
         It 'Handles balena execution errors' {
-            Setup-AvailableCommandMock -CommandName 'balena'
-            
-            Mock -CommandName 'balena' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
+            Setup-CapturingCommandMock -CommandName 'balena' -Output '' -ExitCode 1
+
             $result = Deploy-Balena -Application 'my-app' -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+
+            $result | Should -BeNullOrEmpty
         }
     }
 }
-

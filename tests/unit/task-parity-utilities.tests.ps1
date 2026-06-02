@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' '..')).Path
     $script:ModulePath = Join-Path $repoRoot 'scripts' 'utils' 'task-parity' 'modules' 'TaskParityUtilities.psm1'
     Import-Module $script:ModulePath -DisableNameChecking -Force

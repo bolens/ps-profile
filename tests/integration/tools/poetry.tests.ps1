@@ -262,6 +262,16 @@ Describe 'Poetry Tools Integration Tests' {
 
     Context 'Poetry graceful degradation' {
         BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
             # Remove functions/aliases from previous context
             Remove-Item Function:Install-PoetryDependencies -ErrorAction SilentlyContinue
             Remove-Item Function:Test-PoetryOutdated -ErrorAction SilentlyContinue
@@ -278,18 +288,19 @@ Describe 'Poetry Tools Integration Tests' {
             Remove-Item Alias:poetryimport -ErrorAction SilentlyContinue
             Remove-Item Alias:poetryrestore -ErrorAction SilentlyContinue
 
-            # Mock poetry as unavailable
             Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $false
-            . (Join-Path $script:ProfileDir 'poetry.ps1')
+            $script:MissingPoetryOutput = & { . (Join-Path $script:ProfileDir 'poetry.ps1') } 2>&1 3>&1 | Out-String
         }
 
-        It 'Poetry fragment handles missing tool gracefully and recommends installation' {
+        It 'Functions are not created when poetry is unavailable' {
             Get-Command Install-PoetryDependencies -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
             Get-Command Test-PoetryOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
             Get-Command Update-PoetryDependencies -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-            Get-Command Update-PoetrySelf -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-            Get-Command Export-PoetryDependencies -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-            Get-Command Import-PoetryDependencies -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when poetry is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingPoetryOutput -Pattern 'poetry not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingPoetryOutput -ToolName 'poetry'
         }
     }
 }

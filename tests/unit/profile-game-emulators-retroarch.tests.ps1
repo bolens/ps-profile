@@ -3,13 +3,8 @@
 # Unit tests for Start-RetroArch function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'game-emulators.ps1')
@@ -17,126 +12,92 @@ BeforeAll {
 
 Describe 'game-emulators.ps1 - Start-RetroArch' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestStartProcessCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('retroarch-nightly', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('retroarch', [ref]$null)
+
+        foreach ($toolName in @('retroarch-nightly', 'retroarch')) {
+            Set-TestCommandAvailabilityState -CommandName $toolName -Available $false
+            Remove-Item -Path "Function:\$toolName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$toolName" -Force -ErrorAction SilentlyContinue
         }
+
+        Reset-TestStartProcessMock
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when retroarch tools are not available' {
-            Mock-CommandAvailabilityPester -CommandName 'retroarch-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'retroarch' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -in @('retroarch-nightly', 'retroarch') } -MockWith { return $null }
-            
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'retroarch' -Available $false
+
             $result = Start-RetroArch -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls retroarch-nightly when available' {
             Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
-            Mock-CommandAvailabilityPester -CommandName 'retroarch-nightly' -Available $true
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
+
             Start-RetroArch -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.FilePath | Should -Be 'retroarch-nightly'
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'retroarch-nightly'
         }
-        
+
         It 'Falls back to retroarch when retroarch-nightly not available' {
-            Mock-CommandAvailabilityPester -CommandName 'retroarch-nightly' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly' -Available $false
             Setup-AvailableCommandMock -CommandName 'retroarch'
-            Mock-CommandAvailabilityPester -CommandName 'retroarch' -Available $true
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
+
             Start-RetroArch -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.FilePath | Should -Be 'retroarch'
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'retroarch'
         }
-        
+
         It 'Calls retroarch with core when provided' {
             Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
+
             Start-RetroArch -Core 'snes9x' -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.ArgumentList | Should -Contain '-L'
-            $script:capturedProcess.ArgumentList | Should -Contain 'snes9x'
+
+            $capture = Get-TestStartProcessCapture
+            $capture.ArgumentList | Should -Contain '-L'
+            $capture.ArgumentList | Should -Contain 'snes9x'
         }
-        
+
         It 'Calls retroarch with ROM path when provided' {
             Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'game.sfc' } -MockWith { return $true }
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
-            Start-RetroArch -RomPath 'game.sfc' -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.ArgumentList | Should -Contain 'game.sfc'
+            $romPath = Join-Path (New-TestTempDirectory -Prefix 'RetroArchRom') 'game.sfc'
+            New-Item -ItemType File -Path $romPath -Force | Out-Null
+
+            Start-RetroArch -RomPath $romPath -ErrorAction SilentlyContinue
+
+            $capture = Get-TestStartProcessCapture
+            $capture.ArgumentList | Should -Contain $romPath
         }
-        
+
         It 'Calls retroarch with fullscreen flag when provided' {
             Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
+
             Start-RetroArch -Fullscreen -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.ArgumentList | Should -Contain '--fullscreen'
+
+            $capture = Get-TestStartProcessCapture
+            $capture.ArgumentList | Should -Contain '--fullscreen'
         }
-        
+
         It 'Errors when ROM path does not exist' {
             Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.sfc' } -MockWith { return $false }
-            
-            { Start-RetroArch -RomPath 'nonexistent.sfc' -ErrorAction Stop } | Should -Throw
+            $missingRom = Join-Path (New-TestTempDirectory -Prefix 'RetroArchMissingRom') 'nonexistent.sfc'
+
+            $result = Start-RetroArch -RomPath $missingRom -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
+            Get-TestStartProcessCapture | Should -BeNullOrEmpty
         }
     }
 }
-

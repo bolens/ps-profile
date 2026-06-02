@@ -183,7 +183,7 @@ function Get-MetricsTrend {
     }
 
     # Extract metric values
-    $values = @()
+    $values = [System.Collections.Generic.List[double]]::new()
     foreach ($data in $filteredData) {
         $value = $null
 

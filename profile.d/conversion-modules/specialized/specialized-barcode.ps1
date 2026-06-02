@@ -74,7 +74,7 @@ try {
     console.log('Barcode generated successfully');
 } catch (error) {
     if (error.code === 'MODULE_NOT_FOUND') {
-        console.error('Error: jsbarcode or canvas package is not installed. Install with: npm install -g jsbarcode canvas');
+        console.error('Error: jsbarcode or canvas package is not installed. Install with: __NODE_INSTALL_CMD__');
     } else {
         console.error('Error:', error.message);
     }
@@ -82,6 +82,7 @@ try {
 }
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "barcode-gen-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'canvas', 'jsbarcode' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = & node $tempScript $data $OutputPath $Format 2>&1

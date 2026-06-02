@@ -51,7 +51,7 @@ try:
     import pyarrow.orc as orc
     import pyarrow as pa
 except ImportError:
-    print('Error: pyarrow package is not installed. Install it with: uv pip install pyarrow', file=sys.stderr)
+    print('Error: pyarrow package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 
 try:
@@ -76,6 +76,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "orc-to-json-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pyarrow' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -111,7 +112,7 @@ try:
     import pyarrow.orc as orc
     import pyarrow as pa
 except ImportError:
-    print('Error: pyarrow package is not installed. Install it with: uv pip install pyarrow', file=sys.stderr)
+    print('Error: pyarrow package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 
 try:
@@ -141,6 +142,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json-to-orc-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pyarrow' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -176,7 +178,7 @@ try:
     import pyarrow.orc as orc
     import pyarrow as pa
 except ImportError:
-    print('Error: pyarrow package is not installed. Install it with: uv pip install pyarrow', file=sys.stderr)
+    print('Error: pyarrow package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 
 try:
@@ -197,6 +199,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "orc-to-csv-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pyarrow' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -231,7 +234,7 @@ try:
     import pyarrow.orc as orc
     import pyarrow.parquet as pq
 except ImportError:
-    print('Error: pyarrow package is not installed. Install it with: uv pip install pyarrow', file=sys.stderr)
+    print('Error: pyarrow package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 
 try:
@@ -246,6 +249,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "orc-to-parquet-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pyarrow' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1

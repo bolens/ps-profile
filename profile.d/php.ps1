@@ -47,7 +47,7 @@ function Invoke-Php {
         & php @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'php' -ToolType 'php-package' -DefaultInstallCommand 'scoop install php'
+        Invoke-MissingToolWarning -ToolName 'php' -ToolType 'php-package'
     }
 }
 
@@ -79,7 +79,7 @@ function Start-PhpServer {
         php -S localhost:$Port
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'php' -ToolType 'php-package' -DefaultInstallCommand 'scoop install php'
+        Invoke-MissingToolWarning -ToolName 'php' -ToolType 'php-package'
     }
 }
 
@@ -111,7 +111,7 @@ function Invoke-Composer {
         composer @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package'
     }
 }
 
@@ -127,7 +127,7 @@ function Test-ComposerOutdated {
         & composer outdated
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package'
     }
 }
 
@@ -150,7 +150,7 @@ function Update-ComposerPackages {
         & composer update
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package'
     }
 }
 
@@ -172,7 +172,7 @@ function Update-ComposerSelf {
         & composer self-update
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package'
     }
 }
 
@@ -217,7 +217,7 @@ function Add-ComposerPackage {
         & composer require @args @Packages
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package'
     }
 }
 
@@ -254,7 +254,7 @@ function Remove-ComposerPackage {
         & composer remove @args @Packages
     }
     else {
-        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package' -DefaultInstallCommand 'scoop install composer'
+        Invoke-MissingToolWarning -ToolName 'composer' -ToolType 'php-package'
     }
 }
 

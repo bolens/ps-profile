@@ -332,5 +332,5 @@ if (Test-CachedCommand winget) {
     Set-AgentModeAlias -Name 'winget-restore' -Target 'Import-WingetPackages'
 }
 else {
-    Write-MissingToolWarning -Tool 'winget' -InstallHint 'Winget is included with Windows 10/11. If missing, install from: https://aka.ms/getwinget'
+    Invoke-MissingToolWarning -ToolName 'winget'
 }

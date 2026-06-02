@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Chocolatey Tools Integration Tests' {
     BeforeAll {
         try {
@@ -506,100 +508,115 @@ Describe 'Chocolatey Tools Integration Tests' {
         }
 
         It 'Import-ChocoPackages calls choco install with packages.config' {
-            $script:capturedArgs = $null
-            $testFile = 'test-packages.config'
-            # Create a mock file
-            '<?xml version="1.0"?><packages><package id="git" /></packages>' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
+            if (-not $IsWindows) {
+                Set-ItResult -Inconclusive -Because 'Chocolatey import invokes choco through Invoke-WithWideEvent; validated on Windows CI'
+                return
+            }
+
+            $testDir = New-TestTempDirectory -Prefix 'ChocoImport'
+            $testFile = Join-Path $testDir 'test-packages.config'
+            '<?xml version="1.0"?><packages><package id="git" /></packages>' | Set-Content -Path $testFile
+            Test-Path -LiteralPath $testFile | Should -Be $true
+
             Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
                 Write-Output 'Packages imported successfully'
             }
 
-            # Execute
             { Import-ChocoPackages -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
+            Should -Invoke -CommandName 'choco' -Times 1 -Exactly -ParameterFilter {
+                $flatArgs = [System.Collections.Generic.List[object]]::new()
+                foreach ($arg in $args) {
+                    if ($arg -is [System.Array]) {
+                        foreach ($nestedArg in $arg) {
+                            $flatArgs.Add($nestedArg)
+                        }
+                    }
+                    else {
+                        $flatArgs.Add($arg)
+                    }
+                }
+                ($flatArgs -contains 'install') -and ($flatArgs -contains $testFile)
             }
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain $testFile
-
-            # Cleanup
-            Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
 
         It 'Import-ChocoPackages with Yes passes -y flag' {
-            $script:capturedArgs = $null
-            $testFile = 'test-packages.config'
-            '<?xml version="1.0"?><packages><package id="git" /></packages>' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
+            if (-not $IsWindows) {
+                Set-ItResult -Inconclusive -Because 'Chocolatey import invokes choco through Invoke-WithWideEvent; validated on Windows CI'
+                return
+            }
+
+            $testDir = New-TestTempDirectory -Prefix 'ChocoImportYes'
+            $testFile = Join-Path $testDir 'test-packages-yes.config'
+            '<?xml version="1.0"?><packages><package id="git" /></packages>' | Set-Content -Path $testFile
+            Test-Path -LiteralPath $testFile | Should -Be $true
+
             Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
                 Write-Output 'Packages imported successfully'
             }
 
-            # Execute
             { Import-ChocoPackages -Path $testFile -Yes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
+            Should -Invoke -CommandName 'choco' -Times 1 -Exactly -ParameterFilter {
+                $flatArgs = [System.Collections.Generic.List[object]]::new()
+                foreach ($arg in $args) {
+                    if ($arg -is [System.Array]) {
+                        foreach ($nestedArg in $arg) {
+                            $flatArgs.Add($nestedArg)
+                        }
+                    }
+                    else {
+                        $flatArgs.Add($arg)
+                    }
+                }
+                ($flatArgs -contains 'install') -and ($flatArgs -contains '-y')
             }
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain '-y'
-
-            # Cleanup
-            Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
 
-        It 'Chocolatey fragment handles missing tool gracefully' {
-            BeforeAll {
-                # Clear caches and warnings
-                if ($global:MissingToolWarnings) {
-                    $null = $global:MissingToolWarnings.TryRemove('choco', [ref]$null)
-                }
-                if ($null -ne $global:TestCachedCommandCache) {
-                    $global:TestCachedCommandCache = @{}
-                }
-                if ($null -ne $global:AssumedAvailableCommands) {
-                    $null = $global:AssumedAvailableCommands.TryRemove('choco', [ref]$null)
-                    $null = $global:AssumedAvailableCommands.TryRemove('choco'.ToLowerInvariant(), [ref]$null)
-                }
-            
-                # Clear any function mocks that might exist
-                Remove-Item Function:choco -ErrorAction SilentlyContinue
-                Remove-Item Function:global:choco -ErrorAction SilentlyContinue
-            
-                # Mock choco as unavailable BEFORE loading the fragment
-                Mock-CommandAvailabilityPester -CommandName 'choco' -Available $false
-            
-                # Remove any existing Chocolatey functions
-                Remove-Item Function:Install-ChocoPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Remove-ChocoPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Update-ChocoPackages -ErrorAction SilentlyContinue
-                Remove-Item Function:Test-ChocoOutdated -ErrorAction SilentlyContinue
-                Remove-Item Function:Update-ChocoSelf -ErrorAction SilentlyContinue
-                Remove-Item Function:Clear-ChocoCache -ErrorAction SilentlyContinue
-                Remove-Item Function:Find-ChocoPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Get-ChocoPackage -ErrorAction SilentlyContinue
-                Remove-Item Function:Get-ChocoPackageInfo -ErrorAction SilentlyContinue
-                Remove-Item Function:Export-ChocoPackages -ErrorAction SilentlyContinue
-                Remove-Item Function:Import-ChocoPackages -ErrorAction SilentlyContinue
-                
-                # Reload the fragment - functions should not be created since choco is unavailable
-                . (Join-Path $script:ProfileDir 'chocolatey.ps1')
+    }
+
+    Context 'Graceful degradation when choco is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Remove-Item Function:choco -ErrorAction SilentlyContinue
+            Remove-Item Function:global:choco -ErrorAction SilentlyContinue
+            Mock-CommandAvailabilityPester -CommandName 'choco' -Available $false
+
+            @(
+                'Install-ChocoPackage', 'Remove-ChocoPackage', 'Update-ChocoPackages',
+                'Test-ChocoOutdated', 'Update-ChocoSelf', 'Clear-ChocoCache',
+                'Find-ChocoPackage', 'Get-ChocoPackage', 'Get-ChocoPackageInfo',
+                'Export-ChocoPackages', 'Import-ChocoPackages'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            It 'Functions are not created when choco is unavailable' {
-                # Verify functions were not created
-                Get-Command Install-ChocoPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            $output = & { . (Join-Path $script:ProfileDir 'chocolatey.ps1') } 2>&1 3>&1 | Out-String
+            $script:MissingChocoOutput = $output
+        }
+
+        It 'Functions are not created when choco is unavailable' {
+            Get-Command Install-ChocoPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when choco is unavailable' {
+            if (Get-Command Test-ToolAvailableOnPlatform -ErrorAction SilentlyContinue) {
+                if (-not (Test-ToolAvailableOnPlatform -Tool 'chocolatey')) {
+                    Set-ItResult -Inconclusive -Because 'Chocolatey install hints are only emitted on Windows'
+                    return
+                }
             }
+
+            Assert-TestMissingToolWarning -Output $script:MissingChocoOutput -Pattern 'choco not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingChocoOutput -ToolName 'chocolatey'
         }
     }
 }

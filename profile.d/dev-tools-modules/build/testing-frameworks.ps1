@@ -49,7 +49,7 @@ function Invoke-Jest {
         npx jest @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'jest or npx' -InstallHint 'Install with: npm install -g jest or npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'jest' -ToolType 'node-package' -Tool 'jest or npx'
     }
 }
 
@@ -84,7 +84,7 @@ function Invoke-Vitest {
         npx vitest @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'vitest or npx' -InstallHint 'Install with: npm install -g vitest or npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'vitest' -ToolType 'node-package' -Tool 'vitest or npx'
     }
 }
 
@@ -119,7 +119,7 @@ function Invoke-Playwright {
         npx playwright @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'playwright or npx' -InstallHint 'Install with: npm install -g playwright or npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'playwright' -ToolType 'node-package' -Tool 'playwright or npx'
     }
 }
 
@@ -154,7 +154,7 @@ function Invoke-Cypress {
         npx cypress @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'cypress or npx' -InstallHint 'Install with: npm install -g cypress or npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'cypress' -ToolType 'node-package' -Tool 'cypress or npx'
     }
 }
 
@@ -189,7 +189,7 @@ function Invoke-Mocha {
         npx mocha @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'mocha or npx' -InstallHint 'Install with: npm install -g mocha or npm install -g npm'
+        Invoke-MissingToolWarning -ToolName 'mocha' -ToolType 'node-package' -Tool 'mocha or npx'
     }
 }
 

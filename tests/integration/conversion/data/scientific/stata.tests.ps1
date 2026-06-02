@@ -78,7 +78,7 @@ Describe 'Stata Format Conversion Tests' {
 
         It 'Stata conversion functions require Python and pandas/polars/pyreadstat' {
             if (-not $script:PythonAvailable) {
-                Set-ItResult -Skipped -Because "Python is not available. Install Python to use Stata conversions."
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'python' -ToolType 'python-runtime' -Context 'Python is not available. Install Python to use Stata conversions.')
                 return
             }
             # Test that function exists and would require pandas/polars/pyreadstat

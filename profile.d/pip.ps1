@@ -43,7 +43,7 @@ if (Test-CachedCommand pip) {
             & pip install @args @Packages
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'pipinstall' -Target 'Install-PipPackage'
@@ -81,7 +81,7 @@ if (Test-CachedCommand pip) {
             & pip uninstall @args @Packages
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'pipuninstall' -Target 'Remove-PipPackage'
@@ -102,7 +102,7 @@ if (Test-CachedCommand pip) {
             & pip list --outdated
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'pipoutdated' -Target 'Test-PipOutdated'
@@ -136,7 +136,7 @@ if (Test-CachedCommand pip) {
             }
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'pipupdate' -Target 'Update-PipPackages'
@@ -155,7 +155,7 @@ if (Test-CachedCommand pip) {
             & pip install --upgrade pip
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'pipupgrade' -Target 'Update-PipSelf'
@@ -195,7 +195,7 @@ if (Test-CachedCommand pip) {
             & pip @args | Out-File -FilePath $Path -Encoding UTF8
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'pipexport' -Target 'Export-PipPackages'
@@ -265,12 +265,12 @@ if (Test-CachedCommand pip) {
             }
         }
         else {
-            Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+            Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
         }
     }
     Set-AgentModeAlias -Name 'pipimport' -Target 'Import-PipPackages'
     Set-AgentModeAlias -Name 'piprestore' -Target 'Import-PipPackages'
 }
 else {
-    Write-MissingToolWarning -Tool 'pip' -InstallHint 'Install with: python -m ensurepip --upgrade'
+    Invoke-MissingToolWarning -ToolName 'pip' -ToolType 'python-package'
 }

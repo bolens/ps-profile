@@ -3,13 +3,8 @@
 # Unit tests for 3D/CAD editor functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir '3d-cad.ps1')
@@ -17,169 +12,143 @@ BeforeAll {
 
 Describe '3d-cad.ps1 - Editor Functions' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestStartProcessCapture
+        Reset-TestStartProcessMock
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('blender', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('freecad', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('openscad-dev', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('openscad', [ref]$null)
+
+        foreach ($toolName in @('blender', 'freecad', 'openscad-dev', 'openscad')) {
+            if (Get-Command Set-TestCommandAvailabilityState -ErrorAction SilentlyContinue) {
+                Set-TestCommandAvailabilityState -CommandName $toolName -Available $false
+            }
+
+            Remove-Item -Path "Function:\$toolName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$toolName" -Force -ErrorAction SilentlyContinue
         }
     }
-    
+
     Context 'Launch-Blender' {
         It 'Returns null when blender is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'blender' } -MockWith { return $null }
-            
+            Set-TestCommandAvailabilityState -CommandName 'blender' -Available $false
+
             $result = Launch-Blender -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls blender when available' {
             Setup-AvailableCommandMock -CommandName 'blender'
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
+
             Launch-Blender -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.FilePath | Should -Be 'blender'
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'blender'
         }
-        
+
         It 'Calls blender with background flag when provided' {
             Setup-AvailableCommandMock -CommandName 'blender'
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
+
             Launch-Blender -Background -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess.ArgumentList | Should -Contain '--background'
+
+            $capture = Get-TestStartProcessCapture
+            $capture.ArgumentList | Should -Contain '--background'
         }
-        
+
         It 'Calls blender with project path when provided' {
             Setup-AvailableCommandMock -CommandName 'blender'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'scene.blend' } -MockWith { return $true }
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
-            Launch-Blender -ProjectPath 'scene.blend' -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess.ArgumentList | Should -Contain 'scene.blend'
+            $projectPath = Join-Path (New-TestTempDirectory -Prefix 'BlenderProject') 'scene.blend'
+            New-Item -ItemType File -Path $projectPath -Force | Out-Null
+
+            Launch-Blender -ProjectPath $projectPath -ErrorAction SilentlyContinue
+
+            $capture = Get-TestStartProcessCapture
+            $capture.ArgumentList | Should -Contain $projectPath
         }
     }
-    
+
     Context 'Launch-FreeCAD' {
         It 'Returns null when freecad is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'freecad' -Available $false
-            
+            Set-TestCommandAvailabilityState -CommandName 'freecad' -Available $false
+
             $result = Launch-FreeCAD -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls freecad when available' {
             Setup-AvailableCommandMock -CommandName 'freecad'
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
+
             Launch-FreeCAD -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.FilePath | Should -Be 'freecad'
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'freecad'
         }
     }
-    
+
     Context 'Launch-OpenSCAD' {
         It 'Returns null when OpenSCAD is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'openscad-dev' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'openscad' -Available $false
-            
+            Set-TestCommandAvailabilityState -CommandName 'openscad-dev' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'openscad' -Available $false
+
             $result = Launch-OpenSCAD -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls openscad-dev when available' {
             Setup-AvailableCommandMock -CommandName 'openscad-dev'
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
-            Launch-OpenSCAD -ScriptPath 'model.scad' -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess | Should -Not -BeNullOrEmpty
-            $script:capturedProcess.FilePath | Should -Be 'openscad-dev'
+            $scriptPath = Join-Path (New-TestTempDirectory -Prefix 'OpenScadScript') 'model.scad'
+            New-Item -ItemType File -Path $scriptPath -Force | Out-Null
+
+            Launch-OpenSCAD -ScriptPath $scriptPath -ErrorAction SilentlyContinue
+
+            $capture = Get-TestStartProcessCapture
+            $capture | Should -Not -BeNullOrEmpty
+            $capture.FilePath | Should -Be 'openscad-dev'
         }
-        
+
         It 'Falls back to openscad when openscad-dev not available' {
-            Mock-CommandAvailabilityPester -CommandName 'openscad-dev' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'openscad-dev' -Available $false
             Setup-AvailableCommandMock -CommandName 'openscad'
-            
-            $script:capturedProcess = $null
-            Mock Start-Process -MockWith {
-                $script:capturedProcess = @{
-                    FilePath     = $FilePath
-                    ArgumentList = $ArgumentList
-                }
-            }
-            
-            Launch-OpenSCAD -ScriptPath 'model.scad' -ErrorAction SilentlyContinue
-            
-            $script:capturedProcess.FilePath | Should -Be 'openscad'
+            $scriptPath = Join-Path (New-TestTempDirectory -Prefix 'OpenScadFallback') 'model.scad'
+            New-Item -ItemType File -Path $scriptPath -Force | Out-Null
+
+            Launch-OpenSCAD -ScriptPath $scriptPath -ErrorAction SilentlyContinue
+
+            $capture = Get-TestStartProcessCapture
+            $capture.FilePath | Should -Be 'openscad'
         }
-        
+
         It 'Calls openscad with output path for rendering' {
-            Setup-AvailableCommandMock -CommandName 'openscad-dev'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'model.scad' } -MockWith { return $true }
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'model.stl' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'openscad-dev' -MockWith {
-                $script:capturedArgs = $args
+            $tempDir = New-TestTempDirectory -Prefix 'OpenScadRender'
+            $scriptPath = Join-Path $tempDir 'model.scad'
+            $outputPath = Join-Path $tempDir 'model.stl'
+            New-Item -ItemType File -Path $scriptPath -Force | Out-Null
+
+            Set-TestCommandAvailabilityState -CommandName 'openscad-dev' -Available $true
+            $renderMock = {
+                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+
+                $outputIndex = [array]::IndexOf($Arguments, '-o')
+                if ($outputIndex -ge 0 -and ($outputIndex + 1) -lt $Arguments.Count) {
+                    $renderOutput = $Arguments[$outputIndex + 1]
+                    if ($renderOutput) {
+                        New-Item -ItemType File -Path $renderOutput -Force | Out-Null
+                    }
+                }
+
                 $global:LASTEXITCODE = 0
-                return 'Rendering complete'
             }
-            
-            $result = Launch-OpenSCAD -ScriptPath 'model.scad' -OutputPath 'model.stl' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'openscad-dev' -Times 1 -Exactly
-            $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain 'model.stl'
+            Set-Item -Path Function:\openscad-dev -Value $renderMock -Force
+            Set-Item -Path Function:\global:openscad-dev -Value $renderMock -Force
+
+            $result = Launch-OpenSCAD -ScriptPath $scriptPath -OutputPath $outputPath -ErrorAction SilentlyContinue
+
+            $result | Should -Be $outputPath
         }
     }
 }
-

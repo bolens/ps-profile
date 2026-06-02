@@ -87,7 +87,7 @@ if (Get-Command Test-IsWindows -ErrorAction SilentlyContinue) {
             }
         }
 
-        It 'maintains PowerShell execution policy compatibility' {
+        It 'maintains PowerShell execution policy compatibility' -Skip:(-not ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6)) {
             $currentPolicy = Get-ExecutionPolicy
             try {
                 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
@@ -100,7 +100,7 @@ Write-Output 'EXECUTION_POLICY_COMPATIBLE'
                 $result | Should -Match 'EXECUTION_POLICY_COMPATIBLE'
             }
             finally {
-                Set-ExecutionPolicy -ExecutionPolicy $currentPolicy -Scope Process -Force
+                Set-ExecutionPolicy -ExecutionPolicy $currentPolicy -Scope Process -Force -ErrorAction SilentlyContinue
             }
         }
     }

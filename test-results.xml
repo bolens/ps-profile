@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="22" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-05-30" time="23:00:52">
+  <environment nunit-version="2.5.8.0" user-domain="" clr-version="11.0.0" user="panda" os-version="7.0.9-1-cachyos" machine-name="bamboo" cwd="/home/panda/dev/ps-profile" platform="Linux" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="3.8145" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="/home/panda/dev/ps-profile/tests/unit/library-common.tests.ps1" executed="True" result="Success" success="True" time="3.8145" asserts="0" description="/home/panda/dev/ps-profile/tests/unit/library-common.tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Get-RepoRoot" executed="True" result="Success" success="True" time="1.215" asserts="0" description="Get-RepoRoot">
+            <results>
+              <test-suite type="TestFixture" name="Get-RepoRoot.Valid script path handling" executed="True" result="Success" success="True" time="0.8893" asserts="0" description="Get-RepoRoot.Valid script path handling">
+                <results>
+                  <test-case description="Returns repository root for scripts/utils/ location" name="Get-RepoRoot.Valid script path handling.Returns repository root for scripts/utils/ location" time="0.4147" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns repository root for scripts/checks/ location" name="Get-RepoRoot.Valid script path handling.Returns repository root for scripts/checks/ location" time="0.4708" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Get-RepoRoot.Error handling" executed="True" result="Success" success="True" time="1.2124" asserts="0" description="Get-RepoRoot.Error handling">
+                <results>
+                  <test-case description="Throws error for invalid script path" name="Get-RepoRoot.Error handling.Throws error for invalid script path" time="0.3203" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-ProfileDirectory" executed="True" result="Success" success="True" time="2.2959" asserts="0" description="Get-ProfileDirectory">
+            <results>
+              <test-suite type="TestFixture" name="Get-ProfileDirectory.General behavior" executed="True" result="Success" success="True" time="1.079" asserts="0" description="Get-ProfileDirectory.General behavior">
+                <results>
+                  <test-case description="Returns profile.d directory path" name="Get-ProfileDirectory.General behavior.Returns profile.d directory path" time="1.0764" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-PowerShellScripts" executed="True" result="Success" success="True" time="2.309" asserts="0" description="Get-PowerShellScripts">
+            <results>
+              <test-suite type="TestFixture" name="Get-PowerShellScripts.Listing scripts" executed="True" result="Success" success="True" time="0.0084" asserts="0" description="Get-PowerShellScripts.Listing scripts">
+                <results>
+                  <test-case description="Returns PowerShell script files" name="Get-PowerShellScripts.Listing scripts.Returns PowerShell script files" time="0.0041" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Sorts by name when SortByName is specified" name="Get-PowerShellScripts.Listing scripts.Sorts by name when SortByName is specified" time="0.0025" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Get-PowerShellScripts.Error handling" executed="True" result="Success" success="True" time="0.0114" asserts="0" description="Get-PowerShellScripts.Error handling">
+                <results>
+                  <test-case description="Throws error for non-existent path" name="Get-PowerShellScripts.Error handling.Throws error for non-existent path" time="0.0014" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Resolve-DefaultPath" executed="True" result="Success" success="True" time="2.3394" asserts="0" description="Resolve-DefaultPath">
+            <results>
+              <test-suite type="TestFixture" name="Resolve-DefaultPath.Default resolution" executed="True" result="Success" success="True" time="0.0069" asserts="0" description="Resolve-DefaultPath.Default resolution">
+                <results>
+                  <test-case description="Returns default path when Path is null" name="Resolve-DefaultPath.Default resolution.Returns default path when Path is null" time="0.0016" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns default path when Path is empty" name="Resolve-DefaultPath.Default resolution.Returns default path when Path is empty" time="0.001" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns provided path when Path is specified" name="Resolve-DefaultPath.Default resolution.Returns provided path when Path is specified" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Resolve-DefaultPath.Error handling" executed="True" result="Success" success="True" time="0.0101" asserts="0" description="Resolve-DefaultPath.Error handling">
+                <results>
+                  <test-case description="Throws error when provided path does not exist" name="Resolve-DefaultPath.Error handling.Throws error when provided path does not exist" time="0.0018" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Test-PathExists" executed="True" result="Success" success="True" time="2.3495" asserts="0" description="Test-PathExists">
+            <results>
+              <test-suite type="TestFixture" name="Test-PathExists.Valid inputs" executed="True" result="Success" success="True" time="0.0037" asserts="0" description="Test-PathExists.Valid inputs">
+                <results>
+                  <test-case description="Returns true for existing file" name="Test-PathExists.Valid inputs.Returns true for existing file" time="0.0011" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns true for existing directory" name="Test-PathExists.Valid inputs.Returns true for existing directory" time="0.0013" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="Test-PathExists.Error handling" executed="True" result="Success" success="True" time="0.0087" asserts="0" description="Test-PathExists.Error handling">
+                <results>
+                  <test-case description="Throws error for non-existent path" name="Test-PathExists.Error handling.Throws error for non-existent path" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Throws error when path exists but wrong type (file vs directory)" name="Test-PathExists.Error handling.Throws error when path exists but wrong type (file vs directory)" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Test-CommandAvailable" executed="True" result="Success" success="True" time="3.5423" asserts="0" description="Test-CommandAvailable">
+            <results>
+              <test-suite type="TestFixture" name="Test-CommandAvailable.Command availability checks" executed="True" result="Success" success="True" time="1.1902" asserts="0" description="Test-CommandAvailable.Command availability checks">
+                <results>
+                  <test-case description="Returns true for available command" name="Test-CommandAvailable.Command availability checks.Returns true for available command" time="0.478" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Returns false for unavailable command" name="Test-CommandAvailable.Command availability checks.Returns false for unavailable command" time="0.7089" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-PowerShellExecutable" executed="True" result="Success" success="True" time="3.5492" asserts="0" description="Get-PowerShellExecutable">
+            <results>
+              <test-suite type="TestFixture" name="Get-PowerShellExecutable.General behavior" executed="True" result="Success" success="True" time="0.0043" asserts="0" description="Get-PowerShellExecutable.General behavior">
+                <results>
+                  <test-case description="Returns executable name" name="Get-PowerShellExecutable.General behavior.Returns executable name" time="0.0017" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Exit Code Constants" executed="True" result="Success" success="True" time="3.5597" asserts="0" description="Exit Code Constants">
+            <results>
+              <test-suite type="TestFixture" name="Exit Code Constants.Exports constants" executed="True" result="Success" success="True" time="0.008" asserts="0" description="Exit Code Constants.Exports constants">
+                <results>
+                  <test-case description="Exports EXIT_SUCCESS constant" name="Exit Code Constants.Exports constants.Exports EXIT_SUCCESS constant" time="0.0015" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Exports EXIT_VALIDATION_FAILURE constant" name="Exit Code Constants.Exports constants.Exports EXIT_VALIDATION_FAILURE constant" time="0.0012" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Exports EXIT_SETUP_ERROR constant" name="Exit Code Constants.Exports constants.Exports EXIT_SETUP_ERROR constant" time="0.0012" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Exports EXIT_OTHER_ERROR constant" name="Exit Code Constants.Exports constants.Exports EXIT_OTHER_ERROR constant" time="0.0013" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

@@ -2,9 +2,8 @@
 # Performance-related helper tests covering metrics and regression detection.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     # Import the Performance and CodeMetrics modules (Common.psm1 no longer exists)
     $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     Import-Module (Join-Path $libPath 'performance' 'PerformanceMeasurement.psm1') -DisableNameChecking -ErrorAction Stop -Global

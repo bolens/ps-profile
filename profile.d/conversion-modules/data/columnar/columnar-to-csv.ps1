@@ -71,7 +71,7 @@ const fs = require('fs');
         fs.writeFileSync(process.argv[3], csvLines.join('\n'));
     } catch (error) {
         if (error.code === 'MODULE_NOT_FOUND') {
-            console.error('Error: parquetjs package is not installed. Install it with: pnpm add -g parquetjs');
+            console.error('Error: parquetjs package is not installed. Install it with: __NODE_INSTALL_CMD__');
         } else {
             console.error('Error:', error.message);
         }
@@ -80,6 +80,7 @@ const fs = require('fs');
 })();
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "parquet-to-csv-$(Get-Random).js"
+            $nodeScript = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'apache-arrow', 'parquetjs' -Global
             Set-Content -LiteralPath $tempScript -Value $nodeScript -Encoding UTF8
             try {
                 $result = Invoke-NodeScript -ScriptPath $tempScript -Arguments $InputPath, $OutputPath
@@ -115,7 +116,7 @@ const fs = require('fs');
             }
             catch {
                 $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|parquetjs') {
-                    "parquetjs package is not installed. Install it with: pnpm add -g parquetjs"
+                    Resolve-NodeInstallHintMessage -Message "parquetjs package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'parquetjs' -Global
                 }
                 else {
                     "Failed to convert CSV to Parquet: $_"
@@ -161,7 +162,7 @@ const fs = require('fs');
             }
             catch {
                 $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|apache-arrow') {
-                    "apache-arrow package is not installed. Install it with: pnpm add -g apache-arrow"
+                    Resolve-NodeInstallHintMessage -Message "apache-arrow package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'apache-arrow' -Global
                 }
                 else {
                     "Failed to convert Arrow to CSV: $_"
@@ -196,7 +197,7 @@ const fs = require('fs');
             }
             catch {
                 $errorMsg = if ($_.Exception.Message -match 'MODULE_NOT_FOUND|package.*not installed|apache-arrow') {
-                    "apache-arrow package is not installed. Install it with: pnpm add -g apache-arrow"
+                    Resolve-NodeInstallHintMessage -Message "apache-arrow package is not installed. Install it with: __NODE_INSTALL_CMD__" -PackageNames 'apache-arrow' -Global
                 }
                 else {
                     "Failed to convert CSV to Arrow: $_"

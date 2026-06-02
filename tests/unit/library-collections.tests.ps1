@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
         $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
@@ -50,55 +49,54 @@ AfterAll {
     Remove-Module Collections -ErrorAction SilentlyContinue -Force
 }
 
-Describe 'Collections Module Functions' {
-    BeforeAll {
-        # Clear any existing Pester mocks that might interfere
-        if (Get-Command Clear-Mock -ErrorAction SilentlyContinue) {
-            Clear-Mock -ErrorAction SilentlyContinue
+function global:Install-TestReflectionWrappers {
+    $mockReflectionPath = Join-Path $PSScriptRoot '..\TestSupport\Mocking\MockReflection.psm1'
+    if (Test-Path -LiteralPath $mockReflectionPath) {
+        Import-Module $mockReflectionPath -DisableNameChecking -ErrorAction Stop -Force -Global
+    }
+
+    $functionsToExport = @('Invoke-MakeGenericTypeWrapper', 'Invoke-CreateInstanceWrapper', 'Invoke-TypeConstructorWrapper')
+    foreach ($funcName in $functionsToExport) {
+        $moduleFunc = Get-Command $funcName -ErrorAction SilentlyContinue -All | Where-Object { $_.Source -eq 'MockReflection' } | Select-Object -First 1
+        if ($moduleFunc) {
+            Set-Item -Path "Function:\global:$funcName" -Value $moduleFunc.ScriptBlock -Force -ErrorAction SilentlyContinue
         }
-        
-        # Ensure wrapper functions are available for all tests
-        # Import MockReflection module to provide wrapper functions
-        $mockReflectionPath = Join-Path $PSScriptRoot '..\TestSupport\Mocking\MockReflection.psm1'
-        if (Test-Path -LiteralPath $mockReflectionPath) {
-            Import-Module $mockReflectionPath -DisableNameChecking -ErrorAction SilentlyContinue -Force -Global
-        }
-        
-        # Ensure wrapper functions are in global scope and working
-        $functionsToExport = @('Invoke-MakeGenericTypeWrapper', 'Invoke-CreateInstanceWrapper', 'Invoke-TypeConstructorWrapper')
-        foreach ($funcName in $functionsToExport) {
-            # Remove any existing mocks for this function
-            if (Get-Command Clear-Mock -ErrorAction SilentlyContinue) {
-                Clear-Mock -CommandName $funcName -ErrorAction SilentlyContinue
-            }
-            
-            # Check if function exists and works
-            $existingFunc = Get-Command $funcName -ErrorAction SilentlyContinue -Scope Global
-            if (-not $existingFunc) {
-                # Create fallback wrapper functions if not available
-                switch ($funcName) {
-                    'Invoke-MakeGenericTypeWrapper' {
-                        function global:Invoke-MakeGenericTypeWrapper {
-                            param([type]$GenericTypeDefinition, [type[]]$TypeArguments)
-                            return $GenericTypeDefinition.MakeGenericType($TypeArguments)
-                        }
+        elseif (-not (Get-Command $funcName -ErrorAction SilentlyContinue -Scope Global)) {
+            switch ($funcName) {
+                'Invoke-MakeGenericTypeWrapper' {
+                    function global:Invoke-MakeGenericTypeWrapper {
+                        param([type]$GenericTypeDefinition, [type[]]$TypeArguments)
+                        return $GenericTypeDefinition.MakeGenericType($TypeArguments)
                     }
-                    'Invoke-CreateInstanceWrapper' {
-                        function global:Invoke-CreateInstanceWrapper {
-                            param([type]$Type)
-                            return [System.Activator]::CreateInstance($Type)
-                        }
+                }
+                'Invoke-CreateInstanceWrapper' {
+                    function global:Invoke-CreateInstanceWrapper {
+                        param([type]$Type)
+                        return [System.Activator]::CreateInstance($Type)
                     }
-                    'Invoke-TypeConstructorWrapper' {
-                        function global:Invoke-TypeConstructorWrapper {
-                            param([type]$Type)
-                            return $Type::new()
-                        }
+                }
+                'Invoke-TypeConstructorWrapper' {
+                    function global:Invoke-TypeConstructorWrapper {
+                        param([type]$Type)
+                        return $Type::new()
                     }
                 }
             }
         }
-        
+    }
+}
+
+function global:Reset-TestCollectionsModule {
+    Install-TestReflectionWrappers
+    Remove-Module Collections -ErrorAction SilentlyContinue -Force
+    Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
+}
+
+Describe 'Collections Module Functions' {
+    BeforeAll {
+        # Ensure wrapper functions are available for all tests
+        Install-TestReflectionWrappers
+
         # Verify wrapper functions work by testing them
         try {
             $testListType = [System.Collections.Generic.List`1].MakeGenericType([object])
@@ -111,13 +109,11 @@ Describe 'Collections Module Functions' {
             Write-Warning "Error testing wrapper functions during setup: $($_.Exception.Message)"
         }
     }
-    
+
     BeforeEach {
-        # Clear any Pester mocks before each test to prevent interference
-        if (Get-Command Clear-Mock -ErrorAction SilentlyContinue) {
-            Clear-Mock -ErrorAction SilentlyContinue
-        }
+        Reset-TestCollectionsModule
     }
+
     Context 'New-ObjectList' {
         It 'Creates a new List of PSCustomObject' {
             # Call function directly - same pattern as "Returns empty list initially" which passes
@@ -375,16 +371,12 @@ Describe 'Collections Module Functions' {
         }
 
         It 'New-ObjectList handles errors gracefully' {
-            # Verify the function doesn't throw when called normally
-            { $list = New-ObjectList } | Should -Not -Throw
-            # Access Count directly like the passing tests
+            $list = New-ObjectList
             $list.Count | Should -Be 0
         }
 
         It 'New-StringList handles errors gracefully' {
-            # Verify the function doesn't throw when called normally
-            { $list = New-StringList } | Should -Not -Throw
-            # Access Count directly like the passing tests
+            $list = New-StringList
             $list.Count | Should -Be 0
         }
 
@@ -522,285 +514,218 @@ Describe 'Collections Module Functions' {
         }
     }
 
-    Context 'Error Path Testing with Mocking' {
-        BeforeAll {
-            # Import MockReflection module once for all tests in this context
-            $mockReflectionPath = Join-Path $PSScriptRoot '..\TestSupport\Mocking\MockReflection.psm1'
-            if (Test-Path -LiteralPath $mockReflectionPath) {
-                Import-Module $mockReflectionPath -DisableNameChecking -ErrorAction Stop -Force -Global
-            }
-            
-            # Ensure wrapper functions are in global scope so Get-Command can find them
-            # Copy module functions to global scope if they're not already there
-            # This is critical - the module checks for these functions at runtime
-            $functionsToExport = @('Invoke-MakeGenericTypeWrapper', 'Invoke-CreateInstanceWrapper', 'Invoke-TypeConstructorWrapper')
-            foreach ($funcName in $functionsToExport) {
-                $moduleFunc = Get-Command $funcName -ErrorAction SilentlyContinue -All | Where-Object { $_.Source -eq 'MockReflection' } | Select-Object -First 1
-                if ($moduleFunc) {
-                    # Copy the function from the module to global scope
-                    $funcDef = $moduleFunc.ScriptBlock
-                    Set-Item -Path "Function:\global:$funcName" -Value $funcDef -Force -ErrorAction SilentlyContinue
-                }
-                elseif (-not (Get-Command $funcName -ErrorAction SilentlyContinue -Scope Global)) {
-                    # Fallback: create a simple wrapper if module function not found
-                    switch ($funcName) {
-                        'Invoke-MakeGenericTypeWrapper' {
-                            function global:Invoke-MakeGenericTypeWrapper {
-                                param([type]$GenericTypeDefinition, [type[]]$TypeArguments)
-                                return $GenericTypeDefinition.MakeGenericType($TypeArguments)
-                            }
-                        }
-                        'Invoke-CreateInstanceWrapper' {
-                            function global:Invoke-CreateInstanceWrapper {
-                                param([type]$Type)
-                                return [System.Activator]::CreateInstance($Type)
-                            }
-                        }
-                        'Invoke-TypeConstructorWrapper' {
-                            function global:Invoke-TypeConstructorWrapper {
-                                param([type]$Type)
-                                return $Type::new()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        BeforeEach {
-            # Ensure clean state for each test
-            # Verify wrapper functions are still available before reloading module
-            $wrapperAvailable = Test-Path Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
-            if (-not $wrapperAvailable) {
-                # Re-import MockReflection if wrapper functions are missing
-                $mockReflectionPath = Join-Path $PSScriptRoot '..\TestSupport\Mocking\MockReflection.psm1'
-                if (Test-Path -LiteralPath $mockReflectionPath) {
-                    Import-Module $mockReflectionPath -DisableNameChecking -ErrorAction Stop -Force -Global
-                }
-            }
-            
-            # Remove and reimport Collections module so it picks up wrapper functions
-            Remove-Module Collections -ErrorAction SilentlyContinue -Force
-            Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-        }
-
+    Context 'Error Path Testing with TestSupport Stubs' {
         AfterAll {
-            # Clean up mocks
-            Remove-Module Collections -ErrorAction SilentlyContinue -Force
+            Reset-TestCollectionsModule
             Remove-Module MockReflection -ErrorAction SilentlyContinue -Force
         }
 
-
-        It 'New-TypedList handles invalid type string' {
-            # Test error path when type string is invalid
-            # This covers the type conversion logic
-            $originalVerbosePreference = $VerbosePreference
-            try {
-                $VerbosePreference = 'Continue'
-                
-                # Reload module
-                Remove-Module Collections -ErrorAction SilentlyContinue -Force
-                Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
-                # Try to create list with invalid type string
-                # This should be handled gracefully by the type conversion logic
-                { New-TypedList -Type 'InvalidTypeNameThatDoesNotExist' -Verbose -ErrorAction Stop } | Should -Throw -Because "Invalid type should throw an error"
-            }
-            catch {
-                # Expected - invalid type should throw
-            }
-            finally {
-                $VerbosePreference = $originalVerbosePreference
-            }
-        }
-
         It 'New-ObjectList handles MakeGenericType returning null' {
-            # Mock MakeGenericType wrapper to return null to test error path
-            # This covers lines 45-48 (null check, Write-Verbose, return null)
+            # Stub MakeGenericType wrapper to return null to test error path
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock the wrapper function to return null
-                Mock -CommandName Invoke-MakeGenericTypeWrapper -MockWith { return $null } -ParameterFilter {
-                    $GenericTypeDefinition -eq [System.Collections.Generic.List`1] -and
-                    $TypeArguments.Count -eq 1 -and
-                    $TypeArguments[0] -eq [object]
+
+                function global:Invoke-MakeGenericTypeWrapper {
+                    param(
+                        [type]$GenericTypeDefinition,
+                        [type[]]$TypeArguments
+                    )
+
+                    if ($GenericTypeDefinition -eq [System.Collections.Generic.List`1] -and
+                        $TypeArguments.Count -eq 1 -and
+                        $TypeArguments[0] -eq [object]) {
+                        return $null
+                    }
+
+                    return $GenericTypeDefinition.MakeGenericType($TypeArguments)
                 }
-                
-                # Reload module so it picks up the mocked wrapper function
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-ObjectList -Verbose
                 $result | Should -BeNullOrEmpty -Because "MakeGenericType returning null should result in null return"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
 
         It 'New-ObjectList handles CreateInstance returning null' {
-            # Test error path when CreateInstance returns null
-            # This covers lines 54-57 (null check, Write-Verbose, return null)
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock CreateInstance wrapper to return null
-                Mock -CommandName Invoke-CreateInstanceWrapper -MockWith { return $null }
-                
-                # Reload module so it picks up the mocked wrapper function
+
+                function global:Invoke-CreateInstanceWrapper {
+                    param([type]$Type)
+                    return $null
+                }
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-ObjectList -Verbose
                 $result | Should -BeNullOrEmpty -Because "CreateInstance returning null should result in null return"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
 
         It 'New-ObjectList handles exceptions in try-catch block' {
-            # Test catch block error handling
-            # This covers lines 63-66 (catch block, Write-Verbose, return null)
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock MakeGenericType wrapper to throw exception
-                Mock -CommandName Invoke-MakeGenericTypeWrapper -MockWith {
-                    throw [System.InvalidOperationException]::new("Test exception for error path coverage")
+
+                function global:Invoke-MakeGenericTypeWrapper {
+                    param(
+                        [type]$GenericTypeDefinition,
+                        [type[]]$TypeArguments
+                    )
+
+                    throw [System.InvalidOperationException]::new('Test exception for error path coverage')
                 }
-                
-                # Reload module so it picks up the mocked wrapper function
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-ObjectList -Verbose
                 $result | Should -BeNullOrEmpty -Because "Exception in try block should be caught and return null"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
 
         It 'New-StringList handles constructor returning null' {
-            # Test error path when constructor returns null
-            # This covers lines 95-98 (null check, Write-Verbose, return null)
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock constructor wrapper to return null
-                Mock -CommandName Invoke-TypeConstructorWrapper -MockWith { return $null } -ParameterFilter {
-                    $Type -eq [System.Collections.Generic.List[string]]
+
+                function global:Invoke-TypeConstructorWrapper {
+                    param([type]$Type)
+
+                    if ($Type -eq [System.Collections.Generic.List[string]]) {
+                        return $null
+                    }
+
+                    return $Type::new()
                 }
-                
-                # Reload module so it picks up the mocked wrapper function
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-StringList -Verbose
                 $result | Should -BeNullOrEmpty -Because "Constructor returning null should result in null return"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
 
         It 'New-StringList handles exceptions in try-catch block' {
-            # Test catch block error handling
-            # This covers lines 103-106 (catch block, Write-Verbose, return null)
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock constructor wrapper to throw exception
-                Mock -CommandName Invoke-TypeConstructorWrapper -MockWith {
-                    throw [System.InvalidOperationException]::new("Test exception for error path coverage")
-                } -ParameterFilter {
-                    $Type -eq [System.Collections.Generic.List[string]]
+
+                function global:Invoke-TypeConstructorWrapper {
+                    param([type]$Type)
+
+                    if ($Type -eq [System.Collections.Generic.List[string]]) {
+                        throw [System.InvalidOperationException]::new('Test exception for error path coverage')
+                    }
+
+                    return $Type::new()
                 }
-                
-                # Reload module so it picks up the mocked wrapper function
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-StringList -Verbose
                 $result | Should -BeNullOrEmpty -Because "Exception in try block should be caught and return null"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
 
         It 'New-TypedList handles MakeGenericType returning null' {
-            # Test error path when MakeGenericType returns null
-            # This covers lines 160-163 (null check, Write-Verbose, return null)
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock MakeGenericType wrapper to return null
-                Mock -CommandName Invoke-MakeGenericTypeWrapper -MockWith { return $null }
-                
-                # Reload module so it picks up the mocked wrapper function
+
+                function global:Invoke-MakeGenericTypeWrapper {
+                    param(
+                        [type]$GenericTypeDefinition,
+                        [type[]]$TypeArguments
+                    )
+
+                    return $null
+                }
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-TypedList -Type 'int' -Verbose
                 $result | Should -BeNullOrEmpty -Because "MakeGenericType returning null should result in null return"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
 
         It 'New-TypedList handles CreateInstance returning null' {
-            # Test error path when CreateInstance returns null
-            # This covers lines 169-172 (null check, Write-Verbose, return null)
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock CreateInstance wrapper to return null
-                Mock -CommandName Invoke-CreateInstanceWrapper -MockWith { return $null }
-                
-                # Reload module so it picks up the mocked wrapper function
+
+                function global:Invoke-CreateInstanceWrapper {
+                    param([type]$Type)
+                    return $null
+                }
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-TypedList -Type 'int' -Verbose
                 $result | Should -BeNullOrEmpty -Because "CreateInstance returning null should result in null return"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
 
         It 'New-TypedList handles exceptions in try-catch block' {
-            # Test catch block error handling
-            # This covers lines 178-181 (catch block, Write-Verbose, return null)
             $originalVerbosePreference = $VerbosePreference
             try {
                 $VerbosePreference = 'Continue'
-                
-                # Mock MakeGenericType wrapper to throw exception
-                Mock -CommandName Invoke-MakeGenericTypeWrapper -MockWith {
-                    throw [System.InvalidOperationException]::new("Test exception for error path coverage")
+
+                function global:Invoke-MakeGenericTypeWrapper {
+                    param(
+                        [type]$GenericTypeDefinition,
+                        [type[]]$TypeArguments
+                    )
+
+                    throw [System.InvalidOperationException]::new('Test exception for error path coverage')
                 }
-                
-                # Reload module so it picks up the mocked wrapper function
+
                 Remove-Module Collections -ErrorAction SilentlyContinue -Force
                 Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-                
+
                 $result = New-TypedList -Type 'int' -Verbose
                 $result | Should -BeNullOrEmpty -Because "Exception in try block should be caught and return null"
             }
             finally {
                 $VerbosePreference = $originalVerbosePreference
+                Reset-TestCollectionsModule
             }
         }
     }

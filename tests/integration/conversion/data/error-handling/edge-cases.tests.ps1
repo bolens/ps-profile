@@ -22,7 +22,7 @@ Describe 'Edge Case Handling Tests' {
         It 'ConvertFrom-BsonToJson handles invalid BSON gracefully' {
             Get-Command ConvertFrom-BsonToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -40,7 +40,7 @@ Describe 'Edge Case Handling Tests' {
         It 'ConvertFrom-MessagePackToJson handles invalid MessagePack gracefully' {
             Get-Command ConvertFrom-MessagePackToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -58,7 +58,7 @@ Describe 'Edge Case Handling Tests' {
         It 'ConvertFrom-AvroToJson handles invalid Avro gracefully' {
             Get-Command ConvertFrom-AvroToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {

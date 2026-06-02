@@ -3,26 +3,23 @@
 # Unit tests for New-PythonProject and Install-PythonPackage functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-python.ps1')
+    . (Join-Path $script:ProfileDir 'lang-python-env.ps1')
+    . (Join-Path $script:ProfileDir 'lang-python-packages.ps1')
+    $script:ProjectRoot = New-TestTempDirectory -Prefix 'PythonProjectTest'
 }
 
 Describe 'lang-python.ps1 - New-PythonProject' {
     BeforeEach {
-        $script:TestDrive = $TestDrive
+        Clear-TestCommandInvocationCapture
     }
 
     Context 'Project creation' {
         It 'Creates project directory structure' {
-            $projectPath = New-PythonProject -Name 'testproject' -Path $script:TestDrive
+            $projectPath = New-PythonProject -Name 'testproject' -Path $script:ProjectRoot
 
             $projectPath | Should -Not -BeNullOrEmpty
             Test-Path -LiteralPath $projectPath | Should -Be $true
@@ -32,36 +29,29 @@ Describe 'lang-python.ps1 - New-PythonProject' {
         }
 
         It 'Creates requirements.txt when uv is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames 'uv'
 
-            $projectPath = New-PythonProject -Name 'testproject2' -Path $script:TestDrive
+            $projectPath = New-PythonProject -Name 'testproject2' -Path $script:ProjectRoot
 
             Test-Path -LiteralPath (Join-Path $projectPath 'requirements.txt') | Should -Be $true
         }
 
         It 'Uses uv init when UseUV is specified and uv is available' {
-            Setup-AvailableCommandMock -CommandName 'uv'
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Project initialized'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'uv' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Project initialized' 
-            }
-
-            $projectPath = New-PythonProject -Name 'testproject3' -Path $script:TestDrive -UseUV
+            $projectPath = New-PythonProject -Name 'testproject3' -Path $script:ProjectRoot -UseUV
 
             $projectPath | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'init'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'init'
         }
 
         It 'Does not overwrite existing files' {
-            $projectPath = New-PythonProject -Name 'testproject4' -Path $script:TestDrive
+            $projectPath = New-PythonProject -Name 'testproject4' -Path $script:ProjectRoot
             $readmePath = Join-Path $projectPath 'README.md'
             Set-Content -Path $readmePath -Value 'Custom README'
 
-            # Create again - should not overwrite
-            $projectPath2 = New-PythonProject -Name 'testproject4' -Path $script:TestDrive
+            $null = New-PythonProject -Name 'testproject4' -Path $script:ProjectRoot
 
             Get-Content -Path $readmePath | Should -Contain 'Custom README'
         }
@@ -70,27 +60,17 @@ Describe 'lang-python.ps1 - New-PythonProject' {
 
 Describe 'lang-python.ps1 - Install-PythonPackage' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('uv', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('pip', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('uv', [ref]$null)
-            $null = $global:AssumedAvailableCommands.TryRemove('pip', [ref]$null)
-        }
+        Mark-TestCommandsUnavailable -CommandNames @('uv', 'pip')
     }
 
     Context 'Tool not available' {
         It 'Returns null when neither uv nor pip is available' {
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'pip' -Available $false
-
             $result = Install-PythonPackage -Packages @('requests') -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -99,79 +79,63 @@ Describe 'lang-python.ps1 - Install-PythonPackage' {
 
     Context 'Tool available' {
         It 'Prefers uv when available' {
-            Setup-AvailableCommandMock -CommandName 'uv'
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Installed requests'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'uv' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Installed requests' 
-            }
+            $result = Install-PythonPackage -Packages @('requests') -ErrorAction SilentlyContinue
 
-            $result = Install-PythonPackage -Packages @('requests')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'pip'
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain 'requests'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'pip'
+            $args | Should -Contain 'install'
+            $args | Should -Contain 'requests'
+            $result | Should -Be 'Installed requests'
         }
 
         It 'Falls back to pip when uv is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
-            Setup-AvailableCommandMock -CommandName 'pip'
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Installed requests'
+            Mark-TestCommandsUnavailable -CommandNames 'uv'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'pip' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Installed requests' 
-            }
+            $result = Install-PythonPackage -Packages @('requests') -ErrorAction SilentlyContinue
 
-            $result = Install-PythonPackage -Packages @('requests')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain 'requests'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'install'
+            $args | Should -Contain 'requests'
+            $result | Should -Be 'Installed requests'
         }
 
         It 'Calls installer with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'uv'
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Installed package'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'uv' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Installed package' 
+            $params = @{
+                Packages  = @('pytest')
+                Arguments = @('--dev')
             }
+            Install-PythonPackage @params -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Install-PythonPackage -Packages @('pytest') -Arguments @('--dev')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '--dev'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--dev'
         }
     }
 
     Context 'Error handling' {
         It 'Falls back to pip when uv fails' {
-            Setup-AvailableCommandMock -CommandName 'uv'
-            Setup-AvailableCommandMock -CommandName 'pip'
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Installed package'
 
-            Mock -CommandName 'uv' -MockWith {
+            $global:AssumedAvailableCommands['uv'] = $true
+            $global:TestCachedCommandCache['uv'] = [pscustomobject]@{
+                Result  = $true
+                Expires = (Get-Date).AddHours(24)
+            }
+            $throwingUv = {
                 throw [System.Management.Automation.CommandNotFoundException]::new('uv: command failed')
             }
-
-            $script:capturedArgs = $null
-            Mock -CommandName 'pip' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Installed package' 
-            }
+            Set-Item -Path 'Function:\global:uv' -Value $throwingUv -Force
+            Set-Item -Path 'Function:\uv' -Value $throwingUv -Force
 
             $result = Install-PythonPackage -Packages @('requests') -ErrorAction SilentlyContinue
 
             $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'install'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'install'
         }
     }
 }
-

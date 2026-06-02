@@ -52,7 +52,7 @@ function Invoke-Angular {
         ng @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -DefaultInstallCommand 'npm install -g npm or npm install -g @angular/cli' -Tool 'npx or ng'
+        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -Tool 'npx or ng'
     }
 }
 
@@ -87,7 +87,7 @@ function New-AngularApp {
         ng new @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -DefaultInstallCommand 'npm install -g npm or npm install -g @angular/cli' -Tool 'npx or ng'
+        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -Tool 'npx or ng'
     }
 }
 
@@ -122,7 +122,7 @@ function Start-AngularDev {
         ng serve @Arguments
     }
     else {
-        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -DefaultInstallCommand 'npm install -g npm or npm install -g @angular/cli' -Tool 'npx or ng'
+        Invoke-MissingToolWarning -ToolName '@angular/cli' -ToolType 'node-package' -Tool 'npx or ng'
     }
 }
 

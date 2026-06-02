@@ -141,7 +141,7 @@ try:
     with open(sys.argv[2], 'w', encoding='utf-8') as f:
         json.dump(result, f, indent=2, default=str, ensure_ascii=False)
 except ImportError:
-    print('Error: pyodbc package is not installed. Install with: uv pip install pyodbc', file=sys.stderr)
+    print('Error: pyodbc package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     print('Note: On Windows, you may also need Microsoft Access Database Engine (ACE).', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
@@ -149,6 +149,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "access-decode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pyodbc' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $args = @($InputPath, $OutputPath)
@@ -199,13 +200,14 @@ try:
     raise NotImplementedError("Creating new Access databases from JSON is not fully supported. Use existing database or convert to SQLite first.")
     
 except ImportError:
-    print('Error: pyodbc package is not installed. Install with: uv pip install pyodbc', file=sys.stderr)
+    print('Error: pyodbc package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "access-encode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pyodbc' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -296,13 +298,14 @@ try:
     cursor.close()
     conn.close()
 except ImportError:
-    print('Error: pyodbc package is not installed. Install with: uv pip install pyodbc', file=sys.stderr)
+    print('Error: pyodbc package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "access-to-csv-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pyodbc' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $args = @($InputPath, $OutputPath)

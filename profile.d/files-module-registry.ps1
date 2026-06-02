@@ -309,7 +309,7 @@ function Load-EnsureModules {
             
             if ($moduleExists) {
                 try {
-                    . $modulePath
+                    Invoke-GlobalProfileScript -Path $modulePath
                     $loadedCount++
                 }
                 catch {

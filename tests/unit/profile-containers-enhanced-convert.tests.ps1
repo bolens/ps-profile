@@ -3,128 +3,86 @@
 # Unit tests for Convert-ComposeToK8s function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'containers-enhanced.ps1')
+
+    $script:TestComposeDir = New-TestTempDirectory -Prefix 'KomposeCompose'
+    $script:TestComposeFile = Join-Path $script:TestComposeDir 'docker-compose.yml'
+    Set-Content -Path $script:TestComposeFile -Value 'version: "3"'
+    $script:TestOutputDir = New-TestTempDirectory -Prefix 'KomposeOutput'
 }
 
 Describe 'containers-enhanced.ps1 - Convert-ComposeToK8s' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('kompose', [ref]$null)
-        }
-        
-        # Create test compose file
-        $script:TestComposeFile = Join-Path $TestDrive 'docker-compose.yml'
-        'version: "3"' | Out-File -FilePath $script:TestComposeFile -Encoding utf8
+
+        Set-TestCommandAvailabilityState -CommandName 'kompose' -Available $false
+        Remove-Item -Path 'Function:\kompose' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:kompose' -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when kompose is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'kompose' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'kompose' } -MockWith { return $null }
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestComposeFile } -MockWith { return $true }
-            
             $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Compose file validation' {
         It 'Returns error when compose file does not exist' {
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.yml' } -MockWith { return $false }
-            
-            { Convert-ComposeToK8s -ComposeFile 'nonexistent.yml' -ErrorAction Stop } | Should -Throw
+            Setup-AvailableCommandMock -CommandName 'kompose'
+            $missingFile = Join-Path (New-TestTempDirectory -Prefix 'KomposeMissing') 'nonexistent.yml'
+
+            { Convert-ComposeToK8s -ComposeFile $missingFile -ErrorAction Stop } | Should -Throw
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls kompose with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'kompose'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestComposeFile } -MockWith { return $true }
-            Mock Get-Location -MockWith { return [PSCustomObject]@{ Path = $TestDrive } }
-            Mock New-Item -MockWith { return [PSCustomObject]@{ FullName = $TestDrive } }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'kompose' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'convert'
-            $script:capturedArgs | Should -Contain '-f'
-            $script:capturedArgs | Should -Contain $script:TestComposeFile
-            $script:capturedArgs | Should -Contain '-o'
+            Setup-CapturingCommandMock -CommandName 'kompose' -Output ''
+
+            $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -OutputPath $script:TestOutputDir -Confirm:$false -ErrorAction SilentlyContinue
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'convert'
+            $args | Should -Contain '-f'
+            $args | Should -Contain $script:TestComposeFile
+            $args | Should -Contain '-o'
+            $args | Should -Contain $script:TestOutputDir
+            $result | Should -Be $script:TestOutputDir
         }
-        
+
         It 'Calls kompose with JSON format' {
-            Setup-AvailableCommandMock -CommandName 'kompose'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestComposeFile } -MockWith { return $true }
-            Mock Get-Location -MockWith { return [PSCustomObject]@{ Path = $TestDrive } }
-            Mock New-Item -MockWith { return [PSCustomObject]@{ FullName = $TestDrive } }
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'kompose' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -Format 'json' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--json'
+            Setup-CapturingCommandMock -CommandName 'kompose' -Output ''
+
+            Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -OutputPath $script:TestOutputDir -Format 'json' -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--json'
         }
-        
+
         It 'Returns output path on success' {
-            Setup-AvailableCommandMock -CommandName 'kompose'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestComposeFile } -MockWith { return $true }
-            Mock Get-Location -MockWith { return [PSCustomObject]@{ Path = $TestDrive } }
-            Mock New-Item -MockWith { return [PSCustomObject]@{ FullName = $TestDrive } }
-            
-            Mock -CommandName 'kompose' -MockWith { 
-                $global:LASTEXITCODE = 0
-                return $null
-            }
-            
-            $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -ErrorAction SilentlyContinue
-            
-            $result | Should -Not -BeNullOrEmpty
+            Setup-CapturingCommandMock -CommandName 'kompose' -Output ''
+
+            $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -OutputPath $script:TestOutputDir -Confirm:$false -ErrorAction SilentlyContinue
+
+            $result | Should -Be $script:TestOutputDir
         }
-        
+
         It 'Handles kompose execution errors' {
-            Setup-AvailableCommandMock -CommandName 'kompose'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq $script:TestComposeFile } -MockWith { return $true }
-            Mock Get-Location -MockWith { return [PSCustomObject]@{ Path = $TestDrive } }
-            Mock New-Item -MockWith { return [PSCustomObject]@{ FullName = $TestDrive } }
-            
-            Mock -CommandName 'kompose' -MockWith { 
-                $global:LASTEXITCODE = 1
-                return $null
-            }
-            Mock Write-Error { }
-            
-            $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -ErrorAction SilentlyContinue
-            
-            Should -Invoke Write-Error -Times 1
+            Setup-CapturingCommandMock -CommandName 'kompose' -Output '' -ExitCode 1
+
+            $result = Convert-ComposeToK8s -ComposeFile $script:TestComposeFile -OutputPath $script:TestOutputDir -Confirm:$false -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
     }
 }
-

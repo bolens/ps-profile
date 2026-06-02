@@ -28,7 +28,7 @@ Describe 'Zstandard (zstd) Compression Tests' {
     Context 'Zstandard (zstd) Compression' {
         It 'Compress-Zstd compresses a file' {
             if (-not $script:zstdAvailable) {
-                Set-ItResult -Skipped -Because "zstd command is not available. Install: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'zstd' -Context 'zstd command is not available')
                 return
             }
             
@@ -49,7 +49,7 @@ Describe 'Zstandard (zstd) Compression Tests' {
         
         It 'Expand-Zstd decompresses a zstd file' {
             if (-not $script:zstdAvailable) {
-                Set-ItResult -Skipped -Because "zstd command is not available. Install: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'zstd' -Context 'zstd command is not available')
                 return
             }
             
@@ -74,7 +74,7 @@ Describe 'Zstandard (zstd) Compression Tests' {
         
         It 'zstd compression and decompression roundtrip' {
             if (-not $script:zstdAvailable) {
-                Set-ItResult -Skipped -Because "zstd command is not available. Install: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'zstd' -Context 'zstd command is not available')
                 return
             }
             
@@ -99,7 +99,7 @@ Describe 'Zstandard (zstd) Compression Tests' {
         
         It 'Compress-Zstd with custom compression level' {
             if (-not $script:zstdAvailable) {
-                Set-ItResult -Skipped -Because "zstd command is not available. Install: Windows (scoop install zstd), Linux (apt install zstd), macOS (brew install zstd)"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'zstd' -Context 'zstd command is not available')
                 return
             }
             

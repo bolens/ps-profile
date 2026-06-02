@@ -3,39 +3,28 @@
 # Unit tests for Build-Maven function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-java.ps1')
+    . (Join-Path $script:ProfileDir 'lang-java-build.ps1')
 }
 
 Describe 'lang-java.ps1 - Build-Maven' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('mvn', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('mvn', [ref]$null)
-        }
+        Set-TestCommandAvailabilityState -CommandName 'mvn' -Available $false
+        Remove-Item -Path 'Function:\mvn' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:mvn' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
         It 'Returns null when mvn is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'mvn' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'mvn' } -MockWith { return $null }
-
             $result = Build-Maven -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,59 +33,31 @@ Describe 'lang-java.ps1 - Build-Maven' {
 
     Context 'Tool available' {
         It 'Calls mvn without arguments' {
-            Setup-AvailableCommandMock -CommandName 'mvn'
+            Setup-CapturingCommandMock -CommandName 'mvn' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'mvn' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            $result = Build-Maven -ErrorAction SilentlyContinue
 
-            $result = Build-Maven
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'Build complete'
         }
 
         It 'Calls mvn with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'mvn'
+            Setup-CapturingCommandMock -CommandName 'mvn' -Output 'Build complete'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'mvn' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
+            Build-Maven 'clean', 'install' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Build-Maven -Arguments @('clean', 'install')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'clean'
-            $script:capturedArgs | Should -Contain 'install'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'clean'
+            $args | Should -Contain 'install'
         }
     }
 
     Context 'Error handling' {
         It 'Handles mvn execution errors' {
-            Setup-AvailableCommandMock -CommandName 'mvn'
+            Set-TestCommandThrowingMock -CommandName 'mvn' -Message 'mvn: command failed'
 
-            Mock -CommandName 'mvn' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('mvn: command failed')
-            }
-            Mock Write-Error { }
-
-            try {
-                $result = Build-Maven -ErrorAction SilentlyContinue
-            }
-            catch {
-                # Exception may propagate in test environment
-            }
-
-            $result | Should -BeNullOrEmpty
-            # Write-Error may or may not be called depending on how PowerShell handles the exception
-            # The important thing is that the function handles the error gracefully
+            { Build-Maven -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

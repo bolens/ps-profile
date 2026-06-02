@@ -69,7 +69,7 @@ function Invoke-TestWithRetry {
         try {
             $attempt++
             if (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
-                Write-ScriptMessage -Message "Test execution attempt $attempt of $($MaxRetries + 1)" -LogLevel 'Info'
+                $null = Write-ScriptMessage -Message "Test execution attempt $attempt of $($MaxRetries + 1)" -LogLevel 'Info'
             }
 
             $result = & $ScriptBlock
@@ -97,7 +97,7 @@ function Invoke-TestWithRetry {
 
                 if (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
                     $logLevel = if ($SuppressRetryWarnings) { 'Debug' } else { 'Warning' }
-                    Write-ScriptMessage -Message "Test execution failed, retrying in $delay seconds... ($($MaxRetries - $attempt + 1) attempts remaining)" -LogLevel $logLevel
+                    $null = Write-ScriptMessage -Message "Test execution failed, retrying in $delay seconds... ($($MaxRetries - $attempt + 1) attempts remaining)" -LogLevel $logLevel
                 }
                 Start-Sleep -Seconds $delay
             }

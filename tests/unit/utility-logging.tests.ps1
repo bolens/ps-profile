@@ -2,9 +2,8 @@
 # Logging helper tests that validate Write-ScriptMessage behavior.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:LogTestRoot = New-TestTempDirectory -Prefix 'LoggingTests'
 }
 

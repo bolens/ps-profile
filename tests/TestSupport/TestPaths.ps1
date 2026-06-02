@@ -176,27 +176,27 @@ function Get-TestScriptPath {
     )
 
     $repoRoot = Get-TestRepoRoot -StartPath $StartPath
-    $testArtifactsRoot = Join-Path $repoRoot 'tests' 'test-artifacts'
-    
-    # Ensure test-artifacts directory exists
-    if (-not (Test-Path -LiteralPath $testArtifactsRoot)) {
-        New-Item -ItemType Directory -Path $testArtifactsRoot -Force | Out-Null
+
+    # Paths must live under the real repo scripts/ tree so Get-RepoRoot can walk up to the repo root.
+    $normalizedRelative = ($RelativePath -replace '\\', '/').TrimStart('/')
+    if ($normalizedRelative -notmatch '^scripts/') {
+        throw "Get-TestScriptPath RelativePath must begin with 'scripts/' (got: $RelativePath)"
     }
-    
-    # Create the full path in test-artifacts mirroring the repository structure
-    $testScriptPath = Join-Path $testArtifactsRoot $RelativePath
-    
+
+    $relativeAfterScripts = $normalizedRelative -replace '^scripts/', ''
+    $testScriptPath = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path '.test-fixtures' ($relativeAfterScripts -replace '/', [IO.Path]::DirectorySeparatorChar)))
+
     # Ensure parent directory exists
     $parentDir = Split-Path -Path $testScriptPath -Parent
     if (-not (Test-Path -LiteralPath $parentDir)) {
         New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
     }
-    
+
     # Create the file if it doesn't exist
     if (-not (Test-Path -LiteralPath $testScriptPath)) {
         Set-Content -Path $testScriptPath -Value $Content -ErrorAction SilentlyContinue
     }
-    
+
     return $testScriptPath
 }
 

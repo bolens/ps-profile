@@ -46,7 +46,7 @@ function Invoke-Azure {
     
     # Use base module if available, otherwise fallback to direct execution
     if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
-        return Invoke-CloudCommand -CommandName 'az' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install azure-cli'
+        return Invoke-CloudCommand -CommandName 'az' -Arguments $Arguments -ParseJson $false -ErrorOnNonZeroExit $false
     }
     else {
         # Fallback to original implementation
@@ -54,7 +54,7 @@ function Invoke-Azure {
             az @Arguments
         }
         else {
-            Write-MissingToolWarning -Tool 'az' -InstallHint 'Install with: scoop install azure-cli'
+            Invoke-MissingToolWarning -ToolName 'az'
         }
     }
 }
@@ -87,7 +87,7 @@ function Invoke-AzureDeveloper {
         azd @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'azd' -InstallHint 'Install with: scoop install azure-developer-cli'
+        Invoke-MissingToolWarning -ToolName 'azd' -Tool 'azd'
     }
 }
 
@@ -108,7 +108,7 @@ function Connect-AzureAccount {
     
     # Use base module if available
     if (Get-Command Invoke-CloudCommand -ErrorAction SilentlyContinue) {
-        return Invoke-CloudCommand -CommandName 'az' -Arguments @('login') -OperationName "azure.account.connect" -ParseJson $false -ErrorOnNonZeroExit $false -InstallHint 'Install with: scoop install azure-cli'
+        return Invoke-CloudCommand -CommandName 'az' -Arguments @('login') -OperationName "azure.account.connect" -ParseJson $false -ErrorOnNonZeroExit $false
     }
     else {
         # Fallback to original implementation
@@ -116,7 +116,7 @@ function Connect-AzureAccount {
             az login
         }
         else {
-            Write-MissingToolWarning -Tool 'Azure CLI (az)' -InstallHint 'Install with: scoop install azure-cli'
+            Invoke-MissingToolWarning -ToolName 'az' -Tool 'Azure CLI (az)'
         }
     }
 }
@@ -149,7 +149,7 @@ function Start-AzureDeveloperUp {
         azd up @Arguments
     }
     else {
-        Write-MissingToolWarning -Tool 'Azure Developer CLI (azd)' -InstallHint 'Install with: scoop install azure-developer-cli'
+        Invoke-MissingToolWarning -ToolName 'azd' -Tool 'Azure Developer CLI (azd)'
     }
 }
 

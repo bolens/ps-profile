@@ -79,13 +79,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'gitleaks')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                $null
-            }
-            Invoke-MissingToolWarning -ToolName 'gitleaks' -DefaultInstallCommand 'scoop install gitleaks'
+            Invoke-MissingToolWarning -ToolName 'gitleaks'
             return $null
         }
 
@@ -111,13 +105,13 @@ try {
             return $null
         }
 
-        $args = @('detect', '--source', $repoPath, '--format', $OutputFormat)
+        $gitleaksArguments = @('detect', '--source', $repoPath, '--format', $OutputFormat)
 
         if ($ReportPath) {
-            $args += '--report-path', $ReportPath
+            $gitleaksArguments += '--report-path', $ReportPath
         }
         else {
-            $args += '--no-git'
+            $gitleaksArguments += '--no-git'
         }
 
         if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
@@ -126,12 +120,12 @@ try {
                 output_format   = $OutputFormat
                 report_path     = $ReportPath
             } -ScriptBlock {
-                & gitleaks $args 2>&1
+                & gitleaks $gitleaksArguments 2>&1
             }
         }
         else {
             try {
-                $result = & gitleaks $args 2>&1
+                $result = & gitleaks $gitleaksArguments 2>&1
                 return $result
             }
             catch {
@@ -180,13 +174,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'trufflehog')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    $null
-                }
-                Invoke-MissingToolWarning -ToolName 'trufflehog' -DefaultInstallCommand 'scoop install trufflehog'
+                Invoke-MissingToolWarning -ToolName 'trufflehog'
                 return $null
             }
 
@@ -200,7 +188,7 @@ try {
             if (-not (Test-Path -LiteralPath $scanPath)) {
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                     Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
-                            [System.IO.PathNotFoundException]::new("Path not found: $scanPath"),
+                            [System.IO.DirectoryNotFoundException]::new("Path not found: $scanPath"),
                             'PathNotFound',
                             [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                             $scanPath
@@ -273,7 +261,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'osv-scanner')) {
-                Invoke-MissingToolWarning -ToolName 'osv-scanner' -DefaultInstallCommand 'scoop install osv-scanner'
+                Invoke-MissingToolWarning -ToolName 'osv-scanner'
                 return $null
             }
 
@@ -287,7 +275,7 @@ try {
             if (-not (Test-Path -LiteralPath $scanPath)) {
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                     Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
-                            [System.IO.PathNotFoundException]::new("Path not found: $scanPath"),
+                            [System.IO.DirectoryNotFoundException]::new("Path not found: $scanPath"),
                             'PathNotFound',
                             [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                             $scanPath
@@ -364,7 +352,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'yara')) {
-            Invoke-MissingToolWarning -ToolName 'yara' -DefaultInstallCommand 'scoop install yara'
+            Invoke-MissingToolWarning -ToolName 'yara'
             return $null
         }
 
@@ -469,14 +457,14 @@ try {
         )
 
         if (-not (Test-CachedCommand 'clamscan')) {
-            Invoke-MissingToolWarning -ToolName 'clamav' -DefaultInstallCommand 'scoop install clamav' -Tool 'clamscan'
+            Invoke-MissingToolWarning -ToolName 'clamav' -Tool 'clamscan'
             return $null
         }
 
         if (-not (Test-Path -LiteralPath $Path)) {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
-                        [System.IO.PathNotFoundException]::new("Path not found: $Path"),
+                        [System.IO.DirectoryNotFoundException]::new("Path not found: $Path"),
                         'PathNotFound',
                         [System.Management.Automation.ErrorCategory]::ObjectNotFound,
                         $Path
@@ -567,11 +555,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'dangerzone')) {
-            $installHint = Get-PreferenceAwareInstallHint -ToolName 'dangerzone' -ToolType 'Utility' -DefaultInstallCommand 'scoop install dangerzone'
-            if ($installHint -notmatch 'Docker') {
-                $installHint += ' (requires Docker)'
-            }
-            Write-MissingToolWarning -Tool 'dangerzone' -InstallHint $installHint
+            Invoke-DangerzoneMissingWarning
             return $null
         }
 

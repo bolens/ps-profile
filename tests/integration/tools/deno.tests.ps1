@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Deno Tools Integration Tests' {
     BeforeAll {
         try {
@@ -96,6 +98,35 @@ Describe 'Deno Tools Integration Tests' {
             Update-DenoSelf
             Should -Invoke -CommandName 'deno' -Times 1 -Exactly
             Get-Command Update-DenoSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Invoke-Deno emits missing-tool warning when deno is unavailable' {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('deno', [ref]$null)
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'deno' -Available $false
+
+            $output = Invoke-Deno --version 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'deno not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'deno'
+        }
+
+        It 'Invoke-DenoRun emits missing-tool warning when deno is unavailable' {
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('deno', [ref]$null)
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'deno' -Available $false
+
+            $output = Invoke-DenoRun 'main.ts' 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'deno not found'
         }
     }
 }

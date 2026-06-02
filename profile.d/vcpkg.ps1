@@ -120,5 +120,5 @@ if (Test-CachedCommand vcpkg) {
     Set-AgentModeAlias -Name 'vcpkgupdate' -Target 'Update-VcpkgPackages'
 }
 else {
-    Write-MissingToolWarning -Tool 'vcpkg' -InstallHint 'Install from: https://vcpkg.io/en/getting-started.html'
+    Invoke-MissingToolWarning -ToolName 'vcpkg'
 }

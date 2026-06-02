@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'Conan Tools Integration Tests' {
     BeforeAll {
         try {
@@ -134,15 +136,40 @@ Describe 'Conan Tools Integration Tests' {
             Should -Invoke -CommandName 'conan' -Times 1 -Exactly
         }
 
-        It 'Conan fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('conan', [ref]$null)
+    }
+}
+
+Describe 'Conan unavailable graceful degradation' {
+    BeforeAll {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    }
+
+    It 'Functions are not created when conan is unavailable' {
+        $installCommand = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
             }
             Mock-CommandAvailabilityPester -CommandName 'conan' -Available $false
-            Remove-Item Function:Install-ConanPackages -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-ConanPackages -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'conan.ps1')
-            Get-Command Install-ConanPackages -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            Get-Command Install-ConanPackages -ErrorAction SilentlyContinue
         }
+        $installCommand | Should -BeNullOrEmpty
+    }
+
+    It 'Emits missing-tool warning when conan is unavailable' {
+        $output = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'conan' -Available $false
+            . (Join-Path $script:ProfileDir 'conan.ps1')
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'conan not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'conan'
     }
 }

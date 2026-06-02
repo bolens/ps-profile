@@ -16,12 +16,21 @@
 function Invoke-TestPwshScript {
     param(
         [Parameter(Mandatory)]
-        [string]$ScriptContent
+        [string]$ScriptContent,
+
+        [string]$RepositoryRoot
     )
 
     # Use test-data directory instead of system temp
     # Note: Get-TestRepoRoot should be available from TestSupport.ps1 loading TestPaths.ps1 first
-    $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $repoRoot = if ($RepositoryRoot) { $RepositoryRoot } else { Get-TestRepoRoot -StartPath $PSScriptRoot }
+    $escapedRepoRoot = $repoRoot.Replace("'", "''")
+    $scriptPrefix = @"
+`$env:PS_PROFILE_TEST_MODE = '1'
+`$env:PS_PROFILE_REPO_ROOT = '$escapedRepoRoot'
+"@
+
+    $ScriptContent = $scriptPrefix + [Environment]::NewLine + $ScriptContent
     $testDataRoot = Join-Path $repoRoot 'tests' 'test-data'
     
     # Ensure test-data directory exists
@@ -52,11 +61,19 @@ function Invoke-TestPwshScript {
         $exitCode = $LASTEXITCODE
         
         if ($exitCode -ne 0) {
-            $errorMessage = if ($output) { $output -join "`n" } else { "Unknown error" }
+            $errorMessage = if ($output) { ($output | ForEach-Object { "$_" }) -join [Environment]::NewLine } else { 'Unknown error' }
             throw "Test script failed with exit code $exitCode : $errorMessage"
         }
-        
-        return $output
+
+        if ($null -eq $output) {
+            return ''
+        }
+
+        if ($output -is [string]) {
+            return $output
+        }
+
+        return ($output | ForEach-Object { "$_" }) -join [Environment]::NewLine
     }
     catch {
         Write-Error "Failed to execute test script '$tempFile': $($_.Exception.Message)"

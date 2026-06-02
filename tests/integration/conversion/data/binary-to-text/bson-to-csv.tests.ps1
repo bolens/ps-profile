@@ -21,7 +21,7 @@ Describe 'BSON to CSV Conversion Tests' {
     Context 'BSON to CSV Conversions' {
         It 'ConvertFrom-BsonToCsv converts BSON to CSV' {
             Get-Command ConvertFrom-BsonToCsv -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -31,7 +31,7 @@ Describe 'BSON to CSV Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName 'bson')) {
-                Set-ItResult -Skipped -Because "bson package not installed. Install with: pnpm add -g bson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'bson' -ToolType 'node-package' -Context 'bson package not installed')
                 return
             }
             $json = '[{"name":"test1","value":123},{"name":"test2","value":456}]'

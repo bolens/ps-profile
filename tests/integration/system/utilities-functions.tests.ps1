@@ -14,6 +14,9 @@ Describe 'System Utility Functions' {
             . $testSupportPath
 
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+            if (-not (Get-Command Initialize-SystemUtilityIntegration -ErrorAction SilentlyContinue)) {
+                throw 'Initialize-SystemUtilityIntegration is not available from TestSupport'
+            }
             $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
                 throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -41,8 +44,7 @@ Describe 'System Utility Functions' {
 
     Context 'System utility functions' {
         BeforeAll {
-            . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-            . (Join-Path $script:ProfileDir 'system.ps1')
+            Initialize-SystemUtilityIntegration -ProfileDir $script:ProfileDir -IncludeUtilities
         }
 
         It 'Get-DiskUsage function exists and returns drive information' {
@@ -81,10 +83,8 @@ Describe 'System Utility Functions' {
 
         It 'Get-NetworkPorts handles missing netstat command gracefully' {
             Get-Command Get-NetworkPorts -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Mock netstat as unavailable
             Mock-CommandAvailabilityPester -CommandName 'netstat' -Available $false -Scope It
-            # Function should handle missing command gracefully
-            { Get-NetworkPorts -ErrorAction SilentlyContinue } | Should -Not -Throw
+            { Get-NetworkPorts -ErrorAction Stop } | Should -Throw '*netstat*'
         }
 
         It 'Test-NetworkConnection function exists' {
@@ -99,25 +99,26 @@ Describe 'System Utility Functions' {
 
         It 'Resolve-DnsNameCustom function exists' {
             Get-Command Resolve-DnsNameCustom -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Mock Resolve-DnsName to avoid actual DNS calls
-            Mock-NetworkPester -Operation 'Resolve-DnsName' -ReturnValue @{
-                Name      = 'localhost'
-                Type      = 'A'
-                IPAddress = '127.0.0.1'
-            } -ParameterFilter { $Name -eq 'localhost' }
-            # Test with localhost
-            { Resolve-DnsNameCustom -Name localhost -ErrorAction SilentlyContinue } | Should -Not -Throw
+            if (-not (Get-Command Resolve-DnsName -ErrorAction SilentlyContinue)) {
+                function global:Resolve-DnsName {
+                    param([string]$Name)
+                    [PSCustomObject]@{ Name = $Name; Type = 'A'; IPAddress = '127.0.0.1' }
+                }
+            }
+            { Resolve-DnsNameCustom -Name 'localhost' -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
 
         It 'Find-File function exists and can search for files' {
             Get-Command Find-File -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Create a test file
             $testFile = Join-Path $TestDrive 'test_find.txt'
             Set-Content -Path $testFile -Value 'test content'
-            # Search for it
-            $result = Find-File -Filter 'test_find.txt'
-            # Result may be empty if search doesn't work as expected, but function should exist
-            { Find-File -Filter '*.txt' } | Should -Not -Throw
+            Push-Location $TestDrive
+            try {
+                { Find-File 'test_find.txt' -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'New-Directory function exists' {

@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'vcpkg Tools Integration Tests' {
     BeforeAll {
         try {
@@ -135,16 +137,40 @@ Describe 'vcpkg Tools Integration Tests' {
             Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
-        It 'vcpkg fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('vcpkg', [ref]$null)
+    }
+}
+
+Describe 'vcpkg unavailable graceful degradation' {
+    BeforeAll {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    }
+
+    It 'Functions are not created when vcpkg is unavailable' {
+        $installCommand = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
             }
             Mock-CommandAvailabilityPester -CommandName 'vcpkg' -Available $false
-            Remove-Item Function:Install-VcpkgPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Remove-VcpkgPackage -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-VcpkgPackages -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'vcpkg.ps1')
-            Get-Command Install-VcpkgPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            Get-Command Install-VcpkgPackage -ErrorAction SilentlyContinue
         }
+        $installCommand | Should -BeNullOrEmpty
+    }
+
+    It 'Emits missing-tool warning when vcpkg is unavailable' {
+        $output = & {
+            if ($global:CollectedMissingToolWarnings) { $global:CollectedMissingToolWarnings.Clear() }
+            if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'vcpkg' -Available $false
+            . (Join-Path $script:ProfileDir 'vcpkg.ps1')
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'vcpkg not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'vcpkg'
     }
 }

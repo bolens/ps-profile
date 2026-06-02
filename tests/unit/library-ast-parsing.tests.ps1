@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     
@@ -15,8 +14,7 @@ BeforeAll {
     Import-Module $script:AstParsingPath -DisableNameChecking -ErrorAction Stop -Force
     
     # Create test directory and files
-    $script:TestDir = Join-Path $env:TEMP "test-ast-parsing-$(Get-Random)"
-    New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
+    $script:TestDir = New-TestTempDirectory -Prefix 'AstParsingTests'
     
     # Create test PowerShell file with functions
     $script:TestScript = Join-Path $script:TestDir 'test-script.ps1'
@@ -47,7 +45,7 @@ AfterAll {
     Remove-Module FileContent -ErrorAction SilentlyContinue -Force
     
     # Clean up test files
-    if ($script:TestDir -and (Test-Path $script:TestDir)) {
+    if ($null -ne $script:TestDir -and (Test-Path -LiteralPath $script:TestDir)) {
         Remove-Item -Path $script:TestDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
@@ -71,7 +69,8 @@ Describe 'AstParsing Module Functions' {
 
         It 'Throws error for invalid PowerShell syntax' {
             $invalidScript = Join-Path $script:TestDir 'invalid.ps1'
-            Set-Content -Path $invalidScript -Value '{ invalid syntax }' -Encoding UTF8
+            # Brace-wrapped text is valid PowerShell (scriptblock); use incomplete syntax instead
+            Set-Content -Path $invalidScript -Value 'function {' -Encoding UTF8
             { Get-PowerShellAst -Path $invalidScript } | Should -Throw
         }
 

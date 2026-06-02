@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'asdf Tools Integration Tests' {
     BeforeAll {
         try {
@@ -161,16 +163,35 @@ Describe 'asdf Tools Integration Tests' {
             Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
         }
 
-        It 'asdf fragment handles missing tool gracefully' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('asdf', [ref]$null)
+    }
+
+    Context 'Graceful degradation when asdf is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @('Install-AsdfTool', 'Remove-AsdfTool', 'Update-AsdfSelf') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'asdf' -Available $false
-            Remove-Item Function:Install-AsdfTool -ErrorAction SilentlyContinue
-            Remove-Item Function:Remove-AsdfTool -ErrorAction SilentlyContinue
-            Remove-Item Function:Update-AsdfSelf -ErrorAction SilentlyContinue
-            . (Join-Path $script:ProfileDir 'asdf.ps1')
+            $script:MissingAsdfOutput = & { . (Join-Path $script:ProfileDir 'asdf.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when asdf is unavailable' {
             Get-Command Install-AsdfTool -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when asdf is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingAsdfOutput -Pattern 'asdf not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingAsdfOutput -ToolName 'asdf'
         }
     }
 }

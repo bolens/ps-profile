@@ -1,6 +1,5 @@
-﻿. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:FragmentErrorHandlingPath = Join-Path $script:LibPath 'fragment' 'FragmentErrorHandling.psm1'
@@ -15,7 +14,7 @@ BeforeAll {
     Import-Module $script:FragmentErrorHandlingPath -DisableNameChecking -ErrorAction Stop -Force
     
     # Create test fragment files
-    $script:TestFragmentDir = Join-Path $env:TEMP "test-fragments-$(Get-Random)"
+    $script:TestFragmentDir = New-TestTempDirectory -Prefix 'FragmentErrorTests'
     New-Item -ItemType Directory -Path $script:TestFragmentDir -Force | Out-Null
     
     # Valid fragment
@@ -146,8 +145,9 @@ Describe 'FragmentErrorHandling Module Functions' {
                 [System.Management.Automation.ErrorCategory]::InvalidOperation,
                 $null
             )
-            
-            { Write-FragmentError -ErrorRecord $errorRecord -FragmentName 'test-fragment' } | Should -Not -Throw
+
+            Write-FragmentError -ErrorRecord $errorRecord -FragmentName 'test-fragment' -ErrorAction SilentlyContinue -ErrorVariable fragmentErrors | Out-Null
+            $fragmentErrors | Should -Not -BeNullOrEmpty
         }
 
         It 'Includes context in error message when provided' {
@@ -157,55 +157,58 @@ Describe 'FragmentErrorHandling Module Functions' {
                 [System.Management.Automation.ErrorCategory]::InvalidOperation,
                 $null
             )
-            
-            { Write-FragmentError -ErrorRecord $errorRecord -FragmentName 'test-fragment' -Context 'Initialization' } | Should -Not -Throw
+
+            Write-FragmentError -ErrorRecord $errorRecord -FragmentName 'test-fragment' -Context 'Initialization' -ErrorAction SilentlyContinue -ErrorVariable fragmentErrors | Out-Null
+            $fragmentErrors | Should -Not -BeNullOrEmpty
+            $fragmentErrors[0].Exception.Message | Should -Match 'Initialization'
         }
 
-        It 'Uses Write-ProfileError if available' {
-            # Mock Write-ProfileError
-            <#
-            .SYNOPSIS
-                Performs operations related to Mock-Write-ProfileError.
-            
-            .DESCRIPTION
-                Performs operations related to Mock-Write-ProfileError.
-            
-            .PARAMETER ErrorRecord
-                The ErrorRecord parameter.
-            
-            .PARAMETER Context
-                The Context parameter.
-            
-            .PARAMETER Category
-                The Category parameter.
-            
-            .OUTPUTS
-                object
-            #>
-            function Mock-Write-ProfileError {
-                param($ErrorRecord, $Context, $Category)
-            }
-            
+        It 'Uses Write-ProfileError when fragment load fails in debug mode' {
+            $script:WriteProfileErrorInvocations = [System.Collections.Generic.List[hashtable]]::new()
             $originalWriteProfileError = Get-Command Write-ProfileError -ErrorAction SilentlyContinue
-            if (-not $originalWriteProfileError) {
-                Set-Item -Path Function:\Write-ProfileError -Value ${function:Mock-Write-ProfileError} -Force
-            }
-            
-            try {
-                $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-                    [System.Exception]::new('Test error'),
-                    'TestErrorId',
-                    [System.Management.Automation.ErrorCategory]::InvalidOperation,
-                    $null
+
+            function global:Write-ProfileError {
+                param(
+                    $ErrorRecord,
+                    $Context,
+                    $Category
                 )
-                
-                Mock -CommandName Write-ProfileError -MockWith { }
-                Write-FragmentError -ErrorRecord $errorRecord -FragmentName 'test-fragment'
-                Should -Invoke Write-ProfileError -Exactly 1
+
+                $null = $script:WriteProfileErrorInvocations.Add(@{
+                        Context  = $Context
+                        Category = $Category
+                    })
+            }
+
+            Set-Item -Path Function:\global:Write-ProfileError -Value ${function:global:Write-ProfileError} -Force
+
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            if (Get-Command Remove-TestCachedCommandCacheEntry -ErrorAction SilentlyContinue) {
+                Remove-TestCachedCommandCacheEntry -Name 'Write-ProfileError' | Out-Null
+            }
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            try {
+                $env:PS_PROFILE_DEBUG = '1'
+                $errorBlock = { throw 'Test error' }
+                $result = Invoke-FragmentSafely -FragmentName 'test-fragment' -FragmentPath 'dummy.ps1' -ScriptBlock $errorBlock
+                $result | Should -Be $false
+                $script:WriteProfileErrorInvocations.Count | Should -BeGreaterThan 0
             }
             finally {
-                if (-not $originalWriteProfileError) {
-                    Remove-Item -Path Function:\Write-ProfileError -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Write-ProfileError -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-ProfileError -Force -ErrorAction SilentlyContinue
+                if ($originalWriteProfileError) {
+                    Set-Item -Path Function:\global:Write-ProfileError -Value $originalWriteProfileError.ScriptBlock -Force
+                }
+
+                if ($null -ne $originalDebug) {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+                else {
+                    Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -217,9 +220,9 @@ Describe 'FragmentErrorHandling Module Functions' {
                 [System.Management.Automation.ErrorCategory]::InvalidOperation,
                 $null
             )
-            
-            # Should not throw
-            { Write-FragmentError -ErrorRecord $errorRecord -FragmentName 'test-fragment' } | Should -Not -Throw
+
+            Write-FragmentError -ErrorRecord $errorRecord -FragmentName 'test-fragment' -ErrorAction SilentlyContinue -ErrorVariable fragmentErrors | Out-Null
+            $fragmentErrors | Should -Not -BeNullOrEmpty
         }
     }
 
@@ -263,9 +266,9 @@ Describe 'FragmentErrorHandling Module Functions' {
             )
             
             $errorInfo = Get-FragmentErrorInfo -ErrorRecord $errorRecord -FragmentName 'test-fragment'
-            $errorInfo | Should -HaveMember 'InnerException'
+            $errorInfo.PSObject.Properties.Name | Should -Contain 'InnerException'
             $errorInfo.InnerException | Should -Be 'Inner error'
-            $errorInfo | Should -HaveMember 'InnerExceptionType'
+            $errorInfo.PSObject.Properties.Name | Should -Contain 'InnerExceptionType'
         }
 
         It 'Includes script stack trace when available' {
@@ -290,7 +293,7 @@ Describe 'FragmentErrorHandling Module Functions' {
             )
             
             $errorInfo = Get-FragmentErrorInfo -ErrorRecord $errorRecord -FragmentName 'test-fragment'
-            $errorInfo | Should -HaveMember 'FullyQualifiedErrorId'
+            $errorInfo.PSObject.Properties.Name | Should -Contain 'FullyQualifiedErrorId'
             $errorInfo.FullyQualifiedErrorId | Should -Be 'TestErrorId'
         }
 

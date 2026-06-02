@@ -170,7 +170,8 @@ function Initialize-ProfileScoopLegacy {
             }
         }
         if (-not $scoopRoot) {
-            $userScoopPath = "$env:USERPROFILE\scoop"
+            $userHome = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { $null }
+            $userScoopPath = if ($userHome) { Join-Path $userHome 'scoop' } else { $null }
             if ($userScoopPath -and -not [string]::IsNullOrWhiteSpace($userScoopPath) -and (Test-Path -LiteralPath $userScoopPath -ErrorAction SilentlyContinue)) {
                 $scoopRoot = $userScoopPath
             }

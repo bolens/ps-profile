@@ -48,7 +48,7 @@ try {
             & go run @Arguments
         }
         else {
-            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
         }
     }
 
@@ -75,7 +75,7 @@ try {
             & go build @Arguments
         }
         else {
-            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
         }
     }
 
@@ -102,7 +102,7 @@ try {
             & go mod @Arguments
         }
         else {
-            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
         }
     }
 
@@ -129,7 +129,7 @@ try {
             & go test @Arguments
         }
         else {
-            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
         }
     }
 
@@ -151,7 +151,7 @@ try {
             & go install golang.org/x/tools/cmd/...@latest
         }
         else {
-            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
         }
     }
 
@@ -180,7 +180,7 @@ try {
             & go mod tidy
         }
         else {
-            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
         }
     }
 
@@ -206,7 +206,7 @@ try {
             & go install @Packages
         }
         else {
-            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package' -DefaultInstallCommand 'scoop install go'
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
         }
     }
 

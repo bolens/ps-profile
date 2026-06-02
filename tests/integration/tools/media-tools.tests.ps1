@@ -52,28 +52,34 @@ Describe 'media-tools.ps1 - Function Registration' {
 }
 
 Describe 'media-tools.ps1 - Graceful Degradation' {
+    BeforeEach {
+        foreach ($cmd in @('handbrake-cli', 'HandBrakeCLI', 'ffmpeg', 'cyanrip', 'mediainfo', 'MediaInfo', 'mkvmerge')) {
+            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        }
+    }
+
     It 'Convert-Video handles missing tool gracefully' {
         { Convert-Video -InputPath 'test.mp4' -OutputPath 'output.mkv' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Extract-Audio handles missing tool gracefully' {
         { Extract-Audio -InputPath 'test.mp4' -OutputPath 'audio.mp3' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Tag-Audio handles missing tool gracefully' {
         { Tag-Audio -AudioPath 'test.mp3' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Rip-CD handles missing tool gracefully' {
         { Rip-CD -OutputPath 'C:\Output' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Get-MediaInfo handles missing tool gracefully' {
         { Get-MediaInfo -MediaPath 'test.mp4' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Merge-MKV handles missing tool gracefully' {
         { Merge-MKV -InputPaths @('part1.mkv', 'part2.mkv') -OutputPath 'output.mkv' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
 }
 

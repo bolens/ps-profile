@@ -3,177 +3,113 @@
 # Unit tests for Build-RustRelease and Update-RustDependencies functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'lang-rust.ps1')
+    . (Join-Path $script:ProfileDir 'lang-rust-build.ps1')
 }
 
 Describe 'lang-rust.ps1 - Build-RustRelease' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('cargo', [ref]$null)
-        }
-        
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('cargo', [ref]$null)
-        }
+
+        Mark-TestCommandsUnavailable -CommandNames 'cargo'
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when cargo is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'cargo' } -MockWith { return $null }
-            
             $result = Build-RustRelease -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls cargo build --release without arguments' {
-            Setup-AvailableCommandMock -CommandName 'cargo'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
-            
-            $result = Build-RustRelease
-            
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'build'
-            $script:capturedArgs | Should -Contain '--release'
+            Setup-CapturingCommandMock -CommandName 'cargo' -Output 'Build complete'
+
+            $result = Build-RustRelease -ErrorAction SilentlyContinue
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'build'
+            $args | Should -Contain '--release'
+            $result | Should -Be 'Build complete'
         }
-        
+
         It 'Calls cargo build --release with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'cargo'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Build complete' 
-            }
-            
-            $result = Build-RustRelease -Arguments @('--bin', 'myapp')
-            
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'build'
-            $script:capturedArgs | Should -Contain '--release'
-            $script:capturedArgs | Should -Contain '--bin'
-            $script:capturedArgs | Should -Contain 'myapp'
+            Setup-CapturingCommandMock -CommandName 'cargo' -Output 'Build complete'
+
+            Build-RustRelease '--bin', 'myapp' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'build'
+            $args | Should -Contain '--release'
+            $args | Should -Contain '--bin'
+            $args | Should -Contain 'myapp'
         }
     }
-    
+
     Context 'Error handling' {
         It 'Handles cargo build execution errors' {
-            Setup-AvailableCommandMock -CommandName 'cargo'
-            
-            Mock -CommandName 'cargo' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('cargo: command failed')
-            }
-            Mock Write-Error { }
-            
-            $result = Build-RustRelease -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'cargo' -Message 'cargo: command failed'
+
+            { Build-RustRelease -ErrorAction Stop } | Should -Throw
         }
     }
 }
 
 Describe 'lang-rust.ps1 - Update-RustDependencies' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('cargo', [ref]$null)
-        }
-        
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('cargo', [ref]$null)
-        }
+
+        Mark-TestCommandsUnavailable -CommandNames 'cargo'
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when cargo is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'cargo' } -MockWith { return $null }
-            
             $result = Update-RustDependencies -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Tool available' {
         It 'Calls cargo update without arguments' {
-            Setup-AvailableCommandMock -CommandName 'cargo'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Dependencies updated' 
-            }
-            
-            $result = Update-RustDependencies
-            
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'update'
+            Setup-CapturingCommandMock -CommandName 'cargo' -Output 'Dependencies updated'
+
+            $result = Update-RustDependencies -ErrorAction SilentlyContinue
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'update'
+            $result | Should -Be 'Dependencies updated'
         }
-        
+
         It 'Calls cargo update with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'cargo'
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo' -MockWith { 
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Dependencies updated' 
-            }
-            
-            $result = Update-RustDependencies -Arguments @('--package', 'serde')
-            
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain 'update'
-            $script:capturedArgs | Should -Contain '--package'
-            $script:capturedArgs | Should -Contain 'serde'
+            Setup-CapturingCommandMock -CommandName 'cargo' -Output 'Dependencies updated'
+
+            Update-RustDependencies '--package', 'serde' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'update'
+            $args | Should -Contain '--package'
+            $args | Should -Contain 'serde'
         }
     }
-    
+
     Context 'Error handling' {
         It 'Handles cargo update execution errors' {
-            Setup-AvailableCommandMock -CommandName 'cargo'
-            
-            Mock -CommandName 'cargo' -MockWith { 
-                throw [System.Management.Automation.CommandNotFoundException]::new('cargo: command failed')
-            }
-            Mock Write-Error { }
-            
-            $result = Update-RustDependencies -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
-            Should -Invoke Write-Error -Times 1
+            Set-TestCommandThrowingMock -CommandName 'cargo' -Message 'cargo: command failed'
+
+            { Update-RustDependencies -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

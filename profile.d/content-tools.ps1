@@ -79,12 +79,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'yt-dlp')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'yt-dlp-nightly' -Tool 'yt-dlp'
             return
         }
@@ -177,12 +171,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'gallery-dl')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'gallery-dl'
             return
         }
@@ -259,12 +247,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'yt-dlp')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'yt-dlp-nightly' -Tool 'yt-dlp'
             return
         }
@@ -343,12 +325,6 @@ try {
         )
 
         if (-not (Test-CachedCommand 'monolith')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'monolith'
             return
         }
@@ -434,12 +410,6 @@ try {
         }
 
         if (-not $twitchCmd) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
             Invoke-MissingToolWarning -ToolName 'twitchdownloader-cli' -Tool 'twitchdownloader'
             return
         }

@@ -107,5 +107,5 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'nimble-remove' -Target 'Remove-NimblePackage'
 }
 else {
-    Write-MissingToolWarning -Tool 'nimble' -InstallHint 'Install Nim from: https://nim-lang.org/install.html or use: scoop install nim'
+    Invoke-MissingToolWarning -ToolName 'nim'
 }

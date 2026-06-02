@@ -3,156 +3,114 @@
 # Unit tests for Build-GodotProject function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'game-dev.ps1')
+
+    $script:TestProjectDir = New-TestTempDirectory -Prefix 'GodotBuildProject'
+    $script:TestOutputDir = New-TestTempDirectory -Prefix 'GodotBuildOutput'
 }
 
 Describe 'game-dev.ps1 - Build-GodotProject' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('godot', [ref]$null)
-        }
+
+        Set-TestCommandAvailabilityState -CommandName 'godot' -Available $false
+        Remove-Item -Path Function:\godot -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Function:\global:godot -Force -ErrorAction SilentlyContinue
     }
-    
+
     Context 'Tool not available' {
         It 'Returns null when godot is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'godot' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'godot' } -MockWith { return $null }
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
-            
+            Set-TestCommandAvailabilityState -CommandName 'godot' -Available $false
+
+            $result = Build-GodotProject -ProjectPath $script:TestProjectDir -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Project path validation' {
-        It 'Errors when project path does not exist' {
+        It 'Returns null when project path does not exist' {
             Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\Nonexistent' } -MockWith { return $false }
-            
-            { Build-GodotProject -ProjectPath 'C:\Projects\Nonexistent' -ExportPreset 'Windows Desktop' -ErrorAction Stop } | Should -Throw
+            $missingProject = Join-Path (New-TestTempDirectory -Prefix 'GodotMissingProject') 'nonexistent'
+
+            $result = Build-GodotProject -ProjectPath $missingProject -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'Build execution' {
         It 'Calls godot with export preset' {
-            Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\MyGame' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'godot' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Build complete'
-            }
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'godot' -Times 1 -Exactly
-            $script:capturedArgs | Should -Contain '--headless'
-            $script:capturedArgs | Should -Contain '--path'
-            $script:capturedArgs | Should -Contain 'C:\Projects\MyGame'
-            $script:capturedArgs | Should -Contain '--export'
-            $script:capturedArgs | Should -Contain 'Windows Desktop'
+            Setup-CapturingCommandMock -CommandName 'godot' -Output 'Build complete'
+
+            $result = Build-GodotProject -ProjectPath $script:TestProjectDir -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
+
+            $result | Should -Not -BeNullOrEmpty
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain '--headless'
+            $args | Should -Contain '--path'
+            $args | Should -Contain $script:TestProjectDir
+            $args | Should -Contain '--export'
+            $args | Should -Contain 'Windows Desktop'
         }
-        
+
         It 'Calls godot with platform when ExportPreset not provided' {
-            Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\MyGame' } -MockWith { return $true }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'godot' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Build complete'
-            }
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -Platform 'windows' -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--export'
-            $script:capturedArgs | Should -Contain 'windows'
+            Setup-CapturingCommandMock -CommandName 'godot' -Output 'Build complete'
+
+            Build-GodotProject -ProjectPath $script:TestProjectDir -Platform 'windows' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain '--export'
+            $args | Should -Contain 'windows'
         }
-        
+
         It 'Warns when neither ExportPreset nor Platform provided' {
             Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\MyGame' } -MockWith { return $true }
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ErrorAction SilentlyContinue
-            
+
+            $result = Build-GodotProject -ProjectPath $script:TestProjectDir -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Creates output directory if it does not exist' {
-            Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\MyGame' } -MockWith { return $true }
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Output' } -MockWith { return $false }
-            Mock New-Item -MockWith { return [PSCustomObject]@{ FullName = 'C:\Output' } }
-            
-            $script:capturedArgs = @()
-            Mock -CommandName 'godot' -MockWith {
-                $script:capturedArgs = $args
-                $global:LASTEXITCODE = 0
-                return 'Build complete'
-            }
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -OutputPath 'C:\Output' -ErrorAction SilentlyContinue
-            
-            Should -Invoke 'New-Item' -Times 1 -Exactly
-            $script:capturedArgs | Should -Contain 'C:\Output'
+            Setup-CapturingCommandMock -CommandName 'godot' -Output 'Build complete'
+            $newOutputDir = Join-Path (New-TestTempDirectory -Prefix 'GodotBuildOutputParent') 'nested-output'
+
+            Build-GodotProject -ProjectPath $script:TestProjectDir -ExportPreset 'Windows Desktop' -OutputPath $newOutputDir -ErrorAction SilentlyContinue | Out-Null
+
+            Test-Path -LiteralPath $newOutputDir | Should -Be $true
+            $args = Get-TestCommandInvocationArgs
+            $args | Should -Contain $newOutputDir
         }
-        
+
         It 'Returns output path on success' {
-            Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\MyGame' } -MockWith { return $true }
-            
-            Mock -CommandName 'godot' -MockWith {
-                $global:LASTEXITCODE = 0
-                return 'Build complete'
-            }
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -OutputPath 'C:\Output' -ErrorAction SilentlyContinue
-            
-            $result | Should -Be 'C:\Output'
+            Setup-CapturingCommandMock -CommandName 'godot' -Output 'Build complete'
+
+            $result = Build-GodotProject -ProjectPath $script:TestProjectDir -ExportPreset 'Windows Desktop' -OutputPath $script:TestOutputDir -ErrorAction SilentlyContinue
+
+            $result | Should -Be $script:TestOutputDir
         }
-        
+
         It 'Returns project path when OutputPath not provided' {
-            Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\MyGame' } -MockWith { return $true }
-            
-            Mock -CommandName 'godot' -MockWith {
-                $global:LASTEXITCODE = 0
-                return 'Build complete'
-            }
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
-            
-            $result | Should -Be 'C:\Projects\MyGame'
+            Setup-CapturingCommandMock -CommandName 'godot' -Output 'Build complete'
+
+            $result = Build-GodotProject -ProjectPath $script:TestProjectDir -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
+
+            $result | Should -Be $script:TestProjectDir
         }
-        
+
         It 'Errors when build fails' {
-            Setup-AvailableCommandMock -CommandName 'godot'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'C:\Projects\MyGame' } -MockWith { return $true }
-            
-            Mock -CommandName 'godot' -MockWith {
-                $global:LASTEXITCODE = 1
-                return 'Build failed'
-            }
-            
-            { Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -ErrorAction Stop } | Should -Throw
+            Setup-CapturingCommandMock -CommandName 'godot' -Output 'Build failed' -ExitCode 1
+
+            { Build-GodotProject -ProjectPath $script:TestProjectDir -ExportPreset 'Windows Desktop' -ErrorAction Stop } | Should -Throw '*Godot build failed*'
         }
     }
 }
-

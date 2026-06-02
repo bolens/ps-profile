@@ -45,7 +45,6 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'npx' } -MockWith { $null }
             # Mock npx command before loading fragment to prevent conflicts
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'nextjs.ps1')
         }
 
@@ -64,10 +63,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('npx', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
             $output = next-dev 2>&1 3>&1 | Out-String
-            $output | Should -Match 'npx not found'
-            $output | Should -Match 'npm install -g npm'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'npx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nodejs' -ToolType 'node-package'
         }
 
         It 'Creates Build-NextJsApp function' {
@@ -84,10 +82,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('npx', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
             $output = next-build 2>&1 3>&1 | Out-String
-            $output | Should -Match 'npx not found'
-            $output | Should -Match 'npm install -g npm'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'npx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nodejs' -ToolType 'node-package'
         }
 
         It 'Creates Start-NextJsProduction function' {
@@ -117,8 +114,6 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             # Mock vite and npx commands before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'vite' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'vite' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'vite.ps1')
         }
 
@@ -136,10 +131,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('vite', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'vite' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'vite' } -MockWith { $false }
             $output = vite --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'vite not found'
-            $output | Should -Match 'npm install -g vite'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'vite not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'vite' -ToolType 'node-package'
         }
 
         It 'Creates New-ViteProject function' {
@@ -178,8 +172,6 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             # Mock npx and ng commands before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'ng' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'ng' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'angular.ps1')
         }
 
@@ -198,11 +190,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
             Mock-CommandAvailabilityPester -CommandName 'ng' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'ng' } -MockWith { $false }
             $output = ng --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'npx or ng not found'
-            $output | Should -Match 'npm install -g npm or npm install -g @angular/cli'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'npx or ng not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('nodejs', '@angular/cli') -ToolType 'node-package'
         }
 
         It 'Creates New-AngularApp function' {
@@ -232,8 +222,6 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             # Mock npx and vue commands before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'vue' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'vue' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'vue.ps1')
         }
 
@@ -252,11 +240,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
             Mock-CommandAvailabilityPester -CommandName 'vue' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'vue' } -MockWith { $false }
             $output = vue --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'npx or vue not found'
-            $output | Should -Match 'npm install -g npm or npm install -g @vue/cli'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'npx or vue not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('nodejs', '@vue/cli') -ToolType 'node-package'
         }
 
         It 'Creates New-VueApp function' {
@@ -286,8 +272,6 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             # Mock npx and nuxi commands before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
             Mock-CommandAvailabilityPester -CommandName 'nuxi' -Available $false -Scope Context
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'nuxi' } -MockWith { $false }
             . (Join-Path $script:ProfileDir 'nuxt.ps1')
         }
 
@@ -305,10 +289,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('nuxi', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'nuxi' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'nuxi' } -MockWith { $false }
             $output = nuxi --version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'nuxi not found'
-            $output | Should -Match 'npm install -g nuxi'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'nuxi not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nuxi' -ToolType 'node-package'
         }
 
         It 'Creates Start-NuxtDev function' {
@@ -325,10 +308,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('npx', [ref]$null)
             }
             Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'npx' } -MockWith { $false }
             $output = nuxt-dev 2>&1 3>&1 | Out-String
-            $output | Should -Match 'npx not found'
-            $output | Should -Match 'npm install -g npm'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'npx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nodejs' -ToolType 'node-package'
         }
 
         It 'Creates Build-NuxtApp function' {

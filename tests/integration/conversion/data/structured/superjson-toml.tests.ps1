@@ -22,7 +22,7 @@ Describe 'SuperJSON to/from TOML Conversion Tests' {
         It 'ConvertFrom-SuperJsonToToml converts SuperJSON to TOML' {
             Get-Command ConvertFrom-SuperJsonToToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -43,7 +43,7 @@ Describe 'SuperJSON to/from TOML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -59,7 +59,7 @@ Describe 'SuperJSON to/from TOML Conversion Tests' {
         It 'ConvertTo-SuperJsonFromToml converts TOML to SuperJSON' {
             Get-Command ConvertTo-SuperJsonFromToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -75,7 +75,7 @@ Describe 'SuperJSON to/from TOML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $toml = "name = `"test`"`nvalue = 123"
@@ -88,7 +88,7 @@ Describe 'SuperJSON to/from TOML Conversion Tests' {
             Get-Command ConvertFrom-SuperJsonToToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-SuperJsonFromToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if node not available
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -109,7 +109,7 @@ Describe 'SuperJSON to/from TOML Conversion Tests' {
             }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
-                Set-ItResult -Skipped -Because "superjson package not installed. Install with: pnpm add -g superjson"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
                 return
             }
             $originalToml = "name = `"test`"`nvalue = 123"

@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'dart Tools Integration Tests' {
     BeforeAll {
         try {
@@ -146,6 +148,74 @@ Describe 'dart Tools Integration Tests' {
             Update-FlutterPackages
             Should -Invoke -CommandName 'flutter' -Times 1 -Exactly
             Get-Command Update-FlutterPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when dart is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Test-DartOutdated', 'Update-DartPackages', 'Add-DartPackage', 'Remove-DartPackage',
+                'Test-FlutterOutdated', 'Update-FlutterPackages', 'Add-FlutterPackage', 'Remove-FlutterPackage'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'dart' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'flutter' -Available $false
+            $script:MissingDartOutput = & { . (Join-Path $script:ProfileDir 'dart.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Dart functions are not created when dart is unavailable' {
+            Get-Command Test-DartOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when dart is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingDartOutput -Pattern 'dart not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingDartOutput -ToolName 'dart'
+        }
+    }
+
+    Context 'Graceful degradation when flutter is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @(
+                'Test-DartOutdated', 'Update-DartPackages', 'Add-DartPackage', 'Remove-DartPackage',
+                'Test-FlutterOutdated', 'Update-FlutterPackages', 'Add-FlutterPackage', 'Remove-FlutterPackage'
+            ) | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'dart' -Available $true
+            Mock-CommandAvailabilityPester -CommandName 'flutter' -Available $false
+            $script:MissingFlutterOutput = & { . (Join-Path $script:ProfileDir 'dart.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Flutter functions are not created when flutter is unavailable' {
+            Get-Command Test-FlutterOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when flutter is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingFlutterOutput -Pattern 'flutter not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingFlutterOutput -ToolName 'flutter'
         }
     }
 }

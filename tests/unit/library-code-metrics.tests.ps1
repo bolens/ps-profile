@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
         $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
@@ -45,7 +44,7 @@ BeforeAll {
         Import-Module $script:CodeMetricsPath -DisableNameChecking -ErrorAction Stop -Force
         
         # Create test directory and files
-        $script:TestDir = Join-Path $env:TEMP "test-code-metrics-$(Get-Random)"
+        $script:TestDir = New-TestTempDirectory -Prefix 'CodeMetricsTests'
         New-Item -ItemType Directory -Path $script:TestDir -Force | Out-Null
         
         # Create test PowerShell script
@@ -93,7 +92,7 @@ Describe 'CodeMetrics Module Functions' {
     Context 'ConvertTo-FileMetricsArray' {
         It 'Converts null to empty array' {
             $result = @(ConvertTo-FileMetricsArray -InputList $null)
-            $result | Should -Not -BeNull
+            $null -ne $result | Should -Be $true
             $result -is [System.Array] | Should -Be $true
             $result.Count | Should -Be 0
         }

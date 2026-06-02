@@ -84,7 +84,6 @@ function Invoke-FragmentSafely {
     # Use Test-CachedCommand if available for better performance, otherwise use Test-HasCommand
     $hasWriteScriptMessage = $false
     $hasTestFragmentWarningSuppressed = $false
-    $hasWriteProfileError = $false
 
     # Fast check: Test function provider first to avoid Get-Command overhead
     $useCachedCommand = (Test-Path 'Function:\Test-CachedCommand' -ErrorAction SilentlyContinue) -or
@@ -93,13 +92,11 @@ function Invoke-FragmentSafely {
     if ($useCachedCommand) {
         $hasWriteScriptMessage = Test-CachedCommand -Name 'Write-ScriptMessage'
         $hasTestFragmentWarningSuppressed = Test-CachedCommand -Name 'Test-FragmentWarningSuppressed'
-        $hasWriteProfileError = Test-CachedCommand -Name 'Write-ProfileError'
     }
     else {
         # Fallback: Direct Get-Command checks (only if Test-CachedCommand unavailable)
         $hasWriteScriptMessage = (Get-Command 'Write-ScriptMessage' -ErrorAction SilentlyContinue) -ne $null
         $hasTestFragmentWarningSuppressed = (Get-Command 'Test-FragmentWarningSuppressed' -ErrorAction SilentlyContinue) -ne $null
-        $hasWriteProfileError = (Get-Command 'Write-ProfileError' -ErrorAction SilentlyContinue) -ne $null
     }
 
     $errorContext = @{
@@ -267,7 +264,7 @@ function Invoke-FragmentSafely {
             }
 
             # Use Write-ProfileError if available (legacy support)
-            if ($hasWriteProfileError -and $debugLevel -ge 1) {
+            if ((Get-Command Write-ProfileError -ErrorAction SilentlyContinue) -and $debugLevel -ge 1) {
                 try {
                     Write-ProfileError -ErrorRecord $_ -Context "Fragment: $FragmentName" -Category 'Fragment'
                 }

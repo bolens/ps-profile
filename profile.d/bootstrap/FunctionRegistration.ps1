@@ -38,6 +38,10 @@ function global:Set-AgentModeFunction {
         return $false
     }
 
+    if ([string]::IsNullOrWhiteSpace($Name)) {
+        return $false
+    }
+
     $existing = Get-Command -Name $Name -ErrorAction SilentlyContinue
     $allowReplace = $global:AgentModeReplaceAllowed.Contains($Name)
 
@@ -114,6 +118,9 @@ function global:Set-AgentModeAlias {
     )
 
     # Validation attributes handle null/empty checks
+    if ([string]::IsNullOrWhiteSpace($Name) -or [string]::IsNullOrWhiteSpace($Target)) {
+        return $false
+    }
 
     if (Get-Command -Name $Name -ErrorAction SilentlyContinue) {
         return $false
@@ -190,6 +197,14 @@ function global:Register-LazyFunction {
         return $false
     }
 
+    if ([string]::IsNullOrWhiteSpace($Name)) {
+        return $false
+    }
+
+    if ($Alias -and [string]::IsNullOrWhiteSpace($Alias)) {
+        return $false
+    }
+
     if (Get-Command -Name $Name -ErrorAction SilentlyContinue) {
         return $false
     }
@@ -236,18 +251,18 @@ function global:Register-LazyFunction {
     Custom warning message when command is not found. If not specified, uses default format.
 
 .PARAMETER InstallHint
-    Installation hint to display when command is missing (e.g., "Install with: scoop install bat").
+    Installation hint to display when command is missing (optional; auto-resolved via Get-PlatformInstallHint when omitted).
 
 .PARAMETER CommandType
     Type of command to look for. Defaults to 'Application' (external executables).
 
 .EXAMPLE
-    Register-ToolWrapper -FunctionName 'bat' -CommandName 'bat' -InstallHint 'Install with: scoop install bat'
+    Register-ToolWrapper -FunctionName 'bat' -CommandName 'bat'
 
     Creates a 'bat' function that wraps the 'bat' command.
 
 .EXAMPLE
-    Register-ToolWrapper -FunctionName 'fd' -CommandName 'fd' -InstallHint 'Install with: scoop install fd'
+    Register-ToolWrapper -FunctionName 'fd' -CommandName 'fd' -InstallPackageName 'fd'
 
     Creates an 'fd' function that wraps the 'fd' command.
 #>
@@ -267,17 +282,23 @@ function global:Register-ToolWrapper {
 
         [string]$InstallHint,
 
+        [string]$InstallPackageName,
+
         [System.Management.Automation.CommandTypes]$CommandType = [System.Management.Automation.CommandTypes]::Application
     )
 
     # Validation attributes handle null/empty checks
+    if ([string]::IsNullOrWhiteSpace($FunctionName) -or [string]::IsNullOrWhiteSpace($CommandName)) {
+        return $false
+    }
 
     # Capture variables in a hashtable for closure (more reliable than individual variables)
     $captured = @{
-        CommandName    = $CommandName
-        CommandType    = $CommandType
-        InstallHint    = $InstallHint
-        WarningMessage = $WarningMessage
+        CommandName         = $CommandName
+        CommandType         = $CommandType
+        InstallHint         = $InstallHint
+        InstallPackageName  = $InstallPackageName
+        WarningMessage      = $WarningMessage
     }
 
     # Create the wrapper function body with closure
@@ -323,7 +344,10 @@ function global:Register-ToolWrapper {
         }
         else {
             # Command not found - use standard error handling
-            if ($captured.InstallHint) {
+            if ($captured.WarningMessage) {
+                Write-Warning $captured.WarningMessage
+            }
+            elseif ($captured.InstallHint) {
                 if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
                     Write-MissingToolWarning -Tool $captured.CommandName -InstallHint $captured.InstallHint
                 }
@@ -331,8 +355,18 @@ function global:Register-ToolWrapper {
                     Write-Warning "$($captured.CommandName) not found. $($captured.InstallHint)"
                 }
             }
-            elseif ($captured.WarningMessage) {
-                Write-Warning $captured.WarningMessage
+            elseif (Get-Command Invoke-MissingToolWarning -ErrorAction SilentlyContinue) {
+                $splat = @{
+                    ToolName = $captured.CommandName
+                    Tool     = $captured.CommandName
+                }
+                if ($captured.InstallPackageName) {
+                    $splat['InstallPackageName'] = $captured.InstallPackageName
+                }
+                if (Get-Command Resolve-CommandInstallToolType -ErrorAction SilentlyContinue) {
+                    $splat['ToolType'] = Resolve-CommandInstallToolType -CommandName $captured.CommandName
+                }
+                Invoke-MissingToolWarning @splat
             }
             else {
                 Write-Warning "$($captured.CommandName) not found"

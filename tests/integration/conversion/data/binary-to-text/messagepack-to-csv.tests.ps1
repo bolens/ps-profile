@@ -21,7 +21,7 @@ Describe 'MessagePack to CSV Conversion Tests' {
     Context 'MessagePack to CSV Conversions' {
         It 'ConvertFrom-MessagePackToCsv converts MessagePack to CSV' {
             Get-Command ConvertFrom-MessagePackToCsv -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $node = Test-ToolAvailable -ToolName 'node' -InstallCommand 'scoop install nodejs' -Silent
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
             if (-not $node.Available) {
                 $skipMessage = "Node.js not available"
                 if ($node.InstallCommand) {
@@ -31,7 +31,7 @@ Describe 'MessagePack to CSV Conversion Tests' {
                 return
             }
             if (-not (Test-NpmPackageAvailable -PackageName '@msgpack/msgpack')) {
-                Set-ItResult -Skipped -Because "@msgpack/msgpack package not installed. Install with: pnpm add -g @msgpack/msgpack"
+                Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName '@msgpack/msgpack' -ToolType 'node-package' -Context '@msgpack/msgpack package not installed')
                 return
             }
             $json = '[{"name":"test1","value":123},{"name":"test2","value":456}]'

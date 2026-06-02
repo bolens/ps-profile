@@ -47,7 +47,7 @@ function Get-MinioFileList {
         mc ls $Path
     }
     else {
-        Write-MissingToolWarning -Tool 'mc' -InstallHint 'Install with: scoop install minio-client'
+        Invoke-MissingToolWarning -ToolName 'mc'
     }
 }
 
@@ -85,7 +85,7 @@ function Copy-MinioFile {
         mc cp $Source $Destination
     }
     else {
-        Write-MissingToolWarning -Tool 'mc' -InstallHint 'Install with: scoop install minio-client'
+        Invoke-MissingToolWarning -ToolName 'mc'
     }
 }
 

@@ -82,13 +82,14 @@ try:
     with open(sys.argv[2], 'w') as f:
         json.dump(result, f, indent=2, default=str)
 except ImportError:
-    print('Error: scipy package is not installed. Install it with: uv pip install scipy', file=sys.stderr)
+    print('Error: scipy package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "matlab-decode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'scipy' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -148,13 +149,14 @@ try:
     mat_data = convert_to_numpy(data)
     savemat(sys.argv[2], mat_data)
 except ImportError:
-    print('Error: scipy package is not installed. Install it with: uv pip install scipy', file=sys.stderr)
+    print('Error: scipy package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "matlab-encode-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'scipy' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -228,13 +230,14 @@ try:
         for row in data:
             writer.writerow(row.tolist())
 except ImportError:
-    print('Error: scipy package is not installed. Install it with: uv pip install scipy', file=sys.stderr)
+    print('Error: scipy package is not installed. Install it with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
     sys.exit(1)
 except Exception as e:
     print(f'Error: {str(e)}', file=sys.stderr)
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "matlab-to-csv-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'scipy' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $args = @($InputPath, $OutputPath)

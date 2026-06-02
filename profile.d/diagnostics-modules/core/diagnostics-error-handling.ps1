@@ -74,14 +74,11 @@ Message: $errorMessage
         # Log to file if debug mode is enabled
         if ($env:PS_PROFILE_DEBUG) {
             # Use cross-platform home directory
-            $userHome = if (Test-Path Function:\Get-UserHome) {
+            $userHome = if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
                 Get-UserHome
             }
-            elseif ($env:HOME) {
-                $env:HOME
-            }
             else {
-                $env:USERPROFILE
+                $null
             }
 
             if ($userHome) {
@@ -245,6 +242,10 @@ Message: $errorMessage
             $attempt++
             $attemptStartTime = [DateTime]::Now
             try {
+                if (-not ($FragmentPath -and -not [string]::IsNullOrWhiteSpace($FragmentPath) -and (Test-Path -LiteralPath $FragmentPath -PathType Leaf))) {
+                    throw [System.IO.FileNotFoundException]::new("Fragment file not found: $FragmentPath")
+                }
+
                 $null = . $FragmentPath
                 $loadDuration = ([DateTime]::Now - $loadStartTime).TotalMilliseconds
                 $attemptDuration = ([DateTime]::Now - $attemptStartTime).TotalMilliseconds

@@ -120,10 +120,11 @@ try {
 
         # If Version is specified, try to find it
         if ($Version) {
+            $javaBin = if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') { 'java.exe' } else { 'java' }
+
             # First, check standard environment variables (highest priority)
             # Check if existing JAVA_HOME matches the requested version
             if ($env:JAVA_HOME -and (Test-Path -LiteralPath $env:JAVA_HOME -PathType Container)) {
-                $javaBin = if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') { 'java.exe' } else { 'java' }
                 $javaExe = Join-Path $env:JAVA_HOME 'bin' $javaBin
                 if (Test-Path -LiteralPath $javaExe) {
                     try {
@@ -142,7 +143,8 @@ try {
             # Check other Java-related environment variables that packages might set
             $javaEnvVars = @('JRE_HOME', 'JDK_HOME', 'JAVA_ROOT', 'JAVA_PATH')
             foreach ($envVar in $javaEnvVars) {
-                $envValue = (Get-Variable -Name "env:$envVar" -ErrorAction SilentlyContinue).Value
+                $envVariable = Get-Variable -Name "env:$envVar" -ErrorAction SilentlyContinue
+                $envValue = if ($null -ne $envVariable) { $envVariable.Value } else { $null }
                 if ($envValue -and (Test-Path -LiteralPath $envValue -PathType Container)) {
                     $javaExe = Join-Path $envValue 'bin' $javaBin
                     if (Test-Path -LiteralPath $javaExe) {
@@ -210,9 +212,23 @@ try {
                 # Fallback: Try common Scoop locations
                 $scoopRoot = $env:SCOOP
                 if (-not $scoopRoot) {
-                    if ($env:USERPROFILE) {
-                        $scoopRoot = Join-Path $env:USERPROFILE 'scoop'
+                    $userHome = if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+                        Get-UserHome
                     }
+                    elseif ($env:HOME) {
+                        $env:HOME
+                    }
+                    elseif ($env:USERPROFILE) {
+                        $env:USERPROFILE
+                    }
+                    else {
+                        $null
+                    }
+
+                    if ($userHome) {
+                        $scoopRoot = Join-Path $userHome 'scoop'
+                    }
+
                     if (-not (Test-Path -LiteralPath $scoopRoot -ErrorAction SilentlyContinue)) {
                         if ($env:LOCALAPPDATA) {
                             $scoopRoot = Join-Path $env:LOCALAPPDATA 'scoop'

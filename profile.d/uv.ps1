@@ -9,16 +9,16 @@
 # Dependencies: bootstrap, env
 
 if (Test-CachedCommand uv) {
-    # UV pip replacement
     <#
     .SYNOPSIS
         Python package manager using uv instead of pip.
     .DESCRIPTION
         Replacement for pip that uses uv for faster Python package management.
     #>
-    function Invoke-Pip { uv pip @args }
-    Set-AgentModeAlias -Name 'pip' -Target 'Invoke-Pip'
-    # UV run
+    function Invoke-Pip {
+        uv pip @args
+    }
+
     <#
     .SYNOPSIS
         Runs Python commands in temporary virtual environments using uv.
@@ -26,12 +26,13 @@ if (Test-CachedCommand uv) {
         Executes Python commands with their dependencies automatically managed in isolated environments.
     #>
     function Invoke-UVRun {
-        param([string]$Command, [string[]]$Args)
+        param(
+            [string]$Command,
+            [string[]]$Args
+        )
         uv run $Command @Args
     }
-    Set-Alias -Name uvrun -Value Invoke-UVRun -Option AllScope -Force
 
-    # UV tool install
     <#
     .SYNOPSIS
         Installs Python tools globally using uv.
@@ -42,9 +43,7 @@ if (Test-CachedCommand uv) {
         param([string]$Package)
         uv tool install $Package
     }
-    Set-Alias -Name uvtool -Value Install-UVTool -Option AllScope -Force
 
-    # UV venv
     <#
     .SYNOPSIS
         Creates Python virtual environments using uv.
@@ -52,12 +51,10 @@ if (Test-CachedCommand uv) {
         Creates virtual environments much faster than traditional venv or virtualenv.
     #>
     function New-UVVenv {
-        param([string]$Path = ".venv")
+        param([string]$Path = '.venv')
         uv venv $Path
     }
-    Set-Alias -Name uvvenv -Value New-UVVenv -Option AllScope -Force
 
-    # Upgrade all outdated packages
     <#
     .SYNOPSIS
         Upgrades all outdated Python packages using uv.
@@ -72,10 +69,10 @@ if (Test-CachedCommand uv) {
         [CmdletBinding()]
         param()
 
-        Write-Verbose "Checking for outdated packages..."
+        Write-Verbose 'Checking for outdated packages...'
         uv pip list --outdated
 
-        Write-Verbose "Upgrading all packages..."
+        Write-Verbose 'Upgrading all packages...'
         $packages = uv pip freeze | ForEach-Object { $_.Split('==')[0] }
         if ($packages) {
             foreach ($package in $packages) {
@@ -84,12 +81,10 @@ if (Test-CachedCommand uv) {
             }
         }
         else {
-            Write-Output "No packages found to upgrade."
+            Write-Output 'No packages found to upgrade.'
         }
     }
-    Set-Alias -Name uvupgrade -Value Update-UVOutdatedPackages -Option AllScope -Force
 
-    # Upgrade all uv tools
     <#
     .SYNOPSIS
         Upgrades all globally installed uv tools to their latest versions.
@@ -104,42 +99,61 @@ if (Test-CachedCommand uv) {
         [CmdletBinding()]
         param()
 
-        Write-Verbose "Upgrading all uv tools..."
+        Write-Verbose 'Upgrading all uv tools...'
         uv tool upgrade --all
     }
-    Set-Alias -Name uvtoolupgrade -Value Update-UVTools -Option AllScope -Force
 
-    # UV pip install/uninstall - use via Invoke-Pip alias
-    # Note: The Invoke-Pip function already provides uv pip install/uninstall functionality
-    # Users can use: pip install package or pip uninstall package
-
-    # UV tool run
     <#
     .SYNOPSIS
         Runs tools installed with UV.
     .DESCRIPTION
         Executes tools that were installed using uv tool install.
     #>
-    function Invoke-UVTool { uv tool run @args }
-    Set-AgentModeAlias -Name 'uvx' -Target 'Invoke-UVTool'
-    # UV add
+    function Invoke-UVTool {
+        uv tool run @args
+    }
+
     <#
     .SYNOPSIS
         Adds dependencies to UV project.
     .DESCRIPTION
         Adds packages as dependencies to the current UV project.
     #>
-    function Add-UVDependency { uv add @args }
-    Set-AgentModeAlias -Name 'uva' -Target 'Add-UVDependency'
-    # UV sync
+    function Add-UVDependency {
+        uv add @args
+    }
+
     <#
     .SYNOPSIS
         Syncs UV project dependencies.
     .DESCRIPTION
         Installs and synchronizes all project dependencies.
     #>
-    function Sync-UVDependencies { uv sync @args }
-    Set-AgentModeAlias -Name 'uvs' -Target 'Sync-UVDependencies'
+    function Sync-UVDependencies {
+        uv sync @args
+    }
+
+    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
+        Set-AgentModeFunction -Name 'Invoke-Pip' -Body ${function:Invoke-Pip}
+        Set-AgentModeFunction -Name 'Invoke-UVRun' -Body ${function:Invoke-UVRun}
+        Set-AgentModeFunction -Name 'Install-UVTool' -Body ${function:Install-UVTool}
+        Set-AgentModeFunction -Name 'New-UVVenv' -Body ${function:New-UVVenv}
+        Set-AgentModeFunction -Name 'Update-UVOutdatedPackages' -Body ${function:Update-UVOutdatedPackages}
+        Set-AgentModeFunction -Name 'Update-UVTools' -Body ${function:Update-UVTools}
+        Set-AgentModeFunction -Name 'Invoke-UVTool' -Body ${function:Invoke-UVTool}
+        Set-AgentModeFunction -Name 'Add-UVDependency' -Body ${function:Add-UVDependency}
+        Set-AgentModeFunction -Name 'Sync-UVDependencies' -Body ${function:Sync-UVDependencies}
+
+        Set-AgentModeAlias -Name 'pip' -Target 'Invoke-Pip'
+        Set-AgentModeAlias -Name 'uvrun' -Target 'Invoke-UVRun'
+        Set-AgentModeAlias -Name 'uvtool' -Target 'Install-UVTool'
+        Set-AgentModeAlias -Name 'uvvenv' -Target 'New-UVVenv'
+        Set-AgentModeAlias -Name 'uvupgrade' -Target 'Update-UVOutdatedPackages'
+        Set-AgentModeAlias -Name 'uvtoolupgrade' -Target 'Update-UVTools'
+        Set-AgentModeAlias -Name 'uvx' -Target 'Invoke-UVTool'
+        Set-AgentModeAlias -Name 'uva' -Target 'Add-UVDependency'
+        Set-AgentModeAlias -Name 'uvs' -Target 'Sync-UVDependencies'
+    }
 }
 else {
     Invoke-MissingToolWarning -ToolName 'uv' -ToolType 'python-package'

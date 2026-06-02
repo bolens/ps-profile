@@ -90,7 +90,7 @@ Describe 'LaTeX and Specialized Document Format Conversion Tests' {
 
         It 'ConvertTo-PdfFromTextile converts Textile to PDF' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -134,7 +134,7 @@ This is test content.
 
         It 'ConvertTo-DocxFromTextile converts Textile to DOCX' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -169,7 +169,7 @@ This is test content.
 
         It 'ConvertTo-LaTeXFromTextile converts Textile to LaTeX' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -228,10 +228,10 @@ This is test content.
 
         It 'ConvertFrom-DjvuToPdf converts DjVu to PDF' {
             # Skip if tools not available
-            $imageMagick = Test-ToolAvailable -ToolName 'magick' -InstallCommand 'scoop install imagemagick' -Silent
-            $convert = Test-ToolAvailable -ToolName 'convert' -InstallCommand 'scoop install imagemagick' -Silent
-            $graphicsMagick = Test-ToolAvailable -ToolName 'gm' -InstallCommand 'scoop install graphicsmagick' -Silent
-            $djvulibre = Test-ToolAvailable -ToolName 'djvups' -InstallCommand 'scoop install djvulibre' -Silent
+            $imageMagick = Test-ToolAvailable -ToolName 'magick' -Silent
+            $convert = Test-ToolAvailable -ToolName 'convert' -Silent
+            $graphicsMagick = Test-ToolAvailable -ToolName 'gm' -Silent
+            $djvulibre = Test-ToolAvailable -ToolName 'djvups' -Silent
             
             $hasImageMagick = $imageMagick.Available -or $convert.Available -or $graphicsMagick.Available
             $hasDjvulibre = $djvulibre.Available
@@ -240,12 +240,13 @@ This is test content.
                 $skipMessage = "ImageMagick/GraphicsMagick or djvulibre not available"
                 $installCommands = @()
                 if (-not $hasImageMagick) {
-                    $installCommands += "scoop install imagemagick"
-                    $installCommands += "scoop install graphicsmagick"
+                    if ($imageMagick.InstallCommand) { $installCommands += $imageMagick.InstallCommand }
+                    if ($graphicsMagick.InstallCommand) { $installCommands += $graphicsMagick.InstallCommand }
                 }
-                if (-not $hasDjvulibre) {
-                    $installCommands += "scoop install djvulibre"
+                if (-not $hasDjvulibre -and $djvulibre.InstallCommand) {
+                    $installCommands += $djvulibre.InstallCommand
                 }
+                $installCommands = $installCommands | Select-Object -Unique
                 if ($installCommands.Count -gt 0) {
                     $skipMessage += ". Install with: $($installCommands -join ' or ')"
                 }
@@ -271,7 +272,7 @@ This is test content.
 
         It 'ConvertFrom-DjvuToText extracts text from DjVu' {
             # Skip if djvutxt not available
-            $djvutxt = Test-ToolAvailable -ToolName 'djvutxt' -InstallCommand 'scoop install djvulibre' -Silent
+            $djvutxt = Test-ToolAvailable -ToolName 'djvutxt' -Silent
             if (-not $djvutxt.Available) {
                 $skipMessage = "djvutxt command not available"
                 if ($djvutxt.InstallCommand) {
@@ -287,10 +288,10 @@ This is test content.
 
         It 'DjVu conversion functions handle .djv extension' {
             # Skip if tools not available
-            $imageMagick = Test-ToolAvailable -ToolName 'magick' -InstallCommand 'scoop install imagemagick' -Silent
-            $convert = Test-ToolAvailable -ToolName 'convert' -InstallCommand 'scoop install imagemagick' -Silent
-            $graphicsMagick = Test-ToolAvailable -ToolName 'gm' -InstallCommand 'scoop install graphicsmagick' -Silent
-            $djvulibre = Test-ToolAvailable -ToolName 'ddjvu' -InstallCommand 'scoop install djvulibre' -Silent
+            $imageMagick = Test-ToolAvailable -ToolName 'magick' -Silent
+            $convert = Test-ToolAvailable -ToolName 'convert' -Silent
+            $graphicsMagick = Test-ToolAvailable -ToolName 'gm' -Silent
+            $djvulibre = Test-ToolAvailable -ToolName 'ddjvu' -Silent
             
             $hasImageMagick = $imageMagick.Available -or $convert.Available -or $graphicsMagick.Available
             $hasDjvulibre = $djvulibre.Available
@@ -299,12 +300,13 @@ This is test content.
                 $skipMessage = "ImageMagick/GraphicsMagick or djvulibre not available"
                 $installCommands = @()
                 if (-not $hasImageMagick) {
-                    $installCommands += "scoop install imagemagick"
-                    $installCommands += "scoop install graphicsmagick"
+                    if ($imageMagick.InstallCommand) { $installCommands += $imageMagick.InstallCommand }
+                    if ($graphicsMagick.InstallCommand) { $installCommands += $graphicsMagick.InstallCommand }
                 }
-                if (-not $hasDjvulibre) {
-                    $installCommands += "scoop install djvulibre"
+                if (-not $hasDjvulibre -and $djvulibre.InstallCommand) {
+                    $installCommands += $djvulibre.InstallCommand
                 }
+                $installCommands = $installCommands | Select-Object -Unique
                 if ($installCommands.Count -gt 0) {
                     $skipMessage += ". Install with: $($installCommands -join ' or ')"
                 }

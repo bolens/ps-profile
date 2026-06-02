@@ -3,349 +3,435 @@
 # Unit tests for CloudProviderBase.ps1
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    
-    # Load bootstrap first
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    
-    # Load CloudProviderBase module
+
+    $errorHandlingPath = Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1'
+    if (Test-Path -LiteralPath $errorHandlingPath) {
+        . $errorHandlingPath
+    }
+
+    # Keep wide events during tests (tail sampling otherwise drops most success events).
+    # Install wrapper before CloudProviderBase so Invoke-CloudCommand resolves it at runtime.
+    $script:RealInvokeWithWideEvent = ${function:Invoke-WithWideEvent}
+    function Invoke-WithWideEvent {
+        [CmdletBinding()]
+        param(
+            [Parameter(Mandatory)]
+            [string]$OperationName,
+
+            [Parameter(Mandatory)]
+            [scriptblock]$ScriptBlock,
+
+            [hashtable]$Context = @{},
+
+            [ValidateSet('DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL')]
+            [string]$Level = 'INFO',
+
+            [switch]$AlwaysKeep
+        )
+
+        & $script:RealInvokeWithWideEvent -OperationName $OperationName -ScriptBlock $ScriptBlock -Context $Context -Level $Level -AlwaysKeep:$true
+    }
+
     . (Join-Path $script:ProfileDir 'bootstrap' 'CloudProviderBase.ps1')
+
+    if (-not (Get-Variable -Name MissingToolWarnings -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:MissingToolWarnings = @{}
+    }
+
+    if (-not (Get-Variable -Name CollectedMissingToolWarnings -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:CollectedMissingToolWarnings = [System.Collections.Generic.List[hashtable]]::new()
+    }
 }
 
-BeforeEach {
-    # Clear command cache
-    if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-        Clear-TestCachedCommandCache | Out-Null
+AfterAll {
+    if ($script:RealInvokeWithWideEvent) {
+        Set-Item -Path 'Function:\Global:Invoke-WithWideEvent' -Value $script:RealInvokeWithWideEvent -Force -ErrorAction SilentlyContinue
     }
-    
-    if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-        $null = $global:TestCachedCommandCache.TryRemove('aws', [ref]$null)
-        $null = $global:TestCachedCommandCache.TryRemove('az', [ref]$null)
-        $null = $global:TestCachedCommandCache.TryRemove('gcloud', [ref]$null)
+}
+
+$global:ClearCloudCommandMocks = {
+    foreach ($commandName in @('aws', 'az', 'gcloud')) {
+        Remove-Item "Function:\Global:$commandName" -Force -ErrorAction SilentlyContinue
     }
+}
+
+$global:ResetCloudCommandExitCode = {
+    $global:LASTEXITCODE = 0
 }
 
 Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
+    BeforeEach {
+        & $global:ClearCloudCommandMocks
+        & $global:ResetCloudCommandExitCode
+
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
+            $null = $global:TestCachedCommandCache.TryRemove('aws', [ref]$null)
+            $null = $global:TestCachedCommandCache.TryRemove('az', [ref]$null)
+            $null = $global:TestCachedCommandCache.TryRemove('gcloud', [ref]$null)
+        }
+
+        if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
+            Clear-EventCollection | Out-Null
+        }
+
+        $global:TestCapturedArguments = $null
+        $env:PS_PROFILE_SUPPRESS_EVENTS = '1'
+    }
+
+    AfterEach {
+        & $global:ClearCloudCommandMocks
+    }
+
     Context 'Command Detection' {
         It 'Returns null when command is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
+            Mark-TestCommandsUnavailable -CommandNames 'aws'
+
             $result = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls')
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Shows warning when command is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
-            $warningOutput = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') 6>&1
-            
-            $warningOutput | Should -Match 'aws'
+            Mark-TestCommandsUnavailable -CommandNames 'aws'
+
+            $null = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls')
+
+            $warningTools = @($global:CollectedMissingToolWarnings | ForEach-Object { $_.Tool })
+            $warningTools | Should -Contain 'aws'
         }
-        
+
         It 'Executes command when available' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName '&' -MockWith {
-                param($CommandName, $Arguments)
-                if ($CommandName -eq 'aws' -and $Arguments[0] -eq 's3' -and $Arguments[1] -eq 'ls') {
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                if ($args.Count -ge 2 -and $args[0] -eq 's3' -and $args[1] -eq 'ls') {
                     return 'bucket1', 'bucket2'
                 }
-            } -ParameterFilter { $CommandName -eq 'aws' }
-            
+            }.GetNewClosure() -Force
+
             $result = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls')
-            
+
             $result | Should -Not -BeNullOrEmpty
         }
     }
-    
+
     Context 'Operation Name Generation' {
         It 'Generates operation name from command and first argument' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName '&' -MockWith { return '{}' } -ParameterFilter { $CommandName -eq 'aws' }
-            
-            # Mock Invoke-WithWideEvent to capture operation name
-            $capturedOperationName = $null
-            Mock -CommandName 'Invoke-WithWideEvent' -MockWith {
-                param($OperationName, $ScriptBlock)
-                $script:capturedOperationName = $OperationName
-                return & $ScriptBlock
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{}'
+            }.GetNewClosure() -Force
+
             Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls')
-            
-            $capturedOperationName | Should -Be 'aws.s3'
+
+            $global:WideEvents[-1].event_name | Should -Be 'aws.s3'
         }
-        
+
         It 'Uses provided operation name' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName '&' -MockWith { return '{}' } -ParameterFilter { $CommandName -eq 'aws' }
-            
-            $capturedOperationName = $null
-            Mock -CommandName 'Invoke-WithWideEvent' -MockWith {
-                param($OperationName, $ScriptBlock)
-                $script:capturedOperationName = $OperationName
-                return & $ScriptBlock
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{}'
+            }.GetNewClosure() -Force
+
             Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') -OperationName 'custom.operation'
-            
-            $capturedOperationName | Should -Be 'custom.operation'
+
+            $global:WideEvents[-1].event_name | Should -Be 'custom.operation'
         }
     }
-    
+
     Context 'JSON Parsing' {
         It 'Parses JSON output by default' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            $jsonOutput = '{"Buckets":[{"Name":"bucket1"}]}'
-            Mock -CommandName '&' -MockWith { return $jsonOutput } -ParameterFilter { $CommandName -eq 'aws' }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{"Buckets":[{"Name":"bucket1"}]}'
+            }.GetNewClosure() -Force
+
             $result = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3api', 'list-buckets')
-            
+
             $result | Should -BeOfType [PSCustomObject]
             $result.Buckets | Should -Not -BeNullOrEmpty
         }
-        
+
         It 'Returns raw output when ParseJson is false' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            $textOutput = 'bucket1 bucket2'
-            Mock -CommandName '&' -MockWith { return $textOutput } -ParameterFilter { $CommandName -eq 'aws' }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return 'bucket1 bucket2'
+            }.GetNewClosure() -Force
+
             $result = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') -ParseJson $false
-            
-            $result | Should -Be $textOutput
+
+            $result | Should -Be 'bucket1 bucket2'
         }
-        
+
         It 'Handles invalid JSON gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            $invalidJson = 'not json'
-            Mock -CommandName '&' -MockWith { return $invalidJson } -ParameterFilter { $CommandName -eq 'aws' }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return 'not json'
+            }.GetNewClosure() -Force
+
             $result = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') -ParseJson $true
-            
-            $result | Should -Be $invalidJson
+
+            $result | Should -Be 'not json'
         }
     }
-    
+
     Context 'Error Handling' {
         It 'Throws error on non-zero exit code by default' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName '&' -MockWith {
-                $script:LASTEXITCODE = 1
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 1
                 return 'Error: Access denied'
-            } -ParameterFilter { $CommandName -eq 'aws' }
-            
+            }.GetNewClosure() -Force
+
             {
                 Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls')
             } | Should -Throw
         }
-        
-        It 'Returns null when ErrorOnNonZeroExit is false' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName '&' -MockWith {
-                $script:LASTEXITCODE = 1
+
+        It 'Returns output when ErrorOnNonZeroExit is false' {
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 1
                 return 'Error'
-            } -ParameterFilter { $CommandName -eq 'aws' }
-            
+            }.GetNewClosure() -Force
+
             $result = Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') -ErrorOnNonZeroExit $false
-            
-            $result | Should -BeNullOrEmpty
+
+            $result | Should -Be 'Error'
         }
     }
-    
+
     Context 'Context Tracking' {
         It 'Includes command and arguments in context' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName '&' -MockWith { return '{}' } -ParameterFilter { $CommandName -eq 'aws' }
-            
-            $capturedContext = $null
-            Mock -CommandName 'Invoke-WithWideEvent' -MockWith {
-                param($OperationName, $Context, $ScriptBlock)
-                $script:capturedContext = $Context
-                return & $ScriptBlock
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{}'
+            }.GetNewClosure() -Force
+
             Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') -Context @{ custom = 'value' }
-            
-            $capturedContext.command | Should -Be 'aws'
-            $capturedContext.arguments | Should -Be 's3 ls'
-            $capturedContext.custom | Should -Be 'value'
+
+            $eventContext = $global:WideEvents[-1].context
+            $eventContext.command | Should -Be 'aws'
+            $eventContext.arguments | Should -Be 's3 ls'
+            $eventContext.custom | Should -Be 'value'
         }
     }
 }
 
 Describe 'CloudProviderBase.ps1 - Set-CloudProfile' {
+    BeforeEach {
+        & $global:ClearCloudCommandMocks
+        & $global:ResetCloudCommandExitCode
+        $env:PS_PROFILE_SUPPRESS_EVENTS = '1'
+        Remove-Item Env:AWS_PROFILE -ErrorAction SilentlyContinue
+
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+    }
+
     Context 'Profile Setting' {
         It 'Sets environment variable' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
             $result = Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value 'production' -EnvVarName 'AWS_PROFILE' -CommandName 'aws' -DisplayName 'AWS profile'
-            
+
             $result | Should -Be $true
             $env:AWS_PROFILE | Should -Be 'production'
         }
-        
+
         It 'Returns false when command is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
+            Mark-TestCommandsUnavailable -CommandNames 'aws'
+
             $result = Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value 'production' -EnvVarName 'AWS_PROFILE' -CommandName 'aws'
-            
+
             $result | Should -Be $false
         }
-        
+
         It 'Validates setting when ValidateCommand provided' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                param($CommandName, $Arguments)
-                if ($Arguments[0] -eq 'sts' -and $Arguments[1] -eq 'get-caller-identity') {
-                    return @{ Account = '123456789012' }
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                if ($args.Count -ge 2 -and $args[0] -eq 'sts' -and $args[1] -eq 'get-caller-identity') {
+                    return '{"Account":"123456789012"}'
                 }
-                return $null
-            }
-            
+            }.GetNewClosure() -Force
+
             $result = Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value 'production' -EnvVarName 'AWS_PROFILE' -CommandName 'aws' -ValidateCommand 'sts get-caller-identity'
-            
+
             $result | Should -Be $true
         }
     }
 }
 
 Describe 'CloudProviderBase.ps1 - Get-CloudResources' {
+    BeforeEach {
+        & $global:ClearCloudCommandMocks
+        & $global:ResetCloudCommandExitCode
+        $global:TestCapturedArguments = $null
+        $env:PS_PROFILE_SUPPRESS_EVENTS = '1'
+
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        if (Get-Command Clear-EventCollection -ErrorAction SilentlyContinue) {
+            Clear-EventCollection | Out-Null
+        }
+    }
+
     Context 'Service/Action Pattern' {
         It 'Builds command arguments from service and action' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            $capturedArguments = $null
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                param($CommandName, $Arguments)
-                $script:capturedArguments = $Arguments
-                return @{ Instances = @() }
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                $global:TestCapturedArguments = $args
+                return '{}'
+            }.GetNewClosure() -Force
+
             Get-CloudResources -CommandName 'aws' -Service 'ec2' -Action 'describe-instances'
-            
-            $capturedArguments[0] | Should -Be 'ec2'
-            $capturedArguments[1] | Should -Be 'describe-instances'
+
+            $global:TestCapturedArguments[0] | Should -Be 'ec2'
+            $global:TestCapturedArguments[1] | Should -Be 'describe-instances'
         }
-        
+
         It 'Generates operation name from service and action' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            $capturedOperationName = $null
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                param($CommandName, $Arguments, $OperationName)
-                $script:capturedOperationName = $OperationName
-                return @{}
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{}'
+            }.GetNewClosure() -Force
+
             Get-CloudResources -CommandName 'aws' -Service 'ec2' -Action 'describe-instances'
-            
-            $capturedOperationName | Should -Be 'aws.ec2.describe-instances'
+
+            $global:WideEvents[-1].event_name | Should -Be 'aws.ec2.describe-instances'
         }
     }
-    
+
     Context 'Direct Arguments Pattern' {
         It 'Uses provided arguments directly' {
-            Mock-CommandAvailabilityPester -CommandName 'az' -Available $true
-            
-            $capturedArguments = $null
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                param($CommandName, $Arguments)
-                $script:capturedArguments = $Arguments
-                return @()
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'az'
+
+            Set-Item -Path 'Function:\Global:az' -Value {
+                $global:LASTEXITCODE = 0
+                $global:TestCapturedArguments = $args
+                return '[]'
+            }.GetNewClosure() -Force
+
             Get-CloudResources -CommandName 'az' -Arguments @('vm', 'list')
-            
-            $capturedArguments[0] | Should -Be 'vm'
-            $capturedArguments[1] | Should -Be 'list'
+
+            $global:TestCapturedArguments[0] | Should -Be 'vm'
+            $global:TestCapturedArguments[1] | Should -Be 'list'
         }
     }
-    
+
     Context 'Error Handling' {
         It 'Returns null when neither Service/Action nor Arguments provided' {
-            $result = Get-CloudResources -CommandName 'aws'
-            
-            $result | Should -BeNullOrEmpty
+            { Get-CloudResources -CommandName 'aws' } | Should -Throw '*Service/Action*'
         }
     }
 }
 
 Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
+    BeforeEach {
+        & $global:ClearCloudCommandMocks
+        & $global:ResetCloudCommandExitCode
+        $env:PS_PROFILE_SUPPRESS_EVENTS = '1'
+
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+    }
+
     Context 'Connection Testing' {
         It 'Tests connection successfully' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                return @{ Account = '123456789012' }
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{"Account":"123456789012"}'
+            }.GetNewClosure() -Force
+
             $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Account'
-            
+
             $result | Should -Be $true
         }
-        
+
         It 'Returns false when connection fails' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                return $null
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 1
+                return ''
+            }.GetNewClosure() -Force
+
             $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity')
-            
+
             $result | Should -Be $false
         }
-        
+
         It 'Validates success indicator' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                return @{ Account = '123456789012' }
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{"Account":"123456789012"}'
+            }.GetNewClosure() -Force
+
             $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Account'
-            
+
             $result | Should -Be $true
         }
-        
+
         It 'Returns false when success indicator not found' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                return @{ UserId = 'test' }
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{"UserId":"test"}'
+            }.GetNewClosure() -Force
+
             $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Account'
-            
+
             $result | Should -Be $false
         }
-        
+
         It 'Handles nested success indicators' {
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true
-            
-            Mock -CommandName 'Invoke-CloudCommand' -MockWith {
-                return @{ Response = @{ Account = '123456789012' } }
-            }
-            
+            Setup-AvailableCommandMock -CommandName 'aws'
+
+            Set-Item -Path 'Function:\Global:aws' -Value {
+                $global:LASTEXITCODE = 0
+                return '{"Response":{"Account":"123456789012"}}'
+            }.GetNewClosure() -Force
+
             $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Response.Account'
-            
+
             $result | Should -Be $true
         }
     }

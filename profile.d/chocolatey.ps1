@@ -369,9 +369,9 @@ if (Test-CachedCommand choco) {
             return
         }
         
-        $args = @('install', $Path)
+        $chocoArgs = @('install', $Path)
         if ($Yes) {
-            $args += '-y'
+            $chocoArgs += '-y'
         }
         
         if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
@@ -379,16 +379,16 @@ if (Test-CachedCommand choco) {
                 path         = $Path
                 auto_confirm = $Yes.IsPresent
             } -ScriptBlock {
-                & choco @args
+                & choco @chocoArgs
             } | Out-Null
         }
         else {
-            & choco @args
+            & choco @chocoArgs
         }
     }
     Set-AgentModeAlias -Name 'choimport' -Target 'Import-ChocoPackages'
     Set-AgentModeAlias -Name 'chorestore' -Target 'Import-ChocoPackages'
 }
 else {
-    Write-MissingToolWarning -Tool 'choco' -InstallHint 'Install from: https://chocolatey.org/install'
+    Invoke-MissingToolWarning -ToolName 'chocolatey' -Tool 'choco'
 }

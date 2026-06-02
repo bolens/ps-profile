@@ -13,8 +13,36 @@ if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debu
     # Debug is enabled, $debugLevel contains the numeric level (1-3)
 }
 
-$userHome = if ($env:HOME) { $env:HOME } elseif ($env:USERPROFILE) { $env:USERPROFILE } else { '~' }
-$starshipConfig = Join-Path $userHome '.config' 'starship.toml'
+# Import shared path helpers for cross-platform config resolution
+$scriptsDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
+if (Test-Path -LiteralPath $moduleImportPath) {
+    Import-Module $moduleImportPath -DisableNameChecking -ErrorAction SilentlyContinue
+    Import-LibModule -ModuleName 'PlatformPaths' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+}
+
+$userHome = if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+    Get-UserHome
+}
+elseif (Get-Command Get-ConfigDirectory -ErrorAction SilentlyContinue) {
+    Split-Path -Parent (Get-ConfigDirectory)
+}
+elseif ($env:HOME) {
+    $env:HOME
+}
+elseif ($env:USERPROFILE) {
+    $env:USERPROFILE
+}
+else {
+    '~'
+}
+
+$starshipConfig = if (Get-Command Get-ConfigDirectory -ErrorAction SilentlyContinue) {
+    Join-Path (Get-ConfigDirectory) 'starship.toml'
+}
+else {
+    Join-Path $userHome '.config' 'starship.toml'
+}
 
 # Level 1: Basic operation start
 if ($debugLevel -ge 1) {

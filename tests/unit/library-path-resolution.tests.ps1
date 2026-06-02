@@ -1,6 +1,5 @@
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
         $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
@@ -31,6 +30,7 @@ BeforeAll {
         # Create test script path in test artifacts directory
         $script:TestScriptPath = Get-TestScriptPath -RelativePath 'scripts/utils/test.ps1' -StartPath $PSScriptRoot
         $script:TestScriptCreated = $true
+        $script:TempRoot = New-TestTempDirectory -Prefix 'PathResolutionTests'
     }
     catch {
         $errorDetails = @{
@@ -111,8 +111,7 @@ Describe 'PathResolution Module Functions' {
 
         It 'Handles paths with .. components' {
             $testScriptPath = Get-TestScriptPath -RelativePath 'scripts/lib/test.ps1' -StartPath $PSScriptRoot
-            # Create a path with .. components
-            $parentPath = Join-Path $script:RepoRoot 'tests' 'test-artifacts' 'scripts' 'utils' '..' 'lib' 'test.ps1'
+            $parentPath = Join-Path $script:RepoRoot 'scripts' '.test-fixtures' 'utils' '..' 'lib' 'test.ps1'
             $result = Get-RepoRoot -ScriptPath $parentPath
             $result | Should -Be $script:RepoRoot
         }
@@ -139,7 +138,7 @@ Describe 'PathResolution Module Functions' {
 
         It 'Throws when repository root not found' {
             # Create a temporary directory structure without scripts/
-            $tempDir = Join-Path $env:TEMP "test-no-repo-$(Get-Random)"
+            $tempDir = Join-Path $script:TempRoot "test-no-repo-$(Get-Random)"
             $tempScript = Join-Path $tempDir 'test.ps1'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
@@ -195,7 +194,7 @@ Describe 'PathResolution Module Functions' {
         }
 
         It 'Throws when repository root cannot be determined' {
-            $tempDir = Join-Path $env:TEMP "test-no-repo-$(Get-Random)"
+            $tempDir = Join-Path $script:TempRoot "test-no-repo-$(Get-Random)"
             $tempScript = Join-Path $tempDir 'test.ps1'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
@@ -216,7 +215,7 @@ Describe 'PathResolution Module Functions' {
         }
 
         It 'Returns null when repository root not found and ErrorAction is SilentlyContinue' {
-            $tempDir = Join-Path $env:TEMP "test-no-repo-$(Get-Random)"
+            $tempDir = Join-Path $script:TempRoot "test-no-repo-$(Get-Random)"
             $tempScript = Join-Path $tempDir 'test.ps1'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
@@ -230,7 +229,7 @@ Describe 'PathResolution Module Functions' {
         }
 
         It 'Throws when repository root not found and ErrorAction is Stop' {
-            $tempDir = Join-Path $env:TEMP "test-no-repo-$(Get-Random)"
+            $tempDir = Join-Path $script:TempRoot "test-no-repo-$(Get-Random)"
             $tempScript = Join-Path $tempDir 'test.ps1'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
@@ -245,7 +244,7 @@ Describe 'PathResolution Module Functions' {
         It 'Exits with code 2 when ExitOnError is specified and ExitCodes module not available' {
             # This is difficult to test without actually exiting, but we can verify the structure
             # The function should attempt to use Exit-WithCode if available
-            $tempDir = Join-Path $env:TEMP "test-no-repo-$(Get-Random)"
+            $tempDir = Join-Path $script:TempRoot "test-no-repo-$(Get-Random)"
             $tempScript = Join-Path $tempDir 'test.ps1'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
@@ -264,7 +263,7 @@ Describe 'PathResolution Module Functions' {
             if ($exitCodesPath -and (Test-Path -LiteralPath $exitCodesPath)) {
                 Import-Module $exitCodesPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
                 
-                $tempDir = Join-Path $env:TEMP "test-no-repo-$(Get-Random)"
+                $tempDir = Join-Path $script:TempRoot "test-no-repo-$(Get-Random)"
                 $tempScript = Join-Path $tempDir 'test.ps1'
                 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
                 Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
@@ -281,7 +280,7 @@ Describe 'PathResolution Module Functions' {
         }
 
         It 'Handles ErrorAction Continue' {
-            $tempDir = Join-Path $env:TEMP "test-no-repo-$(Get-Random)"
+            $tempDir = Join-Path $script:TempRoot "test-no-repo-$(Get-Random)"
             $tempScript = Join-Path $tempDir 'test.ps1'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue

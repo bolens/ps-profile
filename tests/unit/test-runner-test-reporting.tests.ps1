@@ -23,6 +23,12 @@ BeforeAll {
     Import-Module (Join-Path $modulePath 'TestRecovery.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestSummaryGeneration.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestReporting.psm1') -Force
+    Import-Module (Join-Path $modulePath 'TestFailureAnalysis.psm1') -Force
+    Import-Module (Join-Path $modulePath 'TestPerformanceAnalysis.psm1') -Force
+    Import-Module (Join-Path $modulePath 'TestCategorization.psm1') -Force
+    Import-Module (Join-Path $modulePath 'TestReportFormats.psm1') -Force
+    Import-Module (Join-Path $modulePath 'BaselineGeneration.psm1') -Force
+    Import-Module (Join-Path $modulePath 'BaselineComparison.psm1') -Force
     # Import OutputUtils submodules (barrel file removed)
     Import-Module (Join-Path $modulePath 'OutputPathUtils.psm1') -Force
     Import-Module (Join-Path $modulePath 'OutputSanitizer.psm1') -Force
@@ -31,6 +37,7 @@ BeforeAll {
 
     # Set up test repository root (two levels up from tests/unit)
     $script:TestRepoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'TestReporting'
     Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
 }
 
@@ -149,7 +156,7 @@ Describe 'TestReporting Module Tests' {
                 Time         = [TimeSpan]::FromSeconds(5)
             }
 
-            $baselinePath = Join-Path $TestDrive 'test-baseline.json'
+            $baselinePath = Join-Path $script:TestTempRoot 'test-baseline.json'
 
             $baseline = New-PerformanceBaseline -TestResult $mockResult -OutputPath $baselinePath
 
@@ -197,7 +204,7 @@ Describe 'TestReporting Module Tests' {
                 }
             }
 
-            $baselinePath = Join-Path $TestDrive 'baseline.json'
+            $baselinePath = Join-Path $script:TestTempRoot 'baseline.json'
             $baselineData | ConvertTo-Json -Depth 10 | Out-File -FilePath $baselinePath
 
             # Current results (slower)

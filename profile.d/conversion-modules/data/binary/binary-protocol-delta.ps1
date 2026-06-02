@@ -54,7 +54,7 @@ except ImportError:
     try:
         from deltalake import DeltaTable
     except ImportError:
-        print('Error: delta-spark or deltalake package is not installed. Install with: uv pip install delta-spark or uv pip install deltalake', file=sys.stderr)
+        print('Error: delta-spark or deltalake package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
         sys.exit(1)
 
 try:
@@ -81,6 +81,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "delta-to-json-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'delta-spark', 'deltalake', 'pyarrow' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -122,7 +123,7 @@ except ImportError:
         from deltalake import write_deltalake
         import pyarrow as pa
     except ImportError:
-        print('Error: delta-spark or deltalake package is not installed. Install with: uv pip install delta-spark or uv pip install deltalake', file=sys.stderr)
+        print('Error: delta-spark or deltalake package is not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
         sys.exit(1)
 
 try:
@@ -165,6 +166,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "json-to-delta-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'delta-spark', 'deltalake', 'pyarrow' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1
@@ -203,7 +205,7 @@ except ImportError:
         from deltalake import DeltaTable
         import pyarrow.parquet as pq
     except ImportError:
-        print('Error: delta-spark or deltalake and pyarrow packages are not installed. Install with: uv pip install delta-spark pyarrow or uv pip install deltalake pyarrow', file=sys.stderr)
+        print('Error: delta-spark or deltalake and pyarrow packages are not installed. Install with: __PYTHON_INSTALL_CMD__', file=sys.stderr)
         sys.exit(1)
 
 try:
@@ -218,6 +220,7 @@ except Exception as e:
     sys.exit(1)
 "@
             $tempScript = Join-Path ([System.IO.Path]::GetTempPath()) "delta-to-parquet-$(Get-Random).py"
+            $pythonScript = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'delta-spark', 'deltalake', 'pyarrow' -Global
             Set-Content -LiteralPath $tempScript -Value $pythonScript -Encoding UTF8
             try {
                 $result = & $pythonCmd $tempScript $InputPath $OutputPath 2>&1

@@ -18,15 +18,37 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
         Set-Item -Path Function:\global:__FileNavigation_UpThree -Value { Set-Location ..\..\..\ } -Force | Out-Null
 
         $resolveHome = {
-            if (Test-Path Function:\Get-UserHome) {
+            if (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
                 Get-UserHome
             }
             elseif ($env:HOME) {
                 $env:HOME
             }
-            else {
+            elseif ($env:USERPROFILE) {
                 $env:USERPROFILE
             }
+            else {
+                $null
+            }
+        }.GetNewClosure()
+
+        $resolveUserDirectory = {
+            param(
+                [Parameter(Mandatory)]
+                [ValidateSet('Desktop', 'Downloads', 'Documents')]
+                [string]$Name
+            )
+
+            if (Get-Command Get-UserDirectory -ErrorAction SilentlyContinue) {
+                return Get-UserDirectory -Name $Name
+            }
+
+            $resolvedHome = & $resolveHome
+            if ($resolvedHome) {
+                return Join-Path $resolvedHome $Name
+            }
+
+            return $null
         }.GetNewClosure()
 
         $homeScript = {
@@ -41,12 +63,7 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
         Set-Item -Path Function:\global:__FileNavigation_Home -Value $homeScript -Force | Out-Null
 
         $desktopScript = {
-            $resolvedHome = & $resolveHome
-            if (-not $resolvedHome) {
-                throw 'Unable to determine user home directory.'
-            }
-
-            $desktop = Join-Path $resolvedHome 'Desktop'
+            $desktop = & $resolveUserDirectory 'Desktop'
             if ($desktop -and -not [string]::IsNullOrWhiteSpace($desktop) -and (Test-Path -LiteralPath $desktop)) {
                 Set-Location $desktop
             }
@@ -57,12 +74,7 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
         Set-Item -Path Function:\global:__FileNavigation_Desktop -Value $desktopScript -Force | Out-Null
 
         $downloadsScript = {
-            $resolvedHome = & $resolveHome
-            if (-not $resolvedHome) {
-                throw 'Unable to determine user home directory.'
-            }
-
-            $downloads = Join-Path $resolvedHome 'Downloads'
+            $downloads = & $resolveUserDirectory 'Downloads'
             if ($downloads -and -not [string]::IsNullOrWhiteSpace($downloads) -and (Test-Path -LiteralPath $downloads)) {
                 Set-Location $downloads
             }
@@ -73,12 +85,7 @@ if (-not (Test-Path "Function:\\Ensure-FileNavigation")) {
         Set-Item -Path Function:\global:__FileNavigation_Downloads -Value $downloadsScript -Force | Out-Null
 
         $documentsScript = {
-            $resolvedHome = & $resolveHome
-            if (-not $resolvedHome) {
-                throw 'Unable to determine user home directory.'
-            }
-
-            $documents = Join-Path $resolvedHome 'Documents'
+            $documents = & $resolveUserDirectory 'Documents'
             if ($documents -and -not [string]::IsNullOrWhiteSpace($documents) -and (Test-Path -LiteralPath $documents)) {
                 Set-Location $documents
             }

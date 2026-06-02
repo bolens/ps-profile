@@ -2,12 +2,14 @@
 # Tests for general-purpose utility helpers exposed by profile fragments.
 #
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'ProfileUtility'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
     . (Join-Path $script:ProfileDir 'utilities.ps1')
+    Ensure-Utilities
 }
 
 Describe 'Profile utility functions' {
@@ -98,10 +100,11 @@ Describe 'Profile utility functions' {
 
     Context 'PATH management helpers' {
         It 'Remove-Path removes directory from PATH' {
-            $testPath = Join-Path $TestDrive 'TestPath'
+            $testPath = Join-Path $script:TestTempRoot 'TestPath'
+            $pathSeparator = [System.IO.Path]::PathSeparator
             $originalPath = $env:PATH
             try {
-                $env:PATH = "$env:PATH;$testPath"
+                $env:PATH = "$env:PATH$pathSeparator$testPath"
                 $env:PATH | Should -Match ([regex]::Escape($testPath))
                 Remove-Path -Path $testPath
                 $env:PATH | Should -Not -Match ([regex]::Escape($testPath))
@@ -115,14 +118,15 @@ Describe 'Profile utility functions' {
         }
 
         It 'Add-Path adds directory to PATH' {
-            $testPath = Join-Path $TestDrive 'TestAddPath'
+            $testPath = Join-Path $script:TestTempRoot 'TestAddPath'
             if (-not (Test-Path $testPath)) {
                 New-Item -ItemType Directory -Path $testPath -Force | Out-Null
             }
 
             $originalPath = $env:PATH
             try {
-                if ($env:PATH -split ';' -contains $testPath) {
+                $pathEntries = $env:PATH -split [System.IO.Path]::PathSeparator
+                if ($pathEntries -contains $testPath) {
                     Remove-Path -Path $testPath
                 }
 

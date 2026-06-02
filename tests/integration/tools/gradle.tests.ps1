@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'gradle Tools Integration Tests' {
     BeforeAll {
         try {
@@ -91,6 +93,36 @@ Describe 'gradle Tools Integration Tests' {
             Update-GradleWrapper
             Should -Invoke -CommandName 'gradle' -Times 1 -Exactly
             Get-Command Update-GradleWrapper -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when gradle is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @('Test-GradleOutdated', 'Update-GradleWrapper') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'gradle' -Available $false
+            $script:MissingGradleOutput = & { . (Join-Path $script:ProfileDir 'gradle.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when gradle is unavailable' {
+            Get-Command Test-GradleOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when gradle is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingGradleOutput -Pattern 'gradle not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingGradleOutput -ToolName 'gradle'
         }
     }
 }

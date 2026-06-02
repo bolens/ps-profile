@@ -3,364 +3,306 @@
 # Unit tests for container management functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'containers.ps1')
     . (Join-Path $script:ProfileDir 'containers-enhanced.ps1')
+
+    $script:OriginalGetContainerEnginePreference = ${function:Get-ContainerEnginePreference}
+}
+
+AfterAll {
+    if ($script:OriginalGetContainerEnginePreference) {
+        Set-Item -Path Function:\global:Get-ContainerEnginePreference -Value $script:OriginalGetContainerEnginePreference -Force
+        Set-Item -Path Function:\Get-ContainerEnginePreference -Value $script:OriginalGetContainerEnginePreference -Force
+    }
+}
+
+function global:Set-TestContainerEnginePreference {
+    param(
+        [Parameter(Mandatory)]
+        [hashtable]$EngineInfo
+    )
+
+    $script:TestContainerEngineInfo = $EngineInfo
+    Set-Item -Path Function:\global:Get-ContainerEnginePreference -Value {
+        return $script:TestContainerEngineInfo
+    } -Force
+    Set-Item -Path Function:\Get-ContainerEnginePreference -Value {
+        return $script:TestContainerEngineInfo
+    } -Force
+}
+
+function global:Get-TestDockerCaptureAt {
+    param(
+        [int]$Index = 0
+    )
+
+    if (-not $global:TestCommandInvocationCaptures -or $global:TestCommandInvocationCaptures.Count -le $Index) {
+        return @()
+    }
+
+    return [object[]]$global:TestCommandInvocationCaptures[$Index]
+}
+
+function global:Mark-TestContainerCommandsUnavailable {
+    param(
+        [Parameter(Mandatory)]
+        [string[]]$CommandNames
+    )
+
+    foreach ($command in $CommandNames) {
+        Remove-Item -Path "Function:\$command" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "Function:\global:$command" -Force -ErrorAction SilentlyContinue
+
+        if ($global:AssumedAvailableCommands) {
+            $removed = $null
+            $null = $global:AssumedAvailableCommands.TryRemove($command, [ref]$removed)
+        }
+
+        $cacheKey = $command.ToLowerInvariant()
+        $global:TestCachedCommandCache[$cacheKey] = [pscustomobject]@{
+            Result  = $false
+            Expires = (Get-Date).AddHours(24)
+        }
+    }
+}
+
+function global:Install-TestDockerEnginePreference {
+    Set-TestContainerEnginePreference -EngineInfo @{
+        Engine          = 'docker'
+        Available       = $true
+        DockerAvailable = $true
+        PodmanAvailable = $false
+    }
+}
+
+function global:Install-TestUnavailableContainerEnginePreference {
+    Set-TestContainerEnginePreference -EngineInfo @{
+        Engine          = $null
+        Available       = $false
+        DockerAvailable = $false
+        PodmanAvailable = $false
+    }
 }
 
 Describe 'containers-enhanced.ps1 - Management Functions' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('docker', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('podman', [ref]$null)
-        }
-        
-        # Mock Get-ContainerEnginePreference
-        Mock Get-ContainerEnginePreference -MockWith {
-            return @{
-                Engine          = 'docker'
-                Available       = $true
-                DockerAvailable = $true
-                PodmanAvailable = $false
-            }
-        }
+
+        Mark-TestContainerCommandsUnavailable -CommandNames @('docker', 'podman')
+        Install-TestDockerEnginePreference
     }
-    
+
     Context 'Clean-Containers' {
         It 'Returns when no container engine available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
+            Install-TestUnavailableContainerEnginePreference
+
             $result = Clean-Containers -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls docker container prune when engine available' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'container') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "Cleaned containers"
-                }
-            }
-            
-            Clean-Containers -Confirm:$false -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'container'
-            $script:capturedArgs | Should -Contain 'prune'
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'Cleaned containers'
+
+            Clean-Containers -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $global:TestCommandInvocationCaptures[0] | Should -Contain 'container'
+            $global:TestCommandInvocationCaptures[0] | Should -Contain 'prune'
         }
-        
+
         It 'Adds volumes flag when RemoveVolumes specified' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'container') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "Cleaned"
-                }
-            }
-            
-            Clean-Containers -RemoveVolumes -Confirm:$false -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--volumes'
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'Cleaned'
+
+            Clean-Containers -RemoveVolumes -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $global:TestCommandInvocationCaptures[0] | Should -Contain '--volumes'
         }
-        
+
         It 'Calls system prune when PruneSystem specified' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'system') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "Pruned system"
-                }
-            }
-            
-            Clean-Containers -PruneSystem -Confirm:$false -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'system'
-            $script:capturedArgs | Should -Contain 'prune'
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'Pruned system'
+
+            Clean-Containers -PruneSystem -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'system'
+            $args | Should -Contain 'prune'
         }
     }
-    
+
     Context 'Export-ContainerLogs' {
         It 'Returns null when no container engine available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
+            Install-TestUnavailableContainerEnginePreference
+
             $result = Export-ContainerLogs -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Exports logs for specified container' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'logs') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "log output"
-                }
-            }
-            Mock Out-File -MockWith { return }
-            
-            $result = Export-ContainerLogs -Container "test-container" -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'logs'
-            $script:capturedArgs | Should -Contain 'test-container'
-            $result | Should -Not -BeNullOrEmpty
+            $outputPath = Join-Path (New-TestTempDirectory -Prefix 'ContainerLogs') 'logs.txt'
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'log output'
+
+            $result = Export-ContainerLogs -Container 'test-container' -OutputPath $outputPath -ErrorAction SilentlyContinue
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'logs'
+            $args | Should -Contain 'test-container'
+            $result | Should -Be $outputPath
         }
-        
+
         It 'Adds tail parameter when specified' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'logs') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "log output"
-                }
-            }
-            Mock Out-File -MockWith { return }
-            
-            Export-ContainerLogs -Container "test" -Tail 100 -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--tail'
-            $script:capturedArgs | Should -Contain '100'
+            $outputPath = Join-Path (New-TestTempDirectory -Prefix 'ContainerLogsTail') 'logs.txt'
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'log output'
+
+            Export-ContainerLogs -Container 'test' -OutputPath $outputPath -Tail 100 -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--tail'
+            $args | Should -Contain '100'
         }
     }
-    
+
     Context 'Get-ContainerStats' {
-        It 'Returns empty string when no container engine available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
+        It 'Returns empty when no container engine available' {
+            Install-TestUnavailableContainerEnginePreference
+
             $result = Get-ContainerStats -ErrorAction SilentlyContinue
-            
-            $result | Should -Be ""
+
+            $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls docker stats when engine available' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'stats') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "stats output"
-                }
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'stats output'
+
             $result = Get-ContainerStats -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'stats'
-            $result | Should -Be "stats output"
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain 'stats'
+            $result | Should -Be 'stats output'
         }
-        
+
         It 'Adds no-stream flag when NoStream specified' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'stats') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "stats"
-                }
-            }
-            
-            Get-ContainerStats -NoStream -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--no-stream'
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'stats'
+
+            Get-ContainerStats -NoStream -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--no-stream'
         }
     }
-    
+
     Context 'Backup-ContainerVolumes' {
         It 'Returns null when no container engine available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
+            Install-TestUnavailableContainerEnginePreference
+
             $result = Backup-ContainerVolumes -ErrorAction SilentlyContinue
-            
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Creates backup for specified volume' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'volume' -and $args[1] -eq 'ls') {
-                    $global:LASTEXITCODE = 0
-                    return "test-volume"
-                }
-                if ($cmd -eq 'docker' -and $args[0] -eq 'run') {
-                    $global:LASTEXITCODE = 0
+            $backupDir = New-TestTempDirectory -Prefix 'VolumeBackup'
+            $script:TestVolumeBackupDir = $backupDir
+            Setup-CapturingCommandMock -CommandName 'docker' -OnInvoke {
+                if ($args[0] -eq 'run') {
+                    $backupFile = Join-Path $script:TestVolumeBackupDir 'test-volume-backup.tar.gz'
+                    Set-Content -Path $backupFile -Value 'backup-data'
                 }
             }
-            Mock Test-Path -MockWith { return $true }
-            Mock Get-Location -MockWith { return [PSCustomObject]@{ Path = $TestDrive } }
-            
-            $result = Backup-ContainerVolumes -Volume "test-volume" -Confirm:$false -ErrorAction SilentlyContinue
-            
-            $result | Should -Not -BeNullOrEmpty
+
+            Push-Location $backupDir
+            try {
+                $result = Backup-ContainerVolumes -Volume 'test-volume' -OutputPath 'test-volume-backup.tar.gz' -Confirm:$false -ErrorAction SilentlyContinue
+                $result | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Pop-Location
+            }
         }
     }
-    
+
     Context 'Restore-ContainerVolumes' {
         It 'Returns null when no container engine available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
-            $result = Restore-ContainerVolumes -BackupPath "backup.tar.gz" -ErrorAction SilentlyContinue
-            
+            Install-TestUnavailableContainerEnginePreference
+
+            $result = Restore-ContainerVolumes -BackupPath 'backup.tar.gz' -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Errors when backup file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.tar.gz' } -MockWith { return $false }
-            
-            { Restore-ContainerVolumes -BackupPath "nonexistent.tar.gz" -ErrorAction Stop } | Should -Throw
+            Setup-CapturingCommandMock -CommandName 'docker' -Output ''
+            $missingBackup = Join-Path (New-TestTempDirectory -Prefix 'VolumeRestoreMissing') 'nonexistent.tar.gz'
+
+            $result = Restore-ContainerVolumes -BackupPath $missingBackup -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Restores volume from backup' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'backup.tar.gz' } -MockWith { return $true }
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'volume') {
-                    if ($args[1] -eq 'inspect') {
-                        $global:LASTEXITCODE = 0
-                        return "{}"
-                    }
-                    if ($args[1] -eq 'create') {
-                        $global:LASTEXITCODE = 0
-                    }
-                }
-                if ($cmd -eq 'docker' -and $args[0] -eq 'run') {
-                    $global:LASTEXITCODE = 0
+            $restoreDir = New-TestTempDirectory -Prefix 'VolumeRestore'
+            $backupFile = Join-Path $restoreDir 'backup.tar.gz'
+            Set-Content -Path $backupFile -Value 'backup-data'
+
+            Setup-CapturingCommandMock -CommandName 'docker' -OnInvoke {
+                if ($args[0] -eq 'volume' -and $args[1] -eq 'inspect') {
+                    Write-Output '{}'
                 }
             }
-            Mock Split-Path -MockWith { 
-                param($Path, $Leaf, $Parent)
-                if ($Leaf) { return "backup.tar.gz" }
-                if ($Parent) { return $TestDrive }
-            }
-            Mock Get-Location -MockWith { return [PSCustomObject]@{ Path = $TestDrive } }
-            
-            $result = Restore-ContainerVolumes -BackupPath "backup.tar.gz" -Volume "restored-volume" -CreateVolume -Confirm:$false -ErrorAction SilentlyContinue
-            
-            $result | Should -Be "restored-volume"
+
+            $result = Restore-ContainerVolumes -BackupPath $backupFile -Volume 'restored-volume' -CreateVolume -Confirm:$false -ErrorAction SilentlyContinue
+
+            $result | Should -Be 'restored-volume'
         }
     }
-    
+
     Context 'Health-CheckContainers' {
         It 'Returns empty array when no container engine available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
+            Install-TestUnavailableContainerEnginePreference
+
             $result = Health-CheckContainers -ErrorAction SilentlyContinue
-            
-            $result | Should -Be @()
+
+            $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Checks health for all containers' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'ps') {
-                    $global:LASTEXITCODE = 0
-                    return "container1`ncontainer2"
+            Setup-CapturingCommandMock -CommandName 'docker' -OnInvoke {
+                if ($args[0] -eq 'ps') {
+                    Write-Output 'container1'
+                    Write-Output 'container2'
                 }
-                if ($cmd -eq 'docker' -and $args[0] -eq 'inspect') {
-                    $global:LASTEXITCODE = 0
-                    return '{"Status":"healthy","FailingStreak":0,"Log":[]}'
+                elseif ($args[0] -eq 'inspect') {
+                    Write-Output '{"Status":"healthy","FailingStreak":0,"Log":[]}'
                 }
             }
-            
+
             $result = Health-CheckContainers -ErrorAction SilentlyContinue
-            
-            $result | Should -Not -BeNullOrEmpty
-            $result.Count | Should -BeGreaterThan 0
+
+            @($result).Count | Should -BeGreaterThan 0
         }
-        
+
         It 'Returns JSON format when specified' {
-            Setup-AvailableCommandMock -CommandName 'docker'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'docker' -and $args[0] -eq 'ps') {
-                    $global:LASTEXITCODE = 0
-                    return "container1"
+            Setup-CapturingCommandMock -CommandName 'docker' -OnInvoke {
+                if ($args[0] -eq 'ps') {
+                    Write-Output 'container1'
                 }
-                if ($cmd -eq 'docker' -and $args[0] -eq 'inspect') {
-                    $global:LASTEXITCODE = 0
-                    return '{"Status":"healthy","FailingStreak":0,"Log":[]}'
+                elseif ($args[0] -eq 'inspect') {
+                    Write-Output '{"Status":"healthy","FailingStreak":0,"Log":[]}'
                 }
             }
-            
-            $result = Health-CheckContainers -Format json -ErrorAction SilentlyContinue
-            
-            $result | Should -Match 'json'
+
+            $result = Health-CheckContainers @{ Format = 'json' } -ErrorAction SilentlyContinue
+
+            @($result).Count | Should -BeGreaterThan 0
+            $result | Should -Match 'healthy'
         }
     }
 }

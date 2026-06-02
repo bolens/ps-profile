@@ -187,7 +187,7 @@ Describe 'EPUB and E-book Conversion Tests' {
 
         It 'ConvertFrom-Fb2ToMarkdown converts FB2 to Markdown' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {
@@ -221,7 +221,7 @@ Describe 'EPUB and E-book Conversion Tests' {
 
         It 'FB2 conversion functions handle .fbz extension' {
             # Skip if pandoc not available
-            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -InstallCommand 'scoop install pandoc' -Silent
+            $pandoc = Test-ToolAvailable -ToolName 'pandoc' -Silent
             if (-not $pandoc.Available) {
                 $skipMessage = "pandoc command not available"
                 if ($pandoc.InstallCommand) {

@@ -73,13 +73,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'bruno')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-                Invoke-MissingToolWarning -ToolName 'bruno' -DefaultInstallCommand 'scoop install bruno'
+                Invoke-MissingToolWarning -ToolName 'bruno'
                 return $null
             }
 
@@ -186,13 +180,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'hurl')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-                Invoke-MissingToolWarning -ToolName 'hurl' -DefaultInstallCommand 'scoop install hurl'
+                Invoke-MissingToolWarning -ToolName 'hurl'
                 return $null
             }
 
@@ -315,13 +303,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'http')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-                Invoke-MissingToolWarning -ToolName 'httpie' -DefaultInstallCommand 'scoop install httpie'
+                Invoke-MissingToolWarning -ToolName 'httpie'
                 return $null
             }
 
@@ -440,13 +422,7 @@ try {
         )
 
         if (-not (Test-CachedCommand 'httptoolkit')) {
-            $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-            }
-            else {
-                Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
-            Invoke-MissingToolWarning -ToolName 'httptoolkit' -DefaultInstallCommand 'scoop install httptoolkit'
+            Invoke-MissingToolWarning -ToolName 'httptoolkit'
             return $null
         }
 
@@ -523,13 +499,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'insomnia')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-                Invoke-MissingToolWarning -ToolName 'insomnia' -DefaultInstallCommand 'scoop install insomnia'
+                Invoke-MissingToolWarning -ToolName 'insomnia'
                 return $null
             }
 
@@ -642,13 +612,7 @@ try {
 
         process {
             if (-not (Test-CachedCommand 'newman')) {
-                $repoRoot = if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                    Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction SilentlyContinue
-                }
-                else {
-                    Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-                Invoke-MissingToolWarning -ToolName 'newman' -DefaultInstallCommand 'npm install -g newman'
+                Invoke-MissingToolWarning -ToolName 'newman' -ToolType 'node-package'
                 return $null
             }
 

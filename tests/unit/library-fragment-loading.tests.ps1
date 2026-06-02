@@ -5,9 +5,8 @@ tests/unit/library-fragment-loading.tests.ps1
     Unit tests for FragmentLoading.psm1 module functions.
 #>
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     # Import PathResolution first (use SilentlyContinue to avoid duplicate ErrorAction issues)
     $pathResolutionModulePath = Get-TestPath -RelativePath 'scripts\lib\path\PathResolution.psm1' -StartPath $PSScriptRoot -EnsureExists
     if ($pathResolutionModulePath -and (Test-Path -LiteralPath $pathResolutionModulePath)) {

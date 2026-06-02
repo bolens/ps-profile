@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'maven Tools Integration Tests' {
     BeforeAll {
         try {
@@ -91,6 +93,36 @@ Describe 'maven Tools Integration Tests' {
             Update-MavenDependencies
             Should -Invoke -CommandName 'mvn' -Times 1 -Exactly
             Get-Command Update-MavenDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Graceful degradation when mvn is unavailable' {
+        BeforeAll {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            @('Test-MavenOutdated', 'Update-MavenDependencies') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'mvn' -Available $false
+            $script:MissingMavenOutput = & { . (Join-Path $script:ProfileDir 'maven.ps1') } 2>&1 3>&1 | Out-String
+        }
+
+        It 'Functions are not created when mvn is unavailable' {
+            Get-Command Test-MavenOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
+        It 'Emits missing-tool warning when mvn is unavailable' {
+            Assert-TestMissingToolWarning -Output $script:MissingMavenOutput -Pattern 'mvn not found'
+            Assert-TestOutputContainsInstallCommand -Output $script:MissingMavenOutput -ToolName 'maven'
         }
     }
 }

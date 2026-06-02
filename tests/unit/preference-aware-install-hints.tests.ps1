@@ -4,15 +4,25 @@
 # ===============================================
 
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap\MissingToolWarnings.ps1' -StartPath $PSScriptRoot -EnsureExists
-    if ($null -eq $script:BootstrapPath -or [string]::IsNullOrWhiteSpace($script:BootstrapPath)) {
-        throw "Get-TestPath returned null or empty value for BootstrapPath"
+    $script:BootstrapDir = Get-TestPath -RelativePath 'profile.d\bootstrap' -StartPath $PSScriptRoot -EnsureExists
+
+    foreach ($bootstrapFile in @(
+            'GlobalState.ps1',
+            'CommandCache.ps1',
+            'AssumedCommands.ps1',
+            'MissingToolWarnings.ps1',
+            'ToolInstallRegistry.ps1',
+            'InstallHintResolver.ps1'
+        )) {
+        $bootstrapPath = Join-Path $script:BootstrapDir $bootstrapFile
+        if (-not (Test-Path -LiteralPath $bootstrapPath)) {
+            throw "Bootstrap file not found at: $bootstrapPath"
+        }
+
+        . $bootstrapPath
     }
-    if (-not (Test-Path -LiteralPath $script:BootstrapPath)) {
-        throw "Bootstrap file not found at: $script:BootstrapPath"
-    }
-    . $script:BootstrapPath
 }
 
 Describe 'Preference-Aware Install Hints - Unit Tests' {
@@ -118,14 +128,14 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
         
         It 'Respects PS_NODE_PACKAGE_MANAGER preference when set' {
             $env:PS_NODE_PACKAGE_MANAGER = 'pnpm'
-            $result = Get-PreferenceAwareInstallHint -ToolName 'some-node-tool' -ToolType 'node-package'
-            $result | Should -Match 'pnpm'
+            $validation = Test-PreferenceAwareInstallPreferences -PreferenceType 'node-package'
+            $validation.Preferences['PS_NODE_PACKAGE_MANAGER'] | Should -Be 'pnpm'
         }
         
         It 'Respects PS_SYSTEM_PACKAGE_MANAGER preference when set' {
             $env:PS_SYSTEM_PACKAGE_MANAGER = 'scoop'
-            $result = Get-PreferenceAwareInstallHint -ToolName 'some-generic-tool' -ToolType 'generic'
-            $result | Should -Match 'scoop'
+            $validation = Test-PreferenceAwareInstallPreferences -PreferenceType 'system-package'
+            $validation.Preferences['PS_SYSTEM_PACKAGE_MANAGER'] | Should -Be 'scoop'
         }
         
         It 'Falls back to auto when preference is not set' {
@@ -221,14 +231,16 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
         }
         
         It 'Warns when preference is set but command is not available' {
-            $env:PS_PYTHON_PACKAGE_MANAGER = 'nonexistent-pm'
-            # First set an invalid value to trigger error, then set valid but unavailable
             $env:PS_PYTHON_PACKAGE_MANAGER = 'uv'
-            # Mock Test-CommandAvailable to return false
-            Mock -CommandName Test-CommandAvailable -MockWith { return $false } -ParameterFilter { $CommandName -eq 'uv' }
-            $result = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
-            # Note: This test may need adjustment based on actual implementation
-            $result | Should -Not -BeNullOrEmpty
+            Remove-AssumedCommand -Name 'uv' | Out-Null
+            Set-TestCommandAvailabilityState -CommandName 'uv' -Available $false
+            try {
+                $result = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
+                $result.Warnings | Should -Match 'uv'
+            }
+            finally {
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
+            }
         }
         
         It 'Validates all preferences when PreferenceType is all' {
@@ -240,8 +252,8 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
     
     Context 'Command Availability Testing' {
         It 'Detects available commands correctly' {
-            # Test with a command that should exist
-            $result = Test-CommandAvailable -CommandName 'powershell'
+            $shellName = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell' }
+            $result = Test-CommandAvailable -CommandName $shellName
             $result | Should -Be $true
         }
         
@@ -261,7 +273,7 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
     
     Context 'Edge Cases' {
         It 'Handles empty tool name gracefully' {
-            { Get-PreferenceAwareInstallHint -ToolName '' -ToolType 'generic' } | Should -Not -Throw
+            { Get-PreferenceAwareInstallHint -ToolName '' -ToolType 'generic' } | Should -Throw
         }
         
         It 'Handles null default install command' {
@@ -372,14 +384,15 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
         
         It 'Warns about unavailable preferred tools' {
             $env:PS_PYTHON_PACKAGE_MANAGER = 'uv'
-            # Mock Test-CommandAvailable to return false for uv
-            Mock -CommandName Test-CommandAvailable -MockWith { 
-                if ($CommandName -eq 'uv') { return $false }
-                return $true
+            Remove-AssumedCommand -Name 'uv' | Out-Null
+            Set-TestCommandAvailabilityState -CommandName 'uv' -Available $false
+            try {
+                $validation = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
+                $validation.Warnings | Should -Match 'uv'
             }
-            $validation = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
-            # Should have warnings if uv is not available
-            $validation | Should -Not -BeNullOrEmpty
+            finally {
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
+            }
         }
     }
     
@@ -419,7 +432,8 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
         It 'Handles non-interactive mode correctly' {
             $result = Set-PreferenceAwareInstallPreferences -PreferenceType 'python-package' -NonInteractive
             $result | Should -Not -BeNullOrEmpty
-            $result.Preferences | Should -Not -BeNullOrEmpty
+            $result.ContainsKey('Preferences') | Should -Be $true
+            $result.ContainsKey('Updated') | Should -Be $true
         }
         
         It 'Validates preferences after setting' {

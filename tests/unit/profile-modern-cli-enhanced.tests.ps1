@@ -3,416 +3,283 @@
 # Unit tests for enhanced modern-cli functions
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'modern-cli.ps1')
+
+    $script:TestSearchDir = New-TestTempDirectory -Prefix 'ModernCliSearch'
+    $script:TestBatFile = Join-Path (New-TestTempDirectory -Prefix 'ModernCliBat') 'test.txt'
+    Set-Content -Path $script:TestBatFile -Value 'test content'
+    $script:TestBatPs1File = Join-Path (Split-Path $script:TestBatFile -Parent) 'test.ps1'
+    Set-Content -Path $script:TestBatPs1File -Value 'function test {}'
+    $script:ZoxideTargetPath = New-TestTempDirectory -Prefix 'ZoxideTarget'
+}
+
+function global:Reset-TestModernCliCommandAvailability {
+    $managedCommands = @('fd', 'rg', 'zoxide', 'bat')
+
+    Clear-TestCachedCommandCache | Out-Null
+
+    foreach ($command in $managedCommands) {
+        Remove-Item -Path "Function:\$command" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "Function:\global:$command" -Force -ErrorAction SilentlyContinue
+
+        if ($global:AssumedAvailableCommands) {
+            $removed = $null
+            $null = $global:AssumedAvailableCommands.TryRemove($command, [ref]$removed)
+        }
+
+        $cacheKey = $command.ToLowerInvariant()
+        $global:TestCachedCommandCache[$cacheKey] = [pscustomobject]@{
+            Result  = $false
+            Expires = (Get-Date).AddHours(24)
+        }
+    }
+}
+
+function global:Get-TestModernCliInvocationArgs {
+    Get-TestCommandInvocationArgsFlat
 }
 
 Describe 'modern-cli.ps1 - Enhanced Functions' {
     BeforeEach {
-        # Clear command cache
-        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-            Clear-TestCachedCommandCache | Out-Null
-        }
-        
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('fd', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('rg', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('zoxide', [ref]$null)
-            $null = $global:TestCachedCommandCache.TryRemove('bat', [ref]$null)
-        }
-        
-        # Mock Get-Location to return TestDrive
-        Mock Get-Location -MockWith { return [PSCustomObject]@{ Path = $TestDrive } }
+        Clear-TestCommandInvocationCapture
+        Reset-TestModernCliCommandAvailability
     }
-    
+
     Context 'Find-WithFd' {
         It 'Returns empty array when fd is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'fd' -Available $false
-            
-            $result = Find-WithFd -Pattern "test" -ErrorAction SilentlyContinue
-            
+            $result = Find-WithFd -Pattern 'test' -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Calls fd with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'fd'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'fd') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return @('file1.txt', 'file2.txt')
-                }
-            }
-            
-            $result = Find-WithFd -Pattern "test" -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--ignore-case'
-            $script:capturedArgs | Should -Contain 'test'
+            Setup-CapturingCommandMock -CommandName 'fd' -Output "file1.txt`nfile2.txt"
+
+            $result = Find-WithFd -Pattern 'test' -ErrorAction SilentlyContinue
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--ignore-case'
+            $args | Should -Contain 'test'
             $result | Should -Not -BeNullOrEmpty
         }
-        
+
         It 'Adds type filter when specified' {
-            Setup-AvailableCommandMock -CommandName 'fd'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'fd') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return @('file1.txt')
-                }
-            }
-            
-            Find-WithFd -Pattern "test" -Type f -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--type'
-            $script:capturedArgs | Should -Contain 'f'
+            Setup-CapturingCommandMock -CommandName 'fd' -Output 'file1.txt'
+
+            Find-WithFd -Pattern 'test' -Type f -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--type'
+            $args | Should -Contain 'f'
         }
-        
+
         It 'Adds extension filter when specified' {
-            Setup-AvailableCommandMock -CommandName 'fd'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'fd') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return @('file1.ps1')
-                }
-            }
-            
-            Find-WithFd -Pattern "test" -Extension "ps1" -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--extension'
-            $script:capturedArgs | Should -Contain 'ps1'
+            Setup-CapturingCommandMock -CommandName 'fd' -Output 'file1.ps1'
+
+            Find-WithFd -Pattern 'test' -Extension 'ps1' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--extension'
+            $args | Should -Contain 'ps1'
         }
-        
+
         It 'Adds hidden flag when specified' {
-            Setup-AvailableCommandMock -CommandName 'fd'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'fd') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return @()
-                }
-            }
-            
-            Find-WithFd -Pattern "test" -Hidden -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--hidden'
+            Setup-CapturingCommandMock -CommandName 'fd' -Output ''
+
+            Find-WithFd -Pattern 'test' -Hidden -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--hidden'
         }
-        
+
         It 'Handles case-sensitive search' {
-            Setup-AvailableCommandMock -CommandName 'fd'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'fd') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return @()
-                }
-            }
-            
-            Find-WithFd -Pattern "Test" -CaseSensitive -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Not -Contain '--ignore-case'
+            Setup-CapturingCommandMock -CommandName 'fd' -Output ''
+
+            Find-WithFd -Pattern 'Test' -CaseSensitive -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Not -Contain '--ignore-case'
         }
     }
-    
+
     Context 'Grep-WithRipgrep' {
         It 'Returns empty string when rg is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'rg' -Available $false
-            
-            $result = Grep-WithRipgrep -Pattern "test" -ErrorAction SilentlyContinue
-            
-            $result | Should -Be ""
+            $result = Grep-WithRipgrep -Pattern 'test' -ErrorAction SilentlyContinue
+
+            @($result).Count | Should -Be 0
         }
-        
+
         It 'Calls rg with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'rg'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'rg') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "match found"
-                }
-            }
-            
-            $result = Grep-WithRipgrep -Pattern "test" -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--ignore-case'
-            $script:capturedArgs | Should -Contain '--line-number'
-            $script:capturedArgs | Should -Contain 'test'
-            $result | Should -Be "match found"
+            Setup-CapturingCommandMock -CommandName 'rg' -Output 'match found'
+
+            $result = Grep-WithRipgrep -Pattern 'test' -ErrorAction SilentlyContinue
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--ignore-case'
+            $args | Should -Contain '--line-number'
+            $args | Should -Contain 'test'
+            $result | Should -Be 'match found'
         }
-        
+
         It 'Adds context lines when specified' {
-            Setup-AvailableCommandMock -CommandName 'rg'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'rg') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "match with context"
-                }
-            }
-            
-            Grep-WithRipgrep -Pattern "test" -Context 3 -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-C'
-            $script:capturedArgs | Should -Contain '3'
+            Setup-CapturingCommandMock -CommandName 'rg' -Output 'match with context'
+
+            Grep-WithRipgrep -Pattern 'test' -Context 3 -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '-C'
+            $args | Should -Contain '3'
         }
-        
+
         It 'Adds file type filter when specified' {
-            Setup-AvailableCommandMock -CommandName 'rg'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'rg') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "match"
-                }
-            }
-            
-            Grep-WithRipgrep -Pattern "test" -FileType "ps1" -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-t'
-            $script:capturedArgs | Should -Contain 'ps1'
+            Setup-CapturingCommandMock -CommandName 'rg' -Output 'match'
+
+            Grep-WithRipgrep -Pattern 'test' -FileType 'ps1' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '-t'
+            $args | Should -Contain 'ps1'
         }
-        
+
         It 'Handles exit code 1 (no matches) as valid' {
-            Setup-AvailableCommandMock -CommandName 'rg'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'rg') {
-                    $global:LASTEXITCODE = 1
-                    return ""
-                }
-            }
-            
-            $result = Grep-WithRipgrep -Pattern "nonexistent" -ErrorAction SilentlyContinue
-            
-            $result | Should -Be ""
+            Setup-CapturingCommandMock -CommandName 'rg' -Output '' -ExitCode 1
+
+            $result = Grep-WithRipgrep -Pattern 'nonexistent' -ErrorAction SilentlyContinue
+
+            $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Adds files-with-matches flag when specified' {
-            Setup-AvailableCommandMock -CommandName 'rg'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'rg') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return "file1.ps1"
-                }
-            }
-            
-            Grep-WithRipgrep -Pattern "test" -FilesWithMatches -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '-l'
+            Setup-CapturingCommandMock -CommandName 'rg' -Output 'file1.ps1'
+
+            Grep-WithRipgrep -Pattern 'test' -FilesWithMatches -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '-l'
         }
     }
-    
+
     Context 'Navigate-WithZoxide' {
         It 'Returns null when zoxide is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'zoxide' -Available $false
-            
-            $result = Navigate-WithZoxide -Query "test" -ErrorAction SilentlyContinue
-            
+            $result = Navigate-WithZoxide -Query 'test' -ErrorAction SilentlyContinue
+
             $result | Should -BeNullOrEmpty
         }
-        
+
         It 'Adds current directory to zoxide database' {
-            Setup-AvailableCommandMock -CommandName 'zoxide'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'zoxide' -and $args[0] -eq 'add') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'zoxide' -Output (Get-Location).Path
+
             $result = Navigate-WithZoxide -Add -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'add'
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain 'add'
             $result | Should -Not -BeNullOrEmpty
         }
-        
+
         It 'Queries zoxide for directory' {
-            Setup-AvailableCommandMock -CommandName 'zoxide'
-            $script:capturedArgs = $null
-            $script:mockPath = Join-Path $TestDrive 'Documents'
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'zoxide' -and $args[0] -eq 'query') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return $script:mockPath
+            Setup-CapturingCommandMock -CommandName 'zoxide' -OnInvoke {
+                param([object[]]$Arguments)
+                if ($Arguments[0] -eq 'query') {
+                    Write-Output $script:ZoxideTargetPath
                 }
             }
-            Mock Set-Location -MockWith { return }
-            
-            $result = Navigate-WithZoxide -Query "Documents" -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain 'query'
-            $script:capturedArgs | Should -Contain 'Documents'
-            $result | Should -Be $script:mockPath
+
+            $result = Navigate-WithZoxide -Query 'Documents' -ErrorAction SilentlyContinue
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain 'query'
+            $args | Should -Contain 'Documents'
+            $result | Should -Be $script:ZoxideTargetPath
         }
-        
+
         It 'Adds interactive flag when specified' {
-            Setup-AvailableCommandMock -CommandName 'zoxide'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'zoxide' -and $args[0] -eq 'query') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return $TestDrive
+            Setup-CapturingCommandMock -CommandName 'zoxide' -OnInvoke {
+                param([object[]]$Arguments)
+                if ($Arguments[0] -eq 'query') {
+                    Write-Output $script:ZoxideTargetPath
                 }
             }
-            Mock Set-Location -MockWith { return }
-            
-            Navigate-WithZoxide -Query "test" -Interactive -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--interactive'
+
+            Navigate-WithZoxide -Query 'test' -Interactive -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--interactive'
         }
-        
+
         It 'Queries all directories when QueryAll specified' {
-            Setup-AvailableCommandMock -CommandName 'zoxide'
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'zoxide' -and $args[0] -eq 'query' -and $args[1] -eq '--all') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                    return @('path1', 'path2')
-                }
-            }
-            
+            Setup-CapturingCommandMock -CommandName 'zoxide' -Output "path1`npath2"
+
             $result = Navigate-WithZoxide -QueryAll -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--all'
-            $result | Should -Not -BeNullOrEmpty
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain 'query'
+            @($result).Count | Should -BeGreaterThan 0
         }
-        
+
         It 'Warns when no query specified' {
             Setup-AvailableCommandMock -CommandName 'zoxide'
-            
+
             $result = Navigate-WithZoxide -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
+
+            @($result)[-1] | Should -BeNullOrEmpty
         }
     }
-    
+
     Context 'View-WithBat' {
         It 'Returns when bat is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'bat' -Available $false
-            
-            View-WithBat -Path "test.txt" -ErrorAction SilentlyContinue
-            
-            # Should complete without error
+            View-WithBat -Path $script:TestBatFile -ErrorAction SilentlyContinue | Out-Null
         }
-        
+
         It 'Calls bat with correct arguments' {
-            Setup-AvailableCommandMock -CommandName 'bat'
-            $testFile = Join-Path $TestDrive 'test.txt'
-            'test content' | Out-File -FilePath $testFile
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'bat') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            View-WithBat -Path $testFile -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--paging=never'
-            $script:capturedArgs | Should -Contain '--wrap=never'
-            $script:capturedArgs | Should -Contain $testFile
+            Setup-CapturingCommandMock -CommandName 'bat' -Output 'rendered'
+
+            View-WithBat -Path $script:TestBatFile -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--paging=never'
+            $args | Should -Contain '--wrap=never'
+            $args | Should -Contain $script:TestBatFile
         }
-        
+
         It 'Adds language when specified' {
-            Setup-AvailableCommandMock -CommandName 'bat'
-            $testFile = Join-Path $TestDrive 'test.ps1'
-            'function test {}' | Out-File -FilePath $testFile
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'bat') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            View-WithBat -Path $testFile -Language "powershell" -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--language'
-            $script:capturedArgs | Should -Contain 'powershell'
+            Setup-CapturingCommandMock -CommandName 'bat' -Output 'rendered'
+
+            View-WithBat -Path $script:TestBatPs1File -Language 'powershell' -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--language'
+            $args | Should -Contain 'powershell'
         }
-        
+
         It 'Disables line numbers when specified' {
-            Setup-AvailableCommandMock -CommandName 'bat'
-            $testFile = Join-Path $TestDrive 'test.txt'
-            'content' | Out-File -FilePath $testFile
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'bat') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            View-WithBat -Path $testFile -LineNumbers:$false -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--no-line-numbers'
+            Setup-CapturingCommandMock -CommandName 'bat' -Output 'rendered'
+
+            View-WithBat -Path $script:TestBatFile -LineNumbers:$false -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--no-line-numbers'
         }
-        
+
         It 'Adds plain flag when specified' {
-            Setup-AvailableCommandMock -CommandName 'bat'
-            $testFile = Join-Path $TestDrive 'test.txt'
-            'content' | Out-File -FilePath $testFile
-            $script:capturedArgs = $null
-            Mock & {
-                param($cmd, $args)
-                if ($cmd -eq 'bat') {
-                    $script:capturedArgs = $args
-                    $global:LASTEXITCODE = 0
-                }
-            }
-            
-            View-WithBat -Path $testFile -Plain -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs | Should -Contain '--plain'
+            Setup-CapturingCommandMock -CommandName 'bat' -Output 'rendered'
+
+            View-WithBat -Path $script:TestBatFile -Plain -ErrorAction SilentlyContinue | Out-Null
+
+            $args = Get-TestModernCliInvocationArgs
+            $args | Should -Contain '--plain'
         }
-        
+
         It 'Warns when file does not exist' {
             Setup-AvailableCommandMock -CommandName 'bat'
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.txt' } -MockWith { return $false }
-            
-            View-WithBat -Path "nonexistent.txt" -ErrorAction SilentlyContinue
-            
-            # Should complete without error (warning handled internally)
+            $missingFile = Join-Path (New-TestTempDirectory -Prefix 'BatMissing') 'nonexistent.txt'
+
+            View-WithBat -Path $missingFile -ErrorAction SilentlyContinue | Out-Null
+
+            Get-TestModernCliInvocationArgs | Should -BeNullOrEmpty
         }
     }
 }

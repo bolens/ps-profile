@@ -68,8 +68,8 @@ if (Test-CachedCommand scoop) {
                     $scoopRoot = $env:SCOOP
                 }
                 # Check default user location (cross-platform compatible)
-                elseif ($env:USERPROFILE -or $env:HOME) {
-                    $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
+                elseif (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+                    $userHome = Get-UserHome
                     $defaultScoop = Join-Path $userHome 'scoop'
                     if (Test-Path -LiteralPath $defaultScoop -PathType Container -ErrorAction SilentlyContinue) {
                         $scoopRoot = $defaultScoop
@@ -370,6 +370,18 @@ if (Test-CachedCommand scoop) {
         if ($env:SCOOP -and (Test-Path -LiteralPath $env:SCOOP)) {
             $userScoopPath = $env:SCOOP
         }
+        elseif (Get-Command Get-UserHome -ErrorAction SilentlyContinue) {
+            $candidate = Join-Path (Get-UserHome) 'scoop'
+            if (Test-Path -LiteralPath $candidate) {
+                $userScoopPath = $candidate
+            }
+        }
+        elseif ($env:HOME) {
+            $candidate = Join-Path $env:HOME 'scoop'
+            if (Test-Path -LiteralPath $candidate) {
+                $userScoopPath = $candidate
+            }
+        }
         elseif ($env:USERPROFILE) {
             $candidate = Join-Path $env:USERPROFILE 'scoop'
             if (Test-Path -LiteralPath $candidate) {
@@ -550,5 +562,5 @@ if (Test-CachedCommand scoop) {
     Set-AgentModeAlias -Name 'fixscoop' -Target 'Repair-ScoopBuckets'
 }
 else {
-    Write-MissingToolWarning -Tool 'Scoop' -InstallHint 'Install from: https://scoop.sh/'
+    Invoke-MissingToolWarning -ToolName 'scoop' -Tool 'Scoop'
 }

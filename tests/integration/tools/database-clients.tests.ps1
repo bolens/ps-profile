@@ -201,7 +201,8 @@ Describe 'database-clients.ps1 - Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'mongodb-compass' -Available $false
             $output = Start-MongoDbCompass 2>&1 3>&1 | Out-String
-            $output | Should -Match 'mongodb-compass'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'mongodb-compass not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'mongodb-compass'
         }
         
         It 'hasura alias handles missing tool gracefully' {
@@ -220,9 +221,58 @@ Describe 'database-clients.ps1 - Integration Tests' {
             }
             Mock-CommandAvailabilityPester -CommandName 'hasura-cli' -Available $false
             $output = Invoke-Hasura version 2>&1 3>&1 | Out-String
-            $output | Should -Match 'hasura'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'hasura-cli not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'hasura-cli'
         }
         
+        It 'sql-workbench alias handles missing tool gracefully' {
+            . $script:DatabaseClientsPath -ErrorAction SilentlyContinue
+            if (-not (Get-Alias sql-workbench -ErrorAction SilentlyContinue)) {
+                if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
+                    Set-AgentModeAlias -Name 'sql-workbench' -Target 'Start-SqlWorkbench' | Out-Null
+                }
+            }
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('sql-workbench', [ref]$null)
+            }
+            Mock-CommandAvailabilityPester -CommandName 'sql-workbench' -Available $false
+            $output = Start-SqlWorkbench 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'sql-workbench not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'sql-workbench'
+        }
+
+        It 'dbeaver alias handles missing tool gracefully' {
+            . $script:DatabaseClientsPath -ErrorAction SilentlyContinue
+            if (-not (Get-Alias dbeaver -ErrorAction SilentlyContinue)) {
+                if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
+                    Set-AgentModeAlias -Name 'dbeaver' -Target 'Start-DBeaver' | Out-Null
+                }
+            }
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('dbeaver', [ref]$null)
+            }
+            Mock-CommandAvailabilityPester -CommandName 'dbeaver' -Available $false
+            $output = Start-DBeaver 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'dbeaver not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'dbeaver'
+        }
+
+        It 'tableplus alias handles missing tool gracefully' {
+            . $script:DatabaseClientsPath -ErrorAction SilentlyContinue
+            if (-not (Get-Alias tableplus -ErrorAction SilentlyContinue)) {
+                if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
+                    Set-AgentModeAlias -Name 'tableplus' -Target 'Start-TablePlus' | Out-Null
+                }
+            }
+            if ($global:MissingToolWarnings) {
+                $null = $global:MissingToolWarnings.TryRemove('tableplus', [ref]$null)
+            }
+            Mock-CommandAvailabilityPester -CommandName 'tableplus' -Available $false
+            $output = Start-TablePlus 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'tableplus not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'tableplus'
+        }
+
         It 'supabase alias handles missing tool gracefully' {
             . $script:DatabaseClientsPath -ErrorAction SilentlyContinue
             # Ensure alias exists
@@ -241,7 +291,8 @@ Describe 'database-clients.ps1 - Integration Tests' {
             Mock-CommandAvailabilityPester -CommandName 'supabase-beta' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'supabase' -Available $false
             $output = Invoke-Supabase status 2>&1 3>&1 | Out-String
-            $output | Should -Match 'supabase'
+            Assert-TestMissingToolWarning -Output $output -Pattern 'supabase not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'supabase'
         }
     }
     
@@ -256,11 +307,13 @@ Describe 'database-clients.ps1 - Integration Tests' {
             if (-not (Get-Command Start-MongoDbCompass -ErrorAction SilentlyContinue)) {
                 . $databaseClientsPath -ErrorAction SilentlyContinue
             }
-            # Verify the function can be called before reload
-            { Start-MongoDbCompass -ErrorAction Stop } | Should -Not -Throw
+            # Verify the function can be called (with tool unavailable) before reload
+            Mock-CommandAvailabilityPester -CommandName 'mongodb-compass' -Available $false
+            { Start-MongoDbCompass -ErrorAction SilentlyContinue } | Should -Not -Throw
             . $databaseClientsPath -ErrorAction SilentlyContinue
-            # Verify the function can still be called after reload
-            { Start-MongoDbCompass -ErrorAction Stop } | Should -Not -Throw
+            # Verify the function can still be called after reload (idempotency)
+            Mock-CommandAvailabilityPester -CommandName 'mongodb-compass' -Available $false
+            { Start-MongoDbCompass -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }
 }

@@ -1,7 +1,7 @@
 Describe "Container Utils Module" {
     BeforeAll {
         try {
-            # Load the bootstrap fragment first (for Test-HasCommand)
+            # Load the bootstrap fragment first
             $bootstrapFragment = Get-TestPath "profile.d\bootstrap.ps1" -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $bootstrapFragment -or [string]::IsNullOrWhiteSpace($bootstrapFragment)) {
                 throw "BootstrapFragment is null or empty"
@@ -70,12 +70,6 @@ Describe "Container Utils Module" {
             Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
             Mock-CommandAvailabilityPester -CommandName 'podman' -Available $true -Scope It
             Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also directly mock Test-HasCommand to ensure it takes precedence
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $true }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
 
             # Mock podman command to simulate compose subcommand success
             Mock -CommandName 'podman' {
@@ -140,12 +134,6 @@ Describe "Container Utils Module" {
             # Also mock docker-compose and podman-compose as unavailable
             Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
             Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also directly mock Test-HasCommand to ensure it takes precedence
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
 
             $result = Test-ContainerEngine
 
@@ -160,6 +148,9 @@ Describe "Container Utils Module" {
             # Clear cached container engine info between tests
             if (Get-Variable -Name '__ContainerEngineInfo' -Scope Script -ErrorAction SilentlyContinue) {
                 Remove-Variable -Name '__ContainerEngineInfo' -Scope Script -Force -ErrorAction SilentlyContinue
+            }
+            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
+                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
             }
             # Clear environment preference
             Remove-Item Env:\CONTAINER_ENGINE_PREFERENCE -ErrorAction SilentlyContinue
@@ -188,47 +179,22 @@ Describe "Container Utils Module" {
         }
 
         It "Provides installation command when no engines are available" {
-            # Clear cached container engine info
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            
-            # Mock all container commands as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also directly mock Test-HasCommand to ensure it takes precedence
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
-            
+            Initialize-ContainerEngineUnavailableMocks
+
             $result = Get-ContainerEnginePreference
             $result.Available | Should -Be $false
             $result.InstallationCommand | Should -Not -BeNullOrEmpty
-            $result.InstallationCommand | Should -Match 'scoop install (docker|podman)'
+            $result.InstallationCommand | Should -Match 'docker'
+            $result.InstallationCommand | Should -Match 'podman'
+            Assert-TestOutputContainsInstallCommand -Output $result.InstallationCommand -ToolNames @('docker', 'podman')
         }
 
         It "Detects docker availability correctly" {
-            # Clear cached container engine info
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            
-            # Mock docker as available
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $true -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also directly mock Test-HasCommand to ensure it takes precedence
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $true }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
-            
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $true
+            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false
+
             # Mock docker compose version check
             Mock -CommandName docker -MockWith { 
                 if ($args[0] -eq 'compose' -and $args[1] -eq 'version') {
@@ -243,23 +209,11 @@ Describe "Container Utils Module" {
         }
 
         It "Detects podman availability correctly" {
-            # Clear cached container engine info
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            
-            # Mock podman as available
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $true -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also directly mock Test-HasCommand to ensure it takes precedence
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $true }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
-            
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $true
+            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false
+
             # Mock podman compose version check
             Mock -CommandName podman -MockWith { 
                 if ($args[0] -eq 'compose' -and $args[1] -eq 'version') {
@@ -274,46 +228,22 @@ Describe "Container Utils Module" {
         }
 
         It "Handles docker-compose standalone command" {
-            # Clear cached container engine info
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            
-            # Mock docker-compose as available but not docker
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $true -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-            
-            # Also directly mock Test-HasCommand to ensure it takes precedence
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $true }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $false }
-            
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $true
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false
+
             $result = Get-ContainerEnginePreference
             $result.DockerComposeAvailable | Should -Be $true
             $result.Available | Should -Be $true
         }
 
         It "Handles podman-compose standalone command" {
-            # Clear cached container engine info
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            
-            # Mock podman-compose as available but not podman
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $true -Scope It
-            
-            # Also directly mock Test-HasCommand to ensure it takes precedence
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'docker-compose' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman' } -MockWith { $false }
-            Mock -CommandName Test-HasCommand -ParameterFilter { $Name -eq 'podman-compose' } -MockWith { $true }
-            
+            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $true
+
             $result = Get-ContainerEnginePreference
             $result.PodmanComposeAvailable | Should -Be $true
             $result.Available | Should -Be $true

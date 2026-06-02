@@ -24,11 +24,12 @@ function Set-PesterExecutionOptions {
 
     # Configure parallel execution
     if ($Parallel -and $Parallel -gt 0) {
-        # In Pester 5, parallel execution is configured using Run.Parallel and Run.MaximumThreadCount
-        # Enable parallel execution
-        $Config.Run.Parallel = $true
-        # Set the maximum number of threads
-        $Config.Run.MaximumThreadCount = $Parallel
+        if ($Config.Run.PSObject.Properties.Name -contains 'Parallel') {
+            $Config.Run.Parallel = $true
+        }
+        if ($Config.Run.PSObject.Properties.Name -contains 'MaximumThreadCount') {
+            $Config.Run.MaximumThreadCount = $Parallel
+        }
     }
 
     # Configure randomization

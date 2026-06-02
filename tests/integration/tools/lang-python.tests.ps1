@@ -1,22 +1,29 @@
 # ===============================================
 # lang-python.tests.ps1
-# Integration tests for lang-python.ps1 fragment
+# Integration tests for lang-python-*.ps1 fragments
 # ===============================================
 
 . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
 
 BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:LangPythonPath = Join-Path $script:ProfileDir 'lang-python.ps1'
+    $script:FragmentPaths = @(
+        (Join-Path $script:ProfileDir 'lang-python-pipx.ps1'),
+        (Join-Path $script:ProfileDir 'lang-python-env.ps1'),
+        (Join-Path $script:ProfileDir 'lang-python-packages.ps1')
+    )
 
-    # Load bootstrap first
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 
-    # Load lang-python fragment
-    . $script:LangPythonPath
+    foreach ($fragmentPath in $script:FragmentPaths) {
+        if (-not (Test-Path -LiteralPath $fragmentPath)) {
+            throw "Fragment not found: $fragmentPath"
+        }
+        . $fragmentPath
+    }
 }
 
-Describe 'lang-python.ps1 Integration Tests' {
+Describe 'lang-python Integration Tests' {
     Context 'Function Registration' {
         It 'Registers Install-PythonApp function' {
             Get-Command Install-PythonApp -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
@@ -45,7 +52,9 @@ Describe 'lang-python.ps1 Integration Tests' {
 
     Context 'Alias Creation' {
         It 'Creates pipx-install alias' {
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath -ErrorAction SilentlyContinue
+            }
             $alias = Get-Alias pipx-install -ErrorAction SilentlyContinue
             if (-not $alias) {
                 if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
@@ -57,19 +66,13 @@ Describe 'lang-python.ps1 Integration Tests' {
         }
 
         It 'Creates pipx alias' {
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
-            $alias = Get-Alias pipx -ErrorAction SilentlyContinue
-            if (-not $alias) {
-                if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
-                    Set-AgentModeAlias -Name 'pipx' -Target 'Invoke-Pipx' | Out-Null
-                }
-                $alias = Get-Alias pipx -ErrorAction SilentlyContinue
-            }
-            $alias | Should -Not -BeNullOrEmpty
+            Assert-ProfileShadowedAlias -AliasName 'pipx' -FunctionName 'Invoke-Pipx'
         }
 
         It 'Creates pyvenv alias' {
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath -ErrorAction SilentlyContinue
+            }
             $alias = Get-Alias pyvenv -ErrorAction SilentlyContinue
             if (-not $alias) {
                 if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
@@ -81,7 +84,9 @@ Describe 'lang-python.ps1 Integration Tests' {
         }
 
         It 'Creates pyinstall alias' {
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath -ErrorAction SilentlyContinue
+            }
             $alias = Get-Alias pyinstall -ErrorAction SilentlyContinue
             if (-not $alias) {
                 if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
@@ -94,43 +99,73 @@ Describe 'lang-python.ps1 Integration Tests' {
     }
 
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         It 'Install-PythonApp handles missing pipx gracefully' {
-            $result = Install-PythonApp -Packages @('test-package') -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
+            Mock-CommandAvailabilityPester -CommandName 'pipx' -Available $false
+            $output = & { Install-PythonApp -Packages @('test-package') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pipx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pipx'
         }
 
         It 'Invoke-Pipx handles missing pipx gracefully' {
-            $result = Invoke-Pipx -Package 'test-package' -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
+            Mock-CommandAvailabilityPester -CommandName 'pipx' -Available $false
+            $output = & { Invoke-Pipx -Package 'test-package' } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pipx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pipx'
         }
 
         It 'Invoke-PythonScript handles missing python gracefully' {
-            $result = Invoke-PythonScript -Script 'script.py' -ErrorAction SilentlyContinue
-            # Should return null or empty when tool is not available
+            Mock-CommandAvailabilityPester -CommandName 'python3' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'python' -Available $false
+            $output = & { Invoke-PythonScript -Script 'script.py' } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'python not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'python'
         }
 
         It 'New-PythonVirtualEnv handles missing tools gracefully' {
-            $result = New-PythonVirtualEnv -ErrorAction SilentlyContinue
-            # Should return null or empty when tools are not available
+            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'python' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'python3' -Available $false
+            $output = & { New-PythonVirtualEnv } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'python not found'
         }
 
         It 'Install-PythonPackage handles missing tools gracefully' {
-            $result = Install-PythonPackage -Packages @('requests') -ErrorAction SilentlyContinue
-            # Should return null or empty when tools are not available
+            foreach ($cmd in @('uv', 'pip', 'pip3')) {
+                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            }
+            $output = & { Install-PythonPackage -Packages @('requests') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pip not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pip'
         }
     }
 
     Context 'Fragment Loading' {
         It 'Fragment can be loaded multiple times (idempotency)' {
-            { . $script:LangPythonPath } | Should -Not -Throw
-            { . $script:LangPythonPath } | Should -Not -Throw
-            { . $script:LangPythonPath } | Should -Not -Throw
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                { . $fragmentPath } | Should -Not -Throw
+                { . $fragmentPath } | Should -Not -Throw
+                { . $fragmentPath } | Should -Not -Throw
+            }
         }
 
         It 'Functions remain available after multiple loads' {
-            . $script:LangPythonPath
-            . $script:LangPythonPath
-            . $script:LangPythonPath
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath
+                . $fragmentPath
+                . $fragmentPath
+            }
 
             Get-Command Install-PythonApp -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             Get-Command Invoke-Pipx -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
@@ -140,7 +175,6 @@ Describe 'lang-python.ps1 Integration Tests' {
 
     Context 'Project Creation' {
         It 'Creates Python project structure' {
-            $testPath = Join-Path $TestDrive 'testproject'
             $projectPath = New-PythonProject -Name 'testproject' -Path $TestDrive
 
             $projectPath | Should -Not -BeNullOrEmpty
@@ -151,4 +185,3 @@ Describe 'lang-python.ps1 Integration Tests' {
         }
     }
 }
-

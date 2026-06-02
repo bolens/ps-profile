@@ -3,13 +3,8 @@
 # Unit tests for Release-GoProject function
 # ===============================================
 
-. (Join-Path $PSScriptRoot '..\TestSupport.ps1')
-
-# Import mocking utilities
-$mockingDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'TestSupport' 'Mocking'
-Import-Module (Join-Path $mockingDir 'PesterMocks.psm1') -DisableNameChecking -ErrorAction SilentlyContinue
-
 BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'lang-go.ps1')
@@ -17,25 +12,19 @@ BeforeAll {
 
 Describe 'lang-go.ps1 - Release-GoProject' {
     BeforeEach {
-        # Clear command cache
+        Clear-TestCommandInvocationCapture
+
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:TestCachedCommandCache.TryRemove('goreleaser', [ref]$null)
-        }
-
-        if (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue) {
-            $null = $global:AssumedAvailableCommands.TryRemove('goreleaser', [ref]$null)
-        }
+        Set-TestCommandAvailabilityState -CommandName 'goreleaser' -Available $false
+        Remove-Item -Path 'Function:\goreleaser' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:goreleaser' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
         It 'Returns null when goreleaser is not available' {
-            Mock-CommandAvailabilityPester -CommandName 'goreleaser' -Available $false
-            Mock Get-Command -ParameterFilter { $Name -eq 'goreleaser' } -MockWith { return $null }
-
             $result = Release-GoProject -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
@@ -44,58 +33,30 @@ Describe 'lang-go.ps1 - Release-GoProject' {
 
     Context 'Tool available' {
         It 'Calls goreleaser without arguments' {
-            Setup-AvailableCommandMock -CommandName 'goreleaser'
+            Setup-CapturingCommandMock -CommandName 'goreleaser' -Output 'Release created'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'goreleaser' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Release created' 
-            }
+            $result = Release-GoProject -ErrorAction SilentlyContinue
 
-            $result = Release-GoProject
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+            @((Get-TestCommandInvocationArgsFlat | Where-Object { $null -ne $_ -and $_ -ne '' })).Count | Should -Be 0
+            $result | Should -Be 'Release created'
         }
 
         It 'Calls goreleaser with additional arguments' {
-            Setup-AvailableCommandMock -CommandName 'goreleaser'
+            Setup-CapturingCommandMock -CommandName 'goreleaser' -Output 'Release created'
 
-            $script:capturedArgs = $null
-            Mock -CommandName 'goreleaser' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                return 'Release created' 
-            }
+            Release-GoProject '--snapshot' -ErrorAction SilentlyContinue | Out-Null
 
-            $result = Release-GoProject -Arguments @('--snapshot')
-
-            $result | Should -Not -BeNullOrEmpty
-            $script:capturedArgs | Should -Contain '--snapshot'
+            $args = Get-TestCommandInvocationArgsFlat
+            $args | Should -Contain '--snapshot'
         }
     }
 
     Context 'Error handling' {
         It 'Handles goreleaser execution errors' {
-            Setup-AvailableCommandMock -CommandName 'goreleaser'
+            Set-TestCommandThrowingMock -CommandName 'goreleaser' -Message 'goreleaser: command failed'
 
-            Mock -CommandName 'goreleaser' -MockWith {
-                throw [System.Management.Automation.CommandNotFoundException]::new('goreleaser: command failed')
-            }
-            Mock Write-Error { }
-
-            try {
-                $result = Release-GoProject -ErrorAction SilentlyContinue
-            }
-            catch {
-                # Exception may propagate in test environment
-            }
-
-            $result | Should -BeNullOrEmpty
-            # Write-Error may or may not be called depending on how PowerShell handles the exception
-            # The important thing is that the function handles the error gracefully
+            { Release-GoProject -ErrorAction Stop } | Should -Throw
         }
     }
 }
-

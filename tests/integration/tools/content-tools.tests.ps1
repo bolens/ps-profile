@@ -48,24 +48,30 @@ Describe 'content-tools.ps1 - Function Registration' {
 }
 
 Describe 'content-tools.ps1 - Graceful Degradation' {
+    BeforeEach {
+        foreach ($cmd in @('yt-dlp', 'gallery-dl', 'monolith', 'twitchdownloader-cli', 'twitchdownloader')) {
+            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        }
+    }
+
     It 'Download-Video handles missing tool gracefully' {
         { Download-Video -Url 'https://youtube.com/watch?v=test' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Download-Gallery handles missing tool gracefully' {
         { Download-Gallery -Url 'https://example.com/gallery' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Download-Playlist handles missing tool gracefully' {
         { Download-Playlist -Url 'https://youtube.com/playlist?list=test' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Archive-WebPage handles missing tool gracefully' {
         { Archive-WebPage -Url 'https://example.com/page' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
     
     It 'Download-Twitch handles missing tool gracefully' {
         { Download-Twitch -Url 'https://twitch.tv/videos/123' -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
+}
 }
 

@@ -12,7 +12,7 @@
 .NOTES
     This is an internal initialization function and should not be called directly.
     Requires xz command-line tool to be installed and available in PATH.
-    Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)
+    Install hint resolved via Get-ConversionToolMissingMessage -ToolName xz.
 #>
 function Initialize-FileConversion-CoreCompressionXz {
     # XZ compress
@@ -27,7 +27,7 @@ function Initialize-FileConversion-CoreCompressionXz {
             # Check if xz command is available
             $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
-                throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }
             
             if (-not $OutputPath) {
@@ -64,7 +64,7 @@ function Initialize-FileConversion-CoreCompressionXz {
             # Check if xz command is available
             $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
-                throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }
             
             if (-not $OutputPath) {
@@ -105,7 +105,7 @@ function Initialize-FileConversion-CoreCompressionXz {
             # Check if xz command is available
             $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
-                throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }
             
             if (-not $OutputPath) {
@@ -141,7 +141,7 @@ function Initialize-FileConversion-CoreCompressionXz {
             # Check if xz command is available
             $xzCmd = Test-CachedCommand 'xz'
             if (-not $xzCmd) {
-                throw "xz command is not available. Install xz: Windows (scoop install xz), Linux (apt install xz-utils), macOS (brew install xz)"
+                throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }
             
             if (-not $OutputPath) {

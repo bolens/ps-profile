@@ -90,7 +90,8 @@ function Invoke-Parallel {
         
         # If no items to process, return empty array immediately
         if ($itemList.Count -eq 0) {
-            return [object[]]@()
+            Write-Output -InputObject @() -NoEnumerate
+            return
         }
 
         # Use runspaces for parallel processing (much faster than jobs)
@@ -115,19 +116,26 @@ function Invoke-Parallel {
                 if ($ScriptBlock -isnot [scriptblock]) {
                     $ScriptBlock = [scriptblock]::Create([string]$ScriptBlock)
                 }
+                else {
+                    # Recreate from source text so pipeline/$_ bindings work after runspace serialization
+                    $ScriptBlock = [scriptblock]::Create($ScriptBlock.ToString())
+                }
 
-                # Support both parameterized scriptblocks and $_ style
-                $PSItem = $Item
-                $_ = $Item
-                
-                # Check if scriptblock has parameters
+                # Support both parameterized scriptblocks and $_ style.
+                # Use Invoke/pipeline instead of dynamic -ParameterName binding, which
+                # fails in runspaces (e.g. -n becomes "-n-n" instead of passing $n).
                 $params = $ScriptBlock.Ast.ParamBlock
                 if ($params -and $params.Parameters.Count -gt 0) {
-                    $paramName = $params.Parameters[0].Name.VariablePath.UserPath
-                    & $ScriptBlock -$paramName $Item
+                    if ($params.Parameters.Count -eq 1) {
+                        $ScriptBlock.Invoke($Item)
+                    }
+                    else {
+                        $boundArgs = @($Item)
+                        $ScriptBlock.Invoke($boundArgs)
+                    }
                 }
                 else {
-                    & $ScriptBlock
+                    $Item | ForEach-Object -Process { & $ScriptBlock }
                 }
             }
 
@@ -232,12 +240,10 @@ function Invoke-Parallel {
                 try {
                     if ($rs.Handle.IsCompleted) {
                         $result = $rs.PowerShell.EndInvoke($rs.Handle)
-                        # Handle array results
-                        if ($result -is [array]) {
-                            $results += $result
-                        }
-                        elseif ($null -ne $result) {
-                            $results += $result
+                        foreach ($resultItem in @($result)) {
+                            if ($null -ne $resultItem) {
+                                $results += $resultItem
+                            }
                         }
                         # Level 3: Log successful task completion
                         $debugLevel = 0
@@ -405,11 +411,8 @@ function Invoke-Parallel {
             }
         }
 
-        # Ensure we always return an array, even if empty
-        if ($results.Count -eq 0) {
-            return [object[]]@()
-        }
-        return $results
+        # Ensure we always return an array, even for a single scalar result
+        Write-Output -InputObject @($results) -NoEnumerate
     }
 }
 

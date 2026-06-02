@@ -70,10 +70,6 @@ Describe 'PHP and Laravel Tools Integration Tests' {
             Get-Command Invoke-Php -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             # Verify the alias exists
             Get-Alias php -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            $output | Should -Match 'scoop install php'
-            $output | Should -Match 'scoop install php'
-            $output | Should -Match 'scoop install php'
-            $output | Should -Match 'scoop install php'
         }
 
         It 'Creates Start-PhpServer function' {

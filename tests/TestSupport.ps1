@@ -17,6 +17,9 @@ $global:ConfirmPreference = 'None'
 # Scoped to script to avoid affecting parent scopes
 Set-StrictMode -Version Latest
 
+# Pre-initialize script-scoped flags for Set-StrictMode compatibility
+$script:TestSupportDefaultAssumedCommandsSet = $null
+
 # Set default parameter values to suppress prompts for Remove-Item and other operations
 # This ensures tests can clean up Function:\ paths without prompting
 if (-not $PSDefaultParameterValues) {
@@ -41,6 +44,28 @@ $global:PSDefaultParameterValues['Clear-Item:Force'] = $true
 # Set environment variables to suppress confirmations in profile fragments
 $env:PS_PROFILE_SUPPRESS_CONFIRMATIONS = '1'
 $env:PS_PROFILE_FORCE = '1'
+
+# TestSupport is only loaded by the test runner and individual test files.
+# Enable test mode immediately so profile fragments and mocks behave non-interactively.
+$env:PS_PROFILE_TEST_MODE = '1'
+$env:PS_PROFILE_NONINTERACTIVE = '1'
+
+function global:Read-Host {
+    <#
+    .SYNOPSIS
+        Non-interactive Read-Host stub for automated test execution.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [object[]]$Remaining,
+
+        [switch]$AsSecureString
+    )
+
+    $prompt = if ($Remaining.Count -gt 0) { [string]$Remaining[0] } else { 'input' }
+    throw "Read-Host is disabled during automated test execution. Prompt: '$prompt'. Mock Read-Host in tests that require interactive behavior."
+}
 
 <#
 .SYNOPSIS
@@ -132,26 +157,28 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
     $mockingDir = Join-Path $testSupportDir 'Mocking'
     if ($mockingDir -and -not [string]::IsNullOrWhiteSpace($mockingDir) -and (Test-Path -LiteralPath $mockingDir)) {
         # Import MockRegistry first (used by other modules)
-        $mockRegistryPath = Join-Path $mockingDir 'MockRegistry.psm1'
+        $mockRegistryPath = Join-Path $mockingDir 'MockRegistry.ps1'
         if ($mockRegistryPath -and -not [string]::IsNullOrWhiteSpace($mockRegistryPath) -and (Test-Path -LiteralPath $mockRegistryPath)) {
-            Import-Module $mockRegistryPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+            . $mockRegistryPath
         }
         
-        # Import other modules (they depend on MockRegistry)
+        # Dot-source mock helpers (.ps1) so Pester Mock runs in the test script scope.
         $mockingModules = @(
-            'MockCommand.psm1',
-            'MockFileSystem.psm1',
-            'MockNetwork.psm1',
-            'MockEnvironment.psm1',
-            'MockPython.psm1',
-            'MockReflection.psm1',
-            'PesterMocks.psm1'
+            'PesterMocks.ps1',
+            'MockCommand.ps1',
+            'MockFileSystem.ps1',
+            'MockNetwork.ps1',
+            'MockEnvironment.ps1',
+            'MockPython.ps1',
+            'MockReflection.ps1'
         )
         
         foreach ($module in $mockingModules) {
             $modulePath = Join-Path $mockingDir $module
             if ($modulePath -and -not [string]::IsNullOrWhiteSpace($modulePath) -and (Test-Path -LiteralPath $modulePath)) {
-                Import-Module $modulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                # Dot-source Pester-aware mock helpers so Mock runs in the test script scope.
+                # Import-Module isolates Mock calls and causes "Mock data are not setup for this scope".
+                . $modulePath
             }
         }
     }
@@ -170,7 +197,7 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
 }
 
 # Provide default assumed commands for optional tooling during tests to avoid noisy warnings
-if (-not (Get-Variable -Name 'TestSupportDefaultAssumedCommandsSet' -Scope Script -ErrorAction SilentlyContinue)) {
+if ($null -eq $script:TestSupportDefaultAssumedCommandsSet) {
     $script:TestSupportDefaultAssumedCommandsSet = $true
 
     $defaultAssumedCommands = @('scoop', 'uv', 'pnpm', 'eza', 'navi', 'btm', 'bottom', 'procs', 'dust', 'pixi')
@@ -200,17 +227,36 @@ if (-not (Get-Variable -Name 'TestSupportDefaultAssumedCommandsSet' -Scope Scrip
     }
 }
 
-# Auto-initialize mocks if test mode is already set when TestSupport.ps1 loads
-if ($env:PS_PROFILE_TEST_MODE -eq '1') {
-    if (Get-Command Initialize-TestMocks -ErrorAction SilentlyContinue) {
-        Initialize-TestMocks
+# Deprecated Test-HasCommand shim so Pester Mock -CommandName Test-HasCommand works
+# before bootstrap loads. Bootstrap replaces this with a Test-CachedCommand wrapper.
+if (-not (Get-Command Test-HasCommand -ErrorAction SilentlyContinue)) {
+    function global:Test-HasCommand {
+        [CmdletBinding()]
+        [OutputType([bool])]
+        param(
+            [Parameter(Mandatory, Position = 0)]
+            [string]$Name
+        )
+
+        if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) {
+            return Test-CachedCommand -Name $Name
+        }
+
+        return $null -ne (Get-Command -Name $Name -ErrorAction SilentlyContinue)
     }
 }
 
+# Reset cross-file pollution before initializing mocks for each test file
+if (Get-Command Reset-TestIsolationState -ErrorAction SilentlyContinue) {
+    Reset-TestIsolationState
+}
+
+# Auto-initialize mocks whenever TestSupport loads (test mode is always enabled above)
+if (Get-Command Initialize-TestMocks -ErrorAction SilentlyContinue) {
+    Initialize-TestMocks
+}
+
 # Register cleanup to run after tests
-if ($env:PS_PROFILE_TEST_MODE -eq '1') {
-    if (Get-Command Remove-TestArtifacts -ErrorAction SilentlyContinue) {
-        # Clean up any existing artifacts
-        Remove-TestArtifacts
-    }
+if (Get-Command Remove-TestArtifacts -ErrorAction SilentlyContinue) {
+    Remove-TestArtifacts
 }
