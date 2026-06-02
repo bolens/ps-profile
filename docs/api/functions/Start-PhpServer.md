@@ -39,7 +39,7 @@ Start-PhpServer -Port 3000
 
 This function has the following aliases:
 
-- `php-server` - Updates Composer to the latest version.
+- `php-server` - Starts PHP built-in development server.
 
 
 ## Source

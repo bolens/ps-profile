@@ -33,7 +33,7 @@ Invoke-AnsiblePlaybook playbook.yml --check
 
 This function has the following aliases:
 
-- `ansible-playbook` - Runs ansible-inventory with the correct invocation strategy for the current platform.
+- `ansible-playbook` - Runs ansible-playbook with the correct invocation strategy for the current platform.
 
 
 ## Source

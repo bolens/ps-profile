@@ -55,70 +55,69 @@ Describe 'mobile-dev.ps1 - Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         BeforeAll {
             . (Join-Path $script:ProfileDir 'mobile-dev.ps1')
         }
-        
+
         It 'Connect-AndroidDevice handles missing adb gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'adb' -Available $false
-            
-            { Connect-AndroidDevice -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Connect-AndroidDevice -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'adb not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'adb'
         }
-        
+
         It 'Mirror-AndroidScreen handles missing scrcpy gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'scrcpy' -Available $false
-            
-            { Mirror-AndroidScreen -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Mirror-AndroidScreen -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'scrcpy not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'scrcpy'
         }
-        
+
         It 'Install-Apk handles missing adb gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'adb' -Available $false
-            
-            $result = Install-Apk -ApkPath 'test.apk' -ErrorAction SilentlyContinue
-            $result | Should -Be $false
+
+            $output = & { Install-Apk -ApkPath 'test.apk' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'adb not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'adb'
         }
-        
+
         It 'Connect-IOSDevice handles missing libimobiledevice gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'idevice_id' -Available $false
-            
-            { Connect-IOSDevice -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Connect-IOSDevice -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'libimobiledevice not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'libimobiledevice'
         }
-        
+
         It 'Flash-Android handles missing pixelflasher gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'pixelflasher' -Available $false
-            
-            { Flash-Android -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Flash-Android -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pixelflasher not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pixelflasher'
         }
-        
+
         It 'Start-AndroidStudio handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'android-studio-canary' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'android-studio' -Available $false
-            
-            { Start-AndroidStudio -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Start-AndroidStudio -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'android-studio-canary not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'android-studio-canary'
         }
     }
 }

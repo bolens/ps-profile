@@ -10,12 +10,29 @@
 
 Describe 'YAML and JSON Conversion Integration Tests' {
     BeforeAll {
+        $testSupportPath = Get-TestSupportPath -StartPath $PSScriptRoot
+        if (-not (Test-Path -LiteralPath $testSupportPath)) {
+            throw "TestSupport file not found at: $testSupportPath"
+        }
+        . $testSupportPath
+
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-TestProfile -ProfileDir $script:ProfileDir -LoadBootstrap -LoadConversionModules 'Data' -LoadFilesFragment -EnsureFileConversion
+        Initialize-ConversionIntegration `
+            -ProfileDir $script:ProfileDir `
+            -ModuleType 'Data' `
+            -SelectiveModules @('yaml.ps1', 'json.ps1') `
+            -EnsureData
+
+        $yqCheck = Test-ToolAvailable -ToolName 'yq' -Silent
+        $script:YqAvailable = $yqCheck -and $yqCheck.Available
     }
 
     Context 'YAML conversion utilities' {
         It 'ConvertTo-Yaml converts JSON to YAML' {
+            if (-not $script:YqAvailable) {
+                Set-ItResult -Skipped -Because 'yq command not available'
+                return
+            }
             $json = '{"name": "test", "value": 123}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json
@@ -26,6 +43,10 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles complex JSON structures' {
+            if (-not $script:YqAvailable) {
+                Set-ItResult -Skipped -Because 'yq command not available'
+                return
+            }
             $json = '{"users": [{"name": "alice", "age": 30}, {"name": "bob", "age": 25}]}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json
@@ -36,6 +57,10 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles empty JSON object' {
+            if (-not $script:YqAvailable) {
+                Set-ItResult -Skipped -Because 'yq command not available'
+                return
+            }
             $json = '{}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json
@@ -45,6 +70,10 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles JSON arrays' {
+            if (-not $script:YqAvailable) {
+                Set-ItResult -Skipped -Because 'yq command not available'
+                return
+            }
             $json = '["item1", "item2", "item3"]'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json

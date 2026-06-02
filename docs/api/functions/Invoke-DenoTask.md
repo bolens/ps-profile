@@ -39,7 +39,7 @@ Invoke-DenoTask build
 
 This function has the following aliases:
 
-- `deno-task` - Updates Deno to the latest version.
+- `deno-task` - Runs Deno tasks.
 
 
 ## Source

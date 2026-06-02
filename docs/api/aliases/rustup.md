@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates all installed cargo packages to their latest versions.
+Executes Rustup commands.
 
 ## Description
 
-Updates all globally installed cargo packages using cargo-install-update. This is equivalent to running 'cargo install-update --all'. Requires the cargo-install-update crate to be installed.
+Wrapper function for Rustup CLI that checks for command availability before execution.
 
 ## Alias Information
 

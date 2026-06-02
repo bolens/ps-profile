@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Lists processes with procs.
+Alias for `procs`
 
 ## Description
 
-Launches procs, a modern replacement for ps that provides a faster, more user-friendly process viewer. Displays running processes with colorized output and improved formatting.
+This is an alias that points to the `procs` command.
 
 ## Alias Information
 

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Yarn to the latest version.
+Adds packages to project dependencies.
 
 ## Description
 
-Updates Yarn itself to the latest version using 'yarn set version latest'.
+Wrapper for yarn add command.
 
 ## Alias Information
 

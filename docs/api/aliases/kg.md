@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Gets the current Kubernetes context.
+Gets Kubernetes resources.
 
 ## Description
 
-Returns the name of the currently active Kubernetes context.
+Wrapper for kubectl get command.
 
 ## Alias Information
 

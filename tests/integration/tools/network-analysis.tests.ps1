@@ -49,29 +49,49 @@ Describe 'network-analysis.ps1 - Function Registration' {
 
 Describe 'network-analysis.ps1 - Graceful Degradation' {
     BeforeEach {
+        if ($global:CollectedMissingToolWarnings) {
+            $global:CollectedMissingToolWarnings.Clear()
+        }
+        if ($global:MissingToolWarnings) {
+            $global:MissingToolWarnings.Clear()
+        }
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
         foreach ($cmd in @('wireshark', 'sniffnet', 'trippy', 'nali', 'ipinfo', 'cloudflared', 'ntfy')) {
             Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
         }
     }
 
     It 'Start-Wireshark handles missing tool gracefully' {
-        { Start-Wireshark -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Start-Wireshark -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'wireshark not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'wireshark'
+    }
+
     It 'Invoke-NetworkScan handles missing tool gracefully' {
-        { Invoke-NetworkScan -Target '192.168.1.1' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Invoke-NetworkScan -Target '192.168.1.1' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'sniffnet not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'sniffnet'
+    }
+
     It 'Get-IpInfo handles missing tool gracefully' {
-        { Get-IpInfo -IpAddress '8.8.8.8' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Get-IpInfo -IpAddress '8.8.8.8' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'nali not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nali'
+    }
+
     It 'Start-CloudflareTunnel handles missing tool gracefully' {
-        { Start-CloudflareTunnel -Url 'http://localhost:8080' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Start-CloudflareTunnel -Url 'http://localhost:8080' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'cloudflared not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cloudflared'
+    }
+
     It 'Send-NtfyNotification handles missing tool gracefully' {
-        { Send-NtfyNotification -Message 'Test' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
+        $output = & { Send-NtfyNotification -Message 'Test' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'ntfy not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ntfy'
+    }
 }
 

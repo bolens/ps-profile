@@ -39,7 +39,7 @@ Add-YarnPackage -D typescript
 
 This function has the following aliases:
 
-- `yarn-add` - Updates Yarn to the latest version.
+- `yarn-add` - Adds packages to project dependencies.
 
 
 ## Source

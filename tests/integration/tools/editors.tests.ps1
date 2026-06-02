@@ -70,17 +70,27 @@ Describe 'editors.ps1 - Integration Tests' {
         BeforeAll {
             . (Join-Path $script:ProfileDir 'editors.ps1')
         }
-        
-        It 'Edit-WithVSCode handles missing tools gracefully' {
+
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            
+        }
+        
+        It 'Edit-WithVSCode handles missing tools gracefully' {
             Mock-CommandAvailabilityPester -CommandName 'code-insiders' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'code' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'codium' -Available $false
-            
-            { Edit-WithVSCode -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Edit-WithVSCode -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'vscode not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'vscode'
         }
         
         It 'Edit-WithCursor handles missing tool gracefully' {
@@ -99,15 +109,15 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Edit-WithNeovim handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
+            Mock-CommandAvailabilityPester -CommandName 'neovim-qt' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'nvim-qt' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'neovim-nightly' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'nvim' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'neovim' -Available $false
-            
-            { Edit-WithNeovim -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Edit-WithNeovim -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'neovim-nightly not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'neovim-nightly'
         }
         
         It 'Launch-Emacs handles missing tool gracefully' {
@@ -126,25 +136,21 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Launch-Lapce handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'lapce-nightly' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'lapce' -Available $false
-            
-            { Launch-Lapce -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Lapce -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'lapce-nightly not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'lapce-nightly'
         }
         
         It 'Launch-Zed handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'zed-nightly' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'zed' -Available $false
-            
-            { Launch-Zed -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Zed -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'zed-nightly not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'zed-nightly'
         }
         
         It 'Get-EditorInfo handles missing editors gracefully' {

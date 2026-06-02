@@ -98,6 +98,69 @@ function Test-Synopsis { }
         }
     }
 
+    Context 'Alias parsing' {
+        It 'uses target function help when aliases are grouped at end of fragment' {
+            $aliasParserPath = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocAliasParser.psm1'
+            $functionParserPath = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocFunctionParser.psm1'
+            Import-Module $functionParserPath -DisableNameChecking -Force
+            Import-Module $aliasParserPath -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'grouped_aliases.ps1'
+            $testContent = @'
+<#
+.SYNOPSIS
+    Upgrades all outdated Python packages using uv.
+.DESCRIPTION
+    Lists all outdated packages and upgrades them to their latest versions.
+#>
+function Update-UVOutdatedPackages {
+    [CmdletBinding()]
+    param()
+}
+
+<#
+.SYNOPSIS
+    Syncs UV project dependencies.
+.DESCRIPTION
+    Installs and synchronizes all project dependencies.
+#>
+function Sync-UVDependencies {
+    [CmdletBinding()]
+    param()
+}
+
+if (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue) {
+    Set-AgentModeAlias -Name 'uvupgrade' -Target 'Update-UVOutdatedPackages'
+    Set-AgentModeAlias -Name 'uvs' -Target 'Sync-UVDependencies'
+}
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $content = Get-Content $testFile -Raw
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile($testFile, [ref]$null, [ref]$null)
+            $functionAsts = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+
+            $functions = [System.Collections.Generic.List[PSCustomObject]]::new()
+            foreach ($funcAst in $functionAsts) {
+                $parsedFunction = Parse-FunctionDocumentation -FuncAst $funcAst -Content $content -File $testFile
+                if ($parsedFunction) {
+                    $functions.Add($parsedFunction)
+                }
+            }
+
+            $aliases = Parse-AliasesFromFile -File $testFile -Functions $functions
+            $uvupgrade = $aliases | Where-Object { $_.Name -eq 'uvupgrade' } | Select-Object -First 1
+            $uvs = $aliases | Where-Object { $_.Name -eq 'uvs' } | Select-Object -First 1
+
+            $uvupgrade | Should -Not -BeNullOrEmpty
+            $uvupgrade.Synopsis | Should -Match 'outdated'
+            $uvupgrade.Synopsis | Should -Not -Match 'Syncs UV'
+
+            $uvs | Should -Not -BeNullOrEmpty
+            $uvs.Synopsis | Should -Match 'Syncs UV project dependencies'
+        }
+    }
+
     Context 'File generation' {
         It 'creates markdown files in correct subdirectories' {
             $tempDir = Join-Path $script:TestTempRoot 'docs_test'

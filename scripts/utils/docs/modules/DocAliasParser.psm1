@@ -173,24 +173,27 @@ function Parse-AliasesFromFile {
         }
 
         try {
-            # Look for comment block before alias (within 30 lines)
+            # Only use comment blocks immediately above the alias (dedicated alias docs).
+            # A wide lookback incorrectly attaches unrelated function help when many
+            # Set-AgentModeAlias calls are grouped at the end of a fragment (e.g. uv.ps1).
             $aliasLineIndex = $commandAst.Extent.StartLineNumber - 1
             $helpContent = ""
+            $hasAdjacentAliasHelp = $false
             if ($aliasLineIndex -gt 0) {
-                $startIdx = [Math]::Max(0, $aliasLineIndex - 30)
+                $adjacentLookbackLines = 2
+                $startIdx = [Math]::Max(0, $aliasLineIndex - $adjacentLookbackLines)
                 $beforeLines = $lines[$startIdx..($aliasLineIndex - 1)]
                 $beforeText = $beforeLines -join "`n"
-            
-                # Use regex module if available, otherwise use simple pattern
+
                 if ($script:regexCommentBlock) {
                     $commentMatches = $script:regexCommentBlock.Matches($beforeText)
                 }
                 else {
-                    # Fallback: simple regex pattern
                     $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
                 }
-            
+
                 if ($commentMatches -and $commentMatches.Count -gt 0) {
+                    $hasAdjacentAliasHelp = $true
                     $helpContent = $commentMatches[-1].Value
                     $helpContent = $helpContent -replace '^<#\s*', '' -replace '\s*#>$', ''
                     $helpContent = $helpContent.Trim()
@@ -209,7 +212,7 @@ function Parse-AliasesFromFile {
 
             $synopsis = ""
             $description = ""
-            if ($helpContent) {
+            if ($hasAdjacentAliasHelp -and $helpContent) {
                 $synopsisMatch = $helpContent -match '(?s)\.SYNOPSIS\s*\n\s*(.+?)(?=\n\s*\.(?:DESCRIPTION|PARAMETER|EXAMPLE|OUTPUTS|NOTES|INPUTS|LINK)|$)'
                 if ($synopsisMatch -and
                     $matches -and
@@ -241,20 +244,16 @@ function Parse-AliasesFromFile {
                 }
             }
 
-            # If no synopsis found, try to get it from the target function
-            if (-not $synopsis) {
-                $targetFunc = $Functions | Where-Object { $_.Name -eq $targetCommand } | Select-Object -First 1
-                if ($targetFunc) {
-                    if ($targetFunc.Synopsis) {
-                        $synopsis = $targetFunc.Synopsis
-                    }
-                    if (-not $description -and $targetFunc.Description) {
-                        $description = $targetFunc.Description
-                    }
+            $targetFunc = $Functions | Where-Object { $_.Name -eq $targetCommand } | Select-Object -First 1
+            if ($targetFunc) {
+                if (-not $hasAdjacentAliasHelp -and $targetFunc.Synopsis) {
+                    $synopsis = $targetFunc.Synopsis
+                }
+                if (-not $hasAdjacentAliasHelp -and -not $description -and $targetFunc.Description) {
+                    $description = $targetFunc.Description
                 }
             }
 
-            # If still no synopsis, create a default one
             if (-not $synopsis) {
                 $synopsis = "Alias for ``$targetCommand``"
             }

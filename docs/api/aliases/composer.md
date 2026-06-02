@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Composer to the latest version.
+Executes Composer commands.
 
 ## Description
 
-Updates Composer itself to the latest version using 'composer self-update'.
+Wrapper function for Composer that checks for command availability before execution.
 
 ## Alias Information
 

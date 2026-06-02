@@ -39,7 +39,7 @@ Install-RustupToolchain nightly
 
 This function has the following aliases:
 
-- `rustup-install` - Updates all installed cargo packages to their latest versions.
+- `rustup-install` - Installs Rust toolchains.
 
 
 ## Source

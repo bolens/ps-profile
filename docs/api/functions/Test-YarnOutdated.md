@@ -31,7 +31,7 @@ Test-YarnOutdated
 
 This function has the following aliases:
 
-- `yarn-outdated` - Updates Yarn to the latest version.
+- `yarn-outdated` - Checks for outdated packages in the current project.
 
 
 ## Source

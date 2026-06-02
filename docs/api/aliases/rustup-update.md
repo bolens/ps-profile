@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates all installed cargo packages to their latest versions.
+Updates the Rust toolchain.
 
 ## Description
 
-Updates all globally installed cargo packages using cargo-install-update. This is equivalent to running 'cargo install-update --all'. Requires the cargo-install-update crate to be installed.
+Wrapper for rustup update command.
 
 ## Alias Information
 

@@ -51,71 +51,65 @@ Describe 're-tools.ps1 - Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         BeforeAll {
             . (Join-Path $script:ProfileDir 're-tools.ps1')
         }
-        
+
         It 'Decompile-Java handles missing jadx gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'jadx' -Available $false
-            
-            $result = Decompile-Java -InputFile 'test.dex' -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
+
+            $output = & { Decompile-Java -InputFile 'test.dex' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'jadx not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'jadx'
         }
-        
+
         It 'Decompile-DotNet handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'dnspyex' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'dnspy' -Available $false
-            
-            $result = Decompile-DotNet -InputFile 'test.dll' -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
+
+            $output = & { Decompile-DotNet -InputFile 'test.dll' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'dnspyex not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'dnspyex'
         }
-        
+
         It 'Analyze-PE handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'pe-bear' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'exeinfo-pe' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'detect-it-easy' -Available $false
-            
-            $result = Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
+
+            $output = & { Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pe-bear not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pe-bear'
         }
-        
+
         It 'Extract-AndroidApk handles missing apktool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'apktool' -Available $false
-            
-            $result = Extract-AndroidApk -InputFile 'test.apk' -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
+
+            $output = & { Extract-AndroidApk -InputFile 'test.apk' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'apktool not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'apktool'
         }
-        
+
         It 'Dump-IL2CPP handles missing il2cppdumper gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'il2cppdumper' -Available $false
-            
-            $result = Dump-IL2CPP -MetadataFile 'metadata.dat' -BinaryFile 'GameAssembly.dll' -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
+
+            $output = & {
+                Dump-IL2CPP -MetadataFile 'metadata.dat' -BinaryFile 'GameAssembly.dll' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'il2cppdumper not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'il2cppdumper'
         }
     }
     

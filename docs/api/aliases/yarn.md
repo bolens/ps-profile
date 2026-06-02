@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Yarn to the latest version.
+Executes Yarn commands.
 
 ## Description
 
-Updates Yarn itself to the latest version using 'yarn set version latest'.
+Wrapper function for Yarn CLI that checks for command availability before execution.
 
 ## Alias Information
 

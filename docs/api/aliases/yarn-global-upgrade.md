@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Yarn to the latest version.
+Updates all globally installed Yarn packages to their latest versions.
 
 ## Description
 
-Updates Yarn itself to the latest version using 'yarn set version latest'.
+Updates all globally installed packages. This is equivalent to running 'yarn global upgrade'.
 
 ## Alias Information
 

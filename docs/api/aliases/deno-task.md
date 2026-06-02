@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Deno to the latest version.
+Runs Deno tasks.
 
 ## Description
 
-Updates Deno itself to the latest version using 'deno upgrade'.
+Wrapper for deno task command to run tasks defined in deno.json.
 
 ## Alias Information
 

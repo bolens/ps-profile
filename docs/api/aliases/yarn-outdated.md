@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Yarn to the latest version.
+Checks for outdated packages in the current project.
 
 ## Description
 
-Updates Yarn itself to the latest version using 'yarn set version latest'.
+Lists all packages that have newer versions available. This is equivalent to running 'yarn outdated'.
 
 ## Alias Information
 

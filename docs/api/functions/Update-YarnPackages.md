@@ -31,7 +31,7 @@ Update-YarnPackages
 
 This function has the following aliases:
 
-- `yarn-upgrade` - Updates Yarn to the latest version.
+- `yarn-upgrade` - Updates all packages in the current project to their latest versions.
 
 
 ## Source

@@ -51,60 +51,63 @@ Describe 'game-dev.ps1 - Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         BeforeAll {
             . (Join-Path $script:ProfileDir 'game-dev.ps1')
         }
-        
+
         It 'Launch-Blockbench handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'blockbench' -Available $false
-            
-            { Launch-Blockbench -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Blockbench -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'blockbench not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'blockbench'
         }
-        
+
         It 'Launch-Tiled handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'tiled' -Available $false
-            
-            { Launch-Tiled -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Tiled -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'tiled not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'tiled'
         }
-        
+
         It 'Launch-Godot handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'godot' -Available $false
-            
-            { Launch-Godot -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Godot -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'godot not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'godot'
         }
-        
+
         It 'Build-GodotProject handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'godot' -Available $false
-            
-            $result = Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
-            $result | Should -BeNullOrEmpty
+
+            $output = & {
+                Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'godot not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'godot'
         }
-        
+
         It 'Launch-Unity handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'unity-hub' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'unity' -Available $false
-            
-            { Launch-Unity -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Unity -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'unity-hub not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'unity-hub'
         }
     }
 }

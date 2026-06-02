@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Gets the current Kubernetes context.
+Executes kubectl with the specified arguments.
 
 ## Description
 
-Returns the name of the currently active Kubernetes context.
+Wrapper function for kubectl that checks for command availability before execution.
 
 ## Alias Information
 

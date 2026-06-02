@@ -39,7 +39,7 @@ Invoke-Composer install
 
 This function has the following aliases:
 
-- `composer-outdated` - Updates Composer to the latest version.
+- `composer-outdated` - Executes Composer commands.
 
 
 ## Source

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows disk usage with dust.
+Alias for `dust`
 
 ## Description
 
-Launches dust, a modern disk usage analyzer that provides an intuitive, interactive view of disk space usage. Displays directory sizes in a tree format sorted by size.
+This is an alias that points to the `dust` command.
 
 ## Alias Information
 

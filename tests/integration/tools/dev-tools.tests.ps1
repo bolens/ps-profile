@@ -1,5 +1,3 @@
-
-
 <#
 .SYNOPSIS
     Integration tests for developer utility tools.
@@ -14,6 +12,8 @@
     Tests cover both successful operations and error handling scenarios.
     Some tests require Node.js and npm packages.
 #>
+
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
 
 Describe 'Developer Tools Integration Tests' {
     BeforeAll {

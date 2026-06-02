@@ -1,4 +1,4 @@
-
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
 
 Describe 'Tooling Integration Tests' {
     BeforeAll {
@@ -108,11 +108,14 @@ Describe 'Tooling Integration Tests' {
     }
 
     Context 'Spellcheck functionality' {
-        It 'spellcheck runs without errors' {
+        It 'spellcheck handles missing cspell gracefully' {
             $spellcheckPath = Join-Path $script:ScriptsUtilsPath 'code-quality\spellcheck.ps1'
             if ($spellcheckPath -and -not [string]::IsNullOrWhiteSpace($spellcheckPath) -and (Test-Path -LiteralPath $spellcheckPath)) {
-                # Spellcheck script handles missing cspell gracefully, so it should not throw
-                { & $spellcheckPath 2>&1 | Out-Null } | Should -Not -Throw
+                $output = & $spellcheckPath 2>&1 | Out-String
+                $output | Should -Not -BeNullOrEmpty
+                if ($output -match 'cspell not found on PATH') {
+                    $output | Should -Match 'Skipping local spellcheck'
+                }
             }
             else {
                 Set-ItResult -Skipped -Because "spellcheck.ps1 not found at $spellcheckPath"

@@ -57,18 +57,24 @@ Describe 'beads.ps1 - Integration Tests' {
     }
     
     Context 'Error Handling' {
-        It 'Handles missing bd command gracefully' {
-            # Clear any cached command availability
-            if (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue) {
-                $null = $global:TestCachedCommandCache.TryRemove('bd', [ref]$null)
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
-            
-            Mock Get-Command -ParameterFilter { $Name -eq 'bd' } -MockWith { return $null }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'bd' -Available $false
-            
-            $result = Invoke-Beads -Arguments @('ready') -ErrorAction SilentlyContinue
-            
-            $result | Should -BeNullOrEmpty
+        }
+
+        It 'Handles missing bd command gracefully' {
+            $output = & { Invoke-Beads -Arguments @('ready') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'bd not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'bd'
         }
     }
 

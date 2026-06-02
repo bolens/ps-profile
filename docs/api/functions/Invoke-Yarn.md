@@ -39,7 +39,7 @@ Invoke-Yarn install
 
 This function has the following aliases:
 
-- `yarn` - Updates Yarn to the latest version.
+- `yarn` - Executes Yarn commands.
 
 
 ## Source

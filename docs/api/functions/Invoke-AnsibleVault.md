@@ -33,7 +33,7 @@ Invoke-AnsibleVault encrypt secrets.yml
 
 This function has the following aliases:
 
-- `ansible-vault` - Runs ansible-inventory with the correct invocation strategy for the current platform.
+- `ansible-vault` - Runs ansible-vault with the correct invocation strategy for the current platform.
 
 
 ## Source

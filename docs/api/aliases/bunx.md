@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Bun to the latest version.
+Executes packages using bunx.
 
 ## Description
 
-Updates Bun itself to the latest version using 'bun upgrade'.
+Wrapper for bunx command that runs packages without installing them globally.
 
 ## Alias Information
 

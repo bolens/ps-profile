@@ -16,7 +16,13 @@ if (Test-CachedCommand uv) {
         Replacement for pip that uses uv for faster Python package management.
     #>
     function Invoke-Pip {
-        uv pip @args
+        [CmdletBinding()]
+        param(
+            [Parameter(ValueFromRemainingArguments = $true)]
+            [object[]]$Arguments
+        )
+
+        uv pip @Arguments
     }
 
     <#
@@ -110,7 +116,13 @@ if (Test-CachedCommand uv) {
         Executes tools that were installed using uv tool install.
     #>
     function Invoke-UVTool {
-        uv tool run @args
+        [CmdletBinding()]
+        param(
+            [Parameter(ValueFromRemainingArguments = $true)]
+            [object[]]$Arguments
+        )
+
+        uv tool run @Arguments
     }
 
     <#
@@ -120,7 +132,13 @@ if (Test-CachedCommand uv) {
         Adds packages as dependencies to the current UV project.
     #>
     function Add-UVDependency {
-        uv add @args
+        [CmdletBinding()]
+        param(
+            [Parameter(ValueFromRemainingArguments = $true)]
+            [object[]]$Arguments
+        )
+
+        uv add @Arguments
     }
 
     <#
@@ -130,7 +148,13 @@ if (Test-CachedCommand uv) {
         Installs and synchronizes all project dependencies.
     #>
     function Sync-UVDependencies {
-        uv sync @args
+        [CmdletBinding()]
+        param(
+            [Parameter(ValueFromRemainingArguments = $true)]
+            [object[]]$Arguments
+        )
+
+        uv sync @Arguments
     }
 
     if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {

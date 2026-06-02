@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-Runs ansible-inventory with the correct invocation strategy for the current platform.
+Runs ansible-galaxy with the correct invocation strategy for the current platform.
 
 ## Description
 

@@ -62,82 +62,94 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
         BeforeAll {
             . (Join-Path $script:ProfileDir 'database.ps1')
         }
-        
-        It 'Connect-Database handles missing tools gracefully' {
+
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            
+        }
+        
+        It 'Connect-Database handles missing tools gracefully' {
             Mock-CommandAvailabilityPester -CommandName 'dbeaver' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
             
-            { Connect-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Connect-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'psql not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'psql'
         }
         
         It 'Query-Database handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
             
-            { Query-Database -DatabaseType PostgreSQL -Database 'testdb' -Query 'SELECT 1' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Query-Database -DatabaseType PostgreSQL -Database 'testdb' -Query 'SELECT 1' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'psql not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'psql'
         }
         
         It 'Export-Database handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'pg_dump' -Available $false
             
-            { Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath 'backup.sql' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pg_dump not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pg_dump'
         }
         
         It 'Import-Database handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             $testFile = Join-Path $TestDrive 'backup.sql'
             'CREATE TABLE test (id INT);' | Out-File -FilePath $testFile
             
             Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
             
-            { Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $testFile -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $testFile -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'psql not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'psql'
         }
         
         It 'Backup-Database handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'pg_dump' -Available $false
             
-            { Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'pg_dump not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pg_dump'
         }
         
         It 'Restore-Database handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             $testFile = Join-Path $TestDrive 'backup.dump'
             'test content' | Out-File -FilePath $testFile
             
             Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
             
-            { Restore-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $testFile -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Restore-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $testFile -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'psql not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'psql'
         }
         
         It 'Get-DatabaseSchema handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
             
-            { Get-DatabaseSchema -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Get-DatabaseSchema -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'psql not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'psql'
         }
     }
     

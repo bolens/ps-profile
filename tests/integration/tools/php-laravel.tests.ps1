@@ -8,6 +8,8 @@
     missing tools gracefully.
 #>
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 Describe 'PHP and Laravel Tools Integration Tests' {
     BeforeAll {
         try {
@@ -59,17 +61,21 @@ Describe 'PHP and Laravel Tools Integration Tests' {
             (Get-Alias php).ResolvedCommandName | Should -Be 'Invoke-Php'
         }
 
-        It 'php alias handles missing tool gracefully and recommends installation' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('php', [ref]$null)
+        It 'Invoke-Php emits missing-tool warning when php is unavailable' {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'php' -Available $false
-            # Verify the function exists
-            # Note: Testing missing tool scenario with aliases can cause recursion issues
-            # due to alias resolution, so we verify function existence instead
-            Get-Command Invoke-Php -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            # Verify the alias exists
-            Get-Alias php -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            $output = & { Invoke-Php --version } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'php not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'php'
         }
 
         It 'Creates Start-PhpServer function' {
@@ -90,17 +96,21 @@ Describe 'PHP and Laravel Tools Integration Tests' {
             (Get-Alias composer).ResolvedCommandName | Should -Be 'Invoke-Composer'
         }
 
-        It 'composer alias handles missing tool gracefully and recommends installation' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('composer', [ref]$null)
+        It 'Invoke-Composer emits missing-tool warning when composer is unavailable' {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'composer' -Available $false
-            # Verify the function exists
-            # Note: Testing missing tool scenario with aliases can cause recursion issues
-            # due to alias resolution, so we verify function existence instead
-            Get-Command Invoke-Composer -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            # Verify the alias exists
-            Get-Alias composer -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            $output = & { Invoke-Composer --version } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'composer not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'composer'
         }
 
         It 'Creates Test-ComposerOutdated function' {
@@ -113,6 +123,11 @@ Describe 'PHP and Laravel Tools Integration Tests' {
         }
 
         It 'Test-ComposerOutdated calls composer outdated' {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $true
+
             Mock -CommandName composer -MockWith {
                 param([string[]]$ArgumentList)
                 $args = $ArgumentList
@@ -137,6 +152,11 @@ Describe 'PHP and Laravel Tools Integration Tests' {
         }
 
         It 'Update-ComposerPackages calls composer update' {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $true
+
             Mock -CommandName composer -MockWith {
                 param([string[]]$ArgumentList)
                 $args = $ArgumentList
@@ -160,6 +180,11 @@ Describe 'PHP and Laravel Tools Integration Tests' {
         }
 
         It 'Update-ComposerSelf calls composer self-update' {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $true
+
             Mock -CommandName composer -MockWith {
                 param([string[]]$ArgumentList)
                 $args = $ArgumentList
@@ -213,17 +238,37 @@ Describe 'PHP and Laravel Tools Integration Tests' {
             (Get-Alias laravel-new).ResolvedCommandName | Should -Be 'New-LaravelApp'
         }
 
-        It 'laravel-new alias handles missing composer gracefully and recommends installation' {
-            if ($global:MissingToolWarnings) {
-                $null = $global:MissingToolWarnings.TryRemove('composer', [ref]$null)
+        It 'New-LaravelApp emits missing-tool warning when composer is unavailable' {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
             }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
             Mock-CommandAvailabilityPester -CommandName 'composer' -Available $false
-            # Verify the function exists
-            # Note: Testing missing tool scenario with aliases can cause recursion issues
-            # due to alias resolution, so we verify function existence instead
-            Get-Command New-LaravelApp -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            # Verify the alias exists
-            Get-Alias laravel-new -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            $output = & { New-LaravelApp 'my-app' } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'composer not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'composer'
+        }
+
+        It 'Invoke-LaravelArtisan emits missing-tool warning when artisan is unavailable' {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'artisan' -Available $false
+            $output = & { Invoke-LaravelArtisan --version } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'artisan not found'
         }
     }
 }

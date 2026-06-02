@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Composer to the latest version.
+Starts PHP built-in development server.
 
 ## Description
 
-Updates Composer itself to the latest version using 'composer self-update'.
+Wrapper for PHP built-in server command.
 
 ## Alias Information
 

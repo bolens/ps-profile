@@ -55,75 +55,70 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         BeforeAll {
             . (Join-Path $script:ProfileDir 'terminal-enhanced.ps1')
         }
-        
+
         It 'Launch-Alacritty handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'alacritty' -Available $false
-            
-            { Launch-Alacritty -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Alacritty -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'alacritty not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'alacritty'
         }
-        
+
         It 'Launch-Kitty handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'kitty' -Available $false
-            
-            { Launch-Kitty -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Kitty -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'kitty not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kitty'
         }
-        
+
         It 'Launch-WezTerm handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'wezterm-nightly' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'wezterm' -Available $false
-            
-            { Launch-WezTerm -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-WezTerm -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'wezterm-nightly not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'wezterm-nightly'
         }
-        
+
         It 'Launch-Tabby handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'tabby' -Available $false
-            
-            { Launch-Tabby -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Tabby -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'tabby not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'tabby'
         }
-        
+
         It 'Start-Tmux handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'tmux' -Available $false
-            
-            $result = Start-Tmux -ErrorAction SilentlyContinue
-            $result | Should -BeNullOrEmpty
+
+            $output = & { Start-Tmux -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'tmux not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'tmux'
         }
-        
+
         It 'Get-TerminalInfo returns empty list when no terminals available' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            # Mock all commands as unavailable
-            $allCommands = @('alacritty', 'kitty', 'wezterm-nightly', 'wezterm', 'tabby', 'tmux', 'screen')
-            foreach ($cmd in $allCommands) {
+            foreach ($cmd in @('alacritty', 'kitty', 'wezterm-nightly', 'wezterm', 'tabby', 'tmux', 'screen')) {
                 Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
             }
-            
+
             $result = Get-TerminalInfo
-            
+
             $result | Should -BeNullOrEmpty
         }
     }

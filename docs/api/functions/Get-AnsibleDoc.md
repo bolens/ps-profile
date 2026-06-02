@@ -33,7 +33,7 @@ Get-AnsibleDoc ping
 
 This function has the following aliases:
 
-- `ansible-doc` - Runs ansible-inventory with the correct invocation strategy for the current platform.
+- `ansible-doc` - Runs ansible-doc with the correct invocation strategy for the current platform.
 
 
 ## Source

@@ -53,33 +53,74 @@ Describe 'media-tools.ps1 - Function Registration' {
 
 Describe 'media-tools.ps1 - Graceful Degradation' {
     BeforeEach {
-        foreach ($cmd in @('handbrake-cli', 'HandBrakeCLI', 'ffmpeg', 'cyanrip', 'mediainfo', 'MediaInfo', 'mkvmerge')) {
+        if ($global:CollectedMissingToolWarnings) {
+            $global:CollectedMissingToolWarnings.Clear()
+        }
+        if ($global:MissingToolWarnings) {
+            $global:MissingToolWarnings.Clear()
+        }
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        foreach ($cmd in @('handbrake-cli', 'HandBrakeCLI', 'ffmpeg', 'cyanrip', 'mediainfo', 'MediaInfo', 'mkvmerge', 'mp3tag')) {
             Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
         }
+
+        $script:TestMediaFile = Join-Path $TestDrive 'test.mp4'
+        Set-Content -Path $script:TestMediaFile -Value 'test' -NoNewline
+        $script:TestAudioFile = Join-Path $TestDrive 'test.mp3'
+        Set-Content -Path $script:TestAudioFile -Value 'test' -NoNewline
     }
 
     It 'Convert-Video handles missing tool gracefully' {
-        { Convert-Video -InputPath 'test.mp4' -OutputPath 'output.mkv' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & {
+            Convert-Video -InputPath $script:TestMediaFile -OutputPath (Join-Path $TestDrive 'output.mkv') -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'ffmpeg not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ffmpeg'
+    }
+
+    It 'Convert-Video handles missing handbrake gracefully' {
+        $output = & {
+            Convert-Video -InputPath $script:TestMediaFile -OutputPath (Join-Path $TestDrive 'output.mkv') -UseHandbrake -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'handbrake-cli not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'handbrake-cli'
+    }
+
     It 'Extract-Audio handles missing tool gracefully' {
-        { Extract-Audio -InputPath 'test.mp4' -OutputPath 'audio.mp3' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & {
+            Extract-Audio -InputPath $script:TestMediaFile -OutputPath (Join-Path $TestDrive 'audio.mp3') -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'ffmpeg not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ffmpeg'
+    }
+
     It 'Tag-Audio handles missing tool gracefully' {
-        { Tag-Audio -AudioPath 'test.mp3' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Tag-Audio -AudioPath $script:TestAudioFile -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'mp3tag not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'mp3tag'
+    }
+
     It 'Rip-CD handles missing tool gracefully' {
-        { Rip-CD -OutputPath 'C:\Output' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Rip-CD -OutputPath (Join-Path $TestDrive 'rip-output') -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'cyanrip not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cyanrip'
+    }
+
     It 'Get-MediaInfo handles missing tool gracefully' {
-        { Get-MediaInfo -MediaPath 'test.mp4' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Get-MediaInfo -MediaPath $script:TestMediaFile -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'mediainfo not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'mediainfo'
+    }
+
     It 'Merge-MKV handles missing tool gracefully' {
-        { Merge-MKV -InputPaths @('part1.mkv', 'part2.mkv') -OutputPath 'output.mkv' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
+        $output = & {
+            Merge-MKV -InputPaths @($script:TestMediaFile) -OutputPath (Join-Path $TestDrive 'merged.mkv') -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'mkvmerge not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'mkvmerge'
+    }
 }
 

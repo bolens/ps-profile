@@ -39,7 +39,7 @@ Invoke-Php script.php
 
 This function has the following aliases:
 
-- `php` - Updates Composer to the latest version.
+- `php` - Executes PHP commands.
 
 
 ## Source

@@ -39,7 +39,7 @@ Install-RubyDevKit -Components 1,2,3
 
 ## Notes
 
-This command is only available on Windows when Ruby is installed via Scoop. After installing Ruby with 'scoop install ruby', run this command to set up the development environment for building native gems.
+This command is only available on Windows when Ruby is installed via Scoop. After installing Ruby (see `Get-PlatformInstallHint -ToolName ruby`), run this command to set up the development environment for building native gems.
 
 
 ## Aliases

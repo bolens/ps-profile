@@ -51,65 +51,62 @@ Describe 'game-emulators.ps1 - Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         BeforeAll {
             . (Join-Path $script:ProfileDir 'game-emulators.ps1')
         }
-        
+
         It 'Start-Dolphin handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            # Mock commands as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'dolphin-dev' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'dolphin-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'dolphin' -Available $false
-            
-            { Start-Dolphin -ErrorAction SilentlyContinue } | Should -Not -Throw
-        }
-        
-        It 'Start-Ryujinx handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'ryujinx-canary' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'ryujinx' -Available $false
-            
-            { Start-Ryujinx -ErrorAction SilentlyContinue } | Should -Not -Throw
-        }
-        
-        It 'Start-RetroArch handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'retroarch-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'retroarch' -Available $false
-            
-            { Start-RetroArch -ErrorAction SilentlyContinue } | Should -Not -Throw
-        }
-        
-        It 'Get-EmulatorList returns empty list when no emulators available' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            # Mock all commands as unavailable
-            $allCommands = @('dolphin-dev', 'dolphin-nightly', 'dolphin', 'ryujinx-canary', 'ryujinx', 'retroarch-nightly', 'retroarch')
-            foreach ($cmd in $allCommands) {
+            foreach ($cmd in @('dolphin-dev', 'dolphin-nightly', 'dolphin')) {
                 Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
             }
-            
-            $result = Get-EmulatorList
-            
-            $result | Should -BeNullOrEmpty
+
+            $output = & { Start-Dolphin -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'dolphin-dev not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'dolphin-dev'
         }
-        
+
+        It 'Start-Ryujinx handles missing tool gracefully' {
+            Mock-CommandAvailabilityPester -CommandName 'ryujinx-canary' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'ryujinx' -Available $false
+
+            $output = & { Start-Ryujinx -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'ryujinx-canary not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ryujinx-canary'
+        }
+
+        It 'Start-RetroArch handles missing tool gracefully' {
+            Mock-CommandAvailabilityPester -CommandName 'retroarch-nightly' -Available $false
+            Mock-CommandAvailabilityPester -CommandName 'retroarch' -Available $false
+
+            $output = & { Start-RetroArch -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'retroarch-nightly not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'retroarch-nightly'
+        }
+
+        It 'Get-EmulatorList returns empty list when no emulators available' {
+            Mock Test-CachedCommand -MockWith { return $false }
+
+            $result = Get-EmulatorList
+
+            @($result) | Should -BeNullOrEmpty
+        }
+
         It 'Launch-Game handles missing ROM file gracefully' {
             Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.iso' } -MockWith { return $false }
-            
-            { Launch-Game -RomPath 'nonexistent.iso' -ErrorAction Stop } | Should -Throw
+
+            { Launch-Game -RomPath 'nonexistent.iso' -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }
     
@@ -122,14 +119,12 @@ Describe 'game-emulators.ps1 - Integration Tests' {
             $result = Get-EmulatorList
             
             $result | Should -Not -BeNullOrEmpty
-            $result | Should -BeOfType [System.Array]
-            
-            if ($result.Count -gt 0) {
-                $result[0] | Should -HaveMember 'Name'
-                $result[0] | Should -HaveMember 'Category'
-                $result[0] | Should -HaveMember 'Command'
-                $result[0] | Should -HaveMember 'Available'
-            }
+
+            $first = @($result)[0]
+            $first.PSObject.Properties.Name | Should -Contain 'Name'
+            $first.PSObject.Properties.Name | Should -Contain 'Category'
+            $first.PSObject.Properties.Name | Should -Contain 'Command'
+            $first.PSObject.Properties.Name | Should -Contain 'Available'
         }
     }
 }

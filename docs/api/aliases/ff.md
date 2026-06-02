@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Finds PowerShell commands using fzf fuzzy finder.
+Finds files using fzf fuzzy finder.
 
 ## Description
 
-Lists all available commands and uses fzf to interactively select one.
+Recursively searches for files and uses fzf to interactively select one.
 
 ## Alias Information
 

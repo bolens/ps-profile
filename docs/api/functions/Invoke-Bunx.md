@@ -39,7 +39,7 @@ Invoke-Bunx --version
 
 This function has the following aliases:
 
-- `bunx` - Updates Bun to the latest version.
+- `bunx` - Executes packages using bunx.
 
 
 ## Source

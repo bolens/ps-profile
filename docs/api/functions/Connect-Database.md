@@ -24,7 +24,7 @@ Database type: PostgreSQL, MySQL, SQLite, MongoDB, SQLServer, Oracle.
 
 Database connection string or connection parameters.
 
-### -Host
+### -ServerHost
 
 Database host name or IP address.
 
@@ -56,7 +56,7 @@ System.Object. Connection information or process object.
 
 `powershell
 $cred = Get-Credential
-    Connect-Database -DatabaseType PostgreSQL -Host localhost -Database mydb -Credential $cred
+    Connect-Database -DatabaseType PostgreSQL -ServerHost localhost -Database mydb -Credential $cred
     
     Connects to PostgreSQL database using GUI client.
 ``

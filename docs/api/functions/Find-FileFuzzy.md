@@ -39,7 +39,7 @@ Find-FileFuzzy -Pattern "\.ps1$"
 
 This function has the following aliases:
 
-- `ff` - Finds PowerShell commands using fzf fuzzy finder.
+- `ff` - Finds files using fzf fuzzy finder.
 
 
 ## Source

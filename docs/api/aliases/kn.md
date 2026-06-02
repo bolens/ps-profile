@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Gets the current Kubernetes context.
+Switches the current Kubernetes context.
 
 ## Description
 
-Returns the name of the currently active Kubernetes context.
+Changes the active Kubernetes context using kubectl config use-context.
 
 ## Alias Information
 

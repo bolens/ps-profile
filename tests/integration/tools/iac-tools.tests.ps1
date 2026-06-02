@@ -1,6 +1,6 @@
 # ===============================================
 # iac-tools.tests.ps1
-# Integration tests for iac-tools.ps1 fragment
+# Integration tests for terraform.ps1 fragment (IaC helpers)
 # ===============================================
 
 . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
@@ -9,77 +9,90 @@ BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')
-    . (Join-Path $script:ProfileDir 'iac-tools.ps1')
+    . (Join-Path $script:ProfileDir 'terraform.ps1')
 }
 
-Describe 'iac-tools.ps1 - Fragment Loading' {
+Describe 'terraform.ps1 - Fragment Loading' {
     It 'Loads fragment without errors' {
-        { . (Join-Path $script:ProfileDir 'iac-tools.ps1') } | Should -Not -Throw
+        { . (Join-Path $script:ProfileDir 'terraform.ps1') } | Should -Not -Throw
     }
     
     It 'Is idempotent (can be loaded multiple times)' {
         { 
-            . (Join-Path $script:ProfileDir 'iac-tools.ps1')
-            . (Join-Path $script:ProfileDir 'iac-tools.ps1')
+            . (Join-Path $script:ProfileDir 'terraform.ps1')
+            . (Join-Path $script:ProfileDir 'terraform.ps1')
         } | Should -Not -Throw
     }
 }
 
-Describe 'iac-tools.ps1 - Function Registration' {
-    It 'Registers Invoke-Terragrunt function' {
-        Get-Command -Name 'Invoke-Terragrunt' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+Describe 'terraform.ps1 - Function Registration' {
+    It 'Registers Invoke-Terraform function' {
+        Get-Command -Name 'Invoke-Terraform' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
     
-    It 'Registers Invoke-OpenTofu function' {
-        Get-Command -Name 'Invoke-OpenTofu' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    It 'Registers Initialize-Terraform function' {
+        Get-Command -Name 'Initialize-Terraform' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
     
-    It 'Registers Plan-Infrastructure function' {
-        Get-Command -Name 'Plan-Infrastructure' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    It 'Registers Get-TerraformPlan function' {
+        Get-Command -Name 'Get-TerraformPlan' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
     
-    It 'Registers Apply-Infrastructure function' {
-        Get-Command -Name 'Apply-Infrastructure' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    It 'Registers Invoke-TerraformApply function' {
+        Get-Command -Name 'Invoke-TerraformApply' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
     
-    It 'Registers Get-TerraformState function' {
-        Get-Command -Name 'Get-TerraformState' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    It 'Registers Remove-TerraformInfrastructure function' {
+        Get-Command -Name 'Remove-TerraformInfrastructure' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
     
-    It 'Registers Invoke-Pulumi function' {
-        Get-Command -Name 'Invoke-Pulumi' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+    It 'Registers tf alias' {
+        Get-Alias tf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
 }
 
-Describe 'iac-tools.ps1 - Graceful Degradation' {
+Describe 'terraform.ps1 - Graceful Degradation' {
     BeforeEach {
-        foreach ($cmd in @('terragrunt', 'tofu', 'terraform', 'pulumi')) {
-            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+        if ($global:CollectedMissingToolWarnings) {
+            $global:CollectedMissingToolWarnings.Clear()
         }
+        if ($global:MissingToolWarnings) {
+            $global:MissingToolWarnings.Clear()
+        }
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        Mock-CommandAvailabilityPester -CommandName 'terraform' -Available $false
     }
 
-    It 'Invoke-Terragrunt handles missing tool gracefully' {
-        { Invoke-Terragrunt plan -ErrorAction SilentlyContinue } | Should -Not -Throw
+    It 'Invoke-Terraform handles missing tool gracefully' {
+        $output = & { Invoke-Terraform version -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
     }
     
-    It 'Invoke-OpenTofu handles missing tool gracefully' {
-        { Invoke-OpenTofu init -ErrorAction SilentlyContinue } | Should -Not -Throw
+    It 'Initialize-Terraform handles missing tool gracefully' {
+        $output = & { Initialize-Terraform -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
     }
     
-    It 'Plan-Infrastructure handles missing tool gracefully' {
-        { Plan-Infrastructure -ErrorAction SilentlyContinue } | Should -Not -Throw
+    It 'Get-TerraformPlan handles missing tool gracefully' {
+        $output = & { Get-TerraformPlan -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
     }
     
-    It 'Apply-Infrastructure handles missing tool gracefully' {
-        { Apply-Infrastructure -ErrorAction SilentlyContinue -WhatIf:$false } | Should -Not -Throw
+    It 'Invoke-TerraformApply handles missing tool gracefully' {
+        $output = & { Invoke-TerraformApply -auto-approve -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
     }
     
-    It 'Get-TerraformState handles missing tool gracefully' {
-        { Get-TerraformState -ErrorAction SilentlyContinue } | Should -Not -Throw
-    }
-    
-    It 'Invoke-Pulumi handles missing tool gracefully' {
-        { Invoke-Pulumi preview -ErrorAction SilentlyContinue } | Should -Not -Throw
+    It 'Remove-TerraformInfrastructure handles missing tool gracefully' {
+        $output = & { Remove-TerraformInfrastructure -auto-approve -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
     }
 }
 

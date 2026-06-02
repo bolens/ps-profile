@@ -69,50 +69,89 @@ Describe 'kubernetes-enhanced.ps1 - Function Registration' {
 
 Describe 'kubernetes-enhanced.ps1 - Graceful Degradation' {
     BeforeEach {
+        if ($global:CollectedMissingToolWarnings) {
+            $global:CollectedMissingToolWarnings.Clear()
+        }
+        if ($global:MissingToolWarnings) {
+            $global:MissingToolWarnings.Clear()
+        }
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
         foreach ($cmd in @('kubectx', 'kubectl', 'kubens', 'stern', 'minikube', 'k9s')) {
             Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
         }
     }
 
     It 'Set-KubeContext handles missing tool gracefully' {
-        { Set-KubeContext -List -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & { Set-KubeContext -List -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
     
     It 'Set-KubeNamespace handles missing tool gracefully' {
-        { Set-KubeNamespace -List -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & { Set-KubeNamespace -List -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
     
     It 'Tail-KubeLogs handles missing tool gracefully' {
-        { Tail-KubeLogs -Pattern 'test' -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & { Tail-KubeLogs -Pattern 'test' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
     
     It 'Get-KubeResources handles missing tool gracefully' {
-        { Get-KubeResources -ResourceType 'pods' -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & {
+            Get-KubeResources -ResourceType 'pods' -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
     
     It 'Start-Minikube handles missing tool gracefully' {
-        { Start-Minikube -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & { Start-Minikube -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'minikube not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'minikube'
     }
     
     It 'Start-K9s handles missing tool gracefully' {
-        { Start-K9s -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & { Start-K9s -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'k9s not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'k9s'
     }
     
     It 'Exec-KubePod handles missing tool gracefully' {
-        { Exec-KubePod -Pod 'test-pod' -Command 'ls' -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & {
+            Exec-KubePod -Pod 'test-pod' -Command 'ls' -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
     
     It 'PortForward-KubeService handles missing tool gracefully' {
-        { PortForward-KubeService -Resource 'test-pod' -LocalPort 8080 -RemotePort 80 -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & {
+            PortForward-KubeService -Resource 'test-pod' -LocalPort 8080 -RemotePort 80 -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
     
     It 'Describe-KubeResource handles missing tool gracefully' {
-        { Describe-KubeResource -ResourceType 'pods' -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & {
+            Describe-KubeResource -ResourceType 'pods' -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
     
     It 'Apply-KubeManifests handles missing tool gracefully' {
         Mock Test-Path -MockWith { return $true }
-        { Apply-KubeManifests -Path 'manifests/' -ErrorAction SilentlyContinue } | Should -Not -Throw
+        $output = & {
+            Apply-KubeManifests -Path 'manifests/' -ErrorAction SilentlyContinue
+        } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
     }
 }
-

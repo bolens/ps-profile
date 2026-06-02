@@ -39,7 +39,7 @@ Invoke-Kubectl get pods
 
 This function has the following aliases:
 
-- `k` - Gets the current Kubernetes context.
+- `k` - Executes kubectl with the specified arguments.
 
 
 ## Source

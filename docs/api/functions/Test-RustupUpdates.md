@@ -31,7 +31,7 @@ Test-RustupUpdates
 
 This function has the following aliases:
 
-- `rustup-check` - Updates all installed cargo packages to their latest versions.
+- `rustup-check` - Checks for Rust toolchain updates.
 
 
 ## Source

@@ -802,11 +802,13 @@ function Import-DataConversionModules {
 function Import-DocumentConversionModules {
     param(
         [Parameter(Mandatory)]
-        [string]$ConversionModulesDir
+        [string]$ConversionModulesDir,
+
+        [string[]]$SelectiveModules
     )
 
     $documentModules = Get-DocumentModulesConfig
-    Import-ModuleGroup -BaseDir $ConversionModulesDir -SubDir 'document' -ModuleConfig $documentModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-')
+    Import-ModuleGroup -BaseDir $ConversionModulesDir -SubDir 'document' -ModuleConfig $documentModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-') -SelectiveModules $SelectiveModules
 }
 
 <#
@@ -924,7 +926,7 @@ function Ensure-ConversionModulesLoaded {
     }
     
     if ($ModuleType -in @('Documents', 'All')) {
-        Import-DocumentConversionModules -ConversionModulesDir $conversionModulesDir
+        Import-DocumentConversionModules -ConversionModulesDir $conversionModulesDir -SelectiveModules $SelectiveModules
     }
     
     if ($ModuleType -in @('Media', 'All')) {
@@ -1138,6 +1140,67 @@ function Initialize-SystemUtilityIntegration {
         if (Test-Path -LiteralPath $envPath) {
             $null = . $envPath
         }
+    }
+}
+
+<#
+.SYNOPSIS
+    Loads conversion modules for integration tests with optional selective loading.
+#>
+function Initialize-ConversionIntegration {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ProfileDir,
+
+        [ValidateSet('Data', 'Documents', 'Media', 'Specialized', 'All')]
+        [string]$ModuleType = 'Data',
+
+        [string[]]$SelectiveModules,
+
+        [switch]$EnsureData,
+
+        [switch]$EnsureDocuments,
+
+        [switch]$EnsureMedia
+    )
+
+    Initialize-TestProfile `
+        -ProfileDir $ProfileDir `
+        -LoadBootstrap `
+        -LoadConversionModules $ModuleType `
+        -LoadFilesFragment `
+        -SelectiveModules $SelectiveModules
+
+    if ($EnsureData) {
+        if (-not $SelectiveModules -or @($SelectiveModules).Count -eq 0) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+        else {
+            foreach ($initializer in @(
+                    'Initialize-FileConversion-CoreBasicJson'
+                    'Initialize-FileConversion-CoreBasicYaml'
+                    'Initialize-FileConversion-CoreBasicCsv'
+                    'Initialize-FileConversion-CoreBasicXml'
+                    'Initialize-FileConversion-CoreBasicBase64'
+                    'Initialize-FileConversion-CoreEncoding'
+                )) {
+                if (Get-Command $initializer -ErrorAction SilentlyContinue) {
+                    & $initializer
+                }
+            }
+            $global:FileConversionDataInitialized = $true
+        }
+    }
+
+    if ($EnsureDocuments -and (Get-Command Ensure-FileConversion-Documents -ErrorAction SilentlyContinue)) {
+        Ensure-FileConversion-Documents
+    }
+
+    if ($EnsureMedia -and (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue)) {
+        Ensure-FileConversion-Media
     }
 }
 

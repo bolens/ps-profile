@@ -30,7 +30,7 @@ Install-YarnDependencies
 
 This function has the following aliases:
 
-- `yarn-install` - Updates Yarn to the latest version.
+- `yarn-install` - Installs project dependencies.
 
 
 ## Source

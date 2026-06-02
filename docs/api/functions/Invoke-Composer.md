@@ -39,7 +39,7 @@ Invoke-Composer install
 
 This function has the following aliases:
 
-- `composer` - Updates Composer to the latest version.
+- `composer` - Executes Composer commands.
 
 
 ## Source

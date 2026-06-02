@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Deno to the latest version.
+Executes Deno commands.
 
 ## Description
 
-Updates Deno itself to the latest version using 'deno upgrade'.
+Wrapper function for Deno CLI that checks for command availability before execution.
 
 ## Alias Information
 

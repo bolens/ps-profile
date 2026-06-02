@@ -139,42 +139,67 @@ Describe 'ai-tools.ps1 - Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         It 'Handles missing ollama gracefully' {
             Mock-CommandAvailabilityPester -CommandName 'ollama' -Available $false
-            # Function should exist even if tool is not available
-            { Invoke-OllamaEnhanced -Arguments @('list') -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Invoke-OllamaEnhanced -Arguments @('list') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'ollama not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ollama'
         }
-        
+
         It 'Handles missing lms gracefully' {
             Mock-CommandAvailabilityPester -CommandName 'lms' -Available $false
-            # Function should exist even if tool is not available
-            { Invoke-LMStudio -Arguments @('list') -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $originalHome = $env:HOME
+            $env:HOME = $TestDrive
+            try {
+                $output = & { Invoke-LMStudio -Arguments @('list') } 2>&1 3>&1 | Out-String
+                Assert-TestMissingToolWarning -Output $output -Pattern 'lms not found'
+                Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'lms'
+            }
+            finally {
+                $env:HOME = $originalHome
+            }
         }
-        
+
         It 'Handles missing koboldcpp gracefully' {
             Mock-CommandAvailabilityPester -CommandName 'koboldcpp' -Available $false
-            # Function should exist even if tool is not available
-            { Invoke-KoboldCpp -Arguments @('--help') -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Invoke-KoboldCpp -Arguments @('--help') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'koboldcpp not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'koboldcpp'
         }
-        
+
         It 'Handles missing llamafile gracefully' {
             Mock-CommandAvailabilityPester -CommandName 'llamafile' -Available $false
-            # Function should exist even if tool is not available
-            { Invoke-Llamafile -Arguments @('--help') -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Invoke-Llamafile -Arguments @('--help') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'llamafile not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'llamafile'
         }
-        
+
         It 'Handles missing llama-cpp gracefully' {
             foreach ($cmd in @('llama-cpp-cuda', 'llama-cpp', 'llama.cpp')) {
                 Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
             }
-            # Function should exist even if tool is not available
-            { Invoke-LlamaCpp -Arguments @('--help') -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Invoke-LlamaCpp -Arguments @('--help') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'llama-cpp not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'llama-cpp'
         }
-        
+
         It 'Handles missing comfy gracefully' {
             Mock-CommandAvailabilityPester -CommandName 'comfy' -Available $false
-            # Function should exist even if tool is not available
-            { Invoke-ComfyUI -Arguments @('install') -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Invoke-ComfyUI -Arguments @('install') } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'comfy not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'comfy'
         }
     }
     

@@ -33,7 +33,7 @@ Invoke-AnsibleGalaxy install geerlingguy.docker
 
 This function has the following aliases:
 
-- `ansible-galaxy` - Runs ansible-inventory with the correct invocation strategy for the current platform.
+- `ansible-galaxy` - Runs ansible-galaxy with the correct invocation strategy for the current platform.
 
 
 ## Source

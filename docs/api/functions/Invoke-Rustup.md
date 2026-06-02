@@ -39,7 +39,7 @@ Invoke-Rustup show
 
 This function has the following aliases:
 
-- `rustup` - Updates all installed cargo packages to their latest versions.
+- `rustup` - Executes Rustup commands.
 
 
 ## Source

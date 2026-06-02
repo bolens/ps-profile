@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-SSH agent and key management helpers.
+Alias for `Get-SSHKeys`
 
 ## Description
 
-Provides functions and aliases for SSH key management: - Get-SSHKeys (ssh-list): list loaded keys - Add-SSHKeyIfNotLoaded (ssh-add-if): idempotent key loader - Start-SSHAgent (ssh-agent-start): start agent if not running
+This is an alias that points to the `Get-SSHKeys` command.
 
 ## Alias Information
 

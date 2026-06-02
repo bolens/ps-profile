@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Searches processes with procs.
+Alias for `procs`
 
 ## Description
 
-Launches procs with search capabilities, allowing you to filter and search through running processes. Uses procs as a modern replacement for ps with enhanced search functionality.
+This is an alias that points to the `procs` command.
 
 ## Alias Information
 

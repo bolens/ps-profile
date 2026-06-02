@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Gets Tailscale connection status.
+Executes Tailscale commands.
 
 ## Description
 
-Wrapper for tailscale status command.
+Wrapper function for Tailscale CLI that checks for command availability before execution.
 
 ## Alias Information
 

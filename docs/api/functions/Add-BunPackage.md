@@ -39,7 +39,7 @@ Add-BunPackage -D typescript
 
 This function has the following aliases:
 
-- `bun-add` - Updates Bun to the latest version.
+- `bun-add` - Adds packages using Bun.
 
 
 ## Source

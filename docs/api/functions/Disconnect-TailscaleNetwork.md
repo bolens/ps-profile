@@ -30,7 +30,7 @@ Disconnect-TailscaleNetwork
 
 This function has the following aliases:
 
-- `ts-down` - Gets Tailscale connection status.
+- `ts-down` - Disconnects from the Tailscale network.
 
 
 ## Source

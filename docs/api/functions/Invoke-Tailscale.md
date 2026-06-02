@@ -39,7 +39,7 @@ Invoke-Tailscale ping hostname
 
 This function has the following aliases:
 
-- `tailscale` - Gets Tailscale connection status.
+- `tailscale` - Executes Tailscale commands.
 
 
 ## Source

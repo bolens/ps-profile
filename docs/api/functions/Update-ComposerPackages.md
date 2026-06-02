@@ -31,7 +31,7 @@ Update-ComposerPackages
 
 This function has the following aliases:
 
-- `composer-update` - Updates Composer to the latest version.
+- `composer-update` - Updates all packages in the current Composer project to their latest versions.
 
 
 ## Source

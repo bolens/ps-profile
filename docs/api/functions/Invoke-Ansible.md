@@ -33,7 +33,7 @@ Invoke-Ansible all -m ping
 
 This function has the following aliases:
 
-- `ansible` - Runs ansible-inventory with the correct invocation strategy for the current platform.
+- `ansible` - Runs ansible with the correct invocation strategy for the current platform.
 
 
 ## Source

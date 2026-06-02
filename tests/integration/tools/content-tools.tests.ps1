@@ -49,29 +49,49 @@ Describe 'content-tools.ps1 - Function Registration' {
 
 Describe 'content-tools.ps1 - Graceful Degradation' {
     BeforeEach {
+        if ($global:CollectedMissingToolWarnings) {
+            $global:CollectedMissingToolWarnings.Clear()
+        }
+        if ($global:MissingToolWarnings) {
+            $global:MissingToolWarnings.Clear()
+        }
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
         foreach ($cmd in @('yt-dlp', 'gallery-dl', 'monolith', 'twitchdownloader-cli', 'twitchdownloader')) {
             Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
         }
     }
 
     It 'Download-Video handles missing tool gracefully' {
-        { Download-Video -Url 'https://youtube.com/watch?v=test' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Download-Video -Url 'https://youtube.com/watch?v=test' } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'yt-dlp not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'yt-dlp'
+    }
+
     It 'Download-Gallery handles missing tool gracefully' {
-        { Download-Gallery -Url 'https://example.com/gallery' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Download-Gallery -Url 'https://example.com/gallery' } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'gallery-dl not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gallery-dl'
+    }
+
     It 'Download-Playlist handles missing tool gracefully' {
-        { Download-Playlist -Url 'https://youtube.com/playlist?list=test' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Download-Playlist -Url 'https://youtube.com/playlist?list=test' } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'yt-dlp not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'yt-dlp'
+    }
+
     It 'Archive-WebPage handles missing tool gracefully' {
-        { Archive-WebPage -Url 'https://example.com/page' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
-    
+        $output = & { Archive-WebPage -Url 'https://example.com/page' } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'monolith not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'monolith'
+    }
+
     It 'Download-Twitch handles missing tool gracefully' {
-        { Download-Twitch -Url 'https://twitch.tv/videos/123' -ErrorAction SilentlyContinue } | Should -Not -Throw
-}
+        $output = & { Download-Twitch -Url 'https://twitch.tv/videos/123' } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'twitchdownloader not found'
+        Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'twitchdownloader'
+    }
 }
 

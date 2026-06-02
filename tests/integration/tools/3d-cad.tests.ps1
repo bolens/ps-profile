@@ -51,61 +51,65 @@ Describe '3d-cad.ps1 - Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+        }
+
         BeforeAll {
             . (Join-Path $script:ProfileDir '3d-cad.ps1')
         }
-        
+
         It 'Launch-Blender handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
-            
-            { Launch-Blender -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-Blender -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'blender not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'blender'
         }
-        
+
         It 'Launch-FreeCAD handles missing tool gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'freecad' -Available $false
-            
-            { Launch-FreeCAD -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-FreeCAD -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'freecad not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'freecad'
         }
-        
+
         It 'Launch-OpenSCAD handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'openscad-dev' -Available $false
             Mock-CommandAvailabilityPester -CommandName 'openscad' -Available $false
-            
-            { Launch-OpenSCAD -ErrorAction SilentlyContinue } | Should -Not -Throw
+
+            $output = & { Launch-OpenSCAD -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'openscad-dev not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'openscad-dev'
         }
-        
+
         It 'Convert-3DFormat handles missing blender gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
-            
-            $result = Convert-3DFormat -InputFile 'model.obj' -OutputFile 'model.stl' -ErrorAction SilentlyContinue
-            $result | Should -BeNullOrEmpty
+
+            $output = & {
+                Convert-3DFormat -InputFile 'model.obj' -OutputFile 'model.stl' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'blender not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'blender'
         }
-        
+
         It 'Render-3DScene handles missing blender gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
             Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
-            
-            $result = Render-3DScene -ProjectPath 'scene.blend' -OutputPath 'render.png' -ErrorAction SilentlyContinue
-            $result | Should -BeNullOrEmpty
+
+            $output = & {
+                Render-3DScene -ProjectPath 'scene.blend' -OutputPath 'render.png' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'blender not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'blender'
         }
     }
 }

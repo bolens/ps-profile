@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Gets Tailscale connection status.
+Connects to the Tailscale network.
 
 ## Description
 
-Wrapper for tailscale status command.
+Wrapper for tailscale up command.
 
 ## Alias Information
 

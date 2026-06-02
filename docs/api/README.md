@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 528
+**Total Functions:** 522
 **Total Aliases:** 514
-**Generated:** 2026-05-29 10:40:21
+**Generated:** 2026-06-02 08:44:59
 
 ## Functions by Fragment
 
@@ -367,15 +367,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [Test-BrewOutdated](functions/Test-BrewOutdated.md) - Checks for outdated Homebrew packages.
 - [Update-BrewPackages](functions/Update-BrewPackages.md) - Updates Homebrew packages.
 - [Update-BrewSelf](functions/Update-BrewSelf.md) - Updates Homebrew to the latest version.
-
-### iac-tools (6 functions)
-
-- [Apply-Infrastructure](functions/Apply-Infrastructure.md) - Applies infrastructure changes.
-- [Get-TerraformState](functions/Get-TerraformState.md) - Queries Terraform state.
-- [Invoke-OpenTofu](functions/Invoke-OpenTofu.md) - Executes OpenTofu commands.
-- [Invoke-Pulumi](functions/Invoke-Pulumi.md) - Executes Pulumi commands.
-- [Invoke-Terragrunt](functions/Invoke-Terragrunt.md) - Executes Terragrunt commands.
-- [Plan-Infrastructure](functions/Plan-Infrastructure.md) - Plans infrastructure changes.
 
 ### jq-yq (2 functions)
 
@@ -896,8 +887,8 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### aliases (2 aliases)
 
-- [la](aliases/la.md) - Enables user-defined aliases and helper functions for enhanced shell experience. (alias for `Get-ChildItemEnhancedAll`)
-- [ll](aliases/ll.md) - Enables user-defined aliases and helper functions for enhanced shell experience. (alias for `Get-ChildItemEnhanced`)
+- [la](aliases/la.md) - Alias for `Get-ChildItemEnhancedAll` (alias for `Get-ChildItemEnhancedAll`)
+- [ll](aliases/ll.md) - Alias for `Get-ChildItemEnhanced` (alias for `Get-ChildItemEnhanced`)
 
 ### angular (3 aliases)
 
@@ -907,12 +898,12 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### ansible (6 aliases)
 
-- [ansible](aliases/ansible.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-Ansible`)
-- [ansible-doc](aliases/ansible-doc.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Get-AnsibleDoc`)
-- [ansible-galaxy](aliases/ansible-galaxy.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-AnsibleGalaxy`)
+- [ansible](aliases/ansible.md) - Runs ansible with the correct invocation strategy for the current platform. (alias for `Invoke-Ansible`)
+- [ansible-doc](aliases/ansible-doc.md) - Runs ansible-doc with the correct invocation strategy for the current platform. (alias for `Get-AnsibleDoc`)
+- [ansible-galaxy](aliases/ansible-galaxy.md) - Runs ansible-galaxy with the correct invocation strategy for the current platform. (alias for `Invoke-AnsibleGalaxy`)
 - [ansible-inventory](aliases/ansible-inventory.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Get-AnsibleInventory`)
-- [ansible-playbook](aliases/ansible-playbook.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-AnsiblePlaybook`)
-- [ansible-vault](aliases/ansible-vault.md) - Runs ansible-inventory with the correct invocation strategy for the current platform. (alias for `Invoke-AnsibleVault`)
+- [ansible-playbook](aliases/ansible-playbook.md) - Runs ansible-playbook with the correct invocation strategy for the current platform. (alias for `Invoke-AnsiblePlaybook`)
+- [ansible-vault](aliases/ansible-vault.md) - Runs ansible-vault with the correct invocation strategy for the current platform. (alias for `Invoke-AnsibleVault`)
 
 ### api-tools (6 aliases)
 
@@ -955,11 +946,11 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### bun (5 aliases)
 
-- [bun-add](aliases/bun-add.md) - Updates Bun to the latest version. (alias for `Add-BunPackage`)
+- [bun-add](aliases/bun-add.md) - Adds packages using Bun. (alias for `Add-BunPackage`)
 - [bun-remove](aliases/bun-remove.md) - Removes packages using Bun. (alias for `Remove-BunPackage`)
-- [bun-run](aliases/bun-run.md) - Updates Bun to the latest version. (alias for `Invoke-BunRun`)
+- [bun-run](aliases/bun-run.md) - Runs npm scripts using Bun. (alias for `Invoke-BunRun`)
 - [bun-upgrade](aliases/bun-upgrade.md) - Updates Bun to the latest version. (alias for `Update-BunSelf`)
-- [bunx](aliases/bunx.md) - Updates Bun to the latest version. (alias for `Invoke-Bunx`)
+- [bunx](aliases/bunx.md) - Executes packages using bunx. (alias for `Invoke-Bunx`)
 
 ### chocolatey (18 aliases)
 
@@ -1042,9 +1033,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### deno (4 aliases)
 
-- [deno](aliases/deno.md) - Updates Deno to the latest version. (alias for `Invoke-Deno`)
-- [deno-run](aliases/deno-run.md) - Updates Deno to the latest version. (alias for `Invoke-DenoRun`)
-- [deno-task](aliases/deno-task.md) - Updates Deno to the latest version. (alias for `Invoke-DenoTask`)
+- [deno](aliases/deno.md) - Executes Deno commands. (alias for `Invoke-Deno`)
+- [deno-run](aliases/deno-run.md) - Runs Deno scripts. (alias for `Invoke-DenoRun`)
+- [deno-task](aliases/deno-task.md) - Runs Deno tasks. (alias for `Invoke-DenoTask`)
 - [deno-upgrade](aliases/deno-upgrade.md) - Updates Deno to the latest version. (alias for `Update-DenoSelf`)
 
 ### dotnet (6 aliases)
@@ -1058,8 +1049,8 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### dust (2 aliases)
 
-- [diskusage](aliases/diskusage.md) - Shows disk usage with dust. (alias for `dust`)
-- [du](aliases/du.md) - Shows disk usage with dust. (alias for `dust`)
+- [diskusage](aliases/diskusage.md) - Alias for `dust` (alias for `dust`)
+- [du](aliases/du.md) - Alias for `dust` (alias for `dust`)
 
 ### eza (11 aliases)
 
@@ -1084,7 +1075,7 @@ This documentation is automatically generated from comment-based help in the pro
 ### fzf (2 aliases)
 
 - [fcmd](aliases/fcmd.md) - Finds PowerShell commands using fzf fuzzy finder. (alias for `Find-CommandFuzzy`)
-- [ff](aliases/ff.md) - Finds PowerShell commands using fzf fuzzy finder. (alias for `Find-FileFuzzy`)
+- [ff](aliases/ff.md) - Finds files using fzf fuzzy finder. (alias for `Find-FileFuzzy`)
 
 ### gcloud (4 aliases)
 
@@ -1197,11 +1188,11 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### kubectl (5 aliases)
 
-- [k](aliases/k.md) - Gets the current Kubernetes context. (alias for `Invoke-Kubectl`)
+- [k](aliases/k.md) - Executes kubectl with the specified arguments. (alias for `Invoke-Kubectl`)
 - [kctx](aliases/kctx.md) - Gets the current Kubernetes context. (alias for `Get-KubectlContext`)
-- [kd](aliases/kd.md) - Gets the current Kubernetes context. (alias for `Describe-KubectlResource`)
-- [kg](aliases/kg.md) - Gets the current Kubernetes context. (alias for `Get-KubectlResource`)
-- [kn](aliases/kn.md) - Gets the current Kubernetes context. (alias for `Set-KubectlContext`)
+- [kd](aliases/kd.md) - Describes Kubernetes resources. (alias for `Describe-KubectlResource`)
+- [kg](aliases/kg.md) - Gets Kubernetes resources. (alias for `Get-KubectlResource`)
+- [kn](aliases/kn.md) - Switches the current Kubernetes context. (alias for `Set-KubectlContext`)
 
 ### lang-go-basic (7 aliases)
 
@@ -1410,17 +1401,17 @@ This documentation is automatically generated from comment-based help in the pro
 ### php (12 aliases)
 
 - [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
-- [composer](aliases/composer.md) - Updates Composer to the latest version. (alias for `Invoke-Composer`)
+- [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
 - [composer-add](aliases/composer-add.md) - Adds packages to Composer project. (alias for `Add-ComposerPackage`)
-- [composer-outdated](aliases/composer-outdated.md) - Updates Composer to the latest version. (alias for `Test-ComposerOutdated`)
+- [composer-outdated](aliases/composer-outdated.md) - Executes Composer commands. (alias for `Test-ComposerOutdated`)
 - [composer-remove](aliases/composer-remove.md) - Removes packages from Composer project. (alias for `Remove-ComposerPackage`)
 - [composer-require](aliases/composer-require.md) - Adds packages to Composer project. (alias for `Add-ComposerPackage`)
 - [composer-self-update](aliases/composer-self-update.md) - Updates Composer to the latest version. (alias for `Update-ComposerSelf`)
-- [composer-update](aliases/composer-update.md) - Updates Composer to the latest version. (alias for `Update-ComposerPackages`)
+- [composer-update](aliases/composer-update.md) - Updates all packages in the current Composer project to their latest versions. (alias for `Update-ComposerPackages`)
 - [php](aliases/php.md) - Executes PHP commands. (alias for `Invoke-Php`)
-- [php](aliases/php.md) - Updates Composer to the latest version. (alias for `Invoke-Php`)
+- [php](aliases/php.md) - Executes PHP commands. (alias for `Invoke-Php`)
 - [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
-- [php-server](aliases/php-server.md) - Updates Composer to the latest version. (alias for `Start-PhpServer`)
+- [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
 
 ### pip (11 aliases)
 
@@ -1490,8 +1481,8 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### procs (2 aliases)
 
-- [ps](aliases/ps.md) - Lists processes with procs. (alias for `procs`)
-- [psgrep](aliases/psgrep.md) - Searches processes with procs. (alias for `procs`)
+- [ps](aliases/ps.md) - Alias for `procs` (alias for `procs`)
+- [psgrep](aliases/psgrep.md) - Alias for `procs` (alias for `procs`)
 
 ### rclone (2 aliases)
 
@@ -1505,10 +1496,10 @@ This documentation is automatically generated from comment-based help in the pro
 ### rustup (5 aliases)
 
 - [cargo-update](aliases/cargo-update.md) - Updates all installed cargo packages to their latest versions. (alias for `Update-CargoPackages`)
-- [rustup](aliases/rustup.md) - Updates all installed cargo packages to their latest versions. (alias for `Invoke-Rustup`)
-- [rustup-check](aliases/rustup-check.md) - Updates all installed cargo packages to their latest versions. (alias for `Test-RustupUpdates`)
-- [rustup-install](aliases/rustup-install.md) - Updates all installed cargo packages to their latest versions. (alias for `Install-RustupToolchain`)
-- [rustup-update](aliases/rustup-update.md) - Updates all installed cargo packages to their latest versions. (alias for `Update-RustupToolchain`)
+- [rustup](aliases/rustup.md) - Executes Rustup commands. (alias for `Invoke-Rustup`)
+- [rustup-check](aliases/rustup-check.md) - Checks for Rust toolchain updates. (alias for `Test-RustupUpdates`)
+- [rustup-install](aliases/rustup-install.md) - Installs Rust toolchains. (alias for `Install-RustupToolchain`)
+- [rustup-update](aliases/rustup-update.md) - Updates the Rust toolchain. (alias for `Update-RustupToolchain`)
 
 ### rye (6 aliases)
 
@@ -1556,7 +1547,7 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [ssh-add-if](aliases/ssh-add-if.md) - Alias for `Add-SSHKeyIfNotLoaded` (alias for `Add-SSHKeyIfNotLoaded`)
 - [ssh-agent-start](aliases/ssh-agent-start.md) - Alias for `Start-SSHAgent` (alias for `Start-SSHAgent`)
-- [ssh-list](aliases/ssh-list.md) - SSH agent and key management helpers. (alias for `Get-SSHKeys`)
+- [ssh-list](aliases/ssh-list.md) - Alias for `Get-SSHKeys` (alias for `Get-SSHKeys`)
 
 ### swift (4 aliases)
 
@@ -1575,10 +1566,10 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### tailscale (4 aliases)
 
-- [tailscale](aliases/tailscale.md) - Gets Tailscale connection status. (alias for `Invoke-Tailscale`)
-- [ts-down](aliases/ts-down.md) - Gets Tailscale connection status. (alias for `Disconnect-TailscaleNetwork`)
+- [tailscale](aliases/tailscale.md) - Executes Tailscale commands. (alias for `Invoke-Tailscale`)
+- [ts-down](aliases/ts-down.md) - Disconnects from the Tailscale network. (alias for `Disconnect-TailscaleNetwork`)
 - [ts-status](aliases/ts-status.md) - Gets Tailscale connection status. (alias for `Get-TailscaleStatus`)
-- [ts-up](aliases/ts-up.md) - Gets Tailscale connection status. (alias for `Connect-TailscaleNetwork`)
+- [ts-up](aliases/ts-up.md) - Connects to the Tailscale network. (alias for `Connect-TailscaleNetwork`)
 
 ### terraform (5 aliases)
 
@@ -1660,14 +1651,14 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### yarn (8 aliases)
 
-- [yarn](aliases/yarn.md) - Updates Yarn to the latest version. (alias for `Invoke-Yarn`)
-- [yarn-add](aliases/yarn-add.md) - Updates Yarn to the latest version. (alias for `Add-YarnPackage`)
-- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates Yarn to the latest version. (alias for `Update-YarnGlobalPackages`)
-- [yarn-install](aliases/yarn-install.md) - Updates Yarn to the latest version. (alias for `Install-YarnDependencies`)
-- [yarn-outdated](aliases/yarn-outdated.md) - Updates Yarn to the latest version. (alias for `Test-YarnOutdated`)
-- [yarn-remove](aliases/yarn-remove.md) - Updates Yarn to the latest version. (alias for `Remove-YarnPackage`)
+- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
+- [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
+- [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
+- [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)
+- [yarn-outdated](aliases/yarn-outdated.md) - Checks for outdated packages in the current project. (alias for `Test-YarnOutdated`)
+- [yarn-remove](aliases/yarn-remove.md) - Removes packages from project dependencies. (alias for `Remove-YarnPackage`)
 - [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
-- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates Yarn to the latest version. (alias for `Update-YarnPackages`)
+- [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
 
 
 ## Generation

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Bun to the latest version.
+Adds packages using Bun.
 
 ## Description
 
-Updates Bun itself to the latest version using 'bun upgrade'.
+Wrapper for bun add command.
 
 ## Alias Information
 

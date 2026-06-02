@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Bun to the latest version.
+Runs npm scripts using Bun.
 
 ## Description
 
-Updates Bun itself to the latest version using 'bun upgrade'.
+Wrapper for bun run command.
 
 ## Alias Information
 

@@ -55,68 +55,60 @@ Describe 'aws.ps1 - Enhanced Functions Integration Tests' {
     }
     
     Context 'Graceful Degradation' {
+        BeforeEach {
+            if ($global:CollectedMissingToolWarnings) {
+                $global:CollectedMissingToolWarnings.Clear()
+            }
+            if ($global:MissingToolWarnings) {
+                $global:MissingToolWarnings.Clear()
+            }
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
+        }
+
         BeforeAll {
             . (Join-Path $script:ProfileDir 'aws.ps1')
         }
-        
+
         It 'Get-AwsCredentials handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
-            { Get-AwsCredentials -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Get-AwsCredentials -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'aws not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'aws'
         }
-        
+
         It 'Test-AwsConnection handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
-            { Test-AwsConnection -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Test-AwsConnection -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'aws not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'aws'
         }
-        
+
         It 'Get-AwsResources handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
-            { Get-AwsResources -Service 'ec2' -Action 'describe-instances' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & {
+                Get-AwsResources -Service 'ec2' -Action 'describe-instances' -ErrorAction SilentlyContinue
+            } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'aws not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'aws'
         }
-        
+
         It 'Export-AwsCredentials handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
-            { Export-AwsCredentials -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Export-AwsCredentials -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'aws not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'aws'
         }
-        
+
         It 'Switch-AwsAccount handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
-            { Switch-AwsAccount -ProfileName 'test' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Switch-AwsAccount -ProfileName 'test' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'aws not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'aws'
         }
-        
+
         It 'Get-AwsCosts handles missing tools gracefully' {
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
-            
-            { Get-AwsCosts -ErrorAction SilentlyContinue } | Should -Not -Throw
+            $output = & { Get-AwsCosts -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern 'aws not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'aws'
         }
     }
     

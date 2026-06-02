@@ -1,5 +1,7 @@
 
 
+. (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+
 <#
 .SYNOPSIS
     Integration tests for infrastructure tool fragments (kubectl, terraform).

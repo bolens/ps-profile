@@ -39,7 +39,7 @@ Remove-YarnPackage typescript -D
 
 This function has the following aliases:
 
-- `yarn-remove` - Updates Yarn to the latest version.
+- `yarn-remove` - Removes packages from project dependencies.
 
 
 ## Source

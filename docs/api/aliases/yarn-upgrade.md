@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Updates Yarn to the latest version.
+Updates all packages in the current project to their latest versions.
 
 ## Description
 
-Updates Yarn itself to the latest version using 'yarn set version latest'.
+Updates all packages to their latest versions according to the version ranges specified in package.json. This is equivalent to running 'yarn upgrade'.
 
 ## Alias Information
 

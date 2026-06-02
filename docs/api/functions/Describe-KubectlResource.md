@@ -39,7 +39,7 @@ Describe-KubectlResource pod my-pod -n default
 
 This function has the following aliases:
 
-- `kd` - Gets the current Kubernetes context.
+- `kd` - Describes Kubernetes resources.
 
 
 ## Source
