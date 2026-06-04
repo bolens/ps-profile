@@ -781,7 +781,7 @@ function global:Get-ToolInstallMethodRegistry {
         'yq'             = @{
             'Windows' = @{ 'scoop' = 'scoop install yq' }
             'Linux'   = @{
-                'apt' = 'sudo apt install yq'; 'pacman' = 'sudo pacman -S yq'
+                'apt' = 'sudo apt install yq'; 'pacman' = 'sudo pacman -S go-yq'
             }
             'macOS'   = @{ 'homebrew' = 'brew install yq' }
         }

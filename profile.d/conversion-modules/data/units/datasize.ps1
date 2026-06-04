@@ -136,7 +136,6 @@ function Initialize-FileConversion-CoreUnitsDataSize {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-DataSize @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-datasize -Value Convert-DataSize -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name datasize -Value Convert-DataSize -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Bytes

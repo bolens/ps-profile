@@ -138,7 +138,6 @@ function Initialize-FileConversion-CoreUnitsTemperature {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Temperature @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-temperature -Value Convert-Temperature -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name temp -Value Convert-Temperature -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Celsius

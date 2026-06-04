@@ -30,7 +30,7 @@ function Initialize-FileConversion-CoreTextGaps {
             # Validate yq is executable
             if (-not $script:YqValidated) {
                 try {
-                    $yqVersion = & yq --version 2>&1
+                    $yqVersion = Invoke-CachedYqCommand --version 2>&1
                     if ($LASTEXITCODE -ne 0) {
                         throw "yq command exists but failed to execute (exit code: $LASTEXITCODE)"
                     }
@@ -41,7 +41,7 @@ function Initialize-FileConversion-CoreTextGaps {
                 }
             }
             
-            $result = & yq eval -p xml -o yaml '.' $InputPath 2>&1
+            $result = Invoke-CachedYqCommand eval -p xml -o yaml '.' $InputPath 2>&1
             if ($LASTEXITCODE -eq 0) {
                 try {
                     $result | Set-Content -LiteralPath $OutputPath -Encoding UTF8 -ErrorAction Stop
@@ -88,7 +88,7 @@ function Initialize-FileConversion-CoreTextGaps {
             # Validate yq is executable (reuse validation if already checked)
             if (-not $script:YqValidated) {
                 try {
-                    $yqVersion = & yq --version 2>&1
+                    $yqVersion = Invoke-CachedYqCommand --version 2>&1
                     if ($LASTEXITCODE -ne 0) {
                         throw "yq command exists but failed to execute (exit code: $LASTEXITCODE)"
                     }
@@ -99,7 +99,7 @@ function Initialize-FileConversion-CoreTextGaps {
                 }
             }
             
-            $result = & yq eval -p yaml -o xml '.' $InputPath 2>&1
+            $result = Invoke-CachedYqCommand eval -p yaml -o xml '.' $InputPath 2>&1
             if ($LASTEXITCODE -eq 0) {
                 try {
                     $result | Set-Content -LiteralPath $OutputPath -Encoding UTF8 -ErrorAction Stop
@@ -249,7 +249,7 @@ function Initialize-FileConversion-CoreTextGaps {
                     throw "yq is not available. Install yq to use JSONL to YAML conversions."
                 }
                 
-                $yamlResult = & yq eval -p json -o yaml '.' $tempJson 2>&1
+                $yamlResult = Invoke-CachedYqCommand eval -p json -o yaml '.' $tempJson 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     try {
                         $yamlResult | Set-Content -LiteralPath $OutputPath -Encoding UTF8 -ErrorAction Stop
@@ -293,7 +293,7 @@ function Initialize-FileConversion-CoreTextGaps {
             # Convert YAML to JSON first, then JSON to JSONL
             $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "yaml-to-jsonl-$(Get-Random).json"
             try {
-                $jsonResult = & yq eval -o=json '.' $InputPath 2>&1
+                $jsonResult = Invoke-CachedYqCommand eval -o=json '.' $InputPath 2>&1
                 if ($LASTEXITCODE -ne 0) {
                     $errorMessage = if ($jsonResult) {
                         $jsonResult -join "`n"

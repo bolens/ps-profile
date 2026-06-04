@@ -26,14 +26,15 @@ Describe 'TOML Conversion Integration Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
     }
 
     Context 'TOML conversion utilities' {
         It 'ConvertFrom-TomlToJson converts TOML to JSON' {
             Get-Command ConvertFrom-TomlToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $toml = "name = `"test`"`nvalue = 123"
@@ -50,8 +51,8 @@ Describe 'TOML Conversion Integration Tests' {
         It 'ConvertTo-TomlFromJson converts JSON to TOML' {
             Get-Command ConvertTo-TomlFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -69,8 +70,8 @@ Describe 'TOML Conversion Integration Tests' {
             Get-Command ConvertFrom-TomlToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-TomlFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $originalToml = "name = `"test`"`nvalue = 123`narray = [1, 2, 3]"
@@ -86,8 +87,8 @@ Describe 'TOML Conversion Integration Tests' {
         It 'ConvertFrom-TomlToYaml converts TOML to YAML' {
             Get-Command ConvertFrom-TomlToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $toml = "name = `"test`"`nvalue = 123"
@@ -99,8 +100,8 @@ Describe 'TOML Conversion Integration Tests' {
         It 'ConvertTo-TomlFromYaml converts YAML to TOML' {
             Get-Command ConvertTo-TomlFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $yaml = "name: test`nvalue: 123"
@@ -112,8 +113,8 @@ Describe 'TOML Conversion Integration Tests' {
         It 'ConvertFrom-TomlToToon converts TOML to TOON' {
             Get-Command ConvertFrom-TomlToToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $toml = "name = `"test`"`nvalue = 123"
@@ -125,8 +126,8 @@ Describe 'TOML Conversion Integration Tests' {
         It 'ConvertTo-TomlFromToon converts TOON to TOML' {
             Get-Command ConvertTo-TomlFromToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $toon = "name `"test`"`nvalue 123"
@@ -138,8 +139,8 @@ Describe 'TOML Conversion Integration Tests' {
         It 'ConvertFrom-TomlToXml converts TOML to XML' {
             Get-Command ConvertFrom-TomlToXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $toml = "name = `"test`"`nvalue = 123"
@@ -151,8 +152,8 @@ Describe 'TOML Conversion Integration Tests' {
         It 'ConvertTo-TomlFromXml converts XML to TOML' {
             Get-Command ConvertTo-TomlFromXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $xml = '<root><item name="test" value="123"/></root>'
@@ -165,8 +166,8 @@ Describe 'TOML Conversion Integration Tests' {
             Get-Command ConvertFrom-TomlToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-TomlFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $originalToml = "name = `"test`"`nvalue = 123"
@@ -183,8 +184,8 @@ Describe 'TOML Conversion Integration Tests' {
             Get-Command ConvertFrom-TomlToToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-TomlFromToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $originalToml = "name = `"test`"`nvalue = 123"
@@ -201,8 +202,8 @@ Describe 'TOML Conversion Integration Tests' {
             Get-Command ConvertFrom-TomlToXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-TomlFromXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $originalToml = "name = `"test`"`nvalue = 123"

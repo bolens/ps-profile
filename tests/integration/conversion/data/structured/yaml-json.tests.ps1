@@ -23,14 +23,13 @@ Describe 'YAML and JSON Conversion Integration Tests' {
             -SelectiveModules @('yaml.ps1', 'json.ps1') `
             -EnsureData
 
-        $yqCheck = Test-ToolAvailable -ToolName 'yq' -Silent
-        $script:YqAvailable = $yqCheck -and $yqCheck.Available
+        $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
     }
 
     Context 'YAML conversion utilities' {
         It 'ConvertTo-Yaml converts JSON to YAML' {
-            if (-not $script:YqAvailable) {
-                Set-ItResult -Skipped -Because 'yq command not available'
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $json = '{"name": "test", "value": 123}'
@@ -43,8 +42,8 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles complex JSON structures' {
-            if (-not $script:YqAvailable) {
-                Set-ItResult -Skipped -Because 'yq command not available'
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $json = '{"users": [{"name": "alice", "age": 30}, {"name": "bob", "age": 25}]}'
@@ -57,8 +56,8 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles empty JSON object' {
-            if (-not $script:YqAvailable) {
-                Set-ItResult -Skipped -Because 'yq command not available'
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $json = '{}'
@@ -70,8 +69,8 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles JSON arrays' {
-            if (-not $script:YqAvailable) {
-                Set-ItResult -Skipped -Because 'yq command not available'
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
                 return
             }
             $json = '["item1", "item2", "item3"]'

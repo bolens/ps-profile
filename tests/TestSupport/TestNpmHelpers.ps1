@@ -59,16 +59,36 @@ try {
 }
 "@
     
-    $tempCheck = New-TestTempFile -Prefix 'npm-check' -Extension '.js' -Content $checkScript
+    $tempDir = [System.IO.Path]::GetTempPath()
+    $tempCheck = Join-Path $tempDir ('npm-check-{0}.js' -f [Guid]::NewGuid().ToString())
+    Set-Content -Path $tempCheck -Value $checkScript -Encoding UTF8
     try {
-        # Set NODE_PATH to include pnpm global if available
-        $env:NODE_PATH = if ($pnpmGlobalPath) { $pnpmGlobalPath } else { $env:NODE_PATH }
-        $result = & node $tempCheck 2>&1 | Where-Object { $_ -match 'available|not available' } | Select-Object -First 1
+        # Set NODE_PATH to include pnpm global if available (same as Invoke-NodeScript)
+        $originalNodePath = $env:NODE_PATH
+        if ($pnpmGlobalPath) {
+            $env:NODE_PATH = if ($env:NODE_PATH) { "$pnpmGlobalPath;$env:NODE_PATH" } else { $pnpmGlobalPath }
+        }
+
+        # Run from a neutral cwd so repo-local node_modules are not picked up
+        $previousLocation = Get-Location
+        try {
+            Set-Location -Path $tempDir
+            $result = & node $tempCheck 2>&1 | Where-Object { $_ -match 'available|not available' } | Select-Object -First 1
+        }
+        finally {
+            Set-Location -Path $previousLocation
+            if ($null -ne $originalNodePath) {
+                $env:NODE_PATH = $originalNodePath
+            }
+            else {
+                Remove-Item Env:\NODE_PATH -ErrorAction SilentlyContinue
+            }
+        }
+
         return ($result -eq 'available')
     }
     finally {
         Remove-Item -Path $tempCheck -ErrorAction SilentlyContinue
-        if ($pnpmGlobalPath) { Remove-Item Env:\NODE_PATH -ErrorAction SilentlyContinue }
     }
 }
 

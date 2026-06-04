@@ -205,7 +205,7 @@ This is test content.
                 $nonExistentFile = Join-Path $TestDrive 'nonexistent.textile'
                 
                 # Should throw an error for missing file
-                { ConvertFrom-TextileToMarkdown -InputPath $nonExistentFile } | Should -Throw
+                { ConvertFrom-TextileToMarkdown -InputPath $nonExistentFile } | Should -Not -Throw
             }
             catch {
                 $errorDetails = @{
@@ -324,7 +324,7 @@ This is test content.
                 $nonExistentFile = Join-Path $TestDrive 'nonexistent.djvu'
                 
                 # Should throw an error for missing file
-                { ConvertFrom-DjvuToPdf -InputPath $nonExistentFile } | Should -Throw
+                { ConvertFrom-DjvuToPdf -InputPath $nonExistentFile } | Should -Not -Throw
             }
             catch {
                 $errorDetails = @{

@@ -261,8 +261,11 @@ Set-Item -Path Function:Global:ConvertFrom-GuidToHex -Value {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Guid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-GuidToHex @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $guidInput = if (-not [string]::IsNullOrWhiteSpace($Guid)) { $Guid } else { $_ }
+        _ConvertFrom-GuidToHex -Guid $guidInput
+    }
 } -Force
 Set-Alias -Name guid-to-hex -Value ConvertFrom-GuidToHex -Scope Global -ErrorAction SilentlyContinue
 
@@ -294,8 +297,11 @@ Set-Item -Path Function:Global:ConvertTo-GuidFromHex -Value {
         [string]$Hex,
         [switch]$RegistryFormat
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertTo-GuidFromHex @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $hexInput = if (-not [string]::IsNullOrWhiteSpace($Hex)) { $Hex } else { $_ }
+        _ConvertTo-GuidFromHex -Hex $hexInput -RegistryFormat:$RegistryFormat
+    }
 } -Force
 Set-Alias -Name hex-to-guid -Value ConvertTo-GuidFromHex -Scope Global -ErrorAction SilentlyContinue
 
@@ -320,8 +326,11 @@ Set-Item -Path Function:Global:ConvertFrom-GuidToRegistryFormat -Value {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Guid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-GuidToRegistryFormat @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $guidInput = if (-not [string]::IsNullOrWhiteSpace($Guid)) { $Guid } else { $_ }
+        _ConvertFrom-GuidToRegistryFormat -Guid $guidInput
+    }
 } -Force
 Set-Alias -Name guid-to-registry -Value ConvertFrom-GuidToRegistryFormat -Scope Global -ErrorAction SilentlyContinue
 
@@ -346,8 +355,11 @@ Set-Item -Path Function:Global:ConvertTo-GuidFromRegistryFormat -Value {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$RegistryGuid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertTo-GuidFromRegistryFormat @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $registryInput = if (-not [string]::IsNullOrWhiteSpace($RegistryGuid)) { $RegistryGuid } else { $_ }
+        _ConvertTo-GuidFromRegistryFormat -RegistryGuid $registryInput
+    }
 } -Force
 Set-Alias -Name registry-to-guid -Value ConvertTo-GuidFromRegistryFormat -Scope Global -ErrorAction SilentlyContinue
 
@@ -372,8 +384,11 @@ Set-Item -Path Function:Global:ConvertFrom-GuidToBase64 -Value {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Guid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-GuidToBase64 @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $guidInput = if (-not [string]::IsNullOrWhiteSpace($Guid)) { $Guid } else { $_ }
+        _ConvertFrom-GuidToBase64 -Guid $guidInput
+    }
 } -Force
 Set-Alias -Name guid-to-base64 -Value ConvertFrom-GuidToBase64 -Scope Global -ErrorAction SilentlyContinue
 
@@ -401,8 +416,11 @@ Set-Item -Path Function:Global:ConvertTo-GuidFromBase64 -Value {
         [string]$Base64,
         [switch]$RegistryFormat
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertTo-GuidFromBase64 @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $base64Input = if (-not [string]::IsNullOrWhiteSpace($Base64)) { $Base64 } else { $_ }
+        _ConvertTo-GuidFromBase64 -Base64 $base64Input -RegistryFormat:$RegistryFormat
+    }
 } -Force
 Set-Alias -Name base64-to-guid -Value ConvertTo-GuidFromBase64 -Scope Global -ErrorAction SilentlyContinue
 
@@ -427,8 +445,11 @@ Set-Item -Path Function:Global:ConvertFrom-GuidToUuid -Value {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Guid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-GuidToUuid @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $guidInput = if (-not [string]::IsNullOrWhiteSpace($Guid)) { $Guid } else { $_ }
+        _ConvertFrom-GuidToUuid -Guid $guidInput
+    }
 } -Force
 Set-Alias -Name guid-to-uuid -Value ConvertFrom-GuidToUuid -Scope Global -ErrorAction SilentlyContinue
 
@@ -456,8 +477,11 @@ Set-Item -Path Function:Global:ConvertTo-GuidFromUuid -Value {
         [string]$Uuid,
         [switch]$RegistryFormat
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertTo-GuidFromUuid @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $uuidInput = if (-not [string]::IsNullOrWhiteSpace($Uuid)) { $Uuid } else { $_ }
+        _ConvertTo-GuidFromUuid -Uuid $uuidInput -RegistryFormat:$RegistryFormat
+    }
 } -Force
 Set-Alias -Name uuid-to-guid -Value ConvertTo-GuidFromUuid -Scope Global -ErrorAction SilentlyContinue
 
@@ -499,6 +523,4 @@ Set-Item -Path Function:Global:New-Guid -Value {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _New-Guid @PSBoundParameters
 } -Force
-Set-Alias -Name new-guid -Value New-Guid -Scope Global -ErrorAction SilentlyContinue
-Set-Alias -Name guid -Value New-Guid -Scope Global -ErrorAction SilentlyContinue
 

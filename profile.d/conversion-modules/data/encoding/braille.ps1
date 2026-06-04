@@ -19,7 +19,7 @@ function Initialize-FileConversion-CoreEncodingBraille {
     # Braille mapping: ASCII to Braille Unicode (U+2800-U+28FF)
     # Braille patterns are 6-dot patterns represented as Unicode characters
     # U+2800 is blank, U+2801-U+283F are various dot combinations
-    $script:BrailleMap = @{
+    $global:FileConversionBrailleMap = @{
         # Letters (a-z)
         'A' = [char]0x2801; 'B' = [char]0x2803; 'C' = [char]0x2809; 'D' = [char]0x2819;
         'E' = [char]0x2811; 'F' = [char]0x280B; 'G' = [char]0x281B; 'H' = [char]0x2813;
@@ -40,14 +40,15 @@ function Initialize-FileConversion-CoreEncodingBraille {
     }
 
     # Reverse mapping: Braille Unicode to ASCII
-    $script:BrailleReverse = @{}
-    foreach ($key in $script:BrailleMap.Keys) {
-        $brailleChar = $script:BrailleMap[$key]
-        $script:BrailleReverse[[int]$brailleChar] = $key
+    $global:FileConversionBrailleReverse = @{}
+    foreach ($key in $global:FileConversionBrailleMap.Keys) {
+        if ($key -match '^[0-9]$') { continue }
+        $brailleChar = $global:FileConversionBrailleMap[$key]
+        $global:FileConversionBrailleReverse[[int]$brailleChar] = $key
     }
 
     # Number sign for Braille numbers
-    $script:BrailleNumberSign = [char]0x283C
+    $global:FileConversionBrailleNumberSign = [char]0x283C
 
     # Helper function to encode text to Braille
     Set-Item -Path Function:Global:_Encode-Braille -Value {
@@ -59,19 +60,19 @@ function Initialize-FileConversion-CoreEncodingBraille {
         $upperText = $Text.ToUpper()
         $i = 0
         while ($i -lt $upperText.Length) {
-            $char = $upperText[$i]
+            $char = [string]$upperText[$i]
             # Check if it's a digit
             if ($char -ge '0' -and $char -le '9') {
                 # Add number sign before first digit in a sequence
                 if ($i -eq 0 -or ($i -gt 0 -and ($upperText[$i - 1] -lt '0' -or $upperText[$i - 1] -gt '9'))) {
-                    $result += $script:BrailleNumberSign
+                    $result += $global:FileConversionBrailleNumberSign
                 }
-                if ($script:BrailleMap.ContainsKey($char)) {
-                    $result += $script:BrailleMap[$char]
+                if ($global:FileConversionBrailleMap.ContainsKey($char)) {
+                    $result += $global:FileConversionBrailleMap[$char]
                 }
             }
-            elseif ($script:BrailleMap.ContainsKey($char)) {
-                $result += $script:BrailleMap[$char]
+            elseif ($global:FileConversionBrailleMap.ContainsKey($char)) {
+                $result += $global:FileConversionBrailleMap[$char]
             }
             else {
                 # Unknown character - use space
@@ -96,15 +97,15 @@ function Initialize-FileConversion-CoreEncodingBraille {
             $brailleCode = [int]$brailleChar
             
             # Check for number sign
-            if ($brailleCode -eq [int]$script:BrailleNumberSign) {
+            if ($brailleCode -eq [int]$global:FileConversionBrailleNumberSign) {
                 $inNumber = $true
                 $i++
                 continue
             }
             
             # Decode Braille character
-            if ($script:BrailleReverse.ContainsKey($brailleCode)) {
-                $asciiChar = $script:BrailleReverse[$brailleCode]
+            if ($global:FileConversionBrailleReverse.ContainsKey($brailleCode)) {
+                $asciiChar = $global:FileConversionBrailleReverse[$brailleCode]
                 # If we're in a number sequence and this is a letter pattern, convert to digit
                 if ($inNumber -and $asciiChar -ge 'A' -and $asciiChar -le 'J') {
                     # Braille letters A-J represent digits 1-0
@@ -196,8 +197,10 @@ function ConvertFrom-AsciiToBraille {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$InputObject
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-AsciiToBraille @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        _ConvertFrom-AsciiToBraille @PSBoundParameters
+    }
 }
 Set-Alias -Name ascii-to-braille -Value ConvertFrom-AsciiToBraille -Scope Global -ErrorAction SilentlyContinue
 Set-Alias -Name braille -Value ConvertFrom-AsciiToBraille -Scope Global -ErrorAction SilentlyContinue
@@ -224,8 +227,10 @@ function ConvertFrom-BrailleToAscii {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$InputObject
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-BrailleToAscii @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        _ConvertFrom-BrailleToAscii @PSBoundParameters
+    }
 }
 Set-Alias -Name braille-to-ascii -Value ConvertFrom-BrailleToAscii -Scope Global -ErrorAction SilentlyContinue
 

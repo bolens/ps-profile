@@ -25,7 +25,7 @@ Describe 'Speed Unit Conversion Tests' {
         It 'Convert-Speed converts m/s to km/h' {
             $result = Convert-Speed -Value 1 -FromUnit 'm/s' -ToUnit 'km/h'
             $result | Should -Not -BeNullOrEmpty
-            $result.Value | Should -Be 3.6
+            [math]::Abs($result.Value - 3.6) | Should -BeLessThan 0.001
         }
 
         It 'Convert-Speed converts km/h to mph' {
@@ -52,7 +52,7 @@ Describe 'Speed Unit Conversion Tests' {
         It 'Convert-Speed supports pipeline input' {
             $result = 10 | Convert-Speed -FromUnit 'm/s' -ToUnit 'km/h'
             $result | Should -Not -BeNullOrEmpty
-            $result.Value | Should -Be 36
+            [math]::Abs($result.Value - 36) | Should -BeLessThan 0.001
         }
 
         It 'Convert-Speed roundtrip conversion' {

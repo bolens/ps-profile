@@ -129,10 +129,17 @@ function Initialize-FileConversion-Asn1 {
         # Extract type definitions (simplified parser)
         # Pattern: TypeName ::= TypeSpecification
         $typePattern = '(\w+)\s*::=\s*([^;]+);'
-        $matches = [regex]::Matches($Asn1Content, $typePattern)
+        $moduleBody = $Asn1Content
+        if ($Asn1Content -match '(?s)BEGIN\s*(.*)\s*END') {
+            $moduleBody = $matches[1]
+        }
+        $matches = [regex]::Matches($moduleBody, $typePattern, 'Singleline')
         
         foreach ($match in $matches) {
             $typeName = $match.Groups[1].Value
+            if ($typeName -in @('DEFINITIONS', 'BEGIN', 'END')) {
+                continue
+            }
             $typeSpec = $match.Groups[2].Value.Trim()
             
             $parsedType = _Parse-Asn1Type -TypeSpec $typeSpec
@@ -164,6 +171,9 @@ function Initialize-FileConversion-Asn1 {
             
             $asn1Content = Get-Content -LiteralPath $InputPath -Raw
             $module = _Parse-Asn1Module -Asn1Content $asn1Content
+            if (-not $module) {
+                $module = @{ ModuleName = ''; Types = @() }
+            }
             
             # Convert to structured format
             $result = @{
@@ -300,6 +310,9 @@ function Initialize-FileConversion-Asn1 {
             
             $asn1Content = Get-Content -LiteralPath $InputPath -Raw
             $module = _Parse-Asn1Module -Asn1Content $asn1Content
+            if (-not $module) {
+                $module = @{ ModuleName = ''; Types = @() }
+            }
             
             # Build XML
             $xmlLines = @()

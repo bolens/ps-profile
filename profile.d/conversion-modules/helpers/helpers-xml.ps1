@@ -19,10 +19,16 @@
 function Convert-XmlToJsonObject {
     param([System.Xml.XmlElement]$Element)
 
-    $obj = [ordered]@{}
-    $hasElements = $false
+        $obj = [ordered]@{}
+        $hasElements = $false
 
-    foreach ($child in $Element.ChildNodes) {
+        foreach ($attr in $Element.Attributes) {
+            if ($attr.Name -match '^xmlns(:|$)') { continue }
+            $obj[$attr.LocalName] = $attr.Value
+            $hasElements = $true
+        }
+
+        foreach ($child in $Element.ChildNodes) {
         if ($child.NodeType -eq 'Element') {
             $hasElements = $true
             $childName = $child.LocalName

@@ -123,11 +123,24 @@ function Initialize-FileConversion-CoreTimeHumanReadable {
             try {
                 $now = Get-Date
                 $diff = $DateTime - $now
+                $calendarDays = ($DateTime.Date - $now.Date).Days
                 $daysDiff = [Math]::Floor($diff.TotalDays)
                 
                 if ($Format -eq 'relative') {
-                    # Relative format
-                    if ([Math]::Abs($diff.TotalSeconds) -lt 60) {
+                    # Relative format (calendar day boundaries for multi-day labels)
+                    if ($calendarDays -eq 1) {
+                        return 'tomorrow'
+                    }
+                    elseif ($calendarDays -eq -1) {
+                        return 'yesterday'
+                    }
+                    elseif ($calendarDays -gt 1 -and $calendarDays -lt 7) {
+                        return "in $calendarDays days"
+                    }
+                    elseif ($calendarDays -lt -1 -and $calendarDays -gt -7) {
+                        return "$([Math]::Abs($calendarDays)) days ago"
+                    }
+                    elseif ([Math]::Abs($diff.TotalSeconds) -lt 60) {
                         return if ($diff.TotalSeconds -gt 0) { "in $([Math]::Round($diff.TotalSeconds)) seconds" } else { "$([Math]::Round([Math]::Abs($diff.TotalSeconds))) seconds ago" }
                     }
                     elseif ([Math]::Abs($diff.TotalMinutes) -lt 60) {
@@ -138,20 +151,8 @@ function Initialize-FileConversion-CoreTimeHumanReadable {
                         $hours = [Math]::Round($diff.TotalHours)
                         return if ($hours -gt 0) { "in $hours hours" } else { "$([Math]::Abs($hours)) hours ago" }
                     }
-                    elseif ($daysDiff -eq 0) {
-                        return if ($diff.TotalHours -gt 0) { "today" } else { "today" }
-                    }
-                    elseif ($daysDiff -eq 1) {
-                        return "tomorrow"
-                    }
-                    elseif ($daysDiff -eq -1) {
-                        return "yesterday"
-                    }
-                    elseif ($daysDiff -gt 0 -and $daysDiff -lt 7) {
-                        return "in $daysDiff days"
-                    }
-                    elseif ($daysDiff -lt 0 -and [Math]::Abs($daysDiff) -lt 7) {
-                        return "$([Math]::Abs($daysDiff)) days ago"
+                    elseif ($calendarDays -eq 0) {
+                        return 'today'
                     }
                     elseif ($daysDiff -ge 7 -and $daysDiff -lt 30) {
                         $weeks = [Math]::Round($daysDiff / 7)

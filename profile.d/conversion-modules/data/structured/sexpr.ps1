@@ -29,7 +29,7 @@ function Initialize-FileConversion-Sexpr {
         if ($null -eq $Item) { return $null }
         if ($Item -is [System.Collections.IList] -or $Item -is [System.Array]) {
             $result = @()
-            foreach ($subItem in $Item) { $result += & $_ConvertSexprItemToJson $subItem }
+            foreach ($subItem in $Item) { $result += & _ConvertSexprItemToJson $subItem }
             return $result
         }
         return $Item
@@ -63,7 +63,7 @@ function Initialize-FileConversion-Sexpr {
         
         function ParseAtom {
             param([ref]$pos)
-            SkipWhitespace -pos ([ref]$pos.Value)
+            SkipWhitespace -pos $pos
             
             if ($pos.Value -ge $script:len) {
                 return $null
@@ -150,7 +150,7 @@ function Initialize-FileConversion-Sexpr {
         
         function ParseList {
             param([ref]$pos)
-            SkipWhitespace -pos ([ref]$pos.Value)
+            SkipWhitespace -pos $pos
             
             if ($pos.Value -ge $script:len -or $script:content[$pos.Value] -ne '(') {
                 return $null
@@ -159,22 +159,22 @@ function Initialize-FileConversion-Sexpr {
             $pos.Value++ # Skip '('
             $list = @()
             
-            SkipWhitespace -pos ([ref]$pos.Value)
+            SkipWhitespace -pos $pos
             
             while ($pos.Value -lt $script:len -and $script:content[$pos.Value] -ne ')') {
                 if ($script:content[$pos.Value] -eq '(') {
-                    $sublist = ParseList -pos ([ref]$pos.Value)
+                    $sublist = ParseList -pos $pos
                     if ($null -ne $sublist) {
                         $list += , $sublist
                     }
                 }
                 else {
-                    $atom = ParseAtom -pos ([ref]$pos.Value)
+                    $atom = ParseAtom -pos $pos
                     if ($null -ne $atom) {
                         $list += $atom
                     }
                 }
-                SkipWhitespace -pos ([ref]$pos.Value)
+                SkipWhitespace -pos $pos
             }
             
             if ($pos.Value -lt $script:len -and $script:content[$pos.Value] -eq ')') {

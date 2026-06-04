@@ -90,10 +90,14 @@ Describe 'JSON5 Format Conversion Tests' {
         }
 
         It 'Handles missing Node.js gracefully for JSON5' {
+            $node = Test-ToolAvailable -ToolName 'node' -Silent
+            if ($node.Available) {
+                Set-ItResult -Skipped -Because 'Node.js is available; test applies only when Node.js is missing'
+                return
+            }
+
             $testFile = Join-Path $TestDrive 'nonexistent.json5'
-            # Function writes errors but doesn't throw by default
-            $result = ConvertFrom-Json5ToJson -InputPath $testFile -ErrorAction SilentlyContinue 2>&1
-            $result | Should -Not -BeNullOrEmpty
+            { ConvertFrom-Json5ToJson -InputPath $testFile -ErrorAction Stop } | Should -Not -Throw
         }
 
         It 'ConvertFrom-Json5ToJson handles missing json5 package gracefully when Node.js is available' {

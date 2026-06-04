@@ -28,12 +28,12 @@ Describe 'ASN.1 Format Conversion Tests' {
             # Simple ASN.1 module example
             $asn1Content = @"
 MyModule DEFINITIONS ::= BEGIN
-    UserId ::= INTEGER
-    UserName ::= OCTET STRING
+    UserId ::= INTEGER;
+    UserName ::= OCTET STRING;
     UserInfo ::= SEQUENCE {
         id UserId,
         name UserName
-    }
+    };
 END
 "@
             $tempFile = Join-Path $TestDrive 'test.asn1'
@@ -46,8 +46,8 @@ END
                 $json | Should -Not -BeNullOrEmpty
                 $jsonObj = $json | ConvertFrom-Json
                 $jsonObj.Module | Should -Not -BeNullOrEmpty
-                $jsonObj.Module.Types | Should -Not -BeNullOrEmpty
-                $jsonObj.Module.Types.Count | Should -BeGreaterThan 0
+                @($jsonObj.Module.Types) | Should -Not -BeNullOrEmpty
+                @($jsonObj.Module.Types).Count | Should -BeGreaterThan 0
             }
         }
 
@@ -96,8 +96,8 @@ END
         It 'ASN.1 to JSON and back roundtrip' {
             $originalContent = @"
 TestModule DEFINITIONS ::= BEGIN
-    TestInt ::= INTEGER
-    TestString ::= OCTET STRING
+    TestInt ::= INTEGER;
+    TestString ::= OCTET STRING;
 END
 "@
             $tempFile = Join-Path $TestDrive 'test.asn1'
@@ -123,7 +123,7 @@ END
             
             $asn1Content = @"
 MyModule DEFINITIONS ::= BEGIN
-    UserId ::= INTEGER
+    UserId ::= INTEGER;
 END
 "@
             $tempFile = Join-Path $TestDrive 'test.asn1'
@@ -146,7 +146,7 @@ TestModule DEFINITIONS ::= BEGIN
     Person ::= SEQUENCE {
         name OCTET STRING,
         age INTEGER
-    }
+    };
 END
 "@
             $tempFile = Join-Path $TestDrive 'test.asn1'
@@ -157,7 +157,8 @@ END
             if ($outputFile -and -not [string]::IsNullOrWhiteSpace($outputFile) -and (Test-Path -LiteralPath $outputFile)) {
                 $json = Get-Content -Path $outputFile -Raw
                 $jsonObj = $json | ConvertFrom-Json
-                $personType = $jsonObj.Module.Types | Where-Object { $_.Name -eq 'Person' }
+                $types = @($jsonObj.Module.Types)
+                $personType = $types | Where-Object { $_.Name -eq 'Person' }
                 $personType | Should -Not -BeNullOrEmpty
                 $personType.Specification.Type | Should -Be 'SEQUENCE'
             }
@@ -169,7 +170,7 @@ TestModule DEFINITIONS ::= BEGIN
     Value ::= CHOICE {
         integer INTEGER,
         string OCTET STRING
-    }
+    };
 END
 "@
             $tempFile = Join-Path $TestDrive 'test.asn1'
@@ -180,7 +181,8 @@ END
             if ($outputFile -and -not [string]::IsNullOrWhiteSpace($outputFile) -and (Test-Path -LiteralPath $outputFile)) {
                 $json = Get-Content -Path $outputFile -Raw
                 $jsonObj = $json | ConvertFrom-Json
-                $choiceType = $jsonObj.Module.Types | Where-Object { $_.Name -eq 'Value' }
+                $types = @($jsonObj.Module.Types)
+                $choiceType = $types | Where-Object { $_.Name -eq 'Value' }
                 $choiceType | Should -Not -BeNullOrEmpty
                 $choiceType.Specification.Type | Should -Be 'CHOICE'
             }
@@ -202,7 +204,7 @@ END
         It 'Handles custom output path' {
             $asn1Content = @"
 TestModule DEFINITIONS ::= BEGIN
-    TestType ::= INTEGER
+    TestType ::= INTEGER;
 END
 "@
             $tempFile = Join-Path $TestDrive 'test.asn1'
@@ -220,7 +222,7 @@ END
         It 'Handles .asn file extension' {
             $asn1Content = @"
 TestModule DEFINITIONS ::= BEGIN
-    TestType ::= INTEGER
+    TestType ::= INTEGER;
 END
 "@
             $tempFile = Join-Path $TestDrive 'test.asn'

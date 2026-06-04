@@ -122,7 +122,6 @@ function Initialize-FileConversion-CoreUnitsPressure {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Pressure @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-pressure -Value Convert-Pressure -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name pressure -Value Convert-Pressure -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Pascals

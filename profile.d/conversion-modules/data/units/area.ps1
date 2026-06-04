@@ -117,7 +117,6 @@ function Initialize-FileConversion-CoreUnitsArea {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Area @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-area -Value Convert-Area -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name area -Value Convert-Area -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Square meters

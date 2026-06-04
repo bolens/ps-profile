@@ -255,6 +255,20 @@ function global:Test-CachedCommand {
         }
     }
 
+    if (-not $result) {
+        foreach ($alternate in (Get-ExternalCommandLookupNames -Name $normalizedName)) {
+            if ($alternate.Equals($normalizedName, [StringComparison]::OrdinalIgnoreCase)) {
+                continue
+            }
+
+            $command = Get-Command -Name $alternate -ErrorAction SilentlyContinue
+            if ($null -ne $command) {
+                $result = $true
+                break
+            }
+        }
+    }
+
     # Cache the result (if caching enabled)
     if ($CacheTTLMinutes -gt 0) {
         $expires = $now.AddMinutes([double]$CacheTTLMinutes)
@@ -265,6 +279,134 @@ function global:Test-CachedCommand {
     }
 
     return $result
+}
+
+<#
+.SYNOPSIS
+    Returns command names to probe for an external tool (includes distro-specific aliases).
+#>
+function global:Get-ExternalCommandLookupNames {
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $normalized = $Name.Trim()
+    # Arch provides mikefarah/yq as go-yq; probe it before python-yq (often installed as yq)
+    if ($normalized.Equals('yq', [StringComparison]::OrdinalIgnoreCase)) {
+        return @('go-yq', 'yq')
+    }
+
+    return @($normalized)
+}
+
+<#
+.SYNOPSIS
+    Returns whether an executable is mikefarah/yq v4+ (not python-yq).
+#>
+function global:Test-IsMikefarahYqExecutable {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Executable
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Executable)) {
+        return $false
+    }
+
+    try {
+        $versionOutput = (& $Executable --version 2>&1 | Out-String).Trim()
+        if ($versionOutput -match 'mikefarah|github\.com/mikefarah') {
+            return $true
+        }
+
+        if ($versionOutput -match '^yq\s+\d') {
+            return $false
+        }
+
+        $evalHelp = (& $Executable eval --help 2>&1 | Out-String)
+        return $evalHelp -match 'evaluates' -and $evalHelp -notmatch 'jq_filter'
+    }
+    catch {
+        return $false
+    }
+}
+
+<#
+.SYNOPSIS
+    Invokes mikefarah/yq (or go-yq on Arch) with the given arguments.
+#>
+function global:Invoke-CachedYqCommand {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$YqArguments
+    )
+
+    $yqCmd = Get-CachedExternalCommand -Name 'yq'
+    if (-not $yqCmd) {
+        throw 'yq command not found. Install mikefarah/yq (on Arch: sudo pacman -S go-yq).'
+    }
+
+    $executable = if (-not [string]::IsNullOrWhiteSpace($yqCmd.Source)) { $yqCmd.Source } else { $yqCmd.Name }
+    if ($YqArguments -and $YqArguments.Count -gt 0) {
+        & $executable @YqArguments
+    }
+    else {
+        & $executable
+    }
+}
+
+<#
+.SYNOPSIS
+    Returns a command object when Test-CachedCommand reports the tool is available.
+.DESCRIPTION
+    Test-CachedCommand returns a boolean. Use this helper when you need to invoke
+    an external executable discovered via the command cache.
+.OUTPUTS
+    System.Management.Automation.CommandInfo
+#>
+function global:Get-CachedExternalCommand {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Name
+    )
+
+    $isYqLookup = $Name.Trim().Equals('yq', [StringComparison]::OrdinalIgnoreCase)
+
+    foreach ($candidate in (Get-ExternalCommandLookupNames -Name $Name)) {
+        if (-not (Test-CachedCommand -Name $candidate)) {
+            continue
+        }
+
+        $application = Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue
+        if ($application) {
+            if ($isYqLookup -and -not (Test-IsMikefarahYqExecutable -Executable $application.Source)) {
+                continue
+            }
+
+            return $application
+        }
+
+        $command = Get-Command -Name $candidate -ErrorAction SilentlyContinue
+        if ($command) {
+            if ($isYqLookup) {
+                $exe = if (-not [string]::IsNullOrWhiteSpace($command.Source)) { $command.Source } else { $command.Name }
+                if (-not (Test-IsMikefarahYqExecutable -Executable $exe)) {
+                    continue
+                }
+            }
+
+            return $command
+        }
+    }
+
+    return $null
 }
 
 <#

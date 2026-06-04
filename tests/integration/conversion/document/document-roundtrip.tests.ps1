@@ -107,9 +107,9 @@ Describe 'Document Roundtrip Conversion Tests' {
                 return
             }
 
-            # Note: Requires actual Textile file for full testing
+            # Note: Requires actual Textile file for full testing (no Markdown -> Textile converter in profile)
             Get-Command ConvertFrom-TextileToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            Get-Command ConvertTo-TextileFromMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            Get-Command ConvertTo-HtmlFromTextile -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
         }
 
         It 'LaTeX -> Markdown -> LaTeX roundtrip' {

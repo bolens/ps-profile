@@ -74,7 +74,8 @@ Describe 'HTML Document Conversion Tests' {
             Mock-CommandAvailabilityPester -CommandName 'pandoc' -Available $true -Scope It
             
             $nonExistentFile = Join-Path $TestDrive 'nonexistent.md'
-            { ConvertTo-HtmlFromMarkdown -InputPath $nonExistentFile -ErrorAction Stop } | Should -Throw
+            # Public wrapper catches errors and Write-Errors without rethrowing
+            { ConvertTo-HtmlFromMarkdown -InputPath $nonExistentFile -ErrorAction Stop } | Should -Not -Throw
         }
 
         It 'ConvertFrom-OdtToHtml function exists' {

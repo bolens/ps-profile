@@ -258,12 +258,12 @@ try {
             }
             
             $convStartTime = Get-Date
-            $lines = Get-Content -LiteralPath $InputPath
+            $lines = @(Get-Content -LiteralPath $InputPath)
             $lineCount = $lines.Count
-            $objects = @()
+            $objects = [System.Collections.Generic.List[object]]::new()
             foreach ($line in $lines) {
                 if (-not [string]::IsNullOrWhiteSpace($line)) {
-                    $objects += $line | ConvertFrom-Json
+                    $objects.Add(($line | ConvertFrom-Json))
                 }
             }
             $objects | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $OutputPath -Encoding UTF8

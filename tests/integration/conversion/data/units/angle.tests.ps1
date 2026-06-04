@@ -29,7 +29,7 @@ Describe 'Angle Unit Conversion Tests' {
         }
 
         It 'Convert-Angle converts radians to degrees' {
-            $result = Convert-Angle -Value [math]::PI -FromUnit 'rad' -ToUnit 'deg'
+            $result = Convert-Angle -Value $( [math]::PI ) -FromUnit 'rad' -ToUnit 'deg'
             $result | Should -Not -BeNullOrEmpty
             [math]::Abs($result.Value - 180) | Should -BeLessThan 0.01
         }
@@ -37,19 +37,19 @@ Describe 'Angle Unit Conversion Tests' {
         It 'Convert-Angle converts degrees to gradians' {
             $result = Convert-Angle -Value 90 -FromUnit 'deg' -ToUnit 'grad'
             $result | Should -Not -BeNullOrEmpty
-            $result.Value | Should -Be 100
+            [math]::Abs($result.Value - 100) | Should -BeLessThan 0.01
         }
 
         It 'Convert-Angle converts gradians to degrees' {
             $result = Convert-Angle -Value 100 -FromUnit 'grad' -ToUnit 'deg'
             $result | Should -Not -BeNullOrEmpty
-            $result.Value | Should -Be 90
+            [math]::Abs($result.Value - 90) | Should -BeLessThan 0.01
         }
 
         It 'Convert-Angle converts degrees to turns' {
             $result = Convert-Angle -Value 360 -FromUnit 'deg' -ToUnit 'turn'
             $result | Should -Not -BeNullOrEmpty
-            $result.Value | Should -Be 1
+            [math]::Abs($result.Value - 1) | Should -BeLessThan 0.01
         }
 
         It 'Convert-Angle supports pipeline input' {

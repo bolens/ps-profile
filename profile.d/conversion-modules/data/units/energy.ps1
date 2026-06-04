@@ -126,7 +126,6 @@ function Initialize-FileConversion-CoreUnitsEnergy {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Energy @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-energy -Value Convert-Energy -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name energy -Value Convert-Energy -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Joules

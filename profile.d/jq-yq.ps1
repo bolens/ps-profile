@@ -76,7 +76,7 @@ function Convert-YqToJson {
     )
     
     if (Test-CachedCommand yq) {
-        yq eval -o=json $File
+        Invoke-CachedYqCommand eval -o=json $File
     }
     else {
         Invoke-MissingToolWarning -ToolName 'yq'

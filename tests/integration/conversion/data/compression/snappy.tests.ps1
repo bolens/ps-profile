@@ -68,17 +68,17 @@ Describe 'Snappy Compression Tests' {
         }
 
         It 'Snappy aliases resolve to functions' {
-            $alias1 = Get-Alias compress-snappy -ErrorAction SilentlyContinue
+            $alias1 = Get-Alias compress-snappy -Scope Global -ErrorAction SilentlyContinue
             $alias1 | Should -Not -BeNullOrEmpty
-            $alias1.ResolvedCommandName | Should -Be 'Compress-Snappy'
-            
-            $alias2 = Get-Alias snappy -ErrorAction SilentlyContinue
+            ($alias1.ResolvedCommandName ?? $alias1.Definition) | Should -Be 'Compress-Snappy'
+
+            $alias2 = Get-Alias snappy -Scope Global -ErrorAction SilentlyContinue
             $alias2 | Should -Not -BeNullOrEmpty
-            $alias2.ResolvedCommandName | Should -Be 'Compress-Snappy'
-            
-            $alias3 = Get-Alias expand-snappy -ErrorAction SilentlyContinue
+            ($alias2.ResolvedCommandName ?? $alias2.Definition) | Should -Be 'Compress-Snappy'
+
+            $alias3 = Get-Alias expand-snappy -Scope Global -ErrorAction SilentlyContinue
             $alias3 | Should -Not -BeNullOrEmpty
-            $alias3.ResolvedCommandName | Should -Be 'Expand-Snappy'
+            ($alias3.ResolvedCommandName ?? $alias3.Definition) | Should -Be 'Expand-Snappy'
         }
     }
 }

@@ -55,24 +55,24 @@ Describe 'LZ4 Compression Tests' {
                 Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'lz4' -Context 'lz4 command is not available')
                 return
             }
-            $func = Get-Command Compress-Lz4 -ErrorAction SilentlyContinue
+            $func = Get-Command Compress-Lz4 -CommandType Function -ErrorAction SilentlyContinue
             if ($func) {
                 $func.Parameters.Keys | Should -Contain 'CompressionLevel'
             }
         }
 
         It 'LZ4 aliases resolve to functions' {
-            $alias1 = Get-Alias compress-lz4 -ErrorAction SilentlyContinue
+            $alias1 = Get-Alias compress-lz4 -Scope Global -ErrorAction SilentlyContinue
             $alias1 | Should -Not -BeNullOrEmpty
-            $alias1.ResolvedCommandName | Should -Be 'Compress-Lz4'
-            
-            $alias2 = Get-Alias lz4 -ErrorAction SilentlyContinue
+            ($alias1.ResolvedCommandName ?? $alias1.Definition) | Should -Be 'Compress-Lz4'
+
+            $alias2 = Get-Alias lz4 -Scope Global -ErrorAction SilentlyContinue
             $alias2 | Should -Not -BeNullOrEmpty
-            $alias2.ResolvedCommandName | Should -Be 'Compress-Lz4'
-            
-            $alias3 = Get-Alias expand-lz4 -ErrorAction SilentlyContinue
+            ($alias2.ResolvedCommandName ?? $alias2.Definition) | Should -Be 'Compress-Lz4'
+
+            $alias3 = Get-Alias expand-lz4 -Scope Global -ErrorAction SilentlyContinue
             $alias3 | Should -Not -BeNullOrEmpty
-            $alias3.ResolvedCommandName | Should -Be 'Expand-Lz4'
+            ($alias3.ResolvedCommandName ?? $alias3.Definition) | Should -Be 'Expand-Lz4'
         }
     }
 }

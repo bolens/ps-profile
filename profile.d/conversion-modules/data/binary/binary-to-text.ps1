@@ -300,7 +300,7 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToYaml -Value {
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "BSON to JSON conversion failed - output file not created"
             }
-            $yamlResult = & yq eval -p json -o yaml '.' $tempJson 2>$null
+            $yamlResult = Invoke-CachedYqCommand eval -p json -o yaml '.' $tempJson 2>$null
             if ($LASTEXITCODE -ne 0) {
                 throw "yq command failed"
             }
@@ -345,7 +345,7 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToYaml -Value {
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "MessagePack to JSON conversion failed - output file not created"
             }
-            $yamlResult = & yq eval -p json -o yaml '.' $tempJson 2>$null
+            $yamlResult = Invoke-CachedYqCommand eval -p json -o yaml '.' $tempJson 2>$null
             if ($LASTEXITCODE -ne 0) {
                 throw "yq command failed"
             }
@@ -390,7 +390,7 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToYaml -Value {
             if ($tempJson -and -not [string]::IsNullOrWhiteSpace($tempJson) -and -not (Test-Path -LiteralPath $tempJson)) {
                 throw "CBOR to JSON conversion failed - output file not created"
             }
-            $yamlResult = & yq eval -p json -o yaml '.' $tempJson 2>$null
+            $yamlResult = Invoke-CachedYqCommand eval -p json -o yaml '.' $tempJson 2>$null
             if ($LASTEXITCODE -ne 0) {
                 throw "yq command failed"
             }

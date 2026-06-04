@@ -166,7 +166,7 @@ function Initialize-FileConversion-CoreBasicCsv {
             $csvData = Import-Csv -Path $Path
             $rowCount = $csvData.Count
             $json = $csvData | ConvertTo-Json -Depth 10
-            $yaml = $json | & yq eval -P 2>&1
+            $yaml = $json | Invoke-CachedYqCommand eval -P 2>&1
             
             if ($LASTEXITCODE -ne 0) {
                 throw "yq command failed with exit code ${LASTEXITCODE}: $yaml"
@@ -217,7 +217,7 @@ function Initialize-FileConversion-CoreBasicCsv {
     Set-Item -Path Function:Global:_ConvertFrom-YamlToCsv -Value {
         param([string]$Path)
         try {
-            $json = & yq eval -o=json $Path 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json $Path 2>$null
             if ($LASTEXITCODE -ne 0 -or -not $json -or $json -eq 'null') {
                 return
             }

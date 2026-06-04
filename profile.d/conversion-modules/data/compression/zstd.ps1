@@ -25,7 +25,7 @@ function Initialize-FileConversion-CoreCompressionZstd {
         )
         try {
             # Check if zstd command is available (Get-Command finds it regardless of extension)
-            $zstdCmd = Test-CachedCommand 'zstd'
+            $zstdCmd = Get-CachedExternalCommand 'zstd'
             if (-not $zstdCmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'zstd')
             }
@@ -65,7 +65,7 @@ function Initialize-FileConversion-CoreCompressionZstd {
         )
         try {
             # Check if zstd command is available (Get-Command finds it regardless of extension)
-            $zstdCmd = Test-CachedCommand 'zstd'
+            $zstdCmd = Get-CachedExternalCommand 'zstd'
             if (-not $zstdCmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'zstd')
             }

@@ -63,38 +63,38 @@ Describe 'XZ/LZMA Compression Tests' {
                 Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'xz' -Context 'xz command is not available')
                 return
             }
-            $func = Get-Command Compress-Xz -ErrorAction SilentlyContinue
+            $func = Get-Command Compress-Xz -CommandType Function -ErrorAction SilentlyContinue
             if ($func) {
                 $func.Parameters.Keys | Should -Contain 'CompressionLevel'
             }
         }
 
         It 'XZ aliases resolve to functions' {
-            $alias1 = Get-Alias compress-xz -ErrorAction SilentlyContinue
+            $alias1 = Get-Alias compress-xz -Scope Global -ErrorAction SilentlyContinue
             $alias1 | Should -Not -BeNullOrEmpty
-            $alias1.ResolvedCommandName | Should -Be 'Compress-Xz'
-            
-            $alias2 = Get-Alias xz -ErrorAction SilentlyContinue
+            ($alias1.ResolvedCommandName ?? $alias1.Definition) | Should -Be 'Compress-Xz'
+
+            $alias2 = Get-Alias xz -Scope Global -ErrorAction SilentlyContinue
             $alias2 | Should -Not -BeNullOrEmpty
-            $alias2.ResolvedCommandName | Should -Be 'Compress-Xz'
-            
-            $alias3 = Get-Alias expand-xz -ErrorAction SilentlyContinue
+            ($alias2.ResolvedCommandName ?? $alias2.Definition) | Should -Be 'Compress-Xz'
+
+            $alias3 = Get-Alias expand-xz -Scope Global -ErrorAction SilentlyContinue
             $alias3 | Should -Not -BeNullOrEmpty
-            $alias3.ResolvedCommandName | Should -Be 'Expand-Xz'
+            ($alias3.ResolvedCommandName ?? $alias3.Definition) | Should -Be 'Expand-Xz'
         }
 
         It 'LZMA aliases resolve to functions' {
-            $alias1 = Get-Alias compress-lzma -ErrorAction SilentlyContinue
+            $alias1 = Get-Alias compress-lzma -Scope Global -ErrorAction SilentlyContinue
             $alias1 | Should -Not -BeNullOrEmpty
-            $alias1.ResolvedCommandName | Should -Be 'Compress-Lzma'
-            
-            $alias2 = Get-Alias lzma -ErrorAction SilentlyContinue
+            ($alias1.ResolvedCommandName ?? $alias1.Definition) | Should -Be 'Compress-Lzma'
+
+            $alias2 = Get-Alias lzma -Scope Global -ErrorAction SilentlyContinue
             $alias2 | Should -Not -BeNullOrEmpty
-            $alias2.ResolvedCommandName | Should -Be 'Compress-Lzma'
-            
-            $alias3 = Get-Alias expand-lzma -ErrorAction SilentlyContinue
+            ($alias2.ResolvedCommandName ?? $alias2.Definition) | Should -Be 'Compress-Lzma'
+
+            $alias3 = Get-Alias expand-lzma -Scope Global -ErrorAction SilentlyContinue
             $alias3 | Should -Not -BeNullOrEmpty
-            $alias3.ResolvedCommandName | Should -Be 'Expand-Lzma'
+            ($alias3.ResolvedCommandName ?? $alias3.Definition) | Should -Be 'Expand-Lzma'
         }
     }
 }

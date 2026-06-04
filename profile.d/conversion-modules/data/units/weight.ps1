@@ -126,7 +126,6 @@ function Initialize-FileConversion-CoreUnitsWeight {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Weight @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-weight -Value Convert-Weight -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name weight -Value Convert-Weight -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name mass -Value Convert-Weight -Scope Global -ErrorAction SilentlyContinue
     

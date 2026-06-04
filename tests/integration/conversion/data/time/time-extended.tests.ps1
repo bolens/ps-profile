@@ -55,11 +55,11 @@ Describe 'Extended Time & Date Conversion Utilities Integration Tests' {
         }
 
         It 'ConvertTo-HumanReadableFromDateTime converts DateTime to relative format' {
-            $yesterday = (Get-Date).AddDays(-1)
+            $yesterday = (Get-Date).Date.AddDays(-1)
             $result = $yesterday | ConvertTo-HumanReadableFromDateTime
             $result | Should -Not -BeNullOrEmpty
             $result | Should -BeOfType [string]
-            $result | Should -Match 'yesterday|1 day'
+            $result | Should -Be 'yesterday'
         }
 
         It 'ConvertFrom-HumanReadableToUnixTimestamp function exists' {
@@ -85,8 +85,18 @@ Describe 'Extended Time & Date Conversion Utilities Integration Tests' {
         }
 
         It 'Convert-TimeZone converts between timezones' {
-            $now = Get-Date
-            $result = $now | Convert-TimeZone -SourceTimeZone "UTC" -TargetTimeZone "Eastern Standard Time"
+            $utcNow = [DateTime]::UtcNow
+            $targetId = (
+                [TimeZoneInfo]::GetSystemTimeZones() |
+                Where-Object { $_.Id -match 'Eastern|New_York' } |
+                Select-Object -First 1
+            ).Id
+            if (-not $targetId) {
+                Set-ItResult -Skipped -Because 'No Eastern timezone ID found on this system'
+                return
+            }
+
+            $result = Convert-TimeZone -DateTime $utcNow -SourceTimeZone 'UTC' -TargetTimeZone $targetId
             $result | Should -Not -BeNullOrEmpty
             $result | Should -BeOfType [DateTime]
         }
@@ -111,11 +121,11 @@ Describe 'Extended Time & Date Conversion Utilities Integration Tests' {
         }
 
         It 'Get-TimeZones returns list of timezones' {
-            $timezones = Get-TimeZones
+            $timezones = @(Get-TimeZones)
             $timezones | Should -Not -BeNullOrEmpty
-            $timezones | Should -HaveCount -GreaterThan 0
-            $timezones[0] | Should -HaveProperty 'Id'
-            $timezones[0] | Should -HaveProperty 'DisplayName'
+            $timezones.Count | Should -BeGreaterThan 0
+            $timezones[0].Id | Should -Not -BeNullOrEmpty
+            $timezones[0].DisplayName | Should -Not -BeNullOrEmpty
         }
     }
 
@@ -203,7 +213,7 @@ Describe 'Extended Time & Date Conversion Utilities Integration Tests' {
         }
 
         It 'Timezone aliases resolve to functions' {
-            (Get-Alias convert-timezone -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'Convert-TimeZone'
+            (Get-Alias tz-convert -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'Convert-TimeZone'
             (Get-Alias datetime-to-timezone -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'ConvertTo-TimeZone'
             (Get-Alias timezone-to-datetime -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'ConvertFrom-TimeZone'
             (Get-Alias list-timezones -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'Get-TimeZones'

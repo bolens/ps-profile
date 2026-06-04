@@ -46,7 +46,7 @@ function Initialize-FileConversion-Toml {
             }
             
             $convStartTime = Get-Date
-            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json -p toml '.' $InputPath 2>$null
             $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
             
             if ($LASTEXITCODE -eq 0 -and $json) {
@@ -185,7 +185,7 @@ function Initialize-FileConversion-Toml {
             }
             
             $convStartTime = Get-Date
-            $yaml = & yq eval -P -p toml -o yaml '.' $InputPath 2>$null
+            $yaml = Invoke-CachedYqCommand eval -P -p toml -o yaml '.' $InputPath 2>$null
             $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
             
             if ($LASTEXITCODE -eq 0 -and $yaml) {
@@ -257,7 +257,7 @@ function Initialize-FileConversion-Toml {
             }
             
             $convStartTime = Get-Date
-            $json = & yq eval -o=json $InputPath 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json $InputPath 2>$null
             if ($LASTEXITCODE -ne 0 -or -not $json) {
                 throw "yq command failed with exit code $LASTEXITCODE"
             }
@@ -329,7 +329,7 @@ function Initialize-FileConversion-Toml {
             }
             
             $convStartTime = Get-Date
-            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json -p toml '.' $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $jsonObj = $json | ConvertFrom-Json
                 $toon = Convert-JsonToToon -JsonObject $jsonObj
@@ -470,7 +470,7 @@ function Initialize-FileConversion-Toml {
             }
             
             $convStartTime = Get-Date
-            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json -p toml '.' $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $jsonObj = $json | ConvertFrom-Json
                 $xml = Convert-JsonToXml -JsonObject $jsonObj

@@ -25,7 +25,7 @@ function Initialize-FileConversion-CoreCompressionLz4 {
         )
         try {
             # Check if lz4 command is available
-            $lz4Cmd = Test-CachedCommand 'lz4'
+            $lz4Cmd = Get-CachedExternalCommand 'lz4'
             if (-not $lz4Cmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'lz4')
             }
@@ -63,7 +63,7 @@ function Initialize-FileConversion-CoreCompressionLz4 {
         )
         try {
             # Check if lz4 command is available
-            $lz4Cmd = Test-CachedCommand 'lz4'
+            $lz4Cmd = Get-CachedExternalCommand 'lz4'
             if (-not $lz4Cmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'lz4')
             }

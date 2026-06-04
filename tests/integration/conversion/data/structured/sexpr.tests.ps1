@@ -129,7 +129,7 @@ Describe 'S-Expression Format Conversion Tests' {
 
     Context 'S-Expressions Additional Conversions' {
         It 'ConvertFrom-SexprToYaml function exists' {
-            Get-Command ConvertFrom-SexprToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            Get-Command _ConvertFrom-SexprToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
         }
     }
 }

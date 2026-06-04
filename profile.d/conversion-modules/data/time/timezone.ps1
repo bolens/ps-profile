@@ -26,28 +26,16 @@ function Initialize-FileConversion-CoreTimeTimezone {
         )
         process {
             try {
-                # Get timezone info
-                $sourceTz = if ($SourceTimeZone -eq 'UTC' -or $SourceTimeZone -eq 'GMT') {
-                    [TimeZoneInfo]::Utc
+                $normalized = $DateTime
+                if ($SourceTimeZone -in 'UTC', 'GMT') {
+                    $normalized = switch ($DateTime.Kind) {
+                        ([DateTimeKind]::Utc) { $DateTime }
+                        ([DateTimeKind]::Local) { $DateTime.ToUniversalTime() }
+                        default { [DateTime]::SpecifyKind($DateTime, [DateTimeKind]::Utc) }
+                    }
                 }
-                else {
-                    [TimeZoneInfo]::FindSystemTimeZoneById($SourceTimeZone)
-                }
-                
-                $targetTz = if ($TargetTimeZone -eq 'UTC' -or $TargetTimeZone -eq 'GMT') {
-                    [TimeZoneInfo]::Utc
-                }
-                else {
-                    [TimeZoneInfo]::FindSystemTimeZoneById($TargetTimeZone)
-                }
-                
-                # Create DateTimeOffset with source timezone
-                $sourceOffset = $sourceTz.GetUtcOffset($DateTime)
-                $dateTimeOffset = New-Object DateTimeOffset($DateTime, $sourceOffset)
-                
-                # Convert to target timezone
-                $targetOffset = [TimeZoneInfo]::ConvertTime($dateTimeOffset, $targetTz)
-                return $targetOffset.DateTime
+
+                return [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($normalized, $SourceTimeZone, $TargetTimeZone)
             }
             catch {
                 throw "Failed to convert timezone: $_"
@@ -114,7 +102,7 @@ function Initialize-FileConversion-CoreTimeTimezone {
     # List available timezones
     Set-Item -Path Function:Global:_Get-TimeZones -Value {
         try {
-            return [TimeZoneInfo]::GetSystemTimeZones() | ForEach-Object {
+            return @([TimeZoneInfo]::GetSystemTimeZones() | ForEach-Object {
                 [PSCustomObject]@{
                     Id            = $_.Id
                     DisplayName   = $_.DisplayName
@@ -122,7 +110,7 @@ function Initialize-FileConversion-CoreTimeTimezone {
                     DaylightName  = $_.DaylightName
                     BaseUtcOffset = $_.BaseUtcOffset
                 }
-            }
+            })
         }
         catch {
             throw "Failed to get timezones: $_"
@@ -165,10 +153,15 @@ function Convert-TimeZone {
         [Parameter(Mandatory)]
         [string]$TargetTimeZone
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _Convert-TimeZone @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $dt = if ($null -ne $DateTime) { $DateTime } else { $_ }
+        _Convert-TimeZone -DateTime $dt -SourceTimeZone $SourceTimeZone -TargetTimeZone $TargetTimeZone
+    }
 }
-Set-AgentModeAlias -Name 'convert-timezone' -Target 'Convert-TimeZone'
+# Alias name must not case-collide with Convert-TimeZone (PowerShell command resolution is case-insensitive)
+Set-AgentModeAlias -Name 'tz-convert' -Target 'Convert-TimeZone'
+Set-Alias -Name 'tz-convert' -Value 'Convert-TimeZone' -Scope Global -Force -ErrorAction SilentlyContinue
 # Convert DateTime to specific timezone
 <#
 .SYNOPSIS
@@ -198,6 +191,7 @@ function ConvertTo-TimeZone {
     _ConvertTo-TimeZone @PSBoundParameters
 }
 Set-AgentModeAlias -Name 'datetime-to-timezone' -Target 'ConvertTo-TimeZone'
+Set-Alias -Name 'datetime-to-timezone' -Value 'ConvertTo-TimeZone' -Scope Global -Force -ErrorAction SilentlyContinue
 # Convert DateTime from specific timezone
 <#
 .SYNOPSIS
@@ -227,6 +221,7 @@ function ConvertFrom-TimeZone {
     _ConvertFrom-TimeZone @PSBoundParameters
 }
 Set-AgentModeAlias -Name 'timezone-to-datetime' -Target 'ConvertFrom-TimeZone'
+Set-Alias -Name 'timezone-to-datetime' -Value 'ConvertFrom-TimeZone' -Scope Global -Force -ErrorAction SilentlyContinue
 # Get available timezones
 <#
 .SYNOPSIS
@@ -246,3 +241,4 @@ function Get-TimeZones {
     _Get-TimeZones
 }
 Set-AgentModeAlias -Name 'list-timezones' -Target 'Get-TimeZones'
+Set-Alias -Name 'list-timezones' -Value 'Get-TimeZones' -Scope Global -Force -ErrorAction SilentlyContinue

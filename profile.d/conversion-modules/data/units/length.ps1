@@ -123,7 +123,7 @@ function Initialize-FileConversion-CoreUnitsLength {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Length @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-length -Value Convert-Length -Scope Global -ErrorAction SilentlyContinue
+    # Avoid convert-length alias: PowerShell resolves it case-insensitively to Convert-Length (self-referential alias).
     Set-Alias -Name length -Value Convert-Length -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Meters

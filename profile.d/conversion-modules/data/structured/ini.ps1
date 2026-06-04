@@ -255,7 +255,7 @@ function Initialize-FileConversion-Ini {
             try {
                 _ConvertFrom-IniToJson -InputPath $InputPath -OutputPath $tempJson
                 $json = Get-Content -LiteralPath $tempJson -Raw
-                $yaml = & yq eval -P '.' $tempJson 2>$null
+                $yaml = Invoke-CachedYqCommand eval -P '.' $tempJson 2>$null
                 if ($LASTEXITCODE -eq 0 -and $yaml) {
                     Set-Content -LiteralPath $OutputPath -Value $yaml -Encoding UTF8
                 }
@@ -332,7 +332,7 @@ function Initialize-FileConversion-Ini {
             # Convert YAML to JSON first, then JSON to INI
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
-                $json = & yq eval -o=json $InputPath 2>$null
+                $json = Invoke-CachedYqCommand eval -o=json $InputPath 2>$null
                 if ($LASTEXITCODE -eq 0 -and $json) {
                     $json | Set-Content -LiteralPath $tempJson -Encoding UTF8
                     _ConvertTo-IniFromJson -InputPath $tempJson -OutputPath $OutputPath
@@ -639,7 +639,7 @@ function Initialize-FileConversion-Ini {
             # Convert TOML to JSON first, then JSON to INI
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
-                $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+                $json = Invoke-CachedYqCommand eval -o=json -p toml '.' $InputPath 2>$null
                 if ($LASTEXITCODE -eq 0 -and $json) {
                     $json | Set-Content -LiteralPath $tempJson -Encoding UTF8
                     _ConvertTo-IniFromJson -InputPath $tempJson -OutputPath $OutputPath

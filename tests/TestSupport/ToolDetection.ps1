@@ -702,7 +702,14 @@ function Test-ToolAvailable {
         $InstallCommand = Resolve-TestToolInstallCommand -ToolName $ToolName -ToolType $ToolType
     }
 
+    $resolvedName = $ToolName
     $available = Get-Command $ToolName -ErrorAction SilentlyContinue
+    if (-not $available -and $ToolName -eq 'yq') {
+        $available = Get-Command go-yq -ErrorAction SilentlyContinue
+        if ($available) {
+            $resolvedName = 'go-yq'
+        }
+    }
 
     if (-not $available -and $Required) {
         $message = "Required tool '$ToolName' is not available."
@@ -727,13 +734,65 @@ function Test-ToolAvailable {
     }
 
     return [PSCustomObject]@{
-        Name           = $ToolName
+        Name           = $resolvedName
         Available      = [bool]$available
         Path           = if ($available) { $available.Source } else { $null }
         Required       = $Required.IsPresent
         InstallCommand = $InstallCommand
         InstallUrl     = $InstallUrl
     }
+}
+
+function Test-MikefarahYqAvailable {
+    <#
+    .SYNOPSIS
+        Returns whether mikefarah/yq v4+ is installed (not python-yq).
+
+    .DESCRIPTION
+        Profile YAML conversions use `yq eval`, which requires
+        https://github.com/mikefarah/yq. The unrelated python `yq` package
+        exposes a different CLI and is not compatible.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param()
+
+    if (Get-Command Get-CachedExternalCommand -ErrorAction SilentlyContinue) {
+        $yqCmd = Get-CachedExternalCommand -Name 'yq'
+        if ($yqCmd -and (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue)) {
+            $executable = if (-not [string]::IsNullOrWhiteSpace($yqCmd.Source)) { $yqCmd.Source } else { $yqCmd.Name }
+            return Test-IsMikefarahYqExecutable -Executable $executable
+        }
+    }
+
+    foreach ($candidate in @('go-yq', 'yq')) {
+        $cmd = Get-Command $candidate -CommandType Application -ErrorAction SilentlyContinue
+        if (-not $cmd) {
+            continue
+        }
+
+        $exe = $cmd.Source
+        if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
+            if (Test-IsMikefarahYqExecutable -Executable $exe) {
+                return $true
+            }
+        }
+        else {
+            $versionOutput = (& $exe --version 2>&1 | Out-String).Trim()
+            if ($versionOutput -match 'mikefarah|github\.com/mikefarah') {
+                return $true
+            }
+
+            if ($versionOutput -notmatch '^yq\s+\d') {
+                $evalHelp = (& $exe eval --help 2>&1 | Out-String)
+                if ($evalHelp -match 'evaluates' -and $evalHelp -notmatch 'jq_filter') {
+                    return $true
+                }
+            }
+        }
+    }
+
+    return $false
 }
 
 function Get-ToolRecommendations {

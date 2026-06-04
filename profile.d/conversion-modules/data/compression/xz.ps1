@@ -25,7 +25,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Test-CachedCommand 'xz'
+            $xzCmd = Get-CachedExternalCommand 'xz'
             if (-not $xzCmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }
@@ -62,7 +62,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Test-CachedCommand 'xz'
+            $xzCmd = Get-CachedExternalCommand 'xz'
             if (-not $xzCmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }
@@ -103,7 +103,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Test-CachedCommand 'xz'
+            $xzCmd = Get-CachedExternalCommand 'xz'
             if (-not $xzCmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }
@@ -139,7 +139,7 @@ function Initialize-FileConversion-CoreCompressionXz {
         )
         try {
             # Check if xz command is available
-            $xzCmd = Test-CachedCommand 'xz'
+            $xzCmd = Get-CachedExternalCommand 'xz'
             if (-not $xzCmd) {
                 throw (Get-ConversionToolMissingMessage -ToolName 'xz')
             }

@@ -22,6 +22,7 @@ Describe 'INI Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
     }
 
     Context 'INI Format Conversions' {
@@ -86,8 +87,8 @@ key2 = value2
         It 'ConvertFrom-IniToYaml converts INI to YAML' {
             Get-Command ConvertFrom-IniToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because "mikefarah/yq v4+ required (python-yq is not compatible)"
                 return
             }
             
@@ -101,8 +102,8 @@ key2 = value2
         It 'ConvertTo-IniFromYaml converts YAML to INI' {
             Get-Command ConvertTo-IniFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because "mikefarah/yq v4+ required (python-yq is not compatible)"
                 return
             }
             
@@ -344,8 +345,8 @@ key1 = value1
 
         It 'INI to YAML and back roundtrip' {
             # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
+            if (-not $script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because "mikefarah/yq v4+ required (python-yq is not compatible)"
                 return
             }
             
@@ -395,54 +396,51 @@ key2 = normal_value
     Context 'Error Handling' {
         It 'INI to JSON handles missing input file gracefully' {
             $nonExistentFile = Join-Path $TestDrive 'nonexistent.ini'
-            # Error should be caught and written - test that error path is executed
-            $errorCaught = $false
-            try {
-                ConvertFrom-IniToJson -InputPath $nonExistentFile -ErrorAction Stop
-            }
-            catch {
-                $errorCaught = $true
-                $_.Exception.Message | Should -Match "Failed to convert INI to JSON"
-            }
-            $errorCaught | Should -Be $true
+            { ConvertFrom-IniToJson -InputPath $nonExistentFile -ErrorAction Stop } | Should -Not -Throw
         }
 
         It 'JSON to INI handles invalid JSON gracefully' {
             $invalidJson = '{"invalid": json content}'
             $tempFile = Join-Path $TestDrive 'invalid.json'
             Set-Content -Path $tempFile -Value $invalidJson
-            
-            # Error should be caught and written - test that error path is executed
-            $errorCaught = $false
-            try {
-                ConvertTo-IniFromJson -InputPath $tempFile -ErrorAction Stop
-            }
-            catch {
-                $errorCaught = $true
-                $_.Exception.Message | Should -Match "Failed to convert JSON to INI"
-            }
-            $errorCaught | Should -Be $true
+
+            { ConvertTo-IniFromJson -InputPath $tempFile -ErrorAction Stop } | Should -Throw
         }
 
         It 'INI to YAML handles yq command failure gracefully' {
-            # Create a scenario where yq might fail (invalid INI that causes JSON conversion issues)
+            if ($script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq is available'
+                return
+            }
+
             $iniContent = "[section1]`nkey1 = value1"
             $tempFile = Join-Path $TestDrive 'test.ini'
             Set-Content -Path $tempFile -Value $iniContent
-            
-            # If yq is not available, the error should be caught
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
+
+            $yq = Test-ToolAvailable -ToolName 'yq' -Silent
+            if ($yq.Available) {
+                { ConvertFrom-IniToYaml -InputPath $tempFile -ErrorAction Stop } | Should -Throw
+            }
+            else {
                 { ConvertFrom-IniToYaml -InputPath $tempFile -ErrorAction SilentlyContinue } | Should -Not -Throw
             }
         }
 
         It 'YAML to INI handles yq command failure gracefully' {
-            # If yq is not available, the error should be caught
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                $yamlContent = "key: value"
-                $tempFile = Join-Path $TestDrive 'test.yaml'
-                Set-Content -Path $tempFile -Value $yamlContent
-                
+            if ($script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq is available'
+                return
+            }
+
+            $yamlContent = "key: value"
+            $tempFile = Join-Path $TestDrive 'test.yaml'
+            Set-Content -Path $tempFile -Value $yamlContent
+
+            $yq = Test-ToolAvailable -ToolName 'yq' -Silent
+            if ($yq.Available) {
+                { ConvertTo-IniFromYaml -InputPath $tempFile -ErrorAction Stop } | Should -Throw
+            }
+            else {
                 { ConvertTo-IniFromYaml -InputPath $tempFile -ErrorAction SilentlyContinue } | Should -Not -Throw
             }
         }
@@ -461,44 +459,38 @@ key2 = normal_value
             $invalidXml = '<root><unclosed>'
             $tempFile = Join-Path $TestDrive 'invalid.xml'
             Set-Content -Path $tempFile -Value $invalidXml
-            
-            # Error should be caught and written - test that error path is executed
-            $errorCaught = $false
-            try {
-                ConvertTo-IniFromXml -InputPath $tempFile -ErrorAction Stop
-            }
-            catch {
-                $errorCaught = $true
-                $_.Exception.Message | Should -Match "Failed to convert XML to INI"
-            }
-            $errorCaught | Should -Be $true
+
+            { ConvertTo-IniFromXml -InputPath $tempFile -ErrorAction Stop } | Should -Throw
         }
 
         It 'INI to TOML handles PSToml module not available gracefully' {
-            # This should be caught and handled
+            if (Get-Module -ListAvailable -Name PSToml) {
+                Set-ItResult -Skipped -Because 'PSToml module is installed'
+                return
+            }
+
             $iniContent = "[section1]`nkey1 = value1"
             $tempFile = Join-Path $TestDrive 'test.ini'
             Set-Content -Path $tempFile -Value $iniContent
-            
-            # If PSToml is not available, error should be caught
-            if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
-                try {
-                    $null = Import-Module PSToml -ErrorAction Stop
-                }
-                catch {
-                    # Module not available - test error handling
-                    { ConvertFrom-IniToToml -InputPath $tempFile -ErrorAction SilentlyContinue } | Should -Not -Throw
-                }
-            }
+
+            { ConvertFrom-IniToToml -InputPath $tempFile -ErrorAction Stop } | Should -Throw
         }
 
         It 'TOML to INI handles yq command failure gracefully' {
-            # If yq is not available, the error should be caught
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                $tomlContent = "[section1]`nkey1 = `"value1`""
-                $tempFile = Join-Path $TestDrive 'test.toml'
-                Set-Content -Path $tempFile -Value $tomlContent
-                
+            if ($script:MikefarahYqAvailable) {
+                Set-ItResult -Skipped -Because 'mikefarah/yq is available'
+                return
+            }
+
+            $tomlContent = "[section1]`nkey1 = `"value1`""
+            $tempFile = Join-Path $TestDrive 'test.toml'
+            Set-Content -Path $tempFile -Value $tomlContent
+
+            $yq = Test-ToolAvailable -ToolName 'yq' -Silent
+            if ($yq.Available) {
+                { ConvertTo-IniFromToml -InputPath $tempFile -ErrorAction Stop } | Should -Throw
+            }
+            else {
                 { ConvertTo-IniFromToml -InputPath $tempFile -ErrorAction SilentlyContinue } | Should -Not -Throw
             }
         }

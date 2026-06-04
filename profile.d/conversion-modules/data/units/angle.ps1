@@ -117,7 +117,6 @@ function Initialize-FileConversion-CoreUnitsAngle {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Angle @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-angle -Value Convert-Angle -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name angle -Value Convert-Angle -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Radians

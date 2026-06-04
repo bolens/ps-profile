@@ -33,8 +33,9 @@ function Convert-JsonToToon {
     # Handle object/hashtable: convert to TOON key-value format (no braces)
     if ($JsonObject -is [PSCustomObject] -or $JsonObject -is [hashtable]) {
         $props = @()
-        foreach ($key in $JsonObject.PSObject.Properties.Name) {
-            $value = $JsonObject.$key
+        foreach ($prop in @($JsonObject.PSObject.Properties)) {
+            $key = $prop.Name
+            $value = $prop.Value
             # Quote key only if it contains special characters
             $keyStr = if ($key -match '^[a-zA-Z_][a-zA-Z0-9_]*$') { $key } else { "`"$key`"" }
             

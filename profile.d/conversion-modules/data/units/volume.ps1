@@ -131,7 +131,6 @@ function Initialize-FileConversion-CoreUnitsVolume {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Volume @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-volume -Value Convert-Volume -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name volume -Value Convert-Volume -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Liters

@@ -210,8 +210,11 @@ Set-Item -Path Function:Global:ConvertFrom-UuidToHex -Value {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Uuid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-UuidToHex @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $uuidInput = if (-not [string]::IsNullOrWhiteSpace($Uuid)) { $Uuid } else { $_ }
+        _ConvertFrom-UuidToHex -Uuid $uuidInput
+    }
 } -Force
 Set-Alias -Name uuid-to-hex -Value ConvertFrom-UuidToHex -Scope Global -ErrorAction SilentlyContinue
 
@@ -236,8 +239,11 @@ Set-Item -Path Function:Global:ConvertTo-UuidFromHex -Value {
         [Parameter(Mandatory, ValueFromPipeline = $true)]
         [string]$Hex
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertTo-UuidFromHex @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $hexInput = if (-not [string]::IsNullOrWhiteSpace($Hex)) { $Hex } else { $_ }
+        _ConvertTo-UuidFromHex -Hex $hexInput
+    }
 } -Force
 Set-Alias -Name hex-to-uuid -Value ConvertTo-UuidFromHex -Scope Global -ErrorAction SilentlyContinue
 
@@ -262,8 +268,11 @@ Set-Item -Path Function:Global:ConvertFrom-UuidToBase64 -Value {
         [Parameter(Mandatory, ValueFromPipeline = $true)]
         [string]$Uuid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-UuidToBase64 @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $uuidInput = if (-not [string]::IsNullOrWhiteSpace($Uuid)) { $Uuid } else { $_ }
+        _ConvertFrom-UuidToBase64 -Uuid $uuidInput
+    }
 } -Force
 Set-Alias -Name uuid-to-base64 -Value ConvertFrom-UuidToBase64 -Scope Global -ErrorAction SilentlyContinue
 
@@ -288,8 +297,11 @@ Set-Item -Path Function:Global:ConvertTo-UuidFromBase64 -Value {
         [Parameter(Mandatory, ValueFromPipeline = $true)]
         [string]$Base64
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertTo-UuidFromBase64 @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $base64Input = if (-not [string]::IsNullOrWhiteSpace($Base64)) { $Base64 } else { $_ }
+        _ConvertTo-UuidFromBase64 -Base64 $base64Input
+    }
 } -Force
 Set-Alias -Name base64-to-uuid -Value ConvertTo-UuidFromBase64 -Scope Global -ErrorAction SilentlyContinue
 
@@ -314,8 +326,11 @@ Set-Item -Path Function:Global:ConvertFrom-UuidToBase32 -Value {
         [Parameter(Mandatory, ValueFromPipeline = $true)]
         [string]$Uuid
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-UuidToBase32 @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $uuidInput = if (-not [string]::IsNullOrWhiteSpace($Uuid)) { $Uuid } else { $_ }
+        _ConvertFrom-UuidToBase32 -Uuid $uuidInput
+    }
 } -Force
 Set-Alias -Name uuid-to-base32 -Value ConvertFrom-UuidToBase32 -Scope Global -ErrorAction SilentlyContinue
 
@@ -340,8 +355,11 @@ Set-Item -Path Function:Global:ConvertTo-UuidFromBase32 -Value {
         [Parameter(Mandatory, ValueFromPipeline = $true)]
         [string]$Base32
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertTo-UuidFromBase32 @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $base32Input = if (-not [string]::IsNullOrWhiteSpace($Base32)) { $Base32 } else { $_ }
+        _ConvertTo-UuidFromBase32 -Base32 $base32Input
+    }
 } -Force
 Set-Alias -Name base32-to-uuid -Value ConvertTo-UuidFromBase32 -Scope Global -ErrorAction SilentlyContinue
 
@@ -379,6 +397,4 @@ Set-Item -Path Function:Global:New-Uuid -Value {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     _New-Uuid @PSBoundParameters
 } -Force
-Set-Alias -Name new-uuid -Value New-Uuid -Scope Global -ErrorAction SilentlyContinue
-Set-Alias -Name uuid -Value New-Uuid -Scope Global -ErrorAction SilentlyContinue
 

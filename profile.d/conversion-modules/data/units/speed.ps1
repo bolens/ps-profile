@@ -115,7 +115,6 @@ function Initialize-FileConversion-CoreUnitsSpeed {
         if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
         _Convert-Speed @PSBoundParameters
     } -Force
-    Set-Alias -Name convert-speed -Value Convert-Speed -Scope Global -ErrorAction SilentlyContinue
     Set-Alias -Name speed -Value Convert-Speed -Scope Global -ErrorAction SilentlyContinue
     
     # Convert from Meters per second

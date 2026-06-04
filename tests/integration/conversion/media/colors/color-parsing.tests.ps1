@@ -105,12 +105,12 @@ Describe 'Color Parsing Tests' {
         }
 
         It 'Parses NCOL color' {
-            $result = Parse-Color -Color 'ncol(R, 0%, 0%)'
+            $result = Parse-Color -Color 'ncol(R0, 0%, 0%)'
             $result | Should -Not -BeNullOrEmpty
         }
 
         It 'Parses NCOLA color' {
-            $result = Parse-Color -Color 'ncola(R, 0%, 0%, 0.5)'
+            $result = Parse-Color -Color 'ncola(R0, 0%, 0%, 0.5)'
             $result | Should -Not -BeNullOrEmpty
             $result.a | Should -Be 0.5
         }

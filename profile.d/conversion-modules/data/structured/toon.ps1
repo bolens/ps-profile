@@ -54,7 +54,7 @@ function Initialize-FileConversion-Toon {
             }
             $json = Get-Content -LiteralPath $InputPath -Raw
             $jsonObj = Convert-ToonToJson -ToonString $json
-            $jsonObj | ConvertTo-Json -Depth 100 | & yq eval -P | Out-File -FilePath $OutputPath -Encoding UTF8
+            $jsonObj | ConvertTo-Json -Depth 100 | Invoke-CachedYqCommand eval -P | Out-File -FilePath $OutputPath -Encoding UTF8
         }
         catch {
             Write-Error "Failed to convert TOON to YAML: $_"
@@ -68,7 +68,7 @@ function Initialize-FileConversion-Toon {
             if (-not $OutputPath) {
                 $OutputPath = $InputPath -replace '\.ya?ml$', '.toon'
             }
-            $json = & yq eval -o=json $InputPath 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $jsonObj = $json | ConvertFrom-Json
                 $toon = Convert-JsonToToon -JsonObject $jsonObj

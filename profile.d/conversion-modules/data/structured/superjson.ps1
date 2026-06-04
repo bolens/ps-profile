@@ -142,7 +142,7 @@ try {
                 -not [string]::IsNullOrWhiteSpace($tempJson) -and
                 (Test-Path -LiteralPath $tempJson)) {
                 $jsonObj = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
-                $jsonObj | ConvertTo-Json -Depth 100 | & yq eval -P | Out-File -FilePath $OutputPath -Encoding UTF8
+                $jsonObj | ConvertTo-Json -Depth 100 | Invoke-CachedYqCommand eval -P | Out-File -FilePath $OutputPath -Encoding UTF8
                 Remove-Item -LiteralPath $tempJson -ErrorAction SilentlyContinue
             }
         }
@@ -164,7 +164,7 @@ try {
             if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
             }
-            $json = & yq eval -o=json $InputPath 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
                 $json | Set-Content -LiteralPath $tempJson -Encoding UTF8
@@ -270,7 +270,7 @@ try {
             if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
             }
-            $json = & yq eval -o=json -p toml '.' $InputPath 2>$null
+            $json = Invoke-CachedYqCommand eval -o=json -p toml '.' $InputPath 2>$null
             if ($LASTEXITCODE -eq 0 -and $json) {
                 $tempJson = Join-Path ([System.IO.Path]::GetTempPath()) "temp-$(Get-Random).json"
                 $json | Set-Content -LiteralPath $tempJson -Encoding UTF8

@@ -260,7 +260,7 @@ function Initialize-FileConversion-CoreEncodingAscii {
             }
             try {
                 # Split by spaces or assume single Roman numerals
-                $romanStrings = $InputObject -split '\s+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+                $romanStrings = @($InputObject -split '\s+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
                 if ($romanStrings.Count -eq 0) {
                     throw "No valid Roman numerals found in input"
                 }

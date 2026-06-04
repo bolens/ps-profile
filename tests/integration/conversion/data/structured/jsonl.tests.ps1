@@ -71,9 +71,7 @@ Describe 'JSONL Format Conversion Tests' {
             $testFile = Join-Path $TestDrive 'test-invalid.jsonl'
             Set-Content -Path $testFile -Value "invalid json line{"
             $outputFile = Join-Path $TestDrive 'test-output.json'
-            # Function writes errors but doesn't throw by default
-            $result = ConvertFrom-JsonLToJson -InputPath $testFile -OutputPath $outputFile -ErrorAction SilentlyContinue 2>&1
-            $result | Should -Not -BeNullOrEmpty
+            { ConvertFrom-JsonLToJson -InputPath $testFile -OutputPath $outputFile -ErrorAction Stop } | Should -Throw
         }
     }
 }

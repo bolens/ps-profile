@@ -106,11 +106,17 @@ function Initialize-FileConversion-Hjson {
         # Remove trailing commas (before } or ])
         $content = $content -replace ',\s*}', '}'
         $content = $content -replace ',\s*]', ']'
-        
-        # Add quotes to unquoted keys
-        # This is a simplified approach - match key: pattern where key is not quoted
-        $content = $content -replace '([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:', '$1"$2":'
-        
+
+        # HJSON allows omitting commas between properties on separate lines
+        $content = $content -replace '(?m)([^\s,{[])\s*\r?\n\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:', "`$1,`n`$2:"
+
+        # Add quotes to unquoted keys (after {, comma, or newline)
+        $content = $content -replace '(?m)([{,]|\r?\n)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:', '$1"$2":'
+
+        # Add quotes to unquoted string values (e.g. name: John)
+        $content = $content -replace ':\s*([A-Za-z][A-Za-z0-9 ]*?)(\s*[,}\r\n])', ': "$1"$2'
+        $content = $content -replace ':\s*"(true|false|null)"(\s*[,}\r\n])', ': $1$2'
+
         return $content
     } -Force
 

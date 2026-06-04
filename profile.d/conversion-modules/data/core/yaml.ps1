@@ -51,7 +51,7 @@ function Initialize-FileConversion-CoreBasicYaml {
             
             # Validate yq is executable
             try {
-                $yqVersion = & yq --version 2>&1
+                $yqVersion = Invoke-CachedYqCommand --version 2>&1
                 if ($LASTEXITCODE -ne 0) {
                     throw "yq command exists but failed to execute (exit code: $LASTEXITCODE)"
                 }
@@ -62,7 +62,7 @@ function Initialize-FileConversion-CoreBasicYaml {
             
             $convStartTime = Get-Date
             # Execute with error capture
-            $errorOutput = & yq eval -o=json '.' $resolvedPath 2>&1
+            $errorOutput = Invoke-CachedYqCommand eval -o=json '.' $resolvedPath 2>&1
             $exitCode = $LASTEXITCODE
             $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
             
@@ -191,7 +191,7 @@ function Initialize-FileConversion-CoreBasicYaml {
             # Validate yq is executable (reuse validation from above if already checked)
             if (-not $script:YqValidated) {
                 try {
-                    $yqVersion = & yq --version 2>&1
+                    $yqVersion = Invoke-CachedYqCommand --version 2>&1
                     if ($LASTEXITCODE -ne 0) {
                         throw "yq command exists but failed to execute (exit code: $LASTEXITCODE)"
                     }
@@ -204,7 +204,7 @@ function Initialize-FileConversion-CoreBasicYaml {
             
             $convStartTime = Get-Date
             # Execute with error capture
-            $errorOutput = & yq eval -p json -o yaml '.' $resolvedPath 2>&1
+            $errorOutput = Invoke-CachedYqCommand eval -p json -o yaml '.' $resolvedPath 2>&1
             $exitCode = $LASTEXITCODE
             $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
             
