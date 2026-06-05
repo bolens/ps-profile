@@ -81,19 +81,19 @@ Describe 'UUID and GUID Conversion Integration Tests' {
 
         It 'ConvertFrom-UuidToBase32 converts UUID to Base32' {
             Get-Command ConvertFrom-UuidToBase32 -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            if (-not (Get-Command _ConvertFrom-HexToBase32 -ErrorAction SilentlyContinue)) {
+            if (-not (Get-Command _Encode-Base32 -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because 'Base32 conversion not available'
                 return
             }
 
             $result = ConvertFrom-UuidToBase32 -Uuid $script:TestUuid
             $result | Should -Not -BeNullOrEmpty
-            $result | Should -Match '^[A-Z2-7]+$'
+            $result | Should -Match '^[A-Z2-7]+=*$'
         }
 
         It 'ConvertTo-UuidFromBase32 converts Base32 to UUID' {
             Get-Command ConvertTo-UuidFromBase32 -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            if (-not (Get-Command _ConvertFrom-Base32ToHex -ErrorAction SilentlyContinue)) {
+            if (-not (Get-Command _Decode-Base32 -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because 'Base32 conversion not available'
                 return
             }

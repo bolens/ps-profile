@@ -139,17 +139,22 @@ function Initialize-FileConversion-SpecializedQrCode {
 #>
 function ConvertTo-QrCodeFromText {
     param([string]$InputPath, [string]$OutputPath)
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertTo-QrCodeFromText -ErrorAction SilentlyContinue) {
             _ConvertTo-QrCodeFromText @PSBoundParameters
         }
         else {
-            Write-Error "Internal conversion function _ConvertTo-QrCodeFromText not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertTo-QrCodeFromText not available'
         }
     }
     catch {
-        Write-Error "Failed to convert text to QR code: $_" -ErrorAction SilentlyContinue
+        throw "Failed to convert text to QR code: $_"
     }
 }
 Set-AgentModeAlias -Name 'text-to-qrcode' -Target 'ConvertTo-QrCodeFromText'
@@ -173,17 +178,22 @@ Set-AgentModeAlias -Name 'text-to-qrcode' -Target 'ConvertTo-QrCodeFromText'
 #>
 function ConvertTo-QrCodeFromJson {
     param([string]$InputPath, [string]$OutputPath)
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertTo-QrCodeFromJson -ErrorAction SilentlyContinue) {
             _ConvertTo-QrCodeFromJson @PSBoundParameters
         }
         else {
-            Write-Error "Internal conversion function _ConvertTo-QrCodeFromJson not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertTo-QrCodeFromJson not available'
         }
     }
     catch {
-        Write-Error "Failed to convert JSON to QR code: $_" -ErrorAction SilentlyContinue
+        throw "Failed to convert JSON to QR code: $_"
     }
 }
 Set-AgentModeAlias -Name 'json-to-qrcode' -Target 'ConvertTo-QrCodeFromJson'
@@ -209,17 +219,22 @@ Set-AgentModeAlias -Name 'json-to-qrcode' -Target 'ConvertTo-QrCodeFromJson'
 #>
 function ConvertFrom-QrCodeToText {
     param([string]$InputPath, [string]$OutputPath)
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertFrom-QrCodeToText -ErrorAction SilentlyContinue) {
             _ConvertFrom-QrCodeToText @PSBoundParameters
         }
         else {
-            Write-Error "Internal conversion function _ConvertFrom-QrCodeToText not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertFrom-QrCodeToText not available'
         }
     }
     catch {
-        Write-Error "Failed to decode QR code: $_" -ErrorAction SilentlyContinue
+        throw "Failed to decode QR code: $_"
     }
 }
 Set-AgentModeAlias -Name 'qrcode-to-text' -Target 'ConvertFrom-QrCodeToText'

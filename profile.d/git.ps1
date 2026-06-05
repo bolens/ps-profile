@@ -64,6 +64,18 @@ try {
         $global:GitInitialized = $true
     }
 
+    # Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+    if (Get-Command Register-LazyFunction -ErrorAction SilentlyContinue) {
+        Register-LazyFunction -Name 'Invoke-GitStatus' -Initializer { Ensure-Git } -Alias 'gs' | Out-Null
+        Register-LazyFunction -Name 'Add-GitChanges' -Initializer { Ensure-Git } -Alias 'ga' | Out-Null
+        Register-LazyFunction -Name 'Save-GitCommit' -Initializer { Ensure-Git } -Alias 'gc' | Out-Null
+        Register-LazyFunction -Name 'Publish-GitChanges' -Initializer { Ensure-Git } -Alias 'gp' | Out-Null
+        Register-LazyFunction -Name 'Get-GitLog' -Initializer { Ensure-Git } -Alias 'gl' | Out-Null
+        Register-LazyFunction -Name 'Compare-GitChanges' -Initializer { Ensure-Git } -Alias 'gd' | Out-Null
+        Register-LazyFunction -Name 'Get-GitBranch' -Initializer { Ensure-Git } -Alias 'gb' | Out-Null
+        Register-LazyFunction -Name 'Switch-GitBranch' -Initializer { Ensure-Git } -Alias 'gco' | Out-Null
+    }
+
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'git'

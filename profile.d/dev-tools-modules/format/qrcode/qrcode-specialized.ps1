@@ -46,9 +46,9 @@ function Initialize-DevTools-QrCode-Specialized {
 try {
     const QRCode = require('qrcode');
     const fs = require('fs');
-    const wifiString = process.argv[1];
-    const outputPath = process.argv[2];
-    const options = JSON.parse(process.argv[3]);
+    const wifiString = process.argv[2];
+    const outputPath = process.argv[3];
+    const options = JSON.parse(process.argv[4]);
     QRCode.toFile(outputPath, wifiString, options, (err) => {
         if (err) {
             console.error('Error:', err.message);
@@ -121,9 +121,9 @@ try {
 try {
     const QRCode = require('qrcode');
     const fs = require('fs');
-    const vcard = process.argv[1];
-    const outputPath = process.argv[2];
-    const options = JSON.parse(process.argv[3]);
+    const vcard = process.argv[2];
+    const outputPath = process.argv[3];
+    const options = JSON.parse(process.argv[4]);
     QRCode.toFile(outputPath, vcard, options, (err) => {
         if (err) {
             console.error('Error:', err.message);
@@ -205,9 +205,9 @@ try {
 try {
     const QRCode = require('qrcode');
     const fs = require('fs');
-    const ical = process.argv[1];
-    const outputPath = process.argv[2];
-    const options = JSON.parse(process.argv[3]);
+    const ical = process.argv[2];
+    const outputPath = process.argv[3];
+    const options = JSON.parse(process.argv[4]);
     QRCode.toFile(outputPath, ical, options, (err) => {
         if (err) {
             console.error('Error:', err.message);

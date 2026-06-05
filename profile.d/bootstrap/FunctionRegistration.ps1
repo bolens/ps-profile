@@ -226,7 +226,10 @@ function global:Register-LazyFunction {
     Set-Item -Path ("Function:\global:" + $Name) -Value $stub -Force | Out-Null
 
     if ($Alias) {
-        Set-AgentModeAlias -Name $Alias -Target $Name | Out-Null
+        if (-not (Set-AgentModeAlias -Name $Alias -Target $Name)) {
+            # Override external commands (e.g. Ghostscript `gs`) that shadow profile shortcuts
+            Set-Alias -Name $Alias -Value $Name -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+        }
     }
 
     return $true

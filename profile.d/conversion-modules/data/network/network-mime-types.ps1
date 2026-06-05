@@ -17,7 +17,7 @@
 #>
 function Initialize-FileConversion-NetworkMimeTypes {
     # Common MIME type to extension mapping
-    $script:MimeTypeToExtension = @{
+    $global:MimeTypeToExtension = @{
         'text/plain'                  = @('txt')
         'text/html'                   = @('html', 'htm')
         'text/css'                    = @('css')
@@ -52,11 +52,16 @@ function Initialize-FileConversion-NetworkMimeTypes {
     }
 
     # Extension to MIME type mapping (reverse)
-    $script:ExtensionToMimeType = @{}
-    foreach ($mimeType in $script:MimeTypeToExtension.Keys) {
-        foreach ($ext in $script:MimeTypeToExtension[$mimeType]) {
-            if (-not $script:ExtensionToMimeType.ContainsKey($ext)) {
-                $script:ExtensionToMimeType[$ext] = $mimeType
+    $global:ExtensionToMimeType = @{}
+    $mimeTypesByPreference = @($global:MimeTypeToExtension.Keys | Sort-Object {
+            if ($_ -like 'application/*') { 0 }
+            elseif ($_ -like 'text/*') { 1 }
+            else { 2 }
+        }, { $_ })
+    foreach ($mimeType in $mimeTypesByPreference) {
+        foreach ($ext in $global:MimeTypeToExtension[$mimeType]) {
+            if (-not $global:ExtensionToMimeType.ContainsKey($ext)) {
+                $global:ExtensionToMimeType[$ext] = $mimeType
             }
         }
     }
@@ -241,18 +246,19 @@ function Parse-MimeType {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$MimeType
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     process {
-        if ([string]::IsNullOrWhiteSpace($MimeType)) {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $mimeText = if ($null -ne $MimeType) { $MimeType } else { $_ }
+        if ([string]::IsNullOrWhiteSpace($mimeText)) {
             return $null
         }
         try {
             if (Get-Command _Parse-MimeType -ErrorAction SilentlyContinue) {
-                $parsed = _Parse-MimeType -MimeType $MimeType
+                $parsed = _Parse-MimeType -MimeType $mimeText
                 # Add extensions if available
                 $fullMime = "$($parsed.Type)/$($parsed.Subtype)"
-                if ($script:MimeTypeToExtension.ContainsKey($fullMime)) {
-                    $parsed.Extensions = $script:MimeTypeToExtension[$fullMime]
+                if ($global:MimeTypeToExtension.ContainsKey($fullMime)) {
+                    $parsed.Extensions = $global:MimeTypeToExtension[$fullMime]
                 }
                 return [PSCustomObject]$parsed
             }
@@ -291,19 +297,20 @@ function Get-MimeTypeFromExtension {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Extension
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     process {
-        if ([string]::IsNullOrWhiteSpace($Extension)) {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $extInput = if ($null -ne $Extension) { $Extension } else { $_ }
+        if ([string]::IsNullOrWhiteSpace($extInput)) {
             return ''
         }
-        $ext = $Extension.Trim()
+        $ext = $extInput.Trim()
         if ($ext.StartsWith('.')) {
             $ext = $ext.Substring(1)
         }
         $ext = $ext.ToLower()
-        
-        if ($script:ExtensionToMimeType.ContainsKey($ext)) {
-            return $script:ExtensionToMimeType[$ext]
+
+        if ($global:ExtensionToMimeType.ContainsKey($ext)) {
+            return $global:ExtensionToMimeType[$ext]
         }
         return ''
     }
@@ -334,23 +341,21 @@ function Get-ExtensionFromMimeType {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$MimeType
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     process {
-        if ([string]::IsNullOrWhiteSpace($MimeType)) {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $mimeInput = if ($null -ne $MimeType) { $MimeType } else { $_ }
+        if ([string]::IsNullOrWhiteSpace($mimeInput)) {
             return @()
         }
-        $mime = $MimeType.Trim()
+        $mime = $mimeInput.Trim()
         # Remove parameters if present
         if ($mime -match '^([^;]+)') {
             $mime = $matches[1].Trim()
         }
-        
-        if ($script:MimeTypeToExtension.ContainsKey($mime)) {
-            $exts = $script:MimeTypeToExtension[$mime]
-            if ($exts.Count -eq 1) {
-                return $exts[0]
-            }
-            return $exts
+
+        if ($global:MimeTypeToExtension.ContainsKey($mime)) {
+            $exts = $global:MimeTypeToExtension[$mime]
+            return $exts[0]
         }
         return @()
     }

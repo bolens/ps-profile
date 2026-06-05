@@ -136,9 +136,14 @@ function Initialize-FileConversion-CoreEncodingBase32 {
                 return ''
             }
             try {
-                # First convert hex to ASCII, then ASCII to Base32
-                $ascii = _ConvertFrom-HexToAscii -InputObject $InputObject
-                return _ConvertFrom-AsciiToBase32 -InputObject $ascii
+                $hex = $InputObject -replace '\s+', '' -replace '-', ''
+                if ($hex.Length % 2 -ne 0) {
+                    throw 'Invalid hex string: length must be even'
+                }
+                $bytes = for ($i = 0; $i -lt $hex.Length; $i += 2) {
+                    [Convert]::ToByte($hex.Substring($i, 2), 16)
+                }
+                return _Encode-Base32 -Bytes $bytes
             }
             catch {
                 throw "Failed to convert Hex to Base32: $_"
@@ -157,9 +162,8 @@ function Initialize-FileConversion-CoreEncodingBase32 {
                 return ''
             }
             try {
-                # First convert Base32 to ASCII, then ASCII to hex
-                $ascii = _ConvertFrom-Base32ToAscii -InputObject $InputObject
-                return _ConvertFrom-AsciiToHex -InputObject $ascii
+                $bytes = _Decode-Base32 -Base32String $InputObject
+                return ($bytes | ForEach-Object { $_.ToString('X2') }) -join ''
             }
             catch {
                 throw "Failed to convert Base32 to Hex: $_"

@@ -15,13 +15,22 @@
 Describe 'JWT Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'jwt.tests.ps1')
         
         # Ensure NodeJs module is loaded (provides Invoke-NodeScript)
         $repoRoot = Split-Path -Parent $script:ProfileDir
         $nodeJsModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'NodeJs.psm1'
         if ($nodeJsModulePath -and -not [string]::IsNullOrWhiteSpace($nodeJsModulePath) -and (Test-Path -LiteralPath $nodeJsModulePath)) {
             Import-Module $nodeJsModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force -Global
+        }
+
+        # JWT decode relies on dev-tools crypto helpers (_Decode-Jwt)
+        $jwtHelperPath = Join-Path $repoRoot 'profile.d' 'dev-tools-modules' 'crypto' 'jwt.ps1'
+        if (Test-Path -LiteralPath $jwtHelperPath) {
+            . $jwtHelperPath
+            if (Get-Command Initialize-DevTools-Jwt -ErrorAction SilentlyContinue) {
+                Initialize-DevTools-Jwt
+            }
         }
         
         # Check if dependencies are available
@@ -108,8 +117,8 @@ Describe 'JWT Conversion Tests' {
                 $json = Get-Content -Path $outputFile -Raw
                 $json | Should -Not -BeNullOrEmpty
                 $jsonObj = $json | ConvertFrom-Json
-                $jsonObj | Should -HaveProperty 'Header'
-                $jsonObj | Should -HaveProperty 'Payload'
+                $jsonObj.Header | Should -Not -Be $null
+                $jsonObj.Payload | Should -Not -Be $null
             }
         }
 
@@ -128,20 +137,32 @@ Describe 'JWT Conversion Tests' {
             $tempFile = Join-Path $TestDrive 'test-jwt-roundtrip.json'
             Set-Content -Path $tempFile -Value $payloadJson -NoNewline
 
-            # Encode to JWT
+            # Encode to JWT, then decode back
             try {
                 ConvertTo-JwtFromJson -InputPath $tempFile -Secret 'test-secret'
-                $jwtFile = $tempFile -replace '\.json$', '.jwt'
-                if ($jwtFile -and -not [string]::IsNullOrWhiteSpace($jwtFile) -and (Test-Path -LiteralPath $jwtFile)) {
-                    # Decode back to JSON
-                    ConvertFrom-JwtToJson -InputPath $jwtFile
-                    $roundtripJson = Get-Content -Path $tempFile -Raw
-                    $roundtripJson | Should -Not -BeNullOrEmpty
-                }
             }
             catch {
                 Set-ItResult -Skipped -Because "JWT encoding failed (may require jsonwebtoken npm package): $_"
+                return
             }
+
+            $jwtFile = $tempFile -replace '\.json$', '.jwt'
+            if (-not (Test-Path -LiteralPath $jwtFile) -or [string]::IsNullOrWhiteSpace((Get-Content -LiteralPath $jwtFile -Raw))) {
+                Set-ItResult -Skipped -Because 'JWT encoding produced no output (may require jsonwebtoken npm package)'
+                return
+            }
+
+            try {
+                ConvertFrom-JwtToJson -InputPath $jwtFile
+            }
+            catch {
+                throw
+            }
+
+            $decodedFile = $jwtFile -replace '\.jwt$', '.json'
+            $decodedJson = Get-Content -LiteralPath $decodedFile -Raw | ConvertFrom-Json
+            $decodedJson.Payload.sub | Should -Be 'user123'
+            $decodedJson.Payload.name | Should -Be 'Test User'
         }
     }
 }

@@ -117,11 +117,12 @@ function Initialize-FileConversion-CoreEncodingEBCDIC {
             [string]$InputObject
         )
         process {
-            if ([string]::IsNullOrEmpty($InputObject)) {
+            $text = if ($null -ne $InputObject) { $InputObject } else { $_ }
+            if ([string]::IsNullOrEmpty($text)) {
                 return ''
             }
             try {
-                $asciiBytes = [System.Text.Encoding]::ASCII.GetBytes($InputObject)
+                $asciiBytes = [System.Text.Encoding]::ASCII.GetBytes($text)
                 $ebcdicBytes = _Encode-EBCDIC -Bytes $asciiBytes
                 # Return as hex string for display
                 return ($ebcdicBytes | ForEach-Object { $_.ToString('X2') }) -join ''
@@ -139,12 +140,13 @@ function Initialize-FileConversion-CoreEncodingEBCDIC {
             [string]$InputObject
         )
         process {
-            if ([string]::IsNullOrWhiteSpace($InputObject)) {
+            $text = if ($null -ne $InputObject) { $InputObject } else { $_ }
+            if ([string]::IsNullOrWhiteSpace($text)) {
                 return ''
             }
             try {
                 # Parse hex string to bytes
-                $hex = $InputObject -replace '\s+', '' -replace '-', ''
+                $hex = $text -replace '\s+', '' -replace '-', ''
                 if ($hex.Length % 2 -ne 0) {
                     throw "Invalid EBCDIC hex string: length must be even"
                 }
@@ -184,8 +186,11 @@ function ConvertFrom-AsciiToEBCDIC {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$InputObject
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-AsciiToEBCDIC @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $text = if ($null -ne $InputObject) { $InputObject } else { $_ }
+        _ConvertFrom-AsciiToEBCDIC -InputObject $text
+    }
 }
 Set-Alias -Name ascii-to-ebcdic -Value ConvertFrom-AsciiToEBCDIC -Scope Global -ErrorAction SilentlyContinue
 
@@ -210,8 +215,11 @@ function ConvertFrom-EBCDICToAscii {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$InputObject
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
-    _ConvertFrom-EBCDICToAscii @PSBoundParameters
+    process {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $text = if ($null -ne $InputObject) { $InputObject } else { $_ }
+        _ConvertFrom-EBCDICToAscii -InputObject $text
+    }
 }
 Set-Alias -Name ebcdic-to-ascii -Value ConvertFrom-EBCDICToAscii -Scope Global -ErrorAction SilentlyContinue
 

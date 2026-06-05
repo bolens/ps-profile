@@ -578,31 +578,43 @@ $global:PSDefaultParameterValues['Clear-Item:Force'] = $true
 function Get-NormalizedPesterResult {
     param([object]$Result)
 
-    if ($null -eq $Result) {
-        return [PSCustomObject]@{
-            PassedCount       = 0
-            FailedCount       = 1
-            SkippedCount      = 0
-            TotalCount        = 0
-            InconclusiveCount = 0
-        }
-    }
-
-    if ($Result.PSObject.Properties.Name -contains 'PassedCount') {
-        return $Result
-    }
-
-    if (($Result.PSObject.Properties.Name -contains 'Result') -and $null -ne $Result.Result -and ($Result.Result.PSObject.Properties.Name -contains 'PassedCount')) {
-        return $Result.Result
-    }
-
-    return [PSCustomObject]@{
+    $failureResult = [PSCustomObject]@{
         PassedCount       = 0
         FailedCount       = 1
         SkippedCount      = 0
         TotalCount        = 0
         InconclusiveCount = 0
     }
+
+    if ($null -eq $Result) {
+        return $failureResult
+    }
+
+    if ($Result.PSObject.Properties.Name -contains 'PassedCount') {
+        return $Result
+    }
+
+    # Invoke-Pester / Invoke-PesterWithTimeout may return Object[] when incidental pipeline
+    # output (e.g. Write-ScriptMessage) is collected alongside the Pester.Run result.
+    if ($Result -is [System.Array] -or ($Result -is [System.Collections.IEnumerable] -and $Result -isnot [string] -and $Result -isnot [hashtable])) {
+        $pesterResults = @(@($Result) | Where-Object {
+            $null -ne $_ -and ($_.PSObject.Properties.Name -contains 'PassedCount')
+        })
+        if ($pesterResults.Length -gt 0) {
+            return $pesterResults[-1]
+        }
+    }
+
+    if ($Result.PSObject.Properties.Name -contains 'Result' -and $null -ne $Result.Result) {
+        return Get-NormalizedPesterResult -Result $Result.Result
+    }
+
+    # Runspace timeout wrapper: @{ Success; Result; Error }
+    if ($Result -is [hashtable] -and $Result.Success -and $null -ne $Result.Result) {
+        return Get-NormalizedPesterResult -Result $Result.Result
+    }
+
+    return $failureResult
 }
 
 # Set environment variables to suppress confirmations in profile fragments
@@ -1553,7 +1565,8 @@ try {
             # Ensure confirmation suppression in script block context
             $ConfirmPreference = 'None'
             $global:ConfirmPreference = 'None'
-            Invoke-PesterWithTimeout -Config $config -TestPaths $script:capturedTestPaths -Timeout $timeoutValue -RunNumber $runNumber -TotalRuns $totalRuns
+            $pesterResult = Invoke-PesterWithTimeout -Config $config -TestPaths $script:capturedTestPaths -Timeout $timeoutValue -RunNumber $runNumber -TotalRuns $totalRuns
+            return $pesterResult
         }
 
         # Execute tests with performance tracking if requested
@@ -1994,6 +2007,7 @@ try {
             if ($exitCode -ne $EXIT_SUCCESS) {
                 Exit-WithCleanup -ExitCode $exitCode -Message "Test execution completed with failures or issues"
             }
+            Exit-WithCleanup -ExitCode $EXIT_SUCCESS
         }
     }
     catch {
@@ -2040,4 +2054,6 @@ finally {
     Pop-Location
 }
 
-$result
+if ($Interactive -or $Watch) {
+    $result
+}

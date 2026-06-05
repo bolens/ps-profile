@@ -18,36 +18,32 @@
     Base32 uses the alphabet A-Z, 2-7 (32 characters) as defined in RFC 4648.
     URL encoding (percent encoding) follows RFC 3986 specification.
 #>
+# Load sub-modules at script scope so public functions persist after initialization (order matters)
+$encodingDir = $PSScriptRoot
+. (Join-Path $encodingDir 'roman.ps1')
+. (Join-Path $encodingDir 'modhex.ps1')
+. (Join-Path $encodingDir 'ascii.ps1')
+. (Join-Path $encodingDir 'hex.ps1')
+. (Join-Path $encodingDir 'binary.ps1')
+. (Join-Path $encodingDir 'numeric.ps1')
+. (Join-Path $encodingDir 'base32.ps1')
+. (Join-Path $encodingDir 'base36.ps1')
+. (Join-Path $encodingDir 'base58.ps1')
+. (Join-Path $encodingDir 'base62.ps1')
+. (Join-Path $encodingDir 'base85.ps1')
+. (Join-Path $encodingDir 'z85.ps1')
+. (Join-Path $encodingDir 'base91.ps1')
+. (Join-Path $encodingDir 'utf16-utf32.ps1')
+. (Join-Path $encodingDir 'rot.ps1')
+. (Join-Path $encodingDir 'morse.ps1')
+. (Join-Path $encodingDir 'url.ps1')
+. (Join-Path $encodingDir 'base122.ps1')
+. (Join-Path $encodingDir 'ebcdic.ps1')
+. (Join-Path $encodingDir 'braille.ps1')
+. (Join-Path $encodingDir 'uuid.ps1')
+. (Join-Path $encodingDir 'guid.ps1')
+
 function Initialize-FileConversion-CoreEncoding {
-    # Load sub-modules in dependency order
-    # $PSScriptRoot is already the encoding directory
-    $encodingDir = $PSScriptRoot
-    
-    # Load modules (order matters due to dependencies)
-    . (Join-Path $encodingDir 'roman.ps1')
-    . (Join-Path $encodingDir 'modhex.ps1')
-    . (Join-Path $encodingDir 'ascii.ps1')
-    . (Join-Path $encodingDir 'hex.ps1')
-    . (Join-Path $encodingDir 'binary.ps1')
-    . (Join-Path $encodingDir 'numeric.ps1')
-    . (Join-Path $encodingDir 'base32.ps1')
-    . (Join-Path $encodingDir 'base36.ps1')
-    . (Join-Path $encodingDir 'base58.ps1')
-    . (Join-Path $encodingDir 'base62.ps1')
-    . (Join-Path $encodingDir 'base85.ps1')
-    . (Join-Path $encodingDir 'z85.ps1')
-    . (Join-Path $encodingDir 'base91.ps1')
-    . (Join-Path $encodingDir 'utf16-utf32.ps1')
-    . (Join-Path $encodingDir 'rot.ps1')
-    . (Join-Path $encodingDir 'morse.ps1')
-    . (Join-Path $encodingDir 'url.ps1')
-    . (Join-Path $encodingDir 'base122.ps1')
-    . (Join-Path $encodingDir 'ebcdic.ps1')
-    . (Join-Path $encodingDir 'braille.ps1')
-    . (Join-Path $encodingDir 'uuid.ps1')
-    . (Join-Path $encodingDir 'guid.ps1')
-    
-    # Initialize all sub-modules in dependency order
     Initialize-FileConversion-CoreEncodingRoman
     Initialize-FileConversion-CoreEncodingModHex
     Initialize-FileConversion-CoreEncodingAscii

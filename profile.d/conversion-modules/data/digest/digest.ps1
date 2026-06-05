@@ -17,16 +17,12 @@
     - Hash format conversions (Hex, Base64, Base32)
     - Checksum calculations (CRC32, Adler32)
 #>
+# Load sub-modules at script scope so public functions persist after initialization
+$digestDir = $PSScriptRoot
+. (Join-Path $digestDir 'digest-hash-format.ps1')
+. (Join-Path $digestDir 'digest-checksum.ps1')
+
 function Initialize-FileConversion-Digest {
-    # Load sub-modules
-    # $PSScriptRoot is already the digest directory
-    $digestDir = $PSScriptRoot
-    
-    # Load modules
-    . (Join-Path $digestDir 'digest-hash-format.ps1')
-    . (Join-Path $digestDir 'digest-checksum.ps1')
-    
-    # Initialize all sub-modules
     Initialize-FileConversion-DigestHashFormat
     Initialize-FileConversion-DigestChecksum
 }

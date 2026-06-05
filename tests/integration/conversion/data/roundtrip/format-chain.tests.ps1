@@ -10,7 +10,7 @@
 
 .NOTES
     Tests cover conversion chains through multiple intermediate formats.
-    Requires yq command for YAML/TOML conversions.
+    Requires yq command for YAML/TOML conversions and PSToml for YAML to TOML step.
 #>
 
 Describe 'Format Chain Conversion Tests' {
@@ -29,6 +29,10 @@ Describe 'Format Chain Conversion Tests' {
             # Skip if yq not available
             if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because "yq command not available"
+                return
+            }
+            if (-not (Get-Module -ListAvailable -Name PSToml -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because "PSToml module not available"
                 return
             }
             $originalXml = '<root><item name="test" value="123"/></root>'

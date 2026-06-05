@@ -16,7 +16,7 @@
 Describe 'Binary Format Conversion Integration Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'binary-formats.tests.ps1')
     }
 
     Context 'BSON conversion utilities' {

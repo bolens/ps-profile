@@ -26,8 +26,9 @@ function global:Initialize-SmartPrompt {
             return
         }
         
-        # Store original prompt
-        if (-not $global:OriginalPrompt) {
+        # Store original prompt (strict-mode safe: variable may not exist yet)
+        $originalPromptVar = Get-Variable -Name OriginalPrompt -Scope Global -ErrorAction SilentlyContinue
+        if (-not $originalPromptVar -or -not $originalPromptVar.Value) {
             $global:OriginalPrompt = $function:prompt
         }
         
@@ -43,7 +44,7 @@ function global:Initialize-SmartPrompt {
             $lastCommandSucceeded = $?
             try {
                 $lastExitCode = $LASTEXITCODE
-                $currentPath = $executionContext.SessionState.Path.CurrentLocation.Path
+                $currentPath = $ExecutionContext.SessionState.Path.CurrentLocation.Path
                 $promptParts = @()
                 
                 # User and computer
@@ -514,7 +515,7 @@ function global:Initialize-SmartPrompt {
                 return " "
             }
             catch {
-                Write-Host "PS $($executionContext.SessionState.Path.CurrentLocation.Path)> " -NoNewline -ForegroundColor Yellow
+                Write-Host "PS $($ExecutionContext.SessionState.Path.CurrentLocation.Path)> " -NoNewline -ForegroundColor Yellow
                 return " "
             }
         }

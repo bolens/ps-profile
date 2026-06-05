@@ -59,8 +59,8 @@ function Initialize-DevTools-Uuid {
             $nodeScript = @"
 try {
     const { v5: uuidv5 } = require('uuid');
-    const namespace = process.argv[1];
-    const name = process.argv[2];
+    const namespace = process.argv[2];
+    const name = process.argv[3];
     const uuid = uuidv5(name, namespace);
     console.log(uuid);
 } catch (error) {

@@ -14,7 +14,7 @@
 Describe 'Checksum Calculation Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'checksum.tests.ps1')
     }
 
     Context 'Checksum Calculations' {
@@ -26,12 +26,10 @@ Describe 'Checksum Calculation Tests' {
             $result = Get-Crc32 -InputString 'Hello World'
             
             $result | Should -Not -BeNullOrEmpty
-            $result | Should -HaveProperty 'Algorithm'
-            $result | Should -HaveProperty 'Checksum'
-            $result | Should -HaveProperty 'Hex'
-            $result | Should -HaveProperty 'Decimal'
             $result.Algorithm | Should -Be 'CRC32'
+            $result.Checksum | Should -Not -Be $null
             $result.Hex | Should -Match '^[0-9A-F]{8}$'
+            $result.Decimal | Should -Not -Be $null
         }
 
         It 'Get-Crc32 calculates CRC32 for file' {
@@ -43,7 +41,6 @@ Describe 'Checksum Calculation Tests' {
             
             $result | Should -Not -BeNullOrEmpty
             $result.Algorithm | Should -Be 'CRC32'
-            $result | Should -HaveProperty 'File'
             $result.File | Should -Be $tempFile
         }
 
@@ -64,12 +61,10 @@ Describe 'Checksum Calculation Tests' {
             $result = Get-Adler32 -InputString 'Hello World'
             
             $result | Should -Not -BeNullOrEmpty
-            $result | Should -HaveProperty 'Algorithm'
-            $result | Should -HaveProperty 'Checksum'
-            $result | Should -HaveProperty 'Hex'
-            $result | Should -HaveProperty 'Decimal'
             $result.Algorithm | Should -Be 'Adler32'
+            $result.Checksum | Should -Not -Be $null
             $result.Hex | Should -Match '^[0-9A-F]{8}$'
+            $result.Decimal | Should -Not -Be $null
         }
 
         It 'Get-Adler32 calculates Adler32 for file' {
@@ -81,7 +76,6 @@ Describe 'Checksum Calculation Tests' {
             
             $result | Should -Not -BeNullOrEmpty
             $result.Algorithm | Should -Be 'Adler32'
-            $result | Should -HaveProperty 'File'
             $result.File | Should -Be $tempFile
         }
 

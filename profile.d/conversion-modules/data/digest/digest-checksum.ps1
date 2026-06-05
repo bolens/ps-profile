@@ -42,9 +42,9 @@ function Initialize-FileConversion-DigestChecksum {
             $crc = (($crc -shr 8) -bxor $crc32Table[($crc -bxor $byte) -band 0xFF])
         }
         $crc = ($crc -bxor 0xFFFFFFFF)
-        
-        # Convert to unsigned 32-bit integer
-        return [uint32]$crc
+
+        # Convert to unsigned 32-bit integer (CRC32 high-bit values are negative as [int32])
+        return [BitConverter]::ToUInt32([BitConverter]::GetBytes([int32]$crc), 0)
     } -Force
 
     # Adler32 calculation
@@ -64,7 +64,8 @@ function Initialize-FileConversion-DigestChecksum {
         }
         
         # Combine into 32-bit value: (adler2 << 16) | adler1
-        return [uint32](($adler2 -shl 16) -bor $adler1)
+        $combined = ($adler2 -shl 16) -bor $adler1
+        return [BitConverter]::ToUInt32([BitConverter]::GetBytes([int32]$combined), 0)
     } -Force
 
     # Calculate checksum from string
@@ -158,14 +159,23 @@ function Initialize-FileConversion-DigestChecksum {
     PSCustomObject
     Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
 #>
-function Get-Crc32 {
+function global:Get-Crc32 {
+    [CmdletBinding(DefaultParameterSetName = 'String')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true, ParameterSetName = 'String')]
         [string]$InputString,
         [Parameter(Mandatory = $false, ParameterSetName = 'File')]
         [string]$FilePath
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         try {
             if ($PSCmdlet.ParameterSetName -eq 'File') {
@@ -182,7 +192,7 @@ function Get-Crc32 {
             }
         }
         catch {
-            Write-Error "Failed to calculate CRC32 checksum: $_" -ErrorAction SilentlyContinue
+            throw "Failed to calculate CRC32 checksum: $_"
         }
     }
 }
@@ -210,14 +220,23 @@ Set-AgentModeAlias -Name 'crc32' -Target 'Get-Crc32'
     PSCustomObject
     Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
 #>
-function Get-Adler32 {
+function global:Get-Adler32 {
+    [CmdletBinding(DefaultParameterSetName = 'String')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true, ParameterSetName = 'String')]
         [string]$InputString,
         [Parameter(Mandatory = $false, ParameterSetName = 'File')]
         [string]$FilePath
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         try {
             if ($PSCmdlet.ParameterSetName -eq 'File') {
@@ -234,7 +253,7 @@ function Get-Adler32 {
             }
         }
         catch {
-            Write-Error "Failed to calculate Adler32 checksum: $_" -ErrorAction SilentlyContinue
+            throw "Failed to calculate Adler32 checksum: $_"
         }
     }
 }
@@ -263,16 +282,27 @@ Set-AgentModeAlias -Name 'adler32' -Target 'Get-Adler32'
     PSCustomObject
     Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
 #>
-function Get-Checksum {
+function global:Get-Checksum {
+    [CmdletBinding(DefaultParameterSetName = 'String')]
+    [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true, ParameterSetName = 'String')]
         [string]$InputString,
         [Parameter(Mandatory = $false, ParameterSetName = 'File')]
         [string]$FilePath,
+        [Parameter(ParameterSetName = 'String')]
+        [Parameter(ParameterSetName = 'File')]
         [ValidateSet('CRC32', 'Adler32')]
         [string]$Algorithm = 'CRC32'
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         try {
             if ($PSCmdlet.ParameterSetName -eq 'File') {
@@ -289,7 +319,7 @@ function Get-Checksum {
             }
         }
         catch {
-            Write-Error "Failed to calculate checksum: $_" -ErrorAction SilentlyContinue
+            throw "Failed to calculate checksum: $_"
         }
     }
 }

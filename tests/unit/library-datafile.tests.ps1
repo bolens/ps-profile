@@ -130,14 +130,11 @@ Describe 'DataFile Module Functions' {
             $result.Array.Count | Should -Be 3
         }
 
-        It 'Handles empty hashtable' -Skip {
-            # Skipped: Function works when called directly but fails in test environment
-            # This appears to be a test-environment specific issue, not a function bug
-            # The function correctly returns empty hashtables when called directly
+        It 'Handles empty hashtable' {
             $testFile = Join-Path $script:TestTempDir 'empty.psd1'
             '@{}' | Set-Content -Path $testFile -Encoding UTF8
             $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -BeNullOrEmpty
+            $result | Should -Not -Be $null
             $result | Should -BeOfType [hashtable]
             $result.Count | Should -Be 0
         }
@@ -313,14 +310,11 @@ Describe 'DataFile Module Functions' {
             }
         }
 
-        It 'Handles file with only whitespace' -Skip {
-            # Skipped: Function works when called directly but fails in test environment
-            # This appears to be a test-environment specific issue, not a function bug
-            # The function correctly returns empty hashtables when called directly
+        It 'Handles file with only whitespace' {
             $testFile = Join-Path $script:TestTempDir 'whitespace.psd1'
             '@{}' | Set-Content -Path $testFile -Encoding UTF8
             $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -BeNullOrEmpty
+            $result | Should -Not -Be $null
             $result | Should -BeOfType [hashtable]
             $result.Count | Should -Be 0
         }
@@ -475,7 +469,7 @@ Describe 'DataFile Module Functions' {
             $result.ValidData | Should -Be 'test'
         }
 
-        It 'Handles empty hashtable with cache cleared' -Skip {
+        It 'Handles empty hashtable with cache cleared' {
             # Clear cache and test empty hashtable
             $testFile = Join-Path $script:TestTempDir 'empty-cleared.psd1'
             '@{}' | Set-Content -Path $testFile -Encoding UTF8
@@ -493,12 +487,12 @@ Describe 'DataFile Module Functions' {
             }
 
             $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -BeNullOrEmpty
+            $result | Should -Not -Be $null
             $result | Should -BeOfType [hashtable]
             $result.Count | Should -Be 0
         }
 
-        It 'Handles whitespace file with cache cleared' -Skip {
+        It 'Handles whitespace file with cache cleared' {
             # Test whitespace file (actually empty hashtable)
             $testFile = Join-Path $script:TestTempDir 'whitespace-cleared.psd1'
             '@{}' | Set-Content -Path $testFile -Encoding UTF8
@@ -516,12 +510,12 @@ Describe 'DataFile Module Functions' {
             }
 
             $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -BeNullOrEmpty
+            $result | Should -Not -Be $null
             $result | Should -BeOfType [hashtable]
             $result.Count | Should -Be 0
         }
 
-        It 'Handles Import-PowerShellDataFile returning null' -Skip {
+        It 'Handles Import-PowerShellDataFile returning null' {
             # Test the path where Import-PowerShellDataFile returns null (line 116-118)
             # This is covered by empty hashtable tests, but let's be explicit
             $testFile = Join-Path $script:TestTempDir 'null-return-test.psd1'
@@ -540,7 +534,7 @@ Describe 'DataFile Module Functions' {
             }
 
             $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -BeNullOrEmpty
+            $result | Should -Not -Be $null
             $result | Should -BeOfType [hashtable]
         }
 
@@ -873,7 +867,7 @@ Describe 'DataFile Module Functions' {
             }
         }
 
-        It 'Tests missing Set-CachedValue in catch block' -Skip {
+        It 'Tests missing Set-CachedValue in catch block' {
             # Test the path where Set-CachedValue is not available in catch block (line 160)
             # This is hard to test because we need to trigger the catch block while Set-CachedValue
             # is unavailable. The catch block handles empty hashtables, but @{} imports successfully
@@ -893,7 +887,7 @@ Describe 'DataFile Module Functions' {
                 # Should return empty hashtable even without Set-CachedValue
                 # The function should handle empty hashtable files in the catch block
                 $result = Import-CachedPowerShellDataFile -Path $testFile
-                $result | Should -Not -BeNullOrEmpty
+                $result | Should -Not -Be $null
                 $result | Should -BeOfType [hashtable]
                 $result.Count | Should -Be 0
             }

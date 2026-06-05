@@ -32,11 +32,10 @@ function Initialize-DevTools-Jwt {
             if ($parts.Length -ne 3) {
                 throw "Invalid JWT token format. Expected 3 parts separated by dots."
             }
-            # Decode header
-            $headerJson = $parts[0] | _ConvertFrom-Base64Url
+            # Decode header and payload (explicit args — Set-Item scriptblocks do not bind pipeline input)
+            $headerJson = _ConvertFrom-Base64Url -Base64Url $parts[0]
             $header = $headerJson | ConvertFrom-Json
-            # Decode payload
-            $payloadJson = $parts[1] | _ConvertFrom-Base64Url
+            $payloadJson = _ConvertFrom-Base64Url -Base64Url $parts[1]
             $payload = $payloadJson | ConvertFrom-Json
             [PSCustomObject]@{
                 Header    = $header
@@ -48,9 +47,7 @@ function Initialize-DevTools-Jwt {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.crypto.jwt.decode' -Context @{}
             }
-            else {
-                Write-Error "Failed to decode JWT: $_"
-            }
+            throw "Failed to decode JWT: $_"
         }
     } -Force
 
@@ -68,9 +65,9 @@ function Initialize-DevTools-Jwt {
             $nodeScript = @"
 try {
     const jwt = require('jsonwebtoken');
-    const payload = JSON.parse(process.argv[1]);
-    const header = JSON.parse(process.argv[2]);
-    const secret = process.argv[3] || 'secret';
+    const payload = JSON.parse(process.argv[2]);
+    const header = JSON.parse(process.argv[3]);
+    const secret = process.argv[4] || 'secret';
     const token = jwt.sign(payload, secret, { header: header });
     console.log(token);
 } catch (error) {
@@ -101,9 +98,7 @@ try {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                 Write-StructuredError -ErrorRecord $_ -OperationName 'dev-tools.crypto.jwt.encode' -Context @{}
             }
-            else {
-                Write-Error "Failed to encode JWT: $_"
-            }
+            throw "Failed to encode JWT: $_"
         }
     } -Force
 }

@@ -14,6 +14,16 @@
 #>
 function New-StarshipPromptFunction {
     param([string]$StarshipCommandPath)
+
+    # These variables exist when called from the prompt scriptblock; provide safe defaults for direct calls/tests
+    if (-not (Test-Path Variable:\lastCommandSucceeded)) {
+        $lastCommandSucceeded = $?
+    }
+    if (-not (Test-Path Variable:\lastExitCode)) {
+        $lastExitCodeVar = Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+        $lastExitCode = if ($lastExitCodeVar) { $lastExitCodeVar.Value } else { 0 }
+    }
+    $executionContext = $ExecutionContext
     
     if ($env:PS_PROFILE_DEBUG) {
         Write-Host "New-StarshipPromptFunction: Creating prompt function..." -ForegroundColor Cyan
@@ -32,13 +42,16 @@ function New-StarshipPromptFunction {
     
     # Build arguments and call starship executable directly
     try {
-        if (-not $global:StarshipCommand -or -not ($global:StarshipCommand -and -not [string]::IsNullOrWhiteSpace($global:StarshipCommand) -and (Test-Path -LiteralPath $global:StarshipCommand))) {
+        $starshipCommandVar = Get-Variable -Name StarshipCommand -Scope Global -ErrorAction SilentlyContinue
+        $starshipExecutable = if ($starshipCommandVar) { $starshipCommandVar.Value } else { $null }
+        $useStarship = $starshipExecutable -and -not [string]::IsNullOrWhiteSpace($starshipExecutable) -and (Test-Path -LiteralPath $starshipExecutable)
+        if (-not $useStarship) {
             $global:LASTEXITCODE = $lastExitCode
             return "PS $($executionContext.SessionState.Path.CurrentLocation.Path)> "
         }
         
         $arguments = Get-StarshipPromptArguments -LastCommandSucceeded $lastCommandSucceeded -LastExitCode $lastExitCode
-        $promptText = & $global:StarshipCommand @arguments 2>$null
+        $promptText = & $starshipExecutable @arguments 2>$null
         
         if ($promptText -and $promptText.Trim()) {
             # Configure PSReadLine for multi-line prompts (Starship may output multiple lines)

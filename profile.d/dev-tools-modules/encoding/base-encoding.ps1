@@ -40,7 +40,7 @@ function Initialize-DevTools-BaseEncoding {
                 }
                 $nodeScript = @"
 import('base32-encode').then(({ default: base32Encode }) => {
-    const text = process.argv[1];
+    const text = process.argv[2];
     const buffer = Buffer.from(text, 'utf8');
     const encoded = base32Encode(buffer, 'RFC4648', { padding: false });
     console.log(encoded);

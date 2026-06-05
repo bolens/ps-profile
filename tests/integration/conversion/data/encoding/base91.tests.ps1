@@ -9,7 +9,6 @@
 
 .NOTES
     Tests cover both successful conversions and roundtrip scenarios.
-    Note: Some roundtrip tests are skipped due to Base91 decoder needing correction for multi-byte sequences.
 #>
 
 Describe 'Base91 Encoding Conversion Tests' {
@@ -33,9 +32,7 @@ Describe 'Base91 Encoding Conversion Tests' {
             $result | Should -BeOfType [string]
         }
         
-        It 'ASCII to Base91 and back roundtrip' -Skip {
-            # TODO: Base91 decoder needs correction for multi-byte sequences
-            # Reference: https://raw.githubusercontent.com/aberaud/base91-python/refs/heads/master/base91.py
+        It 'ASCII to Base91 and back roundtrip' {
             $original = 'Hello World'
             $base91 = $original | ConvertFrom-AsciiToBase91
             $decoded = $base91 | ConvertFrom-Base91ToAscii
@@ -56,9 +53,7 @@ Describe 'Base91 Encoding Conversion Tests' {
             $result | Should -BeOfType [string]
         }
         
-        It 'Hex to Base91 and back roundtrip' -Skip {
-            # TODO: Base91 decoder needs correction for multi-byte sequences
-            # Reference: https://raw.githubusercontent.com/aberaud/base91-python/refs/heads/master/base91.py
+        It 'Hex to Base91 and back roundtrip' {
             $original = '48656C6C6F'
             $base91 = $original | ConvertFrom-HexToBase91
             $decoded = $base91 | ConvertFrom-Base91ToHex
@@ -79,9 +74,7 @@ Describe 'Base91 Encoding Conversion Tests' {
             $result | Should -BeOfType [string]
         }
         
-        It 'Base64 to Base91 and back roundtrip' -Skip {
-            # TODO: Base91 decoder needs correction for multi-byte sequences
-            # Reference: https://raw.githubusercontent.com/aberaud/base91-python/refs/heads/master/base91.py
+        It 'Base64 to Base91 and back roundtrip' {
             $original = 'SGVsbG8gV29ybGQ='
             $base91 = $original | ConvertFrom-Base64ToBase91
             $base64 = $base91 | ConvertFrom-Base91ToBase64

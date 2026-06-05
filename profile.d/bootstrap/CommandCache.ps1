@@ -339,22 +339,26 @@ function global:Test-IsMikefarahYqExecutable {
 <#
 .SYNOPSIS
     Invokes mikefarah/yq (or go-yq on Arch) with the given arguments.
+.DESCRIPTION
+    Forwards pipeline input to yq stdin when used in a pipeline (for example
+    ConvertTo-Json | Invoke-CachedYqCommand eval -P). Without forwarding, yq
+    blocks waiting for stdin while upstream producers block on a full pipe buffer.
 #>
 function global:Invoke-CachedYqCommand {
-    [CmdletBinding()]
-    param(
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]$YqArguments
-    )
-
     $yqCmd = Get-CachedExternalCommand -Name 'yq'
     if (-not $yqCmd) {
         throw 'yq command not found. Install mikefarah/yq (on Arch: sudo pacman -S go-yq).'
     }
 
     $executable = if (-not [string]::IsNullOrWhiteSpace($yqCmd.Source)) { $yqCmd.Source } else { $yqCmd.Name }
-    if ($YqArguments -and $YqArguments.Count -gt 0) {
-        & $executable @YqArguments
+    $yqArguments = @($args)
+    $pipedInput = @($input)
+
+    if ($pipedInput.Count -gt 0) {
+        $pipedInput | & $executable @yqArguments
+    }
+    elseif ($yqArguments.Count -gt 0) {
+        & $executable @yqArguments
     }
     else {
         & $executable

@@ -90,7 +90,7 @@ Describe 'EBCDIC Encoding Conversion Tests' {
 
         It 'Handles pipeline input' {
             $testStrings = @('Hello', 'World', 'Test')
-            $results = $testStrings | ConvertFrom-AsciiToEBCDIC
+            $results = @($testStrings | ConvertFrom-AsciiToEBCDIC)
             $results.Count | Should -Be 3
             foreach ($result in $results) {
                 $result | Should -Match '^[0-9A-F]+$'

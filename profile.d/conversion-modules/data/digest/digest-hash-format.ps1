@@ -201,12 +201,21 @@ function Initialize-FileConversion-DigestHashFormat {
     System.String
     Returns the hash value in Base64 format.
 #>
-function ConvertFrom-HashHexToBase64 {
+function global:ConvertFrom-HashHexToBase64 {
+    [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$HashHex
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         if ([string]::IsNullOrWhiteSpace($HashHex)) {
             return ''
@@ -245,12 +254,21 @@ Set-AgentModeAlias -Name 'hash-hex-to-base64' -Target 'ConvertFrom-HashHexToBase
     System.String
     Returns the hash value in hexadecimal format (lowercase).
 #>
-function ConvertFrom-HashBase64ToHex {
+function global:ConvertFrom-HashBase64ToHex {
+    [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$HashBase64
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         if ([string]::IsNullOrWhiteSpace($HashBase64)) {
             return ''
@@ -285,12 +303,21 @@ Set-AgentModeAlias -Name 'hash-base64-to-hex' -Target 'ConvertFrom-HashBase64ToH
     System.String
     Returns the hash value in Base32 format.
 #>
-function ConvertFrom-HashHexToBase32 {
+function global:ConvertFrom-HashHexToBase32 {
+    [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$HashHex
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         if ([string]::IsNullOrWhiteSpace($HashHex)) {
             return ''
@@ -325,12 +352,21 @@ Set-AgentModeAlias -Name 'hash-hex-to-base32' -Target 'ConvertFrom-HashHexToBase
     System.String
     Returns the hash value in hexadecimal format (lowercase).
 #>
-function ConvertFrom-HashBase32ToHex {
+function global:ConvertFrom-HashBase32ToHex {
+    [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$HashBase32
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         if ([string]::IsNullOrWhiteSpace($HashBase32)) {
             return ''
@@ -365,12 +401,21 @@ Set-AgentModeAlias -Name 'hash-base32-to-hex' -Target 'ConvertFrom-HashBase32ToH
     System.String
     Returns the hash value in Base32 format.
 #>
-function ConvertFrom-HashBase64ToBase32 {
+function global:ConvertFrom-HashBase64ToBase32 {
+    [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$HashBase64
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         if ([string]::IsNullOrWhiteSpace($HashBase64)) {
             return ''
@@ -405,12 +450,21 @@ Set-AgentModeAlias -Name 'hash-base64-to-base32' -Target 'ConvertFrom-HashBase64
     System.String
     Returns the hash value in Base64 format.
 #>
-function ConvertFrom-HashBase32ToBase64 {
+function global:ConvertFrom-HashBase32ToBase64 {
+    [CmdletBinding()]
+    [OutputType([string])]
     param(
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$HashBase32
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+    begin {
+        $dataInitialized = Get-Variable -Name FileConversionDataInitialized -Scope Global -ErrorAction SilentlyContinue
+        if (-not $dataInitialized -or -not $dataInitialized.Value) {
+            if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
+                Ensure-FileConversion-Data
+            }
+        }
+    }
     process {
         if ([string]::IsNullOrWhiteSpace($HashBase32)) {
             return ''

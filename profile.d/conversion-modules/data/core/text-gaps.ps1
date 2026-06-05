@@ -15,6 +15,9 @@
     Requires yq for XML↔YAML conversions.
 #>
 function Initialize-FileConversion-CoreTextGaps {
+    if (-not (Get-Variable -Name 'YqValidated' -Scope Script -ErrorAction SilentlyContinue)) {
+        $script:YqValidated = $false
+    }
     # XML to YAML (direct conversion using yq)
     Set-Item -Path Function:Global:_ConvertFrom-XmlToYaml -Value {
         param([string]$InputPath, [string]$OutputPath)

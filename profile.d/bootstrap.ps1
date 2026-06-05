@@ -344,6 +344,24 @@ try {
             }
         }
 
+        # Load PlatformPaths (cross-platform directory helpers from scripts/lib)
+        $platformPathsPath = Join-Path $bootstrapModulesDir 'PlatformPaths.ps1'
+        if ($platformPathsPath -and -not [string]::IsNullOrWhiteSpace($platformPathsPath) -and (Test-Path -LiteralPath $platformPathsPath)) {
+            try {
+                . $platformPathsPath
+            }
+            catch {
+                if ($env:PS_PROFILE_DEBUG) {
+                    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                        Write-ProfileError -ErrorRecord $_ -Context "Fragment: bootstrap (PlatformPaths.ps1)" -Category 'Fragment'
+                    }
+                    else {
+                        Write-Warning "Failed to load bootstrap module PlatformPaths.ps1 : $($_.Exception.Message)"
+                    }
+                }
+            }
+        }
+
         # Load FragmentCommandRegistry and CommandDispatcher modules (for on-demand fragment loading)
         # These enable automatic fragment loading when commands are called
         $repoRoot = Split-Path -Parent $bootstrapModulesDir

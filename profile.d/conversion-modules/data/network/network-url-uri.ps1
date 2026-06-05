@@ -256,14 +256,15 @@ function Parse-UrlUri {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Url
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     process {
-        if ([string]::IsNullOrWhiteSpace($Url)) {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $urlText = if ($null -ne $Url) { $Url } else { $_ }
+        if ([string]::IsNullOrWhiteSpace($urlText)) {
             return $null
         }
         try {
             if (Get-Command _Parse-UrlUri -ErrorAction SilentlyContinue) {
-                $parsed = _Parse-UrlUri -Url $Url
+                $parsed = _Parse-UrlUri -Url $urlText
                 return [PSCustomObject]$parsed
             }
             else {

@@ -158,6 +158,16 @@ function Get-RepoRoot {
                 break
             }
         }
+
+        # Detect repo root when walking ancestors (handles tests/test-artifacts/scripts/ paths)
+        $hasGit = Test-Path -LiteralPath (Join-Path $currentDir '.git')
+        $hasProfileDir = Test-Path -LiteralPath (Join-Path $currentDir 'profile.d')
+        $hasScriptsDir = Test-Path -LiteralPath (Join-Path $currentDir 'scripts')
+        if (($hasGit -or $hasProfileDir) -and $hasScriptsDir) {
+            $repoRoot = $currentDir
+            break
+        }
+
         $currentDir = [System.IO.Path]::GetDirectoryName($currentDir)
     }
 

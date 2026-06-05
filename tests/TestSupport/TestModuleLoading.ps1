@@ -799,11 +799,14 @@ function Import-DataConversionModules {
 
     # Network modules (always load, but filter if SelectiveModules specified)
     $networkModules = Get-DataNetworkModulesConfig
-    Import-ModuleGroup -BaseDir $dataDir -SubDir 'network' -ModuleConfig $networkModules -DefaultFunctionPatterns @('^Convert(To|From)-') -ParallelLoad:$ParallelLoad -SelectiveModules $SelectiveModules
+    Import-ModuleGroup -BaseDir $dataDir -SubDir 'network' -ModuleConfig $networkModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^Parse-', '^Build-', '^Get-') -ParallelLoad:$ParallelLoad -SelectiveModules $SelectiveModules
 
     # Digest modules (always load, but filter if SelectiveModules specified)
     $digestModules = Get-DataDigestModulesConfig
-    Import-ModuleGroup -BaseDir $dataDir -SubDir 'digest' -ModuleConfig $digestModules -DefaultFunctionPatterns @('^Convert(To|From)-') -ParallelLoad:$ParallelLoad -SelectiveModules $SelectiveModules
+    $digestCustomPatterns = @{
+        'digest.ps1' = @('^Convert(To|From)-', '^Get-')
+    }
+    Import-ModuleGroup -BaseDir $dataDir -SubDir 'digest' -ModuleConfig $digestModules -DefaultFunctionPatterns @('^Convert(To|From)-') -CustomPatterns $digestCustomPatterns -ParallelLoad:$ParallelLoad -SelectiveModules $SelectiveModules
 }
 
 <#
@@ -1286,7 +1289,7 @@ function Resolve-ConversionIntegrationForTest {
         'data/structured/sexpr'                = @{ ModuleType = 'Data'; SelectiveModules = @('sexpr.ps1'); EnsureData = $true }
         'data/structured/toml'                 = @{ ModuleType = 'Data'; SelectiveModules = @('toml.ps1'); EnsureData = $true }
         'data/structured/toon'                 = @{ ModuleType = 'Data'; SelectiveModules = @('toon.ps1'); EnsureData = $true }
-        'data/roundtrip/format-chain'            = @{ ModuleType = 'Data'; SelectiveModules = @('toon.ps1', 'toml.ps1'); EnsureData = $true }
+        'data/roundtrip/format-chain'            = @{ ModuleType = 'Data'; SelectiveModules = @('xml.ps1', 'toon.ps1', 'toml.ps1', 'text-gaps.ps1', 'json-extended.ps1'); EnsureData = $true }
         'data/roundtrip/multi-format-roundtrip'  = @{ ModuleType = 'Data'; SelectiveModules = @('toon.ps1', 'toml.ps1', 'superjson.ps1'); EnsureData = $true }
         'data/compression/xz-lzma'               = @{ ModuleType = 'Data'; SelectiveModules = @('xz.ps1'); EnsureData = $true }
         'data/compression/zlib'                  = @{ ModuleType = 'Data'; SelectiveModules = @('gzip.ps1'); EnsureData = $true }
@@ -1320,8 +1323,8 @@ function Resolve-ConversionIntegrationForTest {
             EnsureData       = $true
         }
         'data/encoding/octal-decimal-roman'    = @{ ModuleType = 'Data'; SelectiveModules = @('ascii.ps1', 'hex.ps1', 'binary.ps1', 'modhex.ps1', 'numeric.ps1', 'roman.ps1'); EnsureData = $true }
-        'data/encoding/uuid-guid'              = @{ ModuleType = 'Data'; SelectiveModules = @('uuid.ps1', 'guid.ps1'); EnsureData = $true }
-        'data/text-formats/xml-yaml'           = @{ ModuleType = 'Data'; SelectiveModules = @(); EnsureData = $true }
+        'data/encoding/uuid-guid'              = @{ ModuleType = 'Data'; SelectiveModules = @('uuid.ps1', 'guid.ps1', 'base32.ps1'); EnsureData = $true }
+        'data/text-formats/xml-yaml'           = @{ ModuleType = 'Data'; SelectiveModules = @('text-gaps.ps1', 'json-extended.ps1'); EnsureData = $true }
         'data/text-formats/jsonl-csv'          = @{ ModuleType = 'Data'; SelectiveModules = @('json-extended.ps1'); EnsureData = $true }
         'data/text-formats/jsonl-yaml'         = @{ ModuleType = 'Data'; SelectiveModules = @('json-extended.ps1'); EnsureData = $true }
         'data/structured/jsonl'                = @{ ModuleType = 'Data'; SelectiveModules = @('json-extended.ps1'); EnsureData = $true }
@@ -1329,19 +1332,21 @@ function Resolve-ConversionIntegrationForTest {
         'data/network/url-uri'                 = @{ ModuleType = 'Data'; SelectiveModules = @('network-url-uri.ps1'); EnsureData = $true }
         'data/network/http-headers'            = @{ ModuleType = 'Data'; SelectiveModules = @('network-http-headers.ps1'); EnsureData = $true }
         'data/network/mime-types'              = @{ ModuleType = 'Data'; SelectiveModules = @('network-mime-types.ps1'); EnsureData = $true }
+        'data/digest/hash-formats'             = @{ ModuleType = 'Data'; SelectiveModules = @('digest.ps1', 'base32.ps1'); EnsureData = $true }
+        'data/digest/checksum'                 = @{ ModuleType = 'Data'; SelectiveModules = @('digest.ps1'); EnsureData = $true }
         'data/database/sql-dump'               = @{ ModuleType = 'Data'; SelectiveModules = @('database-sql-dump.ps1'); EnsureData = $true }
         'data/database/sqlite'                 = @{ ModuleType = 'Data'; SelectiveModules = @('database-sqlite.ps1'); EnsureData = $true }
         'data/database/access'                 = @{ ModuleType = 'Data'; SelectiveModules = @('database-access.ps1'); EnsureData = $true }
         'data/database/dbf'                    = @{ ModuleType = 'Data'; SelectiveModules = @('database-dbf.ps1'); EnsureData = $true }
-        'data/binary-to-text/bson-to-csv'      = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
-        'data/binary-to-text/bson-to-yaml'     = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
-        'data/binary-to-text/cbor-to-csv'      = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
-        'data/binary-to-text/messagepack-to-csv' = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1'); EnsureData = $true }
+        'data/binary-to-text/bson-to-csv'      = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1', 'binary-simple.ps1'); EnsureData = $true }
+        'data/binary-to-text/bson-to-yaml'     = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1', 'binary-simple.ps1'); EnsureData = $true }
+        'data/binary-to-text/cbor-to-csv'      = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1', 'binary-simple.ps1'); EnsureData = $true }
+        'data/binary-to-text/messagepack-to-csv' = @{ ModuleType = 'Data'; SelectiveModules = @('binary-to-text.ps1', 'binary-simple.ps1'); EnsureData = $true }
         'data/binary/avro-schema-evolution'    = @{ ModuleType = 'Data'; SelectiveModules = @('binary-schema-avro.ps1'); EnsureData = $true }
-        'data/binary/bson-cbor'                = @{ ModuleType = 'Data'; SelectiveModules = @('binary-direct.ps1'); EnsureData = $true }
-        'data/binary/bson-messagepack'         = @{ ModuleType = 'Data'; SelectiveModules = @('binary-direct.ps1'); EnsureData = $true }
+        'data/binary/bson-cbor'                = @{ ModuleType = 'Data'; SelectiveModules = @('binary-direct.ps1', 'binary-simple.ps1'); EnsureData = $true }
+        'data/binary/bson-messagepack'         = @{ ModuleType = 'Data'; SelectiveModules = @('binary-direct.ps1', 'binary-simple.ps1'); EnsureData = $true }
         'data/binary/cbor'                     = @{ ModuleType = 'Data'; SelectiveModules = @('binary-simple.ps1'); EnsureData = $true }
-        'data/binary/messagepack-cbor'         = @{ ModuleType = 'Data'; SelectiveModules = @('binary-direct.ps1'); EnsureData = $true }
+        'data/binary/messagepack-cbor'         = @{ ModuleType = 'Data'; SelectiveModules = @('binary-direct.ps1', 'binary-simple.ps1'); EnsureData = $true }
         'data/units/units-edge-cases'          = @{
             ModuleType       = 'Data'
             SelectiveModules = @(
@@ -1351,8 +1356,10 @@ function Resolve-ConversionIntegrationForTest {
             EnsureData       = $true
         }
         'data/binary/capn-proto'               = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-capnp.ps1'); EnsureData = $true }
-        'data/binary/binary-formats'           = @{ ModuleType = 'Data'; SelectiveModules = @('binary-simple.ps1', 'binary-direct.ps1'); EnsureData = $true }
+        'data/binary/binary-formats'           = @{ ModuleType = 'Data'; SelectiveModules = @('binary-simple.ps1', 'binary-direct.ps1', 'binary-schema-avro.ps1'); EnsureData = $true }
         'data/columnar/delta-lake'             = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-delta.ps1'); EnsureData = $true }
+        'data/columnar/iceberg'                = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-iceberg.ps1'); EnsureData = $true }
+        'data/columnar/orc'                    = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-orc.ps1'); EnsureData = $true }
         'data/csv-xml/csv-xml-roundtrip'       = @{ ModuleType = 'Data'; SelectiveModules = @(); EnsureData = $true }
         'data/error-handling/conversion-errors' = @{ ModuleType = 'Data'; SelectiveModules = @('json.ps1'); EnsureData = $true }
         'document/html'                        = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Html'); EnsureDocuments = $true }
@@ -1432,9 +1439,16 @@ function Resolve-ConversionIntegrationForTest {
             @("database-$dbName.ps1")
         }
         'network' { @("network-$($testName -replace '-', '-').ps1") }
-        'columnar' { @("columnar-$testName.ps1") }
+        'columnar' {
+            $columnarMap = @{
+                'delta-lake' = @('binary-protocol-delta.ps1')
+                'iceberg'    = @('binary-protocol-iceberg.ps1')
+                'orc'        = @('binary-protocol-orc.ps1')
+            }
+            if ($columnarMap.ContainsKey($testName)) { $columnarMap[$testName] } else { @("columnar-$testName.ps1") }
+        }
         'binary' { @('binary-simple.ps1') }
-        'binary-to-text' { @('binary-to-text.ps1') }
+        'binary-to-text' { @('binary-to-text.ps1', 'binary-simple.ps1') }
         'units' { @("$testName.ps1") }
         'time' {
             $timeMap = @{
@@ -1480,6 +1494,7 @@ function Resolve-ConversionIntegrationForTest {
     if ($moduleType -eq 'Data') { $result['EnsureData'] = $true }
     if ($moduleType -eq 'Documents') { $result['EnsureDocuments'] = $true }
     if ($moduleType -eq 'Media') { $result['EnsureMedia'] = $true }
+    if ($moduleType -eq 'Specialized') { $result['EnsureSpecialized'] = $true }
     return $result
 }
 
@@ -1508,17 +1523,24 @@ function Initialize-ConversionIntegrationForTestFile {
     )
 
     if (-not $TestScriptPath) {
-        $callerFrame = Get-PSCallStack |
-            Where-Object { $_.ScriptName -and $_.ScriptName -like '*.tests.ps1' } |
-            Select-Object -First 1
-        if ($callerFrame) {
-            $TestScriptPath = $callerFrame.ScriptName
-        }
-        elseif ($PSCommandPath -like '*.tests.ps1') {
-            $TestScriptPath = $PSCommandPath
+        $conversionFrames = @(Get-PSCallStack |
+            Where-Object { $_.ScriptName -and $_.ScriptName -match 'integration[/\\]conversion[/\\].*\.tests\.ps1$' })
+        if ($conversionFrames.Count -gt 0) {
+            $TestScriptPath = $conversionFrames[-1].ScriptName
         }
         else {
-            throw 'Could not resolve test script path. Pass -TestScriptPath explicitly.'
+            $callerFrame = Get-PSCallStack |
+                Where-Object { $_.ScriptName -and $_.ScriptName -like '*.tests.ps1' } |
+                Select-Object -First 1
+            if ($callerFrame) {
+                $TestScriptPath = $callerFrame.ScriptName
+            }
+            elseif ($PSCommandPath -like '*.tests.ps1') {
+                $TestScriptPath = $PSCommandPath
+            }
+            else {
+                throw 'Could not resolve test script path. Pass -TestScriptPath explicitly.'
+            }
         }
     }
 
@@ -1531,6 +1553,7 @@ function Initialize-ConversionIntegrationForTestFile {
     if ($resolved.ContainsKey('EnsureData') -and $resolved.EnsureData) { $params['EnsureData'] = $true }
     if ($resolved.ContainsKey('EnsureDocuments') -and $resolved.EnsureDocuments) { $params['EnsureDocuments'] = $true }
     if ($resolved.ContainsKey('EnsureMedia') -and $resolved.EnsureMedia) { $params['EnsureMedia'] = $true }
+    if ($resolved.ContainsKey('EnsureSpecialized') -and $resolved.EnsureSpecialized) { $params['EnsureSpecialized'] = $true }
 
     Initialize-ConversionIntegration @params
 
@@ -1562,8 +1585,14 @@ function Initialize-ConversionIntegration {
 
         [switch]$EnsureDocuments,
 
-        [switch]$EnsureMedia
+        [switch]$EnsureMedia,
+
+        [switch]$EnsureSpecialized
     )
+
+    if (-not $env:PS_PROFILE_REPO_ROOT) {
+        $env:PS_PROFILE_REPO_ROOT = Split-Path -Parent $ProfileDir
+    }
 
     Initialize-TestProfile `
         -ProfileDir $ProfileDir `
@@ -1598,6 +1627,15 @@ function Initialize-ConversionIntegration {
         }
         elseif (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue) {
             Ensure-FileConversion-Media
+        }
+    }
+
+    if ($EnsureSpecialized) {
+        if ($SelectiveModules -and @($SelectiveModules).Count -gt 0) {
+            $global:FileConversionSpecializedInitialized = $true
+        }
+        elseif (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
         }
     }
 }

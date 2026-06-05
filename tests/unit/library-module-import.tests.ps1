@@ -62,14 +62,6 @@ Describe 'ModuleImport Module Functions' {
             [System.IO.Path]::IsPathRooted($result) | Should -Be $true
         }
 
-        It 'Throws when Get-RepoRoot is not available' {
-            Set-ItResult -Skipped -Because 'Requires removing Get-RepoRoot from global scope — complex to isolate without affecting other tests'
-        }
-
-        It 'Throws when scripts/lib directory does not exist' {
-            Set-ItResult -Skipped -Because 'Requires mocking Get-RepoRoot return value — covered indirectly by other path tests'
-        }
-
         It 'Uses cached value when available' {
             # Clear cache first
             if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
@@ -248,7 +240,7 @@ Describe 'ModuleImport Module Functions' {
         }
 
         It 'Handles ExitOnError when script path cannot be detected' {
-            { Initialize-ScriptEnvironment -ScriptPath '' -ExitOnError } | Should -Throw '*Failed to resolve*'
+            { Initialize-ScriptEnvironment -ScriptPath '' -ExitOnError } | Should -Throw '*ScriptPath cannot be null or empty*'
         }
 
         It 'Handles ExitOnError when module import fails' {

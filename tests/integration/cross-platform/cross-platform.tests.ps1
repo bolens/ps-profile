@@ -56,6 +56,10 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
         It 'functions work with both Windows and Unix-style paths' {
             . (Join-Path $script:ProfileDir 'bootstrap.ps1')
             . (Join-Path $script:ProfileDir 'files.ps1')
+            $navigationModule = Join-Path $script:ProfileDir 'files-modules' 'navigation' 'files-navigation.ps1'
+            if ($navigationModule -and (Test-Path -LiteralPath $navigationModule)) {
+                . $navigationModule
+            }
             if (Get-Command Ensure-FileNavigation -ErrorAction SilentlyContinue) {
                 Ensure-FileNavigation
             }

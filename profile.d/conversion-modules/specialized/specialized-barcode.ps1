@@ -39,16 +39,8 @@ function Initialize-FileConversion-SpecializedBarcode {
                 throw "Node.js is not available. Install Node.js to use barcode generation."
             }
             
-            if ($Data) {
-                $data = $Data
-            }
-            elseif ($InputPath) {
-                $data = Get-Content -LiteralPath $InputPath -Raw
-                $data = $data.Trim()
-            }
-            else {
-                throw "Either InputPath or Data parameter must be provided"
-            }
+            $data = Get-Content -LiteralPath $InputPath -Raw
+            $data = $data.Trim()
             
             $nodeScript = @"
 try {
@@ -195,17 +187,22 @@ function ConvertTo-BarcodeFromText {
         [ValidateSet('CODE128', 'CODE39', 'EAN13', 'EAN8', 'UPC', 'ITF14', 'MSI', 'pharmacode', 'codabar')]
         [string]$Format = 'CODE128'
     )
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertTo-BarcodeFromText -ErrorAction SilentlyContinue) {
             _ConvertTo-BarcodeFromText -InputPath $InputPath -OutputPath $OutputPath -Format $Format
         }
         else {
-            Write-Error "Internal conversion function _ConvertTo-BarcodeFromText not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertTo-BarcodeFromText not available'
         }
     }
     catch {
-        Write-Error "Failed to convert text to barcode: $_" -ErrorAction SilentlyContinue
+        throw "Failed to convert text to barcode: $_"
     }
 }
 Set-AgentModeAlias -Name 'text-to-barcode' -Target 'ConvertTo-BarcodeFromText'
@@ -237,17 +234,22 @@ function ConvertTo-BarcodeFromJson {
         [ValidateSet('CODE128', 'CODE39', 'EAN13', 'EAN8', 'UPC', 'ITF14', 'MSI', 'pharmacode', 'codabar')]
         [string]$Format = 'CODE128'
     )
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertTo-BarcodeFromJson -ErrorAction SilentlyContinue) {
             _ConvertTo-BarcodeFromJson -InputPath $InputPath -OutputPath $OutputPath -Format $Format
         }
         else {
-            Write-Error "Internal conversion function _ConvertTo-BarcodeFromJson not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertTo-BarcodeFromJson not available'
         }
     }
     catch {
-        Write-Error "Failed to convert JSON to barcode: $_" -ErrorAction SilentlyContinue
+        throw "Failed to convert JSON to barcode: $_"
     }
 }
 Set-AgentModeAlias -Name 'json-to-barcode' -Target 'ConvertTo-BarcodeFromJson'
@@ -273,17 +275,22 @@ Set-AgentModeAlias -Name 'json-to-barcode' -Target 'ConvertTo-BarcodeFromJson'
 #>
 function ConvertFrom-BarcodeToText {
     param([string]$InputPath, [string]$OutputPath)
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertFrom-BarcodeToText -ErrorAction SilentlyContinue) {
             _ConvertFrom-BarcodeToText @PSBoundParameters
         }
         else {
-            Write-Error "Internal conversion function _ConvertFrom-BarcodeToText not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertFrom-BarcodeToText not available'
         }
     }
     catch {
-        Write-Error "Failed to decode barcode: $_" -ErrorAction SilentlyContinue
+        throw "Failed to decode barcode: $_"
     }
 }
 Set-AgentModeAlias -Name 'barcode-to-text' -Target 'ConvertFrom-BarcodeToText'

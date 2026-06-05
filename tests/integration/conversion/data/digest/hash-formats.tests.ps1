@@ -14,7 +14,7 @@
 Describe 'Hash Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'hash-formats.tests.ps1')
     }
 
     Context 'Hash Format Conversions' {

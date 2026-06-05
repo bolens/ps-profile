@@ -35,6 +35,10 @@
 #>
 
 [CmdletBinding()]
+param(
+    [string[]]$Path = @('profile.d/bootstrap'),
+    [string]$OutputPath = 'scripts/data/coverage'
+)
 
 # Import ExitCodes for standardized exit handling
 $_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
@@ -50,10 +54,6 @@ if (Test-Path $_ewcLibPath) {
     function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
     enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
 }
-param(
-    [string[]]$Path = @('profile.d/bootstrap'),
-    [string]$OutputPath = 'scripts/data/coverage'
-)
 
 # Parse debug level once at script start
 $debugLevel = 0
@@ -351,9 +351,9 @@ if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
     }
 }
 
-# Remove duplicates
-$testFiles = $testFiles | Select-Object -Unique
-$sourceFiles = $sourceFiles | Select-Object -Unique
+# Remove duplicates (force arrays — Select-Object -Unique returns a scalar when count is 1)
+$testFiles = @($testFiles | Select-Object -Unique)
+$sourceFiles = @($sourceFiles | Select-Object -Unique)
 
 $discoveryDuration = ((Get-Date) - $discoveryStartTime).TotalMilliseconds
 
@@ -531,7 +531,7 @@ if ($result.CodeCoverage) {
         ($coverageObj.CommandsAnalyzedCount -and $coverageObj.CommandsAnalyzedCount -gt 0) -or
         ($coverageObj.CoveragePercent -and $coverageObj.CoveragePercent -gt 0) -or
         ($coverageObj.CommandsExecutedCount -and $coverageObj.CommandsExecutedCount -gt 0) -or
-        ($coverageObj.CoverageReport -and $coverageObj.CoverageReport.Count -gt 0) -or
+        ($coverageObj.CoverageReport -and @($coverageObj.CoverageReport).Count -gt 0) -or
         ($coverageObj.CommandsMissedCount -and $coverageObj.CommandsMissedCount -ge 0)
     )
     
@@ -547,7 +547,7 @@ elseif ($result.Coverage) {
         ($coverageObj.NumberOfCommandsAnalyzed -and $coverageObj.NumberOfCommandsAnalyzed -gt 0) -or
         ($coverageObj.CoveragePercent -and $coverageObj.CoveragePercent -gt 0) -or
         ($coverageObj.NumberOfCommandsExecuted -and $coverageObj.NumberOfCommandsExecuted -gt 0) -or
-        ($coverageObj.CoveredPercent -and $coverageObj.CoveredPercent.Count -gt 0)
+        ($null -ne $coverageObj.CoveredPercent -and @($coverageObj.CoveredPercent).Count -gt 0)
     )
 }
 

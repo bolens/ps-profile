@@ -49,9 +49,7 @@ function Initialize-DevTools-NumberBase {
                     number    = $Number
                 }
             }
-            else {
-                Write-Error "Failed to convert number base: $_"
-            }
+            throw "Failed to convert number base: $_"
         }
     } -Force
 }

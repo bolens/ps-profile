@@ -14,7 +14,7 @@
 Describe 'URL/URI Parsing and Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'url-uri.tests.ps1')
     }
 
     Context 'URL/URI Parsing and Conversions' {
@@ -109,10 +109,10 @@ Describe 'URL/URI Parsing and Conversion Tests' {
         It 'Handles URLs without query string' {
             $url = 'https://example.com/path'
             $parsed = Parse-UrlUri -Url $url
-            
+
             $parsed | Should -Not -BeNullOrEmpty
-            $parsed.QueryParameters | Should -Not -BeNullOrEmpty
-            $parsed.QueryParameters.Count | Should -Be 0
+            $parsed.QueryParameters | Should -Not -Be $null
+            @($parsed.QueryParameters.Keys).Count | Should -Be 0
         }
 
         It 'Handles URLs with multiple query parameters with same key' {
@@ -120,7 +120,7 @@ Describe 'URL/URI Parsing and Conversion Tests' {
             $parsed = Parse-UrlUri -Url $url
             
             $parsed.QueryParameters.tag | Should -Not -BeNullOrEmpty
-            $parsed.QueryParameters.tag | Should -BeOfType [System.Array]
+            $parsed.QueryParameters.tag.GetType().IsArray | Should -BeTrue
             $parsed.QueryParameters.tag.Count | Should -Be 3
         }
     }

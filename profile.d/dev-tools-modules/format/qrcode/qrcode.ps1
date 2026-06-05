@@ -50,9 +50,9 @@ function Initialize-DevTools-QrCode {
 try {
     const QRCode = require('qrcode');
     const fs = require('fs');
-    const data = process.argv[1];
-    const outputPath = process.argv[2];
-    const options = JSON.parse(process.argv[3]);
+    const data = process.argv[2];
+    const outputPath = process.argv[3];
+    const options = JSON.parse(process.argv[4]);
     QRCode.toFile(outputPath, data, options, (err) => {
         if (err) {
             console.error('Error:', err.message);

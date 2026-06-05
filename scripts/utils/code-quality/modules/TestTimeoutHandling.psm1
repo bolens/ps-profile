@@ -250,9 +250,20 @@ function Invoke-PesterWithTimeout {
                     throw "Test execution completed but returned no result"
                 }
 
+                # EndInvoke returns Object[] when the runspace emits multiple pipeline objects
+                if ($jobResult -is [System.Collections.IEnumerable] -and $jobResult -isnot [string]) {
+                    $wrapperResults = @($jobResult) | Where-Object {
+                        $_ -is [hashtable] -and $_.ContainsKey('Success')
+                    }
+                    $wrapperResults = @($wrapperResults)
+                    if ($wrapperResults.Length -gt 0) {
+                        $jobResult = $wrapperResults[-1]
+                    }
+                }
+
                 if ($jobResult.Success) {
                     $result = $jobResult.Result
-                    Write-ScriptMessage -Message "Test execution completed within timeout"
+                    $null = Write-ScriptMessage -Message "Test execution completed within timeout"
                 }
                 else {
                     throw "Test execution failed: $($jobResult.Error.Message)"
@@ -317,10 +328,11 @@ function Invoke-PesterWithTimeout {
     }
 
     if ($TotalRuns -gt 1) {
-        Write-ScriptMessage -Message "Completed test run $RunNumber of $TotalRuns - Passed: $($result.PassedCount), Failed: $($result.FailedCount)"
+        $null = Write-ScriptMessage -Message "Completed test run $RunNumber of $TotalRuns - Passed: $($result.PassedCount), Failed: $($result.FailedCount)"
     }
 
-    return $result
+    # Comma prefix ensures a single Pester.Run is returned even if callers collected pipeline noise
+    return ,$result
 }
 
 Export-ModuleMember -Function Invoke-PesterWithTimeout

@@ -185,14 +185,15 @@ function Parse-QueryString {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$QueryString
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     process {
-        if ([string]::IsNullOrWhiteSpace($QueryString)) {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $queryText = if ($null -ne $QueryString) { $QueryString } else { $_ }
+        if ([string]::IsNullOrWhiteSpace($queryText)) {
             return @{}
         }
         try {
             if (Get-Command _Parse-QueryString -ErrorAction SilentlyContinue) {
-                return _Parse-QueryString -QueryString $QueryString
+                return _Parse-QueryString -QueryString $queryText
             }
             else {
                 Write-Error "Internal parsing function _Parse-QueryString not available" -ErrorAction SilentlyContinue

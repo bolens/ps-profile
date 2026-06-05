@@ -14,7 +14,7 @@
 Describe 'HTTP Headers Parsing and Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'http-headers.tests.ps1')
     }
 
     Context 'HTTP Headers Parsing and Conversions' {
@@ -88,7 +88,7 @@ Set-Cookie: theme=dark
             $parsed = Parse-HttpHeaders -Headers $headers
             
             $parsed.'Set-Cookie' | Should -Not -BeNullOrEmpty
-            $parsed.'Set-Cookie' | Should -BeOfType [System.Array]
+            $parsed.'Set-Cookie'.GetType().IsArray | Should -BeTrue
             $parsed.'Set-Cookie'.Count | Should -Be 2
         }
 
@@ -109,8 +109,8 @@ Set-Cookie: theme=dark
 
         It 'Handles empty headers' {
             $parsed = Parse-HttpHeaders -Headers ''
-            $parsed | Should -Not -BeNullOrEmpty
-            $parsed.Count | Should -Be 0
+            $parsed | Should -Not -Be $null
+            @($parsed.Keys).Count | Should -Be 0
         }
     }
 }

@@ -14,7 +14,7 @@
 Describe 'Query String Parsing and Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'query-string.tests.ps1')
     }
 
     Context 'Query String Parsing and Conversions' {
@@ -113,8 +113,8 @@ Describe 'Query String Parsing and Conversion Tests' {
 
         It 'Handles empty query string' {
             $parsed = Parse-QueryString -QueryString ''
-            $parsed | Should -Not -BeNullOrEmpty
-            $parsed.Count | Should -Be 0
+            $parsed | Should -Not -Be $null
+            @($parsed.Keys).Count | Should -Be 0
         }
     }
 }

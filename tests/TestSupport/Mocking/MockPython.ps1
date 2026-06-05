@@ -48,8 +48,7 @@ function Mock-PythonTools {
     
     # Mock Get-PythonPath
     if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {
-        Mock -CommandName Get-PythonPath -MockWith { return $PythonPath } -Scope It
-    }
+        Mock -CommandName Get-PythonPath -MockWith { return $PythonPath }    }
     else {
         # Create function mock if command doesn't exist
         Set-Item -Path Function:\Get-PythonPath -Value { return $PythonPath } -Force -ErrorAction SilentlyContinue
@@ -73,8 +72,7 @@ function Mock-PythonTools {
         Mock -CommandName Get-DataFrameLibraryPreference -MockWith { 
             param([string]$PythonCmd)
             return $libInfo
-        } -Scope It
-    }
+        }    }
     else {
         # Create function mock if command doesn't exist
         $mockScript = {
@@ -99,8 +97,7 @@ function Mock-PythonTools {
                 'pyreadstat' { return $PyreadstatAvailable }
                 default { return $false }
             }
-        } -Scope It
-    }
+        }    }
     else {
         # Create function mock if command doesn't exist
         $mockScript = {
@@ -168,11 +165,9 @@ function Mock-PythonScriptExecution {
         }
         
         if ($ScriptPath) {
-            Mock -CommandName Invoke-PythonScript -ParameterFilter { $ScriptPath -eq $ScriptPath } -MockWith $mockWith -Scope It
-        }
+            Mock -CommandName Invoke-PythonScript -ParameterFilter { $ScriptPath -eq $ScriptPath } -MockWith $mockWith        }
         else {
-            Mock -CommandName Invoke-PythonScript -MockWith $mockWith -Scope It
-        }
+            Mock -CommandName Invoke-PythonScript -MockWith $mockWith        }
     }
     
     # Also mock direct Python command execution
@@ -205,8 +200,7 @@ function Mock-PythonScriptExecution {
         # Mock the command execution operator
         # Note: This is tricky - we can't directly mock &, but we can mock the command itself
         if (Test-Path "Function:\$pythonCmd") {
-            Mock -CommandName $pythonCmd -MockWith $mockWith -Scope It
-        }
+            Mock -CommandName $pythonCmd -MockWith $mockWith        }
     }
 }
 

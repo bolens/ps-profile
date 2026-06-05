@@ -140,9 +140,6 @@ Describe 'NodeJs Module Functions' {
             $env:NODE_PATH | Should -Be '/original-test-path'
         }
 
-        It 'Sets NODE_PATH when pnpm global path is available' {
-            Set-ItResult -Skipped -Because 'requires pnpm with a populated global store — tested indirectly via Set-NodePathForPnpm'
-        }
     }
 
     Context 'Set-NodePathForPnpm' {

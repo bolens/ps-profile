@@ -34,9 +34,9 @@ function Initialize-DevTools-QrCode-Formats {
 try {
     const QRCode = require('qrcode');
     const fs = require('fs');
-    const data = process.argv[1];
-    const outputPath = process.argv[2];
-    const options = JSON.parse(process.argv[3]);
+    const data = process.argv[2];
+    const outputPath = process.argv[3];
+    const options = JSON.parse(process.argv[4]);
     QRCode.toFile(outputPath, data, options, (err) => {
         if (err) {
             console.error('Error:', err.message);
@@ -99,8 +99,8 @@ try {
             $nodeScript = @"
 try {
     const QRCode = require('qrcode');
-    const data = process.argv[1];
-    const small = process.argv[2] === 'true';
+    const data = process.argv[2];
+    const small = process.argv[3] === 'true';
     QRCode.toString(data, { type: 'terminal', small: small }, (err, string) => {
         if (err) {
             console.error('Error:', err.message);
@@ -160,8 +160,8 @@ try {
             $nodeScript = @"
 try {
     const QRCode = require('qrcode');
-    const data = process.argv[1];
-    const options = JSON.parse(process.argv[2]);
+    const data = process.argv[2];
+    const options = JSON.parse(process.argv[3]);
     QRCode.toDataURL(data, options, (err, url) => {
         if (err) {
             console.error('Error:', err.message);

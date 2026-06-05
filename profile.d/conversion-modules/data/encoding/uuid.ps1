@@ -119,10 +119,12 @@ function Initialize-FileConversion-CoreEncodingUuid {
         process {
             if ([string]::IsNullOrWhiteSpace($Uuid)) { return }
             try {
-                # Use existing Base32 conversion if available
-                if (Get-Command _ConvertFrom-HexToBase32 -ErrorAction SilentlyContinue) {
+                if (Get-Command _Encode-Base32 -ErrorAction SilentlyContinue) {
                     $hex = _ConvertFrom-UuidToHex -Uuid $Uuid
-                    Write-Output (_ConvertFrom-HexToBase32 -InputObject $hex)
+                    $bytes = for ($i = 0; $i -lt $hex.Length; $i += 2) {
+                        [Convert]::ToByte($hex.Substring($i, 2), 16)
+                    }
+                    Write-Output (_Encode-Base32 -Bytes $bytes)
                 }
                 else {
                     throw "Base32 conversion not available. Ensure core-encoding-base32.ps1 is loaded."
@@ -143,9 +145,12 @@ function Initialize-FileConversion-CoreEncodingUuid {
         process {
             if ([string]::IsNullOrWhiteSpace($Base32)) { return }
             try {
-                # Use existing Base32 conversion if available
-                if (Get-Command _ConvertFrom-Base32ToHex -ErrorAction SilentlyContinue) {
-                    $hex = _ConvertFrom-Base32ToHex -InputObject $Base32
+                if (Get-Command _Decode-Base32 -ErrorAction SilentlyContinue) {
+                    $bytes = _Decode-Base32 -Base32String $Base32
+                    if ($bytes.Length -ne 16) {
+                        throw "Invalid Base32: expected 16 bytes for UUID"
+                    }
+                    $hex = ($bytes | ForEach-Object { $_.ToString('X2') }) -join ''
                     Write-Output (_ConvertTo-UuidFromHex -Hex $hex)
                 }
                 else {

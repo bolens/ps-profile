@@ -33,13 +33,12 @@ function Initialize-FileConversion-CoreEncodingBase91 {
         $b = [uint64]0  # Use unsigned to avoid sign extension issues
         $n = 0
         for ($i = 0; $i -lt $Bytes.Length; $i++) {
-            # Match Python: b |= byte << n
-            $b = $b -bor ($Bytes[$i] -shl $n)
+            # Match Python: b |= byte << n (cast to uint64 to avoid sign-extension on shift)
+            $byteVal = [uint64]$Bytes[$i]
+            $b = $b -bor ($byteVal -shl $n)
             $n += 8
-            # Match Python: if n>13: (process when we have more than 13 bits)
-            # Note: Python uses 'if' not 'while', but we need to process all available bits
-            # So we use 'while' to continue processing until n <= 13
-            while ($n -gt 13) {
+            # Match Python: if n>13: (process once per input byte)
+            if ($n -gt 13) {
                 # Match Python: v = b & 8191 (0x1FFF) - get lower 13 bits
                 $v = $b -band 0x1FFF
                 if ($v -gt 88) {
@@ -107,8 +106,8 @@ function Initialize-FileConversion-CoreEncodingBase91 {
                 # Match Python: v += c*91
                 $v = $v + ($c * 91)
                 
-                # Match Python: b |= v << n
-                $b = $b -bor ($v -shl $n)
+                # Match Python: b |= v << n (cast to uint64 to avoid sign-extension on shift)
+                $b = $b -bor ([uint64]$v -shl $n)
                 
                 # Match Python: n += 13 if (v & 8191)>88 else 14
                 if (($v -band 0x1FFF) -gt 88) {
@@ -132,7 +131,7 @@ function Initialize-FileConversion-CoreEncodingBase91 {
         
         # Handle trailing single character (matching Python reference: if v+1)
         if ($v -ge 0) {
-            [void]$bytes.Add([byte](($b -bor ($v -shl $n)) -band 0xFF))
+            [void]$bytes.Add([byte](($b -bor ([uint64]$v -shl $n)) -band 0xFF))
         }
         
         return $bytes.ToArray()

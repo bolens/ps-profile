@@ -174,14 +174,17 @@ Describe "Starship Module Tests" {
             $global:SmartPromptInitialized | Should -Be $true
         }
 
-        It "Sets up command timing tracking when performance hooks are available" -Skip:(-not (Get-Command Skip -ErrorAction SilentlyContinue)) {
+        It "Sets up command timing tracking when performance hooks are available" {
             Initialize-SmartPrompt
 
-            # PreCommandLookupAction should always be set by Initialize-SmartPrompt
+            if (-not $ExecutionContext.SessionState.InvokeCommand.PreCommandLookupAction) {
+                Set-ItResult -Skipped -Because 'PreCommandLookupAction is not available in this PowerShell host'
+                return
+            }
+
             $ExecutionContext.SessionState.InvokeCommand.PreCommandLookupAction | Should -Not -BeNullOrEmpty
 
             # PostCommandLookupAction is only present when performance insights hooks are installed.
-            # In minimal environments (like CI), this may legitimately be null, so treat that as a skip.
             if ($ExecutionContext.SessionState.InvokeCommand.PostCommandLookupAction) {
                 $ExecutionContext.SessionState.InvokeCommand.PostCommandLookupAction | Should -Not -BeNullOrEmpty
             }

@@ -25,6 +25,13 @@ Describe 'Git Integration Tests' {
                 throw "Git fragment not found at: $gitPath"
             }
             . $gitPath
+
+            $registryPath = Join-Path $script:ProfileDir 'files-module-registry.ps1'
+            if (-not (Test-Path -LiteralPath $registryPath)) {
+                throw "Module registry not found at: $registryPath"
+            }
+            . $registryPath
+            Ensure-Git
         }
         catch {
             $errorDetails = @{
@@ -38,6 +45,15 @@ Describe 'Git Integration Tests' {
     }
 
     Context 'Git helpers' {
+        AfterEach {
+            if (Get-Command Set-TestCommandAvailabilityState -ErrorAction SilentlyContinue) {
+                Set-TestCommandAvailabilityState -CommandName 'git' -Available $false
+            }
+            if (Get-Command Clear-TestCommandInvocationCapture -ErrorAction SilentlyContinue) {
+                Clear-TestCommandInvocationCapture
+            }
+        }
+
         It 'git shortcuts handle non-git directories' {
             $nonGitDir = Join-Path $TestDrive 'non_git'
             New-Item -ItemType Directory -Path $nonGitDir -Force | Out-Null
@@ -63,31 +79,36 @@ Describe 'Git Integration Tests' {
         }
 
         It 'git shortcuts forward arguments correctly' {
-            # Mock git as available for consistent test behavior
-            Mock-CommandAvailabilityPester -CommandName 'git' -Available $true
-            
             $testDir = Join-Path $TestDrive 'git_test'
             New-Item -ItemType Directory -Path $testDir -Force | Out-Null
 
             Push-Location $testDir
             try {
-                # Mock git init to avoid actual git operations
-                Mock -CommandName 'git' -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains 'init') {
-                        $global:LASTEXITCODE = 0
+                Setup-CapturingCommandMock -CommandName 'git' -OnInvoke {
+                    $flatArgs = @($args)
+                    $global:TestCommandCaptureState['ExitCode'] = 0
+                    if ($flatArgs -contains 'rev-parse') {
+                        return 'true'
+                    }
+                    if ($flatArgs -contains 'show-ref') {
                         return
                     }
-                    # For other git commands, return empty output
-                    $global:LASTEXITCODE = 0
                     return ''
                 }
-                
+
                 git init --quiet 2>&1 | Out-Null
                 gs --short
-                Should -Invoke -CommandName 'git' -Times 1 -Exactly
+
+                $statusCalls = @($global:TestCommandInvocationCaptures | Where-Object { $_ -contains 'status' })
+                $statusCalls.Count | Should -Be 1
+                $statusCalls[0] | Should -Contain '--short'
+
                 gl --oneline -5
-                Should -Invoke -CommandName 'git' -Times 1 -Exactly
+
+                $logCalls = @($global:TestCommandInvocationCaptures | Where-Object { $_ -contains 'log' })
+                $logCalls.Count | Should -Be 1
+                $logCalls[0] | Should -Contain '--oneline'
+                $logCalls[0] | Should -Contain '-5'
             }
             finally {
                 Pop-Location
@@ -149,29 +170,21 @@ Describe 'Git Integration Tests' {
         }
 
         It 'Test-GitRepositoryHasCommits returns false in empty repo' {
-            # Mock git as available for consistent test behavior
-            Mock-CommandAvailabilityPester -CommandName 'git' -Available $true
-            
             $emptyRepoDir = Join-Path $TestDrive 'empty_git'
             New-Item -ItemType Directory -Path $emptyRepoDir -Force | Out-Null
 
             Push-Location $emptyRepoDir
             try {
-                # Mock git init and git log to simulate empty repo
-                Mock -CommandName 'git' -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains 'init') {
-                        $global:LASTEXITCODE = 0
+                Setup-CapturingCommandMock -CommandName 'git' -OnInvoke {
+                    $flatArgs = @($args)
+                    if ($flatArgs -contains 'show-ref') {
+                        $global:TestCommandCaptureState['ExitCode'] = 1
                         return
                     }
-                    if ($ArgumentList -contains 'log') {
-                        $global:LASTEXITCODE = 0
-                        return ''  # Empty log = no commits
-                    }
-                    $global:LASTEXITCODE = 0
+                    $global:TestCommandCaptureState['ExitCode'] = 0
                     return ''
                 }
-                
+
                 git init --quiet 2>&1 | Out-Null
                 $result = Test-GitRepositoryHasCommits
                 $result | Should -Be $false

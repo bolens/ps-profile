@@ -43,9 +43,10 @@ function Initialize-FileConversion-NetworkHttpHeaders {
             }
             
             # Parse header: Name: Value
-            if ($line -match '^([^:]+):\s*(.*)$') {
-                $headerName = $matches[1].Trim()
-                $headerValue = $matches[2].Trim()
+            $headerMatch = [regex]::Match($line, '^([^:]+):\s*(.*)$')
+            if ($headerMatch.Success) {
+                $headerName = $headerMatch.Groups[1].Value.Trim()
+                $headerValue = $headerMatch.Groups[2].Value.Trim()
                 
                 # HTTP header names are case-insensitive, but we'll preserve original case
                 # Check if header already exists (case-insensitive)
@@ -193,14 +194,15 @@ function Parse-HttpHeaders {
         [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
         [string]$Headers
     )
-    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
     process {
-        if ([string]::IsNullOrWhiteSpace($Headers)) {
+        if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+        $headerText = if ($null -ne $Headers) { $Headers } else { $_ }
+        if ([string]::IsNullOrWhiteSpace($headerText)) {
             return @{}
         }
         try {
             if (Get-Command _Parse-HttpHeaders -ErrorAction SilentlyContinue) {
-                return _Parse-HttpHeaders -Headers $Headers
+                return _Parse-HttpHeaders -Headers $headerText
             }
             else {
                 Write-Error "Internal parsing function _Parse-HttpHeaders not available" -ErrorAction SilentlyContinue

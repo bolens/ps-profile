@@ -18,17 +18,13 @@
     - JWT encoding and decoding
     - Barcode generation and decoding
 #>
+# Load sub-modules at script scope so public functions persist after initialization
+$specializedDir = $PSScriptRoot
+. (Join-Path $specializedDir 'specialized-qrcode.ps1')
+. (Join-Path $specializedDir 'specialized-jwt.ps1')
+. (Join-Path $specializedDir 'specialized-barcode.ps1')
+
 function Initialize-FileConversion-Specialized {
-    # Load sub-modules
-    # $PSScriptRoot is already the specialized directory
-    $specializedDir = $PSScriptRoot
-    
-    # Load modules
-    . (Join-Path $specializedDir 'specialized-qrcode.ps1')
-    . (Join-Path $specializedDir 'specialized-jwt.ps1')
-    . (Join-Path $specializedDir 'specialized-barcode.ps1')
-    
-    # Initialize all sub-modules
     Initialize-FileConversion-SpecializedQrCode
     Initialize-FileConversion-SpecializedJwt
     Initialize-FileConversion-SpecializedBarcode

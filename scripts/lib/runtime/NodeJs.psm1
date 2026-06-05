@@ -216,6 +216,45 @@ function Get-PnpmGlobalPath {
 
 <#
 .SYNOPSIS
+    Gets Node.js module search paths for global and repo-local packages.
+.OUTPUTS
+    System.String[]
+#>
+function Get-NodeModuleSearchPaths {
+    $paths = [System.Collections.Generic.List[string]]::new()
+
+    $pnpmPath = Get-PnpmGlobalPath
+    if ($pnpmPath) {
+        $paths.Add($pnpmPath)
+    }
+
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+        try {
+            $npmRootOutput = npm root -g 2>&1
+            $npmRoot = $npmRootOutput | Where-Object { $_ -and -not ($_ -match 'warn|error|npm ERR') } | Select-Object -Last 1
+            if ($npmRoot -and (Test-Path -LiteralPath $npmRoot)) {
+                $paths.Add($npmRoot.ToString().Trim())
+            }
+        }
+        catch {
+            # Ignore npm root lookup failures
+        }
+    }
+
+    foreach ($base in @($global:BinaryConversionBasePath, $env:PS_PROFILE_REPO_ROOT)) {
+        if ($base -and -not [string]::IsNullOrWhiteSpace($base)) {
+            $localModules = Join-Path $base 'node_modules'
+            if (Test-Path -LiteralPath $localModules) {
+                $paths.Add($localModules)
+            }
+        }
+    }
+
+    return @($paths | Select-Object -Unique)
+}
+
+<#
+.SYNOPSIS
     Executes a Node.js script with proper NODE_PATH configuration.
 .DESCRIPTION
     Executes a Node.js script, automatically setting NODE_PATH to include
@@ -264,35 +303,34 @@ function Invoke-NodeScript {
         throw "Node.js command found at '$($nodeCommand.Source)' but is not executable: $($_.Exception.Message)"
     }
     
-    $pnpmGlobalPath = Get-PnpmGlobalPath
+    $moduleSearchPaths = @(Get-NodeModuleSearchPaths)
     $originalNodePath = $env:NODE_PATH
     
     try {
-        # Set NODE_PATH to include pnpm global if available
-        if ($pnpmGlobalPath) {
+        if ($moduleSearchPaths.Count -gt 0) {
             try {
+                $joinedSearchPaths = $moduleSearchPaths -join [IO.Path]::PathSeparator
                 if ($env:NODE_PATH) {
-                    $env:NODE_PATH = "$pnpmGlobalPath;$env:NODE_PATH"
+                    $env:NODE_PATH = "$joinedSearchPaths$([IO.Path]::PathSeparator)$env:NODE_PATH"
                 }
                 else {
-                    $env:NODE_PATH = $pnpmGlobalPath
+                    $env:NODE_PATH = $joinedSearchPaths
                 }
             }
             catch {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                     if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Failed to set NODE_PATH: $($_.Exception.Message). Continuing without pnpm global path." -OperationName 'nodejs.invoke-script' -Context @{
+                        Write-StructuredWarning -Message "Failed to set NODE_PATH: $($_.Exception.Message). Continuing without configured module paths." -OperationName 'nodejs.invoke-script' -Context @{
                             ScriptPath = $ScriptPath
-                            PnpmGlobalPath = $pnpmGlobalPath
+                            ModuleSearchPaths = $moduleSearchPaths
                             Error = $_.Exception.Message
                         }
                     }
                     else {
-                        Write-Warning "[nodejs.invoke-script] Failed to set NODE_PATH: $($_.Exception.Message). Continuing without pnpm global path."
+                        Write-Warning "[nodejs.invoke-script] Failed to set NODE_PATH: $($_.Exception.Message). Continuing without configured module paths."
                     }
                 }
-                # Level 3: Log detailed error information
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
                     Write-Host "  [nodejs.invoke-script] NODE_PATH error details - Exception: $($_.Exception.GetType().FullName), Message: $($_.Exception.Message)" -ForegroundColor DarkGray
                 }
@@ -378,7 +416,7 @@ function Invoke-NodeScript {
             if ($originalNodePath) {
                 $env:NODE_PATH = $originalNodePath
             }
-            elseif ($pnpmGlobalPath) {
+            elseif ($moduleSearchPaths.Count -gt 0) {
                 Remove-Item Env:\NODE_PATH -ErrorAction SilentlyContinue
             }
         }
@@ -390,7 +428,7 @@ function Invoke-NodeScript {
                         Write-StructuredWarning -Message "Failed to restore NODE_PATH: $($_.Exception.Message)" -OperationName 'nodejs.invoke-script' -Context @{
                             ScriptPath = $ScriptPath
                             OriginalNodePath = $originalNodePath
-                            PnpmGlobalPath = $pnpmGlobalPath
+                            ModuleSearchPaths = $moduleSearchPaths
                             Error = $_.Exception.Message
                         }
                     }
@@ -428,15 +466,16 @@ function Invoke-NodeScript {
     A script block that restores the original NODE_PATH when invoked.
 #>
 function Set-NodePathForPnpm {
-    $pnpmGlobalPath = Get-PnpmGlobalPath
+    $moduleSearchPaths = @(Get-NodeModuleSearchPaths)
     $originalNodePath = $env:NODE_PATH
     
-    if ($pnpmGlobalPath) {
+    if ($moduleSearchPaths.Count -gt 0) {
+        $joinedSearchPaths = $moduleSearchPaths -join [IO.Path]::PathSeparator
         if ($env:NODE_PATH) {
-            $env:NODE_PATH = "$pnpmGlobalPath;$env:NODE_PATH"
+            $env:NODE_PATH = "$joinedSearchPaths$([IO.Path]::PathSeparator)$env:NODE_PATH"
         }
         else {
-            $env:NODE_PATH = $pnpmGlobalPath
+            $env:NODE_PATH = $joinedSearchPaths
         }
     }
     
@@ -445,7 +484,7 @@ function Set-NodePathForPnpm {
         if ($originalNodePath) {
             $env:NODE_PATH = $originalNodePath
         }
-        elseif ($pnpmGlobalPath) {
+        elseif ($moduleSearchPaths.Count -gt 0) {
             Remove-Item Env:\NODE_PATH -ErrorAction SilentlyContinue
         }
     }.GetNewClosure()

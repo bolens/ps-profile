@@ -57,7 +57,10 @@ function Initialize-FileConversion-SpecializedJwt {
             else {
                 throw "JWT encoding function not available. Ensure dev-tools are loaded."
             }
-            
+            if ([string]::IsNullOrWhiteSpace($token)) {
+                throw 'JWT encoding produced an empty token.'
+            }
+
             Set-Content -LiteralPath $OutputPath -Value $token -Encoding UTF8 -NoNewline
         }
         catch {
@@ -82,7 +85,10 @@ function Initialize-FileConversion-SpecializedJwt {
             
             $token = Get-Content -LiteralPath $InputPath -Raw
             $token = $token.Trim()
-            
+            if ([string]::IsNullOrWhiteSpace($token)) {
+                throw "JWT token file is empty: $InputPath"
+            }
+
             # Use existing JWT decoding function if available
             if (Get-Command _Decode-Jwt -ErrorAction SilentlyContinue) {
                 $decoded = _Decode-Jwt -Token $token
@@ -93,7 +99,10 @@ function Initialize-FileConversion-SpecializedJwt {
             else {
                 throw "JWT decoding function not available. Ensure dev-tools are loaded."
             }
-            
+            if (-not $decoded) {
+                throw 'JWT decoding returned no result. The token may be invalid.'
+            }
+
             # Convert to JSON (include header and payload)
             $result = @{
                 Header    = $decoded.Header
@@ -136,17 +145,22 @@ function ConvertTo-JwtFromJson {
         [string]$OutputPath,
         [string]$Secret = ''
     )
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertTo-JwtFromJson -ErrorAction SilentlyContinue) {
             _ConvertTo-JwtFromJson -InputPath $InputPath -OutputPath $OutputPath -Secret $Secret
         }
         else {
-            Write-Error "Internal conversion function _ConvertTo-JwtFromJson not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertTo-JwtFromJson not available'
         }
     }
     catch {
-        Write-Error "Failed to convert JSON to JWT: $_" -ErrorAction SilentlyContinue
+        throw "Failed to convert JSON to JWT: $_"
     }
 }
 Set-AgentModeAlias -Name 'json-to-jwt' -Target 'ConvertTo-JwtFromJson'
@@ -170,17 +184,22 @@ Set-AgentModeAlias -Name 'json-to-jwt' -Target 'ConvertTo-JwtFromJson'
 #>
 function ConvertFrom-JwtToJson {
     param([string]$InputPath, [string]$OutputPath)
-    if (-not $global:FileConversionSpecializedInitialized) { Ensure-FileConversion-Specialized }
+    $specializedInitialized = Get-Variable -Name FileConversionSpecializedInitialized -Scope Global -ErrorAction SilentlyContinue
+    if (-not $specializedInitialized -or -not $specializedInitialized.Value) {
+        if (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
+            Ensure-FileConversion-Specialized
+        }
+    }
     try {
         if (Get-Command _ConvertFrom-JwtToJson -ErrorAction SilentlyContinue) {
             _ConvertFrom-JwtToJson @PSBoundParameters
         }
         else {
-            Write-Error "Internal conversion function _ConvertFrom-JwtToJson not available" -ErrorAction SilentlyContinue
+            throw 'Internal conversion function _ConvertFrom-JwtToJson not available'
         }
     }
     catch {
-        Write-Error "Failed to convert JWT to JSON: $_" -ErrorAction SilentlyContinue
+        throw "Failed to convert JWT to JSON: $_"
     }
 }
 Set-AgentModeAlias -Name 'jwt-to-json' -Target 'ConvertFrom-JwtToJson'

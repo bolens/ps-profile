@@ -224,7 +224,10 @@ function Import-LibModule {
         [bool]$Required = $true
     )
 
-    # Auto-detect script path from call stack if not provided
+    # Reject explicit empty ScriptPath; auto-detect only when the parameter was omitted
+    if ($PSBoundParameters.ContainsKey('ScriptPath') -and [string]::IsNullOrWhiteSpace($ScriptPath)) {
+        throw 'ScriptPath cannot be null or empty'
+    }
     if (-not $ScriptPath) {
         $callStack = Get-PSCallStack
         foreach ($frame in $callStack) {
@@ -516,7 +519,10 @@ function Import-LibModules {
         [bool]$Required = $true
     )
 
-    # Auto-detect script path from call stack if not provided
+    # Reject explicit empty ScriptPath; auto-detect only when the parameter was omitted
+    if ($PSBoundParameters.ContainsKey('ScriptPath') -and [string]::IsNullOrWhiteSpace($ScriptPath)) {
+        throw 'ScriptPath cannot be null or empty'
+    }
     if (-not $ScriptPath) {
         $callStack = Get-PSCallStack
         foreach ($frame in $callStack) {
@@ -688,7 +694,10 @@ function Initialize-ScriptEnvironment {
         [switch]$ExitOnError
     )
 
-    # Auto-detect script path from call stack if not provided
+    # Reject explicit empty ScriptPath; auto-detect only when the parameter was omitted
+    if ($PSBoundParameters.ContainsKey('ScriptPath') -and [string]::IsNullOrWhiteSpace($ScriptPath)) {
+        throw 'ScriptPath cannot be null or empty'
+    }
     if (-not $ScriptPath) {
         $callStack = Get-PSCallStack
         foreach ($frame in $callStack) {
