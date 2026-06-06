@@ -38,6 +38,11 @@ tasks:
     cmds:
       - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{.CLI_ARGS}}
 
+  test-unit-batch:
+    desc: Run unit tests per file with summary (use -Filter profile- etc.)
+    cmds:
+      - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 {{.CLI_ARGS}}
+
   test-performance:
     desc: Run Performance Test Suite
     cmds:

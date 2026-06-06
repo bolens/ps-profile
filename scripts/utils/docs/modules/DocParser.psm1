@@ -55,7 +55,7 @@ function Get-DocumentedCommands {
     $functions = [System.Collections.Generic.List[PSCustomObject]]::new()
     $aliases = [System.Collections.Generic.List[PSCustomObject]]::new()
 
-    Get-ChildItem -Path $ProfilePath -Filter '*.ps1' | ForEach-Object {
+    Get-ChildItem -Path $ProfilePath -Filter '*.ps1' -Recurse -File | ForEach-Object {
         $file = $_.FullName
         Write-Verbose "Scanning $file for functions..."
 

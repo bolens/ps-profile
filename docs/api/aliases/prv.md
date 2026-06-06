@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Show-GitHubPullRequest`
+Views a GitHub pull request in the browser.
 
 ## Description
 
-This is an alias that points to the `Show-GitHubPullRequest` command.
+Opens a pull request in the default browser using the GitHub CLI (gh). Forwards all arguments to gh pr view --web.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/integrations/git-github.ps1

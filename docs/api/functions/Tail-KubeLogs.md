@@ -58,4 +58,4 @@ Tail-KubeLogs -Pattern "nginx" -Namespace "production" -Container "web"
 
 ## Source
 
-Defined in: ../profile.d/kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-modules/kube-logs.ps1

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Switches branches or restores working tree files.
+Alias for `Switch-GitBranch`
 
 ## Description
 
-Changes the active branch or restores files from a specific commit or branch. Forwards all arguments to git checkout.
+This is an alias that points to the `Switch-GitBranch` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

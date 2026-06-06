@@ -54,4 +54,4 @@ Start-Minikube -Profile "dev" -Driver "docker"
 
 ## Source
 
-Defined in: ../profile.d/kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-modules/kube-console.ps1

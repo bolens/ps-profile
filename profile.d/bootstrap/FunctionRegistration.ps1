@@ -45,6 +45,11 @@ function global:Set-AgentModeFunction {
     $existing = Get-Command -Name $Name -ErrorAction SilentlyContinue
     $allowReplace = $global:AgentModeReplaceAllowed.Contains($Name)
 
+    # Promote functions defined in the current dot-source scope (e.g. nested test loads)
+    if ($existing -and -not $allowReplace -and $existing.CommandType -eq 'Function' -and [string]::IsNullOrEmpty($existing.ModuleName)) {
+        $allowReplace = $true
+    }
+
     # Prevent accidental overwrites unless explicitly allowed (used by lazy-loading)
     if ($existing -and -not $allowReplace) {
         return $false

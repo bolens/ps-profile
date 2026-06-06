@@ -66,4 +66,4 @@ PortForward-KubeService -Resource "my-service" -ResourceType "service" -LocalPor
 
 ## Source
 
-Defined in: ../profile.d/kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-modules/kube-workloads.ps1

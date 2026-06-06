@@ -6,7 +6,7 @@ URL-decodes a string.
 
 ## Description
 
-Decodes a URL-encoded string.
+Decodes URL-encoded strings back to their original form.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/data/utilities-encoding.ps1

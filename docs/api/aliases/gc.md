@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Commits staged changes.
+Alias for `Save-GitCommit`
 
 ## Description
 
-Creates a new commit with the currently staged changes. Forwards all arguments to git commit.
+This is an alias that points to the `Save-GitCommit` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

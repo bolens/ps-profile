@@ -63,7 +63,7 @@ Describe 'PathValidation Module Functions' {
         It 'Validates provided path exists' {
             $defaultPath = $script:TestDir
             $nonExistentPath = Join-Path $script:TestDir 'nonexistent.txt'
-            { Resolve-DefaultPath -Path $nonExistentPath -DefaultPath $defaultPath } | Should -Throw "*not found*"
+            { Resolve-DefaultPath -Path $nonExistentPath -DefaultPath $defaultPath } | Should -Throw "*does not exist*"
         }
 
         It 'Validates file type when PathType is File' {

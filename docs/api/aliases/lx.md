@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Initializes file listing utility functions on first use.
+Alias for `Get-ChildItemVisible`
 
 ## Description
 
-Sets up all file listing utility functions when any of them is called for the first time. This lazy loading approach improves profile startup performance.
+This is an alias that points to the `Get-ChildItemVisible` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/02-files-listing.ps1
+Defined in: ../profile.d/files-modules/navigation/files-listing.ps1

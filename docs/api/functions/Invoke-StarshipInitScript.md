@@ -16,7 +16,15 @@ Invoke-StarshipInitScript
 
 ## Parameters
 
-No parameters.
+### -StarshipCommandPath
+
+The path to the starship executable.
+
+
+## Outputs
+
+System.Management.Automation.FunctionInfo The created prompt function.
+
 
 ## Examples
 
@@ -24,4 +32,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/23-starship.ps1
+Defined in: ../profile.d/starship/StarshipInit.ps1

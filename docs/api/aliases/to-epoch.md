@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Converts DateTime to Unix timestamp.
+Converts DateTime to Unix epoch timestamp.
 
 ## Description
 
-Converts a DateTime object or string to a Unix timestamp (seconds since epoch).
+Converts a DateTime object to a Unix epoch timestamp (seconds or milliseconds).
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/data/utilities-datetime.ps1

@@ -62,4 +62,4 @@ Format-GitCommit -Type "fix" -Scope "api" -Description "Fix authentication bug" 
 
 ## Source
 
-Defined in: ../profile.d/git-enhanced.ps1
+Defined in: ../profile.d/git-modules/enhanced/git-workflow.ps1

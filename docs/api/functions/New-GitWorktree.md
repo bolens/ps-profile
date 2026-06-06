@@ -58,4 +58,4 @@ New-GitWorktree -Path "../myrepo-hotfix" -CreateBranch
 
 ## Source
 
-Defined in: ../profile.d/git-enhanced.ps1
+Defined in: ../profile.d/git-modules/enhanced/git-workflow.ps1

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Stages changes for commit.
+Alias for `Add-GitChanges`
 
 ## Description
 
-Adds file changes to the staging area for the next commit. Forwards all arguments to git add.
+This is an alias that points to the `Add-GitChanges` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

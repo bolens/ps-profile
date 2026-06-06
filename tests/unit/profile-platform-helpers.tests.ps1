@@ -485,13 +485,50 @@ Describe 'Platform Detection Helpers' {
                 return
             }
 
-            Mock Get-PlatformInstallHint { return 'Install with: scoop install dangerzone' }
-            Mock Write-MissingToolWarning -MockWith { } -Verifiable
+            $script:MissingToolWarningCaptures = [System.Collections.Generic.List[hashtable]]::new()
+            $originalWriteMissingToolWarning = Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue
+            $originalGetPlatformInstallHint = Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue
 
-            Invoke-DangerzoneMissingWarning
+            function global:Write-MissingToolWarning {
+                param(
+                    [string]$Tool,
+                    [string]$InstallHint
+                )
+                $null = $script:MissingToolWarningCaptures.Add(@{
+                        Tool        = $Tool
+                        InstallHint = $InstallHint
+                    })
+            }
 
-            Should -Invoke Write-MissingToolWarning -Times 1 -ParameterFilter {
-                $Tool -eq 'dangerzone' -and $InstallHint -match 'Docker'
+            function global:Get-PlatformInstallHint {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType = 'generic',
+                    [string]$InstallPackageName
+                )
+                return 'Install with: scoop install dangerzone'
+            }
+
+            try {
+                Invoke-DangerzoneMissingWarning
+
+                $script:MissingToolWarningCaptures.Count | Should -Be 1
+                $script:MissingToolWarningCaptures[0].Tool | Should -Be 'dangerzone'
+                $script:MissingToolWarningCaptures[0].InstallHint | Should -Match 'Docker'
+            }
+            finally {
+                Remove-Item Function:\Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
+
+                if ($originalWriteMissingToolWarning) {
+                    Set-Item -Path Function:\global:Write-MissingToolWarning -Value $originalWriteMissingToolWarning.ScriptBlock -Force
+                }
+
+                if ($originalGetPlatformInstallHint) {
+                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalGetPlatformInstallHint.ScriptBlock -Force
+                }
             }
         }
 
@@ -501,13 +538,49 @@ Describe 'Platform Detection Helpers' {
                 return
             }
 
-            Mock Get-PlatformInstallHint { return 'Install with: scoop install example' }
-            Mock Write-MissingToolWarning -MockWith { } -Verifiable
+            $script:MissingToolWarningCaptures = [System.Collections.Generic.List[hashtable]]::new()
+            $originalWriteMissingToolWarning = Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue
+            $originalGetPlatformInstallHint = Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue
 
-            Invoke-MissingToolWarning -ToolName 'example' -AdditionalHint '(requires extra setup)'
+            function global:Write-MissingToolWarning {
+                param(
+                    [string]$Tool,
+                    [string]$InstallHint
+                )
+                $null = $script:MissingToolWarningCaptures.Add(@{
+                        Tool        = $Tool
+                        InstallHint = $InstallHint
+                    })
+            }
 
-            Should -Invoke Write-MissingToolWarning -Times 1 -ParameterFilter {
-                $InstallHint -match 'extra setup'
+            function global:Get-PlatformInstallHint {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType = 'generic',
+                    [string]$InstallPackageName
+                )
+                return 'Install with: scoop install example'
+            }
+
+            try {
+                Invoke-MissingToolWarning -ToolName 'example' -AdditionalHint '(requires extra setup)'
+
+                $script:MissingToolWarningCaptures.Count | Should -Be 1
+                $script:MissingToolWarningCaptures[0].InstallHint | Should -Match 'extra setup'
+            }
+            finally {
+                Remove-Item Function:\Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Write-MissingToolWarning -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
+
+                if ($originalWriteMissingToolWarning) {
+                    Set-Item -Path Function:\global:Write-MissingToolWarning -Value $originalWriteMissingToolWarning.ScriptBlock -Force
+                }
+
+                if ($originalGetPlatformInstallHint) {
+                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalGetPlatformInstallHint.ScriptBlock -Force
+                }
             }
         }
     }

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows commit history.
+Alias for `Get-GitLog`
 
 ## Description
 
-Displays the commit log for the repository. Forwards all arguments to git log.
+This is an alias that points to the `Get-GitLog` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

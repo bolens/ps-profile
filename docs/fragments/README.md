@@ -2,8 +2,8 @@
 
 This documentation provides an overview of all profile fragments. Each fragment is a modular component of the PowerShell profile.
 
-**Total Fragments:** 132
-**Generated:** 2026-05-27 18:42:43
+**Total Fragments:** 133
+**Generated:** 2026-06-06 15:05:45
 
 ## Fragment Overview
 
@@ -71,6 +71,7 @@ Each fragment provides specific functionality and can be enabled or disabled ind
 - [kubernetes-enhanced](kubernetes-enhanced.md) — See the fragment source file for details.
 - [lang-go](lang-go.md) — See the fragment source file for details.
 - [lang-go-basic](lang-go-basic.md) — See the fragment source file for details.
+- [lang-go-tools](lang-go-tools.md) — See the fragment source file for details.
 - [lang-java-build](lang-java-build.md) — See the fragment source file for details.
 - [lang-java-compilers](lang-java-compilers.md) — See the fragment source file for details.
 - [lang-java-version](lang-java-version.md) — See the fragment source file for details.

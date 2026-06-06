@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/lang-go.ps1
+Defined in: ../profile.d/lang-go-tools.ps1

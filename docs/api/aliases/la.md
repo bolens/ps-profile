@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Lists all directory contents including hidden files using eza.
+Alias for `Get-ChildItemAll`
 
 ## Description
 
-Shows all files including hidden ones in long format.
+This is an alias that points to the `Get-ChildItemAll` command.
 
 ## Alias Information
 
-**Alias for:** `Get-ChildItemEzaAll`
+**Alias for:** `Get-ChildItemAll`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/eza.ps1
+Defined in: ../profile.d/files-modules/navigation/files-listing.ps1

@@ -6,7 +6,7 @@ Extracts audio from video file.
 
 ## Description
 
-Uses ffmpeg to extract audio track from a video file as MP3.
+Uses FFmpeg to extract audio track from a video file in the specified format.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/02-files-conversion.ps1
+Defined in: ../profile.d/conversion-modules/media/audio/video.ps1

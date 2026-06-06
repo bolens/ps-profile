@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Gets an environment variable value from the registry.
+Gets an environment variable value.
 
 ## Description
 
-Retrieves the value of an environment variable from the Windows registry. Works with both user and system-wide environment variables.
+Retrieves a persisted user or machine environment variable using the .NET API. Falls back to the current process environment when no persisted value exists.
 
 ## Signature
 
@@ -22,7 +22,7 @@ The name of the environment variable to retrieve. Type: [string]. Should be a va
 
 ### -Global
 
-If specified, retrieves from system-wide registry; otherwise, from user registry.
+If specified, retrieves the machine-wide value; otherwise, the user value.
 
 
 ## Outputs
@@ -36,4 +36,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/system/utilities-env.ps1

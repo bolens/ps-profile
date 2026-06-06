@@ -139,6 +139,16 @@ function Get-AnsibleInventory {
     script:Invoke-AnsibleBin 'ansible-inventory' $Arguments
 }
 
+# Register functions globally (required for nested/test scopes and command registry)
+if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
+    Set-AgentModeFunction -Name 'Invoke-Ansible' -Body ${function:Invoke-Ansible}
+    Set-AgentModeFunction -Name 'Invoke-AnsiblePlaybook' -Body ${function:Invoke-AnsiblePlaybook}
+    Set-AgentModeFunction -Name 'Invoke-AnsibleGalaxy' -Body ${function:Invoke-AnsibleGalaxy}
+    Set-AgentModeFunction -Name 'Invoke-AnsibleVault' -Body ${function:Invoke-AnsibleVault}
+    Set-AgentModeFunction -Name 'Get-AnsibleDoc' -Body ${function:Get-AnsibleDoc}
+    Set-AgentModeFunction -Name 'Get-AnsibleInventory' -Body ${function:Get-AnsibleInventory}
+}
+
 # Aliases
 Set-AgentModeAlias -Name 'ansible'           -Target 'Invoke-Ansible'
 Set-AgentModeAlias -Name 'ansible-playbook'  -Target 'Invoke-AnsiblePlaybook'

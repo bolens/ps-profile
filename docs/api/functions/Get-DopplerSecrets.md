@@ -58,4 +58,4 @@ Get-DopplerSecrets -Project "my-project" -Config "prod" -Secret "API_KEY"
 
 ## Source
 
-Defined in: ../profile.d/cloud-enhanced.ps1
+Defined in: ../profile.d/cloud-modules/cloud-deploy.ps1

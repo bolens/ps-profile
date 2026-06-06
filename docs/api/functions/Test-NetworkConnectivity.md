@@ -35,4 +35,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/71-network-utils.ps1
+Defined in: ../profile.d/utilities-modules/network/utilities-network-advanced.ps1

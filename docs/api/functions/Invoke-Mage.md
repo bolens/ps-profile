@@ -62,4 +62,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ../profile.d/lang-go.ps1
+Defined in: ../profile.d/lang-go-tools.ps1

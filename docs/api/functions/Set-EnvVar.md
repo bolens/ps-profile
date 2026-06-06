@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Sets an environment variable value in the registry.
+Sets an environment variable value.
 
 ## Description
 
-Sets the value of an environment variable in the Windows registry and broadcasts the change.
+Sets a persisted user or machine environment variable using the .NET API and updates the current process environment. On Windows, broadcasts the change.
 
 ## Signature
 
@@ -26,7 +26,7 @@ The value to set. If null or empty, the variable is removed. Type: [string]. Can
 
 ### -Global
 
-If specified, sets the variable in the system-wide registry; otherwise, in user registry.
+If specified, sets the machine-wide value; otherwise, the user value.
 
 
 ## Outputs
@@ -40,4 +40,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/system/utilities-env.ps1

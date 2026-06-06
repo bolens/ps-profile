@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Opens current directory in File Explorer.
+Opens the current directory in the system file manager.
 
 ## Description
 
-Launches Windows File Explorer in the current directory.
+Launches the system file manager in the current directory. On Windows uses explorer.exe; on Linux uses xdg-open; on macOS uses open.
 
 ## Signature
 
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `open-explorer` - Opens current directory in File Explorer.
+- `open-explorer` - Opens the current directory in the system file manager.
 
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/filesystem/utilities-filesystem.ps1

@@ -16,7 +16,19 @@ Get-StarshipPromptArguments
 
 ## Parameters
 
-No parameters.
+### -LastCommandSucceeded
+
+Whether the last command succeeded.
+
+### -LastExitCode
+
+The exit code of the last command.
+
+
+## Outputs
+
+System.String[]
+
 
 ## Examples
 
@@ -24,4 +36,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/23-starship.ps1
+Defined in: ../profile.d/starship/StarshipHelpers.ps1

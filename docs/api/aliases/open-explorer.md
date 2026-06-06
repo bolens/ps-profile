@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Opens current directory in File Explorer.
+Opens the current directory in the system file manager.
 
 ## Description
 
-Launches Windows File Explorer in the current directory.
+Launches the system file manager in the current directory. On Windows uses explorer.exe; on Linux uses xdg-open; on macOS uses open.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/filesystem/utilities-filesystem.ps1

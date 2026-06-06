@@ -113,7 +113,13 @@ Describe 'Get-RepoRoot' {
 
     Context 'Error handling' {
         It 'Throws error for invalid script path' {
-            { Get-RepoRoot -ScriptPath 'C:\Invalid\Path\script.ps1' } | Should -Throw
+            $invalidPath = if ($IsWindows) {
+                'C:\Invalid\Path\script.ps1'
+            }
+            else {
+                '/nonexistent/invalid/path/script.ps1'
+            }
+            { Get-RepoRoot -ScriptPath $invalidPath } | Should -Throw
         }
     }
 }

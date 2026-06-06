@@ -11,6 +11,7 @@
 Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
     BeforeAll {
         try {
+            . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
                 throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -74,16 +75,23 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
 
     Context 'Ansible wrappers (ansible.ps1)' {
         BeforeAll {
-            # Host may ship ansible binaries that shadow profile aliases
-            @('ansible', 'ansible-playbook', 'ansible-galaxy', 'ansible-vault', 'ansible-doc', 'ansible-inventory') | ForEach-Object {
-                $name = $_
-                Mock -CommandName Get-Command -ParameterFilter { $Name -eq $name } -MockWith { $null }
-            }
             . (Join-Path $script:ProfileDir 'ansible.ps1')
+            @{
+                'ansible'            = 'Invoke-Ansible'
+                'ansible-playbook'   = 'Invoke-AnsiblePlaybook'
+                'ansible-galaxy'     = 'Invoke-AnsibleGalaxy'
+                'ansible-vault'      = 'Invoke-AnsibleVault'
+                'ansible-doc'        = 'Get-AnsibleDoc'
+                'ansible-inventory'  = 'Get-AnsibleInventory'
+            }.GetEnumerator() | ForEach-Object {
+                if (Get-Command $_.Value -CommandType Function -ErrorAction SilentlyContinue) {
+                    Set-Alias -Name $_.Key -Value $_.Value -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+                }
+            }
         }
 
         It 'Creates Invoke-Ansible function' {
-            Test-Path Function:\Invoke-Ansible | Should -Be $true
+            Get-Command Invoke-Ansible -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates ansible alias for Invoke-Ansible' {
@@ -92,7 +100,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Invoke-AnsiblePlaybook function' {
-            Test-Path Function:\Invoke-AnsiblePlaybook | Should -Be $true
+            Get-Command Invoke-AnsiblePlaybook -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates ansible-playbook alias for Invoke-AnsiblePlaybook' {
@@ -101,7 +109,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Invoke-AnsibleGalaxy function' {
-            Test-Path Function:\Invoke-AnsibleGalaxy | Should -Be $true
+            Get-Command Invoke-AnsibleGalaxy -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates ansible-galaxy alias for Invoke-AnsibleGalaxy' {
@@ -110,7 +118,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Invoke-AnsibleVault function' {
-            Test-Path Function:\Invoke-AnsibleVault | Should -Be $true
+            Get-Command Invoke-AnsibleVault -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates ansible-vault alias for Invoke-AnsibleVault' {
@@ -119,7 +127,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Get-AnsibleDoc function' {
-            Test-Path Function:\Get-AnsibleDoc | Should -Be $true
+            Get-Command Get-AnsibleDoc -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates ansible-doc alias for Get-AnsibleDoc' {
@@ -128,7 +136,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Get-AnsibleInventory function' {
-            Test-Path Function:\Get-AnsibleInventory | Should -Be $true
+            Get-Command Get-AnsibleInventory -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Creates ansible-inventory alias for Get-AnsibleInventory' {

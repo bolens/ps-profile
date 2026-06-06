@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Downloads objects and refs from remote repository.
+Alias for `Receive-GitChanges`
 
 ## Description
 
-Fetches changes from the remote repository without merging them into the current branch. Forwards all arguments to git fetch.
+This is an alias that points to the `Receive-GitChanges` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

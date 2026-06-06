@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Clears cached missing tool warnings.
+Performs operations related to Initialize-FragmentWarningSuppression.
 
 ## Description
 
-Removes warning suppression entries so subsequent calls may emit warnings again. When no Tool parameter is provided, all cached warnings are cleared.
+Performs operations related to Initialize-FragmentWarningSuppression.
 
 ## Signature
 
@@ -16,14 +16,11 @@ Initialize-FragmentWarningSuppression
 
 ## Parameters
 
-### -Tool
-
-Optional set of tool names whose warning entries should be cleared.
-
+No parameters.
 
 ## Outputs
 
-System.Boolean
+object
 
 
 ## Examples
@@ -32,4 +29,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/00-bootstrap.ps1
+Defined in: ../profile.d/bootstrap/FragmentWarnings.ps1

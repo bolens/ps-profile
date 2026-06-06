@@ -114,6 +114,15 @@ Many fragments have been refactored to use organized subdirectories for better c
   - `container-compose.ps1` - Docker Compose helpers
   - `container-compose-podman.ps1` - Podman Compose helpers
   - `container-helpers.ps1` - General container utilities
+- **`kubernetes-modules/`** - Kubernetes helper modules (loaded by `kubernetes-enhanced.ps1`)
+  - `kube-context.ps1` - Context and namespace switching
+  - `kube-logs.ps1` - Log tailing helpers
+  - `kube-workloads.ps1` - Resource operations (get, exec, apply)
+  - `kube-console.ps1` - Minikube and k9s launchers
+- **`cloud-modules/`** - Cloud deployment modules (loaded by `cloud-enhanced.ps1`)
+  - `cloud-azure.ps1` - Azure subscription switching
+  - `cloud-gcp.ps1` - GCP project switching
+  - `cloud-deploy.ps1` - Doppler, Heroku, Vercel, Netlify deploy helpers
 - **`conversion-modules/`** - Format conversion utilities (loaded by `files.ps1`)
   - `data/` - Data format conversions (binary, columnar, structured, scientific)
   - `document/` - Document format conversions (Markdown, LaTeX, RST)
@@ -131,8 +140,9 @@ Many fragments have been refactored to use organized subdirectories for better c
 - **`files-modules/`** - File operation modules (loaded by `files.ps1`)
   - `inspection/` - File inspection utilities (hash, head/tail, hexdump, size)
   - `navigation/` - File navigation helpers (listing, navigation)
-- **`git-modules/`** - Git integration modules (loaded by `git.ps1`)
+- **`git-modules/`** - Git integration modules (loaded by `git.ps1`, `git-enhanced.ps1`)
   - `core/` - Core Git operations (basic, advanced, helpers)
+  - `enhanced/` - Enhanced Git tools (changelog, GUI launchers, workflow helpers)
   - `integrations/` - Git service integrations (GitHub)
 - **`utilities-modules/`** - Utility function modules (loaded by `utilities.ps1`, `network-utils.ps1`, `history-enhanced.ps1`)
   - `data/` - Data utilities (datetime, encoding)

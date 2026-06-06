@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/23-starship.ps1
+Defined in: ../profile.d/starship/StarshipModule.ps1

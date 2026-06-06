@@ -58,4 +58,4 @@ Clean-GitBranches -TargetBranch "main" -DryRun
 
 ## Source
 
-Defined in: ../profile.d/git-enhanced.ps1
+Defined in: ../profile.d/git-modules/enhanced/git-workflow.ps1

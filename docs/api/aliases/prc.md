@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `New-GitHubPullRequest`
+Creates a GitHub pull request.
 
 ## Description
 
-This is an alias that points to the `New-GitHubPullRequest` command.
+Creates a new pull request using the GitHub CLI (gh). Forwards all arguments to gh pr create.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/integrations/git-github.ps1

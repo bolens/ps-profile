@@ -26,9 +26,10 @@ No examples provided.
 
 This function has the following aliases:
 
-- `from-epoch` - Converts Unix timestamp to DateTime.
+- `epoch-to-date` - Converts Unix epoch timestamp to DateTime.
+- `from-epoch` - Converts Unix epoch timestamp to DateTime.
 
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/data/utilities-datetime.ps1

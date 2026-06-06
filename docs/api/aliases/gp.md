@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Pushes commits to remote repository.
+Alias for `Publish-GitChanges`
 
 ## Description
 
-Uploads local commits to the remote repository. Forwards all arguments to git push.
+This is an alias that points to the `Publish-GitChanges` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

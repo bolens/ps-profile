@@ -6,7 +6,7 @@ Extracts audio from video file.
 
 ## Description
 
-Uses ffmpeg to extract audio track from a video file as MP3.
+Uses FFmpeg to extract audio track from a video file in the specified format.
 
 ## Signature
 
@@ -18,16 +18,28 @@ ConvertFrom-VideoToAudio
 
 ### -InputPath
 
-The path to the video file.
+Path to the video file.
 
 ### -OutputPath
 
-The path for the output audio file. If not specified, uses input path with .mp3 extension.
+Path for the output audio file. If not specified, uses input path with format extension.
+
+### -Format
+
+Output audio format: mp3, aac, ogg, opus, flac, or wav (default: mp3).
+
+### -Bitrate
+
+Audio bitrate in kbps (default: 192). Used for mp3, aac, and opus formats.
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-VideoToAudio -InputPath "video.mp4" -OutputPath "audio.mp3" -Format mp3
+``
 
 ## Aliases
 
@@ -38,4 +50,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ../profile.d/02-files-conversion.ps1
+Defined in: ../profile.d/conversion-modules/media/audio/video.ps1

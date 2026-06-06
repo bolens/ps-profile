@@ -62,4 +62,4 @@ Describe-KubeResource -ResourceType "deployments" -Namespace "production" -ShowY
 
 ## Source
 
-Defined in: ../profile.d/kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-modules/kube-workloads.ps1

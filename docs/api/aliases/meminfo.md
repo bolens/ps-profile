@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Shows memory information.
+Shows detailed memory usage information.
 
 ## Description
 
-Displays total physical memory capacity in GB. On Windows uses Win32_PhysicalMemory; on Linux reads /proc/meminfo.
+Displays comprehensive memory statistics including usage breakdown and top memory-consuming processes.
 
 ## Alias Information
 
-**Alias for:** `Get-MemoryInfo`
+**Alias for:** `Show-MemoryInfo`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/system-info.ps1
+Defined in: ../profile.d/diagnostics-modules/monitoring/diagnostics-system-monitor.ps1

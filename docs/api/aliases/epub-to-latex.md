@@ -10,7 +10,7 @@ Uses pandoc to convert an EPUB file to LaTeX format.
 
 ## Alias Information
 
-**Alias for:** `ConvertTo-LaTeXFromEpub`
+**Alias for:** `ConvertFrom-EpubToLatex`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/02-files-conversion.ps1
+Defined in: ../profile.d/conversion-modules/document/document-common-epub.ps1

@@ -24,4 +24,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/59-diagnostics.ps1
+Defined in: ../profile.d/diagnostics-modules/core/diagnostics-profile.ps1

@@ -66,4 +66,4 @@ Exec-KubePod -Pod "nginx" -Container "web" -Command "/bin/sh" -Interactive -Tty
 
 ## Source
 
-Defined in: ../profile.d/kubernetes-enhanced.ps1
+Defined in: ../profile.d/kubernetes-modules/kube-workloads.ps1

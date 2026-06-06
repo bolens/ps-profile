@@ -35,14 +35,14 @@ Create parent directories as needed.
 
 `powershell
 mkdir -p core fragment path
-        Creates multiple directories: core, fragment, and path.
+    Creates multiple directories: core, fragment, and path.
 ``
 
 ### Example 2
 
 `powershell
 mkdir -p parent/child/grandchild
-        Creates the full directory path including parent directories.
+    Creates the full directory path including parent directories.
 ``
 
 ## Aliases
@@ -54,4 +54,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ../profile.d/07-system.ps1
+Defined in: ../profile.d/system/FileOperations.ps1

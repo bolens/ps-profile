@@ -6,7 +6,7 @@ URL-encodes a string.
 
 ## Description
 
-Encodes a string for use in URLs.
+Encodes special characters in a string for use in URLs.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/05-utilities.ps1
+Defined in: ../profile.d/utilities-modules/data/utilities-encoding.ps1

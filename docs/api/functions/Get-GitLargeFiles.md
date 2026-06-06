@@ -54,4 +54,4 @@ Get-GitLargeFiles -MinSize 5242880 -Limit 10
 
 ## Source
 
-Defined in: ../profile.d/git-enhanced.ps1
+Defined in: ../profile.d/git-modules/enhanced/git-workflow.ps1

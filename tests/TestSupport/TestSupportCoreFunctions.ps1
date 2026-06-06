@@ -34,3 +34,55 @@ function Mark-TestCommandsUnavailable {
         }
     }
 }
+
+function Import-ProfileFragmentWithShadowedCommands {
+    <#
+    .SYNOPSIS
+        Loads a profile fragment after hiding host commands that would shadow aliases.
+
+    .DESCRIPTION
+        Removes aliases/functions for the given command names, marks them unavailable
+        in the test command cache, dot-sources the fragment, then force-registers aliases
+        when host binaries would otherwise prevent Set-AgentModeAlias from succeeding.
+
+    .PARAMETER FragmentPath
+        Path to the profile fragment to load.
+
+    .PARAMETER ShadowCommandNames
+        Command names to hide before loading the fragment.
+
+    .PARAMETER AliasTargets
+        Optional map of alias name to profile function for force-registration after load.
+
+    .PARAMETER FragmentName
+        Optional fragment idempotency name to clear before reload.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$FragmentPath,
+
+        [Parameter(Mandatory)]
+        [string[]]$ShadowCommandNames,
+
+        [hashtable]$AliasTargets,
+
+        [string]$FragmentName
+    )
+
+    Mark-TestCommandsUnavailable -CommandNames $ShadowCommandNames
+
+    if ($FragmentName -and (Get-Command Clear-FragmentLoaded -ErrorAction SilentlyContinue)) {
+        Clear-FragmentLoaded -FragmentName $FragmentName -ErrorAction SilentlyContinue
+    }
+
+    . $FragmentPath
+
+    if ($AliasTargets) {
+        foreach ($entry in $AliasTargets.GetEnumerator()) {
+            if (Get-Command $entry.Value -CommandType Function -ErrorAction SilentlyContinue) {
+                Set-Alias -Name $entry.Key -Value $entry.Value -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+            }
+        }
+    }
+}

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows differences between commits, branches, or working tree.
+Alias for `Compare-GitChanges`
 
 ## Description
 
-Displays changes between the working tree and staging area, or between commits. Forwards all arguments to git diff.
+This is an alias that points to the `Compare-GitChanges` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

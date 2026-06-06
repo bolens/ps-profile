@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Lists, creates, or deletes branches.
+Alias for `Get-GitBranch`
 
 ## Description
 
-Manages Git branches. Lists branches when called without arguments, or creates/deletes branches with arguments. Forwards all arguments to git branch.
+This is an alias that points to the `Get-GitBranch` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

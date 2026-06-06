@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows Git repository status.
+Alias for `Invoke-GitStatus`
 
 ## Description
 
-Displays the working tree status, showing which files have changes, are staged, or are untracked. Forwards all arguments to git status.
+This is an alias that points to the `Invoke-GitStatus` command.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

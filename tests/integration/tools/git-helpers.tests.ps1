@@ -11,6 +11,7 @@
 Describe 'Git Helpers Integration Tests' {
     BeforeAll {
         try {
+            . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
                 throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -27,6 +28,9 @@ Describe 'Git Helpers Integration Tests' {
                 throw "Bootstrap file not found at: $bootstrapPath"
             }
             . $bootstrapPath
+
+            $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+            Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop
         }
         catch {
             $errorDetails = @{
@@ -41,14 +45,12 @@ Describe 'Git Helpers Integration Tests' {
 
     Context 'Git helpers (git.ps1)' {
         BeforeAll {
-            # Clear the guard variable to allow loading
-            Remove-Variable -Name 'GitHelpersLoaded' -Scope Global -ErrorAction SilentlyContinue
+            Clear-FragmentLoaded -FragmentName 'git' -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'git.ps1')
         }
 
         AfterAll {
-            # Clean up after tests
-            Remove-Variable -Name 'GitHelpersLoaded' -Scope Global -ErrorAction SilentlyContinue
+            Clear-FragmentLoaded -FragmentName 'git' -ErrorAction SilentlyContinue
         }
 
         It 'Creates Get-GitCurrentBranch function' {

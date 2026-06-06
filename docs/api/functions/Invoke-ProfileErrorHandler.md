@@ -27,4 +27,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/72-error-handling.ps1
+Defined in: ../profile.d/diagnostics-modules/core/diagnostics-error-handling.ps1

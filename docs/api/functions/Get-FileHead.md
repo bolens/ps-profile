@@ -129,4 +129,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ../profile.d/02-files-utilities.ps1
+Defined in: ../profile.d/files-modules/inspection/files-head-tail.ps1

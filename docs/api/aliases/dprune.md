@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/22-containers.ps1
+Defined in: ../profile.d/container-modules/container-compose.ps1

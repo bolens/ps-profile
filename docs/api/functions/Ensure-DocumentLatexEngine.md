@@ -29,9 +29,9 @@ No examples provided.
 
 ## Notes
 
-The project assumes Scoop is installed; MiKTeX can be installed via `scoop install miktex`.
+The project supports MiKTeX on Windows and TeX Live / MacTeX on Linux/macOS.
 
 
 ## Source
 
-Defined in: ../profile.d/02-files.ps1
+Defined in: ../profile.d/files/LaTeXDetection.ps1

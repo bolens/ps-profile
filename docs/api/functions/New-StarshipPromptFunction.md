@@ -16,7 +16,10 @@ New-StarshipPromptFunction
 
 ## Parameters
 
-No parameters.
+### -StarshipCommandPath
+
+The path to the starship executable.
+
 
 ## Examples
 
@@ -24,4 +27,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/23-starship.ps1
+Defined in: ../profile.d/starship/StarshipPrompt.ps1
