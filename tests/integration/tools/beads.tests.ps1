@@ -133,7 +133,7 @@ Describe 'beads.ps1 - Integration Tests' {
         It 'New-BeadsIssue has correct parameters' {
             $cmd = Get-Command New-BeadsIssue -ErrorAction SilentlyContinue
             $cmd.Parameters.ContainsKey('Title') | Should -Be $true
-            $cmd.Parameters['Title'].Attributes.Mandatory | Should -Be $true
+            ($cmd.Parameters['Title'].Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }).Mandatory | Should -Be $true
             $cmd.Parameters.ContainsKey('Priority') | Should -Be $true
             $cmd.Parameters.ContainsKey('Type') | Should -Be $true
         }
@@ -141,20 +141,20 @@ Describe 'beads.ps1 - Integration Tests' {
         It 'Get-BeadsIssue has correct parameters' {
             $cmd = Get-Command Get-BeadsIssue -ErrorAction SilentlyContinue
             $cmd.Parameters.ContainsKey('IssueId') | Should -Be $true
-            $cmd.Parameters['IssueId'].Attributes.Mandatory | Should -Be $true
+            ($cmd.Parameters['IssueId'].Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }).Mandatory | Should -Be $true
         }
         
         It 'Update-BeadsIssue has correct parameters' {
             $cmd = Get-Command Update-BeadsIssue -ErrorAction SilentlyContinue
             $cmd.Parameters.ContainsKey('IssueId') | Should -Be $true
-            $cmd.Parameters['IssueId'].Attributes.Mandatory | Should -Be $true
+            ($cmd.Parameters['IssueId'].Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }).Mandatory | Should -Be $true
             $cmd.Parameters.ContainsKey('Status') | Should -Be $true
         }
         
         It 'Close-BeadsIssue has correct parameters' {
             $cmd = Get-Command Close-BeadsIssue -ErrorAction SilentlyContinue
             $cmd.Parameters.ContainsKey('IssueId') | Should -Be $true
-            $cmd.Parameters['IssueId'].Attributes.Mandatory | Should -Be $true
+            ($cmd.Parameters['IssueId'].Attributes | Where-Object { $_ -is [System.Management.Automation.ParameterAttribute] }).Mandatory | Should -Be $true
             $cmd.Parameters.ContainsKey('Reason') | Should -Be $true
         }
     }

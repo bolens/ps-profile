@@ -279,13 +279,15 @@ try {
         function Show-CommandUsageStats {
             Write-Host "-- Command Usage Statistics --"
 
-            if (-not $global:PSProfileCommandUsage) {
+            $usageVar = Get-Variable -Name PSProfileCommandUsage -Scope Global -ErrorAction SilentlyContinue
+            if (-not $usageVar -or -not $usageVar.Value) {
                 Write-Host "No usage statistics collected yet. Usage tracking starts after profile load."
                 Write-Host "Run commands and check back later, or set PS_PROFILE_DEBUG=1 to enable tracking."
                 return
             }
 
-            $stats = $global:PSProfileCommandUsage.GetEnumerator() |
+            $commandUsage = $usageVar.Value
+            $stats = $commandUsage.GetEnumerator() |
             Sort-Object -Property Value -Descending |
             Select-Object -First 20
 
@@ -301,7 +303,7 @@ try {
             }
 
             # Show optimization suggestions
-            $totalCalls = ($global:PSProfileCommandUsage.Values | Measure-Object -Sum).Sum
+            $totalCalls = ($commandUsage.Values | Measure-Object -Sum).Sum
             Write-Host "`nOptimization Insights:"
             Write-Host ("Total tracked calls: {0}" -f $totalCalls)
 
@@ -315,7 +317,7 @@ try {
             }
 
             # Show memory usage estimate
-            $estimatedMemory = $global:PSProfileCommandUsage.Count * 100  # Rough estimate
+            $estimatedMemory = $commandUsage.Count * 100  # Rough estimate
             Write-Host ("`nEstimated tracking overhead: ~{0} bytes" -f $estimatedMemory)
         }
 

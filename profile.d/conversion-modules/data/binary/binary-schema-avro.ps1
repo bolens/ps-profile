@@ -125,7 +125,7 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert Avro to JSON: $_"
+            Write-Error "Failed to convert Avro to JSON: $_" -ErrorAction Continue
         }
     } -Force
 

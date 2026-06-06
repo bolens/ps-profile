@@ -17,7 +17,7 @@
 Describe 'UBJSON Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'ubjson.tests.ps1')
         
         # Ensure NodeJs module is loaded (provides Invoke-NodeScript)
         # The files.ps1 should have loaded it, but ensure it's available

@@ -16,6 +16,12 @@
     - helpers-xml.ps1: Provides Convert-JsonToXml for INI to XML conversions
 #>
 function Initialize-FileConversion-Ini {
+    if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
+        if (Get-Module -ListAvailable -Name PSToml -ErrorAction SilentlyContinue) {
+            Import-Module PSToml -ErrorAction SilentlyContinue
+        }
+    }
+
     # INI to JSON
     Set-Item -Path Function:Global:_ConvertFrom-IniToJson -Value {
         param([string]$InputPath, [string]$OutputPath)
@@ -560,6 +566,11 @@ function Initialize-FileConversion-Ini {
             $tempJson = [System.IO.Path]::GetTempFileName() + '.json'
             try {
                 _ConvertFrom-IniToJson -InputPath $InputPath -OutputPath $tempJson
+                if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
+                    if (Get-Module -ListAvailable -Name PSToml -ErrorAction SilentlyContinue) {
+                        Import-Module PSToml -ErrorAction SilentlyContinue
+                    }
+                }
                 if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
                     throw "PSToml module is not available. Install it with: Install-Module PSToml"
                 }

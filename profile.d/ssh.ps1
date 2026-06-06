@@ -29,7 +29,7 @@ if (-not (Test-Path Function:\Add-SSHKeyIfNotLoaded)) {
     $sbAddIf = {
         param($path)
         if (-not $path) { Write-Warning 'Usage: Add-SSHKeyIfNotLoaded <path-to-key>'; return }
-        if (-not ($path -and -not [string]::IsNullOrWhiteSpace($path) -and (Test-Path -LiteralPath $path))) { Write-Warning 'Key not found: ' + $path; return }
+        if (-not ($path -and -not [string]::IsNullOrWhiteSpace($path) -and (Test-Path -LiteralPath $path))) { Write-Warning "Key not found: $path"; return }
         $existing = (ssh-add -l 2>$null) -join "`n"
         if ($existing -and $existing -match (Split-Path $path -Leaf)) { Write-Output 'Key already loaded'; return }
         ssh-add $path

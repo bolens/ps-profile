@@ -16,8 +16,14 @@
 Describe 'CFG/ConfigParser Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
-        
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'cfg.tests.ps1')
+
+        $repoRoot = Split-Path -Parent $script:ProfileDir
+        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'Python.psm1'
+        if ($pythonModulePath -and -not [string]::IsNullOrWhiteSpace($pythonModulePath) -and (Test-Path -LiteralPath $pythonModulePath)) {
+            Import-Module $pythonModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force -Global
+        }
+
         # Check for Python availability
         $script:PythonAvailable = $false
         if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {

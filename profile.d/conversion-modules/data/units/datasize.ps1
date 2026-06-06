@@ -34,6 +34,12 @@ function Initialize-FileConversion-CoreUnitsDataSize {
         'TiB' = 1099511627776; 'tebibytes' = 1099511627776; 'tebibyte' = 1099511627776
         'PiB' = 1125899906842624; 'pebibytes' = 1125899906842624; 'pebibyte' = 1125899906842624
         'EiB' = 1152921504606846976; 'exbibytes' = 1152921504606846976; 'exbibyte' = 1152921504606846976
+        # Bit units (1 byte = 8 bits)
+        'bit' = 0.125; 'bits' = 0.125
+        'kbit' = 128; 'kilobit' = 128; 'kilobits' = 128
+        'mbit' = 131072; 'megabit' = 131072; 'megabits' = 131072
+        'gbit' = 134217728; 'gigabit' = 134217728; 'gigabits' = 134217728
+        'tbit' = 137438953472; 'terabit' = 137438953472; 'terabits' = 137438953472
     }
     
     # Data size unit definitions (decimal - 1000-based)
@@ -45,6 +51,11 @@ function Initialize-FileConversion-CoreUnitsDataSize {
         'TB' = 1000000000000; 'terabytes' = 1000000000000; 'terabyte' = 1000000000000
         'PB' = 1000000000000000; 'petabytes' = 1000000000000000; 'petabyte' = 1000000000000000
         'EB' = 1000000000000000000; 'exabytes' = 1000000000000000000; 'exabyte' = 1000000000000000000
+        'bit' = 0.125; 'bits' = 0.125
+        'kbit' = 125; 'kilobit' = 125; 'kilobits' = 125
+        'mbit' = 125000; 'megabit' = 125000; 'megabits' = 125000
+        'gbit' = 125000000; 'gigabit' = 125000000; 'gigabits' = 125000000
+        'tbit' = 125000000000; 'terabit' = 125000000000; 'terabits' = 125000000000
     }
     
     # Helper function to convert data size

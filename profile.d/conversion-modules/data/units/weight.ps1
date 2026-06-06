@@ -43,6 +43,9 @@ function Initialize-FileConversion-CoreUnitsWeight {
         'pennyweight' = 0.00155517; 'dwt' = 0.00155517
         # Other units
         'carat' = 0.0002; 'carats' = 0.0002; 'ct' = 0.0002
+        # Engineering / scientific
+        'slug' = 14.5939029372; 'slugs' = 14.5939029372
+        'u' = 1.66053906660E-27; 'dalton' = 1.66053906660E-27; 'daltons' = 1.66053906660E-27; 'amu' = 1.66053906660E-27; 'atomic mass unit' = 1.66053906660E-27
     }
     
     # Helper function to convert weight/mass

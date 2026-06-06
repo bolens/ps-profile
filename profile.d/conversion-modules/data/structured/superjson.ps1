@@ -14,9 +14,18 @@
     Internal dependencies: helpers-xml.ps1 (for Convert-JsonToXml), helpers-toon.ps1 (for Convert-JsonToToon, Convert-ToonToJson)
 #>
 function Initialize-FileConversion-SuperJson {
+    if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
+        if (Get-Module -ListAvailable -Name PSToml -ErrorAction SilentlyContinue) {
+            Import-Module PSToml -ErrorAction SilentlyContinue
+        }
+    }
+
     # Ensure NodeJs module is imported (use repo root from bootstrap if available)
     if (-not (Get-Command Invoke-NodeScript -ErrorAction SilentlyContinue)) {
-        $repoRoot = if (Get-Variable -Name 'RepoRoot' -Scope Script -ErrorAction SilentlyContinue) {
+        $repoRoot = if ($env:PS_PROFILE_REPO_ROOT -and (Test-Path -LiteralPath $env:PS_PROFILE_REPO_ROOT)) {
+            $env:PS_PROFILE_REPO_ROOT
+        }
+        elseif (Get-Variable -Name 'RepoRoot' -Scope Script -ErrorAction SilentlyContinue) {
             $script:RepoRoot
         }
         elseif (Get-Variable -Name 'BootstrapRoot' -Scope Script -ErrorAction SilentlyContinue) {
@@ -74,7 +83,7 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert JSON to SuperJSON: $_"
+            Write-Error "Failed to convert JSON to SuperJSON: $_" -ErrorAction Continue
         }
     } -Force
 
@@ -119,7 +128,7 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert SuperJSON to JSON: $_"
+            Write-Error "Failed to convert SuperJSON to JSON: $_" -ErrorAction Continue
         }
     } -Force
 
@@ -236,6 +245,11 @@ try {
             }
             if (-not (Test-CachedCommand 'yq')) {
                 throw "yq command not available"
+            }
+            if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
+                if (Get-Module -ListAvailable -Name PSToml -ErrorAction SilentlyContinue) {
+                    Import-Module PSToml -ErrorAction SilentlyContinue
+                }
             }
             if (-not (Get-Module -Name PSToml -ErrorAction SilentlyContinue)) {
                 throw "PSToml module is not available"

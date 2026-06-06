@@ -41,8 +41,9 @@ Describe 'Storage Tools Integration Tests' {
 
     Context 'rclone helpers (rclone.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'rclone' and 'rls' so Set-AgentModeAlias creates the aliases
+            # Mock Get-Command so Set-AgentModeAlias creates aliases (host may ship rcopy/rclone/rls binaries)
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rclone' } -MockWith { $null }
+            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rcopy' } -MockWith { $null }
             Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rls' } -MockWith { $null }
             # Mock rclone command before loading fragment
             Mock-CommandAvailabilityPester -CommandName 'rclone' -Available $false -Scope Context

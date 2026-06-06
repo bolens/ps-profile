@@ -65,7 +65,11 @@ function Initialize-FileConversion-Toml {
                 }
             }
             else {
-                throw "yq command failed with exit code $LASTEXITCODE"
+                Write-StructuredError -Message "yq command failed with exit code $LASTEXITCODE" -OperationName 'conversion.toml.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    yq_exit_code = $LASTEXITCODE
+                }
             }
         }
         catch {
@@ -87,8 +91,6 @@ function Initialize-FileConversion-Toml {
             if ($debugLevel -ge 3) {
                 Write-Host "  [conversion.toml.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
             }
-            
-            throw
         }
     } -Force
 

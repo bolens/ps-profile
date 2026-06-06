@@ -73,7 +73,7 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            Add-PdmPackage requests
+            Add-PdmPackage -Packages requests
             Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
@@ -86,7 +86,7 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            Add-PdmPackage pytest -Dev
+            Add-PdmPackage -Packages pytest -Dev
             Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
@@ -113,7 +113,7 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            Remove-PdmPackage requests
+            Remove-PdmPackage -Packages requests
             Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 
@@ -148,7 +148,7 @@ Describe 'PDM Tools Integration Tests' {
                 }
             }
 
-            Update-PdmPackages requests
+            Update-PdmPackages -Packages requests
             Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
         }
 

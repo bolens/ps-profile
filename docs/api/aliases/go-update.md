@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Update-GoDependencies`
+Updates all module dependencies in the current Go project.
 
 ## Description
 
-This is an alias that points to the `Update-GoDependencies` command.
+Runs go get -u ./... to upgrade dependencies to their latest minor/patch versions.
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/go.ps1
+Defined in: ../profile.d/lang-go-basic.ps1

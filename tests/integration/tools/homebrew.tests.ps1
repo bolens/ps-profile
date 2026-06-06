@@ -560,8 +560,10 @@ Describe 'Homebrew Tools Integration Tests' {
                 Write-Output 'Brewfile created successfully'
             }
 
+            $testPath = Get-TestArtifactPath -FileName 'test-Brewfile'
+
             # Execute
-            { Export-BrewPackages -Path (Get-TestArtifactPath -FileName 'test-Brewfile') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-BrewPackages -Path $testPath -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'brew' -Times 1 -Exactly
@@ -571,7 +573,7 @@ Describe 'Homebrew Tools Integration Tests' {
             $script:capturedArgs | Should -Contain 'bundle'
             $script:capturedArgs | Should -Contain 'dump'
             $script:capturedArgs | Should -Contain '--file'
-            $script:capturedArgs | Should -Contain 'test-Brewfile'
+            $script:capturedArgs | Should -Contain $testPath
         }
 
         It 'Export-BrewPackages with Describe passes --describe flag' {

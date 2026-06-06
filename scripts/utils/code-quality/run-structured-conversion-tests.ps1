@@ -16,9 +16,19 @@ foreach ($file in $files) {
     $name = $file.Name
     Write-Host "=== $name ===" -ForegroundColor Cyan
     $output = & pwsh -NoProfile -File $runner -Suite Integration -Path $file.FullName 2>&1 | Out-String
-    $passed = if ($output -match 'Tests Passed:\s*(\d+)') { [int]$Matches[1] } else { -1 }
-    $failed = if ($output -match 'Failed:\s*(\d+)') { [int]$Matches[1] } else { -1 }
-    $skipped = if ($output -match 'Skipped:\s*(\d+)') { [int]$Matches[1] } else { 0 }
+    $passed = -1
+    $failed = -1
+    $skipped = 0
+    if ($output -match 'Tests Passed:\s*(\d+)') {
+        $passed = [int]$Matches[1]
+        if ($output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
+        if ($output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
+    }
+    elseif ($output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
+        $passed = [int]$Matches[1]
+        $failed = [int]$Matches[2]
+        $skipped = [int]$Matches[3]
+    }
     $failLines = [regex]::Matches($output, '(?m)^\s+\[-\].*') | ForEach-Object { $_.Value.Trim() }
 
     $results += [pscustomobject]@{

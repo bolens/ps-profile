@@ -41,6 +41,12 @@ Describe 'Volume Unit Conversion Tests' {
             [math]::Abs($result.Value - 1) | Should -BeLessThan 0.01
         }
 
+        It 'Convert-Volume converts US bushel to liters' {
+            $result = Convert-Volume -Value 1 -FromUnit 'bushel' -ToUnit 'l'
+            $result | Should -Not -BeNullOrEmpty
+            [math]::Abs($result.Value - 35.2391) | Should -BeLessThan 0.01
+        }
+
         It 'Convert-Volume supports pipeline input' {
             $result = 1000 | Convert-Volume -FromUnit 'ml' -ToUnit 'l'
             $result | Should -Not -BeNullOrEmpty

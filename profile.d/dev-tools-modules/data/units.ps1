@@ -40,7 +40,21 @@ function Initialize-DevTools-Units {
         try {
             $fromUnitLower = $FromUnit.ToLower()
             $toUnitLower = $ToUnit.ToLower()
-            if ($fileSizeUnits.ContainsKey($fromUnitLower) -and $fileSizeUnits.ContainsKey($toUnitLower)) {
+
+            $fileSizeUnitNames = @('b', 'bytes', 'byte', 'kb', 'kilobytes', 'kilobyte', 'mb', 'megabytes', 'megabyte', 'gb', 'gigabytes', 'gigabyte', 'tb', 'terabytes', 'terabyte', 'pb', 'petabytes', 'petabyte', 'kib', 'mib', 'gib', 'tib', 'pib', 'bit', 'bits', 'kbit', 'mbit', 'gbit')
+            $timeUnitNames = @('ns', 'nanosecond', 'nanoseconds', 'us', 'microsecond', 'microseconds', 'µs', 'ms', 'milliseconds', 'millisecond', 's', 'seconds', 'second', 'sec', 'm', 'minutes', 'minute', 'min', 'h', 'hours', 'hour', 'hr', 'hrs', 'd', 'days', 'day', 'w', 'weeks', 'week', 'fortnight', 'fortnights', 'month', 'months', 'year', 'years', 'yr', 'yrs')
+
+            if ($fileSizeUnitNames -contains $fromUnitLower -and $fileSizeUnitNames -contains $toUnitLower) {
+                if (Get-Command Convert-DataSize -ErrorAction SilentlyContinue) {
+                    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+                    $converted = Convert-DataSize -Value $Value -FromUnit $FromUnit -ToUnit $ToUnit
+                    return [PSCustomObject]@{
+                        Value         = $converted.Value
+                        Unit          = $converted.Unit
+                        OriginalValue = $converted.OriginalValue
+                        OriginalUnit  = $converted.OriginalUnit
+                    }
+                }
                 $bytes = $Value * $fileSizeUnits[$fromUnitLower]
                 $result = $bytes / $fileSizeUnits[$toUnitLower]
                 return [PSCustomObject]@{
@@ -50,7 +64,17 @@ function Initialize-DevTools-Units {
                     OriginalUnit  = $FromUnit
                 }
             }
-            elseif ($timeUnits.ContainsKey($fromUnitLower) -and $timeUnits.ContainsKey($toUnitLower)) {
+            elseif ($timeUnitNames -contains $fromUnitLower -and $timeUnitNames -contains $toUnitLower) {
+                if (Get-Command Convert-Duration -ErrorAction SilentlyContinue) {
+                    if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
+                    $converted = Convert-Duration -Value $Value -FromUnit $FromUnit -ToUnit $ToUnit
+                    return [PSCustomObject]@{
+                        Value         = $converted.Value
+                        Unit          = $converted.Unit
+                        OriginalValue = $converted.OriginalValue
+                        OriginalUnit  = $converted.OriginalUnit
+                    }
+                }
                 $seconds = $Value * $timeUnits[$fromUnitLower]
                 $result = $seconds / $timeUnits[$toUnitLower]
                 return [PSCustomObject]@{
@@ -84,7 +108,8 @@ function Initialize-DevTools-Units {
 .SYNOPSIS
     Converts values between different units.
 .DESCRIPTION
-    Converts values between file size units (B, KB, MB, GB, TB, PB) and time units (ms, s, m, h, d, w).
+    Converts values between file size units (B, KB, MB, GB, TB, PB, bits) and time units (ns through years).
+    Delegates to Convert-DataSize and Convert-Duration when the file conversion modules are loaded.
 .PARAMETER Value
     The numeric value to convert.
 .PARAMETER FromUnit

@@ -73,7 +73,7 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            Install-PipenvPackage requests
+            Install-PipenvPackage -Packages requests
             Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
@@ -86,7 +86,7 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            Install-PipenvPackage pytest -Dev
+            Install-PipenvPackage -Packages pytest -Dev
             Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
@@ -113,7 +113,7 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            Remove-PipenvPackage requests
+            Remove-PipenvPackage -Packages requests
             Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 
@@ -148,7 +148,7 @@ Describe 'Pipenv Tools Integration Tests' {
                 }
             }
 
-            Update-PipenvPackages requests
+            Update-PipenvPackages -Packages requests
             Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
         }
 

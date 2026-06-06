@@ -186,10 +186,10 @@ Describe 'uv Tools Integration Tests' {
 
         It 'Update-UVOutdatedPackages calls uv pip list --outdated and upgrades packages' {
             $mockFreezeOutput = @('package1==1.0.0', 'package2==2.0.0', 'package3==3.0.0')
-            $callCount = 0
+            $script:uvCallCount = 0
             Mock -CommandName uv -MockWith {
                 param([string[]]$ArgumentList)
-                $script:callCount++
+                $script:uvCallCount++
                 $args = $ArgumentList
                 if ($args -contains 'pip' -and $args -contains 'freeze') {
                     $mockFreezeOutput | ForEach-Object { Write-Output $_ }
@@ -205,7 +205,7 @@ Describe 'uv Tools Integration Tests' {
 
             Get-Command Update-UVOutdatedPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             { Update-UVOutdatedPackages | Out-Null } | Should -Not -Throw
-            $script:callCount | Should -BeGreaterOrEqual 2
+            $script:uvCallCount | Should -BeGreaterOrEqual 2
         }
 
         It 'Update-UVOutdatedPackages handles empty package list gracefully' {

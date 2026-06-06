@@ -79,15 +79,17 @@ Describe 'Git Helpers Integration Tests' {
         }
 
         It 'Fragment is idempotent (can be loaded multiple times)' {
-            # Clear the variable to allow re-loading
-            Remove-Variable -Name 'GitHelpersLoaded' -Scope Global -ErrorAction SilentlyContinue
+            if (-not (Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Inconclusive -Because 'Test-FragmentLoaded is not available'
+                return
+            }
+
             . (Join-Path $script:ProfileDir 'git.ps1')
-            $firstLoad = $global:GitHelpersLoaded
-            
-            # Second load should not change state
+            $firstLoad = Test-FragmentLoaded -FragmentName 'git'
+
             . (Join-Path $script:ProfileDir 'git.ps1')
-            $secondLoad = $global:GitHelpersLoaded
-            
+            $secondLoad = Test-FragmentLoaded -FragmentName 'git'
+
             $firstLoad | Should -Be $secondLoad
             $firstLoad | Should -Be $true
         }

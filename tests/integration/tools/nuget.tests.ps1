@@ -73,7 +73,7 @@ Describe 'NuGet Tools Integration Tests' {
                 }
             }
 
-            Install-NuGetPackage Newtonsoft.Json
+            Install-NuGetPackage -Packages 'Newtonsoft.Json'
             Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
         }
 
@@ -149,6 +149,9 @@ Describe 'NuGet unavailable graceful degradation' {
             if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
+            }
+            @('Install-NuGetPackage', 'Restore-NuGetPackages', 'Update-NuGetPackages') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
             Mock-CommandAvailabilityPester -CommandName 'nuget' -Available $false
             . (Join-Path $script:ProfileDir 'nuget.ps1')

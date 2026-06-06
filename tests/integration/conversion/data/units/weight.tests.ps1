@@ -41,6 +41,12 @@ Describe 'Weight/Mass Unit Conversion Tests' {
             [math]::Abs($result.Value - 1) | Should -BeLessThan 0.01
         }
 
+        It 'Convert-Weight converts slug to kilograms' {
+            $result = Convert-Weight -Value 1 -FromUnit 'slug' -ToUnit 'kg'
+            $result | Should -Not -BeNullOrEmpty
+            [math]::Abs($result.Value - 14.5939) | Should -BeLessThan 0.001
+        }
+
         It 'Convert-Weight supports pipeline input' {
             $result = 1000 | Convert-Weight -FromUnit 'g' -ToUnit 'kg'
             $result | Should -Not -BeNullOrEmpty

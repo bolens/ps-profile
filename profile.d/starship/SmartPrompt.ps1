@@ -36,14 +36,16 @@ function global:Initialize-SmartPrompt {
         function global:prompt {
             # Stop timer for the command that just completed (prompt runs AFTER command execution)
             # This measures the actual command execution time, not the time between prompts
-            if ($global:CommandStartTime) {
-                $global:LastCommandDuration = [DateTime]::Now - $global:CommandStartTime
+            $commandStartTimeVar = Get-Variable -Name CommandStartTime -Scope Global -ErrorAction SilentlyContinue
+            if ($commandStartTimeVar -and $commandStartTimeVar.Value) {
+                $global:LastCommandDuration = [DateTime]::Now - $commandStartTimeVar.Value
                 $global:CommandStartTime = $null
             }
             
             $lastCommandSucceeded = $?
             try {
-                $lastExitCode = $LASTEXITCODE
+                $lastExitCodeVar = Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+                $lastExitCode = if ($lastExitCodeVar) { $lastExitCodeVar.Value } else { 0 }
                 $currentPath = $ExecutionContext.SessionState.Path.CurrentLocation.Path
                 $promptParts = @()
                 
@@ -481,8 +483,9 @@ function global:Initialize-SmartPrompt {
                 }
                 
                 # Execution time (if available) - shows duration of the command that just completed
-                if ($global:LastCommandDuration) {
-                    $duration = $global:LastCommandDuration.TotalMilliseconds
+                $lastDurationVar = Get-Variable -Name LastCommandDuration -Scope Global -ErrorAction SilentlyContinue
+                if ($lastDurationVar -and $lastDurationVar.Value) {
+                    $duration = $lastDurationVar.Value.TotalMilliseconds
                     if ($duration -gt 1000) {
                         $promptParts += ("{0:N0}ms" -f $duration)
                     }

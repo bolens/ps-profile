@@ -16,7 +16,7 @@
 Describe 'Ion Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'ion.tests.ps1')
         
         # Ensure Python module is loaded (provides Get-PythonPath, Invoke-PythonScript)
         $repoRoot = Split-Path -Parent $script:ProfileDir

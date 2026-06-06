@@ -48,6 +48,10 @@ function Initialize-FileConversion-CoreUnitsVolume {
         'ft3' = 28.3168; 'cubic foot' = 28.3168; 'cubic feet' = 28.3168
         'in3' = 0.0163871; 'cubic inch' = 0.0163871; 'cubic inches' = 0.0163871
         'yd3' = 764.555; 'cubic yard' = 764.555; 'cubic yards' = 764.555
+        # US dry measure
+        'bushel' = 35.2391; 'bushels' = 35.2391; 'bu' = 35.2391
+        'peck' = 8.80977; 'pecks' = 8.80977
+        'mi3' = 4168181825.44; 'cubic mile' = 4168181825.44; 'cubic miles' = 4168181825.44
     }
     
     # Helper function to convert volume

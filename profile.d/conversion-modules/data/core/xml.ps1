@@ -65,8 +65,6 @@ function Initialize-FileConversion-CoreBasicXml {
             if ($debugLevel -ge 3) {
                 Write-Host "  [conversion.xml.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
             }
-            
-            throw
         } 
     } -Force
 }

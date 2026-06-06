@@ -47,6 +47,12 @@ Describe 'Energy Unit Conversion Tests' {
             $result.Value | Should -BeLessThan 1056
         }
 
+        It 'Convert-Energy converts horsepower-hour to joules' {
+            $result = Convert-Energy -Value 1 -FromUnit 'hph' -ToUnit 'j'
+            $result | Should -Not -BeNullOrEmpty
+            [math]::Abs($result.Value - 2684519.54) | Should -BeLessThan 1
+        }
+
         It 'Convert-Energy supports pipeline input' {
             $result = 1000 | Convert-Energy -FromUnit 'j' -ToUnit 'kj'
             $result | Should -Not -BeNullOrEmpty

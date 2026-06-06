@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 522
-**Total Aliases:** 514
-**Generated:** 2026-06-02 08:44:59
+**Total Functions:** 491
+**Total Aliases:** 495
+**Generated:** 2026-06-06 13:34:56
 
 ## Functions by Fragment
 
@@ -119,15 +119,6 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Copy-ToClipboard](functions/Copy-ToClipboard.md) - Copies input to the clipboard.
 - [Get-FromClipboard](functions/Get-FromClipboard.md) - Pastes content from the clipboard.
-
-### cloud-enhanced (6 functions)
-
-- [Deploy-Heroku](functions/Deploy-Heroku.md) - Deploys to Heroku.
-- [Deploy-Netlify](functions/Deploy-Netlify.md) - Deploys to Netlify.
-- [Deploy-Vercel](functions/Deploy-Vercel.md) - Deploys to Vercel.
-- [Get-DopplerSecrets](functions/Get-DopplerSecrets.md) - Retrieves secrets from Doppler.
-- [Set-AzureSubscription](functions/Set-AzureSubscription.md) - Switches the active Azure subscription.
-- [Set-GcpProject](functions/Set-GcpProject.md) - Switches the active GCP project.
 
 ### cocoapods (3 functions)
 
@@ -305,20 +296,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-GitHubPullRequest](functions/Invoke-GitHubPullRequest.md) - Manages GitHub pull requests.
 - [Open-GitHubRepository](functions/Open-GitHubRepository.md) - Opens a GitHub repository in the web browser.
 
-### git-enhanced (11 functions)
-
-- [Clean-GitBranches](functions/Clean-GitBranches.md) - Cleans up merged Git branches.
-- [Format-GitCommit](functions/Format-GitCommit.md) - Formats a Git commit message according to conventional commits.
-- [Get-GitLargeFiles](functions/Get-GitLargeFiles.md) - Finds large files in Git history.
-- [Get-GitStats](functions/Get-GitStats.md) - Gets Git repository statistics.
-- [Invoke-GitButler](functions/Invoke-GitButler.md) - Runs Git Butler workflow commands.
-- [Invoke-GitKraken](functions/Invoke-GitKraken.md) - Launches GitKraken GUI.
-- [Invoke-GitTower](functions/Invoke-GitTower.md) - Launches Git Tower GUI.
-- [Invoke-Jujutsu](functions/Invoke-Jujutsu.md) - Runs Jujutsu version control commands.
-- [New-GitChangelog](functions/New-GitChangelog.md) - Generates a changelog using git-cliff.
-- [New-GitWorktree](functions/New-GitWorktree.md) - Creates a new Git worktree.
-- [Sync-GitRepos](functions/Sync-GitRepos.md) - Syncs multiple Git repositories.
-
 ### git (1 functions)
 
 - [Ensure-Git](functions/Ensure-Git.md) - Sets up all Git utility functions when any of them is called for the first time.
@@ -393,20 +370,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-Kubectl](functions/Invoke-Kubectl.md) - Executes kubectl with the specified arguments.
 - [Set-KubectlContext](functions/Set-KubectlContext.md) - Switches the current Kubernetes context.
 
-### kubernetes-enhanced (10 functions)
-
-- [Apply-KubeManifests](functions/Apply-KubeManifests.md) - Applies multiple Kubernetes manifest files.
-- [Describe-KubeResource](functions/Describe-KubeResource.md) - Gets detailed description of Kubernetes resources.
-- [Exec-KubePod](functions/Exec-KubePod.md) - Executes commands in Kubernetes pods.
-- [Get-KubeResources](functions/Get-KubeResources.md) - Gets Kubernetes resource information.
-- [PortForward-KubeService](functions/PortForward-KubeService.md) - Forwards ports from Kubernetes services or pods to local machine.
-- [Set-KubeContext](functions/Set-KubeContext.md) - Switches the active Kubernetes context.
-- [Set-KubeNamespace](functions/Set-KubeNamespace.md) - Switches the active Kubernetes namespace.
-- [Start-K9s](functions/Start-K9s.md) - Launches k9s Kubernetes TUI.
-- [Start-Minikube](functions/Start-Minikube.md) - Starts a Minikube Kubernetes cluster.
-- [Tail-KubeLogs](functions/Tail-KubeLogs.md) - Tails logs from Kubernetes pods.
-
-### lang-go-basic (7 functions)
+### lang-go-basic (8 functions)
 
 - [Build-GoProgram](functions/Build-GoProgram.md) - Builds Go programs.
 - [Install-GoPackage](functions/Install-GoPackage.md) - Installs Go packages globally.
@@ -414,15 +378,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-GoRun](functions/Invoke-GoRun.md) - Runs Go programs.
 - [Remove-GoDependency](functions/Remove-GoDependency.md) - Removes Go module dependencies.
 - [Test-GoPackage](functions/Test-GoPackage.md) - Runs Go tests.
+- [Update-GoDependencies](functions/Update-GoDependencies.md) - Updates all module dependencies in the current Go project.
 - [Update-GoTools](functions/Update-GoTools.md) - Updates Go development tools to their latest versions.
-
-### lang-go (5 functions)
-
-- [Build-GoProject](functions/Build-GoProject.md) - Builds a Go project with common optimizations.
-- [Invoke-Mage](functions/Invoke-Mage.md) - Runs mage build targets for Go projects.
-- [Lint-GoProject](functions/Lint-GoProject.md) - Lints Go code using golangci-lint.
-- [Release-GoProject](functions/Release-GoProject.md) - Creates Go project releases using goreleaser.
-- [Test-GoProject](functions/Test-GoProject.md) - Runs Go tests with common options.
 
 ### lang-java-build (3 functions)
 
@@ -1101,19 +1058,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [gh-open](aliases/gh-open.md) - Opens a GitHub repository in the web browser. (alias for `Open-GitHubRepository`)
 - [gh-pr](aliases/gh-pr.md) - Manages GitHub pull requests. (alias for `Invoke-GitHubPullRequest`)
 
-### git-enhanced (10 aliases)
-
-- [git-cliff](aliases/git-cliff.md) - Generates a changelog using git-cliff. (alias for `New-GitChangelog`)
-- [git-cliff](aliases/git-cliff.md) - Generates a changelog using git-cliff. (alias for `New-GitChangelog`)
-- [git-tower](aliases/git-tower.md) - Launches Git Tower GUI. (alias for `Invoke-GitTower`)
-- [git-tower](aliases/git-tower.md) - Launches Git Tower GUI. (alias for `Invoke-GitTower`)
-- [gitbutler](aliases/gitbutler.md) - Runs Git Butler workflow commands. (alias for `Invoke-GitButler`)
-- [gitbutler](aliases/gitbutler.md) - Runs Git Butler workflow commands. (alias for `Invoke-GitButler`)
-- [gitkraken](aliases/gitkraken.md) - Launches GitKraken GUI. (alias for `Invoke-GitKraken`)
-- [gitkraken](aliases/gitkraken.md) - Launches GitKraken GUI. (alias for `Invoke-GitKraken`)
-- [jj](aliases/jj.md) - Runs Jujutsu version control commands. (alias for `Invoke-Jujutsu`)
-- [jj](aliases/jj.md) - Runs Jujutsu version control commands. (alias for `Invoke-Jujutsu`)
-
 ### git (3 aliases)
 
 - [Git-CurrentBranch](aliases/Git-CurrentBranch.md) - Alias for `Get-GitCurrentBranch` (alias for `Get-GitCurrentBranch`)
@@ -1194,7 +1138,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [kg](aliases/kg.md) - Gets Kubernetes resources. (alias for `Get-KubectlResource`)
 - [kn](aliases/kn.md) - Switches the current Kubernetes context. (alias for `Set-KubectlContext`)
 
-### lang-go-basic (7 aliases)
+### lang-go-basic (8 aliases)
 
 - [go-build](aliases/go-build.md) - Builds Go programs. (alias for `Build-GoProgram`)
 - [go-install](aliases/go-install.md) - Installs Go packages globally. (alias for `Install-GoPackage`)
@@ -1203,19 +1147,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [go-run](aliases/go-run.md) - Runs Go programs. (alias for `Invoke-GoRun`)
 - [go-test](aliases/go-test.md) - Runs Go tests. (alias for `Test-GoPackage`)
 - [go-tools-update](aliases/go-tools-update.md) - Updates Go development tools to their latest versions. (alias for `Update-GoTools`)
-
-### lang-go (10 aliases)
-
-- [go-build-project](aliases/go-build-project.md) - Builds a Go project with common optimizations. (alias for `Build-GoProject`)
-- [go-build-project](aliases/go-build-project.md) - Builds a Go project with common optimizations. (alias for `Build-GoProject`)
-- [go-test-project](aliases/go-test-project.md) - Runs Go tests with common options. (alias for `Test-GoProject`)
-- [go-test-project](aliases/go-test-project.md) - Runs Go tests with common options. (alias for `Test-GoProject`)
-- [golangci-lint](aliases/golangci-lint.md) - Lints Go code using golangci-lint. (alias for `Lint-GoProject`)
-- [golangci-lint](aliases/golangci-lint.md) - Lints Go code using golangci-lint. (alias for `Lint-GoProject`)
-- [goreleaser](aliases/goreleaser.md) - Creates Go project releases using goreleaser. (alias for `Release-GoProject`)
-- [goreleaser](aliases/goreleaser.md) - Creates Go project releases using goreleaser. (alias for `Release-GoProject`)
-- [mage](aliases/mage.md) - Runs mage build targets for Go projects. (alias for `Invoke-Mage`)
-- [mage](aliases/mage.md) - Runs mage build targets for Go projects. (alias for `Invoke-Mage`)
+- [go-update](aliases/go-update.md) - Updates all module dependencies in the current Go project. (alias for `Update-GoDependencies`)
 
 ### lang-java-build (6 aliases)
 

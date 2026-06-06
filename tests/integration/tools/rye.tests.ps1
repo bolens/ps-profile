@@ -73,7 +73,7 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            Add-RyePackage requests
+            Add-RyePackage -Packages requests
             Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
@@ -86,7 +86,7 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            Add-RyePackage pytest -Dev
+            Add-RyePackage -Packages pytest -Dev
             Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
@@ -113,7 +113,7 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            Remove-RyePackage requests
+            Remove-RyePackage -Packages requests
             Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 
@@ -170,7 +170,7 @@ Describe 'Rye Tools Integration Tests' {
                 }
             }
 
-            Update-RyePackages requests
+            Update-RyePackages -Packages requests
             Should -Invoke -CommandName 'rye' -Times 1 -Exactly
         }
 

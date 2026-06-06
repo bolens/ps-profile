@@ -160,6 +160,17 @@ function Ensure-FileConversion-Data {
     if (Get-Command Initialize-FileConversion-CoreUnitsArea -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsArea }
     if (Get-Command Initialize-FileConversion-CoreUnitsPressure -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsPressure }
     if (Get-Command Initialize-FileConversion-CoreUnitsAngle -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsAngle }
+    if (Get-Command Initialize-FileConversion-CoreUnitsPower -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsPower }
+    if (Get-Command Initialize-FileConversion-CoreUnitsDataRate -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsDataRate }
+    if (Get-Command Initialize-FileConversion-CoreUnitsFrequency -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsFrequency }
+    if (Get-Command Initialize-FileConversion-CoreUnitsForce -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsForce }
+    if (Get-Command Initialize-FileConversion-CoreUnitsTorque -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsTorque }
+    if (Get-Command Initialize-FileConversion-CoreUnitsDensity -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsDensity }
+    if (Get-Command Initialize-FileConversion-CoreUnitsFlowRate -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsFlowRate }
+    if (Get-Command Initialize-FileConversion-CoreUnitsAcceleration -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsAcceleration }
+    if (Get-Command Initialize-FileConversion-CoreUnitsTypography -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsTypography }
+    if (Get-Command Initialize-FileConversion-CoreUnitsFuelEconomy -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsFuelEconomy }
+    if (Get-Command Initialize-FileConversion-CoreUnitsTime -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreUnitsTime }
     if (Get-Command Initialize-FileConversion-CoreEncodingGuid -ErrorAction SilentlyContinue) { Initialize-FileConversion-CoreEncodingGuid }
     # Structured format modules
     if (Get-Command Initialize-FileConversion-Toon -ErrorAction SilentlyContinue) { Initialize-FileConversion-Toon }
@@ -241,6 +252,8 @@ function Ensure-FileConversion-Documents {
     # Initialize all document conversion modules (Markdown, LaTeX, reStructuredText, Textile, common utilities)
     # Only initialize functions that exist (modules may not all be loaded)
     if (Get-Command Initialize-FileConversion-DocumentMarkdown -ErrorAction SilentlyContinue) { Initialize-FileConversion-DocumentMarkdown }
+    if (Get-Command Initialize-FileConversion-DocumentMarkdownDialects -ErrorAction SilentlyContinue) { Initialize-FileConversion-DocumentMarkdownDialects }
+    if (Get-Command Initialize-FileConversion-DocumentMarkdownNotes -ErrorAction SilentlyContinue) { Initialize-FileConversion-DocumentMarkdownNotes }
     if (Get-Command Initialize-FileConversion-DocumentLaTeX -ErrorAction SilentlyContinue) { Initialize-FileConversion-DocumentLaTeX }
     if (Get-Command Initialize-FileConversion-DocumentRst -ErrorAction SilentlyContinue) { Initialize-FileConversion-DocumentRst }
     if (Get-Command Initialize-FileConversion-DocumentTextile -ErrorAction SilentlyContinue) { Initialize-FileConversion-DocumentTextile }

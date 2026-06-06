@@ -395,8 +395,10 @@ Describe 'winget Tools Integration Tests' {
                 Write-Output 'Packages exported successfully'
             }
 
+            $testPath = Get-TestArtifactPath -FileName 'test-winget-packages.json'
+
             # Execute
-            { Export-WingetPackages -Path (Get-TestArtifactPath -FileName 'test-winget-packages.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-WingetPackages -Path $testPath -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'winget' -Times 1 -Exactly
@@ -405,7 +407,7 @@ Describe 'winget Tools Integration Tests' {
             }
             $script:capturedArgs | Should -Contain 'export'
             $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain 'test-winget-packages.json'
+            $script:capturedArgs | Should -Contain $testPath
         }
 
         It 'Export-WingetPackages with Source passes --source flag' {
@@ -444,84 +446,93 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Import-WingetPackages calls winget import' {
-            $script:capturedArgs = $null
-            $testFile = 'test-winget-packages.json'
+            $testFile = Get-TestArtifactPath -FileName 'test-winget-packages.json'
             '{"Sources":[],"Packages":[{"PackageIdentifier":"Git.Git","Version":"2.40.0"}]}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages imported successfully'
+
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Mock Invoke-WithWideEvent -MockWith {
+                    param(
+                        [Parameter(Mandatory)]
+                        [string]$OperationName,
+                        [Parameter(Mandatory)]
+                        [scriptblock]$ScriptBlock,
+                        [hashtable]$Context,
+                        [string]$Level,
+                        [switch]$AlwaysKeep
+                    )
+                    & $ScriptBlock
+                }
             }
 
-            # Execute
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages imported successfully'
+
             { Import-WingetPackages -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'import'
-            $script:capturedArgs | Should -Contain '-i'
-            $script:capturedArgs | Should -Contain $testFile
-            $script:capturedArgs | Should -Contain '--accept-package-agreements'
-            $script:capturedArgs | Should -Contain '--accept-source-agreements'
-
-            # Cleanup
-            Remove-Item -Path $testFile -ErrorAction SilentlyContinue
+            $capturedArgs = Get-TestCommandInvocationArgsFlat
+            $capturedArgs | Should -Not -BeNullOrEmpty
+            $capturedArgs | Should -Contain 'import'
+            $capturedArgs | Should -Contain '-i'
+            $capturedArgs | Should -Contain $testFile
+            $capturedArgs | Should -Contain '--accept-package-agreements'
+            $capturedArgs | Should -Contain '--accept-source-agreements'
         }
 
         It 'Import-WingetPackages with IgnoreUnavailable passes --ignore-unavailable flag' {
-            $script:capturedArgs = $null
-            $testFile = 'test-winget-packages.json'
+            $testFile = Get-TestArtifactPath -FileName 'test-winget-packages-ignore.json'
             '{"Sources":[],"Packages":[{"PackageIdentifier":"Git.Git"}]}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages imported'
+
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Mock Invoke-WithWideEvent -MockWith {
+                    param(
+                        [Parameter(Mandatory)]
+                        [string]$OperationName,
+                        [Parameter(Mandatory)]
+                        [scriptblock]$ScriptBlock,
+                        [hashtable]$Context,
+                        [string]$Level,
+                        [switch]$AlwaysKeep
+                    )
+                    & $ScriptBlock
+                }
             }
 
-            # Execute
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages imported'
+
             { Import-WingetPackages -Path $testFile -IgnoreUnavailable -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'import'
-            $script:capturedArgs | Should -Contain '--ignore-unavailable'
-
-            # Cleanup
-            Remove-Item -Path $testFile -ErrorAction SilentlyContinue
+            $capturedArgs = Get-TestCommandInvocationArgsFlat
+            $capturedArgs | Should -Not -BeNullOrEmpty
+            $capturedArgs | Should -Contain 'import'
+            $capturedArgs | Should -Contain '--ignore-unavailable'
         }
 
         It 'Import-WingetPackages with IgnoreVersions passes --ignore-versions flag' {
-            $script:capturedArgs = $null
-            $testFile = 'test-winget-packages.json'
+            $testFile = Get-TestArtifactPath -FileName 'test-winget-packages-versions.json'
             '{"Sources":[],"Packages":[{"PackageIdentifier":"Git.Git"}]}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages imported'
+
+            if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
+                Mock Invoke-WithWideEvent -MockWith {
+                    param(
+                        [Parameter(Mandatory)]
+                        [string]$OperationName,
+                        [Parameter(Mandatory)]
+                        [scriptblock]$ScriptBlock,
+                        [hashtable]$Context,
+                        [string]$Level,
+                        [switch]$AlwaysKeep
+                    )
+                    & $ScriptBlock
+                }
             }
 
-            # Execute
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages imported'
+
             { Import-WingetPackages -Path $testFile -IgnoreVersions -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'import'
-            $script:capturedArgs | Should -Contain '--ignore-versions'
-
-            # Cleanup
-            Remove-Item -Path $testFile -ErrorAction SilentlyContinue
+            $capturedArgs = Get-TestCommandInvocationArgsFlat
+            $capturedArgs | Should -Not -BeNullOrEmpty
+            $capturedArgs | Should -Contain 'import'
+            $capturedArgs | Should -Contain '--ignore-versions'
         }
     }
 

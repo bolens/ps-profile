@@ -28,7 +28,7 @@ function Initialize-FileConversion-CoreBasicCsv {
             
             $convStartTime = Get-Date
             $csvData = Import-Csv -Path $Path
-            $rowCount = $csvData.Count
+            $rowCount = @($csvData).Count
             $json = $csvData | ConvertTo-Json -Depth 10
             $convDuration = ((Get-Date) - $convStartTime).TotalMilliseconds
             
@@ -64,8 +64,6 @@ function Initialize-FileConversion-CoreBasicCsv {
             if ($debugLevel -ge 3) {
                 Write-Host "  [conversion.csv.to-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
             }
-            
-            throw
         } 
     } -Force
 
@@ -138,8 +136,6 @@ function Initialize-FileConversion-CoreBasicCsv {
             if ($debugLevel -ge 3) {
                 Write-Host "  [conversion.csv.from-json] Stack trace: $($_.ScriptStackTrace)" -ForegroundColor DarkGray
             }
-            
-            throw
         } 
     } -Force
 
@@ -164,7 +160,7 @@ function Initialize-FileConversion-CoreBasicCsv {
             
             $convStartTime = Get-Date
             $csvData = Import-Csv -Path $Path
-            $rowCount = $csvData.Count
+            $rowCount = @($csvData).Count
             $json = $csvData | ConvertTo-Json -Depth 10
             $yaml = $json | Invoke-CachedYqCommand eval -P 2>&1
             

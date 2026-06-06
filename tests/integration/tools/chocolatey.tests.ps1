@@ -462,8 +462,10 @@ Describe 'Chocolatey Tools Integration Tests' {
                 Write-Output 'Packages exported successfully'
             }
 
+            $testPath = Get-TestArtifactPath -FileName 'test-packages.config'
+
             # Execute
-            { Export-ChocoPackages -Path (Get-TestArtifactPath -FileName 'test-packages.config') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
+            { Export-ChocoPackages -Path $testPath -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
             Should -Invoke -CommandName 'choco' -Times 1 -Exactly
@@ -472,7 +474,7 @@ Describe 'Chocolatey Tools Integration Tests' {
             }
             $script:capturedArgs | Should -Contain 'export'
             $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain 'test-packages.config'
+            $script:capturedArgs | Should -Contain $testPath
         }
 
         It 'Export-ChocoPackages with IncludeVersions passes --include-version-numbers flag' {

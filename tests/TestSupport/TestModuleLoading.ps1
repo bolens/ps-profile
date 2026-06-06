@@ -298,6 +298,17 @@ function Get-DataCoreModulesConfig {
         'area.ps1'           = 'Initialize-FileConversion-CoreUnitsArea'
         'pressure.ps1'       = 'Initialize-FileConversion-CoreUnitsPressure'
         'angle.ps1'          = 'Initialize-FileConversion-CoreUnitsAngle'
+        'power.ps1'          = 'Initialize-FileConversion-CoreUnitsPower'
+        'datarate.ps1'       = 'Initialize-FileConversion-CoreUnitsDataRate'
+        'frequency.ps1'      = 'Initialize-FileConversion-CoreUnitsFrequency'
+        'force.ps1'          = 'Initialize-FileConversion-CoreUnitsForce'
+        'torque.ps1'         = 'Initialize-FileConversion-CoreUnitsTorque'
+        'density.ps1'        = 'Initialize-FileConversion-CoreUnitsDensity'
+        'flowrate.ps1'       = 'Initialize-FileConversion-CoreUnitsFlowRate'
+        'acceleration.ps1'   = 'Initialize-FileConversion-CoreUnitsAcceleration'
+        'typography.ps1'     = 'Initialize-FileConversion-CoreUnitsTypography'
+        'fueleconomy.ps1'    = 'Initialize-FileConversion-CoreUnitsFuelEconomy'
+        'time.ps1'           = 'Initialize-FileConversion-CoreUnitsTime'
     }
 }
 
@@ -447,6 +458,8 @@ function Get-DataDigestModulesConfig {
 function Get-DocumentModulesConfig {
     return @{
         'document-markdown.ps1'         = 'Initialize-FileConversion-DocumentMarkdown'
+        'document-markdown-dialects.ps1' = 'Initialize-FileConversion-DocumentMarkdownDialects'
+        'document-markdown-notes.ps1'   = 'Initialize-FileConversion-DocumentMarkdownNotes'
         'document-latex.ps1'            = 'Initialize-FileConversion-DocumentLaTeX'
         'document-rst.ps1'              = 'Initialize-FileConversion-DocumentRst'
         'document-textile.ps1'          = 'Initialize-FileConversion-DocumentTextile'
@@ -771,6 +784,17 @@ function Import-DataConversionModules {
         'area.ps1'        = 'Initialize-FileConversion-CoreUnitsArea'
         'pressure.ps1'    = 'Initialize-FileConversion-CoreUnitsPressure'
         'angle.ps1'       = 'Initialize-FileConversion-CoreUnitsAngle'
+        'power.ps1'       = 'Initialize-FileConversion-CoreUnitsPower'
+        'datarate.ps1'    = 'Initialize-FileConversion-CoreUnitsDataRate'
+        'frequency.ps1'   = 'Initialize-FileConversion-CoreUnitsFrequency'
+        'force.ps1'       = 'Initialize-FileConversion-CoreUnitsForce'
+        'torque.ps1'      = 'Initialize-FileConversion-CoreUnitsTorque'
+        'density.ps1'     = 'Initialize-FileConversion-CoreUnitsDensity'
+        'flowrate.ps1'    = 'Initialize-FileConversion-CoreUnitsFlowRate'
+        'acceleration.ps1' = 'Initialize-FileConversion-CoreUnitsAcceleration'
+        'typography.ps1'  = 'Initialize-FileConversion-CoreUnitsTypography'
+        'fueleconomy.ps1' = 'Initialize-FileConversion-CoreUnitsFuelEconomy'
+        'time.ps1'        = 'Initialize-FileConversion-CoreUnitsTime'
     }
     Import-ModuleGroup -BaseDir $unitsDir -ModuleConfig $unitsModules -DefaultFunctionPatterns @('^(Convert|Format)') -CustomPatterns $coreCustomPatterns -SelectiveModules $SelectiveModules
 
@@ -826,7 +850,11 @@ function Import-DocumentConversionModules {
     )
 
     $documentModules = Get-DocumentModulesConfig
-    Import-ModuleGroup -BaseDir $ConversionModulesDir -SubDir 'document' -ModuleConfig $documentModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-') -SelectiveModules $SelectiveModules
+    $documentCustomPatterns = @{
+        'document-markdown-dialects.ps1' = @('^Convert(To|From)-', '^Convert-Markdown', '^Invoke-Markdown', '^Get-Markdown')
+        'document-markdown-notes.ps1'   = @('^Convert(To|From)-', '^Convert-', '^Export-', '^Sync-', '^Invoke-Notionify')
+    }
+    Import-ModuleGroup -BaseDir $ConversionModulesDir -SubDir 'document' -ModuleConfig $documentModules -DefaultFunctionPatterns @('^Convert(To|From)-', '^(Merge|Resize)-') -CustomPatterns $documentCustomPatterns -SelectiveModules $SelectiveModules
 }
 
 <#
@@ -1286,6 +1314,9 @@ function Resolve-ConversionIntegrationForTest {
         'data/structured/ini'                  = @{ ModuleType = 'Data'; SelectiveModules = @('ini.ps1', 'yaml.ps1', 'json.ps1'); EnsureData = $true }
         'data/structured/hjson'                = @{ ModuleType = 'Data'; SelectiveModules = @('hjson.ps1'); EnsureData = $true }
         'data/structured/json5'                = @{ ModuleType = 'Data'; SelectiveModules = @('json-extended.ps1'); EnsureData = $true }
+        'data/structured/cfg'                  = @{ ModuleType = 'Data'; SelectiveModules = @('cfg.ps1'); EnsureData = $true }
+        'data/structured/ion'                  = @{ ModuleType = 'Data'; SelectiveModules = @('ion.ps1'); EnsureData = $true }
+        'data/structured/ubjson'               = @{ ModuleType = 'Data'; SelectiveModules = @('ubjson.ps1'); EnsureData = $true }
         'data/structured/sexpr'                = @{ ModuleType = 'Data'; SelectiveModules = @('sexpr.ps1'); EnsureData = $true }
         'data/structured/toml'                 = @{ ModuleType = 'Data'; SelectiveModules = @('toml.ps1'); EnsureData = $true }
         'data/structured/toon'                 = @{ ModuleType = 'Data'; SelectiveModules = @('toon.ps1'); EnsureData = $true }
@@ -1351,17 +1382,29 @@ function Resolve-ConversionIntegrationForTest {
             ModuleType       = 'Data'
             SelectiveModules = @(
                 'length.ps1', 'weight.ps1', 'temperature.ps1', 'volume.ps1', 'energy.ps1',
-                'speed.ps1', 'area.ps1', 'pressure.ps1', 'angle.ps1', 'datasize.ps1'
+                'speed.ps1', 'area.ps1', 'pressure.ps1', 'angle.ps1', 'datasize.ps1',
+                'power.ps1', 'datarate.ps1', 'frequency.ps1', 'force.ps1', 'torque.ps1',
+                'density.ps1', 'flowrate.ps1', 'acceleration.ps1', 'typography.ps1',
+                'fueleconomy.ps1', 'time.ps1'
             )
             EnsureData       = $true
         }
+        'data/scientific/spss'                 = @{ ModuleType = 'Data'; SelectiveModules = @('scientific-spss.ps1'); EnsureData = $true }
+        'data/scientific/stata'                = @{ ModuleType = 'Data'; SelectiveModules = @('scientific-stata.ps1'); EnsureData = $true }
+        'data/scientific/sas'                  = @{ ModuleType = 'Data'; SelectiveModules = @('scientific-sas.ps1'); EnsureData = $true }
+        'data/scientific/matlab'               = @{ ModuleType = 'Data'; SelectiveModules = @('scientific-matlab.ps1'); EnsureData = $true }
+        'data/scientific/fits'                 = @{ ModuleType = 'Data'; SelectiveModules = @('scientific-fits.ps1'); EnsureData = $true }
         'data/binary/capn-proto'               = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-capnp.ps1'); EnsureData = $true }
         'data/binary/binary-formats'           = @{ ModuleType = 'Data'; SelectiveModules = @('binary-simple.ps1', 'binary-direct.ps1', 'binary-schema-avro.ps1'); EnsureData = $true }
         'data/columnar/delta-lake'             = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-delta.ps1'); EnsureData = $true }
         'data/columnar/iceberg'                = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-iceberg.ps1'); EnsureData = $true }
         'data/columnar/orc'                    = @{ ModuleType = 'Data'; SelectiveModules = @('binary-protocol-orc.ps1'); EnsureData = $true }
-        'data/csv-xml/csv-xml-roundtrip'       = @{ ModuleType = 'Data'; SelectiveModules = @(); EnsureData = $true }
-        'data/error-handling/conversion-errors' = @{ ModuleType = 'Data'; SelectiveModules = @('json.ps1'); EnsureData = $true }
+        'data/csv-xml/csv-to-xml'              = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'xml.ps1'); EnsureData = $true }
+        'data/csv-xml/xml-to-csv'              = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'xml.ps1'); EnsureData = $true }
+        'data/csv-xml/csv-xml-roundtrip'       = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'yaml.ps1'); EnsureData = $true }
+        'data/error-handling/conversion-errors' = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'xml.ps1', 'toon.ps1'); EnsureData = $true }
+        'data/error-handling/edge-cases'        = @{ ModuleType = 'Data'; SelectiveModules = @('binary-simple.ps1', 'binary-schema-avro.ps1'); EnsureData = $true }
+        'data/error-handling/invalid-input'     = @{ ModuleType = 'Data'; SelectiveModules = @('toml.ps1', 'superjson.ps1'); EnsureData = $true }
         'document/html'                        = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Html'); EnsureDocuments = $true }
         'document/markdown'                    = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Standard'); EnsureDocuments = $true }
         'document/epub'                        = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Epub'); EnsureDocuments = $true }

@@ -43,6 +43,18 @@ Describe 'Length Unit Conversion Tests' {
             $result.Value | Should -BeLessThan 0.7
         }
 
+        It 'Convert-Length converts angstroms to nanometers' {
+            $result = Convert-Length -Value 10 -FromUnit 'angstrom' -ToUnit 'nm'
+            $result | Should -Not -BeNullOrEmpty
+            $result.Value | Should -Be 1
+        }
+
+        It 'Convert-Length converts points to inches' {
+            $result = Convert-Length -Value 72 -FromUnit 'pt' -ToUnit 'in'
+            $result | Should -Not -BeNullOrEmpty
+            [math]::Abs($result.Value - 1) | Should -BeLessThan 0.001
+        }
+
         It 'Convert-Length supports pipeline input' {
             $result = 1000 | Convert-Length -FromUnit 'm' -ToUnit 'km'
             $result | Should -Not -BeNullOrEmpty

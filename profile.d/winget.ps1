@@ -307,12 +307,12 @@ if (Test-CachedCommand winget) {
             return
         }
         
-        $args = @('import', '-i', $Path, '--accept-package-agreements', '--accept-source-agreements')
+        $wingetArgs = @('import', '-i', $Path, '--accept-package-agreements', '--accept-source-agreements')
         if ($IgnoreUnavailable) {
-            $args += '--ignore-unavailable'
+            $wingetArgs += '--ignore-unavailable'
         }
         if ($IgnoreVersions) {
-            $args += '--ignore-versions'
+            $wingetArgs += '--ignore-versions'
         }
         
         if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
@@ -321,11 +321,11 @@ if (Test-CachedCommand winget) {
                 ignore_unavailable = $IgnoreUnavailable.IsPresent
                 ignore_versions    = $IgnoreVersions.IsPresent
             } -ScriptBlock {
-                & winget @args
+                & winget @wingetArgs
             } | Out-Null
         }
         else {
-            & winget @args
+            & winget @wingetArgs
         }
     }
     Set-AgentModeAlias -Name 'winget-import' -Target 'Import-WingetPackages'

@@ -87,6 +87,18 @@ Describe 'Data Size Unit Conversion Utilities Integration Tests' {
             $result.Value | Should -Be 1024
             $result.Unit | Should -Be 'MiB'
         }
+
+        It 'Convert-DataSize converts bits to bytes' {
+            $result = Convert-DataSize -Value 8 -FromUnit 'bit' -ToUnit 'B'
+            $result | Should -Not -BeNullOrEmpty
+            $result.Value | Should -Be 1
+        }
+
+        It 'Convert-DataSize converts megabits to kilobits' {
+            $result = Convert-DataSize -Value 1 -FromUnit 'mbit' -ToUnit 'kbit'
+            $result | Should -Not -BeNullOrEmpty
+            $result.Value | Should -Be 1024
+        }
     }
     
     Context 'Data Size Conversions (Decimal Units)' {

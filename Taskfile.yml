@@ -31,7 +31,12 @@ tasks:
   test-integration:
     desc: Run Integration Test Suite
     cmds:
-      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel {{.CLI_ARGS}}
+      - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel {{.CLI_ARGS}}
+
+  test-tools:
+    desc: Run tools integration tests (per-file isolation)
+    cmds:
+      - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{.CLI_ARGS}}
 
   test-performance:
     desc: Run Performance Test Suite

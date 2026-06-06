@@ -47,6 +47,17 @@ $script:FileConversionModuleRegistry = @{
         @{ Dir = 'conversion-modules/data/units'; File = 'area.ps1' }
         @{ Dir = 'conversion-modules/data/units'; File = 'pressure.ps1' }
         @{ Dir = 'conversion-modules/data/units'; File = 'angle.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'power.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'datarate.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'frequency.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'force.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'torque.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'density.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'flowrate.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'acceleration.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'typography.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'fueleconomy.ps1' }
+        @{ Dir = 'conversion-modules/data/units'; File = 'time.ps1' }
         # Structured
         @{ Dir = 'conversion-modules/data/structured'; File = 'toon.ps1' }
         @{ Dir = 'conversion-modules/data/structured'; File = 'toml.ps1' }
@@ -105,7 +116,10 @@ $script:FileConversionModuleRegistry = @{
     )
     
     'Ensure-FileConversion-Documents'   = @(
+        @{ Dir = 'conversion-modules/helpers'; File = 'ConversionBase.ps1' }
         @{ Dir = 'conversion-modules/document'; File = 'document-markdown.ps1' }
+        @{ Dir = 'conversion-modules/document'; File = 'document-markdown-dialects.ps1' }
+        @{ Dir = 'conversion-modules/document'; File = 'document-markdown-notes.ps1' }
         @{ Dir = 'conversion-modules/document'; File = 'document-latex.ps1' }
         @{ Dir = 'conversion-modules/document'; File = 'document-rst.ps1' }
         @{ Dir = 'conversion-modules/document'; File = 'document-textile.ps1' }

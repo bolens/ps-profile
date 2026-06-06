@@ -43,6 +43,7 @@ function Initialize-FileConversion-CoreUnitsEnergy {
         'erg' = 0.0000001; 'ergs' = 0.0000001
         'ft-lb' = 1.35582; 'foot pound' = 1.35582; 'foot pounds' = 1.35582; 'ft lbf' = 1.35582; 'foot-pound' = 1.35582; 'foot-pounds' = 1.35582
         'in-lb' = 0.112985; 'inch pound' = 0.112985; 'inch pounds' = 0.112985; 'inch-pound' = 0.112985; 'inch-pounds' = 0.112985
+        'hph' = 2684519.54; 'horsepower hour' = 2684519.54; 'horsepower-hour' = 2684519.54; 'horsepower hours' = 2684519.54; 'hp h' = 2684519.54
     }
     
     # Helper function to convert energy

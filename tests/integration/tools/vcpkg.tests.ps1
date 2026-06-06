@@ -73,7 +73,7 @@ Describe 'vcpkg Tools Integration Tests' {
                 }
             }
 
-            Install-VcpkgPackage boost
+            Install-VcpkgPackage -Packages boost
             Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
@@ -100,7 +100,7 @@ Describe 'vcpkg Tools Integration Tests' {
                 }
             }
 
-            Remove-VcpkgPackage boost
+            Remove-VcpkgPackage -Packages boost
             Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
@@ -135,7 +135,7 @@ Describe 'vcpkg Tools Integration Tests' {
                 }
             }
 
-            Update-VcpkgPackages boost -NoDryRun
+            Update-VcpkgPackages -Packages boost -NoDryRun
             Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
         }
 
@@ -154,6 +154,9 @@ Describe 'vcpkg unavailable graceful degradation' {
             if ($global:MissingToolWarnings) { $global:MissingToolWarnings.Clear() }
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
+            }
+            @('Install-VcpkgPackage', 'Remove-VcpkgPackage', 'Update-VcpkgPackages') | ForEach-Object {
+                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
             Mock-CommandAvailabilityPester -CommandName 'vcpkg' -Available $false
             . (Join-Path $script:ProfileDir 'vcpkg.ps1')

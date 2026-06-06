@@ -40,6 +40,12 @@ function Initialize-FileConversion-CoreUnitsLength {
         'au' = 149597870700; 'astronomical unit' = 149597870700; 'astronomical units' = 149597870700
         'ly' = 9460730472580800; 'light year' = 9460730472580800; 'light years' = 9460730472580800
         'pc' = 30856775814913673; 'parsec' = 30856775814913673; 'parsecs' = 30856775814913673
+        # Small / typography-related lengths
+        'angstrom' = 0.0000000001; 'angstroms' = 0.0000000001; 'a' = 0.0000000001; 'å' = 0.0000000001
+        'thou' = 0.0000254; 'thousandth of an inch' = 0.0000254
+        'pt' = 0.0254 / 72; 'point' = 0.0254 / 72; 'points' = 0.0254 / 72
+        'pica' = 0.0254 / 6; 'picas' = 0.0254 / 6
+        'hand' = 0.1016; 'hands' = 0.1016
     }
     
     # Helper function to convert length

@@ -74,11 +74,16 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
 
     Context 'Ansible wrappers (ansible.ps1)' {
         BeforeAll {
+            # Host may ship ansible binaries that shadow profile aliases
+            @('ansible', 'ansible-playbook', 'ansible-galaxy', 'ansible-vault', 'ansible-doc', 'ansible-inventory') | ForEach-Object {
+                $name = $_
+                Mock -CommandName Get-Command -ParameterFilter { $Name -eq $name } -MockWith { $null }
+            }
             . (Join-Path $script:ProfileDir 'ansible.ps1')
         }
 
         It 'Creates Invoke-Ansible function' {
-            Get-Command Invoke-Ansible -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Test-Path Function:\Invoke-Ansible | Should -Be $true
         }
 
         It 'Creates ansible alias for Invoke-Ansible' {
@@ -87,7 +92,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Invoke-AnsiblePlaybook function' {
-            Get-Command Invoke-AnsiblePlaybook -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Test-Path Function:\Invoke-AnsiblePlaybook | Should -Be $true
         }
 
         It 'Creates ansible-playbook alias for Invoke-AnsiblePlaybook' {
@@ -96,7 +101,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Invoke-AnsibleGalaxy function' {
-            Get-Command Invoke-AnsibleGalaxy -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Test-Path Function:\Invoke-AnsibleGalaxy | Should -Be $true
         }
 
         It 'Creates ansible-galaxy alias for Invoke-AnsibleGalaxy' {
@@ -105,7 +110,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Invoke-AnsibleVault function' {
-            Get-Command Invoke-AnsibleVault -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Test-Path Function:\Invoke-AnsibleVault | Should -Be $true
         }
 
         It 'Creates ansible-vault alias for Invoke-AnsibleVault' {
@@ -114,7 +119,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Get-AnsibleDoc function' {
-            Get-Command Get-AnsibleDoc -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Test-Path Function:\Get-AnsibleDoc | Should -Be $true
         }
 
         It 'Creates ansible-doc alias for Get-AnsibleDoc' {
@@ -123,7 +128,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
         }
 
         It 'Creates Get-AnsibleInventory function' {
-            Get-Command Get-AnsibleInventory -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            Test-Path Function:\Get-AnsibleInventory | Should -Be $true
         }
 
         It 'Creates ansible-inventory alias for Get-AnsibleInventory' {

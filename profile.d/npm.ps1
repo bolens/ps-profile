@@ -197,12 +197,13 @@ if (Test-CachedCommand npm) {
         
         if (Test-CachedCommand npm) {
             $packages = & npm list -g --depth=0 --json 2>$null | ConvertFrom-Json
-            if ($packages.dependencies) {
+            $dependencyProps = $packages.PSObject.Properties['dependencies']
+            if ($null -ne $dependencyProps -and $null -ne $dependencyProps.Value) {
                 $export = @{
                     dependencies = @{}
                 }
-                foreach ($key in $packages.dependencies.PSObject.Properties.Name) {
-                    $version = $packages.dependencies.$key.version
+                foreach ($key in $dependencyProps.Value.PSObject.Properties.Name) {
+                    $version = $dependencyProps.Value.$key.version
                     $export.dependencies[$key] = $version
                 }
                 $export | ConvertTo-Json -Depth 10 | Out-File -FilePath $Path -Encoding UTF8

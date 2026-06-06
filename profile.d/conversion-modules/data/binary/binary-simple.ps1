@@ -71,7 +71,7 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert JSON to BSON: $_"
+            Write-Error "Failed to convert JSON to BSON: $_" -ErrorAction Continue
         }
     } -Force
 
@@ -122,7 +122,7 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert BSON to JSON: $_"
+            Write-Error "Failed to convert BSON to JSON: $_" -ErrorAction Continue
         }
     } -Force
     # JSON to MessagePack
@@ -164,7 +164,7 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert JSON to MessagePack: $_"
+            Write-Error "Failed to convert JSON to MessagePack: $_" -ErrorAction Continue
         }
     } -Force
 
@@ -211,7 +211,7 @@ try {
             }
         }
         catch {
-            Write-Error "Failed to convert MessagePack to JSON: $_"
+            Write-Error "Failed to convert MessagePack to JSON: $_" -ErrorAction Continue
         }
     } -Force
     # JSON to CBOR

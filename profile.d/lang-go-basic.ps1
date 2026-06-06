@@ -135,6 +135,27 @@ try {
 
     <#
     .SYNOPSIS
+        Updates all module dependencies in the current Go project.
+    .DESCRIPTION
+        Runs go get -u ./... to upgrade dependencies to their latest minor/patch versions.
+    .EXAMPLE
+        Update-GoDependencies
+        Updates all dependencies in the current module.
+    #>
+    function Update-GoDependencies {
+        [CmdletBinding()]
+        param()
+
+        if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand go)) {
+            & go get -u ./...
+        }
+        else {
+            Invoke-MissingToolWarning -ToolName 'go' -ToolType 'go-package'
+        }
+    }
+
+    <#
+    .SYNOPSIS
         Updates Go development tools to their latest versions.
     .DESCRIPTION
         Updates all Go tools from golang.org/x/tools to their latest versions.
@@ -215,6 +236,7 @@ try {
     Set-AgentModeFunction -Name 'Build-GoProgram' -Body ${function:Build-GoProgram}
     Set-AgentModeFunction -Name 'Invoke-GoModule' -Body ${function:Invoke-GoModule}
     Set-AgentModeFunction -Name 'Test-GoPackage' -Body ${function:Test-GoPackage}
+    Set-AgentModeFunction -Name 'Update-GoDependencies' -Body ${function:Update-GoDependencies}
     Set-AgentModeFunction -Name 'Update-GoTools' -Body ${function:Update-GoTools}
     Set-AgentModeFunction -Name 'Remove-GoDependency' -Body ${function:Remove-GoDependency}
     Set-AgentModeFunction -Name 'Install-GoPackage' -Body ${function:Install-GoPackage}
@@ -224,6 +246,7 @@ try {
     Set-AgentModeAlias -Name 'go-build' -Target 'Build-GoProgram'
     Set-AgentModeAlias -Name 'go-mod' -Target 'Invoke-GoModule'
     Set-AgentModeAlias -Name 'go-test' -Target 'Test-GoPackage'
+    Set-AgentModeAlias -Name 'go-update' -Target 'Update-GoDependencies'
     Set-AgentModeAlias -Name 'go-tools-update' -Target 'Update-GoTools'
     Set-AgentModeAlias -Name 'go-install' -Target 'Install-GoPackage'
     Set-AgentModeAlias -Name 'go-remove' -Target 'Remove-GoDependency'

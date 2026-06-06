@@ -104,6 +104,10 @@ Describe 'Language Tools Integration Tests' {
         }
 
         It 'Update-GoDependencies calls go get -u ./...' {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'go' -Available $true -Scope It
             Mock -CommandName go -MockWith {
                 param([string[]]$ArgumentList)
                 $args = $ArgumentList
@@ -127,6 +131,10 @@ Describe 'Language Tools Integration Tests' {
         }
 
         It 'Update-GoTools calls go install golang.org/x/tools/cmd/...@latest' {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Mock-CommandAvailabilityPester -CommandName 'go' -Available $true -Scope It
             Mock -CommandName go -MockWith {
                 param([string[]]$ArgumentList)
                 $args = $ArgumentList
