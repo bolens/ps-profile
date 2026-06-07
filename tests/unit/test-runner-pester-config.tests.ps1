@@ -153,7 +153,7 @@ Describe 'PesterConfig Module Tests' {
             $config = Set-PesterTestResults -Config $config -OutputPath $script:ResultsXml
 
             $config.TestResult.Enabled.Value | Should -Be $true
-            $config.TestResult.OutputPath.Value | Should -Be 'results.xml'
+            $config.TestResult.OutputPath.Value | Should -Be $script:ResultsXml
             $config.TestResult.OutputFormat.Value | Should -Be 'NUnitXml'
         }
 

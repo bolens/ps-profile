@@ -1,14 +1,14 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Runs unit tests per file with a summary table.
+    Runs performance tests per file with a summary table.
 
 .DESCRIPTION
-    The full unit suite is large and can crash in a single session on some hosts.
-    Default mode runs one run-pester process per *.tests.ps1 under tests/unit.
+    The full performance suite is flaky in a single session on some hosts.
+    Default mode runs one run-pester process per *.tests.ps1 under tests/performance.
 
 .PARAMETER Filter
-    Optional glob-style name filter (e.g. profile-, library-).
+    Optional glob-style name filter (e.g. lang-go-).
 
 .PARAMETER RepoRoot
     Repository root directory.
@@ -17,10 +17,10 @@
     Pass -Quiet to run-pester.
 
 .EXAMPLE
-    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1
 
 .EXAMPLE
-    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 -Filter profile-
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 -Filter lang-
 #>
 param(
     [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))),
@@ -30,20 +30,20 @@ param(
     [switch]$Quiet
 )
 
-$unitRoot = Join-Path $RepoRoot 'tests' 'unit'
-if (-not (Test-Path -LiteralPath $unitRoot)) {
-    Write-Error "Unit test directory not found: $unitRoot"
+$perfRoot = Join-Path $RepoRoot 'tests' 'performance'
+if (-not (Test-Path -LiteralPath $perfRoot)) {
+    Write-Error "Performance test directory not found: $perfRoot"
     exit 2
 }
 
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
-$files = @(Get-ChildItem -Path $unitRoot -Filter '*.tests.ps1' -File | Sort-Object Name)
+$files = @(Get-ChildItem -Path $perfRoot -Filter '*.tests.ps1' -File | Sort-Object Name)
 if (-not [string]::IsNullOrWhiteSpace($Filter)) {
     $files = @($files | Where-Object { $_.Name -like "*$Filter*" })
 }
 
 if ($files.Count -eq 0) {
-    Write-Error "No unit test files matched under: $unitRoot (filter: '$Filter')"
+    Write-Error "No performance test files matched under: $perfRoot (filter: '$Filter')"
     exit 2
 }
 
@@ -72,7 +72,7 @@ function Get-PesterRunStats {
     }
 }
 
-function New-UnitRunnerArgs {
+function New-PerformanceRunnerArgs {
     param([string]$TargetPath)
 
     $args = @(
@@ -80,7 +80,7 @@ function New-UnitRunnerArgs {
         '-File'
         $runner
         '-Suite'
-        'Unit'
+        'Performance'
         '-Path'
         $TargetPath
     )
@@ -90,7 +90,7 @@ function New-UnitRunnerArgs {
     return $args
 }
 
-$label = if ([string]::IsNullOrWhiteSpace($Filter)) { 'unit' } else { "unit ($Filter*)" }
+$label = if ([string]::IsNullOrWhiteSpace($Filter)) { 'performance' } else { "performance ($Filter*)" }
 Write-Host "Batch: $label ($($files.Count) files)" -ForegroundColor Cyan
 Write-Host 'Mode: per-file' -ForegroundColor DarkGray
 Write-Host ''
@@ -98,14 +98,15 @@ Write-Host ''
 $results = @()
 foreach ($file in $files) {
     Write-Host "=== $($file.Name) ===" -ForegroundColor Cyan
-    $output = & pwsh -NoProfile -NonInteractive @((New-UnitRunnerArgs -TargetPath $file.FullName)) 2>&1 | Out-String
+    $output = & pwsh -NoProfile -NonInteractive @((New-PerformanceRunnerArgs -TargetPath $file.FullName)) 2>&1 | Out-String
     $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
     $stats = Get-PesterRunStats -Output $output
-    $crashed = $false
 
     if ($stats.Passed -lt 0 -and $exitCode -ne 0) {
-        $stats = [pscustomobject]@{ Passed = 0; Failed = 1; Skipped = 0 }
-        $crashed = $true
+        $stats = [pscustomobject]@{ Passed = 0; Failed = 1; Skipped = 0; Crash = $true }
+    }
+    else {
+        $stats | Add-Member -NotePropertyName Crash -NotePropertyValue $false -Force
     }
 
     $results += [pscustomobject]@{
@@ -113,20 +114,24 @@ foreach ($file in $files) {
         Passed  = $stats.Passed
         Failed  = $stats.Failed
         Skipped = $stats.Skipped
-        Crash   = $crashed
+        Crash   = $stats.Crash
     }
 
-    $suffix = if ($crashed) { ' (crash/unparsed)' } else { '' }
-    $color = if ($stats.Failed -gt 0 -or $crashed) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
+    $suffix = if ($stats.Crash) { ' (crash/unparsed)' } else { '' }
+    $color = if ($stats.Failed -gt 0 -or $stats.Crash) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S$suffix" -ForegroundColor $color
 }
 
 Write-Host ''
 Write-Host "--- Summary ($label) ---" -ForegroundColor Cyan
-$results | Format-Table -AutoSize
-$bad = @($results | Where-Object { $_.Failed -gt 0 })
+$results | Select-Object File, Passed, Failed, Skipped, Crash | Format-Table -AutoSize
+$bad = @($results | Where-Object { $_.Failed -gt 0 -or $_.Crash })
+$skippedOnly = @($results | Where-Object { $_.Failed -eq 0 -and $_.Passed -eq 0 -and $_.Skipped -gt 0 })
 if ($bad.Count -gt 0) {
     Write-Host "Files with failures: $($bad.Count)" -ForegroundColor Red
+    if ($skippedOnly.Count -gt 0) {
+        Write-Host "Files skipped only: $($skippedOnly.Count)" -ForegroundColor DarkGray
+    }
     exit 1
 }
 

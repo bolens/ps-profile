@@ -162,7 +162,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'gitbutler')) {
+        $gitbutlerCmd = if (Test-CachedCommand 'gitbutler') { Get-CachedExternalCommand 'gitbutler' } else { $null }
+        if (-not $gitbutlerCmd) {
             Invoke-MissingToolWarning -ToolName 'gitbutler-nightly' -Tool 'gitbutler'
             return
         }
@@ -173,10 +174,10 @@ try {
                 arguments = $Arguments -join ' '
             } -ScriptBlock {
                 if ($Arguments) {
-                    & gitbutler $Arguments
+                    & $gitbutlerCmd $Arguments
                 }
                 else {
-                    & gitbutler
+                    & $gitbutlerCmd
                 }
             }
         }
@@ -184,10 +185,10 @@ try {
             # Fallback to original implementation
             try {
                 if ($Arguments) {
-                    & gitbutler $Arguments
+                    & $gitbutlerCmd $Arguments
                 }
                 else {
-                    & gitbutler
+                    & $gitbutlerCmd
                 }
             }
             catch {
@@ -232,7 +233,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'jj')) {
+        $jjCmd = if (Test-CachedCommand 'jj') { Get-CachedExternalCommand 'jj' } else { $null }
+        if (-not $jjCmd) {
             Invoke-MissingToolWarning -ToolName 'jj'
             return
         }
@@ -243,10 +245,10 @@ try {
                 arguments = $Arguments -join ' '
             } -ScriptBlock {
                 if ($Arguments) {
-                    & jj $Arguments
+                    & $jjCmd $Arguments
                 }
                 else {
-                    & jj
+                    & $jjCmd
                 }
             }
         }
@@ -254,10 +256,10 @@ try {
             # Fallback to original implementation
             try {
                 if ($Arguments) {
-                    & jj $Arguments
+                    & $jjCmd $Arguments
                 }
                 else {
-                    & jj
+                    & $jjCmd
                 }
             }
             catch {

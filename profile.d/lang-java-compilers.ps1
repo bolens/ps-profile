@@ -58,19 +58,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'kotlinc')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $kotlincCmd = if (Test-CachedCommand 'kotlinc') { Get-CachedExternalCommand 'kotlinc' } else { $null }
+        if (-not $kotlincCmd) {
             Invoke-MissingToolWarning -ToolName 'kotlin' -ToolType 'java-build-tool' -Tool 'kotlinc'
             return $null
         }
@@ -79,12 +68,12 @@ try {
             return Invoke-WithWideEvent -OperationName 'java.kotlin.compile' -Context @{
                 arguments = $Arguments
             } -ScriptBlock {
-                & kotlinc @Arguments 2>&1
+                & $kotlincCmd @Arguments 2>&1
             }
         }
         else {
             try {
-                $result = & kotlinc @Arguments 2>&1
+                $result = & $kotlincCmd @Arguments 2>&1
                 return $result
             }
             catch {
@@ -138,19 +127,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'scalac')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $scalacCmd = if (Test-CachedCommand 'scalac') { Get-CachedExternalCommand 'scalac' } else { $null }
+        if (-not $scalacCmd) {
             Invoke-MissingToolWarning -ToolName 'scala' -ToolType 'java-build-tool' -Tool 'scalac'
             return $null
         }
@@ -159,12 +137,12 @@ try {
             return Invoke-WithWideEvent -OperationName 'java.scala.compile' -Context @{
                 arguments = $Arguments
             } -ScriptBlock {
-                & scalac @Arguments 2>&1
+                & $scalacCmd @Arguments 2>&1
             }
         }
         else {
             try {
-                $result = & scalac @Arguments 2>&1
+                $result = & $scalacCmd @Arguments 2>&1
                 return $result
             }
             catch {

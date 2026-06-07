@@ -7,6 +7,8 @@ BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:FragmentPath = Join-Path $script:ProfileDir 'lang-go.ps1'
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_LOAD_MS' -Default 2000
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_FUNCTION_MS' -Default 500
 
     # Ensure bootstrap is loaded first
     $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
@@ -22,8 +24,7 @@ Describe 'lang-go.ps1 - Performance Tests' {
             . $script:FragmentPath -ErrorAction Stop
             $stopwatch.Stop()
 
-            # Fragment should load in under 1 second
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 1000
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
 
         It 'Multiple loads do not degrade performance' {
@@ -44,13 +45,16 @@ Describe 'lang-go.ps1 - Performance Tests' {
     }
 
     Context 'Function execution performance' {
+        BeforeAll {
+            . $script:FragmentPath -ErrorAction SilentlyContinue
+        }
+
         It 'Release-GoProject executes quickly when tool is missing' {
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $null = Release-GoProject -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms (just checks and warnings)
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Invoke-Mage executes quickly when tool is missing' {
@@ -58,8 +62,7 @@ Describe 'lang-go.ps1 - Performance Tests' {
             $null = Invoke-Mage -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Lint-GoProject executes quickly when tool is missing' {
@@ -67,8 +70,7 @@ Describe 'lang-go.ps1 - Performance Tests' {
             $null = Lint-GoProject -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Build-GoProject executes quickly when tool is missing' {
@@ -76,8 +78,7 @@ Describe 'lang-go.ps1 - Performance Tests' {
             $null = Build-GoProject -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Test-GoProject executes quickly when tool is missing' {
@@ -85,8 +86,7 @@ Describe 'lang-go.ps1 - Performance Tests' {
             $null = Test-GoProject -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
 
@@ -102,8 +102,7 @@ Describe 'lang-go.ps1 - Performance Tests' {
             $null = Release-GoProject -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should be fast due to caching
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
 }

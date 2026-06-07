@@ -121,3 +121,33 @@ function Get-PerformanceThreshold {
     return $Default
 }
 
+<#
+.SYNOPSIS
+    Sets script-scoped performance thresholds for fragment performance tests.
+.DESCRIPTION
+    Populates MaxFragmentLoadTimeMs, MaxRepeatLoadTimeMs, MaxFunctionExecTimeMs,
+    MaxIdempotencyTimeMs, and MaxLookupTimeMs using Get-PerformanceThreshold.
+.PARAMETER Prefix
+    Short name used to build PS_PROFILE_{PREFIX}_* environment variables.
+#>
+function Initialize-FragmentPerformanceThresholds {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Prefix,
+
+        [int]$LoadMs = 3500,
+        [int]$RepeatLoadMs = 3000,
+        [int]$FunctionMs = 2000,
+        [int]$IdempotencyMs = 3000,
+        [int]$LookupMs = 1000
+    )
+
+    $key = ($Prefix -replace '[^A-Za-z0-9]', '_').ToUpperInvariant()
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_LOAD_MS" -Default $LoadMs
+    $script:MaxRepeatLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_REPEAT_LOAD_MS" -Default $RepeatLoadMs
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_FUNCTION_MS" -Default $FunctionMs
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_IDEMPOTENCY_MS" -Default $IdempotencyMs
+    $script:MaxLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_LOOKUP_MS" -Default $LookupMs
+}
+

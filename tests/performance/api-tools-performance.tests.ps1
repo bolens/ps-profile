@@ -15,15 +15,20 @@
     - Idempotency check overhead
 #>
 
-Describe 'API Tools Fragment Performance Tests' {
-    BeforeAll {
-        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        $script:ApiToolsPath = Join-Path $script:ProfileDir 'api-tools.ps1'
-        
-        if (-not (Test-Path -LiteralPath $script:ApiToolsPath)) {
-            throw "API tools fragment not found at: $script:ApiToolsPath"
-        }
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:ApiToolsPath = Join-Path $script:ProfileDir 'api-tools.ps1'
+    Initialize-FragmentPerformanceThresholds -Prefix 'API_TOOLS' -LookupMs 500
+
+    if (-not (Test-Path -LiteralPath $script:ApiToolsPath)) {
+        throw "API tools fragment not found at: $script:ApiToolsPath"
     }
+
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+}
+
+Describe 'API Tools Fragment Performance Tests' {
 
     Context 'Fragment Load Performance' {
         It 'Fragment loads within acceptable time (< 500ms)' {
@@ -34,7 +39,7 @@ Describe 'API Tools Fragment Performance Tests' {
             $loadTime = $stopwatch.Elapsed.TotalMilliseconds
             Write-Verbose "Fragment load time: $([Math]::Round($loadTime, 2))ms" -Verbose
             
-            $loadTime | Should -BeLessThan 500
+            $loadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
 
         It 'Fragment load time is consistent across multiple loads' {
@@ -81,7 +86,7 @@ Describe 'API Tools Fragment Performance Tests' {
             Write-Verbose "Function registration time: $([Math]::Round($registrationTime, 2))ms" -Verbose
             
             # Registration should be fast
-            $registrationTime | Should -BeLessThan 500
+            $registrationTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
 
@@ -115,7 +120,7 @@ Describe 'API Tools Fragment Performance Tests' {
             Write-Verbose "Alias resolution time: $([Math]::Round($resolutionTime, 2))ms" -Verbose
             
             # Alias resolution should be very fast (< 10ms)
-            $resolutionTime | Should -BeLessThan 10
+            $resolutionTime | Should -BeLessThan $script:MaxLookupTimeMs
             # Alias may not exist if command exists, but resolution should still be fast
             if ($alias) {
                 $alias | Should -Not -BeNullOrEmpty
@@ -151,7 +156,7 @@ Describe 'API Tools Fragment Performance Tests' {
             # Second load should be very fast (< 500ms typically) due to idempotency check
             # Note: We use a more lenient threshold due to timing variance and system load.
             # The idempotency check should exit early, but we allow for some overhead.
-            $secondLoadTime | Should -BeLessThan 500
+            $secondLoadTime | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }

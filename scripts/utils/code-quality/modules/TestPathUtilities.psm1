@@ -137,6 +137,7 @@ function Filter-TestPaths {
     )
 
     $filteredPaths = @()
+    $allowExplicitTestRunnerFile = @($TestPaths).Count -eq 1
 
     foreach ($path in $TestPaths) {
         if ($path -and -not [string]::IsNullOrWhiteSpace($path) -and -not (Test-Path -LiteralPath $path)) {
@@ -165,7 +166,7 @@ function Filter-TestPaths {
         else {
             # For files, check if it's a test-runner test file
             $fileName = Split-Path $resolvedPath -Leaf
-            if ($fileName -notin $testRunnerTestFiles) {
+            if ($fileName -notin $testRunnerTestFiles -or $allowExplicitTestRunnerFile) {
                 $filteredPaths += $resolvedPath
             }
         }

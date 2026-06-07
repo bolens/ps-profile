@@ -397,16 +397,23 @@ function global:Get-CachedExternalCommand {
             return $application
         }
 
-        $command = Get-Command -Name $candidate -ErrorAction SilentlyContinue
-        if ($command) {
+        # Test mocks register a Function with the tool name; prefer that over profile aliases
+        # (aliases with the same name as a binary would otherwise recurse into wrapper functions).
+        $functionCmd = Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue
+        if ($functionCmd -and $functionCmd.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
+            return $functionCmd
+        }
+
+        $externalScript = Get-Command -Name $candidate -CommandType ExternalScript -ErrorAction SilentlyContinue
+        if ($externalScript) {
             if ($isYqLookup) {
-                $exe = if (-not [string]::IsNullOrWhiteSpace($command.Source)) { $command.Source } else { $command.Name }
+                $exe = if (-not [string]::IsNullOrWhiteSpace($externalScript.Source)) { $externalScript.Source } else { $externalScript.Name }
                 if (-not (Test-IsMikefarahYqExecutable -Executable $exe)) {
                     continue
                 }
             }
 
-            return $command
+            return $externalScript
         }
     }
 

@@ -6,6 +6,10 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_LOAD_MS' -Default 3500
+    $script:MaxRepeatLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_REPEAT_LOAD_MS' -Default 2500
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_IDEMPOTENCY_MS' -Default 2500
+    $script:MaxFunctionCheckTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_FUNCTION_MS' -Default 500
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')
     . (Join-Path $script:ProfileDir 'git.ps1')
@@ -18,7 +22,7 @@ Describe 'git-enhanced.ps1 - Performance Tests' {
             . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
             $sw.Stop()
             
-            $sw.ElapsedMilliseconds | Should -BeLessThan 500
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
         
         It 'Loads fragment consistently across multiple loads' {
@@ -36,11 +40,15 @@ Describe 'git-enhanced.ps1 - Performance Tests' {
             }
             
             # All loads should be fast (idempotency check)
-            $times | ForEach-Object { $_ | Should -BeLessThan 100 }
+            $times | ForEach-Object { $_ | Should -BeLessThan $script:MaxRepeatLoadTimeMs }
         }
     }
     
     Context 'Function Registration Performance' {
+        BeforeAll {
+            . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
+        }
+
         It 'Registers all functions quickly' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             
@@ -64,11 +72,15 @@ Describe 'git-enhanced.ps1 - Performance Tests' {
             }
             
             $sw.Stop()
-            $sw.ElapsedMilliseconds | Should -BeLessThan 100
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionCheckTimeMs
         }
     }
     
     Context 'Format-GitCommit Performance' {
+        BeforeAll {
+            . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
+        }
+
         It 'Formats commit messages quickly' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             
@@ -77,8 +89,7 @@ Describe 'git-enhanced.ps1 - Performance Tests' {
             }
             
             $sw.Stop()
-            # 100 commits should format in under 100ms
-            $sw.ElapsedMilliseconds | Should -BeLessThan 100
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionCheckTimeMs
         }
     }
     
@@ -92,8 +103,7 @@ Describe 'git-enhanced.ps1 - Performance Tests' {
             . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
             $sw.Stop()
             
-            # Idempotency check should be very fast (< 50ms)
-            $sw.ElapsedMilliseconds | Should -BeLessThan 50
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }

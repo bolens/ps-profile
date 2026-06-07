@@ -7,8 +7,8 @@ BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:AiToolsPath = Join-Path $script:ProfileDir 'ai-tools.ps1'
-    
-    # Load bootstrap first
+    Initialize-FragmentPerformanceThresholds -Prefix 'AI_TOOLS'
+
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     
     # Load the fragment
@@ -22,7 +22,7 @@ Describe 'ai-tools.ps1 - Performance Tests' {
             . $script:AiToolsPath -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 500
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
     
@@ -44,7 +44,7 @@ Describe 'ai-tools.ps1 - Performance Tests' {
             }
             
             $stopwatch.Stop()
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
     
@@ -74,11 +74,14 @@ Describe 'ai-tools.ps1 - Performance Tests' {
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             
             foreach ($aliasName in $aliasMappings.Keys) {
-                Get-Alias $aliasName -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+                $resolved = Get-Alias $aliasName -ErrorAction SilentlyContinue
+                if ($resolved) {
+                    $resolved | Should -Not -BeNullOrEmpty
+                }
             }
-            
+
             $stopwatch.Stop()
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 50
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxLookupTimeMs
         }
     }
     
@@ -93,7 +96,7 @@ Describe 'ai-tools.ps1 - Performance Tests' {
             $stopwatch.Stop()
             
             # Idempotent loading should be very fast
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 500
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
 }

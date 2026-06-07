@@ -38,18 +38,18 @@ BeforeAll {
     $script:TestRepoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
     $script:TestTempRoot = New-TestTempDirectory -Prefix 'TestDiscovery'
     Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
-}
 
-function global:Assert-TestPathsUnderDirectory {
-    param(
-        [string[]]$Paths,
-        [string]$Directory
-    )
+    function script:Assert-TestPathsUnderDirectory {
+        param(
+            [string[]]$Paths,
+            [string]$Directory
+        )
 
-    $normalizedDirectory = (Resolve-Path -LiteralPath $Directory).Path
-    @($Paths | Where-Object {
-            $_ -and $_.StartsWith($normalizedDirectory, [System.StringComparison]::Ordinal)
-        }).Count | Should -BeGreaterThan 0
+        $normalizedDirectory = (Resolve-Path -LiteralPath $Directory).Path
+        @($Paths | Where-Object {
+                $_ -and $_.StartsWith($normalizedDirectory, [System.StringComparison]::Ordinal)
+            }).Count | Should -BeGreaterThan 0
+    }
 }
 
 Describe 'TestDiscovery Module Tests' {

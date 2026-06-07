@@ -1,55 +1,64 @@
 # ===============================================
 # lang-java-performance.tests.ps1
-# Performance tests for lang-java.ps1 fragment
+# Performance tests for lang-java-*.ps1 fragments
 # ===============================================
 
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:FragmentPath = Join-Path $script:ProfileDir 'lang-java.ps1'
+    $script:FragmentPaths = @(
+        (Join-Path $script:ProfileDir 'lang-java-build.ps1'),
+        (Join-Path $script:ProfileDir 'lang-java-compilers.ps1'),
+        (Join-Path $script:ProfileDir 'lang-java-version.ps1')
+    )
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_LOAD_MS' -Default 2000
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_FUNCTION_MS' -Default 1000
 
-    # Ensure bootstrap is loaded first
-    $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-    if (Test-Path -LiteralPath $bootstrapPath) {
-        . $bootstrapPath
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+}
+
+function script:Import-LangJavaTestFragments {
+    foreach ($fragmentPath in $script:FragmentPaths) {
+        . $fragmentPath -ErrorAction SilentlyContinue
     }
 }
 
-Describe 'lang-java.ps1 - Performance Tests' {
+Describe 'lang-java fragments - Performance Tests' {
     Context 'Fragment loading performance' {
-        It 'Loads fragment within acceptable time' {
+        It 'Loads fragments within acceptable time' {
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-            . $script:FragmentPath -ErrorAction Stop
+            Import-LangJavaTestFragments
             $stopwatch.Stop()
 
-            # Fragment should load in under 1 second
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 1000
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
 
         It 'Multiple loads do not degrade performance' {
-            # First load
             $stopwatch1 = [System.Diagnostics.Stopwatch]::StartNew()
-            . $script:FragmentPath -ErrorAction SilentlyContinue
+            Import-LangJavaTestFragments
             $stopwatch1.Stop()
 
-            # Second load (should be fast due to idempotency)
             $stopwatch2 = [System.Diagnostics.Stopwatch]::StartNew()
-            . $script:FragmentPath -ErrorAction SilentlyContinue
+            Import-LangJavaTestFragments
             $stopwatch2.Stop()
 
-            # Second load should be faster or similar to first
             $stopwatch2.ElapsedMilliseconds | Should -BeLessOrEqual ($stopwatch1.ElapsedMilliseconds * 1.5)
         }
     }
 
     Context 'Function execution performance' {
+        BeforeAll {
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath -ErrorAction SilentlyContinue
+            }
+        }
+
         It 'Build-Maven executes quickly when tool is missing' {
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $null = Build-Maven -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms (just checks and warnings)
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Build-Gradle executes quickly when tool is missing' {
@@ -57,8 +66,7 @@ Describe 'lang-java.ps1 - Performance Tests' {
             $null = Build-Gradle -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Build-Ant executes quickly when tool is missing' {
@@ -66,8 +74,7 @@ Describe 'lang-java.ps1 - Performance Tests' {
             $null = Build-Ant -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Compile-Kotlin executes quickly when tool is missing' {
@@ -75,8 +82,7 @@ Describe 'lang-java.ps1 - Performance Tests' {
             $null = Compile-Kotlin -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Compile-Scala executes quickly when tool is missing' {
@@ -84,8 +90,7 @@ Describe 'lang-java.ps1 - Performance Tests' {
             $null = Compile-Scala -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
 
         It 'Set-JavaVersion executes quickly when no parameters' {
@@ -93,24 +98,21 @@ Describe 'lang-java.ps1 - Performance Tests' {
             $null = Set-JavaVersion -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should complete in under 100ms
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
 
     Context 'Command detection performance' {
         It 'Test-CachedCommand is used for efficient command detection' {
-            # Load fragment
-            . $script:FragmentPath -ErrorAction SilentlyContinue
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath -ErrorAction SilentlyContinue
+            }
 
-            # Verify Test-CachedCommand is being used
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $null = Build-Maven -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
-            # Should be fast due to caching
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
 }
-

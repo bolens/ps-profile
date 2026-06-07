@@ -7,6 +7,10 @@ $script:ProfileDir = $null
 
 Describe 'Profile Performance Regression Tests' {
     BeforeAll {
+        if ($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
+            $script:SkipProfilePerformance = $true
+        }
+
         try {
             $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
@@ -287,6 +291,12 @@ Describe 'Profile Performance Regression Tests' {
             }
 
             return $results
+        }
+    }
+
+    BeforeEach {
+        if ($script:SkipProfilePerformance) {
+            Set-ItResult -Skipped -Because 'Profile performance regression tests require an isolated pwsh process (not nested inside run-pester)'
         }
     }
 

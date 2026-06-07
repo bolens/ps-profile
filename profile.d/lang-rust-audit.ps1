@@ -61,19 +61,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'cargo-audit')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $cargoAuditCmd = if (Test-CachedCommand 'cargo-audit') { Get-CachedExternalCommand 'cargo-audit' } else { $null }
+        if (-not $cargoAuditCmd) {
             Invoke-MissingToolWarning -ToolName 'cargo-audit' -ToolType 'rust-package'
             return $null
         }
@@ -82,12 +71,12 @@ try {
             return Invoke-WithWideEvent -OperationName 'rust.cargo-audit.invoke' -Context @{
                 arguments = $Arguments
             } -ScriptBlock {
-                & cargo-audit $Arguments 2>&1
+                & $cargoAuditCmd $Arguments 2>&1
             }
         }
         else {
             try {
-                $result = & cargo-audit $Arguments 2>&1
+                $result = & $cargoAuditCmd $Arguments 2>&1
                 return $result
             }
             catch {
@@ -142,19 +131,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'cargo-outdated')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $cargoOutdatedCmd = if (Test-CachedCommand 'cargo-outdated') { Get-CachedExternalCommand 'cargo-outdated' } else { $null }
+        if (-not $cargoOutdatedCmd) {
             Invoke-MissingToolWarning -ToolName 'cargo-outdated' -ToolType 'rust-package'
             return $null
         }
@@ -163,12 +141,12 @@ try {
             return Invoke-WithWideEvent -OperationName 'rust.cargo-outdated.invoke' -Context @{
                 arguments = $Arguments
             } -ScriptBlock {
-                & cargo-outdated $Arguments 2>&1
+                & $cargoOutdatedCmd $Arguments 2>&1
             }
         }
         else {
             try {
-                $result = & cargo-outdated $Arguments 2>&1
+                $result = & $cargoOutdatedCmd $Arguments 2>&1
                 return $result
             }
             catch {

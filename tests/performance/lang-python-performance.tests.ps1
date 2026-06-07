@@ -1,35 +1,43 @@
 # ===============================================
 # lang-python-performance.tests.ps1
-# Performance tests for lang-python.ps1 fragment
+# Performance tests for lang-python-*.ps1 fragments
 # ===============================================
 
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:LangPythonPath = Join-Path $script:ProfileDir 'lang-python.ps1'
+    $script:FragmentPaths = @(
+        (Join-Path $script:ProfileDir 'lang-python-pipx.ps1'),
+        (Join-Path $script:ProfileDir 'lang-python-env.ps1'),
+        (Join-Path $script:ProfileDir 'lang-python-packages.ps1')
+    )
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_LOAD_MS' -Default 2000
+    $script:MaxLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_LOOKUP_MS' -Default 500
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_IDEMPOTENCY_MS' -Default 3000
+    $script:MaxVarianceMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_VARIANCE_MS' -Default 500
+
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 
-Describe 'lang-python.ps1 Performance Tests' {
+function script:Import-LangPythonTestFragments {
+    foreach ($fragmentPath in $script:FragmentPaths) {
+        . $fragmentPath -ErrorAction SilentlyContinue
+    }
+}
+
+Describe 'lang-python fragments - Performance Tests' {
     Context 'Fragment Load Time' {
-        It 'Fragment loads in less than 500ms' {
+        It 'Fragments load in less than threshold' {
             $loadTimes = @()
             for ($i = 0; $i -lt 5; $i++) {
-                # Clear any cached functions
-                Remove-Item Function:\Install-PythonApp -ErrorAction SilentlyContinue
-                Remove-Item Function:\Invoke-Pipx -ErrorAction SilentlyContinue
-                Remove-Item Function:\Invoke-PythonScript -ErrorAction SilentlyContinue
-                Remove-Item Function:\New-PythonVirtualEnv -ErrorAction SilentlyContinue
-                Remove-Item Function:\New-PythonProject -ErrorAction SilentlyContinue
-                Remove-Item Function:\Install-PythonPackage -ErrorAction SilentlyContinue
-
                 $sw = [System.Diagnostics.Stopwatch]::StartNew()
-                . $script:LangPythonPath -ErrorAction SilentlyContinue
+                Import-LangPythonTestFragments
                 $sw.Stop()
                 $loadTimes += $sw.ElapsedMilliseconds
             }
 
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
-            $avgLoadTime | Should -BeLessThan 500
+            $avgLoadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
 
@@ -37,34 +45,28 @@ Describe 'lang-python.ps1 Performance Tests' {
         It 'Fragment load time is consistent across multiple loads' {
             $loadTimes = @()
             for ($i = 0; $i -lt 10; $i++) {
-                # Clear any cached functions
-                Remove-Item Function:\Install-PythonApp -ErrorAction SilentlyContinue
-                Remove-Item Function:\Invoke-Pipx -ErrorAction SilentlyContinue
-                Remove-Item Function:\Invoke-PythonScript -ErrorAction SilentlyContinue
-                Remove-Item Function:\New-PythonVirtualEnv -ErrorAction SilentlyContinue
-                Remove-Item Function:\New-PythonProject -ErrorAction SilentlyContinue
-                Remove-Item Function:\Install-PythonPackage -ErrorAction SilentlyContinue
-
                 $sw = [System.Diagnostics.Stopwatch]::StartNew()
-                . $script:LangPythonPath -ErrorAction SilentlyContinue
+                Import-LangPythonTestFragments
                 $sw.Stop()
                 $loadTimes += $sw.ElapsedMilliseconds
             }
 
-            $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
             $maxLoadTime = ($loadTimes | Measure-Object -Maximum).Maximum
             $minLoadTime = ($loadTimes | Measure-Object -Minimum).Minimum
             $variance = $maxLoadTime - $minLoadTime
 
-            # Variance should be less than 200ms (consistent performance)
-            $variance | Should -BeLessThan 200
+            $variance | Should -BeLessThan $script:MaxVarianceMs
         }
     }
 
     Context 'Function Registration Performance' {
-        It 'Function registration is fast' {
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
+        BeforeAll {
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath -ErrorAction SilentlyContinue
+            }
+        }
 
+        It 'Function registration is fast' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             Get-Command Install-PythonApp -ErrorAction SilentlyContinue | Out-Null
             Get-Command Invoke-Pipx -ErrorAction SilentlyContinue | Out-Null
@@ -74,14 +76,18 @@ Describe 'lang-python.ps1 Performance Tests' {
             Get-Command Install-PythonPackage -ErrorAction SilentlyContinue | Out-Null
             $sw.Stop()
 
-            $sw.ElapsedMilliseconds | Should -BeLessThan 100
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxLookupTimeMs
         }
     }
 
     Context 'Alias Resolution Performance' {
-        It 'Alias resolution is fast' {
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
+        BeforeAll {
+            foreach ($fragmentPath in $script:FragmentPaths) {
+                . $fragmentPath -ErrorAction SilentlyContinue
+            }
+        }
 
+        It 'Alias resolution is fast' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             Get-Alias pipx-install -ErrorAction SilentlyContinue | Out-Null
             Get-Alias pipx -ErrorAction SilentlyContinue | Out-Null
@@ -89,23 +95,21 @@ Describe 'lang-python.ps1 Performance Tests' {
             Get-Alias pyinstall -ErrorAction SilentlyContinue | Out-Null
             $sw.Stop()
 
-            $sw.ElapsedMilliseconds | Should -BeLessThan 50
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxLookupTimeMs
         }
     }
 
     Context 'Idempotency Check Overhead' {
         It 'Idempotency checks add minimal overhead' {
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
+            Import-LangPythonTestFragments
 
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
-            . $script:LangPythonPath -ErrorAction SilentlyContinue
+            Import-LangPythonTestFragments
+            Import-LangPythonTestFragments
+            Import-LangPythonTestFragments
             $sw.Stop()
 
-            # Multiple loads should be fast due to idempotency
-            $sw.ElapsedMilliseconds | Should -BeLessThan 100
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }
-

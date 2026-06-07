@@ -163,7 +163,7 @@ function Invoke-FragmentSafely {
                             Write-ScriptMessage -Message "[fragment-error-handling.load] $errorMessage" -IsError
                         }
                         else {
-                            Write-Error "[fragment-error-handling.load] $errorMessage"
+                            Write-Error "[fragment-error-handling.load] $errorMessage" -ErrorAction Continue
                         }
                     }
                     # Level 3: Log detailed file access error information
@@ -246,7 +246,7 @@ function Invoke-FragmentSafely {
                     Write-ScriptMessage -Message "[fragment-error-handling.load] $errorMessage" -IsError
                 }
                 else {
-                    Write-Error "[fragment-error-handling.load] $errorMessage"
+                    Write-Error "[fragment-error-handling.load] $errorMessage" -ErrorAction Continue
                 }
             }
             

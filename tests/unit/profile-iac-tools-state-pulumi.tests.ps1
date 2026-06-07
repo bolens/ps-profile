@@ -1,16 +1,16 @@
 # ===============================================
 # profile-iac-tools-state-pulumi.tests.ps1
-# Unit tests for Get-TerraformState and Invoke-Pulumi functions
+# Unit tests for Initialize-Terraform and Invoke-Terraform functions
 # ===============================================
 
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'iac-tools.ps1')
+    . (Join-Path $script:ProfileDir 'terraform.ps1')
 }
 
-Describe 'iac-tools.ps1 - Get-TerraformState' {
+Describe 'terraform.ps1 - Initialize-Terraform' {
     BeforeEach {
         Clear-TestCommandInvocationCapture
 
@@ -18,86 +18,42 @@ Describe 'iac-tools.ps1 - Get-TerraformState' {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        Mark-TestCommandsUnavailable -CommandNames @('terraform', 'tofu')
+        Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false
+        Remove-Item -Path 'Function:\terraform' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:terraform' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
-        It 'Returns null when neither terraform nor opentofu is available' {
-            $result = Get-TerraformState -ErrorAction SilentlyContinue
+        It 'Returns null when terraform is not available' {
+            $result = Initialize-Terraform -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
         }
     }
 
     Context 'terraform available' {
-        BeforeEach {
-            Mark-TestCommandsUnavailable -CommandNames 'tofu'
-        }
+        It 'Calls terraform init with default settings' {
+            Setup-CapturingCommandMock -CommandName 'terraform' -Output 'Init output'
 
-        It 'Calls terraform state show with default settings' {
-            Setup-CapturingCommandMock -CommandName 'terraform' -Output 'State output'
-            Mark-TestCommandsUnavailable -CommandNames 'tofu'
-
-            $result = Get-TerraformState -ErrorAction SilentlyContinue
+            $result = Initialize-Terraform -ErrorAction SilentlyContinue
 
             $args = Get-TestCommandInvocationArgsFlat
-            $args | Should -Contain 'state'
-            $args | Should -Contain 'show'
-            $result | Should -Be 'State output'
+            $args | Should -Contain 'init'
+            $result | Should -Be 'Init output'
         }
 
-        It 'Calls terraform state show with resource address' {
-            Setup-CapturingCommandMock -CommandName 'terraform' -Output 'Resource state'
-            Mark-TestCommandsUnavailable -CommandNames 'tofu'
+        It 'Calls terraform init with upgrade flag' {
+            Setup-CapturingCommandMock -CommandName 'terraform' -Output 'Init output'
 
-            Get-TerraformState -ResourceAddress 'aws_instance.web' -ErrorAction SilentlyContinue | Out-Null
-
-            $args = Get-TestCommandInvocationArgsFlat
-            $args | Should -Contain 'aws_instance.web'
-        }
-
-        It 'Calls terraform state show with JSON format' {
-            Setup-CapturingCommandMock -CommandName 'terraform' -Output '{"state": "json"}'
-            Mark-TestCommandsUnavailable -CommandNames 'tofu'
-
-            Get-TerraformState -OutputFormat 'json' -ErrorAction SilentlyContinue | Out-Null
+            Initialize-Terraform '-upgrade' -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
-            $args | Should -Contain '-json'
-        }
-
-        It 'Calls terraform state show with state file' {
-            Setup-CapturingCommandMock -CommandName 'terraform' -Output 'State output'
-            Mark-TestCommandsUnavailable -CommandNames 'tofu'
-
-            Get-TerraformState -StateFile 'custom.tfstate' -ErrorAction SilentlyContinue | Out-Null
-
-            $args = Get-TestCommandInvocationArgsFlat
-            $args | Should -Contain '-state'
-            $args | Should -Contain 'custom.tfstate'
-        }
-    }
-
-    Context 'opentofu fallback' {
-        It 'Calls tofu state show when terraform not available' {
-            Setup-CapturingCommandMock -CommandName 'tofu' -Output 'State output'
-            Mark-TestCommandsUnavailable -CommandNames 'terraform'
-
-            Test-CachedCommand 'terraform' | Should -Be $false
-            Test-CachedCommand 'tofu' | Should -Be $true
-
-            $result = Get-TerraformState -ErrorAction SilentlyContinue
-
-            $global:TestCommandInvocationCaptures.Count | Should -Be 1
-            $args = Get-TestCommandInvocationArgsFlat
-            $args | Should -Contain 'state'
-            $args | Should -Contain 'show'
-            $result | Should -Be 'State output'
+            $args | Should -Contain '-upgrade'
         }
     }
 }
 
-Describe 'iac-tools.ps1 - Invoke-Pulumi' {
+Describe 'terraform.ps1 - Invoke-Terraform' {
     BeforeEach {
         Clear-TestCommandInvocationCapture
 
@@ -105,44 +61,44 @@ Describe 'iac-tools.ps1 - Invoke-Pulumi' {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        Set-TestCommandAvailabilityState -CommandName 'pulumi' -Available $false
-        Remove-Item -Path 'Function:\pulumi' -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path 'Function:\global:pulumi' -Force -ErrorAction SilentlyContinue
+        Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false
+        Remove-Item -Path 'Function:\terraform' -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path 'Function:\global:terraform' -Force -ErrorAction SilentlyContinue
     }
 
     Context 'Tool not available' {
-        It 'Returns null when pulumi is not available' {
-            $result = Invoke-Pulumi preview -ErrorAction SilentlyContinue
+        It 'Returns null when terraform is not available' {
+            $result = Invoke-Terraform version -ErrorAction SilentlyContinue
 
             $result | Should -BeNullOrEmpty
         }
     }
 
     Context 'Tool available' {
-        It 'Calls pulumi with arguments' {
-            Setup-CapturingCommandMock -CommandName 'pulumi' -Output 'Preview output'
+        It 'Calls terraform with arguments' {
+            Setup-CapturingCommandMock -CommandName 'terraform' -Output 'Terraform v1.0.0'
 
-            Invoke-Pulumi preview -ErrorAction SilentlyContinue | Out-Null
+            Invoke-Terraform version -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
-            $args | Should -Contain 'preview'
+            $args | Should -Contain 'version'
             $global:TestCommandInvocationCaptures.Count | Should -Be 1
         }
 
-        It 'Calls pulumi with multiple arguments' {
-            Setup-CapturingCommandMock -CommandName 'pulumi' -Output 'Up output'
+        It 'Calls terraform with multiple arguments' {
+            Setup-CapturingCommandMock -CommandName 'terraform' -Output 'State list output'
 
-            Invoke-Pulumi up --yes -ErrorAction SilentlyContinue | Out-Null
+            Invoke-Terraform state list -ErrorAction SilentlyContinue | Out-Null
 
             $args = Get-TestCommandInvocationArgsFlat
-            $args | Should -Contain 'up'
-            $args | Should -Contain '--yes'
+            $args | Should -Contain 'state'
+            $args | Should -Contain 'list'
         }
 
-        It 'Handles pulumi execution errors' {
-            Set-TestCommandThrowingMock -CommandName 'pulumi' -Message 'Command not found'
+        It 'Handles terraform execution errors' {
+            Set-TestCommandThrowingMock -CommandName 'terraform' -Message 'Command not found'
 
-            { Invoke-Pulumi preview -ErrorAction Stop } | Should -Throw
+            { Invoke-Terraform version -ErrorAction Stop } | Should -Throw
         }
     }
 }

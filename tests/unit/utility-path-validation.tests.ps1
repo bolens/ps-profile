@@ -35,10 +35,17 @@ Describe 'Path Validation Helpers' {
 
     Context 'Get-RepoRoot' {
         It 'Throws for directories without git metadata' {
-            $tempDir = Join-Path $script:TempRoot ([System.Guid]::NewGuid().ToString())
+            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-git-$([guid]::NewGuid().ToString('n'))"
+            $tempScript = Join-Path $tempDir 'test.ps1'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+            Set-Content -Path $tempScript -Value '# test' -Force
 
-            { Get-RepoRoot -ScriptPath $tempDir } | Should -Throw
+            try {
+                { Get-RepoRoot -ScriptPath $tempScript } | Should -Throw
+            }
+            finally {
+                Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 

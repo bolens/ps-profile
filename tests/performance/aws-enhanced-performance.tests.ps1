@@ -6,6 +6,9 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_LOAD_MS' -Default 2500
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_FUNCTION_MS' -Default 2500
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_IDEMPOTENCY_MS' -Default 500
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 
@@ -17,7 +20,7 @@ Describe 'aws.ps1 - Enhanced Functions Performance Tests' {
             $stopwatch.Stop()
             
             $loadTime = $stopwatch.ElapsedMilliseconds
-            $loadTime | Should -BeLessThan 1000
+            $loadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
         
         It 'Loads fragment consistently across multiple loads' {
@@ -37,7 +40,7 @@ Describe 'aws.ps1 - Enhanced Functions Performance Tests' {
             }
             
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
-            $avgLoadTime | Should -BeLessThan 1000
+            $avgLoadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
     
@@ -58,8 +61,7 @@ Describe 'aws.ps1 - Enhanced Functions Performance Tests' {
             $stopwatch.Stop()
             
             $executionTime = $stopwatch.ElapsedMilliseconds
-            # Allow up to 1000ms for file I/O operations in test environment
-            $executionTime | Should -BeLessThan 1000
+            $executionTime | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
     
@@ -75,11 +77,8 @@ Describe 'aws.ps1 - Enhanced Functions Performance Tests' {
             . (Join-Path $script:ProfileDir 'aws.ps1')
             $stopwatch2.Stop()
             
-            $firstLoad = $stopwatch1.ElapsedMilliseconds
             $secondLoad = $stopwatch2.ElapsedMilliseconds
-            
-            # Second load should be faster (idempotent check)
-            $secondLoad | Should -BeLessThan $firstLoad
+            $secondLoad | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }

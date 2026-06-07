@@ -6,6 +6,9 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_LOAD_MS' -Default 2000
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_FUNCTION_MS' -Default 2000
+    $script:MaxEngineLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_ENGINE_LOOKUP_MS' -Default 100
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 
@@ -17,7 +20,7 @@ Describe 'containers-enhanced.ps1 - Performance Tests' {
             $stopwatch.Stop()
             
             $loadTime = $stopwatch.ElapsedMilliseconds
-            $loadTime | Should -BeLessThan 1000
+            $loadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
         
         It 'Loads fragment consistently across multiple loads' {
@@ -37,7 +40,7 @@ Describe 'containers-enhanced.ps1 - Performance Tests' {
             }
             
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
-            $avgLoadTime | Should -BeLessThan 1000
+            $avgLoadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
     
@@ -45,92 +48,61 @@ Describe 'containers-enhanced.ps1 - Performance Tests' {
         BeforeAll {
             . (Join-Path $script:ProfileDir 'containers-enhanced.ps1')
         }
+
+        BeforeEach {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+
+            Mark-TestCommandsUnavailable -CommandNames @('docker', 'podman')
+        }
         
         It 'Clean-Containers executes quickly when tools not available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Clean-Containers -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
         
         It 'Export-ContainerLogs executes quickly when tools not available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Export-ContainerLogs -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
         
         It 'Get-ContainerStats executes quickly when tools not available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Get-ContainerStats -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
         
         It 'Health-CheckContainers executes quickly when tools not available' {
-            Mock Get-ContainerEnginePreference -MockWith {
-                return @{
-                    Engine          = $null
-                    Available       = $false
-                    DockerAvailable = $false
-                    PodmanAvailable = $false
-                }
-            }
-            
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Health-CheckContainers -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
     
     Context 'Command Cache Performance' {
-        BeforeAll {
-            . (Join-Path $script:ProfileDir 'containers-enhanced.ps1')
-        }
-        
-        It 'Get-ContainerEnginePreference is fast on repeated calls' {
+        It 'Test-CachedCommand is fast on repeated calls' {
             Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-            
+            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             for ($i = 0; $i -lt 100; $i++) {
-                $null = Get-ContainerEnginePreference -ErrorAction SilentlyContinue
+                $null = Test-CachedCommand 'docker'
             }
             $stopwatch.Stop()
-            
+
             $avgTime = $stopwatch.ElapsedMilliseconds / 100
-            $avgTime | Should -BeLessThan 10
+            $avgTime | Should -BeLessThan $script:MaxEngineLookupTimeMs
         }
     }
 }

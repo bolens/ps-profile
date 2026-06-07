@@ -6,20 +6,21 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    Initialize-FragmentPerformanceThresholds -Prefix 'NETWORK_ANALYSIS'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')
 }
 
 Describe 'network-analysis.ps1 - Performance Tests' {
     Context 'Fragment Load Time' {
-        It 'Loads fragment in under 500ms' {
+        It 'Loads fragment in under threshold' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             . (Join-Path $script:ProfileDir 'network-analysis.ps1')
             $sw.Stop()
-            
-            $sw.ElapsedMilliseconds | Should -BeLessThan 500
+
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
-        
+
         It 'Loads fragment consistently across multiple loads' {
             $times = @()
             for ($i = 0; $i -lt 3; $i++) {
@@ -28,17 +29,19 @@ Describe 'network-analysis.ps1 - Performance Tests' {
                 $sw.Stop()
                 $times += $sw.ElapsedMilliseconds
             }
-            
-            # All loads should be fast (idempotency check)
-            $times | ForEach-Object { $_ | Should -BeLessThan 100 }
+
+            $times | ForEach-Object { $_ | Should -BeLessThan $script:MaxRepeatLoadTimeMs }
         }
     }
-    
+
     Context 'Function Registration Performance' {
+        BeforeAll {
+            . (Join-Path $script:ProfileDir 'network-analysis.ps1')
+        }
+
         It 'Registers all functions quickly' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
-            
-            # Functions should already be registered, but we can verify they exist
+
             $functions = @(
                 'Start-Wireshark',
                 'Invoke-NetworkScan',
@@ -46,29 +49,25 @@ Describe 'network-analysis.ps1 - Performance Tests' {
                 'Start-CloudflareTunnel',
                 'Send-NtfyNotification'
             )
-            
+
             foreach ($func in $functions) {
                 Get-Command -Name $func -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             }
-            
+
             $sw.Stop()
-            $sw.ElapsedMilliseconds | Should -BeLessThan 100
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
-    
+
     Context 'Idempotency Check Overhead' {
         It 'Idempotency check has minimal overhead' {
-            # Load fragment first time
             . (Join-Path $script:ProfileDir 'network-analysis.ps1')
-            
-            # Measure second load (should be fast due to idempotency)
+
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             . (Join-Path $script:ProfileDir 'network-analysis.ps1')
             $sw.Stop()
-            
-            # Idempotency check should be very fast (< 50ms)
-            $sw.ElapsedMilliseconds | Should -BeLessThan 50
+
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }
-

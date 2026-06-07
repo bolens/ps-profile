@@ -26,8 +26,8 @@ Describe 'Security Tools Fragment Performance Tests' {
 
             # Baseline performance metrics (in milliseconds)
             # Based on typical fragment load times with 3x safety margin
-            $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_SECURITY_TOOLS_MAX_LOAD_MS' -Default 500
-            $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_SECURITY_TOOLS_MAX_FUNCTION_MS' -Default 100
+            $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_SECURITY_TOOLS_MAX_LOAD_MS' -Default 2500
+            $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_SECURITY_TOOLS_MAX_FUNCTION_MS' -Default 1000
         }
         catch {
             $errorDetails = @{

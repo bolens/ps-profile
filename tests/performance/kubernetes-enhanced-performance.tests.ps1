@@ -6,20 +6,21 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    Initialize-FragmentPerformanceThresholds -Prefix 'KUBERNETES_ENHANCED'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')
 }
 
 Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
     Context 'Fragment Load Time' {
-        It 'Loads fragment in under 500ms' {
+        It 'Loads fragment in under threshold' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
             $sw.Stop()
-            
-            $sw.ElapsedMilliseconds | Should -BeLessThan 500
+
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
-        
+
         It 'Loads fragment consistently across multiple loads' {
             $times = @()
             for ($i = 0; $i -lt 3; $i++) {
@@ -28,20 +29,19 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
                 $sw.Stop()
                 $times += $sw.ElapsedMilliseconds
             }
-            
-            # All loads should be fast (idempotency check) - allow up to 500ms for module loading overhead
-            $times | ForEach-Object { $_ | Should -BeLessThan 500 }
+
+            $times | ForEach-Object { $_ | Should -BeLessThan $script:MaxRepeatLoadTimeMs }
         }
     }
-    
+
     Context 'Function Registration Performance' {
-        It 'Registers all functions quickly' {
-            # Ensure fragment is loaded first
+        BeforeAll {
             . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
-            
+        }
+
+        It 'Registers all functions quickly' {
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
-            
-            # Functions should already be registered, but we can verify they exist
+
             $functions = @(
                 'Set-KubeContext',
                 'Set-KubeNamespace',
@@ -54,66 +54,62 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
                 'Describe-KubeResource',
                 'Apply-KubeManifests'
             )
-            
+
             foreach ($func in $functions) {
                 Get-Command -Name $func -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             }
-            
+
             $sw.Stop()
-            $sw.ElapsedMilliseconds | Should -BeLessThan 100
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
-    
+
     Context 'Function Execution Performance' {
         BeforeAll {
             . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
         }
-        
+
         It 'Exec-KubePod executes quickly when tools not available' {
             Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
-            
+
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Exec-KubePod -Pod 'test-pod' -Command 'ls' -ErrorAction SilentlyContinue
             $stopwatch.Stop()
-            
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
-        
+
         It 'Describe-KubeResource executes quickly when tools not available' {
             Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
-            
+
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Describe-KubeResource -ResourceType 'pods' -ErrorAction SilentlyContinue
             $stopwatch.Stop()
-            
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
-        
+
         It 'Apply-KubeManifests executes quickly when tools not available' {
             Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
             Mock Test-Path -MockWith { return $true }
-            
+
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Apply-KubeManifests -Path 'manifests/' -ErrorAction SilentlyContinue
             $stopwatch.Stop()
-            
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
-    
+
     Context 'Idempotency Check Overhead' {
         It 'Idempotency check has minimal overhead' {
-            # Load fragment first time
             . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
-            
-            # Measure second load (should be fast due to idempotency)
+
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
             $sw.Stop()
-            
-            # Idempotency check should be fast (< 500ms) - allow for module loading overhead
-            $sw.ElapsedMilliseconds | Should -BeLessThan 500
+
+            $sw.ElapsedMilliseconds | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }
-

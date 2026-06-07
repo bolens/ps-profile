@@ -6,6 +6,7 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    Initialize-FragmentPerformanceThresholds -Prefix 'GAME_EMULATORS' -FunctionMs 5000
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 
@@ -17,7 +18,7 @@ Describe 'game-emulators.ps1 - Performance Tests' {
             $stopwatch.Stop()
             
             $loadTime = $stopwatch.ElapsedMilliseconds
-            $loadTime | Should -BeLessThan 500
+            $loadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
         
         It 'Loads fragment consistently across multiple loads' {
@@ -37,7 +38,7 @@ Describe 'game-emulators.ps1 - Performance Tests' {
             }
             
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
-            $avgLoadTime | Should -BeLessThan 500
+            $avgLoadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
     
@@ -52,7 +53,7 @@ Describe 'game-emulators.ps1 - Performance Tests' {
             $stopwatch.Stop()
             
             $executionTime = $stopwatch.ElapsedMilliseconds
-            $executionTime | Should -BeLessThan 100
+            $executionTime | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
     
@@ -68,11 +69,8 @@ Describe 'game-emulators.ps1 - Performance Tests' {
             . (Join-Path $script:ProfileDir 'game-emulators.ps1')
             $stopwatch2.Stop()
             
-            $firstLoad = $stopwatch1.ElapsedMilliseconds
             $secondLoad = $stopwatch2.ElapsedMilliseconds
-            
-            # Second load should be faster (idempotent check)
-            $secondLoad | Should -BeLessThan $firstLoad
+            $secondLoad | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }

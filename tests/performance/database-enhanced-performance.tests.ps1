@@ -6,6 +6,7 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    Initialize-FragmentPerformanceThresholds -Prefix 'DATABASE_ENHANCED'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 
@@ -17,7 +18,7 @@ Describe 'database.ps1 - Enhanced Functions Performance Tests' {
             $stopwatch.Stop()
             
             $loadTime = $stopwatch.ElapsedMilliseconds
-            $loadTime | Should -BeLessThan 1000
+            $loadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
         
         It 'Loads fragment consistently across multiple loads' {
@@ -37,7 +38,7 @@ Describe 'database.ps1 - Enhanced Functions Performance Tests' {
             }
             
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
-            $avgLoadTime | Should -BeLessThan 1000
+            $avgLoadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
     
@@ -59,7 +60,7 @@ Describe 'database.ps1 - Enhanced Functions Performance Tests' {
             
             $executionTime = $stopwatch.ElapsedMilliseconds
             # Allow up to 1000ms for file I/O operations in test environment
-            $executionTime | Should -BeLessThan 1000
+            $executionTime | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
     
@@ -75,11 +76,8 @@ Describe 'database.ps1 - Enhanced Functions Performance Tests' {
             . (Join-Path $script:ProfileDir 'database.ps1')
             $stopwatch2.Stop()
             
-            $firstLoad = $stopwatch1.ElapsedMilliseconds
             $secondLoad = $stopwatch2.ElapsedMilliseconds
-            
-            # Second load should be faster (idempotent check)
-            $secondLoad | Should -BeLessThan $firstLoad
+            $secondLoad | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }

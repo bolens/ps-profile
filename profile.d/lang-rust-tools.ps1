@@ -67,19 +67,8 @@ try {
             [string]$Version
         )
 
-        if (-not (Test-CachedCommand 'cargo-binstall')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $cargoBinstallCmd = if (Test-CachedCommand 'cargo-binstall') { Get-CachedExternalCommand 'cargo-binstall' } else { $null }
+        if (-not $cargoBinstallCmd) {
             Invoke-MissingToolWarning -ToolName 'cargo-binstall' -ToolType 'rust-package'
             return $null
         }
@@ -94,7 +83,7 @@ try {
                     $cmdArgs += '--version', $Version
                 }
                 $cmdArgs += $Packages
-                & cargo-binstall @cmdArgs 2>&1
+                & $cargoBinstallCmd @cmdArgs 2>&1
             }
         }
         else {
@@ -104,7 +93,7 @@ try {
                     $cmdArgs += '--version', $Version
                 }
                 $cmdArgs += $Packages
-                $result = & cargo-binstall @cmdArgs 2>&1
+                $result = & $cargoBinstallCmd @cmdArgs 2>&1
                 return $result
             }
             catch {
@@ -170,19 +159,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'cargo-watch')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $cargoWatchCmd = if (Test-CachedCommand 'cargo-watch') { Get-CachedExternalCommand 'cargo-watch' } else { $null }
+        if (-not $cargoWatchCmd) {
             Invoke-MissingToolWarning -ToolName 'cargo-watch' -ToolType 'rust-package'
             return $null
         }
@@ -197,7 +175,7 @@ try {
                     $cmdArgs += '--'
                     $cmdArgs += $Arguments
                 }
-                & cargo-watch @cmdArgs 2>&1
+                & $cargoWatchCmd @cmdArgs 2>&1
             }
         }
         else {
@@ -207,7 +185,7 @@ try {
                     $cmdArgs += '--'
                     $cmdArgs += $Arguments
                 }
-                $result = & cargo-watch @cmdArgs 2>&1
+                $result = & $cargoWatchCmd @cmdArgs 2>&1
                 return $result
             }
             catch {

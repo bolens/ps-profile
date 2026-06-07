@@ -67,19 +67,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'goreleaser')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $goreleaserCmd = if (Test-CachedCommand 'goreleaser') { Get-CachedExternalCommand 'goreleaser' } else { $null }
+        if (-not $goreleaserCmd) {
             Invoke-MissingToolWarning -ToolName 'goreleaser' -ToolType 'go-package' -DefaultInstallCommand 'go install github.com/goreleaser/goreleaser/v2/cmd/goreleaser@latest (or scoop install goreleaser)'
             return $null
         }
@@ -88,12 +77,12 @@ try {
             return Invoke-WithWideEvent -OperationName 'go.goreleaser.invoke' -Context @{
                 arguments = $Arguments
             } -ScriptBlock {
-                & goreleaser @Arguments 2>&1
+                & $goreleaserCmd @Arguments 2>&1
             }
         }
         else {
             try {
-                $result = & goreleaser @Arguments 2>&1
+                $result = & $goreleaserCmd @Arguments 2>&1
                 return $result
             }
             catch {
@@ -158,19 +147,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'mage')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $mageCmd = if (Test-CachedCommand 'mage') { Get-CachedExternalCommand 'mage' } else { $null }
+        if (-not $mageCmd) {
             Invoke-MissingToolWarning -ToolName 'mage' -DefaultInstallCommand 'go install github.com/magefile/mage@latest (or scoop install mage)'
             return $null
         }
@@ -187,7 +165,7 @@ try {
                 if ($Arguments) {
                     $cmdArgs += $Arguments
                 }
-                & mage @cmdArgs 2>&1
+                & $mageCmd @cmdArgs 2>&1
             }
         }
         else {
@@ -199,7 +177,7 @@ try {
                 if ($Arguments) {
                     $cmdArgs += $Arguments
                 }
-                $result = & mage @cmdArgs 2>&1
+                $result = & $mageCmd @cmdArgs 2>&1
                 return $result
             }
             catch {
@@ -258,19 +236,8 @@ try {
             [string[]]$Arguments
         )
 
-        if (-not (Test-CachedCommand 'golangci-lint')) {
-            $repoRoot = $null
-            if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
-                try {
-                    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot -ErrorAction Stop
-                }
-                catch {
-                    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-                }
-            }
-            else {
-                $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-            }
+        $golangciLintCmd = if (Test-CachedCommand 'golangci-lint') { Get-CachedExternalCommand 'golangci-lint' } else { $null }
+        if (-not $golangciLintCmd) {
             Invoke-MissingToolWarning -ToolName 'golangci-lint' -DefaultInstallCommand 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest (or scoop install golangci-lint)'
             return $null
         }
@@ -279,12 +246,12 @@ try {
             return Invoke-WithWideEvent -OperationName 'go.golangci-lint.invoke' -Context @{
                 arguments = $Arguments
             } -ScriptBlock {
-                & golangci-lint @Arguments 2>&1
+                & $golangciLintCmd @Arguments 2>&1
             }
         }
         else {
             try {
-                $result = & golangci-lint @Arguments 2>&1
+                $result = & $golangciLintCmd @Arguments 2>&1
                 return $result
             }
             catch {

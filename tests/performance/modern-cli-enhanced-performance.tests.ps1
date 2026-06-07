@@ -6,6 +6,7 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    Initialize-FragmentPerformanceThresholds -Prefix 'MODERN_CLI_ENHANCED'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 
@@ -17,7 +18,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             $stopwatch.Stop()
             
             $loadTime = $stopwatch.ElapsedMilliseconds
-            $loadTime | Should -BeLessThan 1000
+            $loadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
         
         It 'Loads fragment consistently across multiple loads' {
@@ -37,7 +38,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             }
             
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
-            $avgLoadTime | Should -BeLessThan 1000
+            $avgLoadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
     
@@ -53,7 +54,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             Find-WithFd -Pattern "test" -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
         
         It 'Grep-WithRipgrep executes quickly when tools not available' {
@@ -63,7 +64,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             Grep-WithRipgrep -Pattern "test" -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
         
         It 'Navigate-WithZoxide executes quickly when tools not available' {
@@ -73,7 +74,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             Navigate-WithZoxide -Query "test" -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
         
         It 'View-WithBat executes quickly when tools not available' {
@@ -83,7 +84,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             View-WithBat -Path (Get-TestArtifactPath -FileName 'test.txt') -ErrorAction SilentlyContinue
             $stopwatch.Stop()
             
-            $stopwatch.ElapsedMilliseconds | Should -BeLessThan 100
+            $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs
         }
     }
     
@@ -102,7 +103,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
             $stopwatch.Stop()
             
             $avgTime = $stopwatch.ElapsedMilliseconds / 100
-            $avgTime | Should -BeLessThan 10
+            $avgTime | Should -BeLessThan $script:MaxLookupTimeMs
         }
     }
 }

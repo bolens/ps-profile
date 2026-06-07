@@ -527,6 +527,7 @@ Describe 'run-pester.ps1 Configuration Files' {
     }
 
     It 'Loads configuration from file' {
+        $null = New-Item -ItemType Directory -Path $script:TestTempRoot -Force -ErrorAction SilentlyContinue
         $configPath = Join-Path $script:TestTempRoot 'test-config.json'
         
         # Create a test config
@@ -542,6 +543,7 @@ Describe 'run-pester.ps1 Configuration Files' {
     }
 
     It 'Command-line parameters override config file' {
+        $null = New-Item -ItemType Directory -Path $script:TestTempRoot -Force -ErrorAction SilentlyContinue
         $configPath = Join-Path $script:TestTempRoot 'test-config.json'
         
         # Create config with Suite = Unit
@@ -688,8 +690,12 @@ Describe 'run-pester.ps1 Interactive Mode' {
     }
     
     It 'Accepts Interactive parameter' {
+        if ($env:PS_PROFILE_NONINTERACTIVE -eq '1' -or $env:CI -eq 'true' -or [Console]::IsInputRedirected) {
+            Set-ItResult -Inconclusive -Because 'Interactive mode requires a TTY'
+            return
+        }
+
         # Interactive mode requires user input, so we can only verify it accepts the parameter
-        # In a real scenario, this would present a menu
         $result = Invoke-RunPesterDryRun @{ Interactive = $true } 2>&1
 
         $result | Should -Not -BeNullOrEmpty

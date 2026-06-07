@@ -50,6 +50,18 @@ BeforeAll {
 }
 
 Describe 'Test Runner Performance Tests' {
+    BeforeAll {
+        if ($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
+            $script:SkipNestedRunnerPerformance = $true
+        }
+    }
+
+    BeforeEach {
+        if ($script:SkipNestedRunnerPerformance) {
+            Set-ItResult -Skipped -Because 'test-runner-performance requires an isolated pwsh process (not nested inside run-pester)'
+        }
+    }
+
     Context 'Test Runner Startup Performance' {
         It 'Starts up within acceptable time limits' {
             try {

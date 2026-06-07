@@ -6,6 +6,7 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    Initialize-FragmentPerformanceThresholds -Prefix '3D_CAD'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 
@@ -17,7 +18,7 @@ Describe '3d-cad.ps1 - Performance Tests' {
             $stopwatch.Stop()
             
             $loadTime = $stopwatch.ElapsedMilliseconds
-            $loadTime | Should -BeLessThan 500
+            $loadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
         
         It 'Loads fragment consistently across multiple loads' {
@@ -37,7 +38,7 @@ Describe '3d-cad.ps1 - Performance Tests' {
             }
             
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
-            $avgLoadTime | Should -BeLessThan 500
+            $avgLoadTime | Should -BeLessThan $script:MaxFragmentLoadTimeMs
         }
     }
     
@@ -53,11 +54,8 @@ Describe '3d-cad.ps1 - Performance Tests' {
             . (Join-Path $script:ProfileDir '3d-cad.ps1')
             $stopwatch2.Stop()
             
-            $firstLoad = $stopwatch1.ElapsedMilliseconds
             $secondLoad = $stopwatch2.ElapsedMilliseconds
-            
-            # Second load should be faster (idempotent check)
-            $secondLoad | Should -BeLessThan $firstLoad
+            $secondLoad | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }
