@@ -4,7 +4,7 @@
 # ===============================================
 
 # Import CommonEnums for PathType enum
-$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'core' 'CommonEnums.psm1'
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'core' 'CommonEnums.psm1'
 if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
     Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
 }

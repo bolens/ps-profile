@@ -15,6 +15,7 @@ $functionParserPath = Join-Path $PSScriptRoot 'DocFunctionParser.psm1'
 $agentModeParserPath = Join-Path $PSScriptRoot 'DocAgentModeFunctionParser.psm1'
 $aliasParserPath = Join-Path $PSScriptRoot 'DocAliasParser.psm1'
 $parserPath = Join-Path $PSScriptRoot 'DocParser.psm1'
+$docPathsPath = Join-Path $PSScriptRoot 'DocPaths.psm1'
 
 foreach ($modulePath in @(
         $regexModulePath
@@ -23,6 +24,7 @@ foreach ($modulePath in @(
         $agentModeParserPath
         $aliasParserPath
         $parserPath
+        $docPathsPath
     )) {
     if (Test-Path $modulePath) {
         Import-Module $modulePath -DisableNameChecking -Force -ErrorAction Stop
@@ -134,6 +136,10 @@ function Get-DocumentationCoverageReport {
 
             $totalDynamicRegistrations++
 
+            if ($functionName -match '^_') {
+                continue
+            }
+
             if ($documentedFunctions.Contains($functionName)) {
                 continue
             }
@@ -161,24 +167,26 @@ function Get-DocumentationCoverageReport {
 
     $functionsDocsPath = Join-Path $DocsPath 'functions'
     $aliasesDocsPath = Join-Path $DocsPath 'aliases'
-    $markdownFunctions = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-    $markdownAliases = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $markdownFunctionNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $markdownAliasNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 
     if (Test-Path -LiteralPath $functionsDocsPath) {
         Get-ChildItem -LiteralPath $functionsDocsPath -Filter '*.md' -File | ForEach-Object {
-            [void]$markdownFunctions.Add($_.BaseName)
+            $commandName = Get-DocumentationCommandNameFromMarkdownBaseName -BaseName $_.BaseName
+            [void]$markdownFunctionNames.Add($commandName)
         }
     }
 
     if (Test-Path -LiteralPath $aliasesDocsPath) {
         Get-ChildItem -LiteralPath $aliasesDocsPath -Filter '*.md' -File | ForEach-Object {
-            [void]$markdownAliases.Add($_.BaseName)
+            $commandName = Get-DocumentationCommandNameFromMarkdownBaseName -BaseName $_.BaseName
+            [void]$markdownAliasNames.Add($commandName)
         }
     }
 
     $missingMarkdown = [System.Collections.Generic.List[PSCustomObject]]::new()
     foreach ($functionName in $documentedFunctions) {
-        if (-not $markdownFunctions.Contains($functionName)) {
+        if (-not $markdownFunctionNames.Contains($functionName)) {
             $entry = $functionByName[$functionName]
             $missingMarkdown.Add([PSCustomObject]@{
                     Name = $functionName
@@ -189,7 +197,7 @@ function Get-DocumentationCoverageReport {
     }
 
     foreach ($aliasName in $documentedAliases) {
-        if (-not $markdownAliases.Contains($aliasName)) {
+        if (-not $markdownAliasNames.Contains($aliasName)) {
             $missingMarkdown.Add([PSCustomObject]@{
                     Name = $aliasName
                     Type = 'Alias'
@@ -199,23 +207,29 @@ function Get-DocumentationCoverageReport {
     }
 
     $orphanMarkdown = [System.Collections.Generic.List[PSCustomObject]]::new()
-    foreach ($functionName in $markdownFunctions) {
-        if (-not $documentedFunctions.Contains($functionName)) {
-            $orphanMarkdown.Add([PSCustomObject]@{
-                    Name = $functionName
-                    Type = 'Function'
-                    Path = Join-Path $functionsDocsPath "$functionName.md"
-                })
+    if (Test-Path -LiteralPath $functionsDocsPath) {
+        Get-ChildItem -LiteralPath $functionsDocsPath -Filter '*.md' -File | ForEach-Object {
+            $commandName = Get-DocumentationCommandNameFromMarkdownBaseName -BaseName $_.BaseName
+            if (-not $documentedFunctions.Contains($commandName)) {
+                $orphanMarkdown.Add([PSCustomObject]@{
+                        Name = $commandName
+                        Type = 'Function'
+                        Path = $_.FullName
+                    })
+            }
         }
     }
 
-    foreach ($aliasName in $markdownAliases) {
-        if (-not $documentedAliases.Contains($aliasName)) {
-            $orphanMarkdown.Add([PSCustomObject]@{
-                    Name = $aliasName
-                    Type = 'Alias'
-                    Path = Join-Path $aliasesDocsPath "$aliasName.md"
-                })
+    if (Test-Path -LiteralPath $aliasesDocsPath) {
+        Get-ChildItem -LiteralPath $aliasesDocsPath -Filter '*.md' -File | ForEach-Object {
+            $commandName = Get-DocumentationCommandNameFromMarkdownBaseName -BaseName $_.BaseName
+            if (-not $documentedAliases.Contains($commandName)) {
+                $orphanMarkdown.Add([PSCustomObject]@{
+                        Name = $commandName
+                        Type = 'Alias'
+                        Path = $_.FullName
+                    })
+            }
         }
     }
 

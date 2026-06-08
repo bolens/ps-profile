@@ -8,6 +8,11 @@ scripts/utils/docs/modules/DocCleanup.psm1
     Provides functions for cleaning up stale documentation files.
 #>
 
+$docPathsModule = Join-Path $PSScriptRoot 'DocPaths.psm1'
+if (Test-Path $docPathsModule) {
+    Import-Module $docPathsModule -DisableNameChecking -Force -ErrorAction SilentlyContinue
+}
+
 <#
 .SYNOPSIS
     Removes stale documentation files.
@@ -39,8 +44,15 @@ function Remove-StaleDocumentation {
     )
 
     Write-ScriptMessage -Message "`nCleaning up stale documentation..."
-    $allDocFiles = Get-ChildItem -Path $DocsPath -Filter '*.md' -Exclude 'README.md' -ErrorAction SilentlyContinue
-    $staleDocs = $allDocFiles | Where-Object { $_.BaseName -notin $DocumentedCommandNames }
+    $allDocFiles = @(Get-ChildItem -Path $DocsPath -Filter '*.md' -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -ne 'README.md' })
+    $documentedBaseNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    foreach ($commandName in $DocumentedCommandNames) {
+        $fileName = Get-DocumentationMarkdownFileName -CommandName $commandName
+        [void]$documentedBaseNames.Add([System.IO.Path]::GetFileNameWithoutExtension($fileName))
+    }
+
+    $staleDocs = $allDocFiles | Where-Object { -not $documentedBaseNames.Contains($_.BaseName) }
 
     if ($staleDocs.Count -gt 0) {
         Write-ScriptMessage -Message "Removing $($staleDocs.Count) stale documentation file(s):"
@@ -51,6 +63,15 @@ function Remove-StaleDocumentation {
     }
     else {
         Write-ScriptMessage -Message "No stale documentation files found."
+    }
+
+    for ($dotCount = 2; $dotCount -le 8; $dotCount++) {
+        $legacyPath = Join-Path $DocsPath (('.' * $dotCount) + '.md')
+        $encodedPath = Join-Path $DocsPath "dot$dotCount.md"
+        if ((Test-Path -LiteralPath $legacyPath) -and (Test-Path -LiteralPath $encodedPath)) {
+            Write-ScriptMessage -Message "  - Removing legacy dot collision file: $(Split-Path -Leaf $legacyPath)"
+            Remove-Item -LiteralPath $legacyPath -Force
+        }
     }
 }
 

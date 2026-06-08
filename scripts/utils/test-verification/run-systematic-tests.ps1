@@ -139,21 +139,9 @@ $categories = @(
 
 # Filter by category if specified
 if ($Category) {
-    $availableCategories = @(
-        @{ Name = 'Bootstrap'; Path = 'tests/integration/bootstrap'; Priority = 1; Type = 'Integration' }
-        @{ Name = 'Tools'; Path = 'tests/integration/tools'; Priority = 2; Type = 'Integration' }
-        @{ Name = 'Conversion-Data'; Path = 'tests/integration/conversion/data'; Priority = 3; Type = 'Integration' }
-        @{ Name = 'Conversion-Document'; Path = 'tests/integration/conversion/document'; Priority = 3; Type = 'Integration' }
-        @{ Name = 'Conversion-Media'; Path = 'tests/integration/conversion/media'; Priority = 3; Type = 'Integration' }
-        @{ Name = 'Filesystem'; Path = 'tests/integration/filesystem'; Priority = 4; Type = 'Integration' }
-        @{ Name = 'Fragments'; Path = 'tests/integration/fragments'; Priority = 4; Type = 'Integration' }
-        @{ Name = 'Profile'; Path = 'tests/integration/profile'; Priority = 4; Type = 'Integration' }
-        @{ Name = 'Utilities'; Path = 'tests/integration/utilities'; Priority = 5; Type = 'Integration' }
-        @{ Name = 'Performance'; Path = 'tests/performance'; Priority = 6; Type = 'Performance' }
-    )
+    $categoryNames = ($categories | ForEach-Object { $_.Name }) -join ', '
     $categories = $categories | Where-Object { $_.Name -eq $Category }
     if (-not $categories) {
-        $categoryNames = ($availableCategories | ForEach-Object { $_.Name }) -join ', '
         Write-CategoryMessage "Category '$Category' not found. Available categories: $categoryNames" -Level 'Error'
         Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }

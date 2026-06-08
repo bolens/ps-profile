@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-WattsFromPower`
+Convert to Watts from Power units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-WattsFromPower` command.
+Convert to Watts from Power units
 
 ## Alias Information
 

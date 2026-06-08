@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-MetersFromTypography`
+Convert to Meters from Typography units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-MetersFromTypography` command.
+Convert to Meters from Typography units
 
 ## Alias Information
 

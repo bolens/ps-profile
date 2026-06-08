@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-FlowRate`
+Convert between FlowRate units
 
 ## Description
 
-This is an alias that points to the `Convert-FlowRate` command.
+Convert between FlowRate units
 
 ## Alias Information
 

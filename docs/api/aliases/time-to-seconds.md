@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-SecondsFromTimeUnit`
+Convert to Seconds from TimeUnit units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-SecondsFromTimeUnit` command.
+Convert to Seconds from TimeUnit units
 
 ## Alias Information
 

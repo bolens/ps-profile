@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-BitsPerSecondFromDataRate`
+Convert to BitsPerSecond from DataRate units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-BitsPerSecondFromDataRate` command.
+Convert to BitsPerSecond from DataRate units
 
 ## Alias Information
 

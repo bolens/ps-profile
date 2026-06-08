@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 2342
+**Total Functions:** 2373
 **Total Aliases:** 1498
-**Generated:** 2026-06-08 11:10:21
+**Generated:** 2026-06-08 11:32:19
 
 ## Functions by Fragment
 
@@ -28,8 +28,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-AacToWav](functions/ConvertFrom-AacToWav.md) - Converts AAC audio to WAV format.
 - [Initialize-FileConversion-MediaAudioAac](functions/Initialize-FileConversion-MediaAudioAac.md) - Initializes AAC audio format conversion utility functions.
 
-### acceleration (1 functions)
+### acceleration (4 functions)
 
+- [Convert-Acceleration](functions/Convert-Acceleration.md) - Convert between Acceleration units
+- [ConvertFrom-MetersPerSecondSquaredToAcceleration](functions/ConvertFrom-MetersPerSecondSquaredToAcceleration.md) - Convert from MetersPerSecondSquared to Acceleration units
+- [ConvertTo-MetersPerSecondSquaredFromAcceleration](functions/ConvertTo-MetersPerSecondSquaredFromAcceleration.md) - Convert to MetersPerSecondSquared from Acceleration units
 - [Initialize-FileConversion-CoreUnitsAcceleration](functions/Initialize-FileConversion-CoreUnitsAcceleration.md) - Initializes Acceleration unit conversion utility functions.
 
 ### ai-tools (6 functions)
@@ -790,8 +793,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [Query-Database](functions/Query-Database.md) - Executes a database query.
 - [Restore-Database](functions/Restore-Database.md) - Restores a database from a backup.
 
-### datarate (1 functions)
+### datarate (4 functions)
 
+- [Convert-DataRate](functions/Convert-DataRate.md) - Convert between DataRate units
+- [ConvertFrom-BitsPerSecondToDataRate](functions/ConvertFrom-BitsPerSecondToDataRate.md) - Convert from BitsPerSecond to DataRate units
+- [ConvertTo-BitsPerSecondFromDataRate](functions/ConvertTo-BitsPerSecondFromDataRate.md) - Convert to BitsPerSecond from DataRate units
 - [Initialize-FileConversion-CoreUnitsDataRate](functions/Initialize-FileConversion-CoreUnitsDataRate.md) - Initializes Data rate unit conversion utility functions.
 
 ### datasize (7 functions)
@@ -811,8 +817,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-DenoTask](functions/Invoke-DenoTask.md) - Runs Deno tasks.
 - [Update-DenoSelf](functions/Update-DenoSelf.md) - Updates Deno to the latest version.
 
-### density (1 functions)
+### density (4 functions)
 
+- [Convert-Density](functions/Convert-Density.md) - Convert between Density units
+- [ConvertFrom-KilogramsPerCubicMeterToDensity](functions/ConvertFrom-KilogramsPerCubicMeterToDensity.md) - Convert from KilogramsPerCubicMeter to Density units
+- [ConvertTo-KilogramsPerCubicMeterFromDensity](functions/ConvertTo-KilogramsPerCubicMeterFromDensity.md) - Convert to KilogramsPerCubicMeter from Density units
 - [Initialize-FileConversion-CoreUnitsDensity](functions/Initialize-FileConversion-CoreUnitsDensity.md) - Initializes Density unit conversion utility functions.
 
 ### dev (39 functions)
@@ -1407,9 +1416,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### files-navigation (8 functions)
 
-- [..](functions/...md) - Changes to the parent directory.
-- [...](functions/....md) - Changes to the grandparent directory.
-- [....](functions/.....md) - Changes to the great-grandparent directory.
+- [..](functions/dot2.md) - Changes to the parent directory.
+- [...](functions/dot3.md) - Changes to the grandparent directory.
+- [....](functions/dot4.md) - Changes to the great-grandparent directory.
 - [~](functions/~.md) - Go to user home directory
 - [Ensure-FileNavigation](functions/Ensure-FileNavigation.md) - Initializes file navigation utility functions on first use.
 - [Set-LocationDesktop](functions/Set-LocationDesktop.md) - Changes to the Desktop directory.
@@ -1450,24 +1459,34 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-FlacToWav](functions/ConvertFrom-FlacToWav.md) - Converts FLAC audio to WAV format.
 - [Initialize-FileConversion-MediaAudioFlac](functions/Initialize-FileConversion-MediaAudioFlac.md) - Initializes FLAC audio format conversion utility functions.
 
-### flowrate (1 functions)
+### flowrate (4 functions)
 
+- [Convert-FlowRate](functions/Convert-FlowRate.md) - Convert between FlowRate units
+- [ConvertFrom-LitersPerSecondToFlowRate](functions/ConvertFrom-LitersPerSecondToFlowRate.md) - Convert from LitersPerSecond to FlowRate units
+- [ConvertTo-LitersPerSecondFromFlowRate](functions/ConvertTo-LitersPerSecondFromFlowRate.md) - Convert to LitersPerSecond from FlowRate units
 - [Initialize-FileConversion-CoreUnitsFlowRate](functions/Initialize-FileConversion-CoreUnitsFlowRate.md) - Initializes Flow rate unit conversion utility functions.
 
-### force (1 functions)
+### force (4 functions)
 
+- [Convert-Force](functions/Convert-Force.md) - Convert between Force units
+- [ConvertFrom-NewtonsToForce](functions/ConvertFrom-NewtonsToForce.md) - Convert from New to nsToForce units
+- [ConvertTo-NewtonsFromForce](functions/ConvertTo-NewtonsFromForce.md) - Convert to Newtons from Force units
 - [Initialize-FileConversion-CoreUnitsForce](functions/Initialize-FileConversion-CoreUnitsForce.md) - Initializes Force unit conversion utility functions.
 
 ### FragmentWarnings (1 functions)
 
 - [Initialize-FragmentWarningSuppression](functions/Initialize-FragmentWarningSuppression.md) - Performs operations related to Initialize-FragmentWarningSuppression.
 
-### frequency (1 functions)
+### frequency (4 functions)
 
+- [Convert-Frequency](functions/Convert-Frequency.md) - Convert between Frequency units
+- [ConvertFrom-HertzToFrequency](functions/ConvertFrom-HertzToFrequency.md) - Convert from Hertz to Frequency units
+- [ConvertTo-HertzFromFrequency](functions/ConvertTo-HertzFromFrequency.md) - Convert to Hertz from Frequency units
 - [Initialize-FileConversion-CoreUnitsFrequency](functions/Initialize-FileConversion-CoreUnitsFrequency.md) - Initializes Frequency unit conversion utility functions.
 
-### fueleconomy (1 functions)
+### fueleconomy (2 functions)
 
+- [Convert-FuelEconomy](functions/Convert-FuelEconomy.md) - Convert between FuelEconomy units
 - [Initialize-FileConversion-CoreUnitsFuelEconomy](functions/Initialize-FileConversion-CoreUnitsFuelEconomy.md) - Initializes Fuel economy unit conversion utility functions.
 
 ### fzf (2 functions)
@@ -2440,9 +2459,12 @@ This documentation is automatically generated from comment-based help in the pro
 - [Update-PoetryDependencies](functions/Update-PoetryDependencies.md) - Updates Poetry project dependencies.
 - [Update-PoetrySelf](functions/Update-PoetrySelf.md) - Updates Poetry to the latest version.
 
-### power (2 functions)
+### power (5 functions)
 
 - [_Convert-Power](functions/_Convert-Power.md) - Thermal
+- [Convert-Power](functions/Convert-Power.md) - Convert between Power units
+- [ConvertFrom-WattsToPower](functions/ConvertFrom-WattsToPower.md) - Convert from Watts to Power units
+- [ConvertTo-WattsFromPower](functions/ConvertTo-WattsFromPower.md) - Convert to Watts from Power units
 - [Initialize-FileConversion-CoreUnitsPower](functions/Initialize-FileConversion-CoreUnitsPower.md) - Initializes Power unit conversion utility functions.
 
 ### pressure (7 functions)
@@ -2969,8 +2991,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-TiffFromPng](functions/ConvertTo-TiffFromPng.md) - Converts PNG image to TIFF format.
 - [Initialize-FileConversion-MediaImagesTiff](functions/Initialize-FileConversion-MediaImagesTiff.md) - Initializes TIFF image format conversion utility functions.
 
-### time (1 functions)
+### time (4 functions)
 
+- [Convert-Duration](functions/Convert-Duration.md) - Convert between Duration units
+- [ConvertFrom-SecondsToTimeUnit](functions/ConvertFrom-SecondsToTimeUnit.md) - Convert from Seconds to TimeUnit units
+- [ConvertTo-SecondsFromTimeUnit](functions/ConvertTo-SecondsFromTimeUnit.md) - Convert to Seconds from TimeUnit units
 - [Initialize-FileConversion-CoreUnitsTime](functions/Initialize-FileConversion-CoreUnitsTime.md) - Initializes Time duration unit conversion utility functions.
 
 ### timestamp (5 functions)
@@ -3033,12 +3058,18 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-ToonFromYaml](functions/ConvertTo-ToonFromYaml.md) - Converts YAML file to TOON format.
 - [Initialize-FileConversion-Toon](functions/Initialize-FileConversion-Toon.md) - Initializes TOON format conversion utility functions.
 
-### torque (1 functions)
+### torque (4 functions)
 
+- [Convert-Torque](functions/Convert-Torque.md) - Convert between Torque units
+- [ConvertFrom-NewtonMetersToTorque](functions/ConvertFrom-NewtonMetersToTorque.md) - Convert from New to nMetersToTorque units
+- [ConvertTo-NewtonMetersFromTorque](functions/ConvertTo-NewtonMetersFromTorque.md) - Convert to NewtonMeters from Torque units
 - [Initialize-FileConversion-CoreUnitsTorque](functions/Initialize-FileConversion-CoreUnitsTorque.md) - Initializes Torque unit conversion utility functions.
 
-### typography (1 functions)
+### typography (4 functions)
 
+- [Convert-Typography](functions/Convert-Typography.md) - Convert between Typography units
+- [ConvertFrom-MetersToTypography](functions/ConvertFrom-MetersToTypography.md) - Convert from Meters to Typography units
+- [ConvertTo-MetersFromTypography](functions/ConvertTo-MetersFromTypography.md) - Convert to Meters from Typography units
 - [Initialize-FileConversion-CoreUnitsTypography](functions/Initialize-FileConversion-CoreUnitsTypography.md) - Initializes Typography unit conversion utility functions.
 
 ### ubjson (5 functions)
@@ -3422,9 +3453,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### acceleration (3 aliases)
 
-- [acceleration](aliases/acceleration.md) - Alias for `Convert-Acceleration` (alias for `Convert-Acceleration`)
-- [acceleration-to-m-s2](aliases/acceleration-to-m-s2.md) - Alias for `ConvertTo-MetersPerSecondSquaredFromAcceleration` (alias for `ConvertTo-MetersPerSecondSquaredFromAcceleration`)
-- [m-s2-to-acceleration](aliases/m-s2-to-acceleration.md) - Alias for `ConvertFrom-MetersPerSecondSquaredToAcceleration` (alias for `ConvertFrom-MetersPerSecondSquaredToAcceleration`)
+- [acceleration](aliases/acceleration.md) - Convert between Acceleration units (alias for `Convert-Acceleration`)
+- [acceleration-to-m-s2](aliases/acceleration-to-m-s2.md) - Convert to MetersPerSecondSquared from Acceleration units (alias for `ConvertTo-MetersPerSecondSquaredFromAcceleration`)
+- [m-s2-to-acceleration](aliases/m-s2-to-acceleration.md) - Convert from MetersPerSecondSquared to Acceleration units (alias for `ConvertFrom-MetersPerSecondSquaredToAcceleration`)
 
 ### ai-tools (6 aliases)
 
@@ -3934,9 +3965,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### datarate (3 aliases)
 
-- [bps-to-datarate](aliases/bps-to-datarate.md) - Alias for `ConvertFrom-BitsPerSecondToDataRate` (alias for `ConvertFrom-BitsPerSecondToDataRate`)
-- [datarate](aliases/datarate.md) - Alias for `Convert-DataRate` (alias for `Convert-DataRate`)
-- [datarate-to-bps](aliases/datarate-to-bps.md) - Alias for `ConvertTo-BitsPerSecondFromDataRate` (alias for `ConvertTo-BitsPerSecondFromDataRate`)
+- [bps-to-datarate](aliases/bps-to-datarate.md) - Convert from BitsPerSecond to DataRate units (alias for `ConvertFrom-BitsPerSecondToDataRate`)
+- [datarate](aliases/datarate.md) - Convert between DataRate units (alias for `Convert-DataRate`)
+- [datarate-to-bps](aliases/datarate-to-bps.md) - Convert to BitsPerSecond from DataRate units (alias for `ConvertTo-BitsPerSecondFromDataRate`)
 
 ### datasize (3 aliases)
 
@@ -3953,9 +3984,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### density (3 aliases)
 
-- [density](aliases/density.md) - Alias for `Convert-Density` (alias for `Convert-Density`)
-- [density-to-kg-m3](aliases/density-to-kg-m3.md) - Alias for `ConvertTo-KilogramsPerCubicMeterFromDensity` (alias for `ConvertTo-KilogramsPerCubicMeterFromDensity`)
-- [kg-m3-to-density](aliases/kg-m3-to-density.md) - Alias for `ConvertFrom-KilogramsPerCubicMeterToDensity` (alias for `ConvertFrom-KilogramsPerCubicMeterToDensity`)
+- [density](aliases/density.md) - Convert between Density units (alias for `Convert-Density`)
+- [density-to-kg-m3](aliases/density-to-kg-m3.md) - Convert to KilogramsPerCubicMeter from Density units (alias for `ConvertTo-KilogramsPerCubicMeterFromDensity`)
+- [kg-m3-to-density](aliases/kg-m3-to-density.md) - Convert from KilogramsPerCubicMeter to Density units (alias for `ConvertFrom-KilogramsPerCubicMeterToDensity`)
 
 ### diagnostics-system-monitor (6 aliases)
 
@@ -4363,25 +4394,25 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### flowrate (3 aliases)
 
-- [flowrate](aliases/flowrate.md) - Alias for `Convert-FlowRate` (alias for `Convert-FlowRate`)
-- [flowrate-to-l-s](aliases/flowrate-to-l-s.md) - Alias for `ConvertTo-LitersPerSecondFromFlowRate` (alias for `ConvertTo-LitersPerSecondFromFlowRate`)
-- [l-s-to-flowrate](aliases/l-s-to-flowrate.md) - Alias for `ConvertFrom-LitersPerSecondToFlowRate` (alias for `ConvertFrom-LitersPerSecondToFlowRate`)
+- [flowrate](aliases/flowrate.md) - Convert between FlowRate units (alias for `Convert-FlowRate`)
+- [flowrate-to-l-s](aliases/flowrate-to-l-s.md) - Convert to LitersPerSecond from FlowRate units (alias for `ConvertTo-LitersPerSecondFromFlowRate`)
+- [l-s-to-flowrate](aliases/l-s-to-flowrate.md) - Convert from LitersPerSecond to FlowRate units (alias for `ConvertFrom-LitersPerSecondToFlowRate`)
 
 ### force (3 aliases)
 
-- [force](aliases/force.md) - Alias for `Convert-Force` (alias for `Convert-Force`)
-- [force-to-newtons](aliases/force-to-newtons.md) - Alias for `ConvertTo-NewtonsFromForce` (alias for `ConvertTo-NewtonsFromForce`)
-- [newtons-to-force](aliases/newtons-to-force.md) - Alias for `ConvertFrom-NewtonsToForce` (alias for `ConvertFrom-NewtonsToForce`)
+- [force](aliases/force.md) - Convert between Force units (alias for `Convert-Force`)
+- [force-to-newtons](aliases/force-to-newtons.md) - Convert to Newtons from Force units (alias for `ConvertTo-NewtonsFromForce`)
+- [newtons-to-force](aliases/newtons-to-force.md) - Convert from New to nsToForce units (alias for `ConvertFrom-NewtonsToForce`)
 
 ### frequency (3 aliases)
 
-- [frequency](aliases/frequency.md) - Alias for `Convert-Frequency` (alias for `Convert-Frequency`)
-- [frequency-to-hz](aliases/frequency-to-hz.md) - Alias for `ConvertTo-HertzFromFrequency` (alias for `ConvertTo-HertzFromFrequency`)
-- [hz-to-frequency](aliases/hz-to-frequency.md) - Alias for `ConvertFrom-HertzToFrequency` (alias for `ConvertFrom-HertzToFrequency`)
+- [frequency](aliases/frequency.md) - Convert between Frequency units (alias for `Convert-Frequency`)
+- [frequency-to-hz](aliases/frequency-to-hz.md) - Convert to Hertz from Frequency units (alias for `ConvertTo-HertzFromFrequency`)
+- [hz-to-frequency](aliases/hz-to-frequency.md) - Convert from Hertz to Frequency units (alias for `ConvertFrom-HertzToFrequency`)
 
 ### fueleconomy (1 aliases)
 
-- [fueleconomy](aliases/fueleconomy.md) - Alias for `Convert-FuelEconomy` (alias for `Convert-FuelEconomy`)
+- [fueleconomy](aliases/fueleconomy.md) - Convert between FuelEconomy units (alias for `Convert-FuelEconomy`)
 
 ### fzf (2 aliases)
 
@@ -5068,9 +5099,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### power (3 aliases)
 
-- [power](aliases/power.md) - Alias for `Convert-Power` (alias for `Convert-Power`)
-- [power-to-watts](aliases/power-to-watts.md) - Alias for `ConvertTo-WattsFromPower` (alias for `ConvertTo-WattsFromPower`)
-- [watts-to-power](aliases/watts-to-power.md) - Alias for `ConvertFrom-WattsToPower` (alias for `ConvertFrom-WattsToPower`)
+- [power](aliases/power.md) - Convert between Power units (alias for `Convert-Power`)
+- [power-to-watts](aliases/power-to-watts.md) - Convert to Watts from Power units (alias for `ConvertTo-WattsFromPower`)
+- [watts-to-power](aliases/watts-to-power.md) - Convert from Watts to Power units (alias for `ConvertFrom-WattsToPower`)
 
 ### pressure (3 aliases)
 
@@ -5435,9 +5466,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### time (3 aliases)
 
-- [duration-units](aliases/duration-units.md) - Alias for `Convert-Duration` (alias for `Convert-Duration`)
-- [seconds-to-time](aliases/seconds-to-time.md) - Alias for `ConvertFrom-SecondsToTimeUnit` (alias for `ConvertFrom-SecondsToTimeUnit`)
-- [time-to-seconds](aliases/time-to-seconds.md) - Alias for `ConvertTo-SecondsFromTimeUnit` (alias for `ConvertTo-SecondsFromTimeUnit`)
+- [duration-units](aliases/duration-units.md) - Convert between Duration units (alias for `Convert-Duration`)
+- [seconds-to-time](aliases/seconds-to-time.md) - Convert from Seconds to TimeUnit units (alias for `ConvertFrom-SecondsToTimeUnit`)
+- [time-to-seconds](aliases/time-to-seconds.md) - Convert to Seconds from TimeUnit units (alias for `ConvertTo-SecondsFromTimeUnit`)
 
 ### timestamp (2 aliases)
 
@@ -5475,15 +5506,15 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### torque (3 aliases)
 
-- [nm-to-torque](aliases/nm-to-torque.md) - Alias for `ConvertFrom-NewtonMetersToTorque` (alias for `ConvertFrom-NewtonMetersToTorque`)
-- [torque](aliases/torque.md) - Alias for `Convert-Torque` (alias for `Convert-Torque`)
-- [torque-to-nm](aliases/torque-to-nm.md) - Alias for `ConvertTo-NewtonMetersFromTorque` (alias for `ConvertTo-NewtonMetersFromTorque`)
+- [nm-to-torque](aliases/nm-to-torque.md) - Convert from New to nMetersToTorque units (alias for `ConvertFrom-NewtonMetersToTorque`)
+- [torque](aliases/torque.md) - Convert between Torque units (alias for `Convert-Torque`)
+- [torque-to-nm](aliases/torque-to-nm.md) - Convert to NewtonMeters from Torque units (alias for `ConvertTo-NewtonMetersFromTorque`)
 
 ### typography (3 aliases)
 
-- [meters-to-typography](aliases/meters-to-typography.md) - Alias for `ConvertFrom-MetersToTypography` (alias for `ConvertFrom-MetersToTypography`)
-- [typography](aliases/typography.md) - Alias for `Convert-Typography` (alias for `Convert-Typography`)
-- [typography-to-meters](aliases/typography-to-meters.md) - Alias for `ConvertTo-MetersFromTypography` (alias for `ConvertTo-MetersFromTypography`)
+- [meters-to-typography](aliases/meters-to-typography.md) - Convert from Meters to Typography units (alias for `ConvertFrom-MetersToTypography`)
+- [typography](aliases/typography.md) - Convert between Typography units (alias for `Convert-Typography`)
+- [typography-to-meters](aliases/typography-to-meters.md) - Convert to Meters from Typography units (alias for `ConvertTo-MetersFromTypography`)
 
 ### ubjson (2 aliases)
 

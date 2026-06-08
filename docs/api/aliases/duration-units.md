@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Duration`
+Convert between Duration units
 
 ## Description
 
-This is an alias that points to the `Convert-Duration` command.
+Convert between Duration units
 
 ## Alias Information
 

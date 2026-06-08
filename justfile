@@ -3,316 +3,313 @@
 
 # Lint profile.d
 lint:
-pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1
+    pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1
 
 # Validate profile (lint + idempotency)
 validate:
-pwsh -NoProfile -File scripts/checks/validate-profile.ps1
+    pwsh -NoProfile -File scripts/checks/validate-profile.ps1
 
 # Check comment-based help
 check-comment-help:
-pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
+    pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
-check-doc-coverage:
-pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{arguments()}}
+check-doc-coverage *ARGS:
+    pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{ARGS}}
 
-check-doc-freshness:
-pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{arguments()}}
+check-doc-freshness *ARGS:
+    pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{ARGS}}
 
 # Run Pester Tests
-test:
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{arguments()}}
+test *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{ARGS}}
 
 # Run Unit Test Suite
-test-unit:
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel {{arguments()}}
+test-unit *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel {{ARGS}}
 
 # Run Integration Test Suite
-test-integration:
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel {{arguments()}}
+test-integration *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel {{ARGS}}
 
 # Run Performance Test Suite
-test-performance:
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance -Parallel {{arguments()}}
+test-performance *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance -Parallel {{ARGS}}
 
 # Run Pester Tests with Coverage
-test-coverage:
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{arguments()}}
+test-coverage *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{ARGS}}
 
 # Run Performance Benchmark
 benchmark:
-pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
+    pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
 
 # Run Security Scan
 security-scan:
-pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1
+    pwsh -NoProfile -File scripts/utils/security/run-security-scan.ps1
 
 # Diagnose profile performance issues
 diagnose-profile-performance:
-pwsh -NoProfile -File scripts/utils/performance/diagnose-profile-performance.ps1
+    pwsh -NoProfile -File scripts/utils/performance/diagnose-profile-performance.ps1
 
 # Optimize Git performance
-optimize-git-performance:
-pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1 {{arguments()}}
+optimize-git-performance *ARGS:
+    pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1 {{ARGS}}
 
 # Check Module Updates
-check-module-updates:
-pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 {{arguments()}}
+check-module-updates *ARGS:
+    pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 {{ARGS}}
 
 # Install Module Updates
-install-module-updates:
-pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update {{arguments()}}
+install-module-updates *ARGS:
+    pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update {{ARGS}}
 
 # Generate Changelog
-generate-changelog:
-pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1 {{arguments()}}
+generate-changelog *ARGS:
+    pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1 {{ARGS}}
 
 # Generate metrics dashboard
-generate-dashboard:
-pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1 {{arguments()}}
+generate-dashboard *ARGS:
+    pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1 {{ARGS}}
 
 # Create Release (Dry Run)
 create-release:
-pwsh -NoProfile -File scripts/utils/release/create-release.ps1 -DryRun
+    pwsh -NoProfile -File scripts/utils/release/create-release.ps1 -DryRun
 
 # Generate API Documentation
-generate-docs:
-pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 {{arguments()}}
+generate-docs *ARGS:
+    pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 {{ARGS}}
 
-generate-docs-incremental:
-pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 -Incremental {{arguments()}}
+generate-docs-incremental *ARGS:
+    pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 -Incremental {{ARGS}}
 
 # Run Spellcheck
 spellcheck:
-pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1
+    pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1
 
 # Check health of all SQLite databases
 db-health:
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action health
+    pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action health
 
 # Get statistics for all SQLite databases
 db-statistics:
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action statistics
+    pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action statistics
 
 # Optimize all SQLite databases
 db-optimize:
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action optimize
+    pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action optimize
 
 # Backup all SQLite databases
 db-backup:
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action backup
+    pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action backup
 
 # Repair corrupted SQLite databases
 db-repair:
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action repair
+    pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action repair
 
 # Validate SQLite database implementation and configuration
 db-validate:
-pwsh -NoProfile -File scripts/utils/database/validate-databases.ps1
+    pwsh -NoProfile -File scripts/utils/database/validate-databases.ps1
 
 # Validate SQLite databases with operation testing
 db-validate-full:
-pwsh -NoProfile -File scripts/utils/database/validate-databases.ps1 -TestOperations
+    pwsh -NoProfile -File scripts/utils/database/validate-databases.ps1 -TestOperations
 
 # Initialize all SQLite databases
 db-init:
-pwsh -NoProfile -File scripts/utils/database/initialize-databases.ps1
+    pwsh -NoProfile -File scripts/utils/database/initialize-databases.ps1
 
 # Clear fragment cache (in-memory and SQLite database)
-clear-fragment-cache:
-pwsh -NoProfile -File scripts/utils/clear-fragment-cache.ps1 {{arguments()}}
+clear-fragment-cache *ARGS:
+    pwsh -NoProfile -File scripts/utils/clear-fragment-cache.ps1 {{ARGS}}
 
 # Validate fragment cache (verify cache state)
-validate-fragment-cache:
-pwsh -NoProfile -File scripts/utils/verify-cache-cleared.ps1 {{arguments()}}
+validate-fragment-cache *ARGS:
+    pwsh -NoProfile -File scripts/utils/verify-cache-cleared.ps1 {{ARGS}}
 
 # Check script standards and best practices
 check-script-standards:
-pwsh -NoProfile -File scripts/checks/check-script-standards.ps1
+    pwsh -NoProfile -File scripts/checks/check-script-standards.ps1
 
 # Run Markdownlint
 markdownlint:
-pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1
+    pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1
 
 # Install Git hooks
-install-githooks:
-pwsh -NoProfile -File scripts/git/install-githooks.ps1 {{arguments()}}
+install-githooks *ARGS:
+    pwsh -NoProfile -File scripts/git/install-githooks.ps1 {{ARGS}}
 
 # Install pre-commit hook only
 install-pre-commit-hook:
-pwsh -NoProfile -File scripts/git/install-pre-commit-hook.ps1
+    pwsh -NoProfile -File scripts/git/install-pre-commit-hook.ps1
 
 # Format Code
-format:
-pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1 {{arguments()}}
+format *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1 {{ARGS}}
 
 # Find Duplicate Functions
 find-duplicates:
-pwsh -NoProfile -File scripts/utils/metrics/find-duplicate-functions.ps1
+    pwsh -NoProfile -File scripts/utils/metrics/find-duplicate-functions.ps1
 
 # Generate Fragment READMEs
-generate-fragment-readmes:
-pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1 {{arguments()}}
+generate-fragment-readmes *ARGS:
+    pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1 {{ARGS}}
 
 # Create a new profile fragment from template
-new-fragment:
-pwsh -NoProfile -File scripts/utils/fragment/new-fragment.ps1 {{arguments()}}
+new-fragment *ARGS:
+    pwsh -NoProfile -File scripts/utils/fragment/new-fragment.ps1 {{ARGS}}
 
 # Generate standalone script wrappers for fragment commands
-generate-command-wrappers:
-pwsh -NoProfile -File scripts/utils/fragment/generate-command-wrappers.ps1 {{arguments()}}
+generate-command-wrappers *ARGS:
+    pwsh -NoProfile -File scripts/utils/fragment/generate-command-wrappers.ps1 {{ARGS}}
 
 # Check Commit Messages
 check-commit-messages:
-pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1
+    pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1
 
 # Update Performance Baseline
-update-baseline:
-pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline {{arguments()}}
+update-baseline *ARGS:
+    pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline {{ARGS}}
 
 # Collect code metrics
 collect-code-metrics:
-pwsh -NoProfile -File scripts/utils/metrics/collect-code-metrics.ps1
+    pwsh -NoProfile -File scripts/utils/metrics/collect-code-metrics.ps1
 
 # Export metrics data
 export-metrics:
-pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1
+    pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1
 
 # Save a metrics snapshot
 save-metrics-snapshot:
-pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1
+    pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1
 
 # Track test coverage trends over time
 track-coverage-trends:
-pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1
+    pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1
 
 # Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests + function naming)
 quality-check format security-scan lint spellcheck markdownlint check-comment-help test validate-function-naming:
-@echo "All quality checks passed"
+    @echo "All quality checks passed"
 
 # Run Pre-commit Checks
 pre-commit-checks:
-pwsh -NoProfile -File scripts/git/pre-commit.ps1
+    pwsh -NoProfile -File scripts/git/pre-commit.ps1
 
 # Check Idempotency
 check-idempotency:
-pwsh -NoProfile -File scripts/checks/check-idempotency.ps1
+    pwsh -NoProfile -File scripts/checks/check-idempotency.ps1
 
 # Validate Function Naming Conventions
 validate-function-naming:
-pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1
+    pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1
 
 # Check for Missing Tests
 check-missing-tests:
-pwsh -NoProfile -File scripts/utils/code-quality/check-missing-tests.ps1
+    pwsh -NoProfile -File scripts/utils/code-quality/check-missing-tests.ps1
 
 # Validate Dependencies
 validate-dependencies:
-pwsh -NoProfile -File scripts/utils/dependencies/validate-dependencies.ps1
+    pwsh -NoProfile -File scripts/utils/dependencies/validate-dependencies.ps1
 
 # Check for missing packages and modules
 check-missing-packages:
-pwsh -NoProfile -File scripts/utils/dependencies/check-missing-packages.ps1
+    pwsh -NoProfile -File scripts/utils/dependencies/check-missing-packages.ps1
 
 # Check Dependency Updates (Vulnerability scanning can be added)
 check-vulnerabilities:
-pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1
+    pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1
 
 # Format and Lint Code
 format-and-lint format lint:
-@echo "Format and lint completed"
+    @echo "Format and lint completed"
 
 # Generate All Documentation (API docs + fragment READMEs)
 all-docs generate-docs generate-fragment-readmes:
-@echo "All documentation generated"
+    @echo "All documentation generated"
 
 # Initialize wrangler configuration
-init-wrangler-config:
-pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1 {{arguments()}}
+init-wrangler-config *ARGS:
+    pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1 {{ARGS}}
 
 # Run development environment setup
 dev-setup:
-pwsh -NoProfile -File scripts/dev/setup.ps1
+    pwsh -NoProfile -File scripts/dev/setup.ps1
 
 # Check task parity across all task runner files
-check-task-parity:
-pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 {{arguments()}}
+check-task-parity *ARGS:
+    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 {{ARGS}}
 
 # Generate missing tasks to achieve parity across all task runner files
-generate-task-parity:
-pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{arguments()}}
+generate-task-parity *ARGS:
+    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{ARGS}}
 
 # Link tests and guides to source targets (drift.lock)
 drift-link:
-pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh
-pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh
+    pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh
+    pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh
 
 # Check that doc links and bindings are current (drift)
 drift-check:
-drift check
+    drift check
 
 # Show drift doc anchor and link status
 drift-status:
-drift status
+    drift status
 
 # Build/warm fragment cache by parsing all fragments
-build-fragment-cache:
-pwsh -NoProfile -File scripts/utils/build-fragment-cache.ps1 {{arguments()}}
+build-fragment-cache *ARGS:
+    pwsh -NoProfile -File scripts/utils/build-fragment-cache.ps1 {{ARGS}}
 
 # Install all optional profile dependencies (global or local)
 install-all:
-pnpm run install-all
+    pnpm run install-all
 
 # Install optional JS and Python dependencies globally
 install-all-global:
-pnpm run install-all-global
+    pnpm run install-all-global
 
 # Install optional JS and Python dependencies locally
 install-all-local:
-pnpm run install-all-local
+    pnpm run install-all-local
 
 # Install optional JS conversion packages globally
 install-js-global:
-pnpm run install-js-global
+    pnpm run install-js-global
 
 # Install optional JS conversion packages locally
 install-js-local:
-pnpm run install-js-local
+    pnpm run install-js-local
 
 # Install optional Python data packages globally
 install-python-global:
-pnpm run install-python-global
+    pnpm run install-python-global
 
 # Install optional Python data packages locally
 install-python-local:
-pnpm run install-python-local
+    pnpm run install-python-local
 
 # Install recommended CLI tools via Scoop
 install-scoop:
-pnpm run install-scoop
-
-# Default: run lint (common first task)
-# Run default task
-default:
-task --list-all
+    pnpm run install-scoop
 
 # Run performance tests per file with summary
-test-performance-batch:
-pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 {{arguments()}}
+test-performance-batch *ARGS:
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 {{ARGS}}
 
 # Run unit tests per file with summary (use -Filter profile- etc.)
-test-unit-batch:
-pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 {{arguments()}}
+test-unit-batch *ARGS:
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 {{ARGS}}
 
 # Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)
-test-conversion-batch:
-pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 {{arguments()}}
+test-conversion-batch *ARGS:
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 {{ARGS}}
 
 # Run all conversion integration sub-batches (document, media/*, data/*)
-test-conversion-all-batch:
-pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 {{arguments()}}
+test-conversion-all-batch *ARGS:
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 {{ARGS}}
 
 # Run tools integration tests (per-file isolation)
-test-tools:
-pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{arguments()}}
+test-tools *ARGS:
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{ARGS}}
+
+# Default: run lint (common first task)
 default: lint

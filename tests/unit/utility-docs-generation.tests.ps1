@@ -401,6 +401,23 @@ Set-AgentModeFunction -Name 'Get-GitLog' -Body { git log @args } | Out-Null
             $function.Synopsis | Should -Match 'Shows commit history'
             $function.Synopsis | Should -Not -Match 'Git log - show commit log'
         }
+
+        It 'encodes dot-only command names into safe markdown filenames' {
+            $docPathsModule = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocPaths.psm1'
+            Import-Module $docPathsModule -DisableNameChecking -Force
+
+            Get-DocumentationMarkdownFileName -CommandName '..' | Should -Be 'dot2.md'
+            Get-DocumentationMarkdownFileName -CommandName '...' | Should -Be 'dot3.md'
+            Get-DocumentationCommandNameFromMarkdownBaseName -BaseName 'dot4' | Should -Be '....'
+        }
+
+        It 'synthesizes help for lazy conversion wrapper registrations' {
+            $helpParserModule = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocHelpParser.psm1'
+            Import-Module $helpParserModule -DisableNameChecking -Force
+
+            $help = Get-SyntheticConversionRegistrationHelp -FunctionName 'Convert-Area'
+            $help | Should -Match 'Convert between Area units'
+        }
     }
 
     Context 'Alias parsing' {

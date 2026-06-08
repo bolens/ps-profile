@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Typography`
+Convert between Typography units
 
 ## Description
 
-This is an alias that points to the `Convert-Typography` command.
+Convert between Typography units
 
 ## Alias Information
 

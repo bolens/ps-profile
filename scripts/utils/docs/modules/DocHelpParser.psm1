@@ -343,6 +343,37 @@ function ConvertTo-StructuredHelpFromSynopsis {
 .EXAMPLE
     Get-FunctionBulletFromHelpText -HelpText $help -FunctionName 'Invoke-GitClone'
 #>
+function Get-SyntheticConversionRegistrationHelp {
+    <#
+    .SYNOPSIS
+        Builds fallback help text for lazy conversion wrapper registrations.
+    #>
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$FunctionName
+    )
+
+    if ($FunctionName -match '^_') {
+        return $null
+    }
+
+    if ($FunctionName -match '^Convert-([A-Za-z]+)$') {
+        $unit = $matches[1]
+        return ConvertTo-StructuredHelpFromSynopsis -Synopsis "Convert between $unit units"
+    }
+
+    if ($FunctionName -match '^ConvertFrom-(.+?)To([A-Za-z]+)$') {
+        return ConvertTo-StructuredHelpFromSynopsis -Synopsis "Convert from $($matches[1]) to $($matches[2]) units"
+    }
+
+    if ($FunctionName -match '^ConvertTo-(.+?)From([A-Za-z]+)$') {
+        return ConvertTo-StructuredHelpFromSynopsis -Synopsis "Convert to $($matches[1]) from $($matches[2]) units"
+    }
+
+    return $null
+}
+
 function Get-FunctionBulletFromHelpText {
     [OutputType([string])]
     param(
@@ -582,7 +613,15 @@ function Get-RegistrationHelpContent {
     }
 
     if ($FunctionName) {
-        return Get-RegistrationHelpFromFileBlock -FileContent $FileContent -FunctionName $FunctionName
+        $fileBlockHelp = Get-RegistrationHelpFromFileBlock -FileContent $FileContent -FunctionName $FunctionName
+        if ($fileBlockHelp) {
+            return $fileBlockHelp
+        }
+
+        $syntheticHelp = Get-SyntheticConversionRegistrationHelp -FunctionName $FunctionName
+        if ($syntheticHelp) {
+            return $syntheticHelp
+        }
     }
 
     return $null
@@ -596,4 +635,5 @@ Export-ModuleMember -Function @(
     'ConvertTo-StructuredHelpFromSynopsis'
     'Get-RegistrationHelpFromFileBlock'
     'Get-RegistrationHelpContent'
+    'Get-SyntheticConversionRegistrationHelp'
 )

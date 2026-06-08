@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Power`
+Convert between Power units
 
 ## Description
 
-This is an alias that points to the `Convert-Power` command.
+Convert between Power units
 
 ## Alias Information
 

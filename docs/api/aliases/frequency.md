@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Frequency`
+Convert between Frequency units
 
 ## Description
 
-This is an alias that points to the `Convert-Frequency` command.
+Convert between Frequency units
 
 ## Alias Information
 

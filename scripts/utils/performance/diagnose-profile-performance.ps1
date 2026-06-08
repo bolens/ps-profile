@@ -11,7 +11,7 @@
 #>
 
 # Import shared utilities
-$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'scripts' 'lib' 'ModuleImport.psm1'
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 if (Test-Path $moduleImportPath) {
     Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
     

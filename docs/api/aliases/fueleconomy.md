@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-FuelEconomy`
+Convert between FuelEconomy units
 
 ## Description
 
-This is an alias that points to the `Convert-FuelEconomy` command.
+Convert between FuelEconomy units
 
 ## Alias Information
 

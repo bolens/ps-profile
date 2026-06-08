@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-MetersPerSecondSquaredFromAcceleration`
+Convert to MetersPerSecondSquared from Acceleration units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-MetersPerSecondSquaredFromAcceleration` command.
+Convert to MetersPerSecondSquared from Acceleration units
 
 ## Alias Information
 

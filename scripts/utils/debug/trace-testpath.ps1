@@ -1,14 +1,3 @@
-# ===============================================
-# trace-testpath.ps1
-# Debug utility to trace Test-Path calls that receive null/empty paths
-# ===============================================
-
-# Import CommonEnums for PathType enum
-$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'core' 'CommonEnums.psm1'
-if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
-    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
-}
-
 <#
 .SYNOPSIS
     Traces Test-Path calls to identify which ones receive null/empty paths.
@@ -32,9 +21,15 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
 param(
     [Parameter(Mandatory)]
     [string]$TestFile,
-    
+
     [string]$TestPath
 )
+
+# Import CommonEnums for PathType enum
+$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'core' 'CommonEnums.psm1'
+if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
+    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
+}
 
 # Enable debug mode
 $env:PS_PROFILE_DEBUG_TESTPATH = 'verbose'
@@ -58,8 +53,8 @@ function global:Test-Path {
         
         [Parameter(ParameterSetName = 'Path')]
         [Parameter(ParameterSetName = 'LiteralPath')]
-        [PathType]$PathType
-        
+        [PathType]$PathType,
+
         [Parameter(ParameterSetName = 'Path')]
         [Parameter(ParameterSetName = 'LiteralPath')]
         [System.Management.Automation.ActionPreference]$ErrorAction = 'Continue'

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Converts Unix timestamp to DateTime.
+Converts Unix epoch timestamp to DateTime.
 
 ## Description
 
-Converts a Unix timestamp (seconds since epoch) to a local DateTime.
+Converts a Unix epoch timestamp (seconds or milliseconds) to a DateTime object.
 
 ## Alias Information
 

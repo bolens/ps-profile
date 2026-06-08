@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-NewtonsToForce`
+Convert from New to nsToForce units
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-NewtonsToForce` command.
+Convert from New to nsToForce units
 
 ## Alias Information
 

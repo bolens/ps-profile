@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Torque`
+Convert between Torque units
 
 ## Description
 
-This is an alias that points to the `Convert-Torque` command.
+Convert between Torque units
 
 ## Alias Information
 

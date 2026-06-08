@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-KilogramsPerCubicMeterFromDensity`
+Convert to KilogramsPerCubicMeter from Density units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-KilogramsPerCubicMeterFromDensity` command.
+Convert to KilogramsPerCubicMeter from Density units
 
 ## Alias Information
 

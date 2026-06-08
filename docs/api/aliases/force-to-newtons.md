@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-NewtonsFromForce`
+Convert to Newtons from Force units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-NewtonsFromForce` command.
+Convert to Newtons from Force units
 
 ## Alias Information
 

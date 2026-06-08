@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Density`
+Convert between Density units
 
 ## Description
 
-This is an alias that points to the `Convert-Density` command.
+Convert between Density units
 
 ## Alias Information
 

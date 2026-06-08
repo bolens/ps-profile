@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-DataRate`
+Convert between DataRate units
 
 ## Description
 
-This is an alias that points to the `Convert-DataRate` command.
+Convert between DataRate units
 
 ## Alias Information
 

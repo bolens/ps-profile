@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-HertzFromFrequency`
+Convert to Hertz from Frequency units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-HertzFromFrequency` command.
+Convert to Hertz from Frequency units
 
 ## Alias Information
 

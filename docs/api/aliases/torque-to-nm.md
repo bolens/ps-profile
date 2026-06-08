@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-NewtonMetersFromTorque`
+Convert to NewtonMeters from Torque units
 
 ## Description
 
-This is an alias that points to the `ConvertTo-NewtonMetersFromTorque` command.
+Convert to NewtonMeters from Torque units
 
 ## Alias Information
 

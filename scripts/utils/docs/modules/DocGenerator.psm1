@@ -8,6 +8,11 @@ scripts/utils/docs/modules/DocGenerator.psm1
     Provides functions for generating markdown documentation files from parsed function and alias data.
 #>
 
+$docPathsModule = Join-Path $PSScriptRoot 'DocPaths.psm1'
+if (Test-Path $docPathsModule) {
+    Import-Module $docPathsModule -DisableNameChecking -Force -ErrorAction SilentlyContinue
+}
+
 <#
 .SYNOPSIS
     Determines whether documentation debug output should be written.
@@ -207,7 +212,7 @@ function Write-FunctionDocumentation {
             continue
         }
         
-        $mdFile = Join-Path $DocsPath "$($function.Name).md"
+        $mdFile = Join-Path $DocsPath (Get-DocumentationMarkdownFileName -CommandName $function.Name)
         if ($processedCount -le 3) {
             Write-DocsDebugMessage -Message "Target file: $mdFile" -ForegroundColor Cyan -CallerCmdlet $PSCmdlet
         }
@@ -410,7 +415,7 @@ function Write-AliasDocumentation {
             continue
         }
 
-        $mdFile = Join-Path $DocsPath "$($alias.Name).md"
+        $mdFile = Join-Path $DocsPath (Get-DocumentationMarkdownFileName -CommandName $alias.Name)
         $DocumentedCommandNames.Add($alias.Name)
 
         if ($null -ne $OnlyNames -and -not $OnlyNames.Contains($alias.Name)) {

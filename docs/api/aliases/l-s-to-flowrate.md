@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-LitersPerSecondToFlowRate`
+Convert from LitersPerSecond to FlowRate units
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-LitersPerSecondToFlowRate` command.
+Convert from LitersPerSecond to FlowRate units
 
 ## Alias Information
 

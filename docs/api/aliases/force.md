@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Force`
+Convert between Force units
 
 ## Description
 
-This is an alias that points to the `Convert-Force` command.
+Convert between Force units
 
 ## Alias Information
 

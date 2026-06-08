@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Acceleration`
+Convert between Acceleration units
 
 ## Description
 
-This is an alias that points to the `Convert-Acceleration` command.
+Convert between Acceleration units
 
 ## Alias Information
 

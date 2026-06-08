@@ -8,6 +8,11 @@ scripts/utils/docs/modules/DocIndexGenerator.psm1
     Provides functions for generating the main README.md index file for documentation.
 #>
 
+$docPathsModule = Join-Path $PSScriptRoot 'DocPaths.psm1'
+if (Test-Path $docPathsModule) {
+    Import-Module $docPathsModule -DisableNameChecking -Force -ErrorAction SilentlyContinue
+}
+
 <#
 .SYNOPSIS
     Generates the main README.md index file for the documentation.
@@ -63,7 +68,10 @@ function Write-DocumentationIndex {
 
     foreach ($group in $groupedFunctions) {
         $fragmentName = $group.Name -replace '\.ps1$', ''
-        $functionList = $group.Group | Sort-Object Name | ForEach-Object { "- [$($_.Name)](functions/$($_.Name).md) - $($_.Synopsis)" }
+        $functionList = $group.Group | Sort-Object Name | ForEach-Object {
+            $relativePath = Get-DocumentationMarkdownRelativePath -Category 'functions' -CommandName $_.Name
+            "- [$($_.Name)]($relativePath) - $($_.Synopsis)"
+        }
         $indexContent += "`n### $fragmentName ($($group.Count) functions)`n`n$($functionList -join "`n")`n"
     }
 
@@ -76,7 +84,8 @@ function Write-DocumentationIndex {
             $fragmentName = $group.Name -replace '\.ps1$', ''
             $aliasList = $group.Group | Sort-Object Name | ForEach-Object { 
                 $desc = if ($_.Synopsis) { $_.Synopsis } else { "Alias for ``$($_.Target)``" }
-                "- [$($_.Name)](aliases/$($_.Name).md) - $desc (alias for ``$($_.Target)``)"
+                $relativePath = Get-DocumentationMarkdownRelativePath -Category 'aliases' -CommandName $_.Name
+                "- [$($_.Name)]($relativePath) - $desc (alias for ``$($_.Target)``)"
             }
             $indexContent += "`n### $fragmentName ($($group.Count) aliases)`n`n$($aliasList -join "`n")`n"
         }
