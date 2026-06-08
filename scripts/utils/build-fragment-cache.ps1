@@ -460,19 +460,19 @@ if ($PSCmdlet.ShouldProcess('Fragment parsing', 'Parse fragments to build cache'
             Write-Host "  [build-fragment-cache] Starting fragment parsing..." -ForegroundColor DarkGray
         }
         
-        $parserModulePath = Join-Path $scriptsDir 'lib' 'fragment' 'FragmentCommandParserOrchestration.psm1'
+        $registryModulePath = Join-Path $scriptsDir 'lib' 'fragment' 'FragmentCommandRegistry.psm1'
         if ($debugLevel -ge 3) {
-            Write-Host "  [build-fragment-cache] FragmentCommandParserOrchestration module path: $parserModulePath" -ForegroundColor DarkGray
+            Write-Host "  [build-fragment-cache] FragmentCommandRegistry module path: $registryModulePath" -ForegroundColor DarkGray
         }
         
-        if (Test-Path -LiteralPath $parserModulePath) {
+        if (Test-Path -LiteralPath $registryModulePath) {
             if ($debugLevel -ge 3) {
-                Write-Host "  [build-fragment-cache] Importing FragmentCommandParserOrchestration module..." -ForegroundColor DarkGray
+                Write-Host "  [build-fragment-cache] Importing FragmentCommandRegistry module..." -ForegroundColor DarkGray
             }
-            Import-Module $parserModulePath -DisableNameChecking -ErrorAction Stop -Force
+            Import-Module $registryModulePath -DisableNameChecking -ErrorAction Stop -Force
             
             if ($debugLevel -ge 3) {
-                Write-Host "  [build-fragment-cache] ✓ FragmentCommandParserOrchestration module imported" -ForegroundColor DarkGray
+                Write-Host "  [build-fragment-cache] ✓ FragmentCommandRegistry module imported" -ForegroundColor DarkGray
             }
             
             if (Get-Command Register-AllFragmentCommands -ErrorAction SilentlyContinue) {
@@ -730,7 +730,7 @@ if ($PSCmdlet.ShouldProcess('Fragment parsing', 'Parse fragments to build cache'
             }
             else {
                 Write-CacheOperationError -OperationName "Fragment parsing" -ErrorMessage "Register-AllFragmentCommands function not found" -ErrorType "CommandNotFound" -Context @{
-                    module_path = $parserModulePath
+                    module_path = $registryModulePath
                 }
                 if ($debugLevel -ge 2) {
                     Write-Host "  [build-fragment-cache] ✗ Register-AllFragmentCommands function not found after module import" -ForegroundColor Red
@@ -739,11 +739,11 @@ if ($PSCmdlet.ShouldProcess('Fragment parsing', 'Parse fragments to build cache'
             }
         }
         else {
-            Write-CacheOperationError -OperationName "Fragment parsing" -ErrorMessage "FragmentCommandParserOrchestration module not found" -ErrorType "FileNotFound" -Context @{
-                module_path = $parserModulePath
+            Write-CacheOperationError -OperationName "Fragment parsing" -ErrorMessage "FragmentCommandRegistry module not found" -ErrorType "FileNotFound" -Context @{
+                module_path = $registryModulePath
             }
             if ($debugLevel -ge 2) {
-                Write-Host "  [build-fragment-cache] ✗ FragmentCommandParserOrchestration module not found at: $parserModulePath" -ForegroundColor Red
+                Write-Host "  [build-fragment-cache] ✗ FragmentCommandRegistry module not found at: $registryModulePath" -ForegroundColor Red
             }
             Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
         }

@@ -1402,7 +1402,7 @@ function Resolve-ConversionIntegrationForTest {
         'data/csv-xml/csv-to-xml'              = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'xml.ps1'); EnsureData = $true }
         'data/csv-xml/xml-to-csv'              = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'xml.ps1'); EnsureData = $true }
         'data/csv-xml/csv-xml-roundtrip'       = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'yaml.ps1'); EnsureData = $true }
-        'data/error-handling/conversion-errors' = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'xml.ps1', 'toon.ps1'); EnsureData = $true }
+        'data/error-handling/errors'            = @{ ModuleType = 'Data'; SelectiveModules = @('csv.ps1', 'xml.ps1', 'toon.ps1'); EnsureData = $true }
         'data/error-handling/edge-cases'        = @{ ModuleType = 'Data'; SelectiveModules = @('binary-simple.ps1', 'binary-schema-avro.ps1'); EnsureData = $true }
         'data/error-handling/invalid-input'     = @{ ModuleType = 'Data'; SelectiveModules = @('toml.ps1', 'superjson.ps1'); EnsureData = $true }
         'document/html'                        = @{ ModuleType = 'Documents'; SelectiveModules = (Get-DocumentConversionSelectiveModules -Set 'Html'); EnsureDocuments = $true }

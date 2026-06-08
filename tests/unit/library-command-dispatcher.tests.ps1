@@ -6,7 +6,7 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    $script:RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:FragmentLibDir = Join-Path $script:RepoRoot 'scripts' 'lib' 'fragment'
     $script:DispatcherModulePath = Join-Path $script:FragmentLibDir 'CommandDispatcher.psm1'
     $script:RegistryModulePath = Join-Path $script:FragmentLibDir 'FragmentCommandRegistry.psm1'

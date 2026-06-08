@@ -51,9 +51,7 @@ BeforeAll {
 
 Describe 'Test Runner Performance Tests' {
     BeforeAll {
-        if ($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
-            $script:SkipNestedRunnerPerformance = $true
-        }
+        $script:SkipNestedRunnerPerformance = $env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1'
     }
 
     BeforeEach {

@@ -450,6 +450,14 @@ function Initialize-FragmentLoading {
     # Default: lazy loading is ENABLED (fragments load on-demand)
     # This needs to be determined before pre-registration to know if it should be skipped
     $lazyLoadEnabled = $true
+
+    # Integration tests dot-source the profile in non-interactive hosts and need eager loading
+    if ($env:PS_PROFILE_TEST_MODE) {
+        $normalizedTestMode = $env:PS_PROFILE_TEST_MODE.Trim().ToLowerInvariant()
+        if ($normalizedTestMode -eq '1' -or $normalizedTestMode -eq 'true') {
+            $lazyLoadEnabled = $false
+        }
+    }
     
     # Check explicit lazy load setting (takes precedence)
     if ($env:PS_PROFILE_LAZY_LOAD_FRAGMENTS) {
@@ -516,31 +524,19 @@ function Initialize-FragmentLoading {
     }
             
     if ($preRegisterEnabled) {
-        # Ensure FragmentCommandParserOrchestration module is loaded (contains Register-AllFragmentCommands)
-        $orchestrationModulePath = Join-Path $FragmentLibDir 'FragmentCommandParserOrchestration.psm1'
-            
-        # Fallback: if path doesn't exist, try to resolve from PSScriptRoot or ProfileD
-        if (-not (Test-Path -LiteralPath $orchestrationModulePath)) {
-            # Try to resolve from ProfileD (go up one level to repo root, then scripts/lib/fragment)
-            if ($ProfileD -and (Test-Path -LiteralPath $ProfileD)) {
-                $repoRoot = Split-Path -Parent $ProfileD
-                $fallbackFragmentLibDir = Join-Path $repoRoot 'scripts' 'lib' 'fragment'
-                $fallbackOrchestrationModulePath = Join-Path $fallbackFragmentLibDir 'FragmentCommandParserOrchestration.psm1'
-                if (Test-Path -LiteralPath $fallbackOrchestrationModulePath) {
-                    $orchestrationModulePath = $fallbackOrchestrationModulePath
-                    $FragmentLibDir = $fallbackFragmentLibDir
-                }
-            }
+        $registryModulePath = Join-Path $FragmentLibDir 'FragmentCommandRegistry.psm1'
+
+        if (-not (Test-Path -LiteralPath $registryModulePath) -and $ProfileD -and (Test-Path -LiteralPath $ProfileD)) {
+            $repoRoot = Split-Path -Parent $ProfileD
+            $registryModulePath = Join-Path $repoRoot 'scripts' 'lib' 'fragment' 'FragmentCommandRegistry.psm1'
         }
-            
-        if (Test-Path -LiteralPath $orchestrationModulePath) {
-            if (-not (Get-Command Register-AllFragmentCommands -ErrorAction SilentlyContinue)) {
-                # Temporarily suppress PowerShell's Import-Module verbose messages
-                $oldVerbosePreference = $VerbosePreference
-                $VerbosePreference = 'SilentlyContinue'
-                Import-Module $orchestrationModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
-                $VerbosePreference = $oldVerbosePreference
-            }
+
+        if ((Test-Path -LiteralPath $registryModulePath) -and -not (Get-Command Register-AllFragmentCommands -ErrorAction SilentlyContinue)) {
+            # Temporarily suppress PowerShell's Import-Module verbose messages
+            $oldVerbosePreference = $VerbosePreference
+            $VerbosePreference = 'SilentlyContinue'
+            Import-Module $registryModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+            $VerbosePreference = $oldVerbosePreference
         }
             
         # Pre-register commands from all fragments

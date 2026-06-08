@@ -24,7 +24,7 @@ The main registry file has been significantly modularized, reducing from **2,656
 - `FragmentCommandRegistryQuery.psm1` - Query operations (Get-FragmentForCommand, Get-CommandsForFragment, etc.)
 - `FragmentCommandRegistrySetup.psm1` - Setup and initialization
 - `FragmentCommandRegistration.psm1` - Registration helper functions
-- `FragmentCommandParserOrchestration.psm1` - Main orchestration for fragment parsing
+- `FragmentCommandRegistry.psm1` - Command registry, bulk parsing, and registration (`Register-AllFragmentCommands`)
 - `FragmentCommandParserCache.psm1` - Cache helper functions
 - `FragmentCommandParserRegex.psm1` - Regex-based parsing
 - `FragmentCommandProcessor.psm1` - Command processing
@@ -181,8 +181,8 @@ FragmentCommandRegistryOrchestration.psm1 (~1,500-1,600 lines) [NEW or extend Pr
 ├── Register-AllFragmentCommands (moved from main)
 └── Coordination logic for batch operations
 
-FragmentCommandParserOrchestration.psm1 (modularized)
-├── Register-CommandsFromFragmentAst (orchestrates AST and regex parsing)
+FragmentCommandRegistry.psm1 (current)
+├── Register-CommandsFromFragment (AST and regex parsing)
 └── Register-AllFragmentCommands (batch registration)
 
 FragmentCommandParserCache.psm1 (modularized)

@@ -219,6 +219,10 @@ $script:FileConversionModuleRegistry = @{
         # Data utilities (encoding, date/time manipulation)
         @{ Dir = 'utilities-modules/data'; File = 'utilities-encoding.ps1' }
         @{ Dir = 'utilities-modules/data'; File = 'utilities-datetime.ps1' }
+        @{ Dir = 'utilities-modules/data'; File = 'utilities-isbn.ps1' }
+        @{ Dir = 'utilities-modules/data'; File = 'utilities-isbn-hyphenation.ps1' }
+        @{ Dir = 'utilities-modules/data'; File = 'utilities-isbn-providers.ps1' }
+        @{ Dir = 'utilities-modules/data'; File = 'utilities-isbn-extended.ps1' }
         # Filesystem utilities (path manipulation, directory operations)
         @{ Dir = 'utilities-modules/filesystem'; File = 'utilities-filesystem.ps1' }
     )

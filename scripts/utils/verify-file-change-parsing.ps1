@@ -49,21 +49,21 @@ $fragmentLibDir = Join-Path $scriptsLibDir 'fragment'
 
 # Import cache modules
 $cacheInitModule = Join-Path $fragmentLibDir 'FragmentCacheInitialization.psm1'
-$orchestrationModule = Join-Path $fragmentLibDir 'FragmentCommandParserOrchestration.psm1'
+$registryModule = Join-Path $fragmentLibDir 'FragmentCommandRegistry.psm1'
 
 if (-not (Test-Path -LiteralPath $cacheInitModule)) {
     Write-Host "✗ FragmentCacheInitialization module not found: $cacheInitModule" -ForegroundColor Red
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
-if (-not (Test-Path -LiteralPath $orchestrationModule)) {
-    Write-Host "✗ FragmentCommandParserOrchestration module not found: $orchestrationModule" -ForegroundColor Red
+if (-not (Test-Path -LiteralPath $registryModule)) {
+    Write-Host "✗ FragmentCommandRegistry module not found: $registryModule" -ForegroundColor Red
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 try {
     Import-Module $cacheInitModule -DisableNameChecking -ErrorAction Stop -Force
-    Import-Module $orchestrationModule -DisableNameChecking -ErrorAction Stop -Force
+    Import-Module $registryModule -DisableNameChecking -ErrorAction Stop -Force
 }
 catch {
     Write-Host "✗ Failed to import modules: $($_.Exception.Message)" -ForegroundColor Red

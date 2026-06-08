@@ -656,10 +656,10 @@ if ($result.FailedCount -gt 0) {
 
 # Exit with appropriate code
 $exitCode = 0
-if ($result.FailedCount -gt 0 -and -not $result.Coverage) {
+if ($result.FailedCount -gt 0 -and -not $hasCoverage) {
     $exitCode = 1
 }
-elseif ($result.Coverage) {
+elseif ($hasCoverage) {
     # Use the coverage object we already determined
     $calculatedCoverage = if ($coverageObj) {
         if ($coverageObj.CoveragePercent) {

@@ -161,7 +161,7 @@ $global:FragmentLoadCount++
 
             try {
                 $content = @'
-function Test-IdempotentFunction {
+function global:Test-IdempotentFunction {
     Write-Output 'loaded'
 }
 '@

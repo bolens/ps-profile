@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 1454
-**Total Aliases:** 1515
-**Generated:** 2026-06-07 14:25:36
+**Total Functions:** 1472
+**Total Aliases:** 1536
+**Generated:** 2026-06-07 23:36:51
 
 ## Functions by Fragment
 
@@ -1891,10 +1891,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [Dump-IL2CPP](functions/Dump-IL2CPP.md) - Dumps IL2CPP metadata from Unity games.
 - [Extract-AndroidApk](functions/Extract-AndroidApk.md) - Extracts and decompiles Android APK files.
 
-### regex (2 functions)
+### regex (16 functions)
 
+- [Compare-RegexDescriptions](functions/Compare-RegexDescriptions.md) - Compares two natural language regex descriptions.
+- [ConvertTo-RegexFromDescription](functions/ConvertTo-RegexFromDescription.md) - Converts a natural language description into a regular expression pattern.
+- [Explain-RegexPattern](functions/Explain-RegexPattern.md) - Explains a regular expression pattern in plain language.
+- [Export-RegexDescriptionCatalog](functions/Export-RegexDescriptionCatalog.md) - Exports the natural language regex catalog to JSON or Markdown.
+- [Get-RegexDescriptionCatalog](functions/Get-RegexDescriptionCatalog.md) - Lists built-in natural language regex catalog entries.
+- [Import-RegexDescriptionSession](functions/Import-RegexDescriptionSession.md) - Loads a saved natural language regex session from a JSON file.
 - [Initialize-DevTools-Regex](functions/Initialize-DevTools-Regex.md) - Initializes regex testing utility functions.
+- [New-RegexDescriptionPesterTest](functions/New-RegexDescriptionPesterTest.md) - Generates a Pester test stub for a natural language regex description.
+- [Resume-RegexDescriptionSession](functions/Resume-RegexDescriptionSession.md) - Resumes work from a saved natural language regex session.
+- [Save-RegexDescriptionSession](functions/Save-RegexDescriptionSession.md) - Saves a natural language regex session to a JSON file.
+- [Search-RegexDescriptions](functions/Search-RegexDescriptions.md) - Searches natural language regex catalog entries.
+- [Show-RegexDescriptionCatalog](functions/Show-RegexDescriptionCatalog.md) - Displays natural language regex catalog entries in a table.
+- [Start-RegexDescriptionBuilder](functions/Start-RegexDescriptionBuilder.md) - Builds a natural language regex description interactively or from segments.
 - [Test-Regex](functions/Test-Regex.md) - Tests a regular expression against input text.
+- [Test-RegexDescriptionRoundTrip](functions/Test-RegexDescriptionRoundTrip.md) - Validates natural language regex description round-trip consistency.
+- [Test-RegexFromDescription](functions/Test-RegexFromDescription.md) - Converts a natural language description to regex and tests it against input.
 
 ### rfc3339 (7 functions)
 
@@ -2334,6 +2348,13 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Find-History](functions/Find-History.md) - Searches command history.
 - [Get-History](functions/Get-History.md) - Shows recent command history.
+
+### utilities-isbn (4 functions)
+
+- [ConvertTo-IsbnNormalized](functions/ConvertTo-IsbnNormalized.md) - Normalizes and validates an ISBN from any supported format.
+- [Format-Isbn](functions/Format-Isbn.md) - Formats a normalized ISBN with standard hyphen groups.
+- [Get-IsbnInfo](functions/Get-IsbnInfo.md) - Looks up book metadata by ISBN.
+- [Test-IsbnValid](functions/Test-IsbnValid.md) - Tests whether an ISBN is valid.
 
 ### utilities-network-advanced (4 functions)
 
@@ -4250,9 +4271,25 @@ This documentation is automatically generated from comment-based help in the pro
 - [rcopy](aliases/rcopy.md) - Copies files using rclone. (alias for `Copy-RcloneFile`)
 - [rls](aliases/rls.md) - Lists files using rclone. (alias for `Get-RcloneFileList`)
 
-### regex (1 aliases)
+### regex (17 aliases)
 
+- [nl-to-regex](aliases/nl-to-regex.md) - Converts a natural language description into a regular expression pattern. (alias for `ConvertTo-RegexFromDescription`)
+- [regex-builder](aliases/regex-builder.md) - Builds a natural language regex description interactively or from segments. (alias for `Start-RegexDescriptionBuilder`)
+- [regex-catalog](aliases/regex-catalog.md) - Lists built-in natural language regex catalog entries. (alias for `Get-RegexDescriptionCatalog`)
+- [regex-catalog-export](aliases/regex-catalog-export.md) - Exports the natural language regex catalog to JSON or Markdown. (alias for `Export-RegexDescriptionCatalog`)
+- [regex-catalog-search](aliases/regex-catalog-search.md) - Searches natural language regex catalog entries. (alias for `Search-RegexDescriptions`)
+- [regex-catalog-show](aliases/regex-catalog-show.md) - Displays natural language regex catalog entries in a table. (alias for `Show-RegexDescriptionCatalog`)
+- [regex-compare](aliases/regex-compare.md) - Compares two natural language regex descriptions. (alias for `Compare-RegexDescriptions`)
+- [regex-explain](aliases/regex-explain.md) - Explains a regular expression pattern in plain language. (alias for `Explain-RegexPattern`)
+- [regex-from-description](aliases/regex-from-description.md) - Converts a natural language description into a regular expression pattern. (alias for `ConvertTo-RegexFromDescription`)
+- [regex-generate-test](aliases/regex-generate-test.md) - Generates a Pester test stub for a natural language regex description. (alias for `New-RegexDescriptionPesterTest`)
+- [regex-roundtrip](aliases/regex-roundtrip.md) - Validates natural language regex description round-trip consistency. (alias for `Test-RegexDescriptionRoundTrip`)
+- [regex-session-import](aliases/regex-session-import.md) - Loads a saved natural language regex session from a JSON file. (alias for `Import-RegexDescriptionSession`)
+- [regex-session-resume](aliases/regex-session-resume.md) - Resumes work from a saved natural language regex session. (alias for `Resume-RegexDescriptionSession`)
+- [regex-session-save](aliases/regex-session-save.md) - Saves a natural language regex session to a JSON file. (alias for `Save-RegexDescriptionSession`)
 - [regex-test](aliases/regex-test.md) - Tests a regular expression against input text. (alias for `Test-Regex`)
+- [regex-test-description](aliases/regex-test-description.md) - Converts a natural language description to regex and tests it against input. (alias for `Test-RegexFromDescription`)
+- [regex-to-description](aliases/regex-to-description.md) - Explains a regular expression pattern in plain language. (alias for `Explain-RegexPattern`)
 
 ### rfc3339 (6 aliases)
 
@@ -4682,6 +4719,14 @@ This documentation is automatically generated from comment-based help in the pro
 ### utilities-history (1 aliases)
 
 - [hg](aliases/hg.md) - Searches command history. (alias for `Find-History`)
+
+### utilities-isbn (5 aliases)
+
+- [isbn](aliases/isbn.md) - Looks up book metadata by ISBN. (alias for `Get-IsbnInfo`)
+- [isbn-format](aliases/isbn-format.md) - Formats a normalized ISBN with standard hyphen groups. (alias for `Format-Isbn`)
+- [isbn-lookup](aliases/isbn-lookup.md) - Looks up book metadata by ISBN. (alias for `Get-IsbnInfo`)
+- [isbn-normalize](aliases/isbn-normalize.md) - Normalizes and validates an ISBN from any supported format. (alias for `ConvertTo-IsbnNormalized`)
+- [isbn-validate](aliases/isbn-validate.md) - Tests whether an ISBN is valid. (alias for `Test-IsbnValid`)
 
 ### utilities-network (3 aliases)
 

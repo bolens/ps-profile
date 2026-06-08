@@ -6,7 +6,7 @@
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 
 BeforeAll {
-    $script:RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:FragmentLibDir = Join-Path $script:RepoRoot 'scripts' 'lib' 'fragment'
     $script:RegistryModulePath = Join-Path $script:FragmentLibDir 'FragmentCommandRegistry.psm1'
     
@@ -473,5 +473,27 @@ Describe 'FragmentCommandRegistry.psm1' {
             $stats | Should -Not -BeNullOrEmpty
         }
     }
+    }
+
+    Describe 'Register-CommandsFromFragment and Register-AllFragmentCommands' {
+        It 'Registers commands from a fragment file path' {
+            if (Get-Command Register-CommandsFromFragment -ErrorAction SilentlyContinue) {
+                $fragmentPath = Join-Path $script:RepoRoot 'profile.d' 'bootstrap.ps1'
+                Test-Path -LiteralPath $fragmentPath | Should -Be $true
+
+                $count = Register-CommandsFromFragment -FragmentPath $fragmentPath -FragmentName 'bootstrap'
+                $count | Should -BeGreaterOrEqual 0
+            }
+        }
+
+        It 'Accepts Register-AllFragmentCommands for batch fragment files' {
+            if (Get-Command Register-AllFragmentCommands -ErrorAction SilentlyContinue) {
+                $fragmentPath = Join-Path $script:RepoRoot 'profile.d' 'bootstrap.ps1'
+                $fragmentFile = Get-Item -LiteralPath $fragmentPath
+                $stats = Register-AllFragmentCommands -FragmentFiles @($fragmentFile) -ForceBothParsingModes
+                $stats | Should -Not -BeNullOrEmpty
+                $stats.ParsedFragments | Should -Be 1
+            }
+        }
     }
 }
