@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/bolens/ps-profile/compare/v1.7.0...v1.8.0) (2026-06-08)
+
+
+### Features
+
+* **isbn:** extend ISBN utilities; prune stale docs ([fa55c06](https://github.com/bolens/ps-profile/commit/fa55c06a0838bb3c70ee63153c63f1ceff6ce154))
+
 # [1.7.0](https://github.com/bolens/ps-profile/compare/v1.6.0...v1.7.0) (2026-06-08)
 
 
