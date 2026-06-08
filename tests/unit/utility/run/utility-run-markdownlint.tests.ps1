@@ -50,4 +50,47 @@ Describe 'run-markdownlint.ps1 execution' {
         $result.ExitCode | Should -BeIn @(0, 1, 2)
         $result.Output | Should -Match "version: $customVersion"
     }
+
+    It 'Fails when markdownlint finds violations in an isolated repository' {
+        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
+            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
+            return
+        }
+
+        $repo = New-TestTempDirectory -Prefix 'MarkdownlintViolationRepo'
+        try {
+            $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:RunMarkdownlintScript -Destination (Join-Path $runnerDir 'run-markdownlint.ps1') -Force
+            @(
+                '# Bad Heading'
+                ''
+                '# Duplicate Top Level'
+            ) | Set-Content -LiteralPath (Join-Path $repo 'bad-markdown.md') -Encoding UTF8
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                git add bad-markdown.md
+                git commit -m 'init bad markdown' -q
+
+                $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
+                $exitCode = $LASTEXITCODE
+            }
+            finally {
+                Pop-Location
+            }
+
+            $exitCode | Should -Be 1
+            $output | Should -Match 'markdownlint found errors|markdownlint'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

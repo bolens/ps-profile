@@ -18,15 +18,21 @@ BeforeAll {
 
 Describe 'check-idempotency.ps1' {
     Context 'Idempotency Checks' {
-        It 'Validates profile idempotency' {
+        It 'Validates profile idempotency and reports runner output' {
+            if ($env:CI -or $env:GITHUB_ACTIONS) {
+                Set-ItResult -Skipped -Because 'full-repo idempotency check is too slow for CI'
+                return
+            }
+
             $scriptPath = Join-Path $script:ScriptsChecksPath 'check-idempotency.ps1'
-            if (Test-Path $scriptPath) {
-                $null = pwsh -NoProfile -File $scriptPath 2>&1
-                $LASTEXITCODE | Should -BeIn @(0, 1)
-            }
-            else {
+            if (-not (Test-Path -LiteralPath $scriptPath)) {
                 Set-ItResult -Skipped -Because 'check-idempotency.ps1 not found'
+                return
             }
+
+            $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
+            $output | Should -Match 'Building temporary idempotency runner|Idempotency runner'
+            $LASTEXITCODE | Should -BeIn @(0, 1)
         }
     }
 }

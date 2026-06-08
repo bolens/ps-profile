@@ -66,4 +66,20 @@ Describe 'check-task-parity.ps1 execution' {
             }
         }
     }
+
+    It 'Fails when the repository root path does not exist' {
+        $missingRepo = Join-Path (New-TestTempDirectory -Prefix 'TaskParityMissingRepo') 'missing-repo-root'
+        try {
+            $result = Invoke-CheckTaskParityScript -ArgumentList @('-RepoRoot', $missingRepo)
+
+            $result.ExitCode | Should -Not -Be 0
+            $result.Output | Should -Match 'Repository root|not found|missing-repo-root'
+        }
+        finally {
+            $parent = Split-Path -Parent $missingRepo
+            if (Test-Path -LiteralPath $parent) {
+                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

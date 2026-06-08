@@ -31,4 +31,11 @@ Describe 'diagnose-profile-loading.ps1 execution' {
         $result.Output | Should -Match '=== End Diagnostics ==='
         $result.Output | Should -Not -Match 'Profile loaded in'
     }
+
+    It 'Reports EXISTS or NOT FOUND for each standard profile path' {
+        $result = Invoke-TestScriptFile -ScriptPath $script:DiagnoseProfileLoadingScript
+
+        $result.Output | Should -Match 'CurrentUserAllHosts'
+        $result.Output | Should -Match 'Status: (EXISTS|NOT FOUND)'
+    }
 }

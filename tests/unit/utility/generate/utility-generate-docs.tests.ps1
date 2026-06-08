@@ -90,4 +90,44 @@ function Get-GenerateDocsFixture {
             }
         }
     }
+
+    It 'Runs incremental generation for an isolated profile directory' {
+        $profileDir = New-TestTempDirectory -Prefix 'GenerateDocsIncrementalProfile'
+        $outputDir = New-TestTempDirectory -Prefix 'GenerateDocsIncrementalOutput'
+        Set-Content -LiteralPath (Join-Path $profileDir '00-fixture.ps1') -Value @'
+<#
+.SYNOPSIS
+    Fixture function for incremental documentation generation.
+.DESCRIPTION
+    Used by generate-docs incremental behavioral tests.
+#>
+function Get-GenerateDocsIncrementalFixture {
+    'ok'
+}
+'@ -Encoding UTF8
+
+        try {
+            $initial = Invoke-TestScriptFile -ScriptPath $script:GenerateDocsScript -ArgumentList @(
+                '-ProfilePath', $profileDir,
+                '-OutputPath', $outputDir
+            )
+            $initial.ExitCode | Should -Be 0
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDocsScript -ArgumentList @(
+                '-Incremental',
+                '-ProfilePath', $profileDir,
+                '-OutputPath', $outputDir
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Incremental mode|Incremental'
+        }
+        finally {
+            foreach ($path in @($profileDir, $outputDir)) {
+                if (Test-Path -LiteralPath $path) {
+                    Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
 }

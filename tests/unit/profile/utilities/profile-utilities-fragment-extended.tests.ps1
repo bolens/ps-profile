@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-fragment-extended.tests.ps1
+# Execution tests for utilities.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,22 +14,39 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
 }
+
 Describe 'profile.d/utilities.ps1 extended scenarios' {
-    It 'Declares essential tier with bootstrap and env dependencies' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    It 'Registers Ensure-Utilities and loads core utility commands' {
+        Get-Command Ensure-Utilities -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+        Ensure-Utilities
+
+        Get-Command ConvertTo-IsbnNormalized -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Find-Isbn -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Format-DateTime -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defers module loading through Ensure-Utilities' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Ensure-Utilities'
-        $c | Should -Match 'Load-EnsureModules'
+
+    It 'Loads utility modules from the utilities-modules subdirectory' {
+        $utilitiesModulesDir = Join-Path $script:ProfileDir 'utilities-modules'
+        Test-Path -LiteralPath $utilitiesModulesDir | Should -Be $true
+
+        Ensure-Utilities
+
+        Get-Command ConvertFrom-UrlEncoded -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Export-IsbnBibliography -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Loads modules from utilities-modules subdirectory' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'utilities-modules'
+
+    It 'Allows repeated Ensure-Utilities calls without losing registered commands' {
+        Ensure-Utilities
+        Ensure-Utilities
+
+        Get-Command Test-IsbnValid -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-IsbnEditions -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
 }

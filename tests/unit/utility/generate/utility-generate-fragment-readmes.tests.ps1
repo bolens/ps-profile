@@ -64,4 +64,43 @@ Describe 'generate-fragment-readmes.ps1 execution' {
         $result.Output | Should -Match 'DRY RUN|Would generate'
         $result.Output | Should -Match 'Would copy fragment READMEs to output directory|Would generate fragment index'
     }
+
+    It 'Writes fragment README files for an isolated profile directory' {
+        $repo = New-TestTempDirectory -Prefix 'GenerateFragmentReadmesApply'
+        try {
+            $docsDir = Join-Path $repo 'scripts' 'utils' 'docs'
+            $profileDir = Join-Path $repo 'profile.d'
+            $outputDir = Join-Path $repo 'docs' 'fragments'
+            $null = New-Item -ItemType Directory -Path $docsDir -Force
+            $null = New-Item -ItemType Directory -Path $profileDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'utils' 'docs' 'modules') -Destination (Join-Path $docsDir 'modules') -Recurse -Force
+            Copy-Item -LiteralPath $script:FragmentReadmesScript -Destination (Join-Path $docsDir 'generate-fragment-readmes.ps1') -Force
+
+            Set-Content -LiteralPath (Join-Path $profileDir 'fixture.ps1') -Value @'
+# Fixture fragment for README generation tests.
+function Get-FragmentReadmeFixture {
+    'ok'
+}
+'@ -Encoding UTF8
+
+            $scriptPath = Join-Path $docsDir 'generate-fragment-readmes.ps1'
+            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+                '-Force',
+                '-OutputPath', $outputDir
+            )
+
+            $result.ExitCode | Should -Be 0
+            $expectedReadme = Join-Path $outputDir 'fixture.md'
+            Test-Path -LiteralPath $expectedReadme | Should -BeTrue
+            Test-Path -LiteralPath (Join-Path $outputDir 'README.md') | Should -BeTrue
+            Get-Content -LiteralPath $expectedReadme -Raw | Should -Match 'Get-FragmentReadmeFixture|fixture'
+            Test-Path -LiteralPath (Join-Path $profileDir 'fixture.ps1.README.md') | Should -BeFalse
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

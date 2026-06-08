@@ -96,4 +96,40 @@ Describe 'install-githooks.ps1 execution' {
             }
         }
     }
+
+    It 'Fails when the requested git hooks directory does not exist' {
+        $repo = New-TestTempDirectory -Prefix 'InstallHooksMissingGitDir'
+        try {
+            $scriptsDir = Join-Path $repo 'scripts'
+            $scriptsGitDir = Join-Path $scriptsDir 'git'
+            $null = New-Item -ItemType Directory -Path (Join-Path $repo '.git') -Force
+            $null = New-Item -ItemType Directory -Path $scriptsGitDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'git' 'hooks') -Destination (Join-Path $scriptsGitDir 'hooks') -Recurse -Force
+            Copy-Item -LiteralPath $script:InstallHooksScript -Destination (Join-Path $scriptsGitDir 'install-githooks.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
+                git add README.md
+                git commit -m 'init' -q
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result = Invoke-InstallGitHooksScript -RepositoryRoot $repo -ExtraArgs @('-GitDir', '.git-missing')
+
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'Git hooks directory|not found'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

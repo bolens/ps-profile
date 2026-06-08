@@ -215,6 +215,33 @@ foreach ($file in $fragments) {
             $skipped++
             continue
         }
+
+        $tier = if ($tierMapping.ContainsKey($baseName)) {
+            $tierMapping[$baseName]
+        }
+        elseif (Get-Command Get-FragmentTier -ErrorAction SilentlyContinue) {
+            Get-FragmentTier -FragmentFile $file
+        }
+        else {
+            'optional'
+        }
+
+        $dependencies = if ($defaultDependencies.ContainsKey($baseName)) {
+            @($defaultDependencies[$baseName])
+        }
+        elseif (Get-Command Get-FragmentDependencies -ErrorAction SilentlyContinue) {
+            @(Get-FragmentDependencies -FragmentFile $file)
+        }
+        else {
+            @()
+        }
+
+        $environments = if ($environmentMapping.ContainsKey($baseName)) {
+            @($environmentMapping[$baseName])
+        }
+        else {
+            @()
+        }
     
     # Remove duplicate metadata lines if they exist
     $lines = $content -split "`r?`n"

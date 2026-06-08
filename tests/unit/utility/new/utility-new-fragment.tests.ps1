@@ -90,4 +90,23 @@ Describe 'new-fragment.ps1 execution' {
             }
         }
     }
+
+    It 'Fails when the fragment number is outside the supported range' {
+        $repo = New-NewFragmentFixtureRepository
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
+                '-Name', 'out-of-range',
+                '-Number', '150',
+                '-Description', 'Fragment number out of range'
+            )
+
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'Fragment number must be between 00 and 99'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

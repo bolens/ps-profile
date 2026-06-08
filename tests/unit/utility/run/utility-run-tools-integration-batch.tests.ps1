@@ -90,4 +90,37 @@ exit 0
             }
         }
     }
+
+    It 'Fails the batch when the stub Pester runner reports test failures' {
+        $tempRoot = New-TestTempDirectory -Prefix 'tools-batch-failure'
+        try {
+            $toolsDir = Join-Path $tempRoot 'tests' 'integration' 'tools' 'failing-batch'
+            $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
+            $null = New-Item -ItemType Directory -Path $toolsDir -Force
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType File -Path (Join-Path $toolsDir 'failing-sample.tests.ps1') -Force
+
+            $stubRunner = @'
+param()
+Write-Host 'Tests Passed: 0, Failed: 1, Skipped: 0'
+exit 1
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:RunToolsBatchScript -ArgumentList @(
+                '-RepoRoot', $tempRoot,
+                '-RelativePath', 'failing-batch',
+                '-Quiet'
+            )
+
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'Batch: tools/failing-batch'
+            $result.Output | Should -Match '0P / 1F / 0S|failed'
+        }
+        finally {
+            if (Test-Path -LiteralPath $tempRoot) {
+                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

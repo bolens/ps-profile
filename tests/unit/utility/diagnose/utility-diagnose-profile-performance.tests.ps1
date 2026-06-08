@@ -23,8 +23,8 @@ BeforeAll {
 
 Describe 'diagnose-profile-performance.ps1 execution' {
     It 'Runs profile performance diagnostics and prints recommendations' {
-        if ($env:CI -or $env:GITHUB_ACTIONS) {
-            Set-ItResult -Skipped -Because 'profile load diagnostics are too slow for CI'
+        if ($env:CI -or $env:GITHUB_ACTIONS -or $env:PS_PROFILE_RUN_SLOW_TESTS -ne '1') {
+            Set-ItResult -Skipped -Because 'set PS_PROFILE_RUN_SLOW_TESTS=1 to run full profile load diagnostics locally'
             return
         }
 
@@ -32,5 +32,40 @@ Describe 'diagnose-profile-performance.ps1 execution' {
 
         $result.ExitCode | Should -Be 0
         $result.Output | Should -Match 'Profile Performance Diagnostics|Optimization Recommendations'
+    }
+
+    It 'Prints optimization recommendations even when the repository profile file is absent' {
+        $repo = New-TestTempDirectory -Prefix 'DiagnoseProfilePerfRepo'
+        try {
+            $perfDir = Join-Path $repo 'scripts' 'utils' 'performance'
+            $null = New-Item -ItemType Directory -Path $perfDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:DiagnoseProfilePerfScript -Destination (Join-Path $perfDir 'diagnose-profile-performance.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
+                git add README.md
+                git commit -m 'init' -q
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $perfDir 'diagnose-profile-performance.ps1')
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Profile Performance Diagnostics'
+            $result.Output | Should -Match 'Method 1: Testing with performance profiling'
+            $result.Output | Should -Match 'Optimization Recommendations'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
     }
 }

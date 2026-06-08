@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Listing helpers (prefer eza when available)
+List all directory contents - enhanced ls -a
 
 ## Description
 
-Listing helpers (prefer eza when available)
+List all directory contents - enhanced ls -a
 
 ## Alias Information
 
-**Alias for:** `Get-ChildItemAll`
+**Alias for:** `Get-ChildItemEnhancedAll`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/files-modules/navigation/files-listing.ps1
+Defined in: ../profile.d/aliases.ps1

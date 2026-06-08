@@ -231,8 +231,8 @@ function Save-MetricsSnapshot {
         
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
             $snapshotInfo = "Timestamp=$($snapshot.Timestamp)"
-            if ($snapshot.ContainsKey('CodeMetrics')) { $snapshotInfo += ", CodeMetrics=included" }
-            if ($snapshot.ContainsKey('PerformanceMetrics')) { $snapshotInfo += ", PerformanceMetrics=included" }
+            if ($snapshot.Keys -contains 'CodeMetrics') { $snapshotInfo += ', CodeMetrics=included' }
+            if ($snapshot.Keys -contains 'PerformanceMetrics') { $snapshotInfo += ', PerformanceMetrics=included' }
             Write-Verbose "[metrics-snapshot.save] Snapshot details: $snapshotInfo"
         }
         

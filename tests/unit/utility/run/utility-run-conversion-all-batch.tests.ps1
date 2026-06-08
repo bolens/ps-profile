@@ -65,4 +65,36 @@ exit 0
             }
         }
     }
+
+    It 'Fails the batch when the stub integration runner reports failures' {
+        $tempRepo = New-TestTempDirectory -Prefix 'ConversionAllFailureStub'
+        try {
+            $runnerDir = Join-Path $tempRepo 'scripts' 'utils' 'code-quality'
+            $conversionDir = Join-Path $tempRepo 'tests' 'integration' 'conversion' 'document'
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType Directory -Path $conversionDir -Force
+            $null = New-Item -ItemType File -Path (Join-Path $conversionDir 'failing-sample.tests.ps1') -Force
+
+            $stubRunner = @'
+param([string]$RelativePath)
+Write-Host '0P / 1F / 0S'
+exit 1
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-conversion-integration-batch.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:RunConversionAllBatchScript -ArgumentList @(
+                '-RepoRoot', $tempRepo,
+                '-RelativePath', 'document',
+                '-Quiet'
+            )
+
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'Conversion all-batch|Sub-batches with failures|0P / 1F / 0S'
+        }
+        finally {
+            if (Test-Path -LiteralPath $tempRepo) {
+                Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

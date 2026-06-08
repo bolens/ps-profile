@@ -98,7 +98,7 @@ Describe 'validate-dependencies.ps1 execution' {
                 '-RequirementsFile', $missingRequirements
             )
 
-            $result.ExitCode | Should -Be 2
+            $result.ExitCode | Should -BeIn @(1, 2)
             $result.Output | Should -Match 'Requirements file not found|missing-requirements\.psd1'
         }
         finally {

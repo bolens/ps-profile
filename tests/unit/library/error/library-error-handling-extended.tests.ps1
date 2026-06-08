@@ -55,4 +55,49 @@ Describe 'ErrorHandling extended scenarios' {
             $result | Should -Be 'SilentlyContinue'
         }
     }
+
+    Context 'Debug tracing' {
+        BeforeEach {
+            $script:OriginalDebug = $env:PS_PROFILE_DEBUG
+        }
+
+        AfterEach {
+            if ($null -eq $script:OriginalDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $script:OriginalDebug
+            }
+        }
+
+        It 'Emits debug output for Invoke-WithErrorHandling when PS_PROFILE_DEBUG is 2' {
+            $env:PS_PROFILE_DEBUG = '2'
+
+            $result = Invoke-WithErrorHandling -ScriptBlock { 'debug-success' } -ErrorActionPreference 'Stop'
+
+            $result | Should -Be 'debug-success'
+        }
+
+        It 'Emits debug output when Invoke-WithErrorHandling fails with PS_PROFILE_DEBUG 2' {
+            $env:PS_PROFILE_DEBUG = '2'
+
+            $result = Invoke-WithErrorHandling -ScriptBlock { throw 'debug failure' } -ErrorActionPreference 'SilentlyContinue'
+
+            $result | Should -BeNullOrEmpty
+        }
+
+        It 'Emits debug output for Write-ErrorOrThrow when PS_PROFILE_DEBUG is 2' {
+            $env:PS_PROFILE_DEBUG = '2'
+
+            { Write-ErrorOrThrow -Message 'debug throw' -ErrorActionPreference 'Stop' } | Should -Throw '*debug throw*'
+        }
+
+        It 'Emits verbose debug output for Invoke-WithErrorHandling when PS_PROFILE_DEBUG is 3' {
+            $env:PS_PROFILE_DEBUG = '3'
+
+            $result = Invoke-WithErrorHandling -ScriptBlock { throw 'trace failure' } -ErrorActionPreference 'SilentlyContinue'
+
+            $result | Should -BeNullOrEmpty
+        }
+    }
 }

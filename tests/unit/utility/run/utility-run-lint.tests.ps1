@@ -72,6 +72,21 @@ function Get-RunLintFixture {
 }
 '@ -Encoding UTF8
 
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                git add profile.d/lint-fixture.ps1
+                if (Test-Path -LiteralPath (Join-Path $repo 'PSScriptAnalyzerSettings.psd1')) {
+                    git add PSScriptAnalyzerSettings.psd1
+                }
+                git commit -m 'init lint fixture' -q
+            }
+            finally {
+                Pop-Location
+            }
+
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $runnerDir 'run-lint.ps1')
 
             $result.Output | Should -Match 'Analyzing|Saved report to'
@@ -80,6 +95,57 @@ function Get-RunLintFixture {
                 Select-Object -First 1
             $reportFile | Should -Not -BeNullOrEmpty
             Test-Path -LiteralPath $reportFile.FullName | Should -BeTrue
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Fails when an isolated fixture contains PSScriptAnalyzer error-level findings' {
+        if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
+            Set-ItResult -Skipped -Because 'PSScriptAnalyzer is not installed'
+            return
+        }
+
+        $repo = New-TestTempDirectory -Prefix 'RunLintViolationRepo'
+        try {
+            $profileDir = Join-Path $repo 'profile.d'
+            $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $null = New-Item -ItemType Directory -Path $profileDir -Force
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:RunLintScript -Destination (Join-Path $runnerDir 'run-lint.ps1') -Force
+            $settingsSource = Join-Path $script:TestRepoRoot 'PSScriptAnalyzerSettings.psd1'
+            if (Test-Path -LiteralPath $settingsSource) {
+                Copy-Item -LiteralPath $settingsSource -Destination (Join-Path $repo 'PSScriptAnalyzerSettings.psd1') -Force
+            }
+            Set-Content -LiteralPath (Join-Path $profileDir 'lint-violation.ps1') -Value @'
+function Get-LintViolationFixture {
+    ConvertTo-SecureString 'secret' -AsPlainText -Force
+}
+'@ -Encoding UTF8
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                git add profile.d/lint-violation.ps1
+                if (Test-Path -LiteralPath (Join-Path $repo 'PSScriptAnalyzerSettings.psd1')) {
+                    git add PSScriptAnalyzerSettings.psd1
+                }
+                git commit -m 'init lint violation fixture' -q
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $runnerDir 'run-lint.ps1')
+
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'Saved report to|Error-level|PSScriptAnalyzer'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

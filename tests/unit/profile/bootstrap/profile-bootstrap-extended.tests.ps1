@@ -18,27 +18,41 @@ BeforeAll {
     }
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:BootstrapPath = Join-Path $script:TestRepoRoot 'profile.d/bootstrap.ps1'
-    $script:BootstrapContent = Get-Content -LiteralPath $script:BootstrapPath -Raw
+    $script:BootstrapDir = Join-Path $script:TestRepoRoot 'profile.d/bootstrap'
 
     . $script:BootstrapPath
 }
 
 Describe 'bootstrap.ps1 extended scenarios' {
     Context 'Load order' {
-        It 'Loads GlobalState before ErrorHandlingStandard' {
-            $globalStateIndex = $script:BootstrapContent.IndexOf('GlobalState.ps1')
-            $errorHandlingIndex = $script:BootstrapContent.IndexOf('ErrorHandlingStandard.ps1')
-            $globalStateIndex | Should -BeGreaterThan (-1)
-            $errorHandlingIndex | Should -BeGreaterThan (-1)
-            $globalStateIndex | Should -BeLessThan $errorHandlingIndex
+        It 'Loads GlobalState before downstream bootstrap modules during execution' {
+            $loadOrder = @(
+                'GlobalState.ps1',
+                'ErrorHandlingStandard.ps1',
+                'CommandCache.ps1',
+                'FunctionRegistration.ps1',
+                'ModulePathCache.ps1',
+                'ModuleLoading.ps1'
+            )
+
+            $content = Get-Content -LiteralPath $script:BootstrapPath -Raw
+            $positions = foreach ($moduleName in $loadOrder) {
+                $content.IndexOf($moduleName)
+            }
+
+            $positions | Should -Not -Contain -1
+            for ($index = 0; $index -lt ($positions.Count - 1); $index++) {
+                $positions[$index] | Should -BeLessThan $positions[$index + 1]
+            }
         }
 
-        It 'Loads CommandCache after GlobalState initialization' {
-            $globalStateIndex = $script:BootstrapContent.IndexOf('GlobalState.ps1')
-            $commandCacheIndex = $script:BootstrapContent.IndexOf('CommandCache.ps1')
-            $globalStateIndex | Should -BeGreaterThan (-1)
-            $commandCacheIndex | Should -BeGreaterThan (-1)
-            $globalStateIndex | Should -BeLessThan $commandCacheIndex
+        It 'Dot-sources expected bootstrap module files from profile.d/bootstrap' {
+            foreach ($moduleName in @(
+                    'GlobalState.ps1', 'ErrorHandlingStandard.ps1', 'FunctionRegistration.ps1',
+                    'ModuleLoading.ps1', 'UserHome.ps1', 'PlatformPaths.ps1'
+                )) {
+                Test-Path -LiteralPath (Join-Path $script:BootstrapDir $moduleName) | Should -Be $true
+            }
         }
     }
 
@@ -58,7 +72,8 @@ Describe 'bootstrap.ps1 extended scenarios' {
 
     Context 'Idempotency' {
         It 'Allows a second bootstrap load without throwing' {
-            { . $script:BootstrapPath } | Should -Not -Throw
+            . $script:BootstrapPath
+            Get-Command Set-AgentModeFunction -ErrorAction Stop | Should -Not -BeNullOrEmpty
         }
 
         It 'Preserves existing function bodies on repeated Set-AgentModeFunction calls' {
@@ -76,9 +91,29 @@ Describe 'bootstrap.ps1 extended scenarios' {
     }
 
     Context 'Failure handling' {
-        It 'Swallows module load failures unless PS_PROFILE_DEBUG is enabled' {
-            $script:BootstrapContent | Should -Match 'PS_PROFILE_DEBUG'
-            $script:BootstrapContent | Should -Match 'Write-ProfileError'
+        It 'Continues loading other bootstrap helpers when a non-critical module fails' {
+            $modulePath = Join-Path $script:BootstrapDir 'UserHome.ps1'
+            $originalBytes = Backup-TestFileBytes -Path $modulePath
+            $previousDebug = $env:PS_PROFILE_DEBUG
+
+            try {
+                Write-TestFileLiteralContent -Path $modulePath -Content 'throw "bootstrap extended failure"'
+                Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+                . $script:BootstrapPath
+
+                Get-Command Set-AgentModeFunction -ErrorAction Stop | Should -Not -BeNullOrEmpty
+                Get-Command Import-FragmentModules -ErrorAction Stop | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Restore-TestFileBytes -Path $modulePath -Bytes $originalBytes
+                if ($null -eq $previousDebug) {
+                    Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $previousDebug
+                }
+            }
         }
     }
 }

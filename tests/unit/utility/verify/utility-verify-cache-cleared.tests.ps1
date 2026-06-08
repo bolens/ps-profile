@@ -84,4 +84,35 @@ Describe 'verify-cache-cleared.ps1 execution' {
             }
         }
     }
+
+    It 'Reports a fully cleared cache when database tables exist but contain no rows' {
+        if (-not $script:SqliteAvailable) {
+            Set-ItResult -Skipped -Because 'sqlite3 is not installed'
+            return
+        }
+
+        $cacheDir = New-TestTempDirectory -Prefix 'VerifyCacheEmptyTables'
+        try {
+            $dbPath = Join-Path $cacheDir 'fragment-cache.db'
+            @'
+CREATE TABLE fragment_ast_cache (id INTEGER PRIMARY KEY);
+CREATE TABLE fragment_content_cache (id INTEGER PRIMARY KEY);
+'@ | & sqlite3 $dbPath 2>&1 | Out-Null
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:VerifyCacheScript -EnvironmentVariables @{
+                PS_PROFILE_CACHE_DIR = $cacheDir
+            }
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Database file exists'
+            $result.Output | Should -Match 'AST cache entries: 0'
+            $result.Output | Should -Match 'Content cache entries: 0'
+            $result.Output | Should -Match 'Cache is cleared \(both AST and content caches are empty\)'
+        }
+        finally {
+            if (Test-Path -LiteralPath $cacheDir) {
+                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

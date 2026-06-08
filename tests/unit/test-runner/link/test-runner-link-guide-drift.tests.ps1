@@ -75,4 +75,20 @@ Describe 'link-guide-drift.ps1 execution' {
             $afterLock | Should -Be $beforeLock
         }
     }
+
+    It 'Fails when GuidePath points to a guide file that does not exist' {
+        if (-not $script:DriftCliAvailable) {
+            Set-ItResult -Skipped -Because 'drift CLI is not installed'
+            return
+        }
+
+        $missingGuide = Join-Path $script:TestRepoRoot 'docs' 'guides' 'definitely-not-a-guide-xyz.md'
+        $result = Invoke-LinkGuideDriftScript -ArgumentList @(
+            '-DryRun',
+            '-GuidePath', $missingGuide
+        )
+
+        $result.ExitCode | Should -Not -Be 0
+        $result.Output | Should -Match 'definitely-not-a-guide-xyz|Cannot find path|does not exist'
+    }
 }

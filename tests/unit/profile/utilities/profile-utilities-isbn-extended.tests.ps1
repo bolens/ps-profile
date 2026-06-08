@@ -3,39 +3,6 @@
 # Unit tests for extended ISBN utilities
 # ===============================================
 
-Describe 'profile.d/utilities-modules/data/utilities-isbn-extended.ps1 structure' {
-    BeforeAll {
-        $current = Get-Item $PSScriptRoot
-        while ($null -ne $current) {
-            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-            if (Test-Path -LiteralPath $testSupportPath) {
-                . $testSupportPath
-                break
-            }
-            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-            $current = $current.Parent
-        }
-        $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-        $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/data/utilities-isbn-extended.ps1'
-    }
-
-    It 'Defines search, export, citation, and workflow commands' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Find-Isbn'
-        $c | Should -Match 'Get-IsbnEditions'
-        $c | Should -Match 'Export-IsbnBibliography'
-        $c | Should -Match 'Complete-Isbn'
-        $c | Should -Match 'Get-IsbnUri'
-        $c | Should -Match 'Save-IsbnBarcode'
-        $c | Should -Match 'Save-IsbnQrCode'
-        $c | Should -Match 'Search-CalibreIsbn'
-        $c | Should -Match 'Test-IsmnValid'
-        $c | Should -Match 'Get-IsbnFromText'
-        $c | Should -Match 'Import-IsbnListFile'
-        $c | Should -Match 'Start-IsbnWatchFolder'
-    }
-}
-
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -56,6 +23,18 @@ BeforeAll {
     $env:PS_PROFILE_ISBN_CACHE_DIR = $script:IsbnCacheDir
     $script:IsbnLibraryPath = Join-Path (New-TestTempDirectory -Prefix 'IsbnLibrary') 'library.json'
     $env:PS_PROFILE_ISBN_LIBRARY_PATH = $script:IsbnLibraryPath
+}
+
+Describe 'utilities-isbn-extended.ps1 - command registration' {
+    It 'Registers extended ISBN commands after Ensure-Utilities' {
+        foreach ($commandName in @(
+                'Find-Isbn', 'Get-IsbnEditions', 'Export-IsbnBibliography', 'Complete-Isbn',
+                'Get-IsbnUri', 'Save-IsbnBarcode', 'Save-IsbnQrCode', 'Search-CalibreIsbn',
+                'Test-IsmnValid', 'Get-IsbnFromText', 'Import-IsbnListFile', 'Start-IsbnWatchFolder'
+            )) {
+            Get-Command $commandName -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        }
+    }
 }
 
 Describe 'utilities-isbn-extended.ps1 - search and editions' {
@@ -134,6 +113,191 @@ Describe 'utilities-isbn-extended.ps1 - search and editions' {
         $results[0].Source | Should -Be 'GoogleBooks'
         $results[0].Title | Should -Be 'Google Found Book'
         $results[0].NormalizedIsbn | Should -Be '9780141439518'
+    }
+
+    It 'Find-Isbn supports author-only Open Library searches' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            param($Uri)
+
+            $Uri | Should -Match 'author=Austen'
+            $Uri | Should -Not -Match 'title='
+
+            return [PSCustomObject]@{
+                docs = @(
+                    [PSCustomObject]@{
+                        title              = 'Author Only Match'
+                        author_name        = @('Austen, Jane')
+                        isbn               = @('9780141439518')
+                        first_publish_year = 1813
+                        key                = '/works/OLAUTH'
+                    }
+                )
+            }
+        }
+
+        $results = Find-Isbn -Author 'Austen' -Provider OpenLibrary -ErrorAction Stop
+
+        $results.Count | Should -Be 1
+        $results[0].Title | Should -Be 'Author Only Match'
+    }
+
+    It 'Surfaces Open Library search failures when Provider is OpenLibrary' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            throw 'Open Library search unavailable'
+        }
+
+        { Find-Isbn -Title 'Unavailable' -Provider OpenLibrary -ErrorAction Stop } |
+            Should -Throw '*Open Library search failed*Open Library search unavailable*'
+    }
+
+    It 'Surfaces Google Books search failures when the fallback provider errors' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            param($Uri)
+
+            if ($Uri -like 'https://openlibrary.org/search.json*') {
+                return [PSCustomObject]@{ docs = @() }
+            }
+
+            throw 'Google Books search unavailable'
+        }
+
+        { Find-Isbn -Title 'Missing Everywhere' -Provider Auto -ErrorAction Stop } |
+            Should -Throw '*Google Books search failed*Google Books search unavailable*'
+    }
+
+    It 'Throws when no search providers return matches' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            param($Uri)
+
+            if ($Uri -like 'https://openlibrary.org/search.json*') {
+                return [PSCustomObject]@{ docs = @() }
+            }
+
+            if ($Uri -like 'https://www.googleapis.com/books/v1/volumes*') {
+                return [PSCustomObject]@{ items = @() }
+            }
+
+            throw "Unexpected URI: $Uri"
+        }
+
+        { Find-Isbn -Title 'Nothing Here' -Author 'Nobody' -ErrorAction Stop } |
+            Should -Throw '*No books found for the specified search*'
+    }
+
+    It 'Returns the Out-GridView selection when -Pick is specified' {
+        $gridView = Get-Command Out-GridView -ErrorAction SilentlyContinue
+        $gridViewBody = if ($gridView) { $gridView.ScriptBlock } else { $null }
+
+        Set-Item -Path Function:\Out-GridView -Value {
+            [CmdletBinding()]
+            param(
+                [Parameter(ValueFromPipeline)]
+                $InputObject,
+
+                $Title,
+
+                [switch]$PassThru
+            )
+
+            begin {
+                $script:GridViewItems = [System.Collections.Generic.List[object]]::new()
+            }
+
+            process {
+                if ($null -ne $InputObject) {
+                    $script:GridViewItems.Add($InputObject) | Out-Null
+                }
+            }
+
+            end {
+                if ($PassThru) {
+                    return ($script:GridViewItems | Select-Object -First 1)
+                }
+            }
+        }.GetNewClosure() -Force
+
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                docs = @(
+                    [PSCustomObject]@{
+                        title              = 'Pick One'
+                        author_name        = @('Picker Author')
+                        isbn               = @('9780306406157')
+                        first_publish_year = 2001
+                        key                = '/works/OLPICK1'
+                    },
+                    [PSCustomObject]@{
+                        title              = 'Pick Two'
+                        author_name        = @('Picker Author')
+                        isbn               = @('9780141439518')
+                        first_publish_year = 2002
+                        key                = '/works/OLPICK2'
+                    }
+                )
+            }
+        }
+
+        try {
+            $results = Find-Isbn -Title 'Pick' -Pick -ErrorAction Stop
+
+            @($results).Count | Should -Be 1
+            @($results)[0].Title | Should -Be 'Pick One'
+        }
+        finally {
+            if ($gridViewBody) {
+                Set-Item -Path Function:\Out-GridView -Value $gridViewBody -Force
+            }
+            else {
+                Remove-Item -Path Function:\Out-GridView -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Returns no results when -Pick is cancelled in Out-GridView' {
+        $gridView = Get-Command Out-GridView -ErrorAction SilentlyContinue
+        $gridViewBody = if ($gridView) { $gridView.ScriptBlock } else { $null }
+
+        Set-Item -Path Function:\Out-GridView -Value {
+            [CmdletBinding()]
+            param(
+                [Parameter(ValueFromPipeline)]
+                $InputObject,
+
+                $Title,
+
+                [switch]$PassThru
+            )
+
+            end {
+                return $null
+            }
+        }.GetNewClosure() -Force
+
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                docs = @(
+                    [PSCustomObject]@{
+                        title       = 'Cancelled Pick'
+                        author_name = @('Cancel Author')
+                        isbn        = @('9780306406157')
+                        key         = '/works/OLCANCEL'
+                    }
+                )
+            }
+        }
+
+        try {
+            $results = Find-Isbn -Title 'Cancelled Pick' -Pick -ErrorAction Stop
+            $results | Should -BeNullOrEmpty
+        }
+        finally {
+            if ($gridViewBody) {
+                Set-Item -Path Function:\Out-GridView -Value $gridViewBody -Force
+            }
+            else {
+                Remove-Item -Path Function:\Out-GridView -Force -ErrorAction SilentlyContinue
+            }
+        }
     }
 
     It 'Get-IsbnEditions returns alternate editions for a work' {
@@ -331,6 +495,83 @@ Describe 'utilities-isbn-extended.ps1 - bibliography and citations' {
 
         $manyAuthors = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Apa -ErrorAction Stop
         $manyAuthors | Should -Match 'Alpha, A\., et al\.'
+    }
+
+    It 'Includes subtitles in APA, MLA, and Chicago citation output' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                'ISBN:9780306406157' = [PSCustomObject]@{
+                    title        = 'Main Title'
+                    subtitle     = 'A Subtitle'
+                    authors      = @([PSCustomObject]@{ name = 'Jane Author' })
+                    publishers   = @([PSCustomObject]@{ name = 'Style Press' })
+                    publish_date = '1999'
+                    identifiers  = [PSCustomObject]@{ isbn_13 = @('9780306406157') }
+                    url          = 'https://openlibrary.org/books/OLSUB'
+                }
+            }
+        }
+
+        $apa = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Apa -ErrorAction Stop
+        $mla = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Mla -Refresh -ErrorAction Stop
+        $chicago = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Chicago -Refresh -ErrorAction Stop
+
+        $apa | Should -Match 'Main Title: A Subtitle'
+        $mla | Should -Match 'Main Title: A Subtitle'
+        $chicago | Should -Match 'Main Title: A Subtitle'
+    }
+
+    It 'Uses Unknown author placeholders and ISBN-10 values in MLA and Chicago output' {
+        $normalized = ConvertTo-IsbnNormalized -Isbn '0-306-40615-2' -Strict
+        $lookupIsbn = if ($normalized.Isbn13) { $normalized.Isbn13 } else { $normalized.Isbn10 }
+        $cachePath = Join-Path $script:IsbnCacheDir "$lookupIsbn-auto.json"
+        $entry = [ordered]@{
+            CachedAt = (Get-Date).ToString('o')
+            Provider = 'Auto'
+            Book     = [pscustomobject]@{
+                Source         = 'TestCache'
+                Title          = 'No Author Book'
+                Subtitle       = $null
+                Authors        = @()
+                Publishers     = @()
+                PublishDate    = $null
+                NumberOfPages  = $null
+                Subjects       = @()
+                Isbn10         = @($normalized.Isbn10)
+                Isbn13         = @()
+                Doi            = $null
+                Url            = $null
+                CoverUrl       = $null
+                NormalizedIsbn = $normalized.Isbn10
+            }
+        }
+
+        $entry | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $cachePath -Encoding UTF8
+
+        $mla = Get-IsbnInfo -Isbn '0-306-40615-2' -OutputFormat Mla -Offline -ErrorAction Stop
+        $chicago = Get-IsbnInfo -Isbn '0-306-40615-2' -OutputFormat Chicago -Offline -ErrorAction Stop
+
+        $mla | Should -Match 'Unknown\. No Author Book\.'
+        $mla | Should -Match 'ISBN 0306406152'
+        $chicago | Should -Match 'Unknown\. No Author Book\.'
+        $chicago | Should -Match 'ISBN: 0306406152'
+    }
+
+    It 'Uses Unknown in APA output when author metadata is missing' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                'ISBN:9780306406157' = [PSCustomObject]@{
+                    title        = 'No Authors Book'
+                    publishers   = @([PSCustomObject]@{ name = 'Sparse Press' })
+                    publish_date = '2000'
+                    identifiers  = [PSCustomObject]@{ isbn_13 = @('9780306406157') }
+                    url          = 'https://openlibrary.org/books/OLNOAUTH'
+                }
+            }
+        }
+
+        $apa = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Apa -ErrorAction Stop
+        $apa | Should -Match '^Unknown \(2000\)\.'
     }
 
     It 'Exports multi-record bibliographies to a file' {
@@ -792,6 +1033,36 @@ Describe 'utilities-isbn-extended.ps1 - formatter edge cases' {
         $ris | Should -Match 'SN  - 9780306406157'
     }
 
+    It 'Uses ISBN-10 in RIS output when ISBN-13 metadata is unavailable' {
+        $normalized = ConvertTo-IsbnNormalized -Isbn '0-306-40615-2' -Strict
+        $lookupIsbn = if ($normalized.Isbn13) { $normalized.Isbn13 } else { $normalized.Isbn10 }
+        $cachePath = Join-Path $script:IsbnCacheDir "$lookupIsbn-auto.json"
+        $entry = [ordered]@{
+            CachedAt = (Get-Date).ToString('o')
+            Provider = 'Auto'
+            Book     = [pscustomobject]@{
+                Source         = 'TestCache'
+                Title          = 'Ris Ten Only'
+                Subtitle       = $null
+                Authors        = @('Ten Author')
+                Publishers     = @('Ten Press')
+                PublishDate    = '1988'
+                NumberOfPages  = $null
+                Isbn10         = @($normalized.Isbn10)
+                Isbn13         = @()
+                NormalizedIsbn = $normalized.Isbn10
+                Url            = 'https://openlibrary.org/books/OLRIS10'
+            }
+        }
+
+        $entry | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $cachePath -Encoding UTF8
+
+        $ris = Get-IsbnInfo -Isbn '0-306-40615-2' -OutputFormat Ris -Offline -ErrorAction Stop
+
+        $ris | Should -Match 'SN  - 0306406152'
+        $ris | Should -Not -Match 'SN  - 9780306406157'
+    }
+
     It 'Uses literal author names in CSL-JSON when only a single name token is present' {
         Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
             return [PSCustomObject]@{
@@ -811,6 +1082,26 @@ Describe 'utilities-isbn-extended.ps1 - formatter edge cases' {
         $parsed.author.Count | Should -Be 1
         $parsed.author[0].literal | Should -Be 'Plato'
         $parsed.title | Should -Be 'Mononym Book'
+    }
+
+    It 'Splits two-part author names into CSL-JSON family and given fields' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                'ISBN:9780306406157' = [PSCustomObject]@{
+                    title        = 'Split Name Book'
+                    authors      = @([PSCustomObject]@{ name = 'Jane Author' })
+                    publish_date = '2001'
+                    identifiers  = [PSCustomObject]@{ isbn_13 = @('9780306406157') }
+                    url          = 'https://openlibrary.org/books/OLSPLIT'
+                }
+            }
+        }
+
+        $csl = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat CslJson -ErrorAction Stop
+        $parsed = $csl | ConvertFrom-Json
+
+        $parsed.author[0].family | Should -Be 'Author'
+        $parsed.author[0].given | Should -Be 'Jane'
     }
 
     It 'Uses n.p. and n.d. placeholders when publisher and year are missing' {

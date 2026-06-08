@@ -122,5 +122,105 @@ Describe 'CodeQualityScore extended scenarios' {
             $result.Timestamp | Should -Not -BeNullOrEmpty
             { [DateTime]::Parse($result.Timestamp) } | Should -Not -Throw
         }
+
+        It 'Throws when CodeMetrics is not a supported object type' {
+            { Get-CodeQualityScore -CodeMetrics 'invalid' } | Should -Throw '*PSCustomObject or Hashtable*'
+        }
+
+        It 'Throws when a required CodeMetrics property is missing' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 100
+                TotalFunctions     = 5
+                TotalComplexity    = 10
+            }
+
+            { Get-CodeQualityScore -CodeMetrics $metrics } | Should -Throw '*DuplicateFunctions*'
+        }
+
+        It 'Throws when Weights is not a hashtable' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 100
+                TotalFunctions     = 5
+                TotalComplexity    = 10
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 100
+            }
+
+            { Get-CodeQualityScore -CodeMetrics $metrics -Weights 'invalid' } | Should -Throw '*hashtable*'
+        }
+
+        It 'Accepts TestCoverage as a hashtable' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 1000
+                TotalFunctions     = 20
+                TotalComplexity    = 50
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 150
+            }
+            $coverage = @{ CoveragePercent = 85 }
+
+            $result = Get-CodeQualityScore -CodeMetrics $metrics -TestCoverage $coverage
+
+            $result.ComponentScores.Coverage | Should -Be 85
+        }
+
+        It 'Treats missing CoveragePercent as zero coverage contribution' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 1000
+                TotalFunctions     = 20
+                TotalComplexity    = 50
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 150
+            }
+            $coverage = [PSCustomObject]@{ TotalLines = 100 }
+
+            $result = Get-CodeQualityScore -CodeMetrics $metrics -TestCoverage $coverage
+
+            $result.ComponentScores.Coverage | Should -Be 0
+        }
+
+        It 'Penalizes oversized files in the file-size component score' {
+            $smallFiles = [PSCustomObject]@{
+                TotalLines         = 1000
+                TotalFunctions     = 20
+                TotalComplexity    = 50
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 150
+            }
+            $largeFiles = [PSCustomObject]@{
+                TotalLines         = 1000
+                TotalFunctions     = 20
+                TotalComplexity    = 50
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 600
+            }
+
+            $smallScore = (Get-CodeQualityScore -CodeMetrics $smallFiles).ComponentScores.FileSize
+            $largeScore = (Get-CodeQualityScore -CodeMetrics $largeFiles).ComponentScores.FileSize
+
+            $largeScore | Should -BeLessThan $smallScore
+        }
+
+        It 'Penalizes excessive function density' {
+            $balanced = [PSCustomObject]@{
+                TotalLines         = 1000
+                TotalFunctions     = 20
+                TotalComplexity    = 50
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 150
+            }
+            $dense = [PSCustomObject]@{
+                TotalLines         = 100
+                TotalFunctions     = 50
+                TotalComplexity    = 50
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 100
+            }
+
+            $balancedDensity = (Get-CodeQualityScore -CodeMetrics $balanced).ComponentScores.FunctionDensity
+            $denseDensity = (Get-CodeQualityScore -CodeMetrics $dense).ComponentScores.FunctionDensity
+
+            $denseDensity | Should -BeLessThan $balancedDensity
+        }
     }
 }

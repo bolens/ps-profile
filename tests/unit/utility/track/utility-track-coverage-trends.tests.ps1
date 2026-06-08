@@ -77,4 +77,37 @@ Describe 'track-coverage-trends.ps1 execution' {
             }
         }
     }
+
+    It 'Reports when no historical coverage snapshots exist in the history directory' {
+        $historyDir = New-TestTempDirectory -Prefix 'CoverageTrendEmptyHistory'
+        $coverageXml = Join-Path (New-TestTempDirectory -Prefix 'CoverageTrendCurrent') 'coverage.xml'
+        @'
+<?xml version="1.0" encoding="utf-8"?>
+<Coverage>
+    <Module ModulePath="C:\test\Sample.psm1">
+        <Function FunctionName="Test-Sample">
+            <Line Number="1" Covered="true" />
+        </Function>
+    </Module>
+</Coverage>
+'@ | Set-Content -LiteralPath $coverageXml -Encoding UTF8
+
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:TrackCoverageScript -ArgumentList @(
+                '-CoverageXmlPath', $coverageXml,
+                '-HistoryPath', $historyDir,
+                '-Days', '30'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'No historical coverage data found|Coverage Trends'
+        }
+        finally {
+            foreach ($path in @($historyDir, (Split-Path -Parent $coverageXml))) {
+                if (Test-Path -LiteralPath $path) {
+                    Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+                }
+            }
+        }
+    }
 }

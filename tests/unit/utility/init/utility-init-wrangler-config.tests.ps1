@@ -55,4 +55,30 @@ Describe 'init-wrangler-config.ps1 execution' {
             }
         }
     }
+
+    It 'Overwrites an existing config file when Force is specified' {
+        $configHome = New-TestTempDirectory -Prefix 'WranglerConfigForce'
+        $configDir = Join-Path $configHome '.wrangler' 'config'
+        $expectedFile = Join-Path $configDir 'default.toml'
+        try {
+            $null = New-Item -ItemType Directory -Path $configDir -Force
+            Set-Content -LiteralPath $expectedFile -Value 'api_token = "old-token"' -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:InitWranglerScript -ArgumentList @(
+                '-ApiToken', 'replacement-token',
+                '-Force'
+            ) -EnvironmentVariables @{
+                XDG_CONFIG_HOME = $configHome
+            }
+
+            $result.ExitCode | Should -Be 0
+            (Get-Content -LiteralPath $expectedFile -Raw) | Should -Match 'api_token = "replacement-token"'
+            (Get-Content -LiteralPath $expectedFile -Raw) | Should -Not -Match 'old-token'
+        }
+        finally {
+            if (Test-Path -LiteralPath $configHome) {
+                Remove-Item -LiteralPath $configHome -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

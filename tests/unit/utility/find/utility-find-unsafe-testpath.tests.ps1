@@ -28,4 +28,38 @@ Describe 'find-unsafe-testpath.ps1 execution' {
         $result.ExitCode | Should -BeIn @(0, $null)
         $result.Output | Should -Match 'unsafe Test-Path|No obviously unsafe Test-Path'
     }
+
+    It 'Detects unsafe Test-Path calls in an isolated repository fixture' {
+        $repo = New-TestTempDirectory -Prefix 'FindUnsafeTestPathRepo'
+        try {
+            $debugDir = Join-Path $repo 'scripts' 'utils' 'debug'
+            $testsDir = Join-Path $repo 'tests' 'unit'
+            $null = New-Item -ItemType Directory -Path $debugDir -Force
+            $null = New-Item -ItemType Directory -Path $testsDir -Force
+            Copy-Item -LiteralPath $script:FindUnsafeTestPathScript -Destination (Join-Path $debugDir 'find-unsafe-testpath.ps1') -Force
+
+            Set-Content -LiteralPath (Join-Path $testsDir 'unsafe-fixture.ps1') -Value @'
+function Test-UnsafeTestPathFixture {
+    param([string]$TargetPath)
+
+    if (Test-Path $TargetPath) {
+        return $true
+    }
+
+    return $false
+}
+'@ -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $debugDir 'find-unsafe-testpath.ps1')
+
+            $result.ExitCode | Should -BeIn @(0, $null)
+            $result.Output | Should -Match 'potentially unsafe Test-Path|unsafe-fixture\.ps1'
+            $result.Output | Should -Match 'TargetPath'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

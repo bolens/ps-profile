@@ -84,7 +84,7 @@ function Get-CodeQualityScore {
     # Validate CodeMetrics has expected properties
     $requiredProperties = @('TotalLines', 'TotalComplexity', 'TotalFunctions', 'DuplicateFunctions')
     foreach ($prop in $requiredProperties) {
-        if (-not $CodeMetrics.PSObject.Properties.Name -contains $prop) {
+        if (-not ($CodeMetrics.PSObject.Properties.Name -contains $prop)) {
             $errorMsg = "CodeMetrics object missing required property: $prop"
             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
                 Write-StructuredWarning -Message "Missing required property" -OperationName 'code-quality-score.calculate' -Context @{

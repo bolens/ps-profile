@@ -46,4 +46,26 @@ Describe 'init-databases-direct.ps1 execution' {
             }
         }
     }
+
+    It 'Reports SQLite not found when sqlite3 is unavailable on PATH' {
+        if (-not $script:SqliteAvailable) {
+            Set-ItResult -Skipped -Because 'sqlite3 is not installed; cannot verify missing-sqlite path'
+            return
+        }
+
+        $emptyPathDir = New-TestTempDirectory -Prefix 'InitDbMissingSqlitePath'
+        $pwshExe = (Get-Command pwsh -ErrorAction Stop).Source
+        try {
+            $output = & $pwshExe -NoProfile -Command "`$env:PATH='$emptyPathDir'; & '$($script:InitDatabasesDirectScript -replace '''', '''''')'" 2>&1 | Out-String
+            $exitCode = $LASTEXITCODE
+
+            $exitCode | Should -BeIn @(1, 2)
+            $output | Should -Match 'SQLite not found'
+        }
+        finally {
+            if (Test-Path -LiteralPath $emptyPathDir) {
+                Remove-Item -LiteralPath $emptyPathDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

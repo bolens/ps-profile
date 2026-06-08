@@ -7,8 +7,18 @@
 #>
 
 BeforeAll {
-    $modulePath = Join-Path $PSScriptRoot '..' '..' 'scripts' 'lib' 'core' 'ErrorHandling.psm1'
-    Import-Module $modulePath -Force -DisableNameChecking
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
+        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
+    }
+    $errorHandlingPath = Join-Path (Get-TestRepoRoot -StartPath $PSScriptRoot) 'scripts/lib/core/ErrorHandling.psm1'
+    Import-Module $errorHandlingPath -DisableNameChecking -Force
 }
 
 AfterAll {

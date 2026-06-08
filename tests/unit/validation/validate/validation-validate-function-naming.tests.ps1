@@ -80,4 +80,22 @@ Describe 'validate-function-naming.ps1 execution' {
             }
         }
     }
+
+    It 'Passes when the requested analysis path contains no PowerShell files' {
+        $emptyDir = New-TestTempDirectory -Prefix 'FunctionNamingEmptyPath'
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
+                '-Path', $emptyDir,
+                '-ExceptionsFile', $script:ExceptionsFile
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'passed with no issues|no issues'
+        }
+        finally {
+            if (Test-Path -LiteralPath $emptyDir) {
+                Remove-Item -LiteralPath $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

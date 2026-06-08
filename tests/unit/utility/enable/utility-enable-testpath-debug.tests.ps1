@@ -26,5 +26,12 @@ Describe 'enable-testpath-debug.ps1 execution' {
         $result = Invoke-TestScriptFile -ScriptPath $script:EnableTestPathDebugScript
 
         $result.Output | Should -Match 'Test-Path debug logging enabled|PS_PROFILE_DEBUG_TESTPATH'
+        $result.ExitCode | Should -Be 0
+    }
+
+    It 'Documents verbose debug mode in output' {
+        $result = Invoke-TestScriptFile -ScriptPath $script:EnableTestPathDebugScript
+
+        $result.Output | Should -Match 'verbose|detailed call stacks'
     }
 }

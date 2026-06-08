@@ -49,4 +49,35 @@ Describe 'add-fragment-metadata.ps1 execution' {
         $result.ExitCode | Should -BeIn @(1, 2)
         $result.Output | Should -Match 'Fragment not found|definitely-missing-fragment-name'
     }
+
+    It 'Adds metadata tags when applying changes to an isolated fixture fragment' {
+        $repo = New-TestTempDirectory -Prefix 'AddFragmentMetadataApply'
+        try {
+            $fragmentDir = Join-Path $repo 'scripts' 'utils' 'fragment'
+            $profileDir = Join-Path $repo 'profile.d'
+            $null = New-Item -ItemType Directory -Path $fragmentDir -Force
+            $null = New-Item -ItemType Directory -Path $profileDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:AddMetadataScript -Destination (Join-Path $fragmentDir 'add-fragment-metadata.ps1') -Force
+
+            Set-Content -LiteralPath (Join-Path $profileDir 'env.ps1') -Value @'
+function Get-AddFragmentMetadataFixture {
+    'fixture'
+}
+'@ -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'add-fragment-metadata.ps1') -ArgumentList @(
+                '-Fragment', 'env'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $updated = Get-Content -LiteralPath (Join-Path $profileDir 'env.ps1') -Raw
+            $updated | Should -Match '# Tier: essential'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

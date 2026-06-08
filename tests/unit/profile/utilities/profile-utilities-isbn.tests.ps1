@@ -808,6 +808,177 @@ Describe 'utilities-isbn.ps1 - cache, export, batch, and cover' {
         }
     }
 
+    It 'Honors PS_PROFILE_ISBN_CACHE_DAYS when reading cached metadata' {
+        $previousDays = $env:PS_PROFILE_ISBN_CACHE_DAYS
+        $env:PS_PROFILE_ISBN_CACHE_DAYS = '1'
+
+        try {
+            Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke (Get-TestOpenLibraryIsbnMock -Title 'Fresh Cache Book')
+
+            Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Object -ErrorAction Stop | Out-Null
+
+            $cachePath = Join-Path $script:IsbnCacheDir '9780306406157-auto.json'
+            $entry = Get-Content -LiteralPath $cachePath -Raw | ConvertFrom-Json
+            $entry.CachedAt = (Get-Date).AddDays(-2).ToString('o')
+            $entry | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $cachePath -Encoding UTF8
+
+            Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+                throw 'Expired cache should trigger a fresh provider lookup'
+            }
+
+            { Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Object -ErrorAction Stop } | Should -Throw '*Expired cache should trigger*'
+        }
+        finally {
+            if ($null -eq $previousDays) {
+                Remove-Item Env:\PS_PROFILE_ISBN_CACHE_DAYS -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_ISBN_CACHE_DAYS = $previousDays
+            }
+        }
+    }
+
+    It 'Treats invalid PS_PROFILE_ISBN_CACHE_DAYS values as the default cache window' {
+        $previousDays = $env:PS_PROFILE_ISBN_CACHE_DAYS
+        $env:PS_PROFILE_ISBN_CACHE_DAYS = 'not-a-number'
+
+        try {
+            Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke (Get-TestOpenLibraryIsbnMock -Title 'Default Cache Window')
+
+            Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Object -ErrorAction Stop | Out-Null
+
+            $cachePath = Join-Path $script:IsbnCacheDir '9780306406157-auto.json'
+            $entry = Get-Content -LiteralPath $cachePath -Raw | ConvertFrom-Json
+            $entry.CachedAt = (Get-Date).AddDays(-10).ToString('o')
+            $entry | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $cachePath -Encoding UTF8
+
+            Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+                throw 'Default cache window should still serve warm metadata'
+            }
+
+            $cached = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Object -ErrorAction Stop
+            $cached.Title | Should -Be 'Default Cache Window'
+        }
+        finally {
+            if ($null -eq $previousDays) {
+                Remove-Item Env:\PS_PROFILE_ISBN_CACHE_DAYS -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_ISBN_CACHE_DAYS = $previousDays
+            }
+        }
+    }
+
+    It 'Surfaces provider-specific lookup failures when a single provider is requested' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            throw 'Open Library unavailable'
+        }
+
+        { Get-IsbnInfo -Isbn '978-0-306-40615-7' -Provider OpenLibrary -ErrorAction Stop } |
+            Should -Throw '*Open Library lookup failed*Open Library unavailable*'
+    }
+
+    It 'Uses PNG extensions for cover downloads when the cover URL ends with .png' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                'ISBN:9780306406157' = [PSCustomObject]@{
+                    title       = 'Png Cover Book'
+                    authors     = @([PSCustomObject]@{ name = 'Cover Author' })
+                    identifiers = [PSCustomObject]@{ isbn_13 = @('9780306406157') }
+                    cover       = [PSCustomObject]@{ large = 'https://example.test/cover.png' }
+                    url         = 'https://openlibrary.org/books/OLPNG'
+                }
+            }
+        }
+        Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Object -ErrorAction Stop | Out-Null
+        Clear-TestCommandInvocationCapture
+
+        $coverDir = New-TestTempDirectory -Prefix 'IsbnPngCover'
+        $coverBytes = [byte[]](9, 8, 7)
+
+        Setup-CapturingCommandMock -CommandName 'Invoke-WebRequest' -OnInvoke {
+            param($OutFile)
+            [System.IO.File]::WriteAllBytes($OutFile, $coverBytes)
+            return [PSCustomObject]@{ StatusCode = 200 }
+        }
+
+        Push-Location $coverDir
+        try {
+            $savedPath = Save-IsbnCover -Isbn '978-0-306-40615-7' -PassThru -ErrorAction Stop
+
+            $savedPath | Should -Be (Join-Path $coverDir '9780306406157.png')
+            Test-Path -LiteralPath $savedPath | Should -Be $true
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'Includes subtitle, subjects, and cover lines in text output' {
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                'ISBN:9780306406157' = [PSCustomObject]@{
+                    title           = 'Text Detail Book'
+                    subtitle        = 'A Detailed Subtitle'
+                    authors         = @([PSCustomObject]@{ name = 'Detail Author' })
+                    publishers      = @([PSCustomObject]@{ name = 'Detail Press' })
+                    publish_date    = '2015'
+                    number_of_pages = 250
+                    subjects        = @(
+                        [PSCustomObject]@{ name = 'Science' },
+                        [PSCustomObject]@{ name = 'History' }
+                    )
+                    identifiers     = [PSCustomObject]@{
+                        isbn_13 = @('9780306406157')
+                        doi     = '10.1000/detail.book'
+                    }
+                    cover           = [PSCustomObject]@{ large = 'https://example.test/detail-cover.jpg' }
+                    url             = 'https://openlibrary.org/books/OLDETAIL'
+                }
+            }
+        }
+
+        $text = Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Text -ErrorAction Stop
+
+        $text | Should -Match 'Subtitle: A Detailed Subtitle'
+        $text | Should -Match 'Subjects: Science, History'
+        $text | Should -Match 'Cover: https://example.test/detail-cover.jpg'
+        $text | Should -Match 'DOI: 10\.1000/detail\.book'
+    }
+
+    It 'Uses ISBN-10 in BibTeX output when ISBN-13 metadata is unavailable' {
+        $normalized = ConvertTo-IsbnNormalized -Isbn '0-306-40615-2' -Strict
+        $lookupIsbn = if ($normalized.Isbn13) { $normalized.Isbn13 } else { $normalized.Isbn10 }
+        $cachePath = Join-Path $script:IsbnCacheDir "$lookupIsbn-auto.json"
+        $entry = [ordered]@{
+            CachedAt = (Get-Date).ToString('o')
+            Provider = 'Auto'
+            Book     = [pscustomobject]@{
+                Source         = 'TestCache'
+                Title          = 'Isbn10 Only Book'
+                Subtitle       = $null
+                Authors        = @('Ten Author')
+                Publishers     = @()
+                PublishDate    = '2001'
+                NumberOfPages  = $null
+                Subjects       = @()
+                Isbn10         = @($normalized.Isbn10)
+                Isbn13         = @()
+                Doi            = $null
+                Url            = $null
+                CoverUrl       = $null
+                NormalizedIsbn = $normalized.Isbn10
+            }
+        }
+
+        $entry | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $cachePath -Encoding UTF8
+
+        $bibtex = Get-IsbnInfo -Isbn '0-306-40615-2' -OutputFormat BibTeX -Offline -ErrorAction Stop
+
+        $bibtex | Should -Match 'isbn = \{0306406152\}'
+        $bibtex | Should -Not -Match 'isbn = \{9780306406157\}'
+    }
+
     It 'Escapes BibTeX special characters in titles and authors' {
         Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
             param($Uri)

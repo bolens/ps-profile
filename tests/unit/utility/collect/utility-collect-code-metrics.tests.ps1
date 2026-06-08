@@ -89,4 +89,24 @@ Describe 'collect-code-metrics.ps1 execution' {
             }
         }
     }
+
+    It 'Warns and continues when a requested analysis path does not exist' {
+        $missingPath = Join-Path (New-TestTempDirectory -Prefix 'CodeMetricsMissingPath') 'does-not-exist'
+        $outputFile = Join-Path (Split-Path -Parent $missingPath) 'metrics-missing-path.json'
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:CollectMetricsScript -ArgumentList @(
+                '-Path', $missingPath,
+                '-OutputPath', $outputFile
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Failed to collect metrics|Warning'
+        }
+        finally {
+            $parent = Split-Path -Parent $missingPath
+            if (Test-Path -LiteralPath $parent) {
+                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

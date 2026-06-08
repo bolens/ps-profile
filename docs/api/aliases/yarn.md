@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Executes Yarn commands.
+Alias for `pnpm`
 
 ## Description
 
-Wrapper function for Yarn CLI that checks for command availability before execution.
+This is an alias that points to the `pnpm` command.
 
 ## Alias Information
 
-**Alias for:** `Invoke-Yarn`
+**Alias for:** `pnpm`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/yarn.ps1
+Defined in: ../profile.d/pnpm.ps1

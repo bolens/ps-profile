@@ -46,4 +46,29 @@ catch {
             }
         }
     }
+
+    Context 'Exit-WithCode pattern' {
+        It 'Exits with validation failure code when Exit-WithCode is invoked' {
+            $scriptPath = Join-Path $script:TempRoot 'exit-with-code.ps1'
+            @'
+enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
+$EXIT_VALIDATION_FAILURE = [ExitCode]::ValidationFailure
+function Exit-WithCode {
+    param([object]$ExitCode, [string]$Message)
+    if ($Message) { Write-Host $Message }
+    exit [int]$ExitCode
+}
+Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message 'validation failed'
+'@ | Set-Content -LiteralPath $scriptPath -Encoding UTF8
+
+            try {
+                $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
+                $LASTEXITCODE | Should -Be 1
+                $output | Should -Match 'validation failed'
+            }
+            finally {
+                Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

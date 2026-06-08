@@ -408,7 +408,7 @@ function Find-Isbn {
         Write-Error 'No books found for the specified search.' -ErrorAction Stop
     }
 
-    $output = ,$results.ToArray()
+    $output = $results.ToArray()
     if ($Pick -and $Host.UI -and $Host.UI.RawUI) {
         $selected = $output | Select-Object Title, Authors, NormalizedIsbn, PublishDate, Source, Url | Out-GridView -Title 'Select a book' -PassThru
         if ($selected) {

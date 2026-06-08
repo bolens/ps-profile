@@ -6,11 +6,11 @@ Converts a Unix timestamp to ISO 8601 format.
 
 ## Description
 
-Converts a Unix timestamp to ISO 8601 date/time format string.
+Converts a Unix timestamp to an ISO 8601 formatted date/time string.
 
 ## Alias Information
 
-**Alias for:** `ConvertFrom-UnixTimestampToIso8601`
+**Alias for:** `ConvertTo-Iso8601FromUnixTimestamp`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/conversion-modules/data/time/unix.ps1
+Defined in: ../profile.d/conversion-modules/data/time/iso8601.ps1

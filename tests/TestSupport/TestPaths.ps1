@@ -272,6 +272,64 @@ function Get-TestArtifactPath {
 
 <#
 .SYNOPSIS
+    Reads the exact on-disk bytes for a file so tests can restore it later.
+.PARAMETER Path
+    Absolute path to the file to back up.
+.OUTPUTS
+    System.Byte[]
+#>
+function Backup-TestFileBytes {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+
+    return [System.IO.File]::ReadAllBytes($Path)
+}
+
+<#
+.SYNOPSIS
+    Restores a file from a byte-for-byte backup created by Backup-TestFileBytes.
+.PARAMETER Path
+    Absolute path to the file to restore.
+.PARAMETER Bytes
+    Original file bytes captured before a temporary test mutation.
+#>
+function Restore-TestFileBytes {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [Parameter(Mandatory)]
+        [byte[]]$Bytes
+    )
+
+    [System.IO.File]::WriteAllBytes($Path, $Bytes)
+}
+
+<#
+.SYNOPSIS
+    Writes literal file content without adding PowerShell's default trailing newline.
+.PARAMETER Path
+    Absolute path to the file to write.
+.PARAMETER Content
+    Exact text content to persist.
+#>
+function Write-TestFileLiteralContent {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [Parameter(Mandatory)]
+        [string]$Content
+    )
+
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
+}
+
+<#
+.SYNOPSIS
     Initializes the per-test cleanup path registry.
 #>
 function Initialize-TestCleanupRegistry {

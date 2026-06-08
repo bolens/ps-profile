@@ -32,8 +32,11 @@ function global:Invoke-PrePushHook {
     )
 
     $hookPath = Join-Path $RepositoryRoot '.git' 'hooks' 'pre-push.ps1'
-    & pwsh -NoProfile -File $hookPath 2>&1 | Out-Null
-    return $LASTEXITCODE
+    $output = & pwsh -NoProfile -File $hookPath 2>&1 | Out-String
+    return [pscustomobject]@{
+        ExitCode = $LASTEXITCODE
+        Output   = $output
+    }
 }
 
 BeforeAll {
@@ -56,7 +59,22 @@ Describe 'pre-push.ps1 execution' {
     It 'Passes when validate-profile succeeds' {
         $repo = New-PrePushTestRepository -ValidateExitCode 0
         try {
-            Invoke-PrePushHook -RepositoryRoot $repo | Should -Be 0
+            Invoke-PrePushHook -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -Be 0
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Prints validate-profile status before completing successfully' {
+        $repo = New-PrePushTestRepository -ValidateExitCode 0
+        try {
+            $result = Invoke-PrePushHook -RepositoryRoot $repo
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'pre-push: running validate-profile'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {
@@ -68,7 +86,7 @@ Describe 'pre-push.ps1 execution' {
     It 'Fails when validate-profile returns a non-zero exit code' {
         $repo = New-PrePushTestRepository -ValidateExitCode 1
         try {
-            Invoke-PrePushHook -RepositoryRoot $repo | Should -BeIn @(1, 2)
+            Invoke-PrePushHook -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -BeIn @(1, 2)
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

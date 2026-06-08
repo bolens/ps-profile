@@ -65,4 +65,37 @@ exit 0
             }
         }
     }
+
+    It 'Fails the batch when the stub Pester runner reports test failures' {
+        $tempRoot = New-TestTempDirectory -Prefix 'performance-batch-failure'
+        try {
+            $perfDir = Join-Path $tempRoot 'tests' 'performance'
+            $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
+            $null = New-Item -ItemType Directory -Path $perfDir -Force
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType File -Path (Join-Path $perfDir 'failing-performance.tests.ps1') -Force
+
+            $stubRunner = @'
+param()
+Write-Host 'Tests Passed: 0, Failed: 1, Skipped: 0'
+exit 1
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:RunPerformanceBatchScript -ArgumentList @(
+                '-RepoRoot', $tempRoot,
+                '-Filter', 'failing-performance',
+                '-Quiet'
+            )
+
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'Batch: performance \(failing-performance\*\)'
+            $result.Output | Should -Match '0P / 1F / 0S|failed'
+        }
+        finally {
+            if (Test-Path -LiteralPath $tempRoot) {
+                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }
