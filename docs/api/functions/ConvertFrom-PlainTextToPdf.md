@@ -33,9 +33,9 @@ Text encoding of the input file (default: UTF8).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-PlainTextToPdf -InputPath "document.txt" -OutputPath "document.pdf"
-``
+```
 
 ## Aliases
 

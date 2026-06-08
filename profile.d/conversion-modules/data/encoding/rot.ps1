@@ -144,22 +144,27 @@ function Initialize-FileConversion-CoreEncodingRot {
 <#
 .SYNOPSIS
     Converts ASCII text to ROT13 cipher encoding.
+
 .DESCRIPTION
     Encodes ASCII text using ROT13 cipher (rotates letters by 13 positions).
     ROT13 is a self-inverse cipher - applying it twice returns the original text.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the ROT13 encoded string.
+
 .EXAMPLE
     "Hello World" | ConvertFrom-AsciiToRot13
     
     Converts text to ROT13 format.
+
 .EXAMPLE
     "Uryyb Jbeyq" | ConvertFrom-Rot13ToAscii
     
     Decodes ROT13 back to original text.
-.OUTPUTS
-    System.String
-    Returns the ROT13 encoded string.
 #>
 function ConvertFrom-AsciiToRot13 {
     param(
@@ -176,18 +181,22 @@ Set-Alias -Name rot13 -Value ConvertFrom-AsciiToRot13 -Scope Global -ErrorAction
 <#
 .SYNOPSIS
     Converts ROT13 cipher encoding to ASCII text.
+
 .DESCRIPTION
     Decodes ROT13 encoded string back to ASCII text.
     Since ROT13 is self-inverse, this is the same as encoding.
+
 .PARAMETER InputObject
     The ROT13 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "Uryyb Jbeyq" | ConvertFrom-Rot13ToAscii
     
     Converts ROT13 to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-Rot13ToAscii {
     param(
@@ -203,23 +212,28 @@ Set-Alias -Name rot13-to-ascii -Value ConvertFrom-Rot13ToAscii -Scope Global -Er
 <#
 .SYNOPSIS
     Converts ASCII text to ROT47 cipher encoding.
+
 .DESCRIPTION
     Encodes ASCII text using ROT47 cipher (rotates all printable ASCII characters by 47 positions).
     ROT47 is a self-inverse cipher - applying it twice returns the original text.
     Unlike ROT13, ROT47 also encodes numbers and special characters.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the ROT47 encoded string.
+
 .EXAMPLE
     "Hello World!" | ConvertFrom-AsciiToRot47
     
     Converts text to ROT47 format.
+
 .EXAMPLE
     "w6==@ (@C=5P" | ConvertFrom-Rot47ToAscii
     
     Decodes ROT47 back to original text.
-.OUTPUTS
-    System.String
-    Returns the ROT47 encoded string.
 #>
 function ConvertFrom-AsciiToRot47 {
     param(
@@ -236,18 +250,22 @@ Set-Alias -Name rot47 -Value ConvertFrom-AsciiToRot47 -Scope Global -ErrorAction
 <#
 .SYNOPSIS
     Converts ROT47 cipher encoding to ASCII text.
+
 .DESCRIPTION
     Decodes ROT47 encoded string back to ASCII text.
     Since ROT47 is self-inverse, this is the same as encoding.
+
 .PARAMETER InputObject
     The ROT47 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "w6==@ (@C=5P" | ConvertFrom-Rot47ToAscii
     
     Converts ROT47 to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-Rot47ToAscii {
     param(

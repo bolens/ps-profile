@@ -38,17 +38,19 @@ PSCustomObject Object containing Value, Unit, OriginalValue, and OriginalUnit pr
 
 ### Example 1
 
-`powershell
+```powershell
 Convert-Units -Value 1024 -FromUnit "KB" -ToUnit "MB"
-    Converts 1024 KB to MB (1 MB).
-``
+```
+
+Converts 1024 KB to MB (1 MB).
 
 ### Example 2
 
-`powershell
+```powershell
 Convert-Units -Value 3600 -FromUnit "seconds" -ToUnit "hours"
-    Converts 3600 seconds to hours (1 hour).
-``
+```
+
+Converts 3600 seconds to hours (1 hour).
 
 ## Aliases
 

@@ -64,9 +64,6 @@ function Invoke-Nuxt {
     Arguments to pass to nuxi dev.
 
 .EXAMPLE
-    Start-NuxtDev
-
-.EXAMPLE
     Start-NuxtDev --port 3000
 #>
 function Start-NuxtDev {
@@ -94,9 +91,6 @@ function Start-NuxtDev {
 
 .PARAMETER Arguments
     Arguments to pass to nuxi build.
-
-.EXAMPLE
-    Build-NuxtApp
 
 .EXAMPLE
     Build-NuxtApp --prerender

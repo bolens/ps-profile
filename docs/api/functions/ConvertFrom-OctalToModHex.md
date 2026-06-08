@@ -30,10 +30,11 @@ System.String The ModHex representation of the input octal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "110 151" | ConvertFrom-OctalToModHex
-    Converts octal to ModHex.
-``
+```
+
+Converts octal to ModHex.
 
 ## Aliases
 

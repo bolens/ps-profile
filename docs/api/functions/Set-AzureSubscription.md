@@ -34,19 +34,19 @@ System.String. Subscription information or list of subscriptions.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-AzureSubscription -SubscriptionId "my-subscription-id"
-        
-        Switches to the specified subscription.
-``
+```
+
+Switches to the specified subscription.
 
 ### Example 2
 
-`powershell
+```powershell
 Set-AzureSubscription -List
-        
-        Lists all available subscriptions.
-``
+```
+
+Lists all available subscriptions.
 
 ## Source
 

@@ -47,8 +47,7 @@ function global:Initialize-BatchLoadingInfo {
 .PARAMETER DependencyLevels
     Number of dependency levels found.
 .EXAMPLE
-    Record-DependencyParsing
-
+    Record-DependencyParsing -ParsingTime 1 -DependencyLevels 1
 #>
 function global:Record-DependencyParsing {
     [CmdletBinding()]
@@ -79,8 +78,7 @@ function global:Record-DependencyParsing {
 .PARAMETER FragmentNames
     Array of fragment names in this batch.
 .EXAMPLE
-    Record-BatchLoading
-
+    Record-BatchLoading -BatchNumber 1 -TotalBatches 1
 #>
 function global:Record-BatchLoading {
     [CmdletBinding()]
@@ -121,8 +119,7 @@ function global:Record-BatchLoading {
 .PARAMETER FailedFragments
     Array of hashtables with Name and Error keys for failed fragments.
 .EXAMPLE
-    Record-FragmentResults
-
+    Record-FragmentResults -SucceededFragments @() -FailedFragments @{}
 #>
 function global:Record-FragmentResults {
     [CmdletBinding()]
@@ -160,11 +157,7 @@ function global:Record-FragmentResults {
 .PARAMETER Count
     Total number of fragments.
 .EXAMPLE
-    _ConvertToNameTableRows
-
-#>XAMPLE
-    Set-TotalFragmentCount
-
+    Set-TotalFragmentCount -Count 10
 #>
 function global:Set-TotalFragmentCount {
     [CmdletBinding()]

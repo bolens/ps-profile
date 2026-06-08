@@ -1,18 +1,13 @@
 <#
-scripts/utils/dependencies/check-missing-packages.ps1
-
 .SYNOPSIS
     Checks for missing npm, Python, and system packages required for data format conversions and tools.
+
 
 .DESCRIPTION
     Loads package lists from requirements.txt, requirements/scoop.txt, requirements/linux.txt,
     and package.json, then checks whether they are installed. Reports missing packages with
     installation instructions for the detected package manager (Scoop, apt, pacman, or dnf).
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-missing-packages.ps1
-
-    Checks all required packages and reports which are missing.
 
 .NOTES
     Package lists:
@@ -26,6 +21,11 @@ scripts/utils/dependencies/check-missing-packages.ps1
     Exit Codes:
     - 0 (EXIT_SUCCESS): All packages are installed
     - 1 (EXIT_VALIDATION_FAILURE): Some packages are missing
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-missing-packages.ps1
+
+    Checks all required packages and reports which are missing.
 #>
 
 # Import ModuleImport first (bootstrap)

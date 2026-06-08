@@ -33,9 +33,9 @@ Maximum number of results to return (default: 20).
 
 ### Example 1
 
-`powershell
-Find-HistoryFuzzy
-``
+```powershell
+Find-HistoryFuzzy -Pattern 'search-term' -MaxResults 1
+```
 
 ## Source
 

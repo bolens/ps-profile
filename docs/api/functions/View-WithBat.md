@@ -54,27 +54,27 @@ System.String. File contents with syntax highlighting.
 
 ### Example 1
 
-`powershell
+```powershell
 View-WithBat -Path "script.ps1"
-    
-    Views PowerShell script with syntax highlighting.
-``
+```
+
+Views PowerShell script with syntax highlighting.
 
 ### Example 2
 
-`powershell
+```powershell
 View-WithBat -Path "README.md" -Language "markdown" -Wrap
-    
-    Views markdown file with wrapping enabled.
-``
+```
+
+Views markdown file with wrapping enabled.
 
 ### Example 3
 
-`powershell
+```powershell
 View-WithBat -Path "file.txt" -Plain
-    
-    Views file as plain text without highlighting.
-``
+```
+
+Views file as plain text without highlighting.
 
 ## Aliases
 

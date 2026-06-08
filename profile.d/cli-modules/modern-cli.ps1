@@ -41,48 +41,59 @@ Register-ToolWrapper -FunctionName 'dust' -CommandName 'dust'
 .SYNOPSIS
     Finds files and directories using fd with enhanced options.
 
+
 .DESCRIPTION
     Enhanced wrapper for fd (find alternative) with common search patterns,
     case-insensitive search, hidden files, and follow symlinks options.
 
+
 .PARAMETER Pattern
     Search pattern (file name or path pattern).
+
 
 .PARAMETER Path
     Starting directory for search. Defaults to current directory.
 
+
 .PARAMETER Type
     File type filter: f (files), d (directories), l (symlinks).
+
 
 .PARAMETER Extension
     File extension filter (e.g., "ps1", "md").
 
+
 .PARAMETER CaseSensitive
     Enable case-sensitive search (default: false).
+
 
 .PARAMETER Hidden
     Include hidden files and directories (default: false).
 
+
 .PARAMETER FollowSymlinks
     Follow symbolic links (default: false).
+
+
+.OUTPUTS
+    System.String[]. Array of matching file/directory paths.
 
 .EXAMPLE
     Find-WithFd -Pattern "test"
     
     Finds all files and directories containing "test" in the name.
 
+
 .EXAMPLE
     Find-WithFd -Pattern "*.ps1" -Type f -Extension "ps1"
     
     Finds all PowerShell script files.
 
+
 .EXAMPLE
     Find-WithFd -Pattern "config" -Path "C:\Users" -Hidden
     
     Finds config files including hidden ones.
-
-.OUTPUTS
-    System.String[]. Array of matching file/directory paths.
 #>
 function Find-WithFd {
     [CmdletBinding()]
@@ -210,51 +221,63 @@ function Find-WithFd {
 .SYNOPSIS
     Searches text using ripgrep with enhanced options.
 
+
 .DESCRIPTION
     Enhanced wrapper for ripgrep (rg) with line numbers, context lines,
     file type filtering, and case-insensitive search options.
 
+
 .PARAMETER Pattern
     Text pattern to search for (regex supported).
+
 
 .PARAMETER Path
     Directory or file to search in. Defaults to current directory.
 
+
 .PARAMETER FileType
     File type filter (e.g., "ps1", "md", "json"). Uses ripgrep type filters.
+
 
 .PARAMETER CaseSensitive
     Enable case-sensitive search (default: false).
 
+
 .PARAMETER Context
     Number of context lines to show before and after matches.
+
 
 .PARAMETER OnlyMatching
     Show only matching text, not full lines.
 
+
 .PARAMETER FilesWithMatches
     Show only file names that contain matches.
 
+
 .PARAMETER Hidden
     Search hidden files and directories (default: false).
+
+
+.OUTPUTS
+    System.String. Search results from ripgrep.
 
 .EXAMPLE
     Grep-WithRipgrep -Pattern "function"
     
     Searches for "function" in all files in current directory.
 
+
 .EXAMPLE
     Grep-WithRipgrep -Pattern "error" -FileType "ps1" -Context 3
     
     Searches for "error" in PowerShell files with 3 lines of context.
 
+
 .EXAMPLE
     Grep-WithRipgrep -Pattern "TODO" -FilesWithMatches
     
     Lists only files containing "TODO".
-
-.OUTPUTS
-    System.String. Search results from ripgrep.
 #>
 function Grep-WithRipgrep {
     [CmdletBinding()]
@@ -397,42 +420,51 @@ function Grep-WithRipgrep {
 .SYNOPSIS
     Navigates to directories using zoxide's smart matching.
 
+
 .DESCRIPTION
     Enhanced wrapper for zoxide (smart cd) that provides intelligent directory
     navigation based on usage frequency and fuzzy matching.
 
+
 .PARAMETER Query
     Directory name or path to navigate to. Can be partial match.
+
 
 .PARAMETER Interactive
     Use interactive mode to select from multiple matches.
 
+
 .PARAMETER Add
     Add current directory to zoxide database.
+
 
 .PARAMETER Remove
     Remove directory from zoxide database.
 
+
 .PARAMETER QueryAll
     Query all directories in database.
+
+
+.OUTPUTS
+    System.String. Path navigated to, or null if navigation failed.
 
 .EXAMPLE
     Navigate-WithZoxide -Query "Documents"
     
     Navigates to the most frequently used directory matching "Documents".
 
+
 .EXAMPLE
     Navigate-WithZoxide -Query "PowerShell" -Interactive
     
     Shows interactive menu if multiple matches found.
 
+
 .EXAMPLE
     Navigate-WithZoxide -Add
     
     Adds current directory to zoxide database.
-
-.OUTPUTS
-    System.String. Path navigated to, or null if navigation failed.
 #>
 function Navigate-WithZoxide {
     [CmdletBinding()]
@@ -582,48 +614,59 @@ function Navigate-WithZoxide {
 .SYNOPSIS
     Views files with syntax highlighting using bat.
 
+
 .DESCRIPTION
     Enhanced wrapper for bat (cat clone) with syntax highlighting, line numbers,
     Git integration, and paging support.
 
+
 .PARAMETER Path
     File path to view. Can be a single file or multiple files.
+
 
 .PARAMETER Language
     Explicitly set syntax highlighting language (e.g., "powershell", "markdown").
 
+
 .PARAMETER LineNumbers
     Show line numbers (default: true).
+
 
 .PARAMETER Plain
     Disable syntax highlighting (plain text mode).
 
+
 .PARAMETER Pager
     Use pager for output (default: true if output is long).
+
 
 .PARAMETER Wrap
     Wrap long lines (default: false).
 
+
 .PARAMETER Theme
     Color theme to use (e.g., "dark", "light", "GitHub").
+
+
+.OUTPUTS
+    System.String. File contents with syntax highlighting.
 
 .EXAMPLE
     View-WithBat -Path "script.ps1"
     
     Views PowerShell script with syntax highlighting.
 
+
 .EXAMPLE
     View-WithBat -Path "README.md" -Language "markdown" -Wrap
     
     Views markdown file with wrapping enabled.
 
+
 .EXAMPLE
     View-WithBat -Path "file.txt" -Plain
     
     Views file as plain text without highlighting.
-
-.OUTPUTS
-    System.String. File contents with syntax highlighting.
 #>
 function View-WithBat {
     [CmdletBinding()]

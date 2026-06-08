@@ -30,17 +30,19 @@ System.String. Output from Scala compiler execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Compile-Scala Main.scala
-        Compiles Main.scala.
-``
+```
+
+Compiles Main.scala.
 
 ### Example 2
 
-`powershell
+```powershell
 Compile-Scala -d classes Main.scala
-        Compiles to a specific output directory.
-``
+```
+
+Compiles to a specific output directory.
 
 ## Aliases
 

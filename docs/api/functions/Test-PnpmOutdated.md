@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Test-PnpmOutdated
-        Checks for outdated packages in the current project.
-``
+```
+
+Checks for outdated packages in the current project.
 
 ## Aliases
 

@@ -33,9 +33,9 @@ Timeout for each connectivity test. Default is 5.
 
 ### Example 1
 
-`powershell
-Test-NetworkConnectivity
-``
+```powershell
+Test-NetworkConnectivity -Target 'value'
+```
 
 ## Source
 

@@ -7,17 +7,22 @@
 <#
 .SYNOPSIS
     Creates empty files or updates file timestamps.
+
 .DESCRIPTION
     Creates new empty files at the specified paths, or updates the last write time
     of existing files (Unix touch behavior).
-.EXAMPLE
-    New-EmptyFile ./notes.txt
-.EXAMPLE
-    New-EmptyFile -LiteralPath 'C:\temp\marker.txt'
+
 .PARAMETER Path
     One or more file paths to create or touch.
+
 .PARAMETER LiteralPath
     Literal file paths to create or touch without wildcard expansion.
+
+.EXAMPLE
+    New-EmptyFile ./notes.txt
+
+.EXAMPLE
+    New-EmptyFile -LiteralPath 'C:\temp\marker.txt'
 
 #>
 function New-EmptyFile {
@@ -325,12 +330,15 @@ function Move-ItemCustom { Move-Item @args }
 <#
 .SYNOPSIS
     Searches for files recursively.
+
 .DESCRIPTION
     Finds files by name pattern in the current directory and subdirectories.
-.EXAMPLE
-    Find-File *.ps1
+
 .PARAMETER FilterArgs
     Name filter arguments forwarded to Get-ChildItem -Recurse -Filter.
+
+.EXAMPLE
+    Find-File *.ps1
 
 #>
 function Find-File {

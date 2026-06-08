@@ -163,22 +163,27 @@ function Initialize-FileConversion-NetworkQueryString {
 <#
 .SYNOPSIS
     Parses a query string into a hashtable.
+
 .DESCRIPTION
     Parses a URL query string (key1=value1&key2=value2) into a hashtable with decoded keys and values.
     Supports multiple values for the same key.
+
 .PARAMETER QueryString
     The query string to parse (with or without leading ?).
+
+.OUTPUTS
+    Hashtable
+    Returns a hashtable with query parameters as keys and values.
+
 .EXAMPLE
     Parse-QueryString -QueryString "name=John&age=30&city=New York"
     
     Parses query string and returns hashtable.
+
 .EXAMPLE
     "key1=value1&key2=value2" | Parse-QueryString
     
     Parses query string from pipeline.
-.OUTPUTS
-    Hashtable
-    Returns a hashtable with query parameters as keys and values.
 #>
 function Parse-QueryString {
     param(
@@ -209,10 +214,17 @@ Set-AgentModeAlias -Name 'parse-query' -Target 'Parse-QueryString'
 <#
 .SYNOPSIS
     Builds a query string from a hashtable.
+
 .DESCRIPTION
     Constructs a URL query string from a hashtable or object containing key-value pairs.
+
 .PARAMETER Parameters
     Hashtable or object with query parameters.
+
+.OUTPUTS
+    System.String
+    Returns the constructed query string.
+
 .EXAMPLE
     $params = @{
         name = 'John'
@@ -222,9 +234,6 @@ Set-AgentModeAlias -Name 'parse-query' -Target 'Parse-QueryString'
     Build-QueryString -Parameters $params
     
     Builds query string from parameters.
-.OUTPUTS
-    System.String
-    Returns the constructed query string.
 #>
 function Build-QueryString {
     param(
@@ -249,18 +258,23 @@ Set-AgentModeAlias -Name 'build-query' -Target 'Build-QueryString'
 <#
 .SYNOPSIS
     Converts query string file to JSON format.
+
 .DESCRIPTION
     Parses a query string from a file and converts it to structured JSON format.
+
 .PARAMETER InputPath
     The path to the file containing the query string (.query or .qs extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-QueryStringToJson -InputPath "query.query"
     
     Converts query.query to query.json.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-QueryStringToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -282,18 +296,23 @@ Set-AgentModeAlias -Name 'query-to-json' -Target 'ConvertFrom-QueryStringToJson'
 <#
 .SYNOPSIS
     Converts JSON file to query string format.
+
 .DESCRIPTION
     Converts a structured JSON file (with key-value pairs) to query string format.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output query string file. If not specified, uses input path with .query extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-QueryStringFromJson -InputPath "params.json"
     
     Converts params.json to params.query.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-QueryStringFromJson {
     param([string]$InputPath, [string]$OutputPath)

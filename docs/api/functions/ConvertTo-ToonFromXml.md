@@ -29,9 +29,9 @@ The path for the output TOON file. If not specified, uses input path with .toon 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-ToonFromXml -InputPath ./input.file
-``
+```
 
 ## Aliases
 

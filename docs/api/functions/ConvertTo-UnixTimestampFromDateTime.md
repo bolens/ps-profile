@@ -30,19 +30,19 @@ System.Int64 Returns a Unix timestamp as a long integer.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-Date | ConvertTo-UnixTimestampFromDateTime
-    
-    Converts the current date/time to a Unix timestamp.
-``
+```
+
+Converts the current date/time to a Unix timestamp.
 
 ### Example 2
 
-`powershell
+```powershell
 [DateTime]::Parse('2021-01-01') | ConvertTo-UnixTimestampFromDateTime
-    
-    Converts a specific date to a Unix timestamp.
-``
+```
+
+Converts a specific date to a Unix timestamp.
 
 ## Aliases
 

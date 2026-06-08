@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EdifactToJson -InputPath "message.edifact"
-    
-    Converts message.edifact to message.json.
-``
+```
+
+Converts message.edifact to message.json.
 
 ## Aliases
 

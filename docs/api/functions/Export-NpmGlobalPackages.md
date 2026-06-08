@@ -25,17 +25,19 @@ Path to save the export file. Defaults to "npm-global-packages.json" in current 
 
 ### Example 1
 
-`powershell
-Export-NpmGlobalPackages
-        Exports global packages to npm-global-packages.json in current directory.
-``
+```powershell
+Export-NpmGlobalPackages -Path ./path
+```
+
+Exports global packages to npm-global-packages.json in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-NpmGlobalPackages -Path "C:\backup\npm-global.json"
-        Exports global packages to a specific file.
-``
+```
+
+Exports global packages to a specific file.
 
 ## Aliases
 

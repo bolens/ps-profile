@@ -38,27 +38,27 @@ System.String. IP information in the specified format.
 
 ### Example 1
 
-`powershell
-Get-IpInfo
-        
-        Gets information about the current public IP address.
-``
+```powershell
+Get-IpInfo -IpAddress 'value' -Tool 'value'
+```
+
+Gets information about the current public IP address.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-IpInfo -IpAddress "8.8.8.8"
-        
-        Gets information about the specified IP address.
-``
+```
+
+Gets information about the specified IP address.
 
 ### Example 3
 
-`powershell
+```powershell
 Get-IpInfo -IpAddress "8.8.8.8" -Tool "ipinfo" -OutputFormat "json"
-        
-        Gets IP information using ipinfo-cli in JSON format.
-``
+```
+
+Gets IP information using ipinfo-cli in JSON format.
 
 ## Source
 

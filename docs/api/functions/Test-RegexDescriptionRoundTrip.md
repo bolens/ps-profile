@@ -46,10 +46,11 @@ PSCustomObject with similarity and consistency metrics.
 
 ### Example 1
 
-`powershell
+```powershell
 Test-RegexDescriptionRoundTrip -Description 'email'
-    Validates round-trip consistency for an email description.
-``
+```
+
+Validates round-trip consistency for an email description.
 
 ## Aliases
 

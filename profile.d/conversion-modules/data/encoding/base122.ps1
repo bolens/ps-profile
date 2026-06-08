@@ -245,18 +245,22 @@ function Initialize-FileConversion-CoreEncodingBase122 {
 <#
 .SYNOPSIS
     Converts ASCII text to Base122 encoding.
+
 .DESCRIPTION
     Encodes ASCII/UTF-8 text to Base122 format.
     Base122 is a URL-safe binary encoding using 122 printable ASCII characters.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base122 encoded string.
+
 .EXAMPLE
     "Hello World" | ConvertFrom-AsciiToBase122
     
     Converts text to Base122 format.
-.OUTPUTS
-    System.String
-    Returns the Base122 encoded string.
 #>
 function ConvertFrom-AsciiToBase122 {
     param(
@@ -272,17 +276,21 @@ Set-Alias -Name ascii-to-base122 -Value ConvertFrom-AsciiToBase122 -Scope Global
 <#
 .SYNOPSIS
     Converts Base122 encoding to ASCII text.
+
 .DESCRIPTION
     Decodes Base122 encoded string back to ASCII/UTF-8 text.
+
 .PARAMETER InputObject
     The Base122 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "Hello World" | ConvertFrom-AsciiToBase122 | ConvertFrom-Base122ToAscii
     
     Converts Base122 to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-Base122ToAscii {
     param(
@@ -298,17 +306,21 @@ Set-Alias -Name base122-to-ascii -Value ConvertFrom-Base122ToAscii -Scope Global
 <#
 .SYNOPSIS
     Converts hexadecimal string to Base122 encoding.
+
 .DESCRIPTION
     Encodes a hexadecimal string to Base122 format.
+
 .PARAMETER InputObject
     The hexadecimal string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base122 encoded string.
+
 .EXAMPLE
     "48656C6C6F" | ConvertFrom-HexToBase122
     
     Converts hex to Base122 format.
-.OUTPUTS
-    System.String
-    Returns the Base122 encoded string.
 #>
 function ConvertFrom-HexToBase122 {
     param(
@@ -324,17 +336,21 @@ Set-Alias -Name hex-to-base122 -Value ConvertFrom-HexToBase122 -Scope Global -Er
 <#
 .SYNOPSIS
     Converts Base122 encoding to hexadecimal string.
+
 .DESCRIPTION
     Decodes Base122 encoded string to hexadecimal format.
+
 .PARAMETER InputObject
     The Base122 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the hexadecimal string.
+
 .EXAMPLE
     "48656C6C6F" | ConvertFrom-HexToBase122 | ConvertFrom-Base122ToHex
     
     Converts Base122 to hex format.
-.OUTPUTS
-    System.String
-    Returns the hexadecimal string.
 #>
 function ConvertFrom-Base122ToHex {
     param(
@@ -350,17 +366,21 @@ Set-Alias -Name base122-to-hex -Value ConvertFrom-Base122ToHex -Scope Global -Er
 <#
 .SYNOPSIS
     Converts Base64 encoding to Base122 encoding.
+
 .DESCRIPTION
     Converts a Base64 encoded string to Base122 format.
+
 .PARAMETER InputObject
     The Base64 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base122 encoded string.
+
 .EXAMPLE
     "SGVsbG8gV29ybGQ=" | ConvertFrom-Base64ToBase122
     
     Converts Base64 to Base122 format.
-.OUTPUTS
-    System.String
-    Returns the Base122 encoded string.
 #>
 function ConvertFrom-Base64ToBase122 {
     param(
@@ -376,17 +396,21 @@ Set-Alias -Name base64-to-base122 -Value ConvertFrom-Base64ToBase122 -Scope Glob
 <#
 .SYNOPSIS
     Converts Base122 encoding to Base64 encoding.
+
 .DESCRIPTION
     Converts a Base122 encoded string to Base64 format.
+
 .PARAMETER InputObject
     The Base122 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base64 encoded string.
+
 .EXAMPLE
     "SGVsbG8gV29ybGQ=" | ConvertFrom-Base64ToBase122 | ConvertFrom-Base122ToBase64
     
     Converts Base122 to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the Base64 encoded string.
 #>
 function ConvertFrom-Base122ToBase64 {
     param(

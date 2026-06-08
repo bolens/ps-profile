@@ -133,9 +133,6 @@ function Connect-AzureAccount {
     Arguments to pass to azd up.
 
 .EXAMPLE
-    Start-AzureDeveloperUp
-
-.EXAMPLE
     Start-AzureDeveloperUp --location eastus
 #>
 function Start-AzureDeveloperUp {

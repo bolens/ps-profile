@@ -13,10 +13,6 @@
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/fragment/validate-fragment-dependencies.ps1
-.PARAMETER ExitCode
-    Process exit code to return.
-.PARAMETER Message
-    Optional message written before exiting.
 
 #>
 

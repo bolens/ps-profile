@@ -29,24 +29,27 @@ Export only user-installed packages (--user flag).
 
 ### Example 1
 
-`powershell
-Export-PipPackages
-        Exports packages to requirements.txt in current directory.
-``
+```powershell
+Export-PipPackages -Path ./path
+```
+
+Exports packages to requirements.txt in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-PipPackages -Path "C:\backup\pip-requirements.txt"
-        Exports packages to a specific file.
-``
+```
+
+Exports packages to a specific file.
 
 ### Example 3
 
-`powershell
+```powershell
 Export-PipPackages -User
-        Exports only user-installed packages.
-``
+```
+
+Exports only user-installed packages.
 
 ## Aliases
 

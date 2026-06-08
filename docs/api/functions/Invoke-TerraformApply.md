@@ -25,15 +25,9 @@ Arguments to pass to terraform apply.
 
 ### Example 1
 
-`powershell
-Invoke-TerraformApply
-``
-
-### Example 2
-
-`powershell
+```powershell
 Invoke-TerraformApply -auto-approve
-``
+```
 
 ## Aliases
 

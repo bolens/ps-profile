@@ -29,9 +29,9 @@ The path for the output merged PDF file.
 
 ### Example 1
 
-`powershell
-Merge-Pdf
-``
+```powershell
+Merge-Pdf -InputPaths @() -OutputPath ./output.file
+```
 
 ## Aliases
 

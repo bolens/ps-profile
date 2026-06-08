@@ -25,15 +25,15 @@ Arguments to pass to deno run.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-DenoRun app.ts
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-DenoRun --allow-net server.ts
-``
+```
 
 ## Aliases
 

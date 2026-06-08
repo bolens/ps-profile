@@ -270,18 +270,22 @@ function Initialize-FileConversion-CoreEncodingBase91 {
 <#
 .SYNOPSIS
     Converts ASCII text to Base91 encoding.
+
 .DESCRIPTION
     Encodes ASCII/UTF-8 text to Base91 format.
     Base91 is more efficient than Base64, providing better compression ratio.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base91 encoded string.
+
 .EXAMPLE
     "Hello World" | ConvertFrom-AsciiToBase91
     
     Converts text to Base91 format.
-.OUTPUTS
-    System.String
-    Returns the Base91 encoded string.
 #>
 function ConvertFrom-AsciiToBase91 {
     param(
@@ -297,17 +301,21 @@ Set-Alias -Name ascii-to-base91 -Value ConvertFrom-AsciiToBase91 -Scope Global -
 <#
 .SYNOPSIS
     Converts Base91 encoding to ASCII text.
+
 .DESCRIPTION
     Decodes Base91 encoded string back to ASCII/UTF-8 text.
+
 .PARAMETER InputObject
     The Base91 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     ">OwJh>Io0Tv!8PE" | ConvertFrom-Base91ToAscii
     
     Converts Base91 to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-Base91ToAscii {
     param(
@@ -323,17 +331,21 @@ Set-Alias -Name base91-to-ascii -Value ConvertFrom-Base91ToAscii -Scope Global -
 <#
 .SYNOPSIS
     Converts hexadecimal string to Base91 encoding.
+
 .DESCRIPTION
     Encodes a hexadecimal string to Base91 format.
+
 .PARAMETER InputObject
     The hexadecimal string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base91 encoded string.
+
 .EXAMPLE
     "48656C6C6F" | ConvertFrom-HexToBase91
     
     Converts hex to Base91 format.
-.OUTPUTS
-    System.String
-    Returns the Base91 encoded string.
 #>
 function ConvertFrom-HexToBase91 {
     param(
@@ -349,17 +361,21 @@ Set-Alias -Name hex-to-base91 -Value ConvertFrom-HexToBase91 -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base91 encoding to hexadecimal string.
+
 .DESCRIPTION
     Decodes Base91 encoded string to hexadecimal format.
+
 .PARAMETER InputObject
     The Base91 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the hexadecimal string.
+
 .EXAMPLE
     ">OwJh>Io0Tv!8PE" | ConvertFrom-Base91ToHex
     
     Converts Base91 to hex format.
-.OUTPUTS
-    System.String
-    Returns the hexadecimal string.
 #>
 function ConvertFrom-Base91ToHex {
     param(
@@ -375,17 +391,21 @@ Set-Alias -Name base91-to-hex -Value ConvertFrom-Base91ToHex -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base64 encoding to Base91 encoding.
+
 .DESCRIPTION
     Converts a Base64 encoded string to Base91 format.
+
 .PARAMETER InputObject
     The Base64 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base91 encoded string.
+
 .EXAMPLE
     "SGVsbG8gV29ybGQ=" | ConvertFrom-Base64ToBase91
     
     Converts Base64 to Base91 format.
-.OUTPUTS
-    System.String
-    Returns the Base91 encoded string.
 #>
 function ConvertFrom-Base64ToBase91 {
     param(
@@ -401,17 +421,21 @@ Set-Alias -Name base64-to-base91 -Value ConvertFrom-Base64ToBase91 -Scope Global
 <#
 .SYNOPSIS
     Converts Base91 encoding to Base64 encoding.
+
 .DESCRIPTION
     Converts a Base91 encoded string to Base64 format.
+
 .PARAMETER InputObject
     The Base91 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base64 encoded string.
+
 .EXAMPLE
     ">OwJh>Io0Tv!8PE" | ConvertFrom-Base91ToBase64
     
     Converts Base91 to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the Base64 encoded string.
 #>
 function ConvertFrom-Base91ToBase64 {
     param(

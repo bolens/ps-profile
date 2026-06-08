@@ -27,11 +27,11 @@ System.Int32. Number of events cleared.
 
 ### Example 1
 
-`powershell
+```powershell
 Clear-EventCollection
-        
-        Clears all collected events.
-``
+```
+
+Clears all collected events.
 
 ## Source
 

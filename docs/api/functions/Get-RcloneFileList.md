@@ -25,15 +25,15 @@ Path to list (local or remote).
 
 ### Example 1
 
-`powershell
+```powershell
 Get-RcloneFileList -Path "remote:path"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Get-RcloneFileList -Path "local:path"
-``
+```
 
 ## Aliases
 

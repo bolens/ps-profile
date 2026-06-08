@@ -34,10 +34,11 @@ System.String The generated UUID v5 string.
 
 ### Example 1
 
-`powershell
+```powershell
 New-UuidV5 -Namespace "6ba7b810-9dad-11d1-80b4-00c04fd430c8" -Name "example.com"
-    Generates a UUID v5 for the given namespace and name.
-``
+```
+
+Generates a UUID v5 for the given namespace and name.
 
 ## Aliases
 

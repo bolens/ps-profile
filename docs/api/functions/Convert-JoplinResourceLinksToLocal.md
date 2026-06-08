@@ -39,16 +39,16 @@ Directory containing exported Joplin resources (matches by filename prefix).
 
 ## Outputs
 
-System.String when content is piped or -PassThru is used. .EXAMPLE Convert-JoplinResourceLinksToLocal
+System.String when content is piped or -PassThru is used.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Convert-JoplinResourceLinksToLocal
-``
+```powershell
+Convert-JoplinResourceLinksToLocal -Content 'text' -InputPath ./input.file
+```
 
 ## Aliases
 

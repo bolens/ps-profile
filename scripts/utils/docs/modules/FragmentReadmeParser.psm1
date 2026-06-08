@@ -72,8 +72,7 @@ else {
 .OUTPUTS
     String. The extracted purpose, or a default message if none found.
 .EXAMPLE
-    Get-FragmentPurpose
-
+    Get-FragmentPurpose -FilePath ./Taskfile.yml -FileInfo 'value'
 #>
 function Get-FragmentPurpose {
     [CmdletBinding()]
@@ -146,8 +145,7 @@ function Get-FragmentPurpose {
 .OUTPUTS
     String. The extracted description, or $null if none found.
 .EXAMPLE
-    Get-FunctionDescription
-
+    Get-FunctionDescription -AllLines @() -FunctionIndex 1
 #>
 function Get-FunctionDescription {
     [CmdletBinding()]
@@ -240,8 +238,7 @@ function Get-FunctionDescription {
 .OUTPUTS
     List of PSCustomObject with Name and Short (description) properties.
 .EXAMPLE
-    Get-FragmentFunctions
-
+    Get-FragmentFunctions -FilePath ./Taskfile.yml
 #>
 function Get-FragmentFunctions {
     [CmdletBinding()]
@@ -330,8 +327,7 @@ function Get-FragmentFunctions {
 .OUTPUTS
     Array of function names (strings).
 .EXAMPLE
-    Get-FragmentEnableHelpers
-
+    Get-FragmentEnableHelpers -FilePath ./Taskfile.yml
 #>
 function Get-FragmentEnableHelpers {
     [CmdletBinding()]

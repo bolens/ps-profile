@@ -25,11 +25,9 @@ Mojo source files to execute.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-MojoRun ./main.mojo
-.PARAMETER Files
-    Mojo source files to execute.
-``
+```
 
 ## Aliases
 

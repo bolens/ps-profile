@@ -34,10 +34,11 @@ System.String The binary representation of the input Base32 string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32ToBinary
-    Converts Base32 to binary with spaces.
-``
+```
+
+Converts Base32 to binary with spaces.
 
 ## Aliases
 

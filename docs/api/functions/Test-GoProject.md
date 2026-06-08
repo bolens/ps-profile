@@ -38,24 +38,27 @@ System.String. Output from go test execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Test-GoProject
-        Runs tests in the current package.
-``
+```
+
+Runs tests in the current package.
 
 ### Example 2
 
-`powershell
+```powershell
 Test-GoProject -VerboseOutput
-        Runs tests with verbose output.
-``
+```
+
+Runs tests with verbose output.
 
 ### Example 3
 
-`powershell
+```powershell
 Test-GoProject -Coverage ./...
-        Runs tests with coverage for all packages.
-``
+```
+
+Runs tests with coverage for all packages.
 
 ## Aliases
 

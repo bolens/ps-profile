@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Godot
-        
-        Launches Godot editor.
-``
+```powershell
+Launch-Godot -ProjectPath 'value'
+```
+
+Launches Godot editor.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Godot -ProjectPath "C:\Projects\MyGame"
-        
-        Launches Godot and opens a project.
-``
+```
+
+Launches Godot and opens a project.
 
 ## Source
 

@@ -34,10 +34,11 @@ System.String The octal representation of the input URL encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello%20World" | ConvertFrom-UrlToOctal
-    Converts URL encoding to octal.
-``
+```
+
+Converts URL encoding to octal.
 
 ## Aliases
 

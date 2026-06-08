@@ -168,18 +168,22 @@ function Initialize-FileConversion-CoreEncodingEBCDIC {
 <#
 .SYNOPSIS
     Converts ASCII text to EBCDIC encoding.
+
 .DESCRIPTION
     Encodes ASCII text to EBCDIC format (Code Page 037).
     Returns the EBCDIC encoding as a hexadecimal string.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the EBCDIC encoded string as hexadecimal.
+
 .EXAMPLE
     "Hello" | ConvertFrom-AsciiToEBCDIC
     
     Converts text to EBCDIC format (returns hex string).
-.OUTPUTS
-    System.String
-    Returns the EBCDIC encoded string as hexadecimal.
 #>
 function ConvertFrom-AsciiToEBCDIC {
     param(
@@ -198,17 +202,21 @@ Set-Alias -Name ascii-to-ebcdic -Value ConvertFrom-AsciiToEBCDIC -Scope Global -
 <#
 .SYNOPSIS
     Converts EBCDIC encoding to ASCII text.
+
 .DESCRIPTION
     Decodes EBCDIC encoded string (as hexadecimal) back to ASCII text.
+
 .PARAMETER InputObject
     The EBCDIC encoded string as hexadecimal.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "C885939396" | ConvertFrom-EBCDICToAscii
     
     Converts EBCDIC hex to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-EBCDICToAscii {
     param(

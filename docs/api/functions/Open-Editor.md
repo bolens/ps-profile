@@ -25,9 +25,9 @@ The path to the file to open.
 
 ### Example 1
 
-`powershell
-Open-Editor
-``
+```powershell
+Open-Editor -p 'value'
+```
 
 ## Aliases
 

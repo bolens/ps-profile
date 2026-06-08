@@ -37,17 +37,19 @@ Specific version to add (--version).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-CargoDependency serde
-    Adds serde as a production dependency.
-``
+```
+
+Adds serde as a production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-CargoDependency tokio-test -Dev
-    Adds tokio-test as a dev dependency.
-``
+```
+
+Adds tokio-test as a dev dependency.
 
 ## Source
 

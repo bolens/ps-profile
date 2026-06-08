@@ -31,9 +31,6 @@
     Arguments to pass to lazydocker.
 
 .EXAMPLE
-    Invoke-LazyDocker
-
-.EXAMPLE
     Invoke-LazyDocker --help
 #>
 function Invoke-LazyDocker {

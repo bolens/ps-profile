@@ -34,10 +34,11 @@ System.String The Roman numeral representation of the input ModHex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "hkkllkkl" | ConvertFrom-ModHexToRoman
-    Converts ModHex to Roman numerals.
-``
+```
+
+Converts ModHex to Roman numerals.
 
 ## Aliases
 

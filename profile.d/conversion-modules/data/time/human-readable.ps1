@@ -309,26 +309,32 @@ function Initialize-FileConversion-CoreTimeHumanReadable {
 <#
 .SYNOPSIS
     Converts a human-readable date string to a DateTime object.
+
 .DESCRIPTION
     Converts natural language date expressions to DateTime objects.
     Supports expressions like "tomorrow", "next week", "2 days ago", "in 3 hours", etc.
+
 .PARAMETER HumanReadableString
     The human-readable date string to convert.
+
+.OUTPUTS
+    System.DateTime
+    Returns a DateTime object representing the parsed date.
+
 .EXAMPLE
     "tomorrow" | ConvertFrom-HumanReadableToDateTime
     
     Converts "tomorrow" to a DateTime object.
+
 .EXAMPLE
     "2 days ago" | ConvertFrom-HumanReadableToDateTime
     
     Converts "2 days ago" to a DateTime object.
+
 .EXAMPLE
     "next Monday" | ConvertFrom-HumanReadableToDateTime
     
     Converts "next Monday" to a DateTime object.
-.OUTPUTS
-    System.DateTime
-    Returns a DateTime object representing the parsed date.
 #>
 function ConvertFrom-HumanReadableToDateTime {
     param(
@@ -343,27 +349,34 @@ Set-AgentModeAlias -Name 'human-to-datetime' -Target 'ConvertFrom-HumanReadableT
 <#
 .SYNOPSIS
     Converts a DateTime object to a human-readable string.
+
 .DESCRIPTION
     Converts a DateTime object to a human-readable relative or formatted string.
+
 .PARAMETER DateTime
     The DateTime object to convert.
+
 .PARAMETER Format
     The format to use: 'relative' (default) for relative times like "2 hours ago", or a standard DateTime format string.
+
+.OUTPUTS
+    System.String
+    Returns a human-readable date string.
+
 .EXAMPLE
     Get-Date | ConvertTo-HumanReadableFromDateTime
     
     Converts the current date/time to a human-readable relative string.
+
 .EXAMPLE
     (Get-Date).AddDays(-2) | ConvertTo-HumanReadableFromDateTime
     
     Converts a date 2 days ago to "2 days ago".
+
 .EXAMPLE
     Get-Date | ConvertTo-HumanReadableFromDateTime -Format 'MMMM d, yyyy'
     
     Converts to a formatted string like "January 15, 2024".
-.OUTPUTS
-    System.String
-    Returns a human-readable date string.
 #>
 function ConvertTo-HumanReadableFromDateTime {
     param(

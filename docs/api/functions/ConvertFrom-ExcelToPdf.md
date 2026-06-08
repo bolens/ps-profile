@@ -33,9 +33,9 @@ Optional sheet name to convert. If not specified, converts the first sheet.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-ExcelToPdf -InputPath "spreadsheet.xlsx" -OutputPath "spreadsheet.pdf"
-``
+```
 
 ## Aliases
 

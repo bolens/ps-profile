@@ -34,17 +34,19 @@ System.String. Output from cargo-binstall execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-RustBinary cargo-watch
-        Installs cargo-watch using cargo-binstall.
-``
+```
+
+Installs cargo-watch using cargo-binstall.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-RustBinary cargo-audit --version 0.18.0
-        Installs a specific version of cargo-audit.
-``
+```
+
+Installs a specific version of cargo-audit.
 
 ## Aliases
 

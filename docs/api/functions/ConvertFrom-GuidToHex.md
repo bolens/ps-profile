@@ -32,11 +32,11 @@ System.String Returns the GUID in hexadecimal format without dashes.
 
 ### Example 1
 
-`powershell
+```powershell
 "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-GuidToHex
-    
-    Converts GUID to hex format: "550E8400E29B41D4A716446655440000"
-``
+```
+
+Converts GUID to hex format: "550E8400E29B41D4A716446655440000"
 
 ## Aliases
 

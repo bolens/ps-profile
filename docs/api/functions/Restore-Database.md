@@ -38,19 +38,19 @@ System.Boolean. True if restore successful.
 
 ### Example 1
 
-`powershell
+```powershell
 Restore-Database -DatabaseType PostgreSQL -Database mydb -BackupPath "backup.dump"
-    
-    Restores PostgreSQL database from backup.
-``
+```
+
+Restores PostgreSQL database from backup.
 
 ### Example 2
 
-`powershell
+```powershell
 Restore-Database -DatabaseType MySQL -Database mydb -BackupPath "backup.sql.gz"
-    
-    Restores MySQL database from compressed backup.
-``
+```
+
+Restores MySQL database from compressed backup.
 
 ## Aliases
 

@@ -29,27 +29,27 @@ Optional network interface name to start capturing on.
 
 ### Example 1
 
-`powershell
-Start-Wireshark
-        
-        Launches Wireshark with default settings.
-``
+```powershell
+Start-Wireshark -CaptureFile 'value' -Interface 'value'
+```
+
+Launches Wireshark with default settings.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-Wireshark -CaptureFile "capture.pcap"
-        
-        Opens the specified capture file in Wireshark.
-``
+```
+
+Opens the specified capture file in Wireshark.
 
 ### Example 3
 
-`powershell
+```powershell
 Start-Wireshark -Interface "Ethernet"
-        
-        Starts Wireshark capturing on the specified interface.
-``
+```
+
+Starts Wireshark capturing on the specified interface.
 
 ## Source
 

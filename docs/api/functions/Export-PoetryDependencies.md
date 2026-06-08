@@ -33,24 +33,27 @@ Include dev dependencies in the export.
 
 ### Example 1
 
-`powershell
-Export-PoetryDependencies
-        Exports dependencies to requirements.txt in current directory.
-``
+```powershell
+Export-PoetryDependencies -Path ./path
+```
+
+Exports dependencies to requirements.txt in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-PoetryDependencies -Path "C:\backup\poetry-requirements.txt"
-        Exports dependencies to a specific file.
-``
+```
+
+Exports dependencies to a specific file.
 
 ### Example 3
 
-`powershell
+```powershell
 Export-PoetryDependencies -Dev
-        Exports dependencies including dev dependencies.
-``
+```
+
+Exports dependencies including dev dependencies.
 
 ## Aliases
 

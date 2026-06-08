@@ -46,17 +46,19 @@ System.String. Output from bd update command.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-BeadsIssue -IssueId bd-a1b2 -Status in_progress
-        Updates issue status to in_progress.
-``
+```
+
+Updates issue status to in_progress.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-BeadsIssue -IssueId bd-a1b2 -Priority 0
-        Updates issue priority to P0.
-``
+```
+
+Updates issue priority to P0.
 
 ## Source
 

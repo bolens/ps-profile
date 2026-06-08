@@ -29,10 +29,11 @@ Project file path (--project).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-DotnetPackage Newtonsoft.Json
-        Removes Newtonsoft.Json from the current project.
-``
+```
+
+Removes Newtonsoft.Json from the current project.
 
 ## Aliases
 

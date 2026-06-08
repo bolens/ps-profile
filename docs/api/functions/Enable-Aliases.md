@@ -22,11 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Enable-Aliases
+```
 
-    Enables all user-defined aliases for the current session.
-``
+Enables all user-defined aliases for the current session.
 
 ## Source
 

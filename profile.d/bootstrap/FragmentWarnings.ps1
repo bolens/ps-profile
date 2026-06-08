@@ -65,8 +65,7 @@ function Initialize-FragmentWarningSuppression {
     System.Boolean
     Returns $true if warnings should be suppressed, $false otherwise.
 .EXAMPLE
-    Test-FragmentWarningSuppressed
-
+    Test-FragmentWarningSuppressed -FragmentName 'git.ps1'
 #>
 function global:Test-FragmentWarningSuppressed {
     [CmdletBinding()]

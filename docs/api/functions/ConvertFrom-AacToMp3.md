@@ -33,9 +33,9 @@ Audio bitrate in kbps (default: 192).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AacToMp3 -InputPath "audio.aac" -OutputPath "audio.mp3"
-``
+```
 
 ## Aliases
 

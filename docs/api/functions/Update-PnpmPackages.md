@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-PnpmPackages
-        Updates all packages in the current project.
-``
+```
+
+Updates all packages in the current project.
 
 ## Aliases
 

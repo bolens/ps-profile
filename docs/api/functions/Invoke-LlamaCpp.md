@@ -30,10 +30,11 @@ System.String. Output from llama.cpp execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-LlamaCpp --help
-        Shows llama.cpp help.
-``
+```
+
+Shows llama.cpp help.
 
 ## Aliases
 

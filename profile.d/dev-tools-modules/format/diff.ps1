@@ -65,19 +65,24 @@ function Initialize-DevTools-Diff {
 <#
 .SYNOPSIS
     Compares two text files and shows differences.
+
 .DESCRIPTION
     Compares two text files and displays differences. Uses diff command if available,
     otherwise shows a line-by-line comparison.
+
 .PARAMETER File1
     Path to the first file.
+
 .PARAMETER File2
     Path to the second file.
-.EXAMPLE
-    Compare-TextFiles -File1 "file1.txt" -File2 "file2.txt"
-    Compares the two files and shows differences.
+
 .OUTPUTS
     System.Boolean
     Returns $true if files are identical, $false if different.
+
+.EXAMPLE
+    Compare-TextFiles -File1 "file1.txt" -File2 "file2.txt"
+    Compares the two files and shows differences.
 #>
 function Compare-TextFiles {
     param([string]$File1, [string]$File2)

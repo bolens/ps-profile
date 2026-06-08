@@ -2,10 +2,9 @@
 #Requires -Version 7.0
 
 <#
-scripts/utils/run-markdownlint.ps1
-
 .SYNOPSIS
     Runs markdownlint on all markdown files.
+
 
 .DESCRIPTION
     Checks if markdownlint-cli is installed and runs it on all markdown files,
@@ -16,16 +15,6 @@ scripts/utils/run-markdownlint.ps1
     The markdownlint-cli version can be controlled via the MARKDOWNLINT_VERSION
     environment variable. Defaults to 0.35.0 if not specified.
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\run-markdownlint.ps1
-
-    Runs markdownlint on all markdown files in the repository.
-
-.EXAMPLE
-    $env:MARKDOWNLINT_VERSION = '0.40.0'
-    pwsh -NoProfile -File scripts\utils\run-markdownlint.ps1
-
-    Runs markdownlint using version 0.40.0.
 
 .NOTES
     Exit Codes:
@@ -36,6 +25,18 @@ scripts/utils/run-markdownlint.ps1
     Version Control:
     - Set MARKDOWNLINT_VERSION environment variable to use a specific version
     - Default version: 0.35.0
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\run-markdownlint.ps1
+
+    Runs markdownlint on all markdown files in the repository.
+
+
+.EXAMPLE
+    $env:MARKDOWNLINT_VERSION = '0.40.0'
+    pwsh -NoProfile -File scripts\utils\run-markdownlint.ps1
+
+    Runs markdownlint using version 0.40.0.
 #>
 
 # Import shared utilities directly (no barrel files)

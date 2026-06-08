@@ -30,19 +30,19 @@ System.String. Output from Git Butler command.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GitButler status
-        
-        Shows Git Butler status.
-``
+```
+
+Shows Git Butler status.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GitButler sync
-        
-        Syncs the repository with Git Butler.
-``
+```
+
+Syncs the repository with Git Butler.
 
 ## Aliases
 

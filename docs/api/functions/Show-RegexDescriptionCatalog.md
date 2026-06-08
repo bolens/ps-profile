@@ -29,17 +29,19 @@ When specified, includes the regex pattern column in the output table.
 
 ### Example 1
 
-`powershell
-Show-RegexDescriptionCatalog
-    Displays all catalog entries.
-``
+```powershell
+Show-RegexDescriptionCatalog -Query 'search term'
+```
+
+Displays all catalog entries.
 
 ### Example 2
 
-`powershell
+```powershell
 Show-RegexDescriptionCatalog -Query 'phone' -IncludePattern
-    Displays phone-related catalog entries including patterns.
-``
+```
+
+Displays phone-related catalog entries including patterns.
 
 ## Aliases
 

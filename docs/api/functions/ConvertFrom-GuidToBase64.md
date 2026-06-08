@@ -32,11 +32,11 @@ System.String Returns the GUID in Base64 format.
 
 ### Example 1
 
-`powershell
+```powershell
 "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-GuidToBase64
-    
-    Converts GUID to Base64 format.
-``
+```
+
+Converts GUID to Base64 format.
 
 ## Aliases
 

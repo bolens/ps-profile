@@ -25,15 +25,9 @@ Arguments to pass to terraform destroy.
 
 ### Example 1
 
-`powershell
-Remove-TerraformInfrastructure
-``
-
-### Example 2
-
-`powershell
+```powershell
 Remove-TerraformInfrastructure -auto-approve
-``
+```
 
 ## Aliases
 

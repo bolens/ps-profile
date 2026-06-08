@@ -25,11 +25,9 @@ Optional search text used when printing a cheatsheet command.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-NaviPrint -Query 'git rebase'
-.PARAMETER Query
-    Optional search text used when printing a cheatsheet command.
-``
+```
 
 ## Aliases
 

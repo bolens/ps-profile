@@ -25,15 +25,15 @@ Arguments to pass to artisan.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-LaravelArt --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-LaravelArt make:model MyModel
-``
+```
 
 ## Aliases
 

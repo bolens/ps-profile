@@ -30,17 +30,19 @@ System.String The hexadecimal representation of the input binary string.
 
 ### Example 1
 
-`powershell
+```powershell
 "01001000 01101001" | ConvertFrom-BinaryToHex
-    Converts binary to hex.
-``
+```
+
+Converts binary to hex.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-BinaryToHex -InputObject "11111111"
-    Converts binary to "FF".
-``
+```
+
+Converts binary to "FF".
 
 ## Aliases
 

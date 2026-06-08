@@ -29,9 +29,9 @@ The path for the output RST file. If not specified, uses input path with .rst ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-RstFromLaTeX -InputPath ./input.file
-``
+```
 
 ## Aliases
 

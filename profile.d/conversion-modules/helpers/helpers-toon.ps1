@@ -20,8 +20,7 @@
 .OUTPUTS
     String representing the TOON format.
 .EXAMPLE
-    Convert-JsonToToon
-
+    Convert-JsonToToon -JsonObject 'value'
 #>
 function Convert-JsonToToon {
     param(
@@ -116,8 +115,7 @@ function Convert-JsonToToon {
 .OUTPUTS
     PowerShell object representing the parsed TOON data.
 .EXAMPLE
-    Convert-ToonToJson
-
+    Convert-ToonToJson -ToonString 'value'
 #>
 function Convert-ToonToJson {
     param(
@@ -146,8 +144,7 @@ function Convert-ToonToJson {
 .OUTPUTS
     Hashtable with 'Object' (the parsed object) and 'Index' (the next index to process).
 .EXAMPLE
-    Parse-ToonLines
-
+    Parse-ToonLines -Lines @('pwsh -File scripts/test.ps1') -Index 1
 #>
 function Parse-ToonLines {
     param(
@@ -257,8 +254,7 @@ function Parse-ToonLines {
 .OUTPUTS
     The parsed value as a PowerShell object (string, int, double, bool, or null).
 .EXAMPLE
-    Parse-ToonValue
-
+    Parse-ToonValue -Value 'value'
 #>
 function Parse-ToonValue {
     param([string]$Value)

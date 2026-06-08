@@ -27,18 +27,18 @@ The base directory that the path must be within.
 
 ## Outputs
 
-System.Boolean. Returns $true if path is safe, $false otherwise. .EXAMPLE if (Test-SafePath -Path $userPath -BasePath $homeDir) { # Safe to use the path }
+System.Boolean. Returns $true if path is safe, $false otherwise.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 if (Test-SafePath -Path $userPath -BasePath $homeDir) {
-        # Safe to use the path
-    }
-``
+```
+
+# Safe to use the path }
 
 ## Source
 

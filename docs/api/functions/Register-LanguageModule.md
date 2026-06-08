@@ -58,13 +58,11 @@ System.Boolean. True if registration successful, false otherwise.
 
 ### Example 1
 
-`powershell
+```powershell
 Register-LanguageModule -LanguageName 'Python' -CommandName 'python' `
-            -VersionManager 'pyenv' -PackageManager 'pip' `
-            -BuildCommand 'setup.py build' -TestCommand 'pytest'
-        
-        Registers Python language module with pyenv and pip support.
-``
+```
+
+-VersionManager 'pyenv' -PackageManager 'pip' ` -BuildCommand 'setup.py build' -TestCommand 'pytest' Registers Python language module with pyenv and pip support.
 
 ## Source
 

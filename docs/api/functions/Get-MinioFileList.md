@@ -25,15 +25,15 @@ Path to list in MinIO.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-MinioFileList -Path "myminio/bucket/path"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Get-MinioFileList -Path "myminio/bucket/"
-``
+```
 
 ## Aliases
 

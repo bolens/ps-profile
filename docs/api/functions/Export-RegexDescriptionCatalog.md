@@ -34,10 +34,11 @@ System.String export contents.
 
 ### Example 1
 
-`powershell
+```powershell
 Export-RegexDescriptionCatalog -Format Markdown -Path ./regex-catalog.md
-    Exports the catalog as Markdown.
-``
+```
+
+Exports the catalog as Markdown.
 
 ## Aliases
 

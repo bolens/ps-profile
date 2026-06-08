@@ -40,11 +40,11 @@ System.String Returns the path to the decompressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Expand-Brotli -InputPath 'data.txt.br'
-    
-    Decompresses data.txt.br to data.txt.
-``
+```
+
+Decompresses data.txt.br to data.txt.
 
 ## Aliases
 

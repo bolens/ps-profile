@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-DjvuToText -InputPath "document.djvu"
-    
-    Extracts text from document.djvu to document.txt.
-``
+```
+
+Extracts text from document.djvu to document.txt.
 
 ## Aliases
 

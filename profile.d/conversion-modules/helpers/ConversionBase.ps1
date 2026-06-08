@@ -38,6 +38,7 @@ try {
     .SYNOPSIS
         Executes a format conversion with standardized validation and error handling.
     
+
     .DESCRIPTION
         Provides a standardized way to execute format conversions with:
         - Input file validation
@@ -47,33 +48,46 @@ try {
         - Exit code validation
         - Comprehensive error handling
     
+
     .PARAMETER InputPath
         Path to the input file to convert.
     
+
     .PARAMETER OutputPath
         Optional path for the output file. If not provided, will be generated from InputPath.
     
+
     .PARAMETER ToolCommand
         Name of the conversion tool command (e.g., 'pandoc', 'ffmpeg', 'magick').
     
+
     .PARAMETER ToolArguments
         Array of arguments to pass to the tool command.
     
+
     .PARAMETER OutputExtension
         File extension for output file (e.g., '.html', '.pdf'). Used if OutputPath not provided.
     
+
     .PARAMETER InputExtension
         File extension of input file (e.g., '.md', '.jpg'). Used for output path generation.
     
+
     .PARAMETER InstallHint
         Installation hint for missing tool warning.
     
+
     .PARAMETER ErrorContext
         Context string for error messages (e.g., "Markdown to HTML conversion").
     
+
     .PARAMETER ValidateOutput
         If specified, validates that output file was created after conversion.
     
+
+    .OUTPUTS
+        System.Boolean. True if conversion successful, false otherwise.
+
     .EXAMPLE
         Invoke-FormatConversion -InputPath 'document.md' `
             -ToolCommand 'pandoc' `
@@ -83,9 +97,6 @@ try {
             -ErrorContext 'Markdown to HTML conversion'
         
         Converts Markdown to HTML using pandoc.
-    
-    .OUTPUTS
-        System.Boolean. True if conversion successful, false otherwise.
     #>
     function Invoke-FormatConversion {
         [CmdletBinding()]
@@ -293,8 +304,7 @@ try {
     .OUTPUTS
         System.Boolean. True if tool is available, false otherwise.
 .EXAMPLE
-    Test-ConversionToolAvailable
-
+    Test-ConversionToolAvailable -ToolCommand 'value' -InstallHint 'value'
 #>
     function Test-ConversionToolAvailable {
         [CmdletBinding()]
@@ -326,25 +336,30 @@ try {
     .SYNOPSIS
         Generates an output path from an input path by replacing the extension.
     
+
     .DESCRIPTION
         Creates an output file path by replacing the input file's extension with a new extension.
     
+
     .PARAMETER InputPath
         Path to the input file.
     
+
     .PARAMETER OutputExtension
         New extension for the output file (e.g., '.html', '.pdf').
     
+
     .PARAMETER InputExtension
         Optional input extension to replace. If not provided, uses file's actual extension.
     
+
+    .OUTPUTS
+        System.String. Generated output path.
+
     .EXAMPLE
         Get-OutputPathFromInput -InputPath 'document.md' -OutputExtension '.html'
         
         Returns 'document.html'.
-    
-    .OUTPUTS
-        System.String. Generated output path.
     #>
     function Get-OutputPathFromInput {
         [CmdletBinding()]

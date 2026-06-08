@@ -30,19 +30,19 @@ PSCustomObject Returns an object with properties: Scheme, Host, Port, Path, Quer
 
 ### Example 1
 
-`powershell
+```powershell
 Parse-UrlUri -Url "https://example.com:8080/path?key=value#fragment"
-    
-    Parses the URL and returns components.
-``
+```
+
+Parses the URL and returns components.
 
 ### Example 2
 
-`powershell
+```powershell
 "https://example.com/path" | Parse-UrlUri
-    
-    Parses URL from pipeline.
-``
+```
+
+Parses URL from pipeline.
 
 ## Aliases
 

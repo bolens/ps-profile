@@ -46,19 +46,19 @@ System.String Returns the path to the compressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Compress-Lz4 -InputPath 'data.txt'
-    
-    Compresses data.txt to data.txt.lz4.
-``
+```
+
+Compresses data.txt to data.txt.lz4.
 
 ### Example 2
 
-`powershell
+```powershell
 Compress-Lz4 -InputPath 'data.txt' -CompressionLevel 9
-    
-    Compresses data.txt with maximum compression level.
-``
+```
+
+Compresses data.txt with maximum compression level.
 
 ## Aliases
 

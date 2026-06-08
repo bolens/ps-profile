@@ -11,10 +11,11 @@ if (-not (Test-Path Function:New-GitHubPullRequest)) {
         Creates a GitHub pull request.
     .DESCRIPTION
         Creates a new pull request using the GitHub CLI (gh). Forwards all arguments to gh pr create.
+.PARAMETER Arguments
+    Arguments forwarded to gh pr create.
+
 .EXAMPLE
     New-GitHubPullRequest --title 'Fix bug' --body 'Details here'
-.PARAMETER a
-    Arguments forwarded to gh pr create.
 
 #>
     function New-GitHubPullRequest {
@@ -35,10 +36,11 @@ if (-not (Test-Path Function:Show-GitHubPullRequest)) {
         Views a GitHub pull request in the browser.
     .DESCRIPTION
         Opens a pull request in the default browser using the GitHub CLI (gh). Forwards all arguments to gh pr view --web.
+.PARAMETER Arguments
+    Arguments forwarded to gh pr view --web.
+
 .EXAMPLE
     Show-GitHubPullRequest 42
-.PARAMETER a
-    Arguments forwarded to gh pr view --web.
 
 #>
     function Show-GitHubPullRequest {

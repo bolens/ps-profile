@@ -38,17 +38,19 @@ System.String. Output from Hurl execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Hurl -TestFile "./api-tests.hurl"
-        Runs the specified Hurl test file.
-``
+```
+
+Runs the specified Hurl test file.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Hurl -TestFile "./test.hurl" -Variable "base_url=https://api.example.com"
-        Runs the test with a variable set.
-``
+```
+
+Runs the test with a variable set.
 
 ## Aliases
 

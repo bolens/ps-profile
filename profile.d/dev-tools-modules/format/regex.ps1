@@ -436,25 +436,33 @@ Pattern: $Pattern
 <#
 .SYNOPSIS
     Tests a regular expression against input text.
+
 .DESCRIPTION
     Tests a regular expression pattern against input text and returns match results.
+
 .PARAMETER Pattern
     The regular expression pattern to test.
+
 .PARAMETER Input
     The input text to test against.
+
 .PARAMETER AllMatches
     If specified, returns all matches instead of just the first.
+
 .PARAMETER IgnoreCase
     If specified, performs case-insensitive matching.
-.EXAMPLE
-    Test-Regex -Pattern "\d+" -Input "Hello 123 World"
-    Tests the pattern against the input and returns match details.
-.EXAMPLE
-    Test-Regex -Pattern "\w+" -Input "Hello World" -AllMatches
-    Returns all word matches in the input.
+
 .OUTPUTS
     PSCustomObject
     Object containing match information (Success, Value, Index, Length, Groups).
+
+.EXAMPLE
+    Test-Regex -Pattern "\d+" -Input "Hello 123 World"
+    Tests the pattern against the input and returns match details.
+
+.EXAMPLE
+    Test-Regex -Pattern "\w+" -Input "Hello World" -AllMatches
+    Returns all word matches in the input.
 #>
 function Test-Regex {
     param(
@@ -475,42 +483,56 @@ Set-AgentModeAlias -Name 'regex-test' -Target 'Test-Regex'
 <#
 .SYNOPSIS
     Converts a natural language description into a regular expression pattern.
+
 .DESCRIPTION
     Translates common natural language regex descriptions into regular expression
     patterns. Supports catalog entries such as email, URL, IPv4, and UUID, plus
     compositional phrases such as "starts with user- followed by digits".
+
 .PARAMETER Description
     Natural language description of the desired pattern.
+
 .PARAMETER Anchored
     When specified, wraps the resulting pattern with ^ and $ if they are not already present.
+
 .PARAMETER IgnoreCase
     When specified, marks the result as case-insensitive.
+
 .PARAMETER PatternOnly
     When specified, returns only the regex pattern string instead of the full result object.
+
 .PARAMETER SampleMatch
     Sample strings that should match the generated pattern.
+
 .PARAMETER SampleNoMatch
     Sample strings that should not match the generated pattern.
+
 .PARAMETER UseAi
     Uses Ollama to generate the regex pattern instead of rule-based conversion.
+
 .PARAMETER TryAiFallback
     Uses Ollama when the rule-based converter cannot interpret the description.
+
 .PARAMETER OutputFormat
     Output format for results: Object (default), Text, or Json.
-.EXAMPLE
-    ConvertTo-RegexFromDescription -Description 'email'
-    Returns a regex pattern object for email addresses.
-.EXAMPLE
-    ConvertTo-RegexFromDescription -Description "starts with 'user-' followed by digits" -Anchored -PatternOnly
-    Returns an anchored regex pattern string.
-.EXAMPLE
-    ConvertTo-RegexFromDescription -Description 'iban' -SampleMatch 'DE89370400440532013000' -SampleNoMatch 'not-an-iban'
-    Returns a pattern and sample validation results.
+
 .OUTPUTS
     PSCustomObject
     Object containing Pattern, Description, Source, IgnoreCase, Notes, IsValid, CatalogName,
     NeedsAiFallback, and optional SampleResults members.
     When -PatternOnly is specified, returns System.String.
+
+.EXAMPLE
+    ConvertTo-RegexFromDescription -Description 'email'
+    Returns a regex pattern object for email addresses.
+
+.EXAMPLE
+    ConvertTo-RegexFromDescription -Description "starts with 'user-' followed by digits" -Anchored -PatternOnly
+    Returns an anchored regex pattern string.
+
+.EXAMPLE
+    ConvertTo-RegexFromDescription -Description 'iban' -SampleMatch 'DE89370400440532013000' -SampleNoMatch 'not-an-iban'
+    Returns a pattern and sample validation results.
 #>
 function ConvertTo-RegexFromDescription {
     [CmdletBinding()]
@@ -536,18 +558,23 @@ Set-AgentModeAlias -Name 'regex-from-description' -Target 'ConvertTo-RegexFromDe
 <#
 .SYNOPSIS
     Lists built-in natural language regex catalog entries.
+
 .DESCRIPTION
     Returns catalog entries that map common descriptions to regex patterns.
+
 .PARAMETER Name
     Optional catalog entry name to return a single entry.
+
+.OUTPUTS
+    PSCustomObject or ordered hashtable depending on whether -Name is specified.
+
 .EXAMPLE
-    Get-RegexDescriptionCatalog
+    Get-RegexDescriptionCatalog -Name 'name'
     Lists all supported catalog entries.
+
 .EXAMPLE
     Get-RegexDescriptionCatalog -Name 'iban'
     Returns the IBAN catalog entry.
-.OUTPUTS
-    PSCustomObject or ordered hashtable depending on whether -Name is specified.
 #>
 function Get-RegexDescriptionCatalog {
     [CmdletBinding()]
@@ -581,15 +608,19 @@ Set-AgentModeAlias -Name 'regex-catalog' -Target 'Get-RegexDescriptionCatalog'
 <#
 .SYNOPSIS
     Searches natural language regex catalog entries.
+
 .DESCRIPTION
     Finds catalog entries whose names or aliases match a query string.
+
 .PARAMETER Query
     Search text to match against catalog names and aliases.
+
+.OUTPUTS
+    PSCustomObject[] with Name, Pattern, Aliases, Notes, and MatchType members.
+
 .EXAMPLE
     Search-RegexDescriptions -Query 'phone'
     Finds catalog entries related to phone numbers.
-.OUTPUTS
-    PSCustomObject[] with Name, Pattern, Aliases, Notes, and MatchType members.
 #>
 function Search-RegexDescriptions {
     [CmdletBinding()]
@@ -607,28 +638,38 @@ Set-AgentModeAlias -Name 'regex-catalog-search' -Target 'Search-RegexDescription
 <#
 .SYNOPSIS
     Converts a natural language description to regex and tests it against input.
+
 .DESCRIPTION
     Generates a regex pattern from a natural language description and immediately
     tests it against the provided input text.
+
 .PARAMETER Description
     Natural language description of the desired pattern.
+
 .PARAMETER InputText
     Input text to test against the generated pattern.
+
 .PARAMETER Anchored
     When specified, wraps the resulting pattern with ^ and $.
+
 .PARAMETER IgnoreCase
     When specified, performs case-insensitive matching.
+
 .PARAMETER AllMatches
     When specified, returns all matches instead of only the first.
+
 .PARAMETER UseAi
     Uses Ollama to generate the regex pattern.
+
 .PARAMETER TryAiFallback
     Uses Ollama when the rule-based converter cannot interpret the description.
+
+.OUTPUTS
+    PSCustomObject containing conversion details and match results.
+
 .EXAMPLE
     Test-RegexFromDescription -Description 'email' -Input 'user@example.com'
     Generates an email regex and tests the input.
-.OUTPUTS
-    PSCustomObject containing conversion details and match results.
 #>
 function Test-RegexFromDescription {
     [CmdletBinding()]
@@ -688,7 +729,7 @@ Set-AgentModeAlias -Name 'regex-test-description' -Target 'Test-RegexFromDescrip
 .PARAMETER IncludePattern
     When specified, includes the regex pattern column in the output table.
 .EXAMPLE
-    Show-RegexDescriptionCatalog
+    Show-RegexDescriptionCatalog -Query 'search term'
     Displays all catalog entries.
 .EXAMPLE
     Show-RegexDescriptionCatalog -Query 'phone' -IncludePattern
@@ -731,25 +772,33 @@ Set-AgentModeAlias -Name 'regex-catalog-show' -Target 'Show-RegexDescriptionCata
 <#
 .SYNOPSIS
     Explains a regular expression pattern in plain language.
+
 .DESCRIPTION
     Reverse direction of the natural language regex converter. Maps known catalog
     patterns back to descriptions and decomposes common regex constructs.
+
 .PARAMETER Pattern
     Regular expression pattern to explain.
+
 .PARAMETER Detailed
     When specified, includes per-component explanations.
+
 .PARAMETER UseAi
     Uses Ollama to generate the explanation instead of rule-based decomposition.
+
 .PARAMETER OutputFormat
     Output format for results: Object (default), Text, or Json.
+
+.OUTPUTS
+    PSCustomObject, System.String, or JSON depending on -OutputFormat.
+
 .EXAMPLE
     Explain-RegexPattern -Pattern '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
     Explains an email regex pattern.
+
 .EXAMPLE
     Explain-RegexPattern -Pattern '^user-\d+$' -OutputFormat Text
     Returns a plain-text explanation.
-.OUTPUTS
-    PSCustomObject, System.String, or JSON depending on -OutputFormat.
 #>
 function Explain-RegexPattern {
     [CmdletBinding()]
@@ -771,24 +820,32 @@ Set-AgentModeAlias -Name 'regex-to-description' -Target 'Explain-RegexPattern'
 <#
 .SYNOPSIS
     Validates natural language regex description round-trip consistency.
+
 .DESCRIPTION
     Converts a description to a regex pattern, explains it back to natural language,
     and scores similarity between the original and explained descriptions.
+
 .PARAMETER Description
     Natural language description to validate.
+
 .PARAMETER Anchored
     When specified, wraps the generated pattern with ^ and $.
+
 .PARAMETER IgnoreCase
     When specified, marks the pattern as case-insensitive.
+
 .PARAMETER MinimumSimilarity
     Minimum similarity score required for a consistent round-trip.
+
 .PARAMETER OutputFormat
     Output format for results: Object (default), Text, or Json.
+
+.OUTPUTS
+    PSCustomObject with similarity and consistency metrics.
+
 .EXAMPLE
     Test-RegexDescriptionRoundTrip -Description 'email'
     Validates round-trip consistency for an email description.
-.OUTPUTS
-    PSCustomObject with similarity and consistency metrics.
 #>
 function Test-RegexDescriptionRoundTrip {
     [CmdletBinding()]
@@ -818,17 +875,22 @@ Set-AgentModeAlias -Name 'regex-roundtrip' -Target 'Test-RegexDescriptionRoundTr
 <#
 .SYNOPSIS
     Exports the natural language regex catalog to JSON or Markdown.
+
 .DESCRIPTION
     Exports catalog entries with patterns, aliases, and notes. Optionally writes to a file.
+
 .PARAMETER Format
     Export format: Json or Markdown.
+
 .PARAMETER Path
     Optional output file path.
+
+.OUTPUTS
+    System.String export contents.
+
 .EXAMPLE
     Export-RegexDescriptionCatalog -Format Markdown -Path ./regex-catalog.md
     Exports the catalog as Markdown.
-.OUTPUTS
-    System.String export contents.
 #>
 function Export-RegexDescriptionCatalog {
     [CmdletBinding()]
@@ -847,42 +909,58 @@ Set-AgentModeAlias -Name 'regex-catalog-export' -Target 'Export-RegexDescription
 <#
 .SYNOPSIS
     Builds a natural language regex description interactively or from segments.
+
 .DESCRIPTION
     Guides you through building a regex description from catalog entries, composed
     segments, or either/or options. Converts the result and optionally tests samples.
+
 .PARAMETER Description
     Uses a pre-built description instead of prompting interactively.
+
 .PARAMETER Segments
     Ordered phrase segments for non-interactive composition.
+
 .PARAMETER Alternation
     When specified with -Segments, builds an either/or description.
+
 .PARAMETER Anchored
     When specified, anchors the generated pattern to the full input.
+
 .PARAMETER IgnoreCase
     When specified, marks the pattern as case-insensitive.
+
 .PARAMETER SampleMatch
     Expected matching samples for the generated pattern.
+
 .PARAMETER SampleNoMatch
     Expected non-matching samples for the generated pattern.
+
 .PARAMETER SessionPath
     Optional path for saving the builder session as JSON.
+
 .PARAMETER SaveSession
     When specified, saves the session to -SessionPath or an auto-generated file.
+
 .PARAMETER NonInteractive
     Requires -Description or -Segments and skips prompts.
+
 .PARAMETER OutputFormat
     Output format for results: Object (default), Text, or Json.
+
+.OUTPUTS
+    PSCustomObject with Description, Pattern, Conversion, Session, and optional SessionPath members.
+
 .EXAMPLE
-    Start-RegexDescriptionBuilder
+    Start-RegexDescriptionBuilder -Description 'value' -Segments @()
     Starts the interactive regex description builder.
+
 .EXAMPLE
     Start-RegexDescriptionBuilder -Segments "starts with 'svc-'", 'digits' -Anchored -NonInteractive
     Builds and converts a description without prompts.
+
 .EXAMPLE
     Start-RegexDescriptionBuilder -Description 'email' -SaveSession -SessionPath ./email-regex.json
     Builds and persists a regex session file.
-.OUTPUTS
-    PSCustomObject with Description, Pattern, Conversion, Session, and optional SessionPath members.
 #>
 function Start-RegexDescriptionBuilder {
     [CmdletBinding()]

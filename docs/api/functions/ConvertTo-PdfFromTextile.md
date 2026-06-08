@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-PdfFromTextile -InputPath "document.textile"
-    
-    Converts document.textile to document.pdf.
-``
+```
+
+Converts document.textile to document.pdf.
 
 ## Aliases
 

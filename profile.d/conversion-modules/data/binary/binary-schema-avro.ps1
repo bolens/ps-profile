@@ -382,8 +382,7 @@ Set-AgentModeAlias -Name 'avro-to-json-evolve' -Target 'ConvertFrom-AvroToJsonWi
     - BackwardCompatible: Whether writer can read reader's data
     - Errors: Array of any compatibility errors
 .EXAMPLE
-    Test-AvroSchemaCompatibility
-
+    Test-AvroSchemaCompatibility -WriterSchemaPath 'value' -ReaderSchemaPath 'value'
 #>
 function Test-AvroSchemaCompatibility {
     param([string]$WriterSchemaPath, [string]$ReaderSchemaPath)

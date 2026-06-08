@@ -33,17 +33,19 @@ Add to specific group (--group).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-PdmPackage requests
-        Adds requests as production dependency.
-``
+```
+
+Adds requests as production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-PdmPackage pytest -Dev
-        Adds pytest as dev dependency.
-``
+```
+
+Adds pytest as dev dependency.
 
 ## Aliases
 

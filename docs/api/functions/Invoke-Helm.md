@@ -25,15 +25,15 @@ Arguments to pass to helm.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Helm --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Helm list
-``
+```
 
 ## Aliases
 

@@ -30,10 +30,11 @@ System.String The ModHex representation of the input URL encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello%20World" | ConvertFrom-UrlToModHex
-    Converts URL encoding to ModHex.
-``
+```
+
+Converts URL encoding to ModHex.
 
 ## Aliases
 

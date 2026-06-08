@@ -30,27 +30,27 @@ System.TimeSpan Returns a TimeSpan object representing the duration.
 
 ### Example 1
 
-`powershell
+```powershell
 "2 hours" | ConvertFrom-DurationToTimeSpan
-    
-    Converts "2 hours" to a TimeSpan object.
-``
+```
+
+Converts "2 hours" to a TimeSpan object.
 
 ### Example 2
 
-`powershell
+```powershell
 "1 day 3 hours 15 minutes" | ConvertFrom-DurationToTimeSpan
-    
-    Converts a complex duration to a TimeSpan object.
-``
+```
+
+Converts a complex duration to a TimeSpan object.
 
 ### Example 3
 
-`powershell
+```powershell
 "3600" | ConvertFrom-DurationToTimeSpan
-    
-    Converts a number (assumed to be seconds) to a TimeSpan object.
-``
+```
+
+Converts a number (assumed to be seconds) to a TimeSpan object.
 
 ## Aliases
 

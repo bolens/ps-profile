@@ -25,17 +25,19 @@ Package names to update (optional, updates all if omitted).
 
 ### Example 1
 
-`powershell
-Update-BrewPackages
-        Updates all packages.
-``
+```powershell
+Update-BrewPackages -Packages 'package-name'
+```
+
+Updates all packages.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-BrewPackages git
-        Updates git package.
-``
+```
+
+Updates git package.
 
 ## Aliases
 

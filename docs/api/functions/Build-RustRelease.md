@@ -30,17 +30,19 @@ System.String. Output from cargo build execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Build-RustRelease
-        Builds the current project in release mode.
-``
+```
+
+Builds the current project in release mode.
 
 ### Example 2
 
-`powershell
+```powershell
 Build-RustRelease --bin myapp
-        Builds a specific binary in release mode.
-``
+```
+
+Builds a specific binary in release mode.
 
 ## Aliases
 

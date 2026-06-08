@@ -25,15 +25,15 @@ Arguments to pass to gcloud.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GCloud --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GCloud config list
-``
+```
 
 ## Aliases
 

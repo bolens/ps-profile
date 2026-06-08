@@ -34,15 +34,15 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-BarcodeToText -InputPath "barcode.png"
-    
-    Decodes barcode.png to barcode.txt.
-``
+```
+
+Decodes barcode.png to barcode.txt.
 
 ## Notes
 
-Full barcode decoding requires additional libraries. This function currently indicates the requirement.
+Full barcode decoding requires additional libraries. This function currently indicates the requirement. .EXAMPLE ConvertFrom-BarcodeToText -InputPath "barcode.png" Decodes barcode.png to barcode.txt.
 
 
 ## Aliases

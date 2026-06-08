@@ -6,7 +6,7 @@
 # Podman-first compose helpers (separate functions for convenience)
 if (-not (Test-Path Function:Start-ContainerComposePodman)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Starts container services using compose (Podman-first).
     .DESCRIPTION
         Runs 'compose up -d' using the available container engine, preferring Podman over Docker.
@@ -14,8 +14,8 @@ if (-not (Test-Path Function:Start-ContainerComposePodman)) {
     .PARAMETER args
         Additional arguments forwarded to compose up -d.
     .EXAMPLE
-        Start-ContainerComposePodman
-    #>
+    Start-ContainerComposePodman -args @('--version')
+#>
     function Start-ContainerComposePodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -40,7 +40,7 @@ if (-not (Test-Path Function:Start-ContainerComposePodman)) {
 
 if (-not (Test-Path Function:Stop-ContainerComposePodman)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Stops container services using compose (Podman-first).
     .DESCRIPTION
         Runs 'compose down' using the available container engine, preferring Podman over Docker.
@@ -48,8 +48,8 @@ if (-not (Test-Path Function:Stop-ContainerComposePodman)) {
     .PARAMETER args
         Additional arguments forwarded to compose down.
     .EXAMPLE
-        Stop-ContainerComposePodman
-    #>
+    Stop-ContainerComposePodman -args @('--version')
+#>
     function Stop-ContainerComposePodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -74,7 +74,7 @@ if (-not (Test-Path Function:Stop-ContainerComposePodman)) {
 
 if (-not (Test-Path Function:Get-ContainerComposeLogsPodman)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Shows container logs using compose (Podman-first).
     .DESCRIPTION
         Runs 'compose logs -f' using the available container engine, preferring Podman over Docker.
@@ -82,8 +82,8 @@ if (-not (Test-Path Function:Get-ContainerComposeLogsPodman)) {
     .PARAMETER args
         Additional arguments forwarded to compose logs -f.
     .EXAMPLE
-        Get-ContainerComposeLogsPodman
-    #>
+    Get-ContainerComposeLogsPodman -args @('--version')
+#>
     function Get-ContainerComposeLogsPodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -108,7 +108,7 @@ if (-not (Test-Path Function:Get-ContainerComposeLogsPodman)) {
 
 if (-not (Test-Path Function:Clear-ContainerSystemPodman)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Prunes unused container system resources (Podman-first).
     .DESCRIPTION
         Runs 'system prune -f' using the available container engine, preferring Podman over Docker.
@@ -116,8 +116,8 @@ if (-not (Test-Path Function:Clear-ContainerSystemPodman)) {
     .PARAMETER args
         Additional arguments forwarded to system prune -f.
     .EXAMPLE
-        Clear-ContainerSystemPodman
-    #>
+    Clear-ContainerSystemPodman -args @('--version')
+#>
     function Clear-ContainerSystemPodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo

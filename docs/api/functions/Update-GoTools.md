@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-GoTools
-        Updates all Go development tools to their latest versions.
-``
+```
+
+Updates all Go development tools to their latest versions.
 
 ## Aliases
 

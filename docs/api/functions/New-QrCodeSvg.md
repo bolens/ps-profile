@@ -49,10 +49,11 @@ Margin size in modules. Default is 4.
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeSvg -Data "https://example.com" -OutputPath "qrcode.svg"
-    Generates a scalable SVG QR code for the URL.
-``
+```
+
+Generates a scalable SVG QR code for the URL.
 
 ## Aliases
 

@@ -10,7 +10,7 @@ scripts/repro_set_agentmode.ps1
     Used by CI (smoke-check.yml and ci-matrix.yml) to catch regressions in the bootstrap layer.
 
 .NOTES
-    Load-order dependency: profile.d/00-bootstrap.ps1 must be parseable and dot-sourceable.
+    Load-order dependency: profile.d/bootstrap.ps1 must be parseable and dot-sourceable.
 #>
 
 [CmdletBinding()]
@@ -25,7 +25,7 @@ Write-Verbose 'repro_set_agentmode: starting'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
 # Source the bootstrap fragment which defines Set-AgentModeFunction / Set-AgentModeAlias
-$bootstrapPath = Join-Path $repoRoot 'profile.d' '00-bootstrap.ps1'
+$bootstrapPath = Join-Path $repoRoot 'profile.d' 'bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $bootstrapPath)) {
     Write-Error "Bootstrap file not found: $bootstrapPath"
     exit 1
@@ -36,11 +36,11 @@ Write-Verbose "Sourcing bootstrap: $bootstrapPath"
 
 # Verify the helpers are now available
 if (-not (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue)) {
-    Write-Error 'Set-AgentModeFunction not available after sourcing 00-bootstrap.ps1'
+    Write-Error 'Set-AgentModeFunction not available after sourcing bootstrap.ps1'
     exit 1
 }
 if (-not (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue)) {
-    Write-Error 'Set-AgentModeAlias not available after sourcing 00-bootstrap.ps1'
+    Write-Error 'Set-AgentModeAlias not available after sourcing bootstrap.ps1'
     exit 1
 }
 

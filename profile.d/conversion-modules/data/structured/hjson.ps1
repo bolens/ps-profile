@@ -409,20 +409,25 @@ function Initialize-FileConversion-Hjson {
 <#
 .SYNOPSIS
     Converts an HJSON file to JSON format.
+
 .DESCRIPTION
     Converts an HJSON (Human JSON) file to standard JSON format.
     Removes comments, normalizes unquoted keys, and removes trailing commas.
+
 .PARAMETER InputPath
     The path to the HJSON file.
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output JSON file.
+
 .EXAMPLE
     ConvertFrom-HjsonToJson -InputPath 'config.hjson'
     
     Converts config.hjson to config.json.
-.OUTPUTS
-    System.String
-    Returns the path to the output JSON file.
 #>
 function ConvertFrom-HjsonToJson {
     param(
@@ -439,20 +444,25 @@ Set-Alias -Name hjson-to-json -Value ConvertFrom-HjsonToJson -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts a JSON file to HJSON format.
+
 .DESCRIPTION
     Converts a standard JSON file to HJSON (Human JSON) format.
     Removes quotes from simple keys to make it more human-readable.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output HJSON file. If not specified, uses input path with .hjson extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output HJSON file.
+
 .EXAMPLE
     ConvertTo-HjsonFromJson -InputPath 'config.json'
     
     Converts config.json to config.hjson.
-.OUTPUTS
-    System.String
-    Returns the path to the output HJSON file.
 #>
 function ConvertTo-HjsonFromJson {
     param(
@@ -469,19 +479,24 @@ Set-Alias -Name json-to-hjson -Value ConvertTo-HjsonFromJson -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts an HJSON file to YAML format.
+
 .DESCRIPTION
     Converts an HJSON file to YAML format via JSON intermediate conversion.
+
 .PARAMETER InputPath
     The path to the HJSON file.
+
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output YAML file.
+
 .EXAMPLE
     ConvertFrom-HjsonToYaml -InputPath 'config.hjson'
     
     Converts config.hjson to config.yaml.
-.OUTPUTS
-    System.String
-    Returns the path to the output YAML file.
 #>
 function ConvertFrom-HjsonToYaml {
     param(
@@ -498,19 +513,24 @@ Set-Alias -Name hjson-to-yaml -Value ConvertFrom-HjsonToYaml -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts a YAML file to HJSON format.
+
 .DESCRIPTION
     Converts a YAML file to HJSON format via JSON intermediate conversion.
+
 .PARAMETER InputPath
     The path to the YAML file.
+
 .PARAMETER OutputPath
     The path for the output HJSON file. If not specified, uses input path with .hjson extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output HJSON file.
+
 .EXAMPLE
     ConvertTo-HjsonFromYaml -InputPath 'config.yaml'
     
     Converts config.yaml to config.hjson.
-.OUTPUTS
-    System.String
-    Returns the path to the output HJSON file.
 #>
 function ConvertTo-HjsonFromYaml {
     param(

@@ -34,11 +34,11 @@ System.String Returns the path to the output JSON file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-JsoncToJson -InputPath 'settings.jsonc'
-    
-    Converts settings.jsonc to settings.json.
-``
+```
+
+Converts settings.jsonc to settings.json.
 
 ## Aliases
 

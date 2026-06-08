@@ -25,9 +25,9 @@ Additional arguments forwarded to compose up -d.
 
 ### Example 1
 
-`powershell
-Start-ContainerComposePodman
-``
+```powershell
+Start-ContainerComposePodman -args @('--version')
+```
 
 ## Aliases
 

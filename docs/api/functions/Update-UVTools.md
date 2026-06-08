@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-UVTools
-        Upgrades all globally installed uv tools.
-``
+```
+
+Upgrades all globally installed uv tools.
 
 ## Aliases
 

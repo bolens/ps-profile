@@ -25,10 +25,11 @@ Tool names with versions to uninstall.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-VoltaTool node@18
-        Uninstalls Node.js 18.
-``
+```
+
+Uninstalls Node.js 18.
 
 ## Aliases
 

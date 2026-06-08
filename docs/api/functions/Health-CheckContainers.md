@@ -34,19 +34,19 @@ System.Object. Health check results.
 
 ### Example 1
 
-`powershell
-Health-CheckContainers
-        
-        Checks health of all running containers.
-``
+```powershell
+Health-CheckContainers -Container 'value' -Format 'value'
+```
+
+Checks health of all running containers.
 
 ### Example 2
 
-`powershell
+```powershell
 Health-CheckContainers -Container "my-container" -Format json
-        
-        Checks health of my-container in JSON format.
-``
+```
+
+Checks health of my-container in JSON format.
 
 ## Source
 

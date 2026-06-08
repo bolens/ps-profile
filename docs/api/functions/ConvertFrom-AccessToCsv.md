@@ -33,9 +33,9 @@ Optional. Name of the table to export. If not specified, exports the first table
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AccessToCsv -InputPath ./input.file
-``
+```
 
 ## Aliases
 

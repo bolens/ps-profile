@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-BunSelf
-    Updates Bun to the latest version.
-``
+```
+
+Updates Bun to the latest version.
 
 ## Aliases
 

@@ -22,11 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Start-RancherDesktop
-        
-        Launches Rancher Desktop GUI.
-``
+```
+
+Launches Rancher Desktop GUI.
 
 ## Source
 

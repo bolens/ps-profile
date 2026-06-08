@@ -21,8 +21,7 @@ scripts/utils/metrics/modules/DashboardDataLoader.psm1
 .OUTPUTS
     Hashtable with CodeMetrics, PerformanceMetrics, and CoverageTrends properties.
 .EXAMPLE
-    Get-DashboardMetrics
-
+    Get-DashboardMetrics -RepoRoot 'value'
 #>
 function Get-DashboardMetrics {
     param(
@@ -88,8 +87,7 @@ function Get-DashboardMetrics {
 .OUTPUTS
     Array of historical metrics objects.
 .EXAMPLE
-    Get-DashboardHistoricalData
-
+    Get-DashboardHistoricalData -HistoricalDataPath 'value'
 #>
 function Get-DashboardHistoricalData {
     param(

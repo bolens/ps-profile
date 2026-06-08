@@ -103,9 +103,6 @@ function New-VueApp {
     Arguments to pass to vue serve.
 
 .EXAMPLE
-    Start-VueDev
-
-.EXAMPLE
     Start-VueDev --port 8080
 #>
 function Start-VueDev {

@@ -30,24 +30,27 @@ System.String. Output from ComfyUI CLI execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-ComfyUI install
-        Installs ComfyUI.
-``
+```
+
+Installs ComfyUI.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-ComfyUI launch
-        Launches ComfyUI server.
-``
+```
+
+Launches ComfyUI server.
 
 ### Example 3
 
-`powershell
+```powershell
 Invoke-ComfyUI node install custom-node-name
-        Installs a custom node.
-``
+```
+
+Installs a custom node.
 
 ## Aliases
 

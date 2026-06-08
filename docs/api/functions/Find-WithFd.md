@@ -54,27 +54,27 @@ System.String[]. Array of matching file/directory paths.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-WithFd -Pattern "test"
-    
-    Finds all files and directories containing "test" in the name.
-``
+```
+
+Finds all files and directories containing "test" in the name.
 
 ### Example 2
 
-`powershell
+```powershell
 Find-WithFd -Pattern "*.ps1" -Type f -Extension "ps1"
-    
-    Finds all PowerShell script files.
-``
+```
+
+Finds all PowerShell script files.
 
 ### Example 3
 
-`powershell
+```powershell
 Find-WithFd -Pattern "config" -Path "C:\Users" -Hidden
-    
-    Finds config files including hidden ones.
-``
+```
+
+Finds config files including hidden ones.
 
 ## Aliases
 

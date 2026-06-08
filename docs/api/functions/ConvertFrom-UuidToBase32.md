@@ -34,11 +34,11 @@ System.String Returns the UUID in Base32 format.
 
 ### Example 1
 
-`powershell
+```powershell
 "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-UuidToBase32
-    
-    Converts UUID to Base32 format.
-``
+```
+
+Converts UUID to Base32 format.
 
 ## Aliases
 

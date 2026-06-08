@@ -153,19 +153,24 @@ function Initialize-FileConversion-CoreEncodingBinary {
 <#
 .SYNOPSIS
     Converts binary string to ASCII text.
+
 .DESCRIPTION
     Converts a binary string back to ASCII text. The binary string should contain 8-bit chunks representing UTF-8 bytes.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToAscii
-    Converts binary to "Hi".
-.EXAMPLE
-    ConvertFrom-BinaryToAscii -InputObject "0100000101000010"
-    Converts binary without spaces to "AB".
+
 .OUTPUTS
     System.String
     The ASCII text representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToAscii
+    Converts binary to "Hi".
+
+.EXAMPLE
+    ConvertFrom-BinaryToAscii -InputObject "0100000101000010"
+    Converts binary without spaces to "AB".
 #>
 function ConvertFrom-BinaryToAscii {
     [CmdletBinding()]
@@ -190,19 +195,24 @@ Set-AgentModeAlias -Name 'binary-to-ascii' -Target 'ConvertFrom-BinaryToAscii'
 <#
 .SYNOPSIS
     Converts binary string to hexadecimal representation.
+
 .DESCRIPTION
     Converts a binary string to hexadecimal string representation. Each 8-bit binary chunk is converted to a hex byte.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToHex
-    Converts binary to hex.
-.EXAMPLE
-    ConvertFrom-BinaryToHex -InputObject "11111111"
-    Converts binary to "FF".
+
 .OUTPUTS
     System.String
     The hexadecimal representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToHex
+    Converts binary to hex.
+
+.EXAMPLE
+    ConvertFrom-BinaryToHex -InputObject "11111111"
+    Converts binary to "FF".
 #>
 function ConvertFrom-BinaryToHex {
     [CmdletBinding()]
@@ -225,19 +235,24 @@ Set-AgentModeAlias -Name 'binary-to-hex' -Target 'ConvertFrom-BinaryToHex'
 <#
 .SYNOPSIS
     Converts binary string to ModHex representation.
+
 .DESCRIPTION
     Converts a binary string to ModHex (modified hexadecimal) representation. First converts binary to hex, then hex to ModHex.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToModHex
-    Converts binary to ModHex.
-.EXAMPLE
-    ConvertFrom-BinaryToModHex -InputObject "11111111"
-    Converts binary to ModHex.
+
 .OUTPUTS
     System.String
     The ModHex representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToModHex
+    Converts binary to ModHex.
+
+.EXAMPLE
+    ConvertFrom-BinaryToModHex -InputObject "11111111"
+    Converts binary to ModHex.
 #>
 function ConvertFrom-BinaryToModHex {
     [CmdletBinding()]
@@ -260,18 +275,23 @@ Set-AgentModeAlias -Name 'binary-to-modhex' -Target 'ConvertFrom-BinaryToModHex'
 <#
 .SYNOPSIS
     Converts binary string to octal representation.
+
 .DESCRIPTION
     Converts a binary string to octal string representation.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between octal bytes. Default is a space.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToOctal
-    Converts binary to octal.
+
 .OUTPUTS
     System.String
     The octal representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToOctal
+    Converts binary to octal.
 #>
 function ConvertFrom-BinaryToOctal {
     [CmdletBinding()]
@@ -295,18 +315,23 @@ Set-AgentModeAlias -Name 'binary-to-octal' -Target 'ConvertFrom-BinaryToOctal'
 <#
 .SYNOPSIS
     Converts binary string to decimal representation.
+
 .DESCRIPTION
     Converts a binary string to decimal string representation.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between decimal values. Default is a space.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToDecimal
-    Converts binary to decimal.
+
 .OUTPUTS
     System.String
     The decimal representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToDecimal
+    Converts binary to decimal.
 #>
 function ConvertFrom-BinaryToDecimal {
     [CmdletBinding()]
@@ -330,18 +355,23 @@ Set-AgentModeAlias -Name 'binary-to-decimal' -Target 'ConvertFrom-BinaryToDecima
 <#
 .SYNOPSIS
     Converts binary string to Roman numeral representation.
+
 .DESCRIPTION
     Converts a binary string to Roman numeral string representation.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between Roman numerals. Default is a space.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToRoman
-    Converts binary to Roman numerals.
+
 .OUTPUTS
     System.String
     The Roman numeral representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToRoman
+    Converts binary to Roman numerals.
 #>
 function ConvertFrom-BinaryToRoman {
     [CmdletBinding()]
@@ -365,16 +395,20 @@ Set-AgentModeAlias -Name 'binary-to-roman' -Target 'ConvertFrom-BinaryToRoman'
 <#
 .SYNOPSIS
     Converts binary string to Base32 representation.
+
 .DESCRIPTION
     Converts a binary string to Base32 string representation.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToBase32
-    Converts binary to Base32.
+
 .OUTPUTS
     System.String
     The Base32 representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToBase32
+    Converts binary to Base32.
 #>
 function ConvertFrom-BinaryToBase32 {
     [CmdletBinding()]
@@ -397,16 +431,20 @@ Set-AgentModeAlias -Name 'binary-to-base32' -Target 'ConvertFrom-BinaryToBase32'
 <#
 .SYNOPSIS
     Converts binary string to URL/percent encoded representation.
+
 .DESCRIPTION
     Converts a binary string to URL/percent encoded string representation.
+
 .PARAMETER InputObject
     The binary string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "01001000 01101001" | ConvertFrom-BinaryToUrl
-    Converts binary to URL encoding.
+
 .OUTPUTS
     System.String
     The URL/percent encoded representation of the input binary string.
+
+.EXAMPLE
+    "01001000 01101001" | ConvertFrom-BinaryToUrl
+    Converts binary to URL encoding.
 #>
 function ConvertFrom-BinaryToUrl {
     [CmdletBinding()]

@@ -103,20 +103,25 @@ try {
 <#
 .SYNOPSIS
     Generates a UUID (Universally Unique Identifier).
+
 .DESCRIPTION
     Generates a UUID of the specified version. Supports v1 (time-based) and v4 (random).
     Note: v1 uses a simplified implementation. For true time-based UUIDs, use external libraries.
+
 .PARAMETER Version
     The UUID version to generate. Default is v4 (random).
-.EXAMPLE
-    New-Uuid
-    Generates a random UUID v4.
-.EXAMPLE
-    New-Uuid -Version v1
-    Generates a time-based UUID v1 (simplified).
+
 .OUTPUTS
     System.String
     The generated UUID string.
+
+.EXAMPLE
+    New-Uuid -Version '1.0.0'
+    Generates a random UUID v4.
+
+.EXAMPLE
+    New-Uuid -Version v1
+    Generates a time-based UUID v1 (simplified).
 #>
 function New-Uuid {
     param(
@@ -131,19 +136,24 @@ Set-AgentModeAlias -Name 'guid' -Target 'New-Uuid'
 <#
 .SYNOPSIS
     Generates a UUID v5 (name-based).
+
 .DESCRIPTION
     Generates a UUID v5 from a namespace and name using SHA-1 hashing.
     Requires Node.js and uuid package.
+
 .PARAMETER Namespace
     The namespace UUID (e.g., DNS, URL namespace).
+
 .PARAMETER Name
     The name to generate UUID from.
-.EXAMPLE
-    New-UuidV5 -Namespace "6ba7b810-9dad-11d1-80b4-00c04fd430c8" -Name "example.com"
-    Generates a UUID v5 for the given namespace and name.
+
 .OUTPUTS
     System.String
     The generated UUID v5 string.
+
+.EXAMPLE
+    New-UuidV5 -Namespace "6ba7b810-9dad-11d1-80b4-00c04fd430c8" -Name "example.com"
+    Generates a UUID v5 for the given namespace and name.
 #>
 function New-UuidV5 {
     param([string]$Namespace, [string]$Name)

@@ -25,17 +25,19 @@ Path to the package.json file to import. Defaults to "npm-global-packages.json" 
 
 ### Example 1
 
-`powershell
-Import-NpmGlobalPackages
-        Restores global packages from npm-global-packages.json in current directory.
-``
+```powershell
+Import-NpmGlobalPackages -Path ./path
+```
+
+Restores global packages from npm-global-packages.json in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-NpmGlobalPackages -Path "C:\backup\npm-global.json"
-        Restores global packages from a specific file.
-``
+```
+
+Restores global packages from a specific file.
 
 ## Aliases
 

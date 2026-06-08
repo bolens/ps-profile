@@ -25,15 +25,9 @@ Arguments to pass to terraform plan.
 
 ### Example 1
 
-`powershell
-Get-TerraformPlan
-``
-
-### Example 2
-
-`powershell
+```powershell
 Get-TerraformPlan -out=tfplan
-``
+```
 
 ## Aliases
 

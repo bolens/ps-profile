@@ -30,17 +30,19 @@ System.String The ASCII text representation of the input Roman numeral string.
 
 ### Example 1
 
-`powershell
+```powershell
 "LXXII CV" | ConvertFrom-RomanToAscii
-    Converts Roman numerals to "Hi".
-``
+```
+
+Converts Roman numerals to "Hi".
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-RomanToAscii -InputObject "LXV LXVII"
-    Converts Roman numerals to "AB".
-``
+```
+
+Converts Roman numerals to "AB".
 
 ## Aliases
 

@@ -27,11 +27,11 @@ System.Object[]. Array of emulator information objects.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-EmulatorList
-        
-        Lists all available emulators.
-``
+```
+
+Lists all available emulators.
 
 ## Source
 

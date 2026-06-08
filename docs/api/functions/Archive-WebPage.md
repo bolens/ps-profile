@@ -29,11 +29,11 @@ Path to save the archived HTML file. Defaults to page title with .html extension
 
 ### Example 1
 
-`powershell
+```powershell
 Archive-WebPage -Url "https://example.com/article"
-        
-        Archives a web page as standalone HTML.
-``
+```
+
+Archives a web page as standalone HTML.
 
 ## Source
 

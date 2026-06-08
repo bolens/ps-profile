@@ -40,15 +40,15 @@ System.String Returns the path to the decompressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Expand-Zstd -InputPath 'data.txt.zst'
-    
-    Decompresses data.txt.zst to data.txt.
-``
+```
+
+Decompresses data.txt.zst to data.txt.
 
 ## Notes
 
-Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd). .OUTPUTS System.String Returns the path to the decompressed file.
+Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd). .EXAMPLE Expand-Zstd -InputPath 'data.txt.zst' Decompresses data.txt.zst to data.txt.
 
 
 ## Aliases

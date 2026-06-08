@@ -33,17 +33,19 @@ Specific version to remove (--version).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-GemPackage rails
-        Removes rails from global installation.
-``
+```
+
+Removes rails from global installation.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-GemPackage rails -User
-        Removes rails from user directory.
-``
+```
+
+Removes rails from user directory.
 
 ## Aliases
 

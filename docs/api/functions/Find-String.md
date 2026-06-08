@@ -29,13 +29,9 @@ File or directory path to search. Defaults to the current directory when omitted
 
 ### Example 1
 
-`powershell
+```powershell
 Find-String -Pattern 'TODO' -Path ./src
-.PARAMETER Pattern
-    Text or regex pattern to search for.
-.PARAMETER Path
-    File or directory path to search. Defaults to the current directory when omitted.
-``
+```
 
 ## Aliases
 

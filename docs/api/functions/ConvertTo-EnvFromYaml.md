@@ -34,11 +34,11 @@ System.String Returns the path to the output .env file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-EnvFromYaml -InputPath 'config.yaml'
-    
-    Converts config.yaml to config.env.
-``
+```
+
+Converts config.yaml to config.env.
 
 ## Aliases
 

@@ -29,9 +29,9 @@ Path for the output LaTeX file. If not specified, uses input path with .tex exte
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AsciidocToLatex -InputPath "document.adoc" -OutputPath "document.tex"
-``
+```
 
 ## Aliases
 

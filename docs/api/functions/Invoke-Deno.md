@@ -25,15 +25,15 @@ Arguments to pass to deno.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Deno --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Deno run app.ts
-``
+```
 
 ## Aliases
 

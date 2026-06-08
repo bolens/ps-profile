@@ -46,17 +46,19 @@ System.String. HTTP response from httpie.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Httpie -Method GET -Url "https://api.example.com/users"
-        Makes a GET request to the specified URL.
-``
+```
+
+Makes a GET request to the specified URL.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Httpie -Method POST -Url "https://api.example.com/users" -Body '{"name":"John"}'
-        Makes a POST request with a JSON body.
-``
+```
+
+Makes a POST request with a JSON body.
 
 ## Aliases
 

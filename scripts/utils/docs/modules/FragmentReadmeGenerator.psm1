@@ -30,8 +30,7 @@ scripts/utils/docs/modules/FragmentReadmeGenerator.psm1
 .OUTPUTS
     String. Complete markdown content for the README.
 .EXAMPLE
-    New-FragmentReadmeContent
-
+    New-FragmentReadmeContent -FileName 'value' -Purpose 'value' -Functions $functions -EnableHelpers @()
 #>
 function New-FragmentReadmeContent {
     [CmdletBinding()]

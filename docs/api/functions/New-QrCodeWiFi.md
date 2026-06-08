@@ -49,10 +49,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeWiFi -Ssid "MyNetwork" -Password "MyPassword123"
-    Generates a WiFi QR code that can be scanned to connect to the network.
-``
+```
+
+Generates a WiFi QR code that can be scanned to connect to the network.
 
 ## Aliases
 

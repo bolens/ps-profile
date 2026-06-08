@@ -25,11 +25,9 @@ URL-encoded text to decode back to plain text.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-UrlEncoded -text 'hello%20world'
-.PARAMETER text
-    URL-encoded text to decode back to plain text.
-``
+```
 
 ## Aliases
 

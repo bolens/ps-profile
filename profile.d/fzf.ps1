@@ -31,8 +31,7 @@
     Optional pattern to filter files before passing to fzf.
 
 .EXAMPLE
-    Find-FileFuzzy
-
+    Find-FileFuzzy -Pattern 'search-term'
 .EXAMPLE
     Find-FileFuzzy -Pattern "\.ps1$"
 #>
@@ -65,7 +64,7 @@ function Find-FileFuzzy {
     Lists all available commands and uses fzf to interactively select one.
 
 .EXAMPLE
-    Find-CommandFuzzy
+    Find-CommandFuzzy -Pattern 'search-term'
 #>
 function Find-CommandFuzzy {
     [CmdletBinding()]

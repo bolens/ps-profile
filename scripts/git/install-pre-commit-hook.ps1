@@ -86,7 +86,7 @@ if ($Restore) {
         Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Restored pre-commit hook from backup to $restoredPath"
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
     }
 }
 
@@ -96,7 +96,7 @@ if ($Prune) {
         Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Pruned $removed pre-commit hook backup(s)"
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -ErrorRecord $_
+        Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
     }
 }
 

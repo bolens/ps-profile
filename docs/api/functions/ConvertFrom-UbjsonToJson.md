@@ -38,11 +38,11 @@ System.String Returns the path to the output JSON file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-UbjsonToJson -InputPath 'data.ubjson'
-    
-    Converts data.ubjson to data.json.
-``
+```
+
+Converts data.ubjson to data.json.
 
 ## Aliases
 

@@ -6,68 +6,21 @@
     Resolves source files for *.tests.ps1 files and runs `drift link` so test
     bindings are recorded in drift.lock. Skips tests whose source cannot be
     resolved confidently.
-.PARAMETER TestFile
-    Specific test file or directory path.
-.EXAMPLE
-    Get-SourcePathsForTestFile
 
-#>ARAMETER BaseName
-    Base file name without extension.
-.EXAMPLE
-    Resolve-IntegrationToolPaths
+.PARAMETER DryRun
+    Shows bindings that would be created without writing drift.lock.
 
-#>ARAMETER BaseName
-    Base file name without extension.
-.EXAMPLE
-    Resolve-ProfileFragmentPaths
+.PARAMETER Refresh
+    Re-links all discovered tests, replacing existing bindings.
 
-#>ARAMETER BaseName
-    Base file name without extension.
-.EXAMPLE
-    Resolve-TestSupportPaths
+.PARAMETER TestPath
+    Limits linking to specific test files or directories under tests/.
 
-#>ARAMETER BaseName
-    Base file name without extension.
 .EXAMPLE
-    Resolve-TestRunnerPaths
+    pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1
 
-#>ARAMETER BaseName
-    Base file name without extension.
 .EXAMPLE
-    Resolve-LibraryModulePaths
-
-#>ARAMETER BaseName
-    Base file name without extension.
-.EXAMPLE
-    Resolve-ValidationScriptPaths
-
-#>ARAMETER BaseName
-    Base file name without extension.
-.EXAMPLE
-    Resolve-UtilityScriptPaths
-
-#>ARAMETER BaseName
-    Base file name without extension.
-.EXAMPLE
-    Resolve-ProfileExtendedPaths
-
-#>ARAMETER TestRelativePath
-    TestRelativeFile or directory path.
-.EXAMPLE
-    Resolve-ConversionModulePaths
-
-#>ARAMETER Content
-    File or help content as text.
-.PARAMETER RepoRoot
-    Repository root used to resolve relative paths.
-.EXAMPLE
-    Resolve-SourcePathsFromContent
-
-#>ARAMETER KebabName
-    Kebab-case name derived from a source file.
-.EXAMPLE
-    ConvertTo-PascalCase
-
+    pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -DryRun
 #>
 
 param(
@@ -781,12 +734,12 @@ function Get-SourcePathsForTestFile {
             }
         }
     }
-    elseif ($testRelative -like 'tests/unit/library-*') {
+    elseif ($baseName -like 'library-*') {
         foreach ($path in @(Resolve-LibraryModulePaths -BaseName $baseName)) {
             if (-not $paths.Contains($path)) { $paths.Add($path) }
         }
     }
-    elseif ($testRelative -like 'tests/unit/profile-*') {
+    elseif ($baseName -like 'profile-*') {
         foreach ($path in @(Resolve-ProfileExtendedPaths -BaseName $baseName)) {
             if (-not $paths.Contains($path)) { $paths.Add($path) }
         }
@@ -796,22 +749,22 @@ function Get-SourcePathsForTestFile {
             }
         }
     }
-    elseif ($testRelative -like 'tests/unit/utility-*') {
+    elseif ($baseName -like 'utility-*') {
         foreach ($path in @(Resolve-UtilityScriptPaths -BaseName $baseName)) {
             if (-not $paths.Contains($path)) { $paths.Add($path) }
         }
     }
-    elseif ($testRelative -like 'tests/unit/validation-*') {
+    elseif ($baseName -like 'validation-*') {
         foreach ($path in @(Resolve-ValidationScriptPaths -BaseName $baseName)) {
             if (-not $paths.Contains($path)) { $paths.Add($path) }
         }
     }
-    elseif ($testRelative -like 'tests/unit/test-runner-*') {
+    elseif ($baseName -like 'test-runner-*') {
         foreach ($path in @(Resolve-TestRunnerPaths -BaseName $baseName)) {
             if (-not $paths.Contains($path)) { $paths.Add($path) }
         }
     }
-    elseif ($testRelative -like 'tests/unit/test-support-*') {
+    elseif ($baseName -like 'test-support*') {
         foreach ($path in @(Resolve-TestSupportPaths -BaseName $baseName)) {
             if (-not $paths.Contains($path)) { $paths.Add($path) }
         }

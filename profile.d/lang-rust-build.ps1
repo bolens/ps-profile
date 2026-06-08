@@ -32,29 +32,33 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds a Rust project in release mode with optimizations.
     
+
     .DESCRIPTION
         Wrapper function for building Rust projects in release mode. This runs
         'cargo build --release' which enables optimizations and produces smaller,
         faster binaries suitable for production use.
     
+
     .PARAMETER Arguments
         Additional arguments to pass to cargo build.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from cargo build execution.
+
     .EXAMPLE
-        Build-RustRelease
+    Build-RustRelease
         Builds the current project in release mode.
     
+
     .EXAMPLE
         Build-RustRelease --bin myapp
         Builds a specific binary in release mode.
-    
-    .OUTPUTS
-        System.String. Output from cargo build execution.
-    #>
+#>
     function Build-RustRelease {
         [CmdletBinding()]
         [OutputType([string])]
@@ -122,29 +126,33 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates Rust project dependencies to their latest compatible versions.
     
+
     .DESCRIPTION
         Updates Cargo.toml dependencies to their latest versions within the
         specified version constraints. This is a convenience wrapper around
         cargo update.
     
+
     .PARAMETER Arguments
         Additional arguments to pass to cargo update.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from cargo update execution.
+
     .EXAMPLE
-        Update-RustDependencies
+    Update-RustDependencies
         Updates all dependencies in the current project.
     
+
     .EXAMPLE
         Update-RustDependencies --package serde
         Updates only the serde package.
-    
-    .OUTPUTS
-        System.String. Output from cargo update execution.
-    #>
+#>
     function Update-RustDependencies {
         [CmdletBinding()]
         [OutputType([string])]
@@ -212,35 +220,41 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Cleans up Cargo cache and build artifacts.
     
+
     .DESCRIPTION
         Removes cached crates and build artifacts from Cargo's cache directory.
         This helps free up disk space by removing downloaded crates and compiled artifacts.
         Uses cargo-cache if available, otherwise falls back to manual cleanup.
     
+
     .PARAMETER Autoclean
         Use cargo cache --autoclean to automatically clean unused cache entries.
     
+
     .PARAMETER All
         Remove all cache entries (use with caution).
     
+
+    .OUTPUTS
+        System.String. Output from cargo cache cleanup execution.
+
     .EXAMPLE
-        Clear-CargoCache
+    Clear-CargoCache
         Cleans up unused cache entries automatically.
     
+
     .EXAMPLE
         Clear-CargoCache -Autoclean
         Uses cargo cache --autoclean for automatic cleanup.
     
+
     .EXAMPLE
         Clear-CargoCache -All
         Removes all cache entries (aggressive cleanup).
-    
-    .OUTPUTS
-        System.String. Output from cargo cache cleanup execution.
-    #>
+#>
     function Clear-CargoCache {
         [CmdletBinding()]
         [OutputType([string])]

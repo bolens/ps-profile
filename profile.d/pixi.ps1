@@ -13,12 +13,15 @@ if (Test-CachedCommand pixi) {
     <#
 .SYNOPSIS
         Installs packages using pixi.
+
     .DESCRIPTION
         Adds packages to the pixi project environment.
-.EXAMPLE
-    Invoke-PixiInstall numpy
+
 .PARAMETER Package
     Package name to add to the pixi project manifest.
+
+.EXAMPLE
+    Invoke-PixiInstall numpy
 
 #>
     function Invoke-PixiInstall {
@@ -30,14 +33,18 @@ if (Test-CachedCommand pixi) {
     <#
 .SYNOPSIS
         Runs commands in the pixi environment.
+
     .DESCRIPTION
         Executes commands within the pixi-managed environment with all dependencies available.
-.EXAMPLE
-    Invoke-PixiRun -Command python -Args @('script.py')
+
 .PARAMETER Command
     Command to run inside the pixi environment.
+
 .PARAMETER Args
     Additional arguments forwarded to the command.
+
+.EXAMPLE
+    Invoke-PixiRun -Command python -Args @('script.py')
 
 #>
     function Invoke-PixiRun {

@@ -29,9 +29,9 @@ Path for the output SVG file. If not specified, uses input path with .svg extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-SvgFromPng -InputPath "image.png" -OutputPath "image.svg"
-``
+```
 
 ## Aliases
 

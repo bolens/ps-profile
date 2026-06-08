@@ -1,8 +1,7 @@
 <#
-scripts/utils/code-quality/validate-function-naming.ps1
-
 .SYNOPSIS
     Validates PowerShell function naming conventions across the codebase.
+
 
 .DESCRIPTION
     Audits all functions in the codebase to ensure they follow PowerShell naming conventions:
@@ -11,24 +10,18 @@ scripts/utils/code-quality/validate-function-naming.ps1
     - Profile functions use Set-AgentModeFunction for collision-safe registration
     - Documents exceptions to naming conventions
 
+
 .PARAMETER Path
     Path to analyze. Defaults to repository root.
+
 
 .PARAMETER OutputPath
     Optional path to save validation report JSON file.
 
+
 .PARAMETER ExceptionsFile
     Optional path to exceptions documentation file. Defaults to docs/guides/FUNCTION_NAMING_EXCEPTIONS.md
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\code-quality\validate-function-naming.ps1
-
-    Validates all functions in the codebase.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\code-quality\validate-function-naming.ps1 -Path profile.d
-
-    Validates functions in profile.d directory only.
 
 .OUTPUTS
     PSCustomObject with validation results including:
@@ -37,6 +30,17 @@ scripts/utils/code-quality/validate-function-naming.ps1
     - Functions with unapproved verbs
     - Functions not using Set-AgentModeFunction in profile.d
     - Exceptions documented
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\code-quality\validate-function-naming.ps1
+
+    Validates all functions in the codebase.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\code-quality\validate-function-naming.ps1 -Path profile.d
+
+    Validates functions in profile.d directory only.
 #>
 
 [CmdletBinding()]

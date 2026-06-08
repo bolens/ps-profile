@@ -33,11 +33,11 @@ Scan directories recursively.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-YaraScan -FilePath "C:\Downloads\file.exe" -RulesPath "C:\Rules\malware.yar"
-    
-        Scans the file against the specified YARA rules.
-``
+```
+
+Scans the file against the specified YARA rules.
 
 ## Aliases
 

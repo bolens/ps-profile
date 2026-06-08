@@ -43,8 +43,7 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Test-WatcherFileMatch
-
+    Test-WatcherFileMatch -FileName 'value' -FullPath 'value'
 #>
 function Test-WatcherFileMatch {
     [CmdletBinding()]
@@ -248,8 +247,7 @@ function Stop-TestWatcherResources {
 .OUTPUTS
     None - runs until canceled or MaximumDurationSeconds elapses
 .EXAMPLE
-    Start-TestWatcher
-
+    Start-TestWatcher -WatchPaths @() -OnChange 'value'
 #>
 function Start-TestWatcher {
     [CmdletBinding()]

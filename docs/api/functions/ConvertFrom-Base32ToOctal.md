@@ -34,10 +34,11 @@ System.String The octal representation of the input Base32 string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32ToOctal
-    Converts Base32 to octal.
-``
+```
+
+Converts Base32 to octal.
 
 ## Aliases
 

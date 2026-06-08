@@ -29,10 +29,11 @@ Use a smaller version of the terminal QR code.
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeTerminal -Data "https://example.com"
-    Displays a QR code in the terminal that can be scanned.
-``
+```
+
+Displays a QR code in the terminal that can be scanned.
 
 ## Aliases
 

@@ -32,11 +32,11 @@ System.String Returns the UUID in hexadecimal format without dashes.
 
 ### Example 1
 
-`powershell
+```powershell
 "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-UuidToHex
-    
-    Converts UUID to hex format: "550E8400E29B41D4A716446655440000"
-``
+```
+
+Converts UUID to hex format: "550E8400E29B41D4A716446655440000"
 
 ## Aliases
 

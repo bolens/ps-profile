@@ -22,9 +22,9 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Connect-AzureAccount
-``
+```
 
 ## Aliases
 

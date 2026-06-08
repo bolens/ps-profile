@@ -34,19 +34,19 @@ System.String. Project information or list of projects.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-GcpProject -ProjectId "my-project-id"
-        
-        Switches to the specified project.
-``
+```
+
+Switches to the specified project.
 
 ### Example 2
 
-`powershell
+```powershell
 Set-GcpProject -List
-        
-        Lists all available projects.
-``
+```
+
+Lists all available projects.
 
 ## Source
 

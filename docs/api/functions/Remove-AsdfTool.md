@@ -29,10 +29,11 @@ Version to uninstall.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-AsdfTool nodejs 18.0.0
-        Uninstalls Node.js 18.0.0.
-``
+```
+
+Uninstalls Node.js 18.0.0.
 
 ## Aliases
 

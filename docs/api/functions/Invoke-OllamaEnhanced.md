@@ -30,17 +30,19 @@ System.String. Output from Ollama execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-OllamaEnhanced list
-        Lists available Ollama models.
-``
+```
+
+Lists available Ollama models.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-OllamaEnhanced run llama2 "Hello, world!"
-        Runs a prompt with the llama2 model.
-``
+```
+
+Runs a prompt with the llama2 model.
 
 ## Aliases
 

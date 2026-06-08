@@ -66,6 +66,11 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
+$testCoverageModule = Join-Path $repoRoot 'scripts' 'lib' 'code-analysis' 'TestCoverage.psm1'
+if (Test-Path -LiteralPath $testCoverageModule) {
+    Import-Module $testCoverageModule -DisableNameChecking -ErrorAction Stop -Force
+}
+
 # Level 1: Basic operation start
 if ($debugLevel -ge 1) {
     Write-Verbose "[metrics.collect] Starting code metrics collection"

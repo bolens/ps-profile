@@ -30,17 +30,19 @@ System.String. Output from cargo-outdated execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Test-RustOutdated
-        Checks for outdated dependencies in the current project.
-``
+```
+
+Checks for outdated dependencies in the current project.
 
 ### Example 2
 
-`powershell
+```powershell
 Test-RustOutdated --aggressive
-        Checks for more aggressive updates including minor version bumps.
-``
+```
+
+Checks for more aggressive updates including minor version bumps.
 
 ## Aliases
 

@@ -59,6 +59,7 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 Import-LibModule -ModuleName 'Locale' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Collections' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root
 try {
@@ -66,6 +67,14 @@ try {
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+$testCoverageModule = Join-Path $repoRoot 'scripts' 'lib' 'code-analysis' 'TestCoverage.psm1'
+if (Test-Path -LiteralPath $testCoverageModule) {
+    Import-Module $testCoverageModule -DisableNameChecking -ErrorAction Stop -Force
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "TestCoverage module not found: $testCoverageModule"
 }
 
 # Level 1: Basic operation start

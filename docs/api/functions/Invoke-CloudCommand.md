@@ -54,11 +54,11 @@ System.Object. Command output (parsed JSON if ParseJson is true, otherwise raw o
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') -OperationName 'aws.s3.list'
-        
-        Executes 'aws s3 ls' with event tracking.
-``
+```
+
+Executes 'aws s3 ls' with event tracking.
 
 ## Source
 

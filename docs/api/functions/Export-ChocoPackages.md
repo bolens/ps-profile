@@ -33,24 +33,27 @@ Exclude dependencies from the export (only top-level packages).
 
 ### Example 1
 
-`powershell
-Export-ChocoPackages
-        Exports packages to packages.config in current directory.
-``
+```powershell
+Export-ChocoPackages -Path ./path
+```
+
+Exports packages to packages.config in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-ChocoPackages -Path "C:\backup\choco-packages.config"
-        Exports packages to a specific file.
-``
+```
+
+Exports packages to a specific file.
 
 ### Example 3
 
-`powershell
+```powershell
 Export-ChocoPackages -IncludeVersions
-        Exports packages with version numbers included.
-``
+```
+
+Exports packages with version numbers included.
 
 ## Aliases
 

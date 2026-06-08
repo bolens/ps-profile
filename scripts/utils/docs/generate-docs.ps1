@@ -106,8 +106,7 @@ function Test-DocsDebugEnabled {
 .PARAMETER ForegroundColor
     Optional color for distinguishing message categories.
 .EXAMPLE
-    Write-DocsDebugMessage
-
+    Write-DocsDebugMessage -Message 'message'
 #>
 function Write-DocsDebugMessage {
     param(

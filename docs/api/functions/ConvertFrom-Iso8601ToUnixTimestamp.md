@@ -30,11 +30,11 @@ System.Int64 Returns a Unix timestamp as a long integer.
 
 ### Example 1
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToUnixTimestamp
-    
-    Converts an ISO 8601 string to a Unix timestamp.
-``
+```
+
+Converts an ISO 8601 string to a Unix timestamp.
 
 ## Aliases
 

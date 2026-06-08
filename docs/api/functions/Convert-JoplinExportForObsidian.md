@@ -27,16 +27,16 @@ Preview changes without moving files.
 
 ## Outputs
 
-PSCustomObject summary with MovedResources and UpdatedFiles counts. .EXAMPLE Convert-JoplinExportForObsidian
+PSCustomObject summary with MovedResources and UpdatedFiles counts.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Convert-JoplinExportForObsidian
-``
+```powershell
+Convert-JoplinExportForObsidian -ExportDirectory 'value'
+```
 
 ## Aliases
 

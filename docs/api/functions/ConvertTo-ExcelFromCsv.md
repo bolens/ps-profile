@@ -33,9 +33,9 @@ Name for the Excel sheet (default: Sheet1).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-ExcelFromCsv -InputPath "data.csv" -OutputPath "data.xlsx" -SheetName "Data"
-``
+```
 
 ## Aliases
 

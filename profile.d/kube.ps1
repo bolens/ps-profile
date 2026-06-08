@@ -34,9 +34,6 @@
     Arguments to pass to minikube start.
 
 .EXAMPLE
-    Start-MinikubeCluster
-
-.EXAMPLE
     Start-MinikubeCluster --driver=docker
 #>
 function Start-MinikubeCluster {
@@ -64,9 +61,6 @@ function Start-MinikubeCluster {
 
 .PARAMETER Arguments
     Arguments to pass to minikube stop.
-
-.EXAMPLE
-    Stop-MinikubeCluster
 
 .EXAMPLE
     Stop-MinikubeCluster --all

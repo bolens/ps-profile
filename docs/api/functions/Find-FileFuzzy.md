@@ -25,15 +25,15 @@ Optional pattern to filter files before passing to fzf.
 
 ### Example 1
 
-`powershell
-Find-FileFuzzy
-``
+```powershell
+Find-FileFuzzy -Pattern 'search-term'
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Find-FileFuzzy -Pattern "\.ps1$"
-``
+```
 
 ## Aliases
 

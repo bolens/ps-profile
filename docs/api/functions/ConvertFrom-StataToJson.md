@@ -29,9 +29,9 @@ The path for the output JSON file. If not specified, uses input path with .json 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-StataToJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

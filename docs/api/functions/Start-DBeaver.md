@@ -30,17 +30,19 @@ System.Diagnostics.Process. Process object for DBeaver.
 
 ### Example 1
 
-`powershell
-Start-DBeaver
-        Launches DBeaver.
-``
+```powershell
+Start-DBeaver -Workspace 'value'
+```
+
+Launches DBeaver.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-DBeaver -Workspace "C:\Workspaces\dbeaver"
-        Launches DBeaver with a specific workspace directory.
-``
+```
+
+Launches DBeaver with a specific workspace directory.
 
 ## Aliases
 

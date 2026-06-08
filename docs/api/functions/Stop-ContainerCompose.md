@@ -25,9 +25,9 @@ Additional arguments forwarded to compose down.
 
 ### Example 1
 
-`powershell
-Stop-ContainerCompose
-``
+```powershell
+Stop-ContainerCompose -args @('--version')
+```
 
 ## Aliases
 

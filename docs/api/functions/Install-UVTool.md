@@ -25,11 +25,9 @@ Python package name to install as a global uv tool.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-UVTool 'package-name'
-.PARAMETER Package
-    Python package name to install as a global uv tool.
-``
+```
 
 ## Aliases
 

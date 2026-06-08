@@ -29,9 +29,9 @@ Path for the output FLAC file. If not specified, uses input path with .flac exte
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OggToFlac -InputPath "audio.ogg" -OutputPath "audio.flac"
-``
+```
 
 ## Aliases
 

@@ -25,11 +25,9 @@ Package name to add to the pixi project manifest.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-PixiInstall numpy
-.PARAMETER Package
-    Package name to add to the pixi project manifest.
-``
+```
 
 ## Aliases
 

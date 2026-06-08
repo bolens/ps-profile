@@ -30,21 +30,27 @@ function Initialize-DevTools-Timestamp {
 <#
 .SYNOPSIS
     Converts Unix epoch timestamp to DateTime.
+
 .DESCRIPTION
     Converts a Unix epoch timestamp (seconds or milliseconds) to a DateTime object.
+
 .PARAMETER Epoch
     The Unix epoch timestamp to convert.
+
 .PARAMETER Milliseconds
     If specified, treats the epoch value as milliseconds instead of seconds.
-.EXAMPLE
-    ConvertFrom-Epoch -Epoch 1609459200
-    Converts Unix timestamp to DateTime (2021-01-01 00:00:00 UTC).
-.EXAMPLE
-    ConvertFrom-Epoch -Epoch 1609459200000 -Milliseconds
-    Converts Unix timestamp in milliseconds to DateTime.
+
 .OUTPUTS
     System.DateTime
     The converted DateTime object.
+
+.EXAMPLE
+    ConvertFrom-Epoch -Epoch 1609459200
+    Converts Unix timestamp to DateTime (2021-01-01 00:00:00 UTC).
+
+.EXAMPLE
+    ConvertFrom-Epoch -Epoch 1609459200000 -Milliseconds
+    Converts Unix timestamp in milliseconds to DateTime.
 #>
 function ConvertFrom-Epoch {
     param([long]$Epoch, [switch]$Milliseconds)
@@ -55,21 +61,27 @@ Set-AgentModeAlias -Name 'epoch-to-date' -Target 'ConvertFrom-Epoch'
 <#
 .SYNOPSIS
     Converts DateTime to Unix epoch timestamp.
+
 .DESCRIPTION
     Converts a DateTime object to a Unix epoch timestamp (seconds or milliseconds).
+
 .PARAMETER DateTime
     The DateTime to convert.
+
 .PARAMETER Milliseconds
     If specified, returns milliseconds instead of seconds.
-.EXAMPLE
-    ConvertTo-Epoch -DateTime (Get-Date)
-    Converts current date to Unix timestamp in seconds.
-.EXAMPLE
-    ConvertTo-Epoch -DateTime (Get-Date) -Milliseconds
-    Converts current date to Unix timestamp in milliseconds.
+
 .OUTPUTS
     System.Int64
     The Unix epoch timestamp.
+
+.EXAMPLE
+    ConvertTo-Epoch -DateTime (Get-Date)
+    Converts current date to Unix timestamp in seconds.
+
+.EXAMPLE
+    ConvertTo-Epoch -DateTime (Get-Date) -Milliseconds
+    Converts current date to Unix timestamp in milliseconds.
 #>
 function ConvertTo-Epoch {
     param([DateTime]$DateTime, [switch]$Milliseconds)

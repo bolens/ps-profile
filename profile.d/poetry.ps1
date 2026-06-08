@@ -165,7 +165,7 @@ if (Test-CachedCommand poetry) {
     Set-AgentModeAlias -Name 'poetry-self-update' -Target 'Update-PoetrySelf'
     # Poetry export - backup dependencies
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports Poetry dependencies to a requirements.txt file.
     .DESCRIPTION
         Creates a requirements.txt file containing all Poetry project dependencies with versions.
@@ -178,7 +178,7 @@ if (Test-CachedCommand poetry) {
     .PARAMETER Dev
         Include dev dependencies in the export.
     .EXAMPLE
-        Export-PoetryDependencies
+    Export-PoetryDependencies -Path ./path
         Exports dependencies to requirements.txt in current directory.
     .EXAMPLE
         Export-PoetryDependencies -Path "C:\backup\poetry-requirements.txt"
@@ -186,7 +186,7 @@ if (Test-CachedCommand poetry) {
     .EXAMPLE
         Export-PoetryDependencies -Dev
         Exports dependencies including dev dependencies.
-    #>
+#>
     function Export-PoetryDependencies {
         [CmdletBinding()]
         param(
@@ -208,7 +208,7 @@ if (Test-CachedCommand poetry) {
     Set-AgentModeAlias -Name 'poetrybackup' -Target 'Export-PoetryDependencies'
     # Poetry install from requirements - restore dependencies
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores Poetry dependencies from a requirements.txt file.
     .DESCRIPTION
         Installs all packages listed in a requirements.txt file using pip.
@@ -220,12 +220,12 @@ if (Test-CachedCommand poetry) {
     .PARAMETER NoDeps
         Don't install dependencies (--no-deps flag for pip).
     .EXAMPLE
-        Import-PoetryDependencies
+    Import-PoetryDependencies -Path ./path
         Restores dependencies from requirements.txt in current directory.
     .EXAMPLE
         Import-PoetryDependencies -Path "C:\backup\poetry-requirements.txt"
         Restores dependencies from a specific file.
-    #>
+#>
     function Import-PoetryDependencies {
         [CmdletBinding()]
         param(

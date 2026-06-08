@@ -38,27 +38,27 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Blender
-        
-        Launches Blender.
-``
+```powershell
+Launch-Blender -ProjectPath 'value' -Script 'build'
+```
+
+Launches Blender.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Blender -ProjectPath "scene.blend"
-        
-        Launches Blender and opens a project file.
-``
+```
+
+Launches Blender and opens a project file.
 
 ### Example 3
 
-`powershell
+```powershell
 Launch-Blender -Background -Script "render.py"
-        
-        Runs Blender in background mode with a Python script.
-``
+```
+
+Runs Blender in background mode with a Python script.
 
 ## Source
 

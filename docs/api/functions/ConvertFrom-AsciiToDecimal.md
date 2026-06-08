@@ -34,17 +34,19 @@ System.String The decimal representation of the input text.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hi" | ConvertFrom-AsciiToDecimal
-    Converts "Hi" to "72 105" (decimal representation).
-``
+```
+
+Converts "Hi" to "72 105" (decimal representation).
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-AsciiToDecimal -InputObject "AB" -Separator ","
-    Converts "AB" to "65,66" (comma separator).
-``
+```
+
+Converts "AB" to "65,66" (comma separator).
 
 ## Aliases
 

@@ -25,21 +25,23 @@ Optional components to install. If not specified, runs 'ridk install' which will
 
 ### Example 1
 
-`powershell
-Install-RubyDevKit
-            Installs MSYS2 development tools (will prompt for component selection).
-``
+```powershell
+Install-RubyDevKit 'package-name'
+```
+
+Installs MSYS2 development tools (will prompt for component selection).
 
 ### Example 2
 
-`powershell
+```powershell
 Install-RubyDevKit -Components 1,2,3
-            Installs specific MSYS2 components.
-``
+```
+
+Installs specific MSYS2 components.
 
 ## Notes
 
-This command is only available on Windows when Ruby is installed via Scoop. After installing Ruby (see `Get-PlatformInstallHint -ToolName ruby`), run this command to set up the development environment for building native gems.
+This command is only available on Windows when Ruby is installed via Scoop. After installing Ruby (see `Get-PlatformInstallHint -ToolName ruby`), run this command to set up the development environment for building native gems. .EXAMPLE Install-RubyDevKit 'package-name' Installs MSYS2 development tools (will prompt for component selection). .EXAMPLE Install-RubyDevKit -Components 1,2,3 Installs specific MSYS2 components.
 
 
 ## Aliases

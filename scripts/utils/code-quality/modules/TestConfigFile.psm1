@@ -37,8 +37,7 @@ if ($jsonUtilitiesPath -and -not [string]::IsNullOrWhiteSpace($jsonUtilitiesPath
 .OUTPUTS
     None
 .EXAMPLE
-    Save-TestConfig
-
+    Save-TestConfig -ConfigPath 'value' -Parameters @{}
 #>
 function Save-TestConfig {
     [CmdletBinding()]
@@ -115,8 +114,7 @@ function Save-TestConfig {
 .OUTPUTS
     Hashtable - Parameter names and values
 .EXAMPLE
-    Load-TestConfig
-
+    Load-TestConfig -ConfigPath 'value'
 #>
 function Load-TestConfig {
     [CmdletBinding()]
@@ -171,8 +169,7 @@ function Load-TestConfig {
 .PARAMETER InputObject
     Object to serialize or inspect.
 .EXAMPLE
-    ConvertTo-Hashtable
-
+    ConvertTo-Hashtable -InputObject $data
 #>
 function ConvertTo-Hashtable {
     param(

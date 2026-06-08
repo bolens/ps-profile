@@ -46,9 +46,11 @@ function Initialize-FileUtilities-Size {
 .SYNOPSIS
     Shows human-readable file size.
 
+
 .DESCRIPTION
     Displays the size of a file in human-readable format with appropriate units
     (bytes, KB, MB, GB, TB). Automatically chooses the most appropriate unit.
+
 
 .PARAMETER Path
     The path to the file to check size. Must be a valid file path.
@@ -57,34 +59,11 @@ function Initialize-FileUtilities-Size {
     System.String
     File path as a string.
 
+
 .OUTPUTS
     System.String
     Human-readable file size with unit.
 
-.EXAMPLE
-    PS C:\> Get-FileSize -Path "C:\temp\largefile.iso"
-    4.25 GB
-
-    Shows the size of a large ISO file in GB.
-
-.EXAMPLE
-    PS C:\> filesize "C:\temp\script.ps1"
-    2.34 KB
-
-    Shows the size of a PowerShell script using the alias.
-
-.EXAMPLE
-    PS C:\> Get-FileSize -Path "C:\temp\small.txt"
-    145 bytes
-
-    Shows the size of a small text file in bytes.
-
-.EXAMPLE
-    PS C:\> Get-FileSize -Path "nonexistent.txt"
-    Get-FileSize : File not found: nonexistent.txt
-    At line:1 char:1
-
-    Shows error when file doesn't exist.
 
 .NOTES
     File sizes are displayed with 2 decimal places for larger units.
@@ -94,6 +73,34 @@ function Initialize-FileUtilities-Size {
     Get-Item
     Get-FileHashValue
     Test-Path
+
+.EXAMPLE
+    PS C:\> Get-FileSize -Path "C:\temp\largefile.iso"
+    4.25 GB
+
+    Shows the size of a large ISO file in GB.
+
+
+.EXAMPLE
+    PS C:\> filesize "C:\temp\script.ps1"
+    2.34 KB
+
+    Shows the size of a PowerShell script using the alias.
+
+
+.EXAMPLE
+    PS C:\> Get-FileSize -Path "C:\temp\small.txt"
+    145 bytes
+
+    Shows the size of a small text file in bytes.
+
+
+.EXAMPLE
+    PS C:\> Get-FileSize -Path "nonexistent.txt"
+    Get-FileSize : File not found: nonexistent.txt
+    At line:1 char:1
+
+    Shows error when file doesn't exist.
 #>
 function Get-FileSize {
     param([string]$Path)

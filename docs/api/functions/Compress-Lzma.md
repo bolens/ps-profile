@@ -46,11 +46,11 @@ System.String Returns the path to the compressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Compress-Lzma -InputPath 'data.txt'
-    
-    Compresses data.txt to data.txt.lzma.
-``
+```
+
+Compresses data.txt to data.txt.lzma.
 
 ## Aliases
 

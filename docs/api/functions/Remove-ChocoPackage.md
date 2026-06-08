@@ -37,17 +37,19 @@ Auto-confirm all prompts.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-ChocoPackage git
-        Removes git.
-``
+```
+
+Removes git.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-ChocoPackage git -RemoveDependencies
-        Removes git and its dependencies.
-``
+```
+
+Removes git and its dependencies.
 
 ## Aliases
 

@@ -25,15 +25,15 @@ Arguments to pass to helm upgrade.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-HelmRelease my-release ./my-chart
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Update-HelmRelease my-release bitnami/nginx
-``
+```
 
 ## Aliases
 

@@ -37,9 +37,9 @@ Audio bitrate in kbps (default: 192). Used for mp3, aac, and opus formats.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-VideoToAudio -InputPath "video.mp4" -OutputPath "audio.mp3" -Format mp3
-``
+```
 
 ## Aliases
 

@@ -33,11 +33,11 @@ Move infected files to quarantine directory.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-ClamAVScan -Path "C:\Downloads" -Recursive
-    
-        Recursively scans the Downloads directory for malware.
-``
+```
+
+Recursively scans the Downloads directory for malware.
 
 ## Aliases
 

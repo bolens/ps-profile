@@ -25,15 +25,9 @@ Arguments to pass to terraform init.
 
 ### Example 1
 
-`powershell
-Initialize-Terraform
-``
-
-### Example 2
-
-`powershell
+```powershell
 Initialize-Terraform -upgrade
-``
+```
 
 ## Aliases
 

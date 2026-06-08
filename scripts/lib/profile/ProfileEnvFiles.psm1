@@ -12,8 +12,7 @@
 .PARAMETER ProfileDir
     Directory containing the profile files.
 .EXAMPLE
-    Initialize-ProfileEnvFiles
-
+    Initialize-ProfileEnvFiles -ProfileDir 'value'
 #>
 function Initialize-ProfileEnvFiles {
     [CmdletBinding()]

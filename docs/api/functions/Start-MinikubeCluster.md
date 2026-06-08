@@ -25,15 +25,9 @@ Arguments to pass to minikube start.
 
 ### Example 1
 
-`powershell
-Start-MinikubeCluster
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-MinikubeCluster --driver=docker
-``
+```
 
 ## Aliases
 

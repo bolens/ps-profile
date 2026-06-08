@@ -46,27 +46,27 @@ System.String. Path navigated to, or null if navigation failed.
 
 ### Example 1
 
-`powershell
+```powershell
 Navigate-WithZoxide -Query "Documents"
-    
-    Navigates to the most frequently used directory matching "Documents".
-``
+```
+
+Navigates to the most frequently used directory matching "Documents".
 
 ### Example 2
 
-`powershell
+```powershell
 Navigate-WithZoxide -Query "PowerShell" -Interactive
-    
-    Shows interactive menu if multiple matches found.
-``
+```
+
+Shows interactive menu if multiple matches found.
 
 ### Example 3
 
-`powershell
+```powershell
 Navigate-WithZoxide -Add
-    
-    Adds current directory to zoxide database.
-``
+```
+
+Adds current directory to zoxide database.
 
 ## Aliases
 

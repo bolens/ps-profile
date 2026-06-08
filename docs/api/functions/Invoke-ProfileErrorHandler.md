@@ -25,9 +25,9 @@ The error record to handle.
 
 ### Example 1
 
-`powershell
-Invoke-ProfileErrorHandler
-``
+```powershell
+Invoke-ProfileErrorHandler @('--help')
+```
 
 ## Source
 

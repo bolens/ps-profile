@@ -25,15 +25,9 @@ Arguments to pass to tailscale up.
 
 ### Example 1
 
-`powershell
-Connect-TailscaleNetwork
-``
-
-### Example 2
-
-`powershell
+```powershell
 Connect-TailscaleNetwork --accept-routes
-``
+```
 
 ## Aliases
 

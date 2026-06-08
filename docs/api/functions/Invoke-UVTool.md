@@ -25,11 +25,9 @@ Arguments forwarded to uv tool run.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-UVTool ruff --version
-.PARAMETER Arguments
-    Arguments forwarded to uv tool run.
-``
+```
 
 ## Aliases
 

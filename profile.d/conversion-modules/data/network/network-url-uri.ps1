@@ -234,22 +234,27 @@ function Initialize-FileConversion-NetworkUrlUri {
 <#
 .SYNOPSIS
     Parses a URL/URI into its components.
+
 .DESCRIPTION
     Parses a URL/URI string into its components (scheme, host, port, path, query, fragment, etc.)
     and returns a structured object with all components.
+
 .PARAMETER Url
     The URL/URI string to parse.
+
+.OUTPUTS
+    PSCustomObject
+    Returns an object with properties: Scheme, Host, Port, Path, Query, Fragment, QueryParameters, etc.
+
 .EXAMPLE
     Parse-UrlUri -Url "https://example.com:8080/path?key=value#fragment"
     
     Parses the URL and returns components.
+
 .EXAMPLE
     "https://example.com/path" | Parse-UrlUri
     
     Parses URL from pipeline.
-.OUTPUTS
-    PSCustomObject
-    Returns an object with properties: Scheme, Host, Port, Path, Query, Fragment, QueryParameters, etc.
 #>
 function Parse-UrlUri {
     param(
@@ -282,10 +287,17 @@ Set-AgentModeAlias -Name 'parse-uri' -Target 'Parse-UrlUri'
 <#
 .SYNOPSIS
     Builds a URL/URI from components.
+
 .DESCRIPTION
     Constructs a URL/URI string from a hashtable or object containing URL components.
+
 .PARAMETER Components
     Hashtable or object with URL components: Scheme, Host, Port, Path, Query, Fragment, QueryParameters.
+
+.OUTPUTS
+    System.String
+    Returns the constructed URL/URI string.
+
 .EXAMPLE
     $components = @{
         Scheme = 'https'
@@ -296,9 +308,6 @@ Set-AgentModeAlias -Name 'parse-uri' -Target 'Parse-UrlUri'
     Build-UrlUri -Components $components
     
     Builds URL from components.
-.OUTPUTS
-    System.String
-    Returns the constructed URL/URI string.
 #>
 function Build-UrlUri {
     param(
@@ -324,18 +333,23 @@ Set-AgentModeAlias -Name 'build-uri' -Target 'Build-UrlUri'
 <#
 .SYNOPSIS
     Converts URL/URI file to JSON format.
+
 .DESCRIPTION
     Parses a URL/URI from a file and converts it to structured JSON format with all components.
+
 .PARAMETER InputPath
     The path to the file containing the URL/URI (.url or .uri extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-UrlUriToJson -InputPath "url.url"
     
     Converts url.url to url.json.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-UrlUriToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -358,18 +372,23 @@ Set-AgentModeAlias -Name 'uri-to-json' -Target 'ConvertFrom-UrlUriToJson'
 <#
 .SYNOPSIS
     Converts JSON file to URL/URI format.
+
 .DESCRIPTION
     Converts a structured JSON file (with URL components) to URL/URI format.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output URL/URI file. If not specified, uses input path with .url extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-UrlUriFromJson -InputPath "url.json"
     
     Converts url.json to url.url.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-UrlUriFromJson {
     param([string]$InputPath, [string]$OutputPath)

@@ -25,15 +25,15 @@ Arguments to pass to deno task.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-DenoTask dev
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-DenoTask build
-``
+```
 
 ## Aliases
 

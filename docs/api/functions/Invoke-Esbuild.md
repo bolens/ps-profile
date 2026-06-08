@@ -25,15 +25,15 @@ Arguments to pass to esbuild.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Esbuild --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Esbuild app.js --bundle --outfile=app.bundle.js
-``
+```
 
 ## Aliases
 

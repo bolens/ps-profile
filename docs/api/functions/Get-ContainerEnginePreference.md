@@ -27,12 +27,11 @@ System.Collections.Hashtable Hashtable with Engine, Available, DockerAvailable, 
 
 ### Example 1
 
-`powershell
+```powershell
 $engineInfo = Get-ContainerEnginePreference
-    if (-not $engineInfo.Available) {
-        Write-Host "Install a container engine: $($engineInfo.InstallationCommand)"
-    }
-``
+```
+
+if (-not $engineInfo.Available) { Write-Host "Install a container engine: $($engineInfo.InstallationCommand)" }
 
 ## Source
 

@@ -196,18 +196,23 @@ function Initialize-FileConversion-DocumentTextile {
 <#
 .SYNOPSIS
     Converts Textile file to Markdown.
+
 .DESCRIPTION
     Uses pandoc to convert a Textile file to Markdown format.
+
 .PARAMETER InputPath
     The path to the Textile file (.textile or .tx extension).
+
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-TextileToMarkdown -InputPath "document.textile"
     
     Converts document.textile to document.md.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-TextileToMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -229,18 +234,23 @@ Set-AgentModeAlias -Name 'textile-to-markdown' -Target 'ConvertFrom-TextileToMar
 <#
 .SYNOPSIS
     Converts Textile file to HTML.
+
 .DESCRIPTION
     Uses pandoc to convert a Textile file to HTML format.
+
 .PARAMETER InputPath
     The path to the Textile file (.textile or .tx extension).
+
 .PARAMETER OutputPath
     The path for the output HTML file. If not specified, uses input path with .html extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-HtmlFromTextile -InputPath "document.textile"
     
     Converts document.textile to document.html.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-HtmlFromTextile {
     param([string]$InputPath, [string]$OutputPath)
@@ -262,18 +272,23 @@ Set-AgentModeAlias -Name 'textile-to-html' -Target 'ConvertTo-HtmlFromTextile'
 <#
 .SYNOPSIS
     Converts Textile file to PDF.
+
 .DESCRIPTION
     Uses pandoc to convert a Textile file to PDF format.
+
 .PARAMETER InputPath
     The path to the Textile file (.textile or .tx extension).
+
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-PdfFromTextile -InputPath "document.textile"
     
     Converts document.textile to document.pdf.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-PdfFromTextile {
     param([string]$InputPath, [string]$OutputPath)
@@ -295,18 +310,23 @@ Set-AgentModeAlias -Name 'textile-to-pdf' -Target 'ConvertTo-PdfFromTextile'
 <#
 .SYNOPSIS
     Converts Textile file to DOCX.
+
 .DESCRIPTION
     Uses pandoc to convert a Textile file to Microsoft Word DOCX format.
+
 .PARAMETER InputPath
     The path to the Textile file (.textile or .tx extension).
+
 .PARAMETER OutputPath
     The path for the output DOCX file. If not specified, uses input path with .docx extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-DocxFromTextile -InputPath "document.textile"
     
     Converts document.textile to document.docx.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-DocxFromTextile {
     param([string]$InputPath, [string]$OutputPath)
@@ -328,18 +348,23 @@ Set-AgentModeAlias -Name 'textile-to-docx' -Target 'ConvertTo-DocxFromTextile'
 <#
 .SYNOPSIS
     Converts Textile file to LaTeX.
+
 .DESCRIPTION
     Uses pandoc to convert a Textile file to LaTeX format.
+
 .PARAMETER InputPath
     The path to the Textile file (.textile or .tx extension).
+
 .PARAMETER OutputPath
     The path for the output LaTeX file. If not specified, uses input path with .tex extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-LaTeXFromTextile -InputPath "document.textile"
     
     Converts document.textile to document.tex.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-LaTeXFromTextile {
     param([string]$InputPath, [string]$OutputPath)

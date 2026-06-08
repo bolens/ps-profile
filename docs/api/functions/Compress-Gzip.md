@@ -35,11 +35,11 @@ The path for the output compressed file. If not specified, uses input path with 
 
 ### Example 1
 
-`powershell
+```powershell
 Compress-Gzip -InputPath "data.txt" -OutputPath "data.txt.gz"
-    
-    Compresses data.txt to data.txt.gz.
-``
+```
+
+Compresses data.txt to data.txt.gz.
 
 ## Aliases
 

@@ -33,24 +33,27 @@ Install latest versions instead of the versions specified in the export file.
 
 ### Example 1
 
-`powershell
-Import-WingetPackages
-        Restores packages from winget-packages.json in current directory.
-``
+```powershell
+Import-WingetPackages -Path ./path
+```
+
+Restores packages from winget-packages.json in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-WingetPackages -Path "C:\backup\winget-backup.json"
-        Restores packages from a specific file.
-``
+```
+
+Restores packages from a specific file.
 
 ### Example 3
 
-`powershell
+```powershell
 Import-WingetPackages -IgnoreUnavailable
-        Restores packages, skipping any that are no longer available.
-``
+```
+
+Restores packages, skipping any that are no longer available.
 
 ## Aliases
 

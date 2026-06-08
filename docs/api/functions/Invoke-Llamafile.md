@@ -38,17 +38,19 @@ System.String. Output from Llamafile execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Llamafile --help
-        Shows Llamafile help.
-``
+```
+
+Shows Llamafile help.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Llamafile -Model "mistral-7b-instruct-v0.2.Q4_K_M.llamafile" -Prompt "Hello, world!"
-        Runs a prompt with a specific llamafile model.
-``
+```
+
+Runs a prompt with a specific llamafile model.
 
 ## Aliases
 

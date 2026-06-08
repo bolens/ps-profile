@@ -29,9 +29,9 @@ Path for the output HTML file. If not specified, uses input path with .html exte
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OdtToHtml -InputPath "document.odt" -OutputPath "document.html"
-``
+```
 
 ## Aliases
 

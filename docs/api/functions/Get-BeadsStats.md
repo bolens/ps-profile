@@ -27,10 +27,11 @@ System.String. Output from bd stats command.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-BeadsStats
-        Gets issue statistics.
-``
+```
+
+Gets issue statistics.
 
 ## Source
 

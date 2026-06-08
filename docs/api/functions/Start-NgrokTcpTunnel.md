@@ -25,15 +25,15 @@ Port number of the local TCP service.
 
 ### Example 1
 
-`powershell
+```powershell
 Start-NgrokTcpTunnel -Port 22
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Start-NgrokTcpTunnel -Port 3306
-``
+```
 
 ## Aliases
 

@@ -29,10 +29,11 @@ Output JSON file path.
 
 ### Example 1
 
-`powershell
+```powershell
 $builder = Start-RegexDescriptionBuilder -Description 'email' -NonInteractive
-    Save-RegexDescriptionSession -Session $builder.Session -Path ./email.json
-``
+```
+
+Save-RegexDescriptionSession -Session $builder.Session -Path ./email.json
 
 ## Aliases
 

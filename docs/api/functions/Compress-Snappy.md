@@ -40,11 +40,11 @@ System.String Returns the path to the compressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Compress-Snappy -InputPath 'data.txt'
-    
-    Compresses data.txt to data.txt.snappy.
-``
+```
+
+Compresses data.txt to data.txt.snappy.
 
 ## Aliases
 

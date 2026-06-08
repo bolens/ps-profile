@@ -30,10 +30,11 @@ System.String The URL/percent encoded representation of the input octal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "110 151" | ConvertFrom-OctalToUrl
-    Converts octal to URL encoding.
-``
+```
+
+Converts octal to URL encoding.
 
 ## Aliases
 

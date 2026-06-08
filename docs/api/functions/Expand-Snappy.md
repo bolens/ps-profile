@@ -40,11 +40,11 @@ System.String Returns the path to the decompressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Expand-Snappy -InputPath 'data.txt.snappy'
-    
-    Decompresses data.txt.snappy to data.txt.
-``
+```
+
+Decompresses data.txt.snappy to data.txt.
 
 ## Aliases
 

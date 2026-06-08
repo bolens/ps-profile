@@ -29,9 +29,9 @@ The path for the output HTML file. If not specified, uses input path with .html 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EpubToHtml -InputPath ./input.file
-``
+```
 
 ## Aliases
 

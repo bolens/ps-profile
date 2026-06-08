@@ -30,19 +30,19 @@ System.Object[]. Array of profile information objects.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-AwsCredentials
-    
-    Lists all configured AWS profiles.
-``
+```
+
+Lists all configured AWS profiles.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-AwsCredentials -ShowKeys
-    
-    Lists profiles with partially masked access key IDs.
-``
+```
+
+Lists profiles with partially masked access key IDs.
 
 ## Aliases
 

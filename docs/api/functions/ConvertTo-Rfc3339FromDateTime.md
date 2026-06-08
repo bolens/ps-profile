@@ -38,19 +38,19 @@ System.String Returns an RFC 3339 formatted date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-Date | ConvertTo-Rfc3339FromDateTime
-    
-    Converts current date/time to RFC 3339 format.
-``
+```
+
+Converts current date/time to RFC 3339 format.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-Date | ConvertTo-Rfc3339FromDateTime -IncludeMilliseconds
-    
-    Converts current date/time to RFC 3339 format with milliseconds.
-``
+```
+
+Converts current date/time to RFC 3339 format with milliseconds.
 
 ## Aliases
 

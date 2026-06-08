@@ -29,17 +29,19 @@ Get information for casks (GUI applications) instead of formulae.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-BrewPackageInfo git
-        Shows detailed information about the git package.
-``
+```
+
+Shows detailed information about the git package.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-BrewPackageInfo visual-studio-code -Cask
-        Shows information for the Visual Studio Code cask.
-``
+```
+
+Shows information for the Visual Studio Code cask.
 
 ## Aliases
 

@@ -30,10 +30,11 @@ PSCustomObject[] with Name, Pattern, Aliases, Notes, and MatchType members.
 
 ### Example 1
 
-`powershell
+```powershell
 Search-RegexDescriptions -Query 'phone'
-    Finds catalog entries related to phone numbers.
-``
+```
+
+Finds catalog entries related to phone numbers.
 
 ## Aliases
 

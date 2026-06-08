@@ -30,19 +30,19 @@ System.String Returns the ROT47 encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello World!" | ConvertFrom-AsciiToRot47
-    
-    Converts text to ROT47 format.
-``
+```
+
+Converts text to ROT47 format.
 
 ### Example 2
 
-`powershell
+```powershell
 "w6==@ (@C=5P" | ConvertFrom-Rot47ToAscii
-    
-    Decodes ROT47 back to original text.
-``
+```
+
+Decodes ROT47 back to original text.
 
 ## Aliases
 

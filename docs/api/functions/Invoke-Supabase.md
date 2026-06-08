@@ -30,24 +30,27 @@ System.String. Output from Supabase CLI execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Supabase status
-        Checks Supabase local development status.
-``
+```
+
+Checks Supabase local development status.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Supabase start
-        Starts local Supabase development environment.
-``
+```
+
+Starts local Supabase development environment.
 
 ### Example 3
 
-`powershell
+```powershell
 Invoke-Supabase stop
-        Stops local Supabase development environment.
-``
+```
+
+Stops local Supabase development environment.
 
 ## Aliases
 

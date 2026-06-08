@@ -34,11 +34,11 @@ System.String Returns the path to the output YAML file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-JsoncToYaml -InputPath 'settings.jsonc'
-    
-    Converts settings.jsonc to settings.yaml.
-``
+```
+
+Converts settings.jsonc to settings.yaml.
 
 ## Aliases
 

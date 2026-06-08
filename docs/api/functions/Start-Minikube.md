@@ -38,19 +38,19 @@ System.String. Minikube status or startup output.
 
 ### Example 1
 
-`powershell
-Start-Minikube
-        
-        Starts Minikube cluster with default settings.
-``
+```powershell
+Start-Minikube -Profile 'value' -Driver 'value'
+```
+
+Starts Minikube cluster with default settings.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-Minikube -Profile "dev" -Driver "docker"
-        
-        Starts Minikube cluster with custom profile and driver.
-``
+```
+
+Starts Minikube cluster with custom profile and driver.
 
 ## Source
 

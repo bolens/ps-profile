@@ -27,11 +27,11 @@ PSCustomObject[] Returns an array of timezone objects with Id, DisplayName, Stan
 
 ### Example 1
 
-`powershell
+```powershell
 Get-TimeZones
-    
-    Lists all available timezones.
-``
+```
+
+Lists all available timezones.
 
 ## Aliases
 

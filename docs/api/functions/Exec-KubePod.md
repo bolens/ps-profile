@@ -50,19 +50,19 @@ System.String. Command output.
 
 ### Example 1
 
-`powershell
+```powershell
 Exec-KubePod -Pod "my-app" -Command "ls -la"
-        
-        Executes ls -la in my-app pod.
-``
+```
+
+Executes ls -la in my-app pod.
 
 ### Example 2
 
-`powershell
+```powershell
 Exec-KubePod -Pod "nginx" -Container "web" -Command "/bin/sh" -Interactive -Tty
-        
-        Opens interactive shell in nginx pod, web container.
-``
+```
+
+Opens interactive shell in nginx pod, web container.
 
 ## Source
 

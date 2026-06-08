@@ -14,30 +14,30 @@ check-comment-help:
     pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
 check-doc-coverage *ARGS:
-    pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{ ARGS }}
 
 check-doc-freshness *ARGS:
-    pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{ ARGS }}
 
 # Run Pester Tests
 test *ARGS:
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{ ARGS }}
 
 # Run Unit Test Suite
 test-unit *ARGS:
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel {{ ARGS }}
 
 # Run Integration Test Suite
 test-integration *ARGS:
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration -Parallel {{ ARGS }}
 
 # Run Performance Test Suite
 test-performance *ARGS:
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance -Parallel {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance -Parallel {{ ARGS }}
 
 # Run Pester Tests with Coverage
 test-coverage *ARGS:
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{ ARGS }}
 
 # Run Performance Benchmark
 benchmark:
@@ -53,23 +53,23 @@ diagnose-profile-performance:
 
 # Optimize Git performance
 optimize-git-performance *ARGS:
-    pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/performance/optimize-git-performance.ps1 {{ ARGS }}
 
 # Check Module Updates
 check-module-updates *ARGS:
-    pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 {{ ARGS }}
 
 # Install Module Updates
 install-module-updates *ARGS:
-    pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1 -Update {{ ARGS }}
 
 # Generate Changelog
 generate-changelog *ARGS:
-    pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/docs/generate-changelog.ps1 {{ ARGS }}
 
 # Generate metrics dashboard
 generate-dashboard *ARGS:
-    pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1 {{ ARGS }}
 
 # Create Release (Dry Run)
 create-release:
@@ -77,10 +77,10 @@ create-release:
 
 # Generate API Documentation
 generate-docs *ARGS:
-    pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 {{ ARGS }}
 
 generate-docs-incremental *ARGS:
-    pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 -Incremental {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 -Incremental {{ ARGS }}
 
 # Run Spellcheck
 spellcheck:
@@ -120,11 +120,11 @@ db-init:
 
 # Clear fragment cache (in-memory and SQLite database)
 clear-fragment-cache *ARGS:
-    pwsh -NoProfile -File scripts/utils/clear-fragment-cache.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/clear-fragment-cache.ps1 {{ ARGS }}
 
 # Validate fragment cache (verify cache state)
 validate-fragment-cache *ARGS:
-    pwsh -NoProfile -File scripts/utils/verify-cache-cleared.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/verify-cache-cleared.ps1 {{ ARGS }}
 
 # Check script standards and best practices
 check-script-standards:
@@ -136,7 +136,7 @@ markdownlint:
 
 # Install Git hooks
 install-githooks *ARGS:
-    pwsh -NoProfile -File scripts/git/install-githooks.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/git/install-githooks.ps1 {{ ARGS }}
 
 # Install pre-commit hook only
 install-pre-commit-hook:
@@ -144,7 +144,7 @@ install-pre-commit-hook:
 
 # Format Code
 format *ARGS:
-    pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/code-quality/run-format.ps1 {{ ARGS }}
 
 # Find Duplicate Functions
 find-duplicates:
@@ -152,15 +152,15 @@ find-duplicates:
 
 # Generate Fragment READMEs
 generate-fragment-readmes *ARGS:
-    pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1 {{ ARGS }}
 
 # Create a new profile fragment from template
 new-fragment *ARGS:
-    pwsh -NoProfile -File scripts/utils/fragment/new-fragment.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/fragment/new-fragment.ps1 {{ ARGS }}
 
 # Generate standalone script wrappers for fragment commands
 generate-command-wrappers *ARGS:
-    pwsh -NoProfile -File scripts/utils/fragment/generate-command-wrappers.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/fragment/generate-command-wrappers.ps1 {{ ARGS }}
 
 # Check Commit Messages
 check-commit-messages:
@@ -168,7 +168,7 @@ check-commit-messages:
 
 # Update Performance Baseline
 update-baseline *ARGS:
-    pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -UpdateBaseline {{ ARGS }}
 
 # Collect code metrics
 collect-code-metrics:
@@ -228,7 +228,7 @@ all-docs generate-docs generate-fragment-readmes:
 
 # Initialize wrangler configuration
 init-wrangler-config *ARGS:
-    pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/setup/init-wrangler-config.ps1 {{ ARGS }}
 
 # Run development environment setup
 dev-setup:
@@ -236,11 +236,11 @@ dev-setup:
 
 # Check task parity across all task runner files
 check-task-parity *ARGS:
-    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 {{ ARGS }}
 
 # Generate missing tasks to achieve parity across all task runner files
 generate-task-parity *ARGS:
-    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{ ARGS }}
 
 # Link tests and guides to source targets (drift.lock)
 drift-link:
@@ -257,7 +257,7 @@ drift-status:
 
 # Build/warm fragment cache by parsing all fragments
 build-fragment-cache *ARGS:
-    pwsh -NoProfile -File scripts/utils/build-fragment-cache.ps1 {{ARGS}}
+    pwsh -NoProfile -File scripts/utils/build-fragment-cache.ps1 {{ ARGS }}
 
 # Install all optional profile dependencies (global or local)
 install-all:
@@ -293,23 +293,23 @@ install-scoop:
 
 # Run performance tests per file with summary
 test-performance-batch *ARGS:
-    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 {{ARGS}}
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 {{ ARGS }}
 
 # Run unit tests per file with summary (use -Filter profile- etc.)
 test-unit-batch *ARGS:
-    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 {{ARGS}}
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 {{ ARGS }}
 
 # Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)
 test-conversion-batch *ARGS:
-    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 {{ARGS}}
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 {{ ARGS }}
 
 # Run all conversion integration sub-batches (document, media/*, data/*)
 test-conversion-all-batch *ARGS:
-    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 {{ARGS}}
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 {{ ARGS }}
 
 # Run tools integration tests (per-file isolation)
 test-tools *ARGS:
-    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{ARGS}}
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{ ARGS }}
 
 # Default: run lint (common first task)
 default: lint

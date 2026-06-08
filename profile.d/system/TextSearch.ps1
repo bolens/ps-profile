@@ -7,14 +7,18 @@
 <#
 .SYNOPSIS
     Searches for patterns in files.
+
 .DESCRIPTION
     Searches for text patterns in files using Select-String.
-.EXAMPLE
-    Find-String -Pattern 'TODO' -Path ./src
+
 .PARAMETER Pattern
     Text or regex pattern to search for.
+
 .PARAMETER Path
     File or directory path to search. Defaults to the current directory when omitted.
+
+.EXAMPLE
+    Find-String -Pattern 'TODO' -Path ./src
 
 #>
 function Find-String {

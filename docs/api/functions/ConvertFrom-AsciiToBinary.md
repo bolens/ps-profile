@@ -34,17 +34,19 @@ System.String The binary representation of the input text.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hi" | ConvertFrom-AsciiToBinary
-    Converts "Hi" to "01001000 01101001".
-``
+```
+
+Converts "Hi" to "01001000 01101001".
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-AsciiToBinary -InputObject "AB" -Separator ""
-    Converts "AB" to "0100000101000010" (no separator).
-``
+```
+
+Converts "AB" to "0100000101000010" (no separator).
 
 ## Aliases
 

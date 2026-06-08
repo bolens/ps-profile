@@ -34,10 +34,11 @@ System.String The decimal representation of the input URL encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello%20World" | ConvertFrom-UrlToDecimal
-    Converts URL encoding to decimal.
-``
+```
+
+Converts URL encoding to decimal.
 
 ## Aliases
 

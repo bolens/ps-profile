@@ -30,10 +30,11 @@ System.String The Base32 representation of the input URL encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello%20World" | ConvertFrom-UrlToBase32
-    Converts URL encoding to Base32.
-``
+```
+
+Converts URL encoding to Base32.
 
 ## Aliases
 

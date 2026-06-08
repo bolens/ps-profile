@@ -29,9 +29,9 @@ The path for the output EPUB file. If not specified, uses input path with .epub 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-EpubFromHtml -InputPath "book.html" -OutputPath "book.epub"
-``
+```
 
 ## Aliases
 

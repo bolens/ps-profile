@@ -29,9 +29,9 @@ Path for the output WAV file. If not specified, uses input path with .wav extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AacToWav -InputPath "audio.aac" -OutputPath "audio.wav"
-``
+```
 
 ## Aliases
 

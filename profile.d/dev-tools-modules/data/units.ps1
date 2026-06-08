@@ -107,24 +107,31 @@ function Initialize-DevTools-Units {
 <#
 .SYNOPSIS
     Converts values between different units.
+
 .DESCRIPTION
     Converts values between file size units (B, KB, MB, GB, TB, PB, bits) and time units (ns through years).
     Delegates to Convert-DataSize and Convert-Duration when the file conversion modules are loaded.
+
 .PARAMETER Value
     The numeric value to convert.
+
 .PARAMETER FromUnit
     The unit of the input value (e.g., "MB", "hours").
+
 .PARAMETER ToUnit
     The unit to convert to (e.g., "KB", "minutes").
-.EXAMPLE
-    Convert-Units -Value 1024 -FromUnit "KB" -ToUnit "MB"
-    Converts 1024 KB to MB (1 MB).
-.EXAMPLE
-    Convert-Units -Value 3600 -FromUnit "seconds" -ToUnit "hours"
-    Converts 3600 seconds to hours (1 hour).
+
 .OUTPUTS
     PSCustomObject
     Object containing Value, Unit, OriginalValue, and OriginalUnit properties.
+
+.EXAMPLE
+    Convert-Units -Value 1024 -FromUnit "KB" -ToUnit "MB"
+    Converts 1024 KB to MB (1 MB).
+
+.EXAMPLE
+    Convert-Units -Value 3600 -FromUnit "seconds" -ToUnit "hours"
+    Converts 3600 seconds to hours (1 hour).
 #>
 function Convert-Units {
     param(

@@ -25,9 +25,9 @@ Number of days of history to keep (default: 30).
 
 ### Example 1
 
-`powershell
-Remove-OldHistory
-``
+```powershell
+Remove-OldHistory 'item'
+```
 
 ## Source
 

@@ -54,11 +54,11 @@ System.Boolean. True if successful, false otherwise.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value 'production' -EnvVarName 'AWS_PROFILE' -CommandName 'aws' -DisplayName 'AWS profile'
-        
-        Sets AWS profile to 'production'.
-``
+```
+
+Sets AWS profile to 'production'.
 
 ## Source
 

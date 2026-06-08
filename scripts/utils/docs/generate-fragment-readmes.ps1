@@ -1,8 +1,7 @@
 <#
-scripts/utils/generate-fragment-readmes.ps1
-
 .SYNOPSIS
     Generates minimal README files for each profile.d/*.ps1 fragment.
+
 
 .DESCRIPTION
     Scans all PowerShell script files in the profile.d directory and generates
@@ -14,32 +13,20 @@ scripts/utils/generate-fragment-readmes.ps1
 
     Existing README files are preserved unless -Force is used to overwrite them.
 
+
 .PARAMETER Force
     If specified, overwrites existing README.md files. Otherwise, existing
     files are skipped and preserved.
+
 
 .PARAMETER OutputPath
     The output directory for fragment documentation. Can be absolute or relative to the
     repository root. Defaults to "docs/fragments".
 
+
 .PARAMETER DryRun
     If specified, shows what README files would be generated without actually creating them.
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1
-
-    Generates README files for all fragments that don't already have one, and copies them
-    to docs/fragments/ with an index.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1 -Force
-
-    Regenerates all README files, overwriting existing ones.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1 -DryRun
-
-    Shows what README files would be generated without actually creating them.
 
 .OUTPUTS
     Creates or updates .README.md files in the profile.d directory, one per
@@ -51,6 +38,7 @@ scripts/utils/generate-fragment-readmes.ps1
     - Enable helpers section listing lazy-loading helper functions
     - Dependencies and Notes sections
 
+
 .NOTES
     The script uses pattern matching to detect:
     - Standard function declarations: function FunctionName { ... }
@@ -60,6 +48,24 @@ scripts/utils/generate-fragment-readmes.ps1
 
 Function descriptions are extracted from single-line comments (#) or
     content within multiline comment blocks immediately preceding the function.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1
+
+    Generates README files for all fragments that don't already have one, and copies them
+    to docs/fragments/ with an index.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1 -Force
+
+    Regenerates all README files, overwriting existing ones.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\generate-fragment-readmes.ps1 -DryRun
+
+    Shows what README files would be generated without actually creating them.
 #>
 
 param(

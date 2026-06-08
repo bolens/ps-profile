@@ -9,8 +9,16 @@ tests/integration/system/monitor.tests.ps1
 Describe 'System Monitor Integration Tests' {
     BeforeAll {
         try {
-            . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
+            $current = Get-Item $PSScriptRoot
+            while ($null -ne $current) {
+                $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+                if (Test-Path -LiteralPath $testSupportPath) {
+                    . $testSupportPath
+                    break
+                }
+                if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+                $current = $current.Parent
+            }
             $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
                 throw "Get-TestPath returned null or empty value for ProfileDir"

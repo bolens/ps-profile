@@ -30,11 +30,11 @@ System.String Returns the decoded ASCII text.
 
 ### Example 1
 
-`powershell
+```powershell
 "w6==@ (@C=5P" | ConvertFrom-Rot47ToAscii
-    
-    Converts ROT47 to text.
-``
+```
+
+Converts ROT47 to text.
 
 ## Aliases
 

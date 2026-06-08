@@ -34,17 +34,19 @@ System.String. Output from virtual environment creation.
 
 ### Example 1
 
-`powershell
-New-PythonVirtualEnv
-        Creates a virtual environment in .venv.
-``
+```powershell
+New-PythonVirtualEnv -Path ./path -PythonVersion 'value'
+```
+
+Creates a virtual environment in .venv.
 
 ### Example 2
 
-`powershell
+```powershell
 New-PythonVirtualEnv -Path 'venv'
-        Creates a virtual environment in 'venv'.
-``
+```
+
+Creates a virtual environment in 'venv'.
 
 ## Aliases
 

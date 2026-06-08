@@ -123,26 +123,33 @@ function Initialize-FileConversion-CoreTimeTimezone {
 <#
 .SYNOPSIS
     Converts a DateTime between two timezones.
+
 .DESCRIPTION
     Converts a DateTime object from one timezone to another.
     Uses .NET TimeZoneInfo for timezone conversions.
+
 .PARAMETER DateTime
     The DateTime object to convert.
+
 .PARAMETER SourceTimeZone
     The source timezone ID (e.g., "Eastern Standard Time", "UTC", "GMT").
+
 .PARAMETER TargetTimeZone
     The target timezone ID (e.g., "Pacific Standard Time", "UTC", "GMT").
+
+.OUTPUTS
+    System.DateTime
+    Returns a DateTime object in the target timezone.
+
 .EXAMPLE
     Get-Date | Convert-TimeZone -SourceTimeZone "Eastern Standard Time" -TargetTimeZone "Pacific Standard Time"
     
     Converts the current date/time from Eastern to Pacific timezone.
+
 .EXAMPLE
     [DateTime]::Now | Convert-TimeZone -SourceTimeZone "UTC" -TargetTimeZone "Eastern Standard Time"
     
     Converts UTC time to Eastern timezone.
-.OUTPUTS
-    System.DateTime
-    Returns a DateTime object in the target timezone.
 #>
 function Convert-TimeZone {
     param(
@@ -166,19 +173,24 @@ Set-Alias -Name 'tz-convert' -Value 'Convert-TimeZone' -Scope Global -Force -Err
 <#
 .SYNOPSIS
     Converts a DateTime to a specific timezone.
+
 .DESCRIPTION
     Converts a DateTime object (assumed to be in local time) to a specific timezone.
+
 .PARAMETER DateTime
     The DateTime object to convert (assumed to be in local time).
+
 .PARAMETER TimeZone
     The target timezone ID (e.g., "Eastern Standard Time", "UTC", "GMT").
+
+.OUTPUTS
+    System.DateTime
+    Returns a DateTime object in the target timezone.
+
 .EXAMPLE
     Get-Date | ConvertTo-TimeZone -TimeZone "UTC"
     
     Converts the current local date/time to UTC.
-.OUTPUTS
-    System.DateTime
-    Returns a DateTime object in the target timezone.
 #>
 function ConvertTo-TimeZone {
     param(
@@ -196,19 +208,24 @@ Set-Alias -Name 'datetime-to-timezone' -Value 'ConvertTo-TimeZone' -Scope Global
 <#
 .SYNOPSIS
     Converts a DateTime from a specific timezone to local time.
+
 .DESCRIPTION
     Converts a DateTime object (assumed to be in the specified timezone) to local time.
+
 .PARAMETER DateTime
     The DateTime object to convert (assumed to be in the specified timezone).
+
 .PARAMETER TimeZone
     The source timezone ID (e.g., "Eastern Standard Time", "UTC", "GMT").
+
+.OUTPUTS
+    System.DateTime
+    Returns a DateTime object in local time.
+
 .EXAMPLE
     [DateTime]::Parse("2024-01-15 12:00:00") | ConvertFrom-TimeZone -TimeZone "UTC"
     
     Converts a UTC date/time to local time.
-.OUTPUTS
-    System.DateTime
-    Returns a DateTime object in local time.
 #>
 function ConvertFrom-TimeZone {
     param(
@@ -226,15 +243,17 @@ Set-Alias -Name 'timezone-to-datetime' -Value 'ConvertFrom-TimeZone' -Scope Glob
 <#
 .SYNOPSIS
     Gets a list of available timezones.
+
 .DESCRIPTION
     Returns a list of all available timezones on the system.
-.EXAMPLE
-    Get-TimeZones
-    
-    Lists all available timezones.
+
 .OUTPUTS
     PSCustomObject[]
     Returns an array of timezone objects with Id, DisplayName, StandardName, DaylightName, and BaseUtcOffset properties.
+
+.EXAMPLE
+    Get-TimeZones
+    Lists all available timezones.
 #>
 function Get-TimeZones {
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }

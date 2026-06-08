@@ -38,19 +38,19 @@ System.String. Deployment status or command output.
 
 ### Example 1
 
-`powershell
+```powershell
 Deploy-Heroku -AppName "my-app"
-        
-        Deploys the current git repository to Heroku.
-``
+```
+
+Deploys the current git repository to Heroku.
 
 ### Example 2
 
-`powershell
+```powershell
 Deploy-Heroku -AppName "my-app" -Action "logs"
-        
-        Shows Heroku application logs.
-``
+```
+
+Shows Heroku application logs.
 
 ## Source
 

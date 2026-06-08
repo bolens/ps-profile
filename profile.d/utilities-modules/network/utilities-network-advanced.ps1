@@ -61,8 +61,7 @@ catch {
 .PARAMETER RetryDelaySeconds
     Delay between retries in seconds. Default is 2.
 .EXAMPLE
-    Invoke-WithRetry
-
+    Invoke-WithRetry -ScriptBlock { }
 #>
 function Invoke-WithRetry {
     param(
@@ -227,8 +226,7 @@ function Invoke-WithRetry {
 .PARAMETER TimeoutSeconds
     Timeout for each connectivity test. Default is 5.
 .EXAMPLE
-    Test-NetworkConnectivity
-
+    Test-NetworkConnectivity -Target 'value'
 #>
 function Test-NetworkConnectivity {
     param(
@@ -290,8 +288,7 @@ function Test-NetworkConnectivity {
 .PARAMETER MaxRetries
     Maximum retry attempts. Default is 3.
 .EXAMPLE
-    Invoke-HttpRequestWithRetry
-
+    Invoke-HttpRequestWithRetry -Uri 'value'
 #>
 function Invoke-HttpRequestWithRetry {
     param(
@@ -345,8 +342,7 @@ function Invoke-HttpRequestWithRetry {
 .PARAMETER TimeoutSeconds
     Timeout for DNS resolution. Default is 10.
 .EXAMPLE
-    Resolve-HostWithRetry
-
+    Resolve-HostWithRetry -HostName 'value'
 #>
 function Resolve-HostWithRetry {
     param(

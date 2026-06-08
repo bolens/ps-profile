@@ -6,8 +6,16 @@ tests/integration/profile/fragment-loader.tests.ps1
 #>
 
 BeforeAll {
-    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
-
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
+        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
+    }
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibDir = Join-Path $script:RepoRoot 'scripts' 'lib'
     $script:FragmentLibDir = Join-Path $script:LibDir 'fragment'

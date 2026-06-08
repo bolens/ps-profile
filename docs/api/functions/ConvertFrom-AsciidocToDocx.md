@@ -29,9 +29,9 @@ Path for the output DOCX file. If not specified, uses input path with .docx exte
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AsciidocToDocx -InputPath "document.adoc" -OutputPath "document.docx"
-``
+```
 
 ## Aliases
 

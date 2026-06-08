@@ -30,17 +30,19 @@ System.Diagnostics.Process. Process object for SQL Workbench/J.
 
 ### Example 1
 
-`powershell
-Start-SqlWorkbench
-        Launches SQL Workbench/J.
-``
+```powershell
+Start-SqlWorkbench -Workspace 'value'
+```
+
+Launches SQL Workbench/J.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-SqlWorkbench -Workspace "C:\Workspaces\my-workspace.xml"
-        Launches SQL Workbench/J with a specific workspace.
-``
+```
+
+Launches SQL Workbench/J with a specific workspace.
 
 ## Aliases
 

@@ -42,19 +42,19 @@ System.Object. Schema information.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-DatabaseSchema -DatabaseType PostgreSQL -Database mydb
-    
-    Gets schema for all tables in PostgreSQL database.
-``
+```
+
+Gets schema for all tables in PostgreSQL database.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-DatabaseSchema -DatabaseType MySQL -Database mydb -TableName users -OutputFormat json
-    
-    Gets schema for specific table in JSON format.
-``
+```
+
+Gets schema for specific table in JSON format.
 
 ## Aliases
 

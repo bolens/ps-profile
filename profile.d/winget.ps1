@@ -106,15 +106,15 @@ if (Test-CachedCommand winget) {
     Set-AgentModeAlias -Name 'winget-remove' -Target 'Remove-WingetPackage'
     # Winget cleanup - clean cache
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Cleans up winget cache.
     .DESCRIPTION
         Removes cached installer packages from winget's cache directory.
         This helps free up disk space by removing downloaded installers.
     .EXAMPLE
-        Clear-WingetCache
+    Clear-WingetCache
         Cleans the winget cache.
-    #>
+#>
     function Clear-WingetCache {
         [CmdletBinding()]
         param()
@@ -164,16 +164,16 @@ if (Test-CachedCommand winget) {
     Set-AgentModeAlias -Name 'winget-find' -Target 'Find-WingetPackage'
     # Winget list - list installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Lists installed winget packages.
     .DESCRIPTION
         Shows all packages currently installed via winget.
     .PARAMETER Source
         Filter by source.
     .EXAMPLE
-        Get-WingetPackage
+    Get-WingetPackage -Source ./source
         Lists all installed winget packages.
-    #>
+#>
     function Get-WingetPackage {
         [CmdletBinding()]
         param(
@@ -230,7 +230,7 @@ if (Test-CachedCommand winget) {
     Set-AgentModeAlias -Name 'winget-info' -Target 'Get-WingetPackageInfo'
     # Winget export - backup installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports installed winget packages to a backup file.
     .DESCRIPTION
         Creates a JSON file containing all installed winget packages.
@@ -240,12 +240,12 @@ if (Test-CachedCommand winget) {
     .PARAMETER Source
         Export packages from a specific source only.
     .EXAMPLE
-        Export-WingetPackages
+    Export-WingetPackages -Path ./path -Source ./source
         Exports packages to winget-packages.json in current directory.
     .EXAMPLE
         Export-WingetPackages -Path "C:\backup\winget-backup.json"
         Exports packages to a specific file.
-    #>
+#>
     function Export-WingetPackages {
         [CmdletBinding()]
         param(
@@ -263,7 +263,7 @@ if (Test-CachedCommand winget) {
     Set-AgentModeAlias -Name 'winget-backup' -Target 'Export-WingetPackages'
     # Winget import - restore packages from backup
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores winget packages from a backup file.
     .DESCRIPTION
         Installs all packages listed in a JSON export file.
@@ -275,7 +275,7 @@ if (Test-CachedCommand winget) {
     .PARAMETER IgnoreVersions
         Install latest versions instead of the versions specified in the export file.
     .EXAMPLE
-        Import-WingetPackages
+    Import-WingetPackages -Path ./path
         Restores packages from winget-packages.json in current directory.
     .EXAMPLE
         Import-WingetPackages -Path "C:\backup\winget-backup.json"
@@ -283,7 +283,7 @@ if (Test-CachedCommand winget) {
     .EXAMPLE
         Import-WingetPackages -IgnoreUnavailable
         Restores packages, skipping any that are no longer available.
-    #>
+#>
     function Import-WingetPackages {
         [CmdletBinding()]
         param(

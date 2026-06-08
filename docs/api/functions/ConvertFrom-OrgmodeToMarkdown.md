@@ -29,9 +29,9 @@ Path for the output Markdown file. If not specified, uses input path with .md ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OrgmodeToMarkdown -InputPath "document.org" -OutputPath "document.md"
-``
+```
 
 ## Aliases
 

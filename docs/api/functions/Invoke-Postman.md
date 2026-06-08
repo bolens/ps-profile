@@ -42,17 +42,19 @@ System.String. Output from Newman execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Postman -CollectionPath "./collection.json"
-        Runs the Postman collection.
-``
+```
+
+Runs the Postman collection.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Postman -CollectionPath "./collection.json" -Environment "./env.json" -Reporters "html", "json"
-        Runs the collection with environment and generates HTML and JSON reports.
-``
+```
+
+Runs the collection with environment and generates HTML and JSON reports.
 
 ## Aliases
 

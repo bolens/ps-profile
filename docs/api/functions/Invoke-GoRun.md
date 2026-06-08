@@ -25,15 +25,15 @@ Arguments to pass to go run.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GoRun main.go
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GoRun ./cmd/server
-``
+```
 
 ## Aliases
 

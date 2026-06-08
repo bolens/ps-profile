@@ -40,11 +40,11 @@ System.String Returns the path to the decompressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Expand-Xz -InputPath 'data.txt.xz'
-    
-    Decompresses data.txt.xz to data.txt.
-``
+```
+
+Decompresses data.txt.xz to data.txt.
 
 ## Aliases
 

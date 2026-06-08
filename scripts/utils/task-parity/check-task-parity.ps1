@@ -675,9 +675,11 @@ if ($Restore -or $Prune) {
     }
 
     if ($Restore) {
+        $restoreErrors = 0
         foreach ($filePath in $targetFiles) {
             if (-not $filePath -or -not (Test-Path -LiteralPath (Split-Path -Parent $filePath) -PathType Container -ErrorAction SilentlyContinue)) {
                 Write-Warning "Skipping restore for missing parent directory: $filePath"
+                $restoreErrors++
                 continue
             }
 
@@ -686,8 +688,13 @@ if ($Restore -or $Prune) {
                 Write-Host "Restored $restoredPath from latest task-parity backup" -ForegroundColor Green
             }
             catch {
+                $restoreErrors++
                 Write-Warning "Could not restore backup for ${filePath}: $($_.Exception.Message)"
             }
+        }
+
+        if ($restoreErrors -gt 0) {
+            Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message "Failed to restore $restoreErrors task file backup(s)"
         }
 
         Exit-WithCode -ExitCode $EXIT_SUCCESS
@@ -695,6 +702,7 @@ if ($Restore -or $Prune) {
 
     if ($Prune) {
         $removedTotal = 0
+        $pruneErrors = 0
         foreach ($filePath in $targetFiles) {
             if (-not $filePath) {
                 continue
@@ -704,8 +712,13 @@ if ($Restore -or $Prune) {
                 $removedTotal += Remove-OldFileBackups -RepoRoot $RepoRoot -Category 'task-parity' -SourcePath $filePath -KeepCount $KeepCount
             }
             catch {
+                $pruneErrors++
                 Write-Warning "Could not prune backups for ${filePath}: $($_.Exception.Message)"
             }
+        }
+
+        if ($pruneErrors -gt 0) {
+            Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message "Failed to prune backups for $pruneErrors task file(s)"
         }
 
         Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Pruned $removedTotal task-parity backup(s)"

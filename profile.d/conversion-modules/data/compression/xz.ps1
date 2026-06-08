@@ -173,26 +173,33 @@ function Initialize-FileConversion-CoreCompressionXz {
 <#
 .SYNOPSIS
     Compresses a file using XZ compression.
+
 .DESCRIPTION
     Compresses a file using the XZ compression format (LZMA2 algorithm).
     XZ provides high compression ratios.
+
 .PARAMETER InputPath
     The path to the file to compress.
+
 .PARAMETER OutputPath
     The path for the output compressed file. If not specified, uses input path with .xz extension.
+
 .PARAMETER CompressionLevel
     The compression level (0-9). Default is 6. Higher levels provide better compression but are slower.
+
+.OUTPUTS
+    System.String
+    Returns the path to the compressed file.
+
 .EXAMPLE
     Compress-Xz -InputPath 'data.txt'
     
     Compresses data.txt to data.txt.xz.
+
 .EXAMPLE
     Compress-Xz -InputPath 'data.txt' -CompressionLevel 9
     
     Compresses data.txt with maximum compression level.
-.OUTPUTS
-    System.String
-    Returns the path to the compressed file.
 #>
 Set-Item -Path Function:Global:Compress-Xz -Value {
     param(
@@ -211,19 +218,24 @@ Set-Alias -Name xz -Value Compress-Xz -Scope Global -ErrorAction SilentlyContinu
 <#
 .SYNOPSIS
     Decompresses an XZ compressed file.
+
 .DESCRIPTION
     Decompresses a file that was compressed using XZ compression.
+
 .PARAMETER InputPath
     The path to the XZ compressed file.
+
 .PARAMETER OutputPath
     The path for the output decompressed file. If not specified, removes .xz extension from input path.
+
+.OUTPUTS
+    System.String
+    Returns the path to the decompressed file.
+
 .EXAMPLE
     Expand-Xz -InputPath 'data.txt.xz'
     
     Decompresses data.txt.xz to data.txt.
-.OUTPUTS
-    System.String
-    Returns the path to the decompressed file.
 #>
 Set-Item -Path Function:Global:Expand-Xz -Value {
     param(
@@ -241,22 +253,28 @@ Set-Alias -Name decompress-xz -Value Expand-Xz -Scope Global -ErrorAction Silent
 <#
 .SYNOPSIS
     Compresses a file using LZMA compression.
+
 .DESCRIPTION
     Compresses a file using the LZMA compression format.
     LZMA provides high compression ratios.
+
 .PARAMETER InputPath
     The path to the file to compress.
+
 .PARAMETER OutputPath
     The path for the output compressed file. If not specified, uses input path with .lzma extension.
+
 .PARAMETER CompressionLevel
     The compression level (0-9). Default is 6. Higher levels provide better compression but are slower.
+
+.OUTPUTS
+    System.String
+    Returns the path to the compressed file.
+
 .EXAMPLE
     Compress-Lzma -InputPath 'data.txt'
     
     Compresses data.txt to data.txt.lzma.
-.OUTPUTS
-    System.String
-    Returns the path to the compressed file.
 #>
 Set-Item -Path Function:Global:Compress-Lzma -Value {
     param(
@@ -275,19 +293,24 @@ Set-Alias -Name lzma -Value Compress-Lzma -Scope Global -ErrorAction SilentlyCon
 <#
 .SYNOPSIS
     Decompresses an LZMA compressed file.
+
 .DESCRIPTION
     Decompresses a file that was compressed using LZMA compression.
+
 .PARAMETER InputPath
     The path to the LZMA compressed file.
+
 .PARAMETER OutputPath
     The path for the output decompressed file. If not specified, removes .lzma extension from input path.
+
+.OUTPUTS
+    System.String
+    Returns the path to the decompressed file.
+
 .EXAMPLE
     Expand-Lzma -InputPath 'data.txt.lzma'
     
     Decompresses data.txt.lzma to data.txt.
-.OUTPUTS
-    System.String
-    Returns the path to the decompressed file.
 #>
 Set-Item -Path Function:Global:Expand-Lzma -Value {
     param(

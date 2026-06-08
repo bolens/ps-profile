@@ -33,11 +33,11 @@ Video quality. Defaults to best available.
 
 ### Example 1
 
-`powershell
+```powershell
 Download-Twitch -Url "https://www.twitch.tv/videos/123456789"
-        
-        Downloads a Twitch VOD.
-``
+```
+
+Downloads a Twitch VOD.
 
 ## Source
 

@@ -25,11 +25,9 @@ Optional search text to pre-fill the navi query prompt.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-NaviSearch -Query 'docker'
-.PARAMETER Query
-    Optional search text to pre-fill the navi query prompt.
-``
+```
 
 ## Aliases
 

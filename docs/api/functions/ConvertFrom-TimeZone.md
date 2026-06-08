@@ -34,11 +34,11 @@ System.DateTime Returns a DateTime object in local time.
 
 ### Example 1
 
-`powershell
+```powershell
 [DateTime]::Parse("2024-01-15 12:00:00") | ConvertFrom-TimeZone -TimeZone "UTC"
-    
-    Converts a UTC date/time to local time.
-``
+```
+
+Converts a UTC date/time to local time.
 
 ## Aliases
 

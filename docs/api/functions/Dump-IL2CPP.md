@@ -42,11 +42,11 @@ System.String. Path to the output directory.
 
 ### Example 1
 
-`powershell
+```powershell
 Dump-IL2CPP -MetadataFile "global-metadata.dat" -BinaryFile "GameAssembly.dll"
-        
-        Dumps IL2CPP metadata from a Unity game.
-``
+```
+
+Dumps IL2CPP metadata from a Unity game.
 
 ## Source
 

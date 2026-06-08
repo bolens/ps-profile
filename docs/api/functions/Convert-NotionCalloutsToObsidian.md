@@ -31,16 +31,16 @@ Optional path to write transformed content.
 
 ## Outputs
 
-System.String when content is piped or -PassThru is used. .EXAMPLE Convert-NotionCalloutsToObsidian
+System.String when content is piped or -PassThru is used.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Convert-NotionCalloutsToObsidian
-``
+```powershell
+Convert-NotionCalloutsToObsidian -Content 'text' -InputPath ./input.file
+```
 
 ## Aliases
 

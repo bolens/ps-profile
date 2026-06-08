@@ -20,8 +20,7 @@ function Get-TextLineEnding {
 .PARAMETER Content
         File or help content as text.
 .EXAMPLE
-    Get-TextLineEnding
-
+    Get-TextLineEnding -Content 'text'
 #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -53,8 +52,7 @@ function Get-TextFileEncoding {
 .PARAMETER Path
         File or directory path.
 .EXAMPLE
-    Get-TextFileEncoding
-
+    Get-TextFileEncoding -Path ./path
 #>
     [CmdletBinding()]
     [OutputType([System.Text.Encoding])]
@@ -113,8 +111,7 @@ function Write-TaskParityTextFile {
 .PARAMETER ExistingContent
         Original file content used to preserve line endings.
 .EXAMPLE
-    Write-TaskParityTextFile
-
+    Write-TaskParityTextFile -Path ./output.txt -Content 'text'
 #>
     [CmdletBinding()]
     param(
@@ -167,8 +164,7 @@ function Join-TaskCommandLines {
 .PARAMETER Lines
         Text lines to process.
 .EXAMPLE
-    Join-TaskCommandLines
-
+    Join-TaskCommandLines -Lines @('pwsh -File scripts/test.ps1')
 #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -202,8 +198,7 @@ function Split-TaskCommandLines {
 .PARAMETER Command
         Shell command text.
 .EXAMPLE
-    Split-TaskCommandLines
-
+    Split-TaskCommandLines -Command 'pwsh -NoProfile -File scripts/test.ps1'
 #>
     [CmdletBinding()]
     [OutputType([string[]])]
@@ -235,8 +230,7 @@ function Normalize-TaskScriptPathInText {
 .PARAMETER Text
         Input text to normalize or inspect.
 .EXAMPLE
-    Normalize-TaskScriptPathInText
-
+    Normalize-TaskScriptPathInText -Text 'scripts/utils/test.ps1'
 #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -267,8 +261,7 @@ function Test-TaskArgumentPlaceholder {
 .PARAMETER Token
         Token text to evaluate.
 .EXAMPLE
-    Test-TaskArgumentPlaceholder
-
+    Test-TaskArgumentPlaceholder -Token '{{.CLI_ARGS}}'
 #>
     [CmdletBinding()]
     [OutputType([bool])]
@@ -297,8 +290,7 @@ function ConvertTo-VsCodeShellTaskDefinition {
 .PARAMETER Description
         Human-readable task description.
 .EXAMPLE
-    ConvertTo-VsCodeShellTaskDefinition -InputPath ./input.file
-
+    ConvertTo-VsCodeShellTaskDefinition -Label 'test' -Command 'pwsh -NoProfile -File scripts/test.ps1'
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -381,8 +373,7 @@ function ConvertFrom-PwshInvocationCommand {
 .PARAMETER Command
         Shell command text.
 .EXAMPLE
-    ConvertFrom-PwshInvocationCommand -InputPath ./input.file
-
+    ConvertFrom-PwshInvocationCommand -Command 'pwsh -NoProfile -File scripts/test.ps1'
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]

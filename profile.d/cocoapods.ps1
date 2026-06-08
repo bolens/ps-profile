@@ -12,14 +12,14 @@
 if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand pod)) {
     # CocoaPods install - install dependencies
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Installs CocoaPods dependencies.
     .DESCRIPTION
         Installs dependencies from Podfile. Creates Pods directory and workspace.
     .EXAMPLE
-        Install-CocoaPodsDependencies
+    Install-CocoaPodsDependencies 'package-name'
         Installs all dependencies.
-    #>
+#>
     function Install-CocoaPodsDependencies {
         [CmdletBinding()]
         param()
@@ -29,19 +29,19 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'podinstall' -Target 'Install-CocoaPodsDependencies'
     # CocoaPods update - update dependencies
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates CocoaPods dependencies.
     .DESCRIPTION
         Updates dependencies to latest versions allowed by Podfile.
     .PARAMETER Pods
         Specific pod names to update (optional, updates all if omitted).
     .EXAMPLE
-        Update-CocoaPodsDependencies
+    Update-CocoaPodsDependencies -Pods @()
         Updates all dependencies.
     .EXAMPLE
         Update-CocoaPodsDependencies Alamofire
         Updates specific pod.
-    #>
+#>
     function Update-CocoaPodsDependencies {
         [CmdletBinding()]
         param(
@@ -59,14 +59,14 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'podupdate' -Target 'Update-CocoaPodsDependencies'
     # CocoaPods deintegrate - remove CocoaPods
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Removes CocoaPods integration from project.
     .DESCRIPTION
         Removes Pods directory and workspace files.
     .EXAMPLE
-        Remove-CocoaPodsIntegration
+    Remove-CocoaPodsIntegration 'item'
         Removes CocoaPods from project.
-    #>
+#>
     function Remove-CocoaPodsIntegration {
         [CmdletBinding()]
         param()

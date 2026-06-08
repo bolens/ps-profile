@@ -38,11 +38,11 @@ System.String Returns the path to the output JSON file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-IonToJson -InputPath 'data.ion'
-    
-    Converts data.ion to data.json.
-``
+```
+
+Converts data.ion to data.json.
 
 ## Aliases
 

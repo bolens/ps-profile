@@ -30,17 +30,19 @@ System.String. Output from cargo-audit execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Audit-RustProject
-        Audits the current Rust project for security vulnerabilities.
-``
+```
+
+Audits the current Rust project for security vulnerabilities.
 
 ### Example 2
 
-`powershell
+```powershell
 Audit-RustProject --deny warnings
-        Audits and treats warnings as errors.
-``
+```
+
+Audits and treats warnings as errors.
 
 ## Aliases
 

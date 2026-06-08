@@ -30,11 +30,11 @@ System.String Returns the decoded ASCII text.
 
 ### Example 1
 
-`powershell
+```powershell
 "⠓⠑⠇⠇⠕" | ConvertFrom-BrailleToAscii
-    
-    Converts Braille to text.
-``
+```
+
+Converts Braille to text.
 
 ## Aliases
 

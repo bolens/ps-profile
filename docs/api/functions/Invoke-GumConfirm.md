@@ -23,16 +23,16 @@ Confirmation message shown to the user.
 
 ## Outputs
 
-System.Boolean .EXAMPLE if (Invoke-GumConfirm -Prompt 'Delete file?') { Remove-Item ./temp.txt }
+System.Boolean
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 if (Invoke-GumConfirm -Prompt 'Delete file?') { Remove-Item ./temp.txt }
-``
+```
 
 ## Aliases
 

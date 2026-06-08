@@ -25,15 +25,9 @@ Arguments to pass to next dev.
 
 ### Example 1
 
-`powershell
-Start-NextJsDev
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-NextJsDev --port 3001
-``
+```
 
 ## Aliases
 

@@ -46,23 +46,23 @@ System.String Returns the path to the compressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Compress-Zstd -InputPath 'data.txt'
-    
-    Compresses data.txt to data.txt.zst.
-``
+```
+
+Compresses data.txt to data.txt.zst.
 
 ### Example 2
 
-`powershell
+```powershell
 Compress-Zstd -InputPath 'data.txt' -CompressionLevel 10
-    
-    Compresses data.txt with compression level 10.
-``
+```
+
+Compresses data.txt with compression level 10.
 
 ## Notes
 
-Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd). .OUTPUTS System.String Returns the path to the compressed file.
+Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd). .EXAMPLE Compress-Zstd -InputPath 'data.txt' Compresses data.txt to data.txt.zst. .EXAMPLE Compress-Zstd -InputPath 'data.txt' -CompressionLevel 10 Compresses data.txt with compression level 10.
 
 
 ## Aliases

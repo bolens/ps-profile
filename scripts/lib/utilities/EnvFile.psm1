@@ -209,7 +209,6 @@ function Load-EnvFile {
 
 .EXAMPLE
     Initialize-EnvFiles
-    
 .EXAMPLE
     Initialize-EnvFiles -RepoRoot 'C:\Projects\MyRepo' -Overwrite
 #>

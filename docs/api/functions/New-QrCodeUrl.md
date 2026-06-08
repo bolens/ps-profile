@@ -41,17 +41,19 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeUrl -Url "example.com"
-    Generates a QR code for https://example.com.
-``
+```
+
+Generates a QR code for https://example.com.
 
 ### Example 2
 
-`powershell
+```powershell
 New-QrCodeUrl -Url "https://example.com" -Title "My Website"
-    Generates a QR code for the URL with a title reference.
-``
+```
+
+Generates a QR code for the URL with a title reference.
 
 ## Aliases
 

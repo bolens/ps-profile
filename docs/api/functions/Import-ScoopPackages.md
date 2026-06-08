@@ -25,17 +25,19 @@ Path to the scoopfile.json file to import. Defaults to "scoopfile.json" in curre
 
 ### Example 1
 
-`powershell
-Import-ScoopPackages
-        Restores packages from scoopfile.json in current directory.
-``
+```powershell
+Import-ScoopPackages -Path ./path
+```
+
+Restores packages from scoopfile.json in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-ScoopPackages -Path "C:\backup\scoop-packages.json"
-        Restores packages from a specific file.
-``
+```
+
+Restores packages from a specific file.
 
 ## Aliases
 

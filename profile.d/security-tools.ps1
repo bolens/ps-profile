@@ -38,32 +38,38 @@ try {
     .SYNOPSIS
         Scans a Git repository for secrets using gitleaks.
     
+
     .DESCRIPTION
         Runs gitleaks scan on the specified repository path. Gitleaks detects
         secrets, API keys, passwords, and other sensitive information in Git
         repositories.
     
+
     .PARAMETER RepositoryPath
         Path to the Git repository to scan. Defaults to current directory.
     
+
     .PARAMETER OutputFormat
         Output format: json, csv, sarif. Defaults to json.
     
+
     .PARAMETER ReportPath
         Optional path to save the scan report.
     
+
+    .OUTPUTS
+        System.String. Scan results in the specified format.
+
     .EXAMPLE
         Invoke-GitLeaksScan -RepositoryPath "C:\Projects\MyRepo"
     
         Scans the specified repository for secrets.
     
+
     .EXAMPLE
         Invoke-GitLeaksScan -OutputFormat "sarif" -ReportPath "scan-results.sarif"
     
         Scans current directory and saves results in SARIF format.
-    
-    .OUTPUTS
-        System.String. Scan results in the specified format.
     #>
     function Invoke-GitLeaksScan {
         [CmdletBinding()]

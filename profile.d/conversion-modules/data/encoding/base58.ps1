@@ -241,18 +241,22 @@ function Initialize-FileConversion-CoreEncodingBase58 {
 <#
 .SYNOPSIS
     Converts ASCII text to Base58 encoding.
+
 .DESCRIPTION
     Encodes ASCII/UTF-8 text to Base58 format.
     Base58 is commonly used by Bitcoin addresses and other cryptocurrency applications.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base58 encoded string.
+
 .EXAMPLE
     "Hello World" | ConvertFrom-AsciiToBase58
     
     Converts text to Base58 format.
-.OUTPUTS
-    System.String
-    Returns the Base58 encoded string.
 #>
 function ConvertFrom-AsciiToBase58 {
     param(
@@ -268,17 +272,21 @@ Set-Alias -Name ascii-to-base58 -Value ConvertFrom-AsciiToBase58 -Scope Global -
 <#
 .SYNOPSIS
     Converts Base58 encoding to ASCII text.
+
 .DESCRIPTION
     Decodes Base58 encoded string back to ASCII/UTF-8 text.
+
 .PARAMETER InputObject
     The Base58 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "JxF12TrwUP45BMd" | ConvertFrom-Base58ToAscii
     
     Converts Base58 to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-Base58ToAscii {
     param(
@@ -294,17 +302,21 @@ Set-Alias -Name base58-to-ascii -Value ConvertFrom-Base58ToAscii -Scope Global -
 <#
 .SYNOPSIS
     Converts hexadecimal string to Base58 encoding.
+
 .DESCRIPTION
     Encodes a hexadecimal string to Base58 format.
+
 .PARAMETER InputObject
     The hexadecimal string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base58 encoded string.
+
 .EXAMPLE
     "48656C6C6F" | ConvertFrom-HexToBase58
     
     Converts hex to Base58 format.
-.OUTPUTS
-    System.String
-    Returns the Base58 encoded string.
 #>
 function ConvertFrom-HexToBase58 {
     param(
@@ -320,17 +332,21 @@ Set-Alias -Name hex-to-base58 -Value ConvertFrom-HexToBase58 -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base58 encoding to hexadecimal string.
+
 .DESCRIPTION
     Decodes Base58 encoded string to hexadecimal format.
+
 .PARAMETER InputObject
     The Base58 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the hexadecimal string.
+
 .EXAMPLE
     "JxF12TrwUP45BMd" | ConvertFrom-Base58ToHex
     
     Converts Base58 to hex format.
-.OUTPUTS
-    System.String
-    Returns the hexadecimal string.
 #>
 function ConvertFrom-Base58ToHex {
     param(
@@ -346,17 +362,21 @@ Set-Alias -Name base58-to-hex -Value ConvertFrom-Base58ToHex -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base64 encoding to Base58 encoding.
+
 .DESCRIPTION
     Converts a Base64 encoded string to Base58 format.
+
 .PARAMETER InputObject
     The Base64 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base58 encoded string.
+
 .EXAMPLE
     "SGVsbG8gV29ybGQ=" | ConvertFrom-Base64ToBase58
     
     Converts Base64 to Base58 format.
-.OUTPUTS
-    System.String
-    Returns the Base58 encoded string.
 #>
 function ConvertFrom-Base64ToBase58 {
     param(
@@ -372,17 +392,21 @@ Set-Alias -Name base64-to-base58 -Value ConvertFrom-Base64ToBase58 -Scope Global
 <#
 .SYNOPSIS
     Converts Base58 encoding to Base64 encoding.
+
 .DESCRIPTION
     Converts a Base58 encoded string to Base64 format.
+
 .PARAMETER InputObject
     The Base58 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base64 encoded string.
+
 .EXAMPLE
     "JxF12TrwUP45BMd" | ConvertFrom-Base58ToBase64
     
     Converts Base58 to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the Base64 encoded string.
 #>
 function ConvertFrom-Base58ToBase64 {
     param(

@@ -25,15 +25,15 @@ Arguments to pass to vite.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Vite --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Vite build
-``
+```
 
 ## Aliases
 

@@ -190,22 +190,27 @@ function Initialize-FileConversion-CoreTimeRfc3339 {
 <#
 .SYNOPSIS
     Converts an RFC 3339 date/time string to a DateTime object.
+
 .DESCRIPTION
     Converts an RFC 3339 formatted date/time string to a DateTime object.
     RFC 3339 is a profile of ISO 8601 with specific formatting requirements.
+
 .PARAMETER Rfc3339String
     The RFC 3339 formatted date/time string to convert.
+
+.OUTPUTS
+    System.DateTime
+    Returns a DateTime object representing the RFC 3339 date/time.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Rfc3339ToDateTime
     
     Converts an RFC 3339 string to a DateTime object.
+
 .EXAMPLE
     '2021-01-01T12:30:45.123+05:00' | ConvertFrom-Rfc3339ToDateTime
     
     Converts an RFC 3339 string with timezone and milliseconds.
-.OUTPUTS
-    System.DateTime
-    Returns a DateTime object representing the RFC 3339 date/time.
 #>
 function ConvertFrom-Rfc3339ToDateTime {
     param(
@@ -220,26 +225,33 @@ Set-AgentModeAlias -Name 'rfc3339-to-datetime' -Target 'ConvertFrom-Rfc3339ToDat
 <#
 .SYNOPSIS
     Converts a DateTime object to RFC 3339 format.
+
 .DESCRIPTION
     Converts a DateTime object to RFC 3339 formatted date/time string.
     RFC 3339 requires timezone information (Z for UTC or +/-HH:mm offset).
+
 .PARAMETER DateTime
     The DateTime object to convert.
+
 .PARAMETER IncludeMilliseconds
     Include milliseconds in the output format.
+
 .PARAMETER UseLocalTimezone
     Use local timezone offset instead of UTC.
+
+.OUTPUTS
+    System.String
+    Returns an RFC 3339 formatted date/time string.
+
 .EXAMPLE
     Get-Date | ConvertTo-Rfc3339FromDateTime
     
     Converts current date/time to RFC 3339 format.
+
 .EXAMPLE
     Get-Date | ConvertTo-Rfc3339FromDateTime -IncludeMilliseconds
     
     Converts current date/time to RFC 3339 format with milliseconds.
-.OUTPUTS
-    System.String
-    Returns an RFC 3339 formatted date/time string.
 #>
 function ConvertTo-Rfc3339FromDateTime {
     param(
@@ -256,19 +268,24 @@ Set-AgentModeAlias -Name 'datetime-to-rfc3339' -Target 'ConvertTo-Rfc3339FromDat
 <#
 .SYNOPSIS
     Converts a Unix timestamp to RFC 3339 format.
+
 .DESCRIPTION
     Converts a Unix timestamp (seconds since epoch) to RFC 3339 formatted date/time string.
+
 .PARAMETER UnixTimestamp
     The Unix timestamp to convert.
+
 .PARAMETER IncludeMilliseconds
     Include milliseconds in the output format.
+
+.OUTPUTS
+    System.String
+    Returns an RFC 3339 formatted date/time string.
+
 .EXAMPLE
     1609459200 | ConvertTo-Rfc3339FromUnixTimestamp
     
     Converts Unix timestamp to RFC 3339 format.
-.OUTPUTS
-    System.String
-    Returns an RFC 3339 formatted date/time string.
 #>
 function ConvertTo-Rfc3339FromUnixTimestamp {
     param(
@@ -284,17 +301,21 @@ Set-AgentModeAlias -Name 'unix-to-rfc3339' -Target 'ConvertTo-Rfc3339FromUnixTim
 <#
 .SYNOPSIS
     Converts an RFC 3339 date/time string to a Unix timestamp.
+
 .DESCRIPTION
     Converts an RFC 3339 formatted date/time string to a Unix timestamp (seconds since epoch).
+
 .PARAMETER Rfc3339String
     The RFC 3339 formatted date/time string to convert.
+
+.OUTPUTS
+    System.Double
+    Returns a Unix timestamp (seconds since epoch).
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Rfc3339ToUnixTimestamp
     
     Converts RFC 3339 string to Unix timestamp.
-.OUTPUTS
-    System.Double
-    Returns a Unix timestamp (seconds since epoch).
 #>
 function ConvertFrom-Rfc3339ToUnixTimestamp {
     param(
@@ -309,18 +330,22 @@ Set-AgentModeAlias -Name 'rfc3339-to-unix' -Target 'ConvertFrom-Rfc3339ToUnixTim
 <#
 .SYNOPSIS
     Converts an RFC 3339 date/time string to ISO 8601 format.
+
 .DESCRIPTION
     Converts an RFC 3339 formatted date/time string to ISO 8601 format.
     RFC 3339 is a profile of ISO 8601, so conversion is straightforward.
+
 .PARAMETER Rfc3339String
     The RFC 3339 formatted date/time string to convert.
+
+.OUTPUTS
+    System.String
+    Returns an ISO 8601 formatted date/time string.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertTo-Iso8601FromRfc3339
     
     Converts an RFC 3339 string to ISO 8601 format.
-.OUTPUTS
-    System.String
-    Returns an ISO 8601 formatted date/time string.
 #>
 function ConvertTo-Iso8601FromRfc3339 {
     param(
@@ -335,19 +360,24 @@ Set-AgentModeAlias -Name 'rfc3339-to-iso8601' -Target 'ConvertTo-Iso8601FromRfc3
 <#
 .SYNOPSIS
     Converts an RFC 3339 date/time string to a human-readable format.
+
 .DESCRIPTION
     Converts an RFC 3339 formatted date/time string to a human-readable date/time format.
+
 .PARAMETER Rfc3339String
     The RFC 3339 formatted date/time string to convert.
+
 .PARAMETER Format
     The format string to use (default: 'F' for full date/time).
+
+.OUTPUTS
+    System.String
+    Returns a human-readable date/time string.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Rfc3339ToHumanReadable
     
     Converts RFC 3339 string to human-readable format.
-.OUTPUTS
-    System.String
-    Returns a human-readable date/time string.
 #>
 function ConvertFrom-Rfc3339ToHumanReadable {
     param(

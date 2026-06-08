@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Zed
-        
-        Launches Zed.
-``
+```powershell
+Launch-Zed -Path ./path
+```
+
+Launches Zed.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Zed -Path "C:\Projects\MyApp"
-        
-        Opens a directory in Zed.
-``
+```
+
+Opens a directory in Zed.
 
 ## Source
 

@@ -29,17 +29,19 @@ Add as dev dependency (--dev).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-FlutterPackage http
-        Adds http as a production dependency.
-``
+```
+
+Adds http as a production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-FlutterPackage flutter_test -Dev
-        Adds flutter_test as a dev dependency.
-``
+```
+
+Adds flutter_test as a dev dependency.
 
 ## Aliases
 

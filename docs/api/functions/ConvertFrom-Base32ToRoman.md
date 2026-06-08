@@ -34,10 +34,11 @@ System.String The Roman numeral representation of the input Base32 string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32ToRoman
-    Converts Base32 to Roman numerals.
-``
+```
+
+Converts Base32 to Roman numerals.
 
 ## Aliases
 

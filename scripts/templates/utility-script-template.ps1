@@ -2,20 +2,23 @@
 .SYNOPSIS
     Brief description of what the script does.
 
+
 .DESCRIPTION
     Detailed description of the script's functionality, including any important
     notes about usage, dependencies, or behavior.
 
+
 .PARAMETER ParameterName
     Description of the parameter.
 
-.EXAMPLE
-    .\utility-script-template.ps1 -ParameterName "value"
-    Example of how to use the script.
 
 .NOTES
     Author: Your Name
     Date: $(Get-Date -Format 'yyyy-MM-dd')
+
+.EXAMPLE
+    .\utility-script-template.ps1 -ParameterName "value"
+    Example of how to use the script.
 #>
 
 [CmdletBinding()]

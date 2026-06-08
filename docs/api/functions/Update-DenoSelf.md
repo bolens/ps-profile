@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-DenoSelf
-    Updates Deno to the latest version.
-``
+```
+
+Updates Deno to the latest version.
 
 ## Aliases
 

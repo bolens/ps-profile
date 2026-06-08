@@ -30,11 +30,11 @@ System.String Returns the decoded ASCII text.
 
 ### Example 1
 
-`powershell
+```powershell
 "73W9kKxE" | ConvertFrom-Base62ToAscii
-    
-    Converts Base62 to text.
-``
+```
+
+Converts Base62 to text.
 
 ## Aliases
 

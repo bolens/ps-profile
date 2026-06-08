@@ -171,22 +171,27 @@ function Initialize-FileConversion-CoreTimeIso8601 {
 <#
 .SYNOPSIS
     Converts an ISO 8601 date/time string to a DateTime object.
+
 .DESCRIPTION
     Converts an ISO 8601 formatted date/time string to a DateTime object.
     Supports various ISO 8601 formats including with/without timezone and milliseconds.
+
 .PARAMETER Iso8601String
     The ISO 8601 formatted date/time string to convert.
+
+.OUTPUTS
+    System.DateTime
+    Returns a DateTime object representing the ISO 8601 date/time.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToDateTime
     
     Converts an ISO 8601 string to a DateTime object.
+
 .EXAMPLE
     '2021-01-01T12:30:45.123+05:00' | ConvertFrom-Iso8601ToDateTime
     
     Converts an ISO 8601 string with timezone and milliseconds.
-.OUTPUTS
-    System.DateTime
-    Returns a DateTime object representing the ISO 8601 date/time.
 #>
 function ConvertFrom-Iso8601ToDateTime {
     param(
@@ -201,25 +206,32 @@ Set-AgentModeAlias -Name 'iso8601-to-datetime' -Target 'ConvertFrom-Iso8601ToDat
 <#
 .SYNOPSIS
     Converts a DateTime object to ISO 8601 format.
+
 .DESCRIPTION
     Converts a DateTime object to an ISO 8601 formatted date/time string.
+
 .PARAMETER DateTime
     The DateTime object to convert.
+
 .PARAMETER IncludeMilliseconds
     Include milliseconds in the output (default: false).
+
 .PARAMETER IncludeTimezone
     Include timezone information in the output (default: false).
+
+.OUTPUTS
+    System.String
+    Returns an ISO 8601 formatted date/time string.
+
 .EXAMPLE
     Get-Date | ConvertTo-Iso8601FromDateTime
     
     Converts the current date/time to ISO 8601 format.
+
 .EXAMPLE
     Get-Date | ConvertTo-Iso8601FromDateTime -IncludeMilliseconds -IncludeTimezone
     
     Converts with milliseconds and timezone information.
-.OUTPUTS
-    System.String
-    Returns an ISO 8601 formatted date/time string.
 #>
 function ConvertTo-Iso8601FromDateTime {
     param(
@@ -236,17 +248,21 @@ Set-AgentModeAlias -Name 'datetime-to-iso8601' -Target 'ConvertTo-Iso8601FromDat
 <#
 .SYNOPSIS
     Converts an ISO 8601 date/time string to a Unix timestamp.
+
 .DESCRIPTION
     Converts an ISO 8601 formatted date/time string to a Unix timestamp.
+
 .PARAMETER Iso8601String
     The ISO 8601 formatted date/time string to convert.
+
+.OUTPUTS
+    System.Int64
+    Returns a Unix timestamp as a long integer.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToUnixTimestamp
     
     Converts an ISO 8601 string to a Unix timestamp.
-.OUTPUTS
-    System.Int64
-    Returns a Unix timestamp as a long integer.
 #>
 function ConvertFrom-Iso8601ToUnixTimestamp {
     param(
@@ -261,21 +277,27 @@ Set-AgentModeAlias -Name 'iso8601-to-unix' -Target 'ConvertFrom-Iso8601ToUnixTim
 <#
 .SYNOPSIS
     Converts a Unix timestamp to ISO 8601 format.
+
 .DESCRIPTION
     Converts a Unix timestamp to an ISO 8601 formatted date/time string.
+
 .PARAMETER UnixTimestamp
     The Unix timestamp to convert.
+
 .PARAMETER IncludeMilliseconds
     Include milliseconds in the output (default: false).
+
 .PARAMETER IncludeTimezone
     Include timezone information in the output (default: false).
+
+.OUTPUTS
+    System.String
+    Returns an ISO 8601 formatted date/time string.
+
 .EXAMPLE
     1609459200 | ConvertTo-Iso8601FromUnixTimestamp
     
     Converts a Unix timestamp to ISO 8601 format.
-.OUTPUTS
-    System.String
-    Returns an ISO 8601 formatted date/time string.
 #>
 function ConvertTo-Iso8601FromUnixTimestamp {
     param(
@@ -292,18 +314,22 @@ Set-AgentModeAlias -Name 'unix-to-iso8601' -Target 'ConvertTo-Iso8601FromUnixTim
 <#
 .SYNOPSIS
     Converts an ISO 8601 date/time string to RFC 3339 format.
+
 .DESCRIPTION
     Converts an ISO 8601 formatted date/time string to RFC 3339 format.
     RFC 3339 is a profile of ISO 8601 with some restrictions.
+
 .PARAMETER Iso8601String
     The ISO 8601 formatted date/time string to convert.
+
+.OUTPUTS
+    System.String
+    Returns an RFC 3339 formatted date/time string.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToRfc3339
     
     Converts an ISO 8601 string to RFC 3339 format.
-.OUTPUTS
-    System.String
-    Returns an RFC 3339 formatted date/time string.
 #>
 function ConvertFrom-Iso8601ToRfc3339 {
     param(
@@ -318,24 +344,30 @@ Set-AgentModeAlias -Name 'iso8601-to-rfc3339' -Target 'ConvertFrom-Iso8601ToRfc3
 <#
 .SYNOPSIS
     Converts an ISO 8601 date/time string to a human-readable format.
+
 .DESCRIPTION
     Converts an ISO 8601 formatted date/time string to a human-readable date/time format.
+
 .PARAMETER Iso8601String
     The ISO 8601 formatted date/time string to convert.
+
 .PARAMETER Format
     The format string to use (default: 'F' for full date/time).
     See DateTime.ToString() format strings for options.
+
+.OUTPUTS
+    System.String
+    Returns a human-readable date/time string.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToHumanReadable
     
     Converts an ISO 8601 string to a human-readable format.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToHumanReadable -Format 'yyyy-MM-dd'
     
     Converts using a custom format.
-.OUTPUTS
-    System.String
-    Returns a human-readable date/time string.
 #>
 function ConvertFrom-Iso8601ToHumanReadable {
     param(

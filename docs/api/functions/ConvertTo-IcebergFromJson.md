@@ -29,9 +29,9 @@ The path for the output Iceberg table directory. If not specified, uses input pa
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-IcebergFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

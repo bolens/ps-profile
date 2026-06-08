@@ -62,16 +62,11 @@ System.Boolean. True if conversion successful, false otherwise.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-FormatConversion -InputPath 'document.md' `
-            -ToolCommand 'pandoc' `
-            -ToolArguments @('-o', 'output.html') `
-            -OutputExtension '.html' `
-            -InputExtension '.md' `
-            -ErrorContext 'Markdown to HTML conversion'
-        
-        Converts Markdown to HTML using pandoc.
-``
+```
+
+-ToolCommand 'pandoc' ` -ToolArguments @('-o', 'output.html') ` -OutputExtension '.html' ` -InputExtension '.md' ` -ErrorContext 'Markdown to HTML conversion' Converts Markdown to HTML using pandoc.
 
 ## Source
 

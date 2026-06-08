@@ -25,15 +25,15 @@ Port number of the local HTTP server (default: 80).
 
 ### Example 1
 
-`powershell
+```powershell
 Start-NgrokHttpTunnel -Port 8080
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Start-NgrokHttpTunnel -Port 3000
-``
+```
 
 ## Aliases
 

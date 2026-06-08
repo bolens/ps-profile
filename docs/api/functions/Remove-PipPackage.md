@@ -29,17 +29,19 @@ Remove from user site-packages (--user).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-PipPackage requests
-        Removes requests from global installation.
-``
+```
+
+Removes requests from global installation.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-PipPackage requests -User
-        Removes requests from user directory.
-``
+```
+
+Removes requests from user directory.
 
 ## Aliases
 

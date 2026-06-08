@@ -34,11 +34,11 @@ System.String Returns the path to the output JSON file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EnvToJson -InputPath '.env'
-    
-    Converts .env to .env.json.
-``
+```
+
+Converts .env to .env.json.
 
 ## Aliases
 

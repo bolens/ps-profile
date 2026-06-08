@@ -25,10 +25,11 @@ Package IDs or names to uninstall.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-WingetPackage Microsoft.VisualStudioCode
-        Uninstalls Visual Studio Code.
-``
+```
+
+Uninstalls Visual Studio Code.
 
 ## Aliases
 

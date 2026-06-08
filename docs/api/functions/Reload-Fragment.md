@@ -29,17 +29,19 @@ Array of fragment names to reload.
 
 ### Example 1
 
-`powershell
+```powershell
 Reload-Fragment -FragmentName 'files'
-    Reloads the files.ps1 fragment.
-``
+```
+
+Reloads the files.ps1 fragment.
 
 ### Example 2
 
-`powershell
+```powershell
 Reload-Fragment -FragmentName 'files','utilities'
-    Reloads multiple fragments.
-``
+```
+
+Reloads multiple fragments.
 
 ## Source
 

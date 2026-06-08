@@ -34,19 +34,19 @@ System.String[]. List of connected devices or device information.
 
 ### Example 1
 
-`powershell
-Connect-IOSDevice
-        
-        Connects to iOS device.
-``
+```powershell
+Connect-IOSDevice -DeviceId 'value'
+```
+
+Connects to iOS device.
 
 ### Example 2
 
-`powershell
+```powershell
 Connect-IOSDevice -ListDevices
-        
-        Lists all connected iOS devices.
-``
+```
+
+Lists all connected iOS devices.
 
 ## Source
 

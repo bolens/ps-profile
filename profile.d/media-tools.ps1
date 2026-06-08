@@ -38,45 +38,55 @@ try {
     .SYNOPSIS
         Converts video files using ffmpeg or handbrake.
     
+
     .DESCRIPTION
         Converts video files to different formats and codecs. Supports both
         ffmpeg (flexible) and handbrake (preset-based) conversion.
     
+
     .PARAMETER InputPath
         Path to the input video file.
     
+
     .PARAMETER OutputPath
         Path to the output video file.
     
+
     .PARAMETER Codec
         Video codec to use (e.g., h264, hevc, vp9). Defaults to h264.
     
+
     .PARAMETER Preset
         Handbrake preset to use (if using handbrake). Ignored if using ffmpeg.
     
+
     .PARAMETER UseHandbrake
         Use Handbrake instead of ffmpeg for conversion.
     
+
     .PARAMETER Quality
         Quality setting (CRF for ffmpeg, quality for handbrake). Defaults to 23 for ffmpeg.
     
+
+    .OUTPUTS
+        System.String. Path to the converted video file.
+
     .EXAMPLE
         Convert-Video -InputPath "input.mp4" -OutputPath "output.mkv"
         
         Converts input.mp4 to output.mkv using ffmpeg with default settings.
     
+
     .EXAMPLE
         Convert-Video -InputPath "input.mp4" -OutputPath "output.mkv" -Codec "hevc" -Quality 20
         
         Converts to HEVC codec with quality 20.
     
+
     .EXAMPLE
         Convert-Video -InputPath "input.mp4" -OutputPath "output.mkv" -UseHandbrake -Preset "Fast 1080p30"
         
         Converts using Handbrake with a preset.
-    
-    .OUTPUTS
-        System.String. Path to the converted video file.
     #>
     function Convert-Video {
         [CmdletBinding(SupportsShouldProcess = $true)]
@@ -217,34 +227,41 @@ try {
     .SYNOPSIS
         Extracts audio from a video file.
     
+
     .DESCRIPTION
         Extracts audio track from a video file and saves it as an audio file.
         Supports various audio formats (mp3, flac, wav, etc.).
     
+
     .PARAMETER InputPath
         Path to the input video file.
     
+
     .PARAMETER OutputPath
         Path to the output audio file.
     
+
     .PARAMETER AudioCodec
         Audio codec to use (mp3, flac, wav, aac). Defaults to mp3.
     
+
     .PARAMETER Bitrate
         Audio bitrate (for lossy codecs). Defaults to 192k for mp3.
     
+
+    .OUTPUTS
+        System.String. Path to the extracted audio file.
+
     .EXAMPLE
         Extract-Audio -InputPath "video.mp4" -OutputPath "audio.mp3"
         
         Extracts audio from video.mp4 and saves as audio.mp3.
     
+
     .EXAMPLE
         Extract-Audio -InputPath "video.mp4" -OutputPath "audio.flac" -AudioCodec "flac"
         
         Extracts audio as FLAC format.
-    
-    .OUTPUTS
-        System.String. Path to the extracted audio file.
     #>
     function Extract-Audio {
         [CmdletBinding(SupportsShouldProcess = $true)]
@@ -414,31 +431,37 @@ try {
     .SYNOPSIS
         Rips audio from a CD.
     
+
     .DESCRIPTION
         Rips audio tracks from a CD using cyanrip. Supports various output
         formats and quality settings.
     
+
     .PARAMETER OutputPath
         Directory where ripped audio files will be saved.
     
+
     .PARAMETER Format
         Output format: flac, mp3, wav, opus. Defaults to flac.
     
+
     .PARAMETER Quality
         Quality setting (for lossy formats). Defaults to 0 (highest quality).
     
+
+    .OUTPUTS
+        System.String. Path to the output directory.
+
     .EXAMPLE
         Rip-CD -OutputPath "C:\Music\Album"
         
         Rips CD to FLAC format in the specified directory.
     
+
     .EXAMPLE
         Rip-CD -OutputPath "C:\Music\Album" -Format "mp3" -Quality 0
         
         Rips CD to MP3 format with highest quality.
-    
-    .OUTPUTS
-        System.String. Path to the output directory.
     #>
     function Rip-CD {
         [CmdletBinding(SupportsShouldProcess = $true)]
@@ -509,31 +532,37 @@ try {
     .SYNOPSIS
         Gets detailed information about a media file.
     
+
     .DESCRIPTION
         Retrieves detailed technical information about a media file using
         mediainfo. Returns information about video, audio, and container formats.
     
+
     .PARAMETER MediaPath
         Path to the media file.
     
+
     .PARAMETER OutputFormat
         Output format: text, json, xml. Defaults to text.
     
+
     .PARAMETER OutputPath
         Optional path to save the information to a file.
     
+
+    .OUTPUTS
+        System.String. Media information in the specified format.
+
     .EXAMPLE
         Get-MediaInfo -MediaPath "video.mp4"
         
         Displays media information for video.mp4.
     
+
     .EXAMPLE
         Get-MediaInfo -MediaPath "video.mp4" -OutputFormat "json" -OutputPath "info.json"
         
         Saves media information as JSON to info.json.
-    
-    .OUTPUTS
-        System.String. Media information in the specified format.
     #>
     function Get-MediaInfo {
         [CmdletBinding()]
@@ -636,23 +665,27 @@ try {
     .SYNOPSIS
         Merges multiple MKV files into one.
     
+
     .DESCRIPTION
         Merges multiple MKV files using mkvmerge (from mkvtoolnix).
         Preserves all tracks and metadata from source files.
     
+
     .PARAMETER InputPaths
         Array of input MKV file paths.
     
+
     .PARAMETER OutputPath
         Path to the output merged MKV file.
     
+
+    .OUTPUTS
+        System.String. Path to the merged MKV file.
+
     .EXAMPLE
         Merge-MKV -InputPaths @("part1.mkv", "part2.mkv") -OutputPath "complete.mkv"
         
         Merges part1.mkv and part2.mkv into complete.mkv.
-    
-    .OUTPUTS
-        System.String. Path to the merged MKV file.
     #>
     function Merge-MKV {
         [CmdletBinding(SupportsShouldProcess = $true)]

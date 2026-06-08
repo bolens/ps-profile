@@ -34,11 +34,11 @@ System.String Returns a human-readable date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Rfc3339ToHumanReadable
-    
-    Converts RFC 3339 string to human-readable format.
-``
+```
+
+Converts RFC 3339 string to human-readable format.
 
 ## Aliases
 

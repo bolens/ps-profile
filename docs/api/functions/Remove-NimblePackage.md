@@ -29,17 +29,19 @@ Remove from global packages (--global).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-NimblePackage jester
-        Removes jester from local installation.
-``
+```
+
+Removes jester from local installation.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-NimblePackage jester -Global
-        Removes jester from global installation.
-``
+```
+
+Removes jester from global installation.
 
 ## Aliases
 

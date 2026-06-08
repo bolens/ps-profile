@@ -29,9 +29,9 @@ The path for the output DOCX file. If not specified, uses input path with .docx 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EpubToDocx -InputPath "book.epub" -OutputPath "book.docx"
-``
+```
 
 ## Aliases
 

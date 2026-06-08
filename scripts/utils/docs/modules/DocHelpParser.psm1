@@ -167,7 +167,7 @@ function ConvertFrom-CommentHelpContent {
         $examples.Add($exampleMatch.Groups[1].Value.Trim())
     }
 
-    if ($HelpContent -match '(?s)\.OUTPUTS\s*\n\s*(.+?)(?=\n\s*\.(?:NOTES|INPUTS|LINK)|$)') {
+    if ($HelpContent -match '(?s)\.OUTPUTS\s*\n\s*(.+?)(?=\n\s*\.(?:EXAMPLE|NOTES|INPUTS|LINK)|$)') {
         $outputs = $matches[1].Trim()
         $outputs = $outputs -replace '\r\n', ' ' -replace '\n', ' ' -replace '\s+', ' '
     }

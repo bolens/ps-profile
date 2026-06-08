@@ -25,15 +25,15 @@ Path to the JSON file to convert.
 
 ### Example 1
 
-`powershell
+```powershell
 Convert-JqToJson -File "data.json"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Convert-JqToJson -File "config.json"
-``
+```
 
 ## Aliases
 

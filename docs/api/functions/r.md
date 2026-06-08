@@ -25,9 +25,9 @@ Either a number (for recent commands) or a pattern to search for.
 
 ### Example 1
 
-`powershell
-r
-``
+```powershell
+r -CommandInput 'value'
+```
 
 ## Aliases
 

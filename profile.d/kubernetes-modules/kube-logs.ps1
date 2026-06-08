@@ -24,34 +24,41 @@ try {
     .SYNOPSIS
         Tails logs from Kubernetes pods.
     
+
     .DESCRIPTION
         Uses stern (if available) or kubectl to tail logs from multiple pods
         matching a pattern. Stern provides better multi-pod log aggregation.
     
+
     .PARAMETER Pattern
         Pod name pattern to match (supports regex with stern).
     
+
     .PARAMETER Namespace
         Kubernetes namespace. Defaults to current namespace.
     
+
     .PARAMETER Container
         Optional container name to filter logs.
     
+
     .PARAMETER Follow
         Follow log output (like tail -f). Defaults to true.
     
+
+    .OUTPUTS
+        System.String. Log output stream.
+
     .EXAMPLE
         Tail-KubeLogs -Pattern "my-app"
         
         Tails logs from all pods matching "my-app".
     
+
     .EXAMPLE
         Tail-KubeLogs -Pattern "nginx" -Namespace "production" -Container "web"
         
         Tails logs from nginx pods in production namespace, container web.
-    
-    .OUTPUTS
-        System.String. Log output stream.
     #>
     function Tail-KubeLogs {
         [CmdletBinding()]

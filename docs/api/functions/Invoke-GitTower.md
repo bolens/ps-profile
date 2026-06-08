@@ -25,19 +25,19 @@ Path to the Git repository. Defaults to current directory.
 
 ### Example 1
 
-`powershell
-Invoke-GitTower
-        
-        Opens Git Tower in the current directory.
-``
+```powershell
+Invoke-GitTower @('--help')
+```
+
+Opens Git Tower in the current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GitTower -RepositoryPath "C:\Projects\MyRepo"
-        
-        Opens Git Tower for the specified repository.
-``
+```
+
+Opens Git Tower for the specified repository.
 
 ## Aliases
 

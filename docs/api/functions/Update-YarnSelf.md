@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-YarnSelf
-    Updates Yarn to the latest version.
-``
+```
+
+Updates Yarn to the latest version.
 
 ## Aliases
 

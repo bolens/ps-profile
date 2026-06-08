@@ -11,20 +11,16 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
 
 <#
 .SYNOPSIS
-    Creates a wrapper function that intercepts Test-Path calls and logs null/empty paths.
+    Dot-sources a Test-Path wrapper that logs null or empty path arguments.
 
 .DESCRIPTION
-    This script creates a function that shadows Test-Path and logs when null/empty paths
-    are detected. It should be dot-sourced before running tests.
-.PARAMETER Path
-    File or directory path.
-.PARAMETER LiteralPath
-    LiteralFile or directory path.
-.PARAMETER PathType
-    Filesystem path type filter for Test-Path.
-.EXAMPLE
-    Test-Path
+    Shadows the global Test-Path function and writes a warning when Path or
+    LiteralPath is null or whitespace. Dot-source this script before running
+    tests that may pass invalid paths.
 
+.EXAMPLE
+    . ./scripts/utils/debug/intercept-testpath.ps1
+    Test-Path -LiteralPath './tests/unit'
 #>
 
 # Save the original Test-Path cmdlet

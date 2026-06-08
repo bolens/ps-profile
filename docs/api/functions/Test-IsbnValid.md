@@ -30,9 +30,9 @@ System.Boolean
 
 ### Example 1
 
-`powershell
+```powershell
 Test-IsbnValid -Isbn "978-0-306-40615-7"
-``
+```
 
 ## Aliases
 

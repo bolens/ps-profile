@@ -25,9 +25,9 @@ Additional arguments forwarded to system prune -f.
 
 ### Example 1
 
-`powershell
-Clear-ContainerSystem
-``
+```powershell
+Clear-ContainerSystem -args @('--version')
+```
 
 ## Aliases
 

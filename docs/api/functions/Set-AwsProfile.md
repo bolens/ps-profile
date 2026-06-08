@@ -25,15 +25,15 @@ Name of the AWS profile to use.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-AwsProfile -ProfileName "production"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Set-AwsProfile -ProfileName "development"
-``
+```
 
 ## Aliases
 

@@ -34,17 +34,19 @@ System.String The Roman numeral representation of the input text.
 
 ### Example 1
 
-`powershell
+```powershell
 "A" | ConvertFrom-AsciiToRoman
-    Converts "A" to "LXXII" (65 in Roman).
-``
+```
+
+Converts "A" to "LXXII" (65 in Roman).
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-AsciiToRoman -InputObject "Hi" -Separator ","
-    Converts "Hi" to "LXXII,CV" (comma separator).
-``
+```
+
+Converts "Hi" to "LXXII,CV" (comma separator).
 
 ## Aliases
 

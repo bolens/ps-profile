@@ -29,17 +29,19 @@ Environment name to remove from (-n/--name).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-CondaPackage numpy
-        Removes numpy from the current environment.
-``
+```
+
+Removes numpy from the current environment.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-CondaPackage numpy -Environment myenv
-        Removes numpy from the specified environment.
-``
+```
+
+Removes numpy from the specified environment.
 
 ## Aliases
 

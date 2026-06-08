@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Start-AndroidStudio
-        
-        Launches Android Studio.
-``
+```powershell
+Start-AndroidStudio -ProjectPath 'value'
+```
+
+Launches Android Studio.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-AndroidStudio -ProjectPath "C:\Projects\MyApp"
-        
-        Launches Android Studio and opens a project.
-``
+```
+
+Launches Android Studio and opens a project.
 
 ## Source
 

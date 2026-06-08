@@ -29,17 +29,19 @@ Specific package ID to update.
 
 ### Example 1
 
-`powershell
-Update-NuGetPackages
-        Updates all packages in current directory.
-``
+```powershell
+Update-NuGetPackages -Path ./path -Id 'value'
+```
+
+Updates all packages in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-NuGetPackages -Id Newtonsoft.Json
-        Updates specific package.
-``
+```
+
+Updates specific package.
 
 ## Aliases
 

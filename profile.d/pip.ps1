@@ -161,7 +161,7 @@ if (Test-CachedCommand pip) {
     Set-AgentModeAlias -Name 'pipupgrade' -Target 'Update-PipSelf'
     # PIP freeze - backup installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports installed pip packages to a requirements.txt file.
     .DESCRIPTION
         Creates a requirements.txt file containing all installed pip packages with versions.
@@ -171,7 +171,7 @@ if (Test-CachedCommand pip) {
     .PARAMETER User
         Export only user-installed packages (--user flag).
     .EXAMPLE
-        Export-PipPackages
+    Export-PipPackages -Path ./path
         Exports packages to requirements.txt in current directory.
     .EXAMPLE
         Export-PipPackages -Path "C:\backup\pip-requirements.txt"
@@ -179,7 +179,7 @@ if (Test-CachedCommand pip) {
     .EXAMPLE
         Export-PipPackages -User
         Exports only user-installed packages.
-    #>
+#>
     function Export-PipPackages {
         [CmdletBinding()]
         param(
@@ -202,7 +202,7 @@ if (Test-CachedCommand pip) {
     Set-AgentModeAlias -Name 'pipbackup' -Target 'Export-PipPackages'
     # PIP install from requirements - restore packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores pip packages from a requirements.txt file.
     .DESCRIPTION
         Installs all packages listed in a requirements.txt file.
@@ -212,7 +212,7 @@ if (Test-CachedCommand pip) {
     .PARAMETER User
         Install to user site-packages (--user flag).
     .EXAMPLE
-        Import-PipPackages
+    Import-PipPackages -Path ./path
         Restores packages from requirements.txt in current directory.
     .EXAMPLE
         Import-PipPackages -Path "C:\backup\pip-requirements.txt"
@@ -220,7 +220,7 @@ if (Test-CachedCommand pip) {
     .EXAMPLE
         Import-PipPackages -User
         Restores packages to user directory.
-    #>
+#>
     function Import-PipPackages {
         [CmdletBinding()]
         param(

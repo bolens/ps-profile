@@ -30,19 +30,19 @@ System.Boolean. True if connection is successful, false otherwise.
 
 ### Example 1
 
-`powershell
-Test-AwsConnection
-    
-    Tests connectivity with the current AWS profile.
-``
+```powershell
+Test-AwsConnection -Profile 'value'
+```
+
+Tests connectivity with the current AWS profile.
 
 ### Example 2
 
-`powershell
+```powershell
 Test-AwsConnection -Profile "production"
-    
-    Tests connectivity with the specified profile.
-``
+```
+
+Tests connectivity with the specified profile.
 
 ## Aliases
 

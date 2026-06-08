@@ -29,9 +29,9 @@ Path for the output EPUB file. If not specified, uses input path with .epub exte
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-MobiToEpub -InputPath "book.mobi" -OutputPath "book.epub"
-``
+```
 
 ## Aliases
 

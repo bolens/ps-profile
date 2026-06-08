@@ -29,17 +29,19 @@ Add as dev dependency (--dev).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-DartPackage http
-        Adds http as a production dependency.
-``
+```
+
+Adds http as a production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-DartPackage build_runner -Dev
-        Adds build_runner as a dev dependency.
-``
+```
+
+Adds build_runner as a dev dependency.
 
 ## Aliases
 

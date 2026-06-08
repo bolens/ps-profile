@@ -37,24 +37,28 @@ try {
     .SYNOPSIS
         Executes Ollama commands with enhanced functionality.
     
+
     .DESCRIPTION
         Enhanced wrapper for Ollama CLI that provides additional functionality
         beyond the basic ollama.ps1 wrapper. Supports all Ollama commands.
     
+
     .PARAMETER Arguments
         Arguments to pass to ollama command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from Ollama execution.
+
     .EXAMPLE
         Invoke-OllamaEnhanced list
         Lists available Ollama models.
     
+
     .EXAMPLE
         Invoke-OllamaEnhanced run llama2 "Hello, world!"
         Runs a prompt with the llama2 model.
-    
-    .OUTPUTS
-        System.String. Output from Ollama execution.
     #>
     function Invoke-OllamaEnhanced {
         [CmdletBinding()]
@@ -106,25 +110,29 @@ try {
     .SYNOPSIS
         Executes LM Studio CLI commands.
     
+
     .DESCRIPTION
         Wrapper function for LM Studio CLI (lms) that executes commands for managing
         local LLMs. LM Studio provides a user-friendly interface for running
         large language models locally.
     
+
     .PARAMETER Arguments
         Arguments to pass to lms command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from LM Studio CLI execution.
+
     .EXAMPLE
         Invoke-LMStudio list
         Lists available models in LM Studio.
     
+
     .EXAMPLE
         Invoke-LMStudio serve
         Starts the LM Studio server.
-    
-    .OUTPUTS
-        System.String. Output from LM Studio CLI execution.
     #>
     function Invoke-LMStudio {
         [CmdletBinding()]
@@ -229,24 +237,28 @@ try {
     .SYNOPSIS
         Executes KoboldCpp commands.
     
+
     .DESCRIPTION
         Wrapper function for KoboldCpp, a lightweight LLM inference server
         that provides a web interface and API for running large language models.
     
+
     .PARAMETER Arguments
         Arguments to pass to koboldcpp command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from KoboldCpp execution.
+
     .EXAMPLE
         Invoke-KoboldCpp --help
         Shows KoboldCpp help.
     
+
     .EXAMPLE
         Start-KoboldCppServer -Model "llama-2-7b.gguf"
         Starts KoboldCpp server with a specific model.
-    
-    .OUTPUTS
-        System.String. Output from KoboldCpp execution.
     #>
     function Invoke-KoboldCpp {
         [CmdletBinding()]
@@ -298,30 +310,36 @@ try {
     .SYNOPSIS
         Executes Llamafile commands.
     
+
     .DESCRIPTION
         Wrapper function for Llamafile, a single-file LLM runner that combines
         a model and inference engine into one executable file.
     
+
     .PARAMETER Arguments
         Arguments to pass to llamafile command.
         Can be used multiple times or as an array.
     
+
     .PARAMETER Model
         Path to the llamafile model file.
     
+
     .PARAMETER Prompt
         Prompt to send to the model.
     
+
+    .OUTPUTS
+        System.String. Output from Llamafile execution.
+
     .EXAMPLE
         Invoke-Llamafile --help
         Shows Llamafile help.
     
+
     .EXAMPLE
         Invoke-Llamafile -Model "mistral-7b-instruct-v0.2.Q4_K_M.llamafile" -Prompt "Hello, world!"
         Runs a prompt with a specific llamafile model.
-    
-    .OUTPUTS
-        System.String. Output from Llamafile execution.
     #>
     function Invoke-Llamafile {
         [CmdletBinding()]
@@ -401,20 +419,23 @@ try {
     .SYNOPSIS
         Executes llama.cpp commands.
     
+
     .DESCRIPTION
         Wrapper function for llama.cpp, a C++ implementation of LLaMA inference.
         Supports multiple variants (llama-cpp, llama-cpp-cuda, etc.).
     
+
     .PARAMETER Arguments
         Arguments to pass to llama-cpp command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from llama.cpp execution.
+
     .EXAMPLE
         Invoke-LlamaCpp --help
         Shows llama.cpp help.
-    
-    .OUTPUTS
-        System.String. Output from llama.cpp execution.
     #>
     function Invoke-LlamaCpp {
         [CmdletBinding()]
@@ -480,29 +501,34 @@ try {
     .SYNOPSIS
         Executes ComfyUI CLI commands.
     
+
     .DESCRIPTION
         Wrapper function for ComfyUI CLI (comfy) that executes commands for managing
         ComfyUI installations, custom nodes, and models. ComfyUI is a powerful
         node-based Stable Diffusion UI.
     
+
     .PARAMETER Arguments
         Arguments to pass to comfy command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from ComfyUI CLI execution.
+
     .EXAMPLE
         Invoke-ComfyUI install
         Installs ComfyUI.
     
+
     .EXAMPLE
         Invoke-ComfyUI launch
         Launches ComfyUI server.
     
+
     .EXAMPLE
         Invoke-ComfyUI node install custom-node-name
         Installs a custom node.
-    
-    .OUTPUTS
-        System.String. Output from ComfyUI CLI execution.
     #>
     function Invoke-ComfyUI {
         [CmdletBinding()]

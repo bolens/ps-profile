@@ -29,16 +29,11 @@ The name of the module that failed to load.
 
 ### Example 1
 
-`powershell
+```powershell
 try {
-        . (Join-Path $dir 'module.ps1')
-    }
-    catch {
-        Write-SubModuleError -ErrorRecord $_ -ModuleName 'module.ps1'
-    }
+```
 
-    Reports an error when loading a sub-module fails.
-``
+. (Join-Path $dir 'module.ps1') } catch { Write-SubModuleError -ErrorRecord $_ -ModuleName 'module.ps1' } Reports an error when loading a sub-module fails.
 
 ## Source
 

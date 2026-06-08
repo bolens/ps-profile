@@ -14,12 +14,15 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     <#
 .SYNOPSIS
         Runs Mojo programs.
+
     .DESCRIPTION
         Executes Mojo source files.
-.EXAMPLE
-    Invoke-MojoRun ./main.mojo
+
 .PARAMETER Files
     Mojo source files to execute.
+
+.EXAMPLE
+    Invoke-MojoRun ./main.mojo
 
 #>
     function Invoke-MojoRun {
@@ -33,12 +36,15 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     <#
 .SYNOPSIS
         Builds Mojo programs.
+
     .DESCRIPTION
         Compiles Mojo source files into executables.
-.EXAMPLE
-    Build-MojoProgram ./main.mojo
+
 .PARAMETER Files
     Mojo source files to compile into executables.
+
+.EXAMPLE
+    Build-MojoProgram ./main.mojo
 
 #>
     function Build-MojoProgram {

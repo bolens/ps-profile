@@ -12,8 +12,7 @@
 .PARAMETER StarshipCommandPath
     The path to the starship executable.
 .EXAMPLE
-    New-StarshipPromptFunction
-
+    New-StarshipPromptFunction -StarshipCommandPath 'value'
 #>
 function New-StarshipPromptFunction {
     param([string]$StarshipCommandPath)

@@ -27,8 +27,7 @@ scripts/utils/code-quality/modules/ValidationReporter.psm1
 .OUTPUTS
     PSCustomObject with validation results including statistics and issues.
 .EXAMPLE
-    Get-ValidationResults
-
+    Get-ValidationResults -Functions $functions -Exceptions @{} -ExceptionVerbs @()
 #>
 function Get-ValidationResults {
     [CmdletBinding()]
@@ -108,8 +107,7 @@ function Get-ValidationResults {
 .OUTPUTS
     None. Outputs to console.
 .EXAMPLE
-    Write-ValidationReport
-
+    Write-ValidationReport -Results 'value'
 #>
 function Write-ValidationReport {
     [CmdletBinding()]
@@ -153,8 +151,7 @@ function Write-ValidationReport {
 .OUTPUTS
     None. Writes file to disk.
 .EXAMPLE
-    Save-ValidationReport
-
+    Save-ValidationReport -Results 'value' -OutputPath ./output.file
 #>
 function Save-ValidationReport {
     [CmdletBinding()]

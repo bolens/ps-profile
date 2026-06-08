@@ -57,39 +57,51 @@ try {
     .SYNOPSIS
         Emits a structured wide event with comprehensive context.
     
+
     .DESCRIPTION
         Creates a wide event following OpenTelemetry semantic conventions.
         Wide events contain all context for an operation in a single structured event.
         Supports tail sampling: always keep errors, sample successful operations.
     
+
     .PARAMETER EventName
         Name of the event/operation (e.g., "database.query", "aws.s3.upload").
         Should follow OpenTelemetry naming conventions.
     
+
     .PARAMETER Level
         Log level: DEBUG, INFO, WARN, ERROR, FATAL.
         Maps to OpenTelemetry severity levels.
     
+
     .PARAMETER Context
         Hashtable of contextual data to include in the event.
         Should include business context (user_id, request_id) and technical context.
     
+
     .PARAMETER ErrorRecord
         Optional ErrorRecord to include error details.
         When provided, event is always kept (not sampled).
     
+
     .PARAMETER DurationMs
         Operation duration in milliseconds.
         Slow operations (> p99 threshold) are always kept.
     
+
     .PARAMETER AlwaysKeep
         Force keeping this event regardless of sampling rules.
         Use for VIP users, feature flags, or critical operations.
     
+
     .PARAMETER SampleRate
         Sampling rate for successful operations (0.0 to 1.0).
         Default: 0.05 (5%).
     
+
+    .OUTPUTS
+        System.Boolean. True if event was kept, false if sampled out.
+
     .EXAMPLE
         Write-WideEvent -EventName "aws.s3.upload" -Level INFO -Context @{
             user_id = "user_123"
@@ -101,6 +113,7 @@ try {
         
         Emits a structured event for S3 upload operation.
     
+
     .EXAMPLE
         Write-WideEvent -EventName "database.query" -Level ERROR -Context @{
             query = "SELECT * FROM users"
@@ -108,9 +121,6 @@ try {
         } -ErrorRecord $error -DurationMs 500
         
         Emits an error event (always kept, not sampled).
-    
-    .OUTPUTS
-        System.Boolean. True if event was kept, false if sampled out.
     #>
     function Write-WideEvent {
         [CmdletBinding()]
@@ -289,25 +299,35 @@ try {
     .SYNOPSIS
         Records an error following OpenTelemetry semantic conventions.
     
+
     .DESCRIPTION
         Records exceptions and errors with full context, following OpenTelemetry standards.
         Always keeps error events (not subject to sampling).
     
+
     .PARAMETER ErrorRecord
         The ErrorRecord to record.
     
+
     .PARAMETER Context
         Additional context about the error (operation name, user, etc.).
     
+
     .PARAMETER OperationName
         Name of the operation that failed (OpenTelemetry span name).
     
+
     .PARAMETER StatusCode
         HTTP or operation status code (if applicable).
     
+
     .PARAMETER Retriable
         Whether the error is retriable.
     
+
+    .OUTPUTS
+        None. Error is recorded and event is emitted.
+
     .EXAMPLE
         try {
             $result = Invoke-Aws s3 ls
@@ -318,9 +338,6 @@ try {
                 region = "us-east-1"
             }
         }
-    
-    .OUTPUTS
-        None. Error is recorded and event is emitted.
     #>
     function Write-StructuredError {
         [CmdletBinding()]
@@ -355,30 +372,36 @@ try {
     .SYNOPSIS
         Records a warning with structured context.
     
+
     .DESCRIPTION
         Records warnings following OpenTelemetry conventions.
         Warnings may be sampled based on configuration.
     
+
     .PARAMETER Message
         Warning message.
     
+
     .PARAMETER Context
         Additional context about the warning.
     
+
     .PARAMETER OperationName
         Name of the operation (OpenTelemetry span name).
     
+
     .PARAMETER Code
         Warning code for categorization.
     
+
+    .OUTPUTS
+        None. Warning is recorded.
+
     .EXAMPLE
         Write-StructuredWarning -Message "Slow query detected" -OperationName "database.query" -Context @{
             query = "SELECT * FROM users"
             duration_ms = 2500
         }
-    
-    .OUTPUTS
-        None. Warning is recorded.
     #>
     function Write-StructuredWarning {
         [CmdletBinding()]
@@ -408,26 +431,36 @@ try {
     .SYNOPSIS
         Wraps an operation with wide event tracking.
     
+
     .DESCRIPTION
         Executes a script block and automatically creates a wide event with timing,
         success/failure, and error details. Follows the wide events pattern of
         building context throughout the operation lifecycle.
     
+
     .PARAMETER OperationName
         Name of the operation (OpenTelemetry span name).
     
+
     .PARAMETER ScriptBlock
         Script block to execute.
     
+
     .PARAMETER Context
         Initial context to include in the event.
     
+
     .PARAMETER Level
         Log level for successful operations.
     
+
     .PARAMETER AlwaysKeep
         Force keeping this event regardless of sampling.
     
+
+    .OUTPUTS
+        System.Object. Result from ScriptBlock execution.
+
     .EXAMPLE
         Invoke-WithWideEvent -OperationName "aws.s3.upload" -Context @{
             bucket = "my-bucket"
@@ -435,9 +468,6 @@ try {
         } -ScriptBlock {
             aws s3 cp file.txt s3://my-bucket/file.txt
         }
-    
-    .OUTPUTS
-        System.Object. Result from ScriptBlock execution.
     #>
     function Invoke-WithWideEvent {
         [CmdletBinding()]
@@ -527,21 +557,22 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets statistics about event sampling.
     
+
     .DESCRIPTION
         Returns statistics about how events are being sampled,
         useful for monitoring and adjusting sampling rates.
     
-    .EXAMPLE
-        Get-EventSamplingStats
-        
-        Returns sampling statistics.
-    
+
     .OUTPUTS
         EventSamplingStats. Sampling statistics with type-safe properties and helper methods.
-    #>
+
+    .EXAMPLE
+    Get-EventSamplingStats
+        Returns sampling statistics.
+#>
     function Get-EventSamplingStats {
         [CmdletBinding()]
         [OutputType([EventSamplingStats])]
@@ -568,21 +599,22 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Clears the collected wide events.
     
+
     .DESCRIPTION
         Clears the in-memory event collection.
         Useful for testing or periodic cleanup.
     
-    .EXAMPLE
-        Clear-EventCollection
-        
-        Clears all collected events.
-    
+
     .OUTPUTS
         System.Int32. Number of events cleared.
-    #>
+
+    .EXAMPLE
+    Clear-EventCollection
+        Clears all collected events.
+#>
     function Clear-EventCollection {
         [CmdletBinding()]
         [OutputType([int])]

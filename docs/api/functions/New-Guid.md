@@ -44,27 +44,27 @@ System.String Returns a new GUID in the specified format.
 
 ### Example 1
 
-`powershell
+```powershell
 New-Guid
-    
-    Generates a new GUID in standard format.
-``
+```
+
+Generates a new GUID in standard format.
 
 ### Example 2
 
-`powershell
+```powershell
 New-Guid -RegistryFormat
-    
-    Generates a new GUID in Windows registry format.
-``
+```
+
+Generates a new GUID in Windows registry format.
 
 ### Example 3
 
-`powershell
+```powershell
 New-Guid -AsHex
-    
-    Generates a new GUID in hexadecimal format.
-``
+```
+
+Generates a new GUID in hexadecimal format.
 
 ## Source
 

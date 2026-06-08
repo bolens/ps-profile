@@ -34,17 +34,19 @@ System.String The binary representation of the input ModHex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "hkkllkkl" | ConvertFrom-ModHexToBinary
-    Converts ModHex to binary with spaces.
-``
+```
+
+Converts ModHex to binary with spaces.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-ModHexToBinary -InputObject "hkkllkkl" -Separator ""
-    Converts ModHex to binary without separator.
-``
+```
+
+Converts ModHex to binary without separator.
 
 ## Aliases
 

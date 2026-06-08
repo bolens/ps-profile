@@ -25,17 +25,19 @@ Tool names with optional versions (e.g., nodejs 18.0.0, python 3.11).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-AsdfTool nodejs 18.0.0
-        Installs Node.js 18.0.0.
-``
+```
+
+Installs Node.js 18.0.0.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-AsdfTool python 3.11
-        Installs Python 3.11.
-``
+```
+
+Installs Python 3.11.
 
 ## Aliases
 

@@ -29,15 +29,15 @@ Destination path (local or MinIO).
 
 ### Example 1
 
-`powershell
+```powershell
 Copy-MinioFile -Source "local/file.txt" -Destination "myminio/bucket/file.txt"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Copy-MinioFile -Source "myminio/bucket/file.txt" -Destination "local/file.txt"
-``
+```
 
 ## Aliases
 

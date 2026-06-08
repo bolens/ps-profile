@@ -29,9 +29,9 @@ Path for the output ODT file. If not specified, uses input path with .odt extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-OdtFromMarkdown -InputPath "document.md" -OutputPath "document.odt"
-``
+```
 
 ## Aliases
 

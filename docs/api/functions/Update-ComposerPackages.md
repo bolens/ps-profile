@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-ComposerPackages
-    Updates all packages in the current Composer project.
-``
+```
+
+Updates all packages in the current Composer project.
 
 ## Aliases
 

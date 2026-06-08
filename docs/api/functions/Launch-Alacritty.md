@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Alacritty
-        
-        Launches Alacritty terminal.
-``
+```powershell
+Launch-Alacritty -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
+```
+
+Launches Alacritty terminal.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Alacritty -Command "git status"
-        
-        Launches Alacritty and executes a command.
-``
+```
+
+Launches Alacritty and executes a command.
 
 ## Source
 

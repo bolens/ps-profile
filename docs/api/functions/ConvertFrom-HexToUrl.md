@@ -30,10 +30,11 @@ System.String The URL/percent encoded representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "48656C6C6F" | ConvertFrom-HexToUrl
-    Converts hex to URL encoding.
-``
+```
+
+Converts hex to URL encoding.
 
 ## Aliases
 

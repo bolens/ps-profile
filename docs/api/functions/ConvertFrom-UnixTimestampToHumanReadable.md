@@ -34,19 +34,19 @@ System.String Returns a human-readable date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 1609459200 | ConvertFrom-UnixTimestampToHumanReadable
-    
-    Converts the Unix timestamp to a human-readable format.
-``
+```
+
+Converts the Unix timestamp to a human-readable format.
 
 ### Example 2
 
-`powershell
+```powershell
 1609459200 | ConvertFrom-UnixTimestampToHumanReadable -Format 'yyyy-MM-dd'
-    
-    Converts the Unix timestamp using a custom format.
-``
+```
+
+Converts the Unix timestamp using a custom format.
 
 ## Aliases
 

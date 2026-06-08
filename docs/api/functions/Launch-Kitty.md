@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Kitty
-        
-        Launches Kitty terminal.
-``
+```powershell
+Launch-Kitty -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
+```
+
+Launches Kitty terminal.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Kitty -Command "npm start"
-        
-        Launches Kitty and executes a command.
-``
+```
+
+Launches Kitty and executes a command.
 
 ## Source
 

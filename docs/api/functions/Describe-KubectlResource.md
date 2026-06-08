@@ -25,15 +25,15 @@ Arguments to pass to kubectl describe.
 
 ### Example 1
 
-`powershell
+```powershell
 Describe-KubectlResource pod my-pod
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Describe-KubectlResource pod my-pod -n default
-``
+```
 
 ## Aliases
 

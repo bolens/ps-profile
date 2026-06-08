@@ -37,17 +37,19 @@ Remove from docs dependencies (--group docs).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-PoetryDependency requests
-        Removes requests from production dependencies.
-``
+```
+
+Removes requests from production dependencies.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-PoetryDependency pytest -Dev
-        Removes pytest from dev dependencies.
-``
+```
+
+Removes pytest from dev dependencies.
 
 ## Aliases
 

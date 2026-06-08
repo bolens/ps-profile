@@ -29,9 +29,9 @@ The path for the output BSON file. If not specified, uses input path with .bson 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-BsonFromMessagePack -InputPath ./input.file
-``
+```
 
 ## Aliases
 

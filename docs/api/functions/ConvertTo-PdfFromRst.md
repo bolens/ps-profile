@@ -29,9 +29,9 @@ The path for the output PDF file. If not specified, uses input path with .pdf ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-PdfFromRst -InputPath ./input.file
-``
+```
 
 ## Aliases
 

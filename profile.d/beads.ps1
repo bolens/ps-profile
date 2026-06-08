@@ -33,29 +33,34 @@ try {
     .SYNOPSIS
         Executes Beads (bd) commands.
     
+
     .DESCRIPTION
         Wrapper function for Beads CLI (bd) that executes commands for managing
         issues, dependencies, and ready work. Beads is a lightweight memory system
         for coding agents using a graph-based issue tracker.
     
+
     .PARAMETER Arguments
         Arguments to pass to bd command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from bd execution.
+
     .EXAMPLE
         Invoke-Beads init
         Initializes a new Beads database in the current repository.
     
+
     .EXAMPLE
         Invoke-Beads ready
         Shows issues that are ready to work on (no blockers).
     
+
     .EXAMPLE
         Invoke-Beads create "Fix bug" -p 1
         Creates a new issue with title "Fix bug" and priority 1.
-    
-    .OUTPUTS
-        System.String. Output from bd execution.
     #>
     function Invoke-Beads {
         [CmdletBinding()]
@@ -116,36 +121,43 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Initializes a Beads database in the current repository.
     
+
     .DESCRIPTION
         Initializes a new Beads issue tracker database in the current repository.
         This creates the .beads/ directory and sets up the database structure.
     
+
     .PARAMETER Contributor
         Initialize for contributor workflow (fork-based).
     
+
     .PARAMETER Team
         Initialize for team workflow (branch-based).
     
+
     .PARAMETER Branch
         Specify a branch name for protected branch workflows.
     
+
     .PARAMETER Quiet
         Run initialization non-interactively (for agents).
     
+
+    .OUTPUTS
+        System.String. Output from bd init command.
+
     .EXAMPLE
-        Initialize-Beads
+    Initialize-Beads -Branch 'main'
         Initializes Beads in the current repository.
     
+
     .EXAMPLE
         Initialize-Beads -Contributor
         Initializes Beads for contributor workflow.
-    
-    .OUTPUTS
-        System.String. Output from bd init command.
-    #>
+#>
     function Initialize-Beads {
         [CmdletBinding()]
         [OutputType([string])]
@@ -166,38 +178,46 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets issues that are ready to work on (no blockers).
     
+
     .DESCRIPTION
         Returns a list of issues that have no open blockers and are ready to be worked on.
     
+
     .PARAMETER Limit
         Maximum number of issues to return.
     
+
     .PARAMETER Priority
         Filter by priority level (0-4, where 0 is highest).
     
+
     .PARAMETER Assignee
         Filter by assignee.
     
+
     .PARAMETER Sort
         Sort order: priority, oldest, or hybrid (default).
     
+
     .PARAMETER Json
         Return output in JSON format.
     
+
+    .OUTPUTS
+        System.String. Output from bd ready command.
+
     .EXAMPLE
-        Get-BeadsReady
+    Get-BeadsReady -Limit 1 -Priority 1
         Gets all ready issues.
     
+
     .EXAMPLE
         Get-BeadsReady -Limit 10 -Priority 1
         Gets top 10 P1 ready issues.
-    
-    .OUTPUTS
-        System.String. Output from bd ready command.
-    #>
+#>
     function Get-BeadsReady {
         [CmdletBinding()]
         [OutputType([string])]
@@ -224,40 +244,50 @@ try {
     .SYNOPSIS
         Creates a new Beads issue.
     
+
     .DESCRIPTION
         Creates a new issue in the Beads tracker with the specified title and optional metadata.
     
+
     .PARAMETER Title
         Title of the issue.
     
+
     .PARAMETER Description
         Detailed description of the issue.
     
+
     .PARAMETER Priority
         Priority level (0-4, where 0 is highest, default is 2).
     
+
     .PARAMETER Type
         Issue type: bug, feature, task, epic, or chore (default: task).
     
+
     .PARAMETER Assignee
         Assign issue to a user.
     
+
     .PARAMETER Labels
         Comma-separated list of labels.
     
+
     .PARAMETER Json
         Return output in JSON format.
     
+
+    .OUTPUTS
+        System.String. Output from bd create command.
+
     .EXAMPLE
         New-BeadsIssue -Title "Fix bug" -Priority 1 -Type bug
         Creates a P1 bug issue.
     
+
     .EXAMPLE
         New-BeadsIssue -Title "Add feature" -Description "Detailed description" -Type feature
         Creates a feature issue with description.
-    
-    .OUTPUTS
-        System.String. Output from bd create command.
     #>
     function New-BeadsIssue {
         [CmdletBinding()]
@@ -295,21 +325,25 @@ try {
     .SYNOPSIS
         Gets details of a specific Beads issue.
     
+
     .DESCRIPTION
         Retrieves full details of an issue by its ID.
     
+
     .PARAMETER IssueId
         The issue ID (e.g., bd-a1b2).
     
+
     .PARAMETER Json
         Return output in JSON format.
     
+
+    .OUTPUTS
+        System.String. Output from bd show command.
+
     .EXAMPLE
         Get-BeadsIssue -IssueId bd-a1b2
         Gets details for issue bd-a1b2.
-    
-    .OUTPUTS
-        System.String. Output from bd show command.
     #>
     function Get-BeadsIssue {
         [CmdletBinding()]
@@ -331,37 +365,46 @@ try {
     .SYNOPSIS
         Lists Beads issues with optional filters.
     
+
     .DESCRIPTION
         Lists issues matching the specified filters.
     
+
     .PARAMETER Status
         Filter by status (open, closed, in_progress).
     
+
     .PARAMETER Priority
         Filter by priority level (0-4).
     
+
     .PARAMETER Assignee
         Filter by assignee.
     
+
     .PARAMETER Labels
         Filter by labels (comma-separated, AND logic).
     
+
     .PARAMETER LabelsAny
         Filter by labels (comma-separated, OR logic).
     
+
     .PARAMETER Json
         Return output in JSON format.
     
+
+    .OUTPUTS
+        System.String. Output from bd list command.
+
     .EXAMPLE
         Get-BeadsIssues -Status open
         Lists all open issues.
     
+
     .EXAMPLE
         Get-BeadsIssues -Priority 1 -Labels "urgent,backend"
         Lists P1 issues with both urgent and backend labels.
-    
-    .OUTPUTS
-        System.String. Output from bd list command.
     #>
     function Get-BeadsIssues {
         [CmdletBinding()]
@@ -395,34 +438,42 @@ try {
     .SYNOPSIS
         Updates a Beads issue.
     
+
     .DESCRIPTION
         Updates an existing issue with new status, priority, assignee, or other fields.
     
+
     .PARAMETER IssueId
         The issue ID to update (e.g., bd-a1b2).
     
+
     .PARAMETER Status
         New status (open, closed, in_progress).
     
+
     .PARAMETER Priority
         New priority level (0-4).
     
+
     .PARAMETER Assignee
         New assignee.
     
+
     .PARAMETER Json
         Return output in JSON format.
     
+
+    .OUTPUTS
+        System.String. Output from bd update command.
+
     .EXAMPLE
         Update-BeadsIssue -IssueId bd-a1b2 -Status in_progress
         Updates issue status to in_progress.
     
+
     .EXAMPLE
         Update-BeadsIssue -IssueId bd-a1b2 -Priority 0
         Updates issue priority to P0.
-    
-    .OUTPUTS
-        System.String. Output from bd update command.
     #>
     function Update-BeadsIssue {
         [CmdletBinding()]
@@ -453,28 +504,34 @@ try {
     .SYNOPSIS
         Closes a Beads issue.
     
+
     .DESCRIPTION
         Closes one or more issues with an optional reason.
     
+
     .PARAMETER IssueId
         One or more issue IDs to close.
     
+
     .PARAMETER Reason
         Reason for closing the issue.
     
+
     .PARAMETER Json
         Return output in JSON format.
     
+
+    .OUTPUTS
+        System.String. Output from bd close command.
+
     .EXAMPLE
         Close-BeadsIssue -IssueId bd-a1b2 -Reason "Completed"
         Closes issue bd-a1b2 with reason "Completed".
     
+
     .EXAMPLE
         Close-BeadsIssue -IssueId bd-a1b2,bd-f14c -Reason "Fixed"
         Closes multiple issues.
-    
-    .OUTPUTS
-        System.String. Output from bd close command.
     #>
     function Close-BeadsIssue {
         [CmdletBinding()]
@@ -500,19 +557,21 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets Beads statistics.
     
+
     .DESCRIPTION
         Returns statistics about issues in the database.
     
-    .EXAMPLE
-        Get-BeadsStats
-        Gets issue statistics.
-    
+
     .OUTPUTS
         System.String. Output from bd stats command.
-    #>
+
+    .EXAMPLE
+    Get-BeadsStats
+        Gets issue statistics.
+#>
     function Get-BeadsStats {
         [CmdletBinding()]
         [OutputType([string])]
@@ -522,19 +581,21 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets blocked issues.
     
+
     .DESCRIPTION
         Returns a list of issues that are blocked by other open issues.
     
-    .EXAMPLE
-        Get-BeadsBlocked
-        Gets all blocked issues.
-    
+
     .OUTPUTS
         System.String. Output from bd blocked command.
-    #>
+
+    .EXAMPLE
+    Get-BeadsBlocked
+        Gets all blocked issues.
+#>
     function Get-BeadsBlocked {
         [CmdletBinding()]
         [OutputType([string])]

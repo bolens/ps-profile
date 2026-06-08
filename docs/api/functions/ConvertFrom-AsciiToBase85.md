@@ -30,11 +30,11 @@ System.String Returns the Base85 encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello World" | ConvertFrom-AsciiToBase85
-    
-    Converts text to Base85 format.
-``
+```
+
+Converts text to Base85 format.
 
 ## Aliases
 

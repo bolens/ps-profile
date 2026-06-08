@@ -42,19 +42,19 @@ System.String. Path to backup file.
 
 ### Example 1
 
-`powershell
+```powershell
 Backup-Database -DatabaseType PostgreSQL -Database mydb
-    
-    Creates a PostgreSQL backup.
-``
+```
+
+Creates a PostgreSQL backup.
 
 ### Example 2
 
-`powershell
+```powershell
 Backup-Database -DatabaseType MySQL -Database mydb -BackupPath "backup.sql" -Compress
-    
-    Creates a compressed MySQL backup.
-``
+```
+
+Creates a compressed MySQL backup.
 
 ## Aliases
 

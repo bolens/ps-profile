@@ -29,9 +29,9 @@ Path for the output GIF file. If not specified, uses input path with .gif extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-WebpToGif -InputPath "image.webp" -OutputPath "image.gif"
-``
+```
 
 ## Aliases
 

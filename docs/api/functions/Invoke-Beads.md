@@ -30,24 +30,27 @@ System.String. Output from bd execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Beads init
-        Initializes a new Beads database in the current repository.
-``
+```
+
+Initializes a new Beads database in the current repository.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Beads ready
-        Shows issues that are ready to work on (no blockers).
-``
+```
+
+Shows issues that are ready to work on (no blockers).
 
 ### Example 3
 
-`powershell
+```powershell
 Invoke-Beads create "Fix bug" -p 1
-        Creates a new issue with title "Fix bug" and priority 1.
-``
+```
+
+Creates a new issue with title "Fix bug" and priority 1.
 
 ## Aliases
 

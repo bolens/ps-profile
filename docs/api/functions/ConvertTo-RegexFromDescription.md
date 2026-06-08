@@ -62,24 +62,27 @@ PSCustomObject Object containing Pattern, Description, Source, IgnoreCase, Notes
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-RegexFromDescription -Description 'email'
-    Returns a regex pattern object for email addresses.
-``
+```
+
+Returns a regex pattern object for email addresses.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertTo-RegexFromDescription -Description "starts with 'user-' followed by digits" -Anchored -PatternOnly
-    Returns an anchored regex pattern string.
-``
+```
+
+Returns an anchored regex pattern string.
 
 ### Example 3
 
-`powershell
+```powershell
 ConvertTo-RegexFromDescription -Description 'iban' -SampleMatch 'DE89370400440532013000' -SampleNoMatch 'not-an-iban'
-    Returns a pattern and sample validation results.
-``
+```
+
+Returns a pattern and sample validation results.
 
 ## Aliases
 

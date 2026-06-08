@@ -29,11 +29,11 @@ Optional output path for the safe PDF. Defaults to input path with .safe.pdf ext
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-DangerzoneConvert -InputPath "C:\Downloads\document.pdf"
-    
-        Converts the document to a safe PDF.
-``
+```
+
+Converts the document to a safe PDF.
 
 ## Aliases
 

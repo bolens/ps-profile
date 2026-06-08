@@ -32,28 +32,33 @@ try {
     .SYNOPSIS
         Installs Python applications using pipx.
 
+
     .DESCRIPTION
         Wrapper function for pipx, which installs Python applications in isolated
         environments. pipx is similar to npm's global install or cargo install.
+
 
     .PARAMETER Packages
         Package names to install.
         Can be used multiple times or as an array.
 
+
     .PARAMETER Arguments
         Additional arguments to pass to pipx install.
         Can be used multiple times or as an array.
+
+
+    .OUTPUTS
+        System.String. Output from pipx install execution.
 
     .EXAMPLE
         Install-PythonApp black
         Installs black as a standalone application.
 
+
     .EXAMPLE
         Install-PythonApp pytest --include-deps
         Installs pytest with additional dependencies.
-
-    .OUTPUTS
-        System.String. Output from pipx install execution.
     #>
     function Install-PythonApp {
         [CmdletBinding()]
@@ -127,27 +132,32 @@ try {
     .SYNOPSIS
         Runs pipx-installed applications.
 
+
     .DESCRIPTION
         Wrapper function for pipx run, which runs Python applications in isolated
         environments without installing them globally.
 
+
     .PARAMETER Package
         Package name to run.
+
 
     .PARAMETER Arguments
         Arguments to pass to the application.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from pipx run execution.
+
     .EXAMPLE
         Invoke-Pipx black --check .
         Runs black in an isolated environment to check code formatting.
 
+
     .EXAMPLE
         Invoke-Pipx pytest tests/
         Runs pytest in an isolated environment.
-
-    .OUTPUTS
-        System.String. Output from pipx run execution.
     #>
     function Invoke-Pipx {
         [CmdletBinding()]

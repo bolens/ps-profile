@@ -31,40 +31,46 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Connects to an Android device via ADB.
     
+
     .DESCRIPTION
         Connects to an Android device using ADB (Android Debug Bridge).
         Can connect via USB or network (TCP/IP).
     
+
     .PARAMETER DeviceIp
         IP address for network connection. If not provided, connects via USB.
     
+
     .PARAMETER Port
         Port for network connection. Defaults to 5555.
     
+
     .PARAMETER ListDevices
         List all connected devices.
     
+
+    .OUTPUTS
+        System.String[]. List of connected devices or connection status.
+
     .EXAMPLE
-        Connect-AndroidDevice
-        
+    Connect-AndroidDevice -DeviceIp 'value' -Port 1
         Connects to Android device via USB.
     
+
     .EXAMPLE
         Connect-AndroidDevice -DeviceIp "192.168.1.100"
         
         Connects to Android device via network.
     
+
     .EXAMPLE
         Connect-AndroidDevice -ListDevices
         
         Lists all connected Android devices.
-    
-    .OUTPUTS
-        System.String[]. List of connected devices or connection status.
-    #>
+#>
     function Connect-AndroidDevice {
         [CmdletBinding()]
         [OutputType([string[]])]
@@ -177,41 +183,48 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Mirrors Android device screen using scrcpy.
     
+
     .DESCRIPTION
         Launches scrcpy to mirror and control Android device screen.
         Supports various display options and quality settings.
     
+
     .PARAMETER DeviceId
         Device ID to mirror. If not provided, uses first connected device.
     
+
     .PARAMETER Fullscreen
         Start in fullscreen mode.
     
+
     .PARAMETER StayAwake
         Keep device awake while mirroring.
     
+
     .PARAMETER MaxSize
         Maximum resolution (e.g., "1920" for 1920px width).
     
+
     .PARAMETER Bitrate
         Video bitrate in Mbps. Defaults to 8.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Mirror-AndroidScreen
-        
+    Mirror-AndroidScreen -DeviceId 'value' -MaxSize 1
         Mirrors Android device screen.
     
+
     .EXAMPLE
         Mirror-AndroidScreen -Fullscreen -StayAwake
         
         Mirrors Android device screen in fullscreen with stay-awake enabled.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Mirror-AndroidScreen {
         [CmdletBinding()]
         param(
@@ -282,34 +295,41 @@ try {
     .SYNOPSIS
         Installs an APK file on Android device.
     
+
     .DESCRIPTION
         Installs an APK file on connected Android device using ADB.
         Supports installation options like replacing existing app or granting permissions.
     
+
     .PARAMETER ApkPath
         Path to the APK file to install.
     
+
     .PARAMETER DeviceId
         Device ID to install on. If not provided, uses first connected device.
     
+
     .PARAMETER ReplaceExisting
         Replace existing application if already installed.
     
+
     .PARAMETER GrantPermissions
         Grant all runtime permissions automatically.
     
+
+    .OUTPUTS
+        System.Boolean. True if installation succeeded, false otherwise.
+
     .EXAMPLE
         Install-Apk -ApkPath "app.apk"
         
         Installs an APK file on Android device.
     
+
     .EXAMPLE
         Install-Apk -ApkPath "app.apk" -ReplaceExisting -GrantPermissions
         
         Installs APK, replacing existing app and granting all permissions.
-    
-    .OUTPUTS
-        System.Boolean. True if installation succeeded, false otherwise.
     #>
     function Install-Apk {
         [CmdletBinding()]
@@ -400,32 +420,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Connects to an iOS device using libimobiledevice.
     
+
     .DESCRIPTION
         Connects to an iOS device and lists connected devices.
         Uses libimobiledevice tools for iOS device management.
     
+
     .PARAMETER ListDevices
         List all connected iOS devices.
     
+
     .PARAMETER DeviceId
         Device UDID to connect to. If not provided, uses first connected device.
     
+
+    .OUTPUTS
+        System.String[]. List of connected devices or device information.
+
     .EXAMPLE
-        Connect-IOSDevice
-        
+    Connect-IOSDevice -DeviceId 'value'
         Connects to iOS device.
     
+
     .EXAMPLE
         Connect-IOSDevice -ListDevices
         
         Lists all connected iOS devices.
-    
-    .OUTPUTS
-        System.String[]. List of connected devices or device information.
-    #>
+#>
     function Connect-IOSDevice {
         [CmdletBinding()]
         [OutputType([string[]])]
@@ -522,29 +546,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Flashes Android device firmware using PixelFlasher.
     
+
     .DESCRIPTION
         Launches PixelFlasher for flashing Android device firmware.
         PixelFlasher is a GUI tool for Android device flashing.
     
+
     .PARAMETER FirmwarePath
         Path to firmware file (optional - can be selected in GUI).
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Flash-Android
-        
+    Flash-Android -FirmwarePath 'value'
         Launches PixelFlasher.
     
+
     .EXAMPLE
         Flash-Android -FirmwarePath "firmware.zip"
         
         Launches PixelFlasher with firmware file path.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Flash-Android {
         [CmdletBinding()]
         param(
@@ -579,29 +606,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Android Studio IDE.
     
+
     .DESCRIPTION
         Launches Android Studio for Android app development.
         Prefers android-studio-canary, falls back to android-studio.
     
+
     .PARAMETER ProjectPath
         Optional path to project to open.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Start-AndroidStudio
-        
+    Start-AndroidStudio -ProjectPath 'value'
         Launches Android Studio.
     
+
     .EXAMPLE
         Start-AndroidStudio -ProjectPath "C:\Projects\MyApp"
         
         Launches Android Studio and opens a project.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Start-AndroidStudio {
         [CmdletBinding()]
         param(

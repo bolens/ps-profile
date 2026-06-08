@@ -29,9 +29,9 @@ The path for the output XML file. If not specified, uses input path with .xml ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-YamlToXml -InputPath ./input.file
-``
+```
 
 ## Aliases
 

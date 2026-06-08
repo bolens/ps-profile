@@ -13,15 +13,19 @@ Write-Host "🔍 Running tests with Test-Path interception..." -ForegroundColor 
 Write-Host "   Test File: $TestFile" -ForegroundColor Gray
 Write-Host ""
 
+$interceptScript = Join-Path $PSScriptRoot 'intercept-testpath.ps1'
+$escapedIntercept = $interceptScript.Replace("'", "''")
+$escapedTestFile = $TestFile.Replace("'", "''")
+
 # Create a script block that sets up interception and runs tests
 $testScript = @"
 # Load interception
-. '$PSScriptRoot\intercept-testpath.ps1'
+. '$escapedIntercept'
 
 # Run the test
 `$ErrorActionPreference = 'Stop'
 Import-Module Pester -MinimumVersion 5.0 -ErrorAction Stop
-`$result = Invoke-Pester -Path '$TestFile' -PassThru -Quiet
+`$result = Invoke-Pester -Path '$escapedTestFile' -PassThru -Quiet
 
 Write-Host "`n=== Test Results ===" -ForegroundColor Cyan
 Write-Host "Passed: `$(`$result.PassedCount)"
@@ -33,4 +37,5 @@ exit `$result.FailedCount
 
 # Run in a new PowerShell session to avoid conflicts
 pwsh -NoProfile -Command $testScript
+exit $LASTEXITCODE
 

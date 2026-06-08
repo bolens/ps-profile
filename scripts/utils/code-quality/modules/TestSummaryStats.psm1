@@ -44,8 +44,7 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 .OUTPUTS
     Hashtable with summary statistics
 .EXAMPLE
-    Get-TestSummaryStatistics
-
+    Get-TestSummaryStatistics -TestResult 'value'
 #>
 function Get-TestSummaryStatistics {
     [CmdletBinding()]
@@ -137,8 +136,7 @@ function Get-TestSummaryStatistics {
 .PARAMETER ShowFailurePatterns
     Show failure patterns section.
 .EXAMPLE
-    Show-TestSummaryStatistics
-
+    Show-TestSummaryStatistics -Statistics @{}
 #>
 function Show-TestSummaryStatistics {
     [CmdletBinding()]

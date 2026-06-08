@@ -57,8 +57,7 @@ function global:Get-PlatformSpecificTools {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Test-ToolAvailableOnPlatform
-
+    Test-ToolAvailableOnPlatform -Tool 'value'
 #>
 function global:Test-ToolAvailableOnPlatform {
     [CmdletBinding()]
@@ -118,8 +117,7 @@ function global:Test-ToolAvailableOnPlatform {
 .PARAMETER Force
     When specified, emits the warning even when it has already been shown.
 .EXAMPLE
-    Write-MissingToolWarning
-
+    Write-MissingToolWarning -Tool 'value'
 #>
 function global:Write-MissingToolWarning {
     [CmdletBinding()]
@@ -209,8 +207,7 @@ function global:Write-MissingToolWarning {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Clear-MissingToolWarnings
-
+    Clear-MissingToolWarnings -Tool @()
 #>
 function global:Clear-MissingToolWarnings {
     [CmdletBinding()]

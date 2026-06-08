@@ -30,17 +30,19 @@ System.String. Output from KoboldCpp execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-KoboldCpp --help
-        Shows KoboldCpp help.
-``
+```
+
+Shows KoboldCpp help.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-KoboldCppServer -Model "llama-2-7b.gguf"
-        Starts KoboldCpp server with a specific model.
-``
+```
+
+Starts KoboldCpp server with a specific model.
 
 ## Aliases
 

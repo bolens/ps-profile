@@ -34,15 +34,15 @@ PSCustomObject with Input, Digits, Format, Isbn10, Isbn13, IsValid, and IsValidC
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-IsbnNormalized -Isbn "978-0-306-40615-7"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertTo-IsbnNormalized -Isbn "ISBN-10: 0-306-40615-2"
-``
+```
 
 ## Aliases
 

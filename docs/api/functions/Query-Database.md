@@ -42,19 +42,19 @@ System.Object. Query results.
 
 ### Example 1
 
-`powershell
+```powershell
 Query-Database -DatabaseType PostgreSQL -Database mydb -Query "SELECT * FROM users LIMIT 10"
-    
-    Executes a PostgreSQL query.
-``
+```
+
+Executes a PostgreSQL query.
 
 ### Example 2
 
-`powershell
+```powershell
 Query-Database -DatabaseType MongoDB -Database mydb -Query "db.users.find().limit(10)"
-    
-    Executes a MongoDB query.
-``
+```
+
+Executes a MongoDB query.
 
 ## Aliases
 

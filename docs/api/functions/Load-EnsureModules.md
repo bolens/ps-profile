@@ -29,9 +29,9 @@ The base directory for resolving module paths (typically $PSScriptRoot).
 
 ### Example 1
 
-`powershell
+```powershell
 Load-EnsureModules -EnsureFunctionName 'Ensure-FileConversion-Data' -BaseDir $PSScriptRoot
-``
+```
 
 ## Source
 

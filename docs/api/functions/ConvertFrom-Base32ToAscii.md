@@ -30,17 +30,19 @@ System.String The ASCII text representation of the input Base32 string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32ToAscii
-    Converts Base32 to "Hello".
-``
+```
+
+Converts Base32 to "Hello".
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-Base32ToAscii -InputObject "MZXW6YTBOI======"
-    Converts Base32 string to ASCII.
-``
+```
+
+Converts Base32 string to ASCII.
 
 ## Aliases
 

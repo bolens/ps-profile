@@ -33,40 +33,46 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Opens files or directories in Visual Studio Code.
     
+
     .DESCRIPTION
         Opens files or directories in VS Code. Prefers vscode-insiders, falls back to vscode or vscodium.
         Optionally opens in a new window.
     
+
     .PARAMETER Path
         File or directory path to open. Defaults to current directory.
     
+
     .PARAMETER NewWindow
         Open in a new window.
     
+
     .PARAMETER Wait
         Wait for the editor to close before returning.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Edit-WithVSCode
-        
+    Edit-WithVSCode -Path ./path
         Opens current directory in VS Code.
     
+
     .EXAMPLE
         Edit-WithVSCode -Path "C:\Projects\MyApp"
         
         Opens a directory in VS Code.
     
+
     .EXAMPLE
         Edit-WithVSCode -Path "script.ps1" -NewWindow
         
         Opens a file in a new VS Code window.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Edit-WithVSCode {
         [CmdletBinding()]
         param(
@@ -161,32 +167,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Opens files or directories in Cursor editor.
     
+
     .DESCRIPTION
         Opens files or directories in Cursor, an AI-powered code editor.
         Optionally opens in a new window.
     
+
     .PARAMETER Path
         File or directory path to open. Defaults to current directory.
     
+
     .PARAMETER NewWindow
         Open in a new window.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Edit-WithCursor
-        
+    Edit-WithCursor -Path ./path
         Opens current directory in Cursor.
     
+
     .EXAMPLE
         Edit-WithCursor -Path "C:\Projects\MyApp"
         
         Opens a directory in Cursor.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Edit-WithCursor {
         [CmdletBinding()]
         param(
@@ -246,37 +256,42 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Opens files in Neovim editor.
     
+
     .DESCRIPTION
         Opens files in Neovim. Prefers neovim-nightly, falls back to neovim.
         Can use GUI version (neovim-qt) if available.
     
+
     .PARAMETER Path
         File path to open. Defaults to current directory.
     
+
     .PARAMETER UseGui
         Use GUI version (neovim-qt) if available.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Edit-WithNeovim
-        
+    Edit-WithNeovim -Path ./path
         Opens Neovim in current directory.
     
+
     .EXAMPLE
         Edit-WithNeovim -Path "script.ps1"
         
         Opens a file in Neovim.
     
+
     .EXAMPLE
         Edit-WithNeovim -Path "script.ps1" -UseGui
         
         Opens a file in Neovim GUI.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Edit-WithNeovim {
         [CmdletBinding()]
         param(
@@ -334,31 +349,35 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Emacs editor.
     
+
     .DESCRIPTION
         Launches Emacs editor. Optionally opens files.
     
+
     .PARAMETER Path
         File path to open. Defaults to current directory.
     
+
     .PARAMETER NoWindow
         Start Emacs in daemon mode (no window).
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Emacs
-        
+    Launch-Emacs -Path ./path
         Launches Emacs.
     
+
     .EXAMPLE
         Launch-Emacs -Path "script.ps1"
         
         Opens a file in Emacs.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Emacs {
         [CmdletBinding()]
         param(
@@ -399,29 +418,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Lapce editor.
     
+
     .DESCRIPTION
         Launches Lapce, a fast code editor. Prefers lapce-nightly, falls back to lapce.
         Optionally opens files or directories.
     
+
     .PARAMETER Path
         File or directory path to open. Defaults to current directory.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Lapce
-        
+    Launch-Lapce -Path ./path
         Launches Lapce.
     
+
     .EXAMPLE
         Launch-Lapce -Path "C:\Projects\MyApp"
         
         Opens a directory in Lapce.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Lapce {
         [CmdletBinding()]
         param(
@@ -462,29 +484,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Zed editor.
     
+
     .DESCRIPTION
         Launches Zed, a high-performance code editor. Prefers zed-nightly, falls back to zed.
         Optionally opens files or directories.
     
+
     .PARAMETER Path
         File or directory path to open. Defaults to current directory.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Zed
-        
+    Launch-Zed -Path ./path
         Launches Zed.
     
+
     .EXAMPLE
         Launch-Zed -Path "C:\Projects\MyApp"
         
         Opens a directory in Zed.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Zed {
         [CmdletBinding()]
         param(
@@ -525,21 +550,22 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets information about available editors.
     
+
     .DESCRIPTION
         Checks for installed editors and returns information about them.
         Lists available editors and their status.
     
-    .EXAMPLE
-        Get-EditorInfo
-        
-        Lists all available editors.
-    
+
     .OUTPUTS
         System.Object[]. Array of editor information objects.
-    #>
+
+    .EXAMPLE
+    Get-EditorInfo
+        Lists all available editors.
+#>
     function Get-EditorInfo {
         [CmdletBinding()]
         [OutputType([object[]])]

@@ -29,17 +29,19 @@ Install globally (--global).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-NimblePackage jester
-        Installs jester locally (if in a project) or globally.
-``
+```
+
+Installs jester locally (if in a project) or globally.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-NimblePackage jester -Global
-        Installs jester globally.
-``
+```
+
+Installs jester globally.
 
 ## Aliases
 

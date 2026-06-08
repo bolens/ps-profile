@@ -29,17 +29,19 @@ Export packages from a specific source only.
 
 ### Example 1
 
-`powershell
-Export-WingetPackages
-        Exports packages to winget-packages.json in current directory.
-``
+```powershell
+Export-WingetPackages -Path ./path -Source ./source
+```
+
+Exports packages to winget-packages.json in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-WingetPackages -Path "C:\backup\winget-backup.json"
-        Exports packages to a specific file.
-``
+```
+
+Exports packages to a specific file.
 
 ## Aliases
 

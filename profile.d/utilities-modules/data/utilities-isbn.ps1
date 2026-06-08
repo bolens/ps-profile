@@ -198,19 +198,25 @@ function script:ConvertTo-Isbn10FromIsbn13Digits {
 <#
 .SYNOPSIS
     Normalizes and validates an ISBN from any supported format.
+
 .DESCRIPTION
     Accepts ISBN-10, ISBN-13, SBN (9-digit), and common prefixed or separated forms
     such as "ISBN-13: 978-0-306-40615-7" or "0 306 40615 2".
+
 .PARAMETER Isbn
     The ISBN value to normalize.
+
 .PARAMETER Strict
     When set, invalid checksums cause an error instead of returning IsValid = $false.
-.EXAMPLE
-    ConvertTo-IsbnNormalized -Isbn "978-0-306-40615-7"
-.EXAMPLE
-    ConvertTo-IsbnNormalized -Isbn "ISBN-10: 0-306-40615-2"
+
 .OUTPUTS
     PSCustomObject with Input, Digits, Format, Isbn10, Isbn13, IsValid, and IsValidChecksum.
+
+.EXAMPLE
+    ConvertTo-IsbnNormalized -Isbn "978-0-306-40615-7"
+
+.EXAMPLE
+    ConvertTo-IsbnNormalized -Isbn "ISBN-10: 0-306-40615-2"
 #>
 function ConvertTo-IsbnNormalized {
     [CmdletBinding()]
@@ -308,14 +314,18 @@ Set-AgentModeAlias -Name 'isbn-normalize' -Target 'ConvertTo-IsbnNormalized'
 <#
 .SYNOPSIS
     Tests whether an ISBN is valid.
+
 .DESCRIPTION
     Returns $true when the input can be parsed and passes ISBN-10 or ISBN-13 checksum validation.
+
 .PARAMETER Isbn
     The ISBN value to validate.
-.EXAMPLE
-    Test-IsbnValid -Isbn "978-0-306-40615-7"
+
 .OUTPUTS
     System.Boolean
+
+.EXAMPLE
+    Test-IsbnValid -Isbn "978-0-306-40615-7"
 #>
 function Test-IsbnValid {
     [CmdletBinding()]
@@ -336,20 +346,27 @@ Set-AgentModeAlias -Name 'isbn-validate' -Target 'Test-IsbnValid'
 <#
 .SYNOPSIS
     Formats a normalized ISBN with standard hyphen groups.
+
 .DESCRIPTION
     Formats ISBN-10 as 1-3-5-1 groups and ISBN-13 as 3-1-3-5-1 groups when possible.
+
 .PARAMETER Isbn
     The ISBN value to format.
+
 .PARAMETER Format
     Target format: Auto, ISBN-10, or ISBN-13.
+
 .PARAMETER Hyphenation
     Hyphenation style: Standard uses fixed groups; Registrant uses ISBN agency registrant rules.
-.EXAMPLE
-    Format-Isbn -Isbn "9780306406157"
-.EXAMPLE
-    Format-Isbn -Isbn "9780201367860" -Hyphenation Registrant
+
 .OUTPUTS
     System.String
+
+.EXAMPLE
+    Format-Isbn -Isbn "9780306406157"
+
+.EXAMPLE
+    Format-Isbn -Isbn "9780201367860" -Hyphenation Registrant
 #>
 function Format-Isbn {
     [CmdletBinding()]
@@ -778,8 +795,7 @@ function script:Set-IsbnCachedBook {
     Provider scope for a single ISBN cache entry. Defaults to Auto.
 
 .EXAMPLE
-    Clear-IsbnCache
-
+    Clear-IsbnCache -Isbn 'value' -Provider 'value'
 .EXAMPLE
     Clear-IsbnCache -LookupIsbn '9780306406157'
 #>
@@ -1282,28 +1298,38 @@ function script:Format-IsbnLookupText {
 <#
 .SYNOPSIS
     Looks up book metadata by ISBN.
+
 .DESCRIPTION
     Accepts ISBN-10, ISBN-13, SBN, and common prefixed or separated forms.
     Queries Open Library first, then Google Books as a fallback.
     Results are cached locally unless -Refresh is specified.
+
 .PARAMETER Isbn
     The ISBN to look up. Supports pipeline input for batch lookups.
+
 .PARAMETER Provider
     Data provider: Auto, OpenLibrary, GoogleBooks, OpenBD, or LibraryOfCongress.
+
 .PARAMETER OutputFormat
     Output format: Object, Text, Json, BibTeX, Ris, CslJson, Apa, Mla, Chicago, Table, or Csv.
+
 .PARAMETER Refresh
     Bypass cached lookup results and fetch fresh metadata.
+
 .PARAMETER Offline
     Return cached metadata only and do not query remote providers.
-.EXAMPLE
-    Get-IsbnInfo -Isbn "978-0-306-40615-7"
-.EXAMPLE
-    Get-IsbnInfo -Isbn "ISBN-10: 0-306-40615-2" -OutputFormat BibTeX
-.EXAMPLE
-    Get-Content isbns.txt | Get-IsbnInfo -OutputFormat Table
+
 .OUTPUTS
     PSCustomObject, System.String
+
+.EXAMPLE
+    Get-IsbnInfo -Isbn "978-0-306-40615-7"
+
+.EXAMPLE
+    Get-IsbnInfo -Isbn "ISBN-10: 0-306-40615-2" -OutputFormat BibTeX
+
+.EXAMPLE
+    Get-Content isbns.txt | Get-IsbnInfo -OutputFormat Table
 #>
 function Get-IsbnInfo {
     [CmdletBinding()]
@@ -1373,22 +1399,30 @@ Set-AgentModeAlias -Name 'isbn-lookup' -Target 'Get-IsbnInfo'
 <#
 .SYNOPSIS
     Downloads a book cover image for an ISBN.
+
 .DESCRIPTION
     Looks up the ISBN, resolves the cover URL, and saves the image to disk.
+
 .PARAMETER Isbn
     The ISBN to look up.
+
 .PARAMETER OutputPath
     Destination file path. Defaults to ./<isbn>.jpg in the current directory.
+
 .PARAMETER Provider
     Data provider: Auto, OpenLibrary, GoogleBooks, OpenBD, or LibraryOfCongress.
+
 .PARAMETER Refresh
     Bypass cached lookup results when resolving metadata.
+
 .PARAMETER PassThru
     Returns the saved file path.
-.EXAMPLE
-    Save-IsbnCover -Isbn "978-0-306-40615-7" -OutputPath "./cover.jpg"
+
 .OUTPUTS
     System.String. Path to the saved cover image when -PassThru is used.
+
+.EXAMPLE
+    Save-IsbnCover -Isbn "978-0-306-40615-7" -OutputPath "./cover.jpg"
 #>
 function Save-IsbnCover {
     [CmdletBinding()]

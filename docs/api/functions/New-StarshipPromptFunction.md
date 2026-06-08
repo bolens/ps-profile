@@ -25,9 +25,9 @@ The path to the starship executable.
 
 ### Example 1
 
-`powershell
-New-StarshipPromptFunction
-``
+```powershell
+New-StarshipPromptFunction -StarshipCommandPath 'value'
+```
 
 ## Source
 

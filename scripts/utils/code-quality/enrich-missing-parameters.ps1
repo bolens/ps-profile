@@ -20,6 +20,9 @@ $script:EnrichmentSkipFileNames = @(
     'add-comment-help.ps1'
     'CommentHelp.psm1'
     'DocParserRegex.psm1'
+    'RegexUtilities.psm1'
+    'improve-bare-examples.ps1'
+    'cleanup-help-examples.ps1'
 )
 
 function Get-ParameterHelpLines {
@@ -100,7 +103,7 @@ function Add-ParameterDocsToHelpBlock {
 
     if (-not $hasExamples) {
         $exampleLine = switch -Regex ($FunctionName) {
-            '^Invoke-' { "    $FunctionName -Arguments @('-h')" }
+            '^Invoke-' { "    $FunctionName @('--help')" }
             '^Get-' { "    $FunctionName" }
             '^New-' { "    $FunctionName" }
             '^Add-' { "    $FunctionName" }

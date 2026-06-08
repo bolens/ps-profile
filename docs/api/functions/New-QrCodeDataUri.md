@@ -45,10 +45,11 @@ Margin size in modules. Default is 4.
 
 ### Example 1
 
-`powershell
+```powershell
 $dataUri = New-QrCodeDataUri -Data "https://example.com"
-    Returns a data URI that can be used in HTML img tags.
-``
+```
+
+Returns a data URI that can be used in HTML img tags.
 
 ## Aliases
 

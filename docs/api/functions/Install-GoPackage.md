@@ -25,10 +25,11 @@ Package paths to install (e.g., github.com/user/cmd/tool@latest).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-GoPackage github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-        Installs golangci-lint globally.
-``
+```
+
+Installs golangci-lint globally.
 
 ## Aliases
 

@@ -29,17 +29,19 @@ Add as dev dependency (--dev).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-ComposerPackage monolog/monolog
-    Adds monolog as a production dependency.
-``
+```
+
+Adds monolog as a production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-ComposerPackage phpunit/phpunit -Dev
-    Adds phpunit as a dev dependency.
-``
+```
+
+Adds phpunit as a dev dependency.
 
 ## Aliases
 

@@ -30,24 +30,27 @@ System.String. Output from Hasura CLI execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Hasura version
-        Checks Hasura CLI version.
-``
+```
+
+Checks Hasura CLI version.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Hasura migrate apply
-        Applies database migrations.
-``
+```
+
+Applies database migrations.
 
 ### Example 3
 
-`powershell
+```powershell
 Invoke-Hasura console
-        Starts Hasura console.
-``
+```
+
+Starts Hasura console.
 
 ## Aliases
 

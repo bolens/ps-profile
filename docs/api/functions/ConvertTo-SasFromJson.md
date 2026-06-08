@@ -29,9 +29,9 @@ The path for the output SAS file. If not specified, uses input path with .sas7bd
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-SasFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

@@ -38,27 +38,27 @@ System.String. Output from cleanup commands.
 
 ### Example 1
 
-`powershell
+```powershell
 Clean-Containers
-        
-        Removes stopped containers and unused images.
-``
+```
+
+Removes stopped containers and unused images.
 
 ### Example 2
 
-`powershell
+```powershell
 Clean-Containers -RemoveVolumes
-        
-        Also removes unused volumes.
-``
+```
+
+Also removes unused volumes.
 
 ### Example 3
 
-`powershell
+```powershell
 Clean-Containers -PruneSystem
-        
-        Prunes all unused system resources.
-``
+```
+
+Prunes all unused system resources.
 
 ## Source
 

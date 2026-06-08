@@ -30,10 +30,11 @@ System.String The hexadecimal representation of the input Base32 string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32ToHex
-    Converts Base32 to hex.
-``
+```
+
+Converts Base32 to hex.
 
 ## Aliases
 

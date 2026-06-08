@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Test-RustupUpdates
-    Checks for available Rust toolchain updates.
-``
+```
+
+Checks for available Rust toolchain updates.
 
 ## Aliases
 

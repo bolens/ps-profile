@@ -25,15 +25,15 @@ Arguments to pass to aws.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Aws s3 ls
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Aws ec2 describe-instances
-``
+```
 
 ## Aliases
 

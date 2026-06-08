@@ -30,11 +30,11 @@ System.String Returns the EBCDIC encoded string as hexadecimal.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello" | ConvertFrom-AsciiToEBCDIC
-    
-    Converts text to EBCDIC format (returns hex string).
-``
+```
+
+Converts text to EBCDIC format (returns hex string).
 
 ## Aliases
 

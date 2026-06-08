@@ -34,19 +34,19 @@ System.String. Namespace information or list of namespaces.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-KubeNamespace -List
-        
-        Lists all available Kubernetes namespaces.
-``
+```
+
+Lists all available Kubernetes namespaces.
 
 ### Example 2
 
-`powershell
+```powershell
 Set-KubeNamespace -Namespace "production"
-        
-        Switches to the specified namespace.
-``
+```
+
+Switches to the specified namespace.
 
 ## Source
 

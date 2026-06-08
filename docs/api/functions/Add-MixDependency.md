@@ -29,10 +29,11 @@ Version requirement (e.g., '~> 1.7').
 
 ### Example 1
 
-`powershell
+```powershell
 Add-MixDependency -Package phoenix -Version '~> 1.7'
-        Provides instructions for adding Phoenix dependency.
-``
+```
+
+Provides instructions for adding Phoenix dependency.
 
 ## Aliases
 

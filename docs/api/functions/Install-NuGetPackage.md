@@ -37,17 +37,19 @@ Directory to install packages to.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-NuGetPackage Newtonsoft.Json
-        Installs Newtonsoft.Json.
-``
+```
+
+Installs Newtonsoft.Json.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-NuGetPackage Newtonsoft.Json -Version 13.0.1
-        Installs specific version.
-``
+```
+
+Installs specific version.
 
 ## Aliases
 

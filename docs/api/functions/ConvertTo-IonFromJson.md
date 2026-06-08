@@ -44,19 +44,19 @@ System.String Returns the path to the output Ion file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-IonFromJson -InputPath 'data.json'
-    
-    Converts data.json to data.ion (text format).
-``
+```
+
+Converts data.json to data.ion (text format).
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertTo-IonFromJson -InputPath 'data.json' -Binary
-    
-    Converts data.json to data.10n (binary format).
-``
+```
+
+Converts data.json to data.10n (binary format).
 
 ## Aliases
 

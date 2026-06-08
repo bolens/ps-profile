@@ -34,8 +34,7 @@ if ($outputPathUtilsModulePath -and -not [string]::IsNullOrWhiteSpace($outputPat
 .PARAMETER RepoRoot
     Repository root used to resolve relative paths.
 .EXAMPLE
-    Test-TestPaths
-
+    Test-TestPaths -TestPaths @('tests/unit') -Suite 'Unit'
 #>
 function Test-TestPaths {
     param(
@@ -89,8 +88,7 @@ function Test-TestPaths {
 .PARAMETER TestFile
     Specific test file or directory path.
 .EXAMPLE
-    Write-TestDiscoveryInfo
-
+    Write-TestDiscoveryInfo -TestPaths @('tests/unit') -Suite 'Unit'
 #>
 function Write-TestDiscoveryInfo {
     param(
@@ -137,8 +135,7 @@ function Write-TestDiscoveryInfo {
 .OUTPUTS
     System.String[] - Filtered and normalized test paths
 .EXAMPLE
-    Filter-TestPaths
-
+    Filter-TestPaths -TestPaths @('tests/unit')
 #>
 function Filter-TestPaths {
     param(
@@ -211,8 +208,7 @@ function Filter-TestPaths {
 .OUTPUTS
     System.String[] - Shuffled test paths
 .EXAMPLE
-    Get-ShuffledTestPaths
-
+    Get-ShuffledTestPaths -TestPaths @('tests/unit')
 #>
 function Get-ShuffledTestPaths {
     param(

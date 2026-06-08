@@ -34,17 +34,19 @@ System.String The binary representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "4865" | ConvertFrom-HexToBinary
-    Converts hex to binary with spaces.
-``
+```
+
+Converts hex to binary with spaces.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-HexToBinary -InputObject "FF" -Separator ""
-    Converts hex to binary without separator.
-``
+```
+
+Converts hex to binary without separator.
 
 ## Aliases
 

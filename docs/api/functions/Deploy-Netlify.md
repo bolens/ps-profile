@@ -38,19 +38,19 @@ System.String. Deployment status or command output.
 
 ### Example 1
 
-`powershell
-Deploy-Netlify
-        
-        Deploys the current project to Netlify.
-``
+```powershell
+Deploy-Netlify -Action 'value' -ProjectPath 'value'
+```
+
+Deploys the current project to Netlify.
 
 ### Example 2
 
-`powershell
+```powershell
 Deploy-Netlify -Action "status"
-        
-        Shows Netlify deployment status.
-``
+```
+
+Shows Netlify deployment status.
 
 ## Source
 

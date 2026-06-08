@@ -30,16 +30,11 @@ System.String Returns the constructed query string.
 
 ### Example 1
 
-`powershell
+```powershell
 $params = @{
-        name = 'John'
-        age = '30'
-        city = 'New York'
-    }
-    Build-QueryString -Parameters $params
-    
-    Builds query string from parameters.
-``
+```
+
+name = 'John' age = '30' city = 'New York' } Build-QueryString -Parameters $params Builds query string from parameters.
 
 ## Aliases
 

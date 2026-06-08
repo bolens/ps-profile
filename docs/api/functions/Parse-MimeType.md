@@ -30,19 +30,19 @@ PSCustomObject Returns an object with properties: Type, Subtype, Parameters, Ext
 
 ### Example 1
 
-`powershell
+```powershell
 Parse-MimeType -MimeType "application/json; charset=utf-8"
-    
-    Parses MIME type and returns components.
-``
+```
+
+Parses MIME type and returns components.
 
 ### Example 2
 
-`powershell
+```powershell
 "text/html" | Parse-MimeType
-    
-    Parses MIME type from pipeline.
-``
+```
+
+Parses MIME type from pipeline.
 
 ## Aliases
 

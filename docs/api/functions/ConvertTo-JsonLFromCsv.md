@@ -29,9 +29,9 @@ The path for the output JSONL file. If not specified, uses input path with .json
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-JsonLFromCsv -InputPath ./input.file
-``
+```
 
 ## Aliases
 

@@ -25,15 +25,15 @@ Arguments to pass to gh pr.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GitHubPullRequest list
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GitHubPullRequest create --title "My PR"
-``
+```
 
 ## Aliases
 

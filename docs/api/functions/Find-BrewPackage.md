@@ -29,17 +29,19 @@ Search for casks (GUI applications) instead of formulae.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-BrewPackage git
-        Searches for packages containing "git".
-``
+```
+
+Searches for packages containing "git".
 
 ### Example 2
 
-`powershell
+```powershell
 Find-BrewPackage visual-studio-code -Cask
-        Searches for casks containing "visual-studio-code".
-``
+```
+
+Searches for casks containing "visual-studio-code".
 
 ## Aliases
 

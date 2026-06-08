@@ -35,27 +35,31 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches MongoDB Compass GUI.
     
+
     .DESCRIPTION
         Opens MongoDB Compass, a GUI tool for MongoDB database management and visualization.
         MongoDB Compass allows you to explore, query, and manage MongoDB databases.
     
+
     .PARAMETER ConnectionString
         Optional MongoDB connection string to open directly.
     
+
+    .OUTPUTS
+        System.Diagnostics.Process. Process object for MongoDB Compass.
+
     .EXAMPLE
-        Start-MongoDbCompass
+    Start-MongoDbCompass -ConnectionString 'value'
         Launches MongoDB Compass GUI.
     
+
     .EXAMPLE
         Start-MongoDbCompass -ConnectionString "mongodb://localhost:27017"
         Launches MongoDB Compass with a connection string.
-    
-    .OUTPUTS
-        System.Diagnostics.Process. Process object for MongoDB Compass.
-    #>
+#>
     function Start-MongoDbCompass {
         [CmdletBinding()]
         [OutputType([System.Diagnostics.Process])]
@@ -103,27 +107,31 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches SQL Workbench/J.
     
+
     .DESCRIPTION
         Opens SQL Workbench/J, a universal database tool for SQL databases.
         Supports multiple database systems including MySQL, PostgreSQL, Oracle, and more.
     
+
     .PARAMETER Workspace
         Optional workspace file to open.
     
+
+    .OUTPUTS
+        System.Diagnostics.Process. Process object for SQL Workbench/J.
+
     .EXAMPLE
-        Start-SqlWorkbench
+    Start-SqlWorkbench -Workspace 'value'
         Launches SQL Workbench/J.
     
+
     .EXAMPLE
         Start-SqlWorkbench -Workspace "C:\Workspaces\my-workspace.xml"
         Launches SQL Workbench/J with a specific workspace.
-    
-    .OUTPUTS
-        System.Diagnostics.Process. Process object for SQL Workbench/J.
-    #>
+#>
     function Start-SqlWorkbench {
         [CmdletBinding()]
         [OutputType([System.Diagnostics.Process])]
@@ -178,27 +186,31 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches DBeaver Universal Database Tool.
     
+
     .DESCRIPTION
         Opens DBeaver, a universal database tool that supports many database types.
         DBeaver provides a rich SQL editor, data viewer, and database management features.
     
+
     .PARAMETER Workspace
         Optional workspace directory to open.
     
+
+    .OUTPUTS
+        System.Diagnostics.Process. Process object for DBeaver.
+
     .EXAMPLE
-        Start-DBeaver
+    Start-DBeaver -Workspace 'value'
         Launches DBeaver.
     
+
     .EXAMPLE
         Start-DBeaver -Workspace "C:\Workspaces\dbeaver"
         Launches DBeaver with a specific workspace directory.
-    
-    .OUTPUTS
-        System.Diagnostics.Process. Process object for DBeaver.
-    #>
+#>
     function Start-DBeaver {
         [CmdletBinding()]
         [OutputType([System.Diagnostics.Process])]
@@ -253,27 +265,31 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches TablePlus.
     
+
     .DESCRIPTION
         Opens TablePlus, a modern database client with a clean interface.
         TablePlus supports multiple database systems with a unified interface.
     
+
     .PARAMETER Connection
         Optional connection name or file to open.
     
+
+    .OUTPUTS
+        System.Diagnostics.Process. Process object for TablePlus.
+
     .EXAMPLE
-        Start-TablePlus
+    Start-TablePlus -Connection 'value'
         Launches TablePlus.
     
+
     .EXAMPLE
         Start-TablePlus -Connection "my-connection"
         Launches TablePlus with a specific connection.
-    
-    .OUTPUTS
-        System.Diagnostics.Process. Process object for TablePlus.
-    #>
+#>
     function Start-TablePlus {
         [CmdletBinding()]
         [OutputType([System.Diagnostics.Process])]
@@ -324,28 +340,33 @@ try {
     .SYNOPSIS
         Executes Hasura CLI commands.
     
+
     .DESCRIPTION
         Wrapper function for Hasura CLI that executes Hasura GraphQL engine commands.
         Hasura provides instant GraphQL APIs over databases.
     
+
     .PARAMETER Arguments
         Arguments to pass to hasura-cli command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from Hasura CLI execution.
+
     .EXAMPLE
         Invoke-Hasura version
         Checks Hasura CLI version.
     
+
     .EXAMPLE
         Invoke-Hasura migrate apply
         Applies database migrations.
     
+
     .EXAMPLE
         Invoke-Hasura console
         Starts Hasura console.
-    
-    .OUTPUTS
-        System.String. Output from Hasura CLI execution.
     #>
     function Invoke-Hasura {
         [CmdletBinding()]
@@ -389,28 +410,33 @@ try {
     .SYNOPSIS
         Executes Supabase CLI commands.
     
+
     .DESCRIPTION
         Wrapper function for Supabase CLI that executes Supabase commands.
         Supabase is an open-source Firebase alternative with PostgreSQL database.
     
+
     .PARAMETER Arguments
         Arguments to pass to supabase command.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from Supabase CLI execution.
+
     .EXAMPLE
         Invoke-Supabase status
         Checks Supabase local development status.
     
+
     .EXAMPLE
         Invoke-Supabase start
         Starts local Supabase development environment.
     
+
     .EXAMPLE
         Invoke-Supabase stop
         Stops local Supabase development environment.
-    
-    .OUTPUTS
-        System.String. Output from Supabase CLI execution.
     #>
     function Invoke-Supabase {
         [CmdletBinding()]

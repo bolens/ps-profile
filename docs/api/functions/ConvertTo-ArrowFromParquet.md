@@ -29,9 +29,9 @@ The path for the output Arrow file. If not specified, uses input path with .arro
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-ArrowFromParquet -InputPath ./input.file
-``
+```
 
 ## Aliases
 

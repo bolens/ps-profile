@@ -1,8 +1,7 @@
 <#
-scripts/utils/database/populate-performance-metrics.ps1
-
 .SYNOPSIS
     Populates the performance metrics database with current metrics.
+
 
 .DESCRIPTION
     Collects and stores performance metrics in the SQLite database:
@@ -14,30 +13,26 @@ scripts/utils/database/populate-performance-metrics.ps1
     - Startup benchmarks
     - Optionally migrates existing JSON/CSV files
 
+
 .PARAMETER IncludeCodeMetrics
     Collect and store code metrics. Defaults to true.
+
 
 .PARAMETER IncludeStartupBenchmark
     Run startup benchmark and store results. Defaults to true.
 
+
 .PARAMETER IncludeMigration
     Migrate existing JSON/CSV files to database. Defaults to false.
+
 
 .PARAMETER BenchmarkIterations
     Number of iterations for startup benchmark. Defaults to 5.
 
+
 .PARAMETER IncludeDocumentationMetrics
     Collect and store documentation coverage metrics. Defaults to false (can be slow).
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\database\populate-performance-metrics.ps1
-
-    Populates database with code metrics and startup benchmarks.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\database\populate-performance-metrics.ps1 -IncludeMigration
-
-    Also migrates existing JSON/CSV files to the database.
 
 .NOTES
     The script collects comprehensive metrics including:
@@ -60,6 +55,17 @@ scripts/utils/database/populate-performance-metrics.ps1
     - Individual metric write failures don't prevent other metrics from being stored
     - You can run the script multiple times to progressively build up your metrics database
     - Each run adds new timestamped entries, enabling historical trend analysis
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\database\populate-performance-metrics.ps1
+
+    Populates database with code metrics and startup benchmarks.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\database\populate-performance-metrics.ps1 -IncludeMigration
+
+    Also migrates existing JSON/CSV files to the database.
 #>
 
 param(
@@ -75,7 +81,7 @@ param(
 )
 
 # Import shared utilities
-$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
@@ -84,7 +90,7 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Import Performance Metrics Database
-$perfMetricsModule = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'database' 'PerformanceMetricsDatabase.psm1'
+$perfMetricsModule = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'database' 'PerformanceMetricsDatabase.psm1'
 if (-not (Test-Path -LiteralPath $perfMetricsModule)) {
     Write-ScriptMessage -Message "Performance Metrics Database module not found: $perfMetricsModule" -IsWarning
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Performance Metrics Database module not found"

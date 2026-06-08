@@ -25,10 +25,11 @@ Auto-confirm all prompts.
 
 ### Example 1
 
-`powershell
+```powershell
 Clear-ChocoCache
-        Cleans the download cache.
-``
+```
+
+Cleans the download cache.
 
 ## Aliases
 

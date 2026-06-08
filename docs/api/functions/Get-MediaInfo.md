@@ -38,19 +38,19 @@ System.String. Media information in the specified format.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-MediaInfo -MediaPath "video.mp4"
-        
-        Displays media information for video.mp4.
-``
+```
+
+Displays media information for video.mp4.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-MediaInfo -MediaPath "video.mp4" -OutputFormat "json" -OutputPath "info.json"
-        
-        Saves media information as JSON to info.json.
-``
+```
+
+Saves media information as JSON to info.json.
 
 ## Source
 

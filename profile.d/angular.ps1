@@ -103,9 +103,6 @@ function New-AngularApp {
     Arguments to pass to ng serve.
 
 .EXAMPLE
-    Start-AngularDev
-
-.EXAMPLE
     Start-AngularDev --port 4200
 #>
 function Start-AngularDev {

@@ -22,8 +22,7 @@ scripts/utils/code-quality/modules/TestRecommendations.psm1
 .OUTPUTS
     Array of recommendation strings
 .EXAMPLE
-    Get-TestRecommendations
-
+    Get-TestRecommendations -Analysis 'value'
 #>
 function Get-TestRecommendations {
     param(

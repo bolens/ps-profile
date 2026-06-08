@@ -25,15 +25,15 @@ Arguments to pass to bunx.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Bunx create next-app
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Bunx --version
-``
+```
 
 ## Aliases
 

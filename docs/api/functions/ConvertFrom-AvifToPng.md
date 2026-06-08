@@ -29,9 +29,9 @@ Path for the output PNG file. If not specified, uses input path with .png extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AvifToPng -InputPath "image.avif" -OutputPath "image.png"
-``
+```
 
 ## Aliases
 

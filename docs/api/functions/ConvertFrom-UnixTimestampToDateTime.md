@@ -30,19 +30,19 @@ System.DateTime Returns a DateTime object representing the timestamp.
 
 ### Example 1
 
-`powershell
+```powershell
 1609459200 | ConvertFrom-UnixTimestampToDateTime
-    
-    Converts the Unix timestamp 1609459200 to a DateTime object.
-``
+```
+
+Converts the Unix timestamp 1609459200 to a DateTime object.
 
 ### Example 2
 
-`powershell
+```powershell
 1609459200.5 | ConvertFrom-UnixTimestampToDateTime
-    
-    Converts a Unix timestamp with fractional seconds.
-``
+```
+
+Converts a Unix timestamp with fractional seconds.
 
 ## Aliases
 

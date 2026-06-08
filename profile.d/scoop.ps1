@@ -245,7 +245,7 @@ if (Test-CachedCommand scoop) {
     Set-AgentModeAlias -Name 'scleanup' -Target 'Clear-ScoopCache'
     # Scoop export - backup installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports installed Scoop packages to a backup file.
     .DESCRIPTION
         Creates a JSON file containing all installed Scoop packages.
@@ -253,12 +253,12 @@ if (Test-CachedCommand scoop) {
     .PARAMETER Path
         Path to save the export file. Defaults to "scoopfile.json" in current directory.
     .EXAMPLE
-        Export-ScoopPackages
+    Export-ScoopPackages -Path ./path
         Exports packages to scoopfile.json in current directory.
     .EXAMPLE
         Export-ScoopPackages -Path "C:\backup\scoop-packages.json"
         Exports packages to a specific file.
-    #>
+#>
     function Export-ScoopPackages {
         [CmdletBinding()]
         param(
@@ -278,7 +278,7 @@ if (Test-CachedCommand scoop) {
     Set-AgentModeAlias -Name 'scoopbackup' -Target 'Export-ScoopPackages'
     # Scoop import - restore packages from backup
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores Scoop packages from a backup file.
     .DESCRIPTION
         Installs all packages listed in a scoopfile.json file.
@@ -286,12 +286,12 @@ if (Test-CachedCommand scoop) {
     .PARAMETER Path
         Path to the scoopfile.json file to import. Defaults to "scoopfile.json" in current directory.
     .EXAMPLE
-        Import-ScoopPackages
+    Import-ScoopPackages -Path ./path
         Restores packages from scoopfile.json in current directory.
     .EXAMPLE
         Import-ScoopPackages -Path "C:\backup\scoop-packages.json"
         Restores packages from a specific file.
-    #>
+#>
     function Import-ScoopPackages {
         [CmdletBinding()]
         param(

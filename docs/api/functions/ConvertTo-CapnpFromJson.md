@@ -33,9 +33,9 @@ The path to the Cap'n Proto schema file (.capnp extension). Required for encodin
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-CapnpFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

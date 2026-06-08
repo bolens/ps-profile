@@ -31,30 +31,35 @@ try {
     .SYNOPSIS
         Installs Python packages using the best available tool.
 
+
     .DESCRIPTION
         Installs Python packages using the best available tool in order of preference:
         - uv (if available) - fastest option
         - pip (if available) - standard option
         Falls back gracefully if neither is available.
 
+
     .PARAMETER Packages
         Package names to install.
         Can be used multiple times or as an array.
+
 
     .PARAMETER Arguments
         Additional arguments to pass to the installer.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from package installation.
+
     .EXAMPLE
         Install-PythonPackage requests
         Installs requests using the best available tool.
 
+
     .EXAMPLE
         Install-PythonPackage pytest --dev
         Installs pytest as a dev dependency (uv only).
-
-    .OUTPUTS
-        System.String. Output from package installation.
     #>
     function Install-PythonPackage {
         [CmdletBinding()]

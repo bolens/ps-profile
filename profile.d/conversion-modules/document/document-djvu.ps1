@@ -213,18 +213,23 @@ function Initialize-FileConversion-DocumentDjvu {
 <#
 .SYNOPSIS
     Converts DjVu file to PDF.
+
 .DESCRIPTION
     Converts a DjVu document file to PDF format using ImageMagick or djvulibre tools.
+
 .PARAMETER InputPath
     The path to the DjVu file (.djvu or .djv extension).
+
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-DjvuToPdf -InputPath "document.djvu"
     
     Converts document.djvu to document.pdf.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-DjvuToPdf {
     param([string]$InputPath, [string]$OutputPath)
@@ -246,18 +251,23 @@ Set-AgentModeAlias -Name 'djvu-to-pdf' -Target 'ConvertFrom-DjvuToPdf'
 <#
 .SYNOPSIS
     Converts DjVu file to PNG.
+
 .DESCRIPTION
     Converts a DjVu document file to PNG image format using ImageMagick or djvulibre tools.
+
 .PARAMETER InputPath
     The path to the DjVu file (.djvu or .djv extension).
+
 .PARAMETER OutputPath
     The path for the output PNG file. If not specified, uses input path with .png extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-DjvuToPng -InputPath "document.djvu"
     
     Converts document.djvu to document.png.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-DjvuToPng {
     param([string]$InputPath, [string]$OutputPath)
@@ -279,18 +289,23 @@ Set-AgentModeAlias -Name 'djvu-to-png' -Target 'ConvertFrom-DjvuToPng'
 <#
 .SYNOPSIS
     Converts DjVu file to JPEG.
+
 .DESCRIPTION
     Converts a DjVu document file to JPEG image format using ImageMagick or djvulibre tools.
+
 .PARAMETER InputPath
     The path to the DjVu file (.djvu or .djv extension).
+
 .PARAMETER OutputPath
     The path for the output JPEG file. If not specified, uses input path with .jpg extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-DjvuToJpeg -InputPath "document.djvu"
     
     Converts document.djvu to document.jpg.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-DjvuToJpeg {
     param([string]$InputPath, [string]$OutputPath)
@@ -313,18 +328,23 @@ Set-AgentModeAlias -Name 'djvu-to-jpg' -Target 'ConvertFrom-DjvuToJpeg'
 <#
 .SYNOPSIS
     Extracts text from DjVu file.
+
 .DESCRIPTION
     Extracts text content from a DjVu document file using djvutxt tool.
+
 .PARAMETER InputPath
     The path to the DjVu file (.djvu or .djv extension).
+
 .PARAMETER OutputPath
     The path for the output text file. If not specified, uses input path with .txt extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-DjvuToText -InputPath "document.djvu"
     
     Extracts text from document.djvu to document.txt.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-DjvuToText {
     param([string]$InputPath, [string]$OutputPath)

@@ -41,10 +41,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeSms -PhoneNumber "+1234567890" -Message "Hello!"
-    Generates an SMS QR code with a pre-filled message.
-``
+```
+
+Generates an SMS QR code with a pre-filled message.
 
 ## Aliases
 

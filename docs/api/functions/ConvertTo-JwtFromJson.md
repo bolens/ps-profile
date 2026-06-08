@@ -38,11 +38,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-JwtFromJson -InputPath "payload.json" -Secret "mysecret"
-    
-    Converts payload.json to payload.jwt token.
-``
+```
+
+Converts payload.json to payload.jwt token.
 
 ## Aliases
 

@@ -25,17 +25,19 @@ Version to set (optional, shows current if omitted).
 
 ### Example 1
 
-`powershell
+```powershell
 Get-HatchVersion
-        Shows current version.
-``
+```
+
+Shows current version.
 
 ### Example 2
 
-`powershell
+```powershell
 Set-HatchVersion -Version 1.2.3
-        Sets version to 1.2.3.
-``
+```
+
+Sets version to 1.2.3.
 
 ## Aliases
 

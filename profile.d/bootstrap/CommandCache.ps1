@@ -6,6 +6,7 @@
 <#
 .SYNOPSIS
     Tests command availability with a short-lived in-memory cache.
+
 .DESCRIPTION
     RECOMMENDED: This is the preferred function for command detection.
     Provides cached command availability checks to avoid repeated lookups.
@@ -13,20 +14,25 @@
     
     This function implements the core command detection logic directly,
     avoiding circular dependencies with Test-HasCommand.
+
 .PARAMETER Name
     The name of the command to check.
+
 .PARAMETER CacheTTLMinutes
     Cache duration in minutes. Defaults to 5 minutes.
     Use 0 or 1 for immediate lookups (minimal caching).
+
 .OUTPUTS
     System.Boolean
+
+.NOTES
+    This is the recommended function for command detection in new code.
+    It provides better performance than Test-HasCommand through caching.
+
 .EXAMPLE
     if (Test-CachedCommand -Name 'git') {
         # Git is available
     }
-.NOTES
-    This is the recommended function for command detection in new code.
-    It provides better performance than Test-HasCommand through caching.
 #>
 function global:Test-CachedCommand {
     [CmdletBinding()]
@@ -394,16 +400,20 @@ function global:Invoke-CachedYqCommand {
 <#
 .SYNOPSIS
     Returns a command object when Test-CachedCommand reports the tool is available.
+
 .DESCRIPTION
     Test-CachedCommand returns a boolean. Use this helper when you need to invoke
     an external executable discovered via the command cache.
+
+.PARAMETER Name
+    External command name to resolve through the profile command cache.
+
 .OUTPUTS
     System.Management.Automation.CommandInfo
 
+
 .EXAMPLE
     $yq = Get-CachedExternalCommand -Name 'yq'
-.PARAMETER Name
-    External command name to resolve through the profile command cache.
 
 #>
 function global:Get-CachedExternalCommand {
@@ -492,8 +502,7 @@ function global:Clear-TestCachedCommandCache {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Remove-TestCachedCommandCacheEntry
-
+    Remove-TestCachedCommandCacheEntry -Name 'name'
 #>
 function global:Remove-TestCachedCommandCacheEntry {
     [CmdletBinding()]
@@ -525,8 +534,7 @@ function global:Remove-TestCachedCommandCacheEntry {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Test-HasCommand
-
+    Test-HasCommand -Name 'name'
 #>
 function global:Test-HasCommand {
     [CmdletBinding()]

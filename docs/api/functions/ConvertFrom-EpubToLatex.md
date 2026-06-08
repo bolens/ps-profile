@@ -29,9 +29,9 @@ The path for the output LaTeX file. If not specified, uses input path with .tex 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EpubToLatex -InputPath ./input.file
-``
+```
 
 ## Aliases
 

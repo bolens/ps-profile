@@ -34,11 +34,11 @@ System.String Returns an RFC 3339 formatted date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 1609459200 | ConvertTo-Rfc3339FromUnixTimestamp
-    
-    Converts Unix timestamp to RFC 3339 format.
-``
+```
+
+Converts Unix timestamp to RFC 3339 format.
 
 ## Aliases
 

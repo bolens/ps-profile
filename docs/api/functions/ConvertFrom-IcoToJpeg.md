@@ -33,9 +33,9 @@ JPEG quality (1-100, default: 90). Higher values mean better quality but larger 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-IcoToJpeg -InputPath "icon.ico" -OutputPath "icon.jpg" -Quality 95
-``
+```
 
 ## Aliases
 

@@ -37,9 +37,9 @@ The desired height.
 
 ### Example 1
 
-`powershell
-Resize-Image
-``
+```powershell
+Resize-Image -InputPath ./input.file -OutputPath ./output.file
+```
 
 ## Aliases
 

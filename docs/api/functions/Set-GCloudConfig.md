@@ -25,15 +25,15 @@ Arguments to pass to gcloud config.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-GCloudConfig list
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Set-GCloudConfig set project my-project
-``
+```
 
 ## Aliases
 

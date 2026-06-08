@@ -30,17 +30,19 @@ System.String The ModHex representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "4865" | ConvertFrom-HexToModHex
-    Converts hex to ModHex.
-``
+```
+
+Converts hex to ModHex.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-HexToModHex -InputObject "FF"
-    Converts hex to ModHex.
-``
+```
+
+Converts hex to ModHex.
 
 ## Aliases
 

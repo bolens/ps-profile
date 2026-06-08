@@ -25,10 +25,11 @@ Package names to remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-DartPackage http
-        Removes http from dependencies.
-``
+```
+
+Removes http from dependencies.
 
 ## Aliases
 

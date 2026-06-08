@@ -24,35 +24,42 @@ try {
     .SYNOPSIS
         Creates a new Git worktree.
     
+
     .DESCRIPTION
         Creates a new worktree for a Git repository. Worktrees allow you to
         have multiple working directories for a single repository.
     
+
     .PARAMETER Path
         Path where the new worktree should be created.
     
+
     .PARAMETER Branch
         Branch name to checkout in the new worktree. If not specified, creates
         a new branch.
     
+
     .PARAMETER CreateBranch
         Create a new branch for the worktree.
     
+
     .PARAMETER RepositoryPath
         Path to the Git repository. Defaults to current directory.
     
+
+    .OUTPUTS
+        System.String. Path to the created worktree.
+
     .EXAMPLE
         New-GitWorktree -Path "../myrepo-feature" -Branch "feature/new-feature"
         
         Creates a new worktree at ../myrepo-feature and checks out the feature/new-feature branch.
     
+
     .EXAMPLE
         New-GitWorktree -Path "../myrepo-hotfix" -CreateBranch
         
         Creates a new worktree and a new branch.
-    
-    .OUTPUTS
-        System.String. Path to the created worktree.
     #>
     function New-GitWorktree {
         [CmdletBinding(SupportsShouldProcess = $true)]
@@ -145,31 +152,37 @@ try {
     .SYNOPSIS
         Syncs multiple Git repositories.
     
+
     .DESCRIPTION
         Performs git pull on multiple repositories to keep them up to date.
     
+
     .PARAMETER RepositoryPaths
         Array of repository paths to sync. If not specified, searches for
         Git repositories in the current directory and subdirectories.
     
+
     .PARAMETER Recurse
         Search for repositories recursively in subdirectories.
     
+
     .PARAMETER MaxDepth
         Maximum depth to search when recursing. Defaults to 3.
     
+
+    .OUTPUTS
+        System.Collections.Hashtable. Results for each repository.
+
     .EXAMPLE
         Sync-GitRepos -RepositoryPaths @("C:\Repo1", "C:\Repo2")
         
         Syncs the specified repositories.
     
+
     .EXAMPLE
         Sync-GitRepos -Recurse -MaxDepth 2
         
         Finds and syncs all Git repositories up to 2 levels deep.
-    
-    .OUTPUTS
-        System.Collections.Hashtable. Results for each repository.
     #>
     function Sync-GitRepos {
         [CmdletBinding()]
@@ -237,39 +250,45 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Cleans up merged Git branches.
     
+
     .DESCRIPTION
         Removes local branches that have been merged into the current branch
         or the specified target branch. Excludes protected branches like
         main, master, and develop.
     
+
     .PARAMETER TargetBranch
         Target branch to check for merged branches. Defaults to current branch.
     
+
     .PARAMETER ExcludeBranches
         Additional branches to exclude from deletion. Defaults to main, master, develop.
     
+
     .PARAMETER Force
         Force delete branches even if they haven't been merged.
     
+
     .PARAMETER DryRun
         Show what would be deleted without actually deleting.
     
+
+    .OUTPUTS
+        System.String[]. List of deleted branch names.
+
     .EXAMPLE
-        Clean-GitBranches
-        
+    Clean-GitBranches -TargetBranch 'value' -ExcludeBranches @()
         Removes all merged branches from the current branch.
     
+
     .EXAMPLE
         Clean-GitBranches -TargetBranch "main" -DryRun
         
         Shows what branches would be deleted without actually deleting them.
-    
-    .OUTPUTS
-        System.String[]. List of deleted branch names.
-    #>
+#>
     function Clean-GitBranches {
         [CmdletBinding(SupportsShouldProcess = $true)]
         [OutputType([string[]])]
@@ -364,35 +383,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets Git repository statistics.
     
+
     .DESCRIPTION
         Calculates various statistics about a Git repository including
         commit counts, contributor information, and file statistics.
     
+
     .PARAMETER RepositoryPath
         Path to the Git repository. Defaults to current directory.
     
+
     .PARAMETER Since
         Only count commits since this date.
     
+
     .PARAMETER Until
         Only count commits until this date.
     
+
+    .OUTPUTS
+        System.Management.Automation.PSCustomObject. Repository statistics.
+
     .EXAMPLE
-        Get-GitStats
-        
+    Get-GitStats -RepositoryPath 'value' -Since 'value'
         Gets statistics for the current repository.
     
+
     .EXAMPLE
         Get-GitStats -Since "2024-01-01"
         
         Gets statistics for commits since January 1, 2024.
-    
-    .OUTPUTS
-        System.Management.Automation.PSCustomObject. Repository statistics.
-    #>
+#>
     function Get-GitStats {
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
@@ -469,37 +493,45 @@ try {
     .SYNOPSIS
         Formats a Git commit message according to conventional commits.
     
+
     .DESCRIPTION
         Helps format commit messages following the Conventional Commits
         specification. Validates and formats commit messages.
     
+
     .PARAMETER Type
         Type of change: feat, fix, docs, style, refactor, perf, test, chore, etc.
     
+
     .PARAMETER Scope
         Optional scope of the change.
     
+
     .PARAMETER Description
         Short description of the change.
     
+
     .PARAMETER Body
         Optional longer description.
     
+
     .PARAMETER Footer
         Optional footer (e.g., breaking changes, issue references).
     
+
+    .OUTPUTS
+        System.String. Formatted commit message.
+
     .EXAMPLE
         Format-GitCommit -Type "feat" -Description "Add new feature"
         
         Formats a feature commit message.
     
+
     .EXAMPLE
         Format-GitCommit -Type "fix" -Scope "api" -Description "Fix authentication bug" -Body "Resolves issue with token expiration"
         
         Formats a fix commit with scope and body.
-    
-    .OUTPUTS
-        System.String. Formatted commit message.
     #>
     function Format-GitCommit {
         [CmdletBinding()]
@@ -542,35 +574,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Finds large files in Git history.
     
+
     .DESCRIPTION
         Identifies large files in the Git repository history that may be
         causing repository bloat.
     
+
     .PARAMETER RepositoryPath
         Path to the Git repository. Defaults to current directory.
     
+
     .PARAMETER MinSize
         Minimum file size in bytes to report. Defaults to 1MB.
     
+
     .PARAMETER Limit
         Maximum number of files to return. Defaults to 20.
     
+
+    .OUTPUTS
+        System.Management.Automation.PSCustomObject[]. Array of large file information.
+
     .EXAMPLE
-        Get-GitLargeFiles
-        
+    Get-GitLargeFiles -RepositoryPath 'value' -MinSize 1
         Finds the 20 largest files in the repository history.
     
+
     .EXAMPLE
         Get-GitLargeFiles -MinSize 5242880 -Limit 10
         
         Finds the 10 largest files over 5MB.
-    
-    .OUTPUTS
-        System.Management.Automation.PSCustomObject[]. Array of large file information.
-    #>
+#>
     function Get-GitLargeFiles {
         [CmdletBinding()]
         [OutputType([PSCustomObject[]])]

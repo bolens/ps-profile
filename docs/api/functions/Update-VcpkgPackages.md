@@ -29,17 +29,19 @@ Actually perform upgrades (default is dry-run).
 
 ### Example 1
 
-`powershell
-Update-VcpkgPackages
-        Shows what would be upgraded (dry-run).
-``
+```powershell
+Update-VcpkgPackages -Packages 'package-name'
+```
+
+Shows what would be upgraded (dry-run).
 
 ### Example 2
 
-`powershell
+```powershell
 Update-VcpkgPackages boost -NoDryRun
-        Upgrades boost package.
-``
+```
+
+Upgrades boost package.
 
 ## Aliases
 

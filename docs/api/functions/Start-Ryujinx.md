@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Start-Ryujinx
-        
-        Launches Ryujinx emulator.
-``
+```powershell
+Start-Ryujinx -RomPath 'value'
+```
+
+Launches Ryujinx emulator.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-Ryujinx -RomPath "game.nsp" -Fullscreen
-        
-        Launches Ryujinx with a ROM in fullscreen mode.
-``
+```
+
+Launches Ryujinx with a ROM in fullscreen mode.
 
 ## Source
 

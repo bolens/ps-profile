@@ -25,11 +25,9 @@ Text pattern to match against saved command history entries.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-HistoryQuick -Pattern 'git'
-.PARAMETER Pattern
-    Text pattern to match against saved command history entries.
-``
+```
 
 ## Aliases
 

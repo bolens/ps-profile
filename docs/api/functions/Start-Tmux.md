@@ -38,27 +38,27 @@ System.String. Session name or nothing.
 
 ### Example 1
 
-`powershell
-Start-Tmux
-        
-        Starts a new tmux session.
-``
+```powershell
+Start-Tmux -SessionName 'value' -Command 'pwsh -NoProfile -File scripts/test.ps1'
+```
+
+Starts a new tmux session.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-Tmux -SessionName "dev" -Command "npm start"
-        
-        Starts a named tmux session and executes a command.
-``
+```
+
+Starts a named tmux session and executes a command.
 
 ### Example 3
 
-`powershell
+```powershell
 Start-Tmux -SessionName "dev" -Attach
-        
-        Attaches to existing session or creates new one.
-``
+```
+
+Attaches to existing session or creates new one.
 
 ## Source
 

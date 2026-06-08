@@ -29,9 +29,9 @@ The path for the output CFG file. If not specified, uses input path with .cfg ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-CfgFromIni -InputPath ./input.file
-``
+```
 
 ## Aliases
 

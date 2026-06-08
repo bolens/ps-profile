@@ -38,27 +38,27 @@ System.String[]. List of connected devices or connection status.
 
 ### Example 1
 
-`powershell
-Connect-AndroidDevice
-        
-        Connects to Android device via USB.
-``
+```powershell
+Connect-AndroidDevice -DeviceIp 'value' -Port 1
+```
+
+Connects to Android device via USB.
 
 ### Example 2
 
-`powershell
+```powershell
 Connect-AndroidDevice -DeviceIp "192.168.1.100"
-        
-        Connects to Android device via network.
-``
+```
+
+Connects to Android device via network.
 
 ### Example 3
 
-`powershell
+```powershell
 Connect-AndroidDevice -ListDevices
-        
-        Lists all connected Android devices.
-``
+```
+
+Lists all connected Android devices.
 
 ## Source
 

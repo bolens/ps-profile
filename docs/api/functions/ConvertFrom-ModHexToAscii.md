@@ -30,17 +30,19 @@ System.String The ASCII text representation of the input ModHex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "hkkllkkl" | ConvertFrom-ModHexToAscii
-    Converts ModHex to ASCII text.
-``
+```
+
+Converts ModHex to ASCII text.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-ModHexToAscii -InputObject "hkkllkkl"
-    Converts ModHex string to ASCII.
-``
+```
+
+Converts ModHex string to ASCII.
 
 ## Aliases
 

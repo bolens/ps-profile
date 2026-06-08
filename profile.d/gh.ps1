@@ -31,8 +31,7 @@
     Optional repository path (e.g., "owner/repo"). If not specified, opens the current repository.
 
 .EXAMPLE
-    Open-GitHubRepository
-
+    Open-GitHubRepository -Repository 'owner/repo'
 .EXAMPLE
     Open-GitHubRepository -Repository "microsoft/vscode"
 #>

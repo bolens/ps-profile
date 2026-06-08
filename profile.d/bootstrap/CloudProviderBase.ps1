@@ -147,6 +147,7 @@ try {
     .SYNOPSIS
         Executes a cloud provider CLI command with standardized error handling.
     
+
     .DESCRIPTION
         Base function for executing cloud provider CLI commands. Handles:
         - Tool detection using Test-CachedCommand
@@ -154,35 +155,43 @@ try {
         - Error handling and output parsing
         - Wide event tracking (if available)
     
+
     .PARAMETER CommandName
         Name of the CLI command (e.g., 'aws', 'az', 'gcloud').
     
+
     .PARAMETER Arguments
         Arguments to pass to the command.
     
+
     .PARAMETER OperationName
         Operation name for event tracking (e.g., 'aws.s3.upload').
         If not provided, defaults to "{CommandName}.{FirstArgument}".
     
+
     .PARAMETER Context
         Additional context for event tracking.
     
+
     .PARAMETER InstallHint
         Installation hint for missing tool warning.
     
+
     .PARAMETER ParseJson
         Attempt to parse output as JSON (default: $true).
     
+
     .PARAMETER ErrorOnNonZeroExit
         Throw error if command exits with non-zero code (default: $true).
     
+
+    .OUTPUTS
+        System.Object. Command output (parsed JSON if ParseJson is true, otherwise raw output).
+
     .EXAMPLE
         Invoke-CloudCommand -CommandName 'aws' -Arguments @('s3', 'ls') -OperationName 'aws.s3.list'
         
         Executes 'aws s3 ls' with event tracking.
-    
-    .OUTPUTS
-        System.Object. Command output (parsed JSON if ParseJson is true, otherwise raw output).
     #>
     function Invoke-CloudCommand {
         [CmdletBinding()]
@@ -297,38 +306,47 @@ try {
     .SYNOPSIS
         Sets cloud provider profile, account, or configuration.
     
+
     .DESCRIPTION
         Base function for managing cloud provider profiles/accounts/configurations.
         Handles environment variable setting and validation.
     
+
     .PARAMETER ProviderName
         Provider name (e.g., 'aws', 'azure', 'gcloud').
     
+
     .PARAMETER ProfileType
         Type of profile setting: 'Profile', 'Region', 'Account', 'Project', 'Config'.
     
+
     .PARAMETER Value
         Value to set.
     
+
     .PARAMETER EnvVarName
         Environment variable name to set (e.g., 'AWS_PROFILE', 'GCLOUD_PROJECT').
     
+
     .PARAMETER CommandName
         CLI command name for validation.
     
+
     .PARAMETER DisplayName
         Display name for the setting (e.g., 'AWS profile', 'GCloud project').
     
+
     .PARAMETER ValidateCommand
         Optional command to validate the setting (e.g., 'aws sts get-caller-identity').
     
+
+    .OUTPUTS
+        System.Boolean. True if successful, false otherwise.
+
     .EXAMPLE
         Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value 'production' -EnvVarName 'AWS_PROFILE' -CommandName 'aws' -DisplayName 'AWS profile'
         
         Sets AWS profile to 'production'.
-    
-    .OUTPUTS
-        System.Boolean. True if successful, false otherwise.
     #>
     function Set-CloudProfile {
         [CmdletBinding()]
@@ -400,39 +418,47 @@ try {
     .SYNOPSIS
         Lists cloud provider resources using service/action pattern.
     
+
     .DESCRIPTION
         Base function for listing cloud provider resources. Supports:
         - Service/Action pattern (AWS style)
         - Direct command pattern (Azure/GCloud style)
         - JSON parsing and error handling
     
+
     .PARAMETER CommandName
         CLI command name (e.g., 'aws', 'az', 'gcloud').
     
+
     .PARAMETER Service
         Service name (e.g., 'ec2', 's3', 'compute').
         Optional for direct command pattern.
     
+
     .PARAMETER Action
         Action name (e.g., 'describe-instances', 'list-buckets', 'list').
         Optional for direct command pattern.
     
+
     .PARAMETER Arguments
         Direct arguments (alternative to Service/Action pattern).
     
+
     .PARAMETER OperationName
         Operation name for event tracking.
     
+
     .PARAMETER Context
         Additional context for event tracking.
     
+
+    .OUTPUTS
+        System.Object. Resource list (parsed JSON or raw output).
+
     .EXAMPLE
         Get-CloudResources -CommandName 'aws' -Service 'ec2' -Action 'describe-instances' -OperationName 'aws.ec2.list'
         
         Lists EC2 instances.
-    
-    .OUTPUTS
-        System.Object. Resource list (parsed JSON or raw output).
     #>
     function Get-CloudResources {
         [CmdletBinding()]
@@ -491,36 +517,44 @@ try {
     .SYNOPSIS
         Tests connection to cloud provider.
     
+
     .DESCRIPTION
         Base function for testing cloud provider connections.
         Executes a validation command and parses the response.
     
+
     .PARAMETER CommandName
         CLI command name (e.g., 'aws', 'az', 'gcloud').
     
+
     .PARAMETER TestCommand
         Command to test connection (e.g., 'sts get-caller-identity', 'account show').
     
+
     .PARAMETER ParseJson
         Parse response as JSON (default: $true).
     
+
     .PARAMETER SuccessIndicator
         Property path to check for success (e.g., 'Account', 'id').
         If provided, checks if this property exists in the response.
     
+
     .PARAMETER OperationName
         Operation name for event tracking.
     
+
     .PARAMETER Context
         Additional context for event tracking.
     
+
+    .OUTPUTS
+        System.Boolean. True if connection successful, false otherwise.
+
     .EXAMPLE
         Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Account'
         
         Tests AWS connection by checking caller identity.
-    
-    .OUTPUTS
-        System.Boolean. True if connection successful, false otherwise.
     #>
     function Test-CloudConnection {
         [CmdletBinding()]

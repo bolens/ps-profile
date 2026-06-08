@@ -25,15 +25,15 @@ Optional repository path (e.g., "owner/repo"). If not specified, opens the curre
 
 ### Example 1
 
-`powershell
-Open-GitHubRepository
-``
+```powershell
+Open-GitHubRepository -Repository 'owner/repo'
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Open-GitHubRepository -Repository "microsoft/vscode"
-``
+```
 
 ## Aliases
 

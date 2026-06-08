@@ -24,6 +24,10 @@ $script:EnrichmentSkipFileNames = @(
     'add-comment-help.ps1'
     'CommentHelp.psm1'
     'DocParserRegex.psm1'
+    'RegexUtilities.psm1'
+    'improve-bare-examples.ps1'
+    'cleanup-help-examples.ps1'
+    'reorder-comment-help.ps1'
 )
 
 function Get-FunctionHelpContent {

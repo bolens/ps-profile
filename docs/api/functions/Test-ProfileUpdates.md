@@ -29,19 +29,15 @@ Maximum number of recent commits to include in the changelog summary.
 
 ### Example 1
 
-`powershell
-Test-ProfileUpdates
-``
+```powershell
+Test-ProfileUpdates -MaxChanges 1
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Test-ProfileUpdates -Force -MaxChanges 5
-.PARAMETER Force
-    Bypasses the once-per-day check and fetches updates immediately.
-.PARAMETER MaxChanges
-    Maximum number of recent commits to include in the changelog summary.
-``
+```
 
 ## Source
 

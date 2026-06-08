@@ -33,9 +33,9 @@ Background color name.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GumStyle -Text 'Success' -Foreground '212'
-``
+```
 
 ## Aliases
 

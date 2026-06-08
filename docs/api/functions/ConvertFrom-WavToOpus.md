@@ -33,9 +33,9 @@ Audio bitrate in kbps (default: 128).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-WavToOpus -InputPath "audio.wav" -OutputPath "audio.opus"
-``
+```
 
 ## Aliases
 

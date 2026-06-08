@@ -29,17 +29,19 @@ Auto-confirm all prompts.
 
 ### Example 1
 
-`powershell
-Update-ChocoPackages
-        Updates all packages.
-``
+```powershell
+Update-ChocoPackages -Packages 'package-name'
+```
+
+Updates all packages.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-ChocoPackages git
-        Updates git package.
-``
+```
+
+Updates git package.
 
 ## Aliases
 

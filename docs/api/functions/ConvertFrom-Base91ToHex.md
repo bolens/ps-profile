@@ -30,11 +30,11 @@ System.String Returns the hexadecimal string.
 
 ### Example 1
 
-`powershell
+```powershell
 ">OwJh>Io0Tv!8PE" | ConvertFrom-Base91ToHex
-    
-    Converts Base91 to hex format.
-``
+```
+
+Converts Base91 to hex format.
 
 ## Aliases
 

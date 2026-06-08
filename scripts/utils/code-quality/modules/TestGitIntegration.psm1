@@ -31,8 +31,7 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 .OUTPUTS
     System.String[] - Array of changed file paths
 .EXAMPLE
-    Get-GitChangedFiles
-
+    Get-GitChangedFiles -RepoRoot 'value'
 #>
 function Get-GitChangedFiles {
     [CmdletBinding()]
@@ -116,8 +115,7 @@ function Get-GitChangedFiles {
 .OUTPUTS
     System.String[] - Array of changed file paths
 .EXAMPLE
-    Get-GitChangedFilesSince
-
+    Get-GitChangedFilesSince -Since 'value' -RepoRoot 'value'
 #>
 function Get-GitChangedFilesSince {
     [CmdletBinding()]
@@ -195,8 +193,7 @@ function Get-GitChangedFilesSince {
 .OUTPUTS
     System.String[] - Array of test file paths
 .EXAMPLE
-    Get-TestFilesForSourceFiles
-
+    Get-TestFilesForSourceFiles -SourceFiles @()
 #>
 function Get-TestFilesForSourceFiles {
     [CmdletBinding()]

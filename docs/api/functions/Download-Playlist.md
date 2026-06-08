@@ -33,11 +33,11 @@ Download audio only for all videos in playlist.
 
 ### Example 1
 
-`powershell
+```powershell
 Download-Playlist -Url "https://www.youtube.com/playlist?list=example"
-        
-        Downloads all videos from a YouTube playlist.
-``
+```
+
+Downloads all videos from a YouTube playlist.
 
 ## Source
 

@@ -50,17 +50,19 @@ System.String. Output from bd list command.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-BeadsIssues -Status open
-        Lists all open issues.
-``
+```
+
+Lists all open issues.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-BeadsIssues -Priority 1 -Labels "urgent,backend"
-        Lists P1 issues with both urgent and backend labels.
-``
+```
+
+Lists P1 issues with both urgent and backend labels.
 
 ## Source
 

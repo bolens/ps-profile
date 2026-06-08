@@ -29,24 +29,27 @@ Install to user site-packages (--user flag).
 
 ### Example 1
 
-`powershell
-Import-PipPackages
-        Restores packages from requirements.txt in current directory.
-``
+```powershell
+Import-PipPackages -Path ./path
+```
+
+Restores packages from requirements.txt in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-PipPackages -Path "C:\backup\pip-requirements.txt"
-        Restores packages from a specific file.
-``
+```
+
+Restores packages from a specific file.
 
 ### Example 3
 
-`powershell
+```powershell
 Import-PipPackages -User
-        Restores packages to user directory.
-``
+```
+
+Restores packages to user directory.
 
 ## Aliases
 

@@ -33,9 +33,9 @@ Optional. Name of the variable to extract. If not specified, uses the first non-
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-MatlabToCsv -InputPath ./input.file
-``
+```
 
 ## Aliases
 

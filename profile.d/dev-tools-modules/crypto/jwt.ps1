@@ -107,17 +107,21 @@ try {
 <#
 .SYNOPSIS
     Decodes a JSON Web Token (JWT).
+
 .DESCRIPTION
     Decodes a JWT token and returns the header and payload as objects.
     Does not verify the signature, only decodes the token structure.
+
 .PARAMETER Token
     The JWT token string to decode.
-.EXAMPLE
-    Decode-Jwt -Token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    Decodes the JWT token and displays header and payload.
+
 .OUTPUTS
     PSCustomObject
     Object containing Header, Payload, and Signature properties.
+
+.EXAMPLE
+    Decode-Jwt -Token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    Decodes the JWT token and displays header and payload.
 #>
 function Decode-Jwt {
     param([string]$Token)
@@ -128,21 +132,27 @@ Set-AgentModeAlias -Name 'jwt-decode' -Target 'Decode-Jwt'
 <#
 .SYNOPSIS
     Encodes data into a JSON Web Token (JWT).
+
 .DESCRIPTION
     Creates a JWT token from a payload and optional header.
     Requires Node.js and jsonwebtoken package.
+
 .PARAMETER Payload
     Hashtable containing the JWT payload data.
+
 .PARAMETER Header
     Hashtable containing the JWT header. Default includes alg and typ.
+
 .PARAMETER Secret
     Secret key for signing the token.
-.EXAMPLE
-    Encode-Jwt -Payload @{sub="user123"; exp=1234567890} -Secret "mysecret"
-    Creates a JWT token with the specified payload.
+
 .OUTPUTS
     System.String
     The encoded JWT token string.
+
+.EXAMPLE
+    Encode-Jwt -Payload @{sub="user123"; exp=1234567890} -Secret "mysecret"
+    Creates a JWT token with the specified payload.
 #>
 function Encode-Jwt {
     param(

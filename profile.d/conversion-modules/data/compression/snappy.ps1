@@ -184,20 +184,25 @@ except Exception as e:
 <#
 .SYNOPSIS
     Compresses a file using Snappy compression.
+
 .DESCRIPTION
     Compresses a file using the Snappy compression algorithm.
     Snappy is a fast compression algorithm developed by Google, optimized for speed.
+
 .PARAMETER InputPath
     The path to the file to compress.
+
 .PARAMETER OutputPath
     The path for the output compressed file. If not specified, uses input path with .snappy extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the compressed file.
+
 .EXAMPLE
     Compress-Snappy -InputPath 'data.txt'
     
     Compresses data.txt to data.txt.snappy.
-.OUTPUTS
-    System.String
-    Returns the path to the compressed file.
 #>
 Set-Item -Path Function:Global:Compress-Snappy -Value {
     param(
@@ -215,19 +220,24 @@ Set-Alias -Name snappy -Value Compress-Snappy -Scope Global -ErrorAction Silentl
 <#
 .SYNOPSIS
     Decompresses a Snappy compressed file.
+
 .DESCRIPTION
     Decompresses a file that was compressed using Snappy compression.
+
 .PARAMETER InputPath
     The path to the Snappy compressed file.
+
 .PARAMETER OutputPath
     The path for the output decompressed file. If not specified, removes .snappy extension from input path.
+
+.OUTPUTS
+    System.String
+    Returns the path to the decompressed file.
+
 .EXAMPLE
     Expand-Snappy -InputPath 'data.txt.snappy'
     
     Decompresses data.txt.snappy to data.txt.
-.OUTPUTS
-    System.String
-    Returns the path to the decompressed file.
 #>
 Set-Item -Path Function:Global:Expand-Snappy -Value {
     param(

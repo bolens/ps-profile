@@ -30,11 +30,11 @@ System.String Returns an RFC 3339 formatted date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToRfc3339
-    
-    Converts an ISO 8601 string to RFC 3339 format.
-``
+```
+
+Converts an ISO 8601 string to RFC 3339 format.
 
 ## Aliases
 

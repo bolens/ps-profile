@@ -25,8 +25,7 @@ scripts/utils/code-quality/modules/TestDependencyManagement.psm1
 .OUTPUTS
     Ordered list of test files with dependency information
 .EXAMPLE
-    Get-TestExecutionOrder
-
+    Get-TestExecutionOrder -TestPaths @('tests/unit') -DependencyMap @{}
 #>
 function Get-TestExecutionOrder {
     param(

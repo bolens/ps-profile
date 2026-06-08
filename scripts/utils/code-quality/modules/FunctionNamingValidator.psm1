@@ -24,8 +24,7 @@ $script:approvedVerbs = (Get-Verb).Verb | Sort-Object
 .OUTPUTS
     System.Boolean. True if the verb is approved, false otherwise.
 .EXAMPLE
-    Test-ApprovedVerb
-
+    Test-ApprovedVerb -Verb 'value'
 #>
 function Test-ApprovedVerb {
     [CmdletBinding()]
@@ -50,8 +49,7 @@ function Test-ApprovedVerb {
 .OUTPUTS
     Hashtable with Verb, Noun, and IsValidFormat properties.
 .EXAMPLE
-    Get-FunctionParts
-
+    Get-FunctionParts -FunctionName 'value'
 #>
 function Get-FunctionParts {
     [CmdletBinding()]
@@ -94,8 +92,7 @@ function Get-FunctionParts {
 .OUTPUTS
     System.Boolean or $null. True if uses safe pattern, false if uses direct function keyword, null if unknown.
 .EXAMPLE
-    Test-UsesAgentModeFunction
-
+    Test-UsesAgentModeFunction -FilePath ./Taskfile.yml -FunctionName 'value'
 #>
 function Test-UsesAgentModeFunction {
     [CmdletBinding()]
@@ -162,8 +159,7 @@ function Test-UsesAgentModeFunction {
 .OUTPUTS
     System.Boolean. True if the function is a bootstrap function, false otherwise.
 .EXAMPLE
-    Test-IsBootstrapFunction
-
+    Test-IsBootstrapFunction -FilePath ./Taskfile.yml -FunctionName 'value'
 #>
 function Test-IsBootstrapFunction {
     [CmdletBinding()]

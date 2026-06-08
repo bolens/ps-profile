@@ -29,9 +29,9 @@ The path for the output JSON5 file. If not specified, uses input path with .json
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-Json5FromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

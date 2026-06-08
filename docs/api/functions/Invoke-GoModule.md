@@ -25,15 +25,15 @@ Arguments to pass to go mod.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GoModule init
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GoModule tidy
-``
+```
 
 ## Aliases
 

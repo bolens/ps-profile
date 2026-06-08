@@ -25,11 +25,9 @@ Unix timestamp in seconds since 1970-01-01 UTC.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-Epoch -epoch 1700000000
-.PARAMETER epoch
-    Unix timestamp in seconds since 1970-01-01 UTC.
-``
+```
 
 ## Aliases
 

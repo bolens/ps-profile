@@ -31,40 +31,46 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Blender 3D modeling and animation software.
     
+
     .DESCRIPTION
         Launches Blender, a 3D modeling, animation, and rendering software.
         Optionally opens a project file.
     
+
     .PARAMETER ProjectPath
         Optional path to Blender project file (.blend) to open.
     
+
     .PARAMETER Background
         Run in background mode (no GUI).
     
+
     .PARAMETER Script
         Python script to execute.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Blender
-        
+    Launch-Blender -ProjectPath 'value' -Script 'build'
         Launches Blender.
     
+
     .EXAMPLE
         Launch-Blender -ProjectPath "scene.blend"
         
         Launches Blender and opens a project file.
     
+
     .EXAMPLE
         Launch-Blender -Background -Script "render.py"
         
         Runs Blender in background mode with a Python script.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Blender {
         [CmdletBinding()]
         param(
@@ -146,29 +152,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches FreeCAD parametric CAD software.
     
+
     .DESCRIPTION
         Launches FreeCAD, a parametric 3D CAD modeler.
         Optionally opens a project file.
     
+
     .PARAMETER ProjectPath
         Optional path to FreeCAD project file (.FCStd) to open.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-FreeCAD
-        
+    Launch-FreeCAD -ProjectPath 'value'
         Launches FreeCAD.
     
+
     .EXAMPLE
         Launch-FreeCAD -ProjectPath "model.FCStd"
         
         Launches FreeCAD and opens a project file.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-FreeCAD {
         [CmdletBinding()]
         param(
@@ -222,40 +231,46 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches OpenSCAD programmatic CAD software.
     
+
     .DESCRIPTION
         Launches OpenSCAD, a programmatic 3D CAD modeler.
         Optionally opens a script file.
     
+
     .PARAMETER ScriptPath
         Optional path to OpenSCAD script file (.scad) to open.
     
+
     .PARAMETER OutputPath
         Optional output path for rendered model.
     
+
     .PARAMETER Format
         Output format: 'stl', 'off', 'amf', '3mf', 'csg', 'dxf', 'svg', 'png', 'pdf'. Defaults to 'stl'.
     
+
+    .OUTPUTS
+        System.String. Path to output file if rendered, otherwise nothing.
+
     .EXAMPLE
-        Launch-OpenSCAD
-        
+    Launch-OpenSCAD -ScriptPath 'value' -OutputPath ./output.file
         Launches OpenSCAD.
     
+
     .EXAMPLE
         Launch-OpenSCAD -ScriptPath "model.scad"
         
         Launches OpenSCAD and opens a script file.
     
+
     .EXAMPLE
         Launch-OpenSCAD -ScriptPath "model.scad" -OutputPath "model.stl" -Format "stl"
         
         Launches OpenSCAD, opens a script, and renders to STL.
-    
-    .OUTPUTS
-        System.String. Path to output file if rendered, otherwise nothing.
-    #>
+#>
     function Launch-OpenSCAD {
         [CmdletBinding()]
         [OutputType([string])]
@@ -369,31 +384,37 @@ try {
     .SYNOPSIS
         Converts 3D model between different formats using Blender.
     
+
     .DESCRIPTION
         Converts 3D model files between different formats using Blender's command-line interface.
         Supports many input and output formats (OBJ, STL, FBX, DAE, PLY, etc.).
     
+
     .PARAMETER InputFile
         Path to the input 3D model file.
     
+
     .PARAMETER OutputFile
         Path to the output 3D model file.
     
+
     .PARAMETER Format
         Output format. If not specified, inferred from OutputFile extension.
     
+
+    .OUTPUTS
+        System.String. Path to the output file.
+
     .EXAMPLE
         Convert-3DFormat -InputFile "model.obj" -OutputFile "model.stl"
         
         Converts OBJ file to STL format.
     
+
     .EXAMPLE
         Convert-3DFormat -InputFile "model.fbx" -OutputFile "model.dae" -Format "dae"
         
         Converts FBX file to DAE format.
-    
-    .OUTPUTS
-        System.String. Path to the output file.
     #>
     function Convert-3DFormat {
         [CmdletBinding()]
@@ -479,34 +500,41 @@ bpy.ops.wm.export_${Format}(filepath=r'$($OutputFile.Replace('\', '\\'))')
     .SYNOPSIS
         Renders a 3D scene using Blender.
     
+
     .DESCRIPTION
         Renders a 3D scene from a Blender project file using Blender's command-line interface.
         Supports various output formats and rendering engines.
     
+
     .PARAMETER ProjectPath
         Path to Blender project file (.blend).
     
+
     .PARAMETER OutputPath
         Path to output rendered image.
     
+
     .PARAMETER Frame
         Frame number to render. If not specified, renders current frame.
     
+
     .PARAMETER Engine
         Rendering engine: 'cycles', 'eevee', 'workbench'. Defaults to 'cycles'.
     
+
+    .OUTPUTS
+        System.String. Path to the rendered image.
+
     .EXAMPLE
         Render-3DScene -ProjectPath "scene.blend" -OutputPath "render.png"
         
         Renders a Blender scene to PNG.
     
+
     .EXAMPLE
         Render-3DScene -ProjectPath "scene.blend" -OutputPath "render.png" -Frame 10 -Engine "eevee"
         
         Renders frame 10 using Eevee engine.
-    
-    .OUTPUTS
-        System.String. Path to the rendered image.
     #>
     function Render-3DScene {
         [CmdletBinding()]

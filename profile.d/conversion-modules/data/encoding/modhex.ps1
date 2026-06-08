@@ -337,19 +337,24 @@ function Initialize-FileConversion-CoreEncodingModHex {
 <#
 .SYNOPSIS
     Converts ModHex string to ASCII text.
+
 .DESCRIPTION
     Converts a ModHex (modified hexadecimal) string back to ASCII text. ModHex uses characters: c, b, d, e, f, g, h, i, j, k, l, n, r, t, u, v.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToAscii
-    Converts ModHex to ASCII text.
-.EXAMPLE
-    ConvertFrom-ModHexToAscii -InputObject "hkkllkkl"
-    Converts ModHex string to ASCII.
+
 .OUTPUTS
     System.String
     The ASCII text representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToAscii
+    Converts ModHex to ASCII text.
+
+.EXAMPLE
+    ConvertFrom-ModHexToAscii -InputObject "hkkllkkl"
+    Converts ModHex string to ASCII.
 #>
 function ConvertFrom-ModHexToAscii {
     [CmdletBinding()]
@@ -372,19 +377,24 @@ Set-AgentModeAlias -Name 'modhex-to-ascii' -Target 'ConvertFrom-ModHexToAscii'
 <#
 .SYNOPSIS
     Converts ModHex string to hexadecimal representation.
+
 .DESCRIPTION
     Converts a ModHex (modified hexadecimal) string to standard hexadecimal representation.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToHex
-    Converts ModHex to hex.
-.EXAMPLE
-    ConvertFrom-ModHexToHex -InputObject "hkkllkkl"
-    Converts ModHex string to hex.
+
 .OUTPUTS
     System.String
     The hexadecimal representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToHex
+    Converts ModHex to hex.
+
+.EXAMPLE
+    ConvertFrom-ModHexToHex -InputObject "hkkllkkl"
+    Converts ModHex string to hex.
 #>
 function ConvertFrom-ModHexToHex {
     [CmdletBinding()]
@@ -407,21 +417,27 @@ Set-AgentModeAlias -Name 'modhex-to-hex' -Target 'ConvertFrom-ModHexToHex'
 <#
 .SYNOPSIS
     Converts ModHex string to binary representation.
+
 .DESCRIPTION
     Converts a ModHex (modified hexadecimal) string to binary string representation. First converts ModHex to hex, then hex to binary.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped. Spaces are automatically removed.
+
 .PARAMETER Separator
     Optional separator between binary bytes. Default is a space.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToBinary
-    Converts ModHex to binary with spaces.
-.EXAMPLE
-    ConvertFrom-ModHexToBinary -InputObject "hkkllkkl" -Separator ""
-    Converts ModHex to binary without separator.
+
 .OUTPUTS
     System.String
     The binary representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToBinary
+    Converts ModHex to binary with spaces.
+
+.EXAMPLE
+    ConvertFrom-ModHexToBinary -InputObject "hkkllkkl" -Separator ""
+    Converts ModHex to binary without separator.
 #>
 function ConvertFrom-ModHexToBinary {
     [CmdletBinding()]
@@ -445,18 +461,23 @@ Set-AgentModeAlias -Name 'modhex-to-binary' -Target 'ConvertFrom-ModHexToBinary'
 <#
 .SYNOPSIS
     Converts ModHex string to octal representation.
+
 .DESCRIPTION
     Converts a ModHex string to octal string representation.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between octal bytes. Default is a space.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToOctal
-    Converts ModHex to octal.
+
 .OUTPUTS
     System.String
     The octal representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToOctal
+    Converts ModHex to octal.
 #>
 function ConvertFrom-ModHexToOctal {
     [CmdletBinding()]
@@ -480,18 +501,23 @@ Set-AgentModeAlias -Name 'modhex-to-octal' -Target 'ConvertFrom-ModHexToOctal'
 <#
 .SYNOPSIS
     Converts ModHex string to decimal representation.
+
 .DESCRIPTION
     Converts a ModHex string to decimal string representation.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between decimal values. Default is a space.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToDecimal
-    Converts ModHex to decimal.
+
 .OUTPUTS
     System.String
     The decimal representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToDecimal
+    Converts ModHex to decimal.
 #>
 function ConvertFrom-ModHexToDecimal {
     [CmdletBinding()]
@@ -515,18 +541,23 @@ Set-AgentModeAlias -Name 'modhex-to-decimal' -Target 'ConvertFrom-ModHexToDecima
 <#
 .SYNOPSIS
     Converts ModHex string to Roman numeral representation.
+
 .DESCRIPTION
     Converts a ModHex string to Roman numeral string representation.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between Roman numerals. Default is a space.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToRoman
-    Converts ModHex to Roman numerals.
+
 .OUTPUTS
     System.String
     The Roman numeral representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToRoman
+    Converts ModHex to Roman numerals.
 #>
 function ConvertFrom-ModHexToRoman {
     [CmdletBinding()]
@@ -550,16 +581,20 @@ Set-AgentModeAlias -Name 'modhex-to-roman' -Target 'ConvertFrom-ModHexToRoman'
 <#
 .SYNOPSIS
     Converts ModHex string to Base32 representation.
+
 .DESCRIPTION
     Converts a ModHex string to Base32 string representation.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToBase32
-    Converts ModHex to Base32.
+
 .OUTPUTS
     System.String
     The Base32 representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToBase32
+    Converts ModHex to Base32.
 #>
 function ConvertFrom-ModHexToBase32 {
     [CmdletBinding()]
@@ -582,16 +617,20 @@ Set-AgentModeAlias -Name 'modhex-to-base32' -Target 'ConvertFrom-ModHexToBase32'
 <#
 .SYNOPSIS
     Converts ModHex string to URL/percent encoded representation.
+
 .DESCRIPTION
     Converts a ModHex string to URL/percent encoded string representation.
+
 .PARAMETER InputObject
     The ModHex string to convert. Can be piped. Spaces are automatically removed.
-.EXAMPLE
-    "hkkllkkl" | ConvertFrom-ModHexToUrl
-    Converts ModHex to URL encoding.
+
 .OUTPUTS
     System.String
     The URL/percent encoded representation of the input ModHex string.
+
+.EXAMPLE
+    "hkkllkkl" | ConvertFrom-ModHexToUrl
+    Converts ModHex to URL encoding.
 #>
 function ConvertFrom-ModHexToUrl {
     [CmdletBinding()]

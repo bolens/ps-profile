@@ -25,15 +25,9 @@ Arguments to pass to helm list.
 
 ### Example 1
 
-`powershell
-Get-HelmReleases
-``
-
-### Example 2
-
-`powershell
+```powershell
 Get-HelmReleases --all-namespaces
-``
+```
 
 ## Aliases
 

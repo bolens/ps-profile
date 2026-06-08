@@ -25,11 +25,9 @@ Directory path where the virtual environment should be created.
 
 ### Example 1
 
-`powershell
-New-UVVenv
-.PARAMETER Path
-    Directory path where the virtual environment should be created.
-``
+```powershell
+New-UVVenv -Path .venv
+```
 
 ## Aliases
 

@@ -35,34 +35,41 @@ try {
     .SYNOPSIS
         Downloads videos using yt-dlp.
     
+
     .DESCRIPTION
         Downloads videos from various platforms using yt-dlp (youtube-dl fork).
         Supports YouTube, Vimeo, and many other video platforms.
     
+
     .PARAMETER Url
         URL of the video to download.
     
+
     .PARAMETER OutputPath
         Directory to save the video. Defaults to current directory.
     
+
     .PARAMETER Format
         Video format/quality. Defaults to best available.
     
+
     .PARAMETER AudioOnly
         Download audio only (extract audio).
     
+
+    .OUTPUTS
+        System.String. Path to the downloaded file.
+
     .EXAMPLE
         Download-Video -Url "https://www.youtube.com/watch?v=example"
         
         Downloads a video from YouTube.
     
+
     .EXAMPLE
         Download-Video -Url "https://www.youtube.com/watch?v=example" -AudioOnly
         
         Downloads audio only from a video.
-    
-    .OUTPUTS
-        System.String. Path to the downloaded file.
     #>
     function Download-Video {
         [CmdletBinding()]

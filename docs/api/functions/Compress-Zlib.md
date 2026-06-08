@@ -35,11 +35,11 @@ The path for the output compressed file. If not specified, uses input path with 
 
 ### Example 1
 
-`powershell
+```powershell
 Compress-Zlib -InputPath "data.txt" -OutputPath "data.txt.zlib"
-    
-    Compresses data.txt to data.txt.zlib.
-``
+```
+
+Compresses data.txt to data.txt.zlib.
 
 ## Aliases
 

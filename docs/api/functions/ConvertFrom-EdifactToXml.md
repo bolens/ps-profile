@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EdifactToXml -InputPath "message.edifact"
-    
-    Converts message.edifact to message.xml.
-``
+```
+
+Converts message.edifact to message.xml.
 
 ## Aliases
 

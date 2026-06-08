@@ -34,10 +34,11 @@ System.String The decimal representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "4865" | ConvertFrom-HexToDecimal
-    Converts hex to decimal.
-``
+```
+
+Converts hex to decimal.
 
 ## Aliases
 

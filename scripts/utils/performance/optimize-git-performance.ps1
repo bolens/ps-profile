@@ -212,7 +212,7 @@ $envVarErrors = [System.Collections.Generic.List[string]]::new()
 foreach ($key in $envVars.Keys) {
     $value = $envVars[$key]
     try {
-        [Environment]::SetEnvironmentVariable($key, $value, 'User') -ErrorAction Stop
+        [Environment]::SetEnvironmentVariable($key, $value, 'User')
         Write-Host "   ✓ Set $key = $value" -ForegroundColor Green
     }
     catch {
@@ -224,7 +224,7 @@ foreach ($key in $envVars.Keys) {
             } -Code 'EnvVarSetFailed'
         }
         else {
-            Write-Host "   ⚠ Failed to set $key: $($_.Exception.Message)" -ForegroundColor Yellow
+            Write-Host "   ⚠ Failed to set ${key}: $($_.Exception.Message)" -ForegroundColor Yellow
         }
     }
 }

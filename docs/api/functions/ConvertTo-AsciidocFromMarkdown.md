@@ -29,9 +29,9 @@ Path for the output AsciiDoc file. If not specified, uses input path with .adoc 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-AsciidocFromMarkdown -InputPath "document.md" -OutputPath "document.adoc"
-``
+```
 
 ## Aliases
 

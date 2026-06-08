@@ -33,17 +33,19 @@ Specific version to install.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-VcpkgPackage boost
-        Installs boost library.
-``
+```
+
+Installs boost library.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-VcpkgPackage boost -Triplet x64-windows
-        Installs for specific platform.
-``
+```
+
+Installs for specific platform.
 
 ## Aliases
 

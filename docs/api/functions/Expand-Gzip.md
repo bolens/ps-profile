@@ -35,11 +35,11 @@ The path for the output decompressed file. If not specified, removes .gz extensi
 
 ### Example 1
 
-`powershell
+```powershell
 Expand-Gzip -InputPath "data.txt.gz" -OutputPath "data.txt"
-    
-    Decompresses data.txt.gz to data.txt.
-``
+```
+
+Decompresses data.txt.gz to data.txt.
 
 ## Aliases
 

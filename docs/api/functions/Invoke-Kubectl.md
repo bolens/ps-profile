@@ -25,15 +25,15 @@ Arguments to pass to kubectl.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Kubectl version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Kubectl get pods
-``
+```
 
 ## Aliases
 

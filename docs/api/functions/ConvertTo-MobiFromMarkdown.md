@@ -33,9 +33,9 @@ Output format: 'mobi', 'azw', or 'azw3' (default: 'mobi').
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-MobiFromMarkdown -InputPath "book.md" -OutputPath "book.mobi" -Format mobi
-``
+```
 
 ## Aliases
 

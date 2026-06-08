@@ -25,17 +25,19 @@ Package names to update. Optional - updates all if omitted.
 
 ### Example 1
 
-`powershell
-Update-RyePackages
-        Updates all packages.
-``
+```powershell
+Update-RyePackages -Packages 'package-name'
+```
+
+Updates all packages.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-RyePackages requests
-        Updates requests package.
-``
+```
+
+Updates requests package.
 
 ## Aliases
 

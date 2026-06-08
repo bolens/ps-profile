@@ -25,15 +25,15 @@ Arguments to pass to create-next-app.
 
 ### Example 1
 
-`powershell
+```powershell
 New-NextJsApp my-app
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-NextJsApp my-app --typescript --tailwind
-``
+```
 
 ## Aliases
 

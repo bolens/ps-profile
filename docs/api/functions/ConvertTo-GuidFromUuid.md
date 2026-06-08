@@ -38,11 +38,11 @@ System.String Returns the UUID as a GUID string.
 
 ### Example 1
 
-`powershell
+```powershell
 "550e8400-e29b-41d4-a716-446655440000" | ConvertTo-GuidFromUuid
-    
-    Converts UUID to GUID format (same format).
-``
+```
+
+Converts UUID to GUID format (same format).
 
 ## Aliases
 

@@ -37,43 +37,53 @@ try {
     .SYNOPSIS
         Registers a language module with standardized commands.
     
+
     .DESCRIPTION
         Creates a standardized set of functions and aliases for a language runtime.
         Handles version management, build commands, package management, and more.
     
+
     .PARAMETER LanguageName
         Name of the language (e.g., 'Python', 'Go', 'Rust').
     
+
     .PARAMETER CommandName
         Name of the CLI command (e.g., 'python', 'go', 'cargo').
     
+
     .PARAMETER VersionManager
         Optional version manager command name (e.g., 'pyenv', 'nvm', 'rustup').
     
+
     .PARAMETER BuildCommand
         Command for building projects (default: 'build').
     
+
     .PARAMETER TestCommand
         Command for running tests (default: 'test').
     
+
     .PARAMETER RunCommand
         Command for running projects (default: 'run').
     
+
     .PARAMETER PackageManager
         Optional package manager command name (e.g., 'pip', 'npm', 'cargo').
     
+
     .PARAMETER CustomCommands
         Hashtable of custom command names to script blocks.
     
+
+    .OUTPUTS
+        System.Boolean. True if registration successful, false otherwise.
+
     .EXAMPLE
         Register-LanguageModule -LanguageName 'Python' -CommandName 'python' `
             -VersionManager 'pyenv' -PackageManager 'pip' `
             -BuildCommand 'setup.py build' -TestCommand 'pytest'
         
         Registers Python language module with pyenv and pip support.
-    
-    .OUTPUTS
-        System.Boolean. True if registration successful, false otherwise.
     #>
     function Register-LanguageModule {
         [CmdletBinding()]

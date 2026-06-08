@@ -29,17 +29,19 @@ Source to search in.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-ChocoPackageInfo git
-        Shows detailed information about the git package.
-``
+```
+
+Shows detailed information about the git package.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-ChocoPackageInfo git, vscode
-        Shows information for multiple packages.
-``
+```
+
+Shows information for multiple packages.
 
 ## Aliases
 

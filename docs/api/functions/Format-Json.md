@@ -29,15 +29,15 @@ Optional input file path when not using the pipeline.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-Content ./data.json -Raw | Format-Json
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Format-Json ./data.json
-``
+```
 
 ## Aliases
 

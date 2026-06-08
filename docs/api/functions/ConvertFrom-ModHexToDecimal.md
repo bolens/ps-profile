@@ -34,10 +34,11 @@ System.String The decimal representation of the input ModHex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "hkkllkkl" | ConvertFrom-ModHexToDecimal
-    Converts ModHex to decimal.
-``
+```
+
+Converts ModHex to decimal.
 
 ## Aliases
 

@@ -29,9 +29,9 @@ The path for the output TOML file. If not specified, uses input path with .toml 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-TomlFromToon -InputPath ./input.file
-``
+```
 
 ## Aliases
 

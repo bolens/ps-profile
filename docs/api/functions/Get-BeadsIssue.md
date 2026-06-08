@@ -34,10 +34,11 @@ System.String. Output from bd show command.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-BeadsIssue -IssueId bd-a1b2
-        Gets details for issue bd-a1b2.
-``
+```
+
+Gets details for issue bd-a1b2.
 
 ## Source
 

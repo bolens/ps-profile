@@ -25,15 +25,15 @@ Arguments to pass to yarn.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Yarn --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Yarn install
-``
+```
 
 ## Aliases
 

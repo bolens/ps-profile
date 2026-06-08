@@ -25,11 +25,9 @@ Mojo source files to compile into executables.
 
 ### Example 1
 
-`powershell
+```powershell
 Build-MojoProgram ./main.mojo
-.PARAMETER Files
-    Mojo source files to compile into executables.
-``
+```
 
 ## Aliases
 

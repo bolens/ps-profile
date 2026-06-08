@@ -18,8 +18,7 @@
 .OUTPUTS
     System.Boolean or System.Management.Automation.ScriptBlock
 .EXAMPLE
-    Set-AgentModeFunction
-
+    Set-AgentModeFunction -Name 'name' -Body 'value'
 #>
 function global:Set-AgentModeFunction {
     [CmdletBinding()]
@@ -110,8 +109,7 @@ function global:Set-AgentModeFunction {
 .OUTPUTS
     System.Boolean or System.String
 .EXAMPLE
-    Set-AgentModeAlias
-
+    Set-AgentModeAlias -Name 'name' -Target 'value'
 #>
 function global:Set-AgentModeAlias {
     [CmdletBinding()]
@@ -187,8 +185,7 @@ function global:Set-AgentModeAlias {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Register-LazyFunction
-
+    Register-LazyFunction -Name 'name' -Initializer 'value'
 #>
 function global:Register-LazyFunction {
     [CmdletBinding()]

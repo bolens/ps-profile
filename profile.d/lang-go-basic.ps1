@@ -53,17 +53,15 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds Go programs.
     .DESCRIPTION
         Wrapper for go build command.
     .PARAMETER Arguments
         Arguments to pass to go build.
     .EXAMPLE
-        Build-GoProgram
-    .EXAMPLE
         Build-GoProgram -o myapp
-    #>
+#>
     function Build-GoProgram {
         [CmdletBinding()]
         param(
@@ -107,17 +105,15 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Runs Go tests.
     .DESCRIPTION
         Wrapper for go test command.
     .PARAMETER Arguments
         Arguments to pass to go test.
     .EXAMPLE
-        Test-GoPackage
-    .EXAMPLE
         Test-GoPackage -v ./...
-    #>
+#>
     function Test-GoPackage {
         [CmdletBinding()]
         param(
@@ -134,14 +130,14 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates all module dependencies in the current Go project.
     .DESCRIPTION
         Runs go get -u ./... to upgrade dependencies to their latest minor/patch versions.
     .EXAMPLE
-        Update-GoDependencies
+    Update-GoDependencies
         Updates all dependencies in the current module.
-    #>
+#>
     function Update-GoDependencies {
         [CmdletBinding()]
         param()
@@ -155,15 +151,15 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates Go development tools to their latest versions.
     .DESCRIPTION
         Updates all Go tools from golang.org/x/tools to their latest versions.
         This is equivalent to running 'go install golang.org/x/tools/cmd/...@latest'.
     .EXAMPLE
-        Update-GoTools
+    Update-GoTools
         Updates all Go development tools to their latest versions.
-    #>
+#>
     function Update-GoTools {
         [CmdletBinding()]
         param()

@@ -303,17 +303,29 @@ function Format-JustfileTask {
         $lines += "# $Description"
     }
     
-    # Task definition
-    $lines += "$TaskName`:"
-    
+    $hasArgs = $false
+    $recipeLines = [System.Collections.Generic.List[string]]::new()
+
     foreach ($cmdLine in (Split-TaskCommandLines -Command $Command)) {
         $trimmed = Normalize-TaskScriptPathInText -Text $cmdLine
-        $trimmed = $trimmed -replace '\{\{ARGS\}\}', '{{arguments()}}'
-        $trimmed = $trimmed -replace '\{\{\.CLI_ARGS\}\}', '{{arguments()}}'
-        $trimmed = $trimmed -replace '\$\(ARGS\)', '{{arguments()}}'
-        $lines += $trimmed
+        $trimmed = $trimmed -replace '\{\{ARGS\}\}', '{{ ARGS }}'
+        $trimmed = $trimmed -replace '\{\{\.CLI_ARGS\}\}', '{{ ARGS }}'
+        $trimmed = $trimmed -replace '\$\(ARGS\)', '{{ ARGS }}'
+        if ($trimmed -match '\{\{\s*ARGS\s*\}\}') {
+            $hasArgs = $true
+        }
+        $recipeLines.Add("    $trimmed")
     }
-    
+
+    if ($hasArgs) {
+        $lines += "$TaskName *ARGS:"
+    }
+    else {
+        $lines += "$TaskName`:"
+    }
+
+    $lines += $recipeLines
+
     return $lines -join "`n"
 }
 

@@ -131,7 +131,7 @@ function Normalize-Command {
     # Normalize common argument placeholders
     # Taskfile: {{.CLI_ARGS}}
     # Makefile: $(ARGS)
-    # Justfile: {{arguments()}}
+    # Justfile: *ARGS parameter with {{ ARGS }}
     # package.json: (no args)
     $normalized = $normalized -replace '\{\{\.CLI_ARGS\}\}', '{{ARGS}}'
     $normalized = $normalized -replace '\$\(ARGS\)', '{{ARGS}}'

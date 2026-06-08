@@ -23,16 +23,16 @@ Friendly name for the caller, used in verbose skip messaging.
 
 ## Outputs
 
-System.Boolean. Returns $true when the repository contains commits. .EXAMPLE Test-GitRepositoryHasCommits
+System.Boolean. Returns $true when the repository contains commits.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Test-GitRepositoryHasCommits
-``
+```powershell
+Test-GitRepositoryHasCommits -CommandName 'Get-GitStatus'
+```
 
 ## Source
 

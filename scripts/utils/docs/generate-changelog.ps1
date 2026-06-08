@@ -1,8 +1,7 @@
 <#
-scripts/utils/generate-changelog.ps1
-
 .SYNOPSIS
     Generates changelog using git-cliff from conventional commits.
+
 
 .DESCRIPTION
     Generates a changelog file from git commit history using git-cliff and
@@ -13,32 +12,21 @@ scripts/utils/generate-changelog.ps1
     cargo (Rust toolchain) if available, or provide instructions for manual
     installation.
 
+
 .PARAMETER OutputFile
     Specifies the output filename for the generated changelog.
     The path is resolved relative to the repository root.
     Default value is "CHANGELOG.md".
 
+
 .PARAMETER Unreleased
     If specified, generates only the unreleased changes section without
     including version tags. Useful for previewing changes before a release.
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1
-
-    Generates a full changelog in CHANGELOG.md.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1 -Unreleased
-
-    Generates only the unreleased changes section.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1 -OutputFile "RELEASE_NOTES.md"
-
-    Generates changelog with a custom output filename.
 
 .OUTPUTS
     Creates or updates the changelog file at the specified path.
+
 
 .NOTES
     This script requires git-cliff to be installed. Installation options:
@@ -51,6 +39,23 @@ scripts/utils/generate-changelog.ps1
     to control changelog formatting, commit categorization, and filtering rules.
 
     Used in CI/CD pipelines and release creation workflows.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1
+
+    Generates a full changelog in CHANGELOG.md.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1 -Unreleased
+
+    Generates only the unreleased changes section.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts/utils/generate-changelog.ps1 -OutputFile "RELEASE_NOTES.md"
+
+    Generates changelog with a custom output filename.
 
 #>
 

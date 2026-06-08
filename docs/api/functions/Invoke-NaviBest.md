@@ -25,11 +25,9 @@ Optional search text used to select the best matching cheatsheet entry.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-NaviBest -Query 'find files'
-.PARAMETER Query
-    Optional search text used to select the best matching cheatsheet entry.
-``
+```
 
 ## Aliases
 

@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-UrlUriToJson -InputPath "url.url"
-    
-    Converts url.url to url.json.
-``
+```
+
+Converts url.url to url.json.
 
 ## Aliases
 

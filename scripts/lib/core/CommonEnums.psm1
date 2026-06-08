@@ -18,8 +18,7 @@ scripts/lib/core/CommonEnums.psm1
 .PARAMETER Definition
     Definition parameter.
 .EXAMPLE
-    Add-CommonEnumType
-
+    Add-CommonEnumType -Name 'name' -Definition 'value'
 #>
 
 function Add-CommonEnumType {

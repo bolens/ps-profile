@@ -58,7 +58,7 @@ if (Test-CachedCommand nuget) {
     Set-AgentModeAlias -Name 'nugetadd' -Target 'Install-NuGetPackage'
     # NuGet restore - restore packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores packages from packages.config or project.json.
     .DESCRIPTION
         Restores packages for a solution or project.
@@ -67,12 +67,12 @@ if (Test-CachedCommand nuget) {
     .PARAMETER Source
         Package source URL.
     .EXAMPLE
-        Restore-NuGetPackages
+    Restore-NuGetPackages -Path ./path -Source ./source
         Restores packages in current directory.
     .EXAMPLE
         Restore-NuGetPackages -Path MyProject.sln
         Restores packages for solution.
-    #>
+#>
     function Restore-NuGetPackages {
         [CmdletBinding()]
         param(
@@ -92,7 +92,7 @@ if (Test-CachedCommand nuget) {
     Set-AgentModeAlias -Name 'nugetrestore' -Target 'Restore-NuGetPackages'
     # NuGet update - update packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates packages in packages.config.
     .DESCRIPTION
         Updates packages to their latest versions.
@@ -101,12 +101,12 @@ if (Test-CachedCommand nuget) {
     .PARAMETER Id
         Specific package ID to update.
     .EXAMPLE
-        Update-NuGetPackages
+    Update-NuGetPackages -Path ./path -Id 'value'
         Updates all packages in current directory.
     .EXAMPLE
         Update-NuGetPackages -Id Newtonsoft.Json
         Updates specific package.
-    #>
+#>
     function Update-NuGetPackages {
         [CmdletBinding()]
         param(

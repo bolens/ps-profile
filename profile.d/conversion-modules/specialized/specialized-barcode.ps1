@@ -163,22 +163,28 @@ try {
 <#
 .SYNOPSIS
     Converts text file to Barcode image.
+
 .DESCRIPTION
     Reads text from a file and generates a barcode image containing that text.
     Requires Node.js, jsbarcode, and canvas packages.
+
 .PARAMETER InputPath
     The path to the text file (.txt or .text extension).
+
 .PARAMETER OutputPath
     The path for the output barcode image file. If not specified, uses input path with .png extension.
+
 .PARAMETER Format
     The barcode format to use. Valid values: CODE128, CODE39, EAN13, EAN8, UPC, ITF14, MSI, pharmacode, codabar.
     Default is CODE128.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-BarcodeFromText -InputPath "data.txt" -Format CODE128
     
     Converts data.txt to data.png barcode.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-BarcodeFromText {
     param(
@@ -210,22 +216,28 @@ Set-AgentModeAlias -Name 'text-to-barcode' -Target 'ConvertTo-BarcodeFromText'
 <#
 .SYNOPSIS
     Converts JSON file to Barcode image.
+
 .DESCRIPTION
     Reads JSON from a file and generates a barcode image containing the JSON data.
     Requires Node.js, jsbarcode, and canvas packages.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output barcode image file. If not specified, uses input path with .png extension.
+
 .PARAMETER Format
     The barcode format to use. Valid values: CODE128, CODE39, EAN13, EAN8, UPC, ITF14, MSI, pharmacode, codabar.
     Default is CODE128.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-BarcodeFromJson -InputPath "data.json" -Format CODE128
     
     Converts data.json to data.png barcode.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-BarcodeFromJson {
     param(
@@ -257,21 +269,27 @@ Set-AgentModeAlias -Name 'json-to-barcode' -Target 'ConvertTo-BarcodeFromJson'
 <#
 .SYNOPSIS
     Converts Barcode image to text.
+
 .DESCRIPTION
     Decodes a barcode image and extracts the text data.
     Note: Full decoding requires additional image processing libraries (barcode-reader, zbar, etc.).
+
 .PARAMETER InputPath
     The path to the barcode image file (.png, .jpg, .jpeg, .gif, .bmp).
+
 .PARAMETER OutputPath
     The path for the output text file. If not specified, uses input path with .txt extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
+.NOTES
+    Full barcode decoding requires additional libraries. This function currently indicates the requirement.
+
 .EXAMPLE
     ConvertFrom-BarcodeToText -InputPath "barcode.png"
     
     Decodes barcode.png to barcode.txt.
-.OUTPUTS
-    None. Creates output file at specified or default path.
-.NOTES
-    Full barcode decoding requires additional libraries. This function currently indicates the requirement.
 #>
 function ConvertFrom-BarcodeToText {
     param([string]$InputPath, [string]$OutputPath)

@@ -29,9 +29,9 @@ Path for the output text file. If not specified, uses input path with .txt exten
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-RtfToText -InputPath "document.rtf" -OutputPath "document.txt"
-``
+```
 
 ## Aliases
 

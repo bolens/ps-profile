@@ -38,27 +38,27 @@ None.
 
 ### Example 1
 
-`powershell
-Edit-WithVSCode
-        
-        Opens current directory in VS Code.
-``
+```powershell
+Edit-WithVSCode -Path ./path
+```
+
+Opens current directory in VS Code.
 
 ### Example 2
 
-`powershell
+```powershell
 Edit-WithVSCode -Path "C:\Projects\MyApp"
-        
-        Opens a directory in VS Code.
-``
+```
+
+Opens a directory in VS Code.
 
 ### Example 3
 
-`powershell
+```powershell
 Edit-WithVSCode -Path "script.ps1" -NewWindow
-        
-        Opens a file in a new VS Code window.
-``
+```
+
+Opens a file in a new VS Code window.
 
 ## Source
 

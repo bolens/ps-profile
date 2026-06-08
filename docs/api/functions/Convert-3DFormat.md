@@ -38,19 +38,19 @@ System.String. Path to the output file.
 
 ### Example 1
 
-`powershell
+```powershell
 Convert-3DFormat -InputFile "model.obj" -OutputFile "model.stl"
-        
-        Converts OBJ file to STL format.
-``
+```
+
+Converts OBJ file to STL format.
 
 ### Example 2
 
-`powershell
+```powershell
 Convert-3DFormat -InputFile "model.fbx" -OutputFile "model.dae" -Format "dae"
-        
-        Converts FBX file to DAE format.
-``
+```
+
+Converts FBX file to DAE format.
 
 ## Source
 

@@ -34,17 +34,19 @@ System.String. Output from pipx run execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Pipx black --check .
-        Runs black in an isolated environment to check code formatting.
-``
+```
+
+Runs black in an isolated environment to check code formatting.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Pipx pytest tests/
-        Runs pytest in an isolated environment.
-``
+```
+
+Runs pytest in an isolated environment.
 
 ## Aliases
 

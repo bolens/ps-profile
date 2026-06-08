@@ -23,16 +23,16 @@ ISBN value from the pipeline.
 
 ## Outputs
 
-PSCustomObject[] .EXAMPLE '9780306406157', '0-306-40615-2' | ConvertTo-IsbnNormalizedList
+PSCustomObject[]
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 '9780306406157', '0-306-40615-2' | ConvertTo-IsbnNormalizedList
-``
+```
 
 ## Aliases
 

@@ -33,9 +33,9 @@ JPEG quality (1-100, default: 90). Higher values mean better quality but larger 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AvifToJpeg -InputPath "image.avif" -OutputPath "image.jpg" -Quality 95
-``
+```
 
 ## Aliases
 

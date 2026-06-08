@@ -29,9 +29,9 @@ The path for the output DBF file. If not specified, uses input path with .dbf ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-DbfFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

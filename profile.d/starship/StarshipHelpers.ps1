@@ -31,8 +31,7 @@ function Test-StarshipInitialized {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Test-PromptNeedsReplacement
-
+    Test-PromptNeedsReplacement -PromptCmd 'value'
 #>
 function Test-PromptNeedsReplacement {
     param([System.Management.Automation.FunctionInfo]$PromptCmd)
@@ -56,8 +55,7 @@ function Test-PromptNeedsReplacement {
 .OUTPUTS
     System.String[]
 .EXAMPLE
-    Get-StarshipPromptArguments
-
+    Get-StarshipPromptArguments -LastCommandSucceeded -LastExitCode 1
 #>
 function Get-StarshipPromptArguments {
     param(

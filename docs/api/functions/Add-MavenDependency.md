@@ -37,10 +37,11 @@ Dependency scope (compile, test, provided, runtime, system).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-MavenDependency -GroupId org.springframework -ArtifactId spring-core -Version 6.0.0
-        Adds Spring Core dependency.
-``
+```
+
+Adds Spring Core dependency.
 
 ## Aliases
 

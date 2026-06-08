@@ -25,15 +25,9 @@ Arguments to pass to go build.
 
 ### Example 1
 
-`powershell
-Build-GoProgram
-``
-
-### Example 2
-
-`powershell
+```powershell
 Build-GoProgram -o myapp
-``
+```
 
 ## Aliases
 

@@ -11,15 +11,19 @@ if (-not (Test-Path Function:Open-Item -ErrorAction SilentlyContinue)) {
 .SYNOPSIS
         Opens files or URLs using the system's default application.
 
+
     .DESCRIPTION
         Opens the specified file or URL using the appropriate system command.
         On Windows, uses Start-Process. On Linux/macOS, uses xdg-open or open.
+
+.PARAMETER Path
+    File path, directory, or URL to open with the system default handler.
+
 .EXAMPLE
     Open-Item ./README.md
+
 .EXAMPLE
     Open-Item https://example.com
-.PARAMETER p
-    File path, directory, or URL to open with the system default handler.
 
 #>
     function Open-Item {

@@ -25,15 +25,9 @@ Arguments to pass to azd up.
 
 ### Example 1
 
-`powershell
-Start-AzureDeveloperUp
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-AzureDeveloperUp --location eastus
-``
+```
 
 ## Aliases
 

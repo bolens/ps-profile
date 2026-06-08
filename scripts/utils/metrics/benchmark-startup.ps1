@@ -1,12 +1,24 @@
 <#
-scripts/utils/benchmark-startup.ps1
-
 .SYNOPSIS
     Measures interactive PowerShell startup performance and per-fragment dot-source times.
+
 
 .DESCRIPTION
     Measures interactive PowerShell startup performance and per-fragment dot-source times.
     Outputs a simple CSV and a human-readable table. Cross-platform compatible.
+
+
+.PARAMETER Iterations
+    The number of times to run the benchmark.
+
+.PARAMETER WorkspaceRoot
+    The root directory of the workspace.
+
+.PARAMETER UpdateBaseline
+    Update the performance baseline.
+
+.PARAMETER RegressionThreshold
+    The threshold for performance regression.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1
@@ -15,15 +27,6 @@ scripts/utils/benchmark-startup.ps1
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -RegressionThreshold 1.2
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -WorkspaceRoot /home/username/Documents/PowerShell
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 5 -UpdateBaseline -RegressionThreshold 1.2 -WorkspaceRoot /home/username/Documents/PowerShell
-
-.PARAMETER Iterations
-    The number of times to run the benchmark.
-.PARAMETER WorkspaceRoot
-    The root directory of the workspace.
-.PARAMETER UpdateBaseline
-    Update the performance baseline.
-.PARAMETER RegressionThreshold
-    The threshold for performance regression.
 #>
 
 param(

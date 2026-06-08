@@ -400,19 +400,24 @@ Set-AgentModeAlias -Name 'url-encode' -Target 'ConvertFrom-AsciiToUrl'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to ASCII text.
+
 .DESCRIPTION
     Converts a URL/percent encoded string back to ASCII text. %XX sequences are decoded to their character equivalents.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToAscii
-    Converts "Hello%20World" to "Hello World".
-.EXAMPLE
-    ConvertFrom-UrlToAscii -InputObject "test%40example.com"
-    Converts URL encoding to "test@example.com".
+
 .OUTPUTS
     System.String
     The ASCII text representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToAscii
+    Converts "Hello%20World" to "Hello World".
+
+.EXAMPLE
+    ConvertFrom-UrlToAscii -InputObject "test%40example.com"
+    Converts URL encoding to "test@example.com".
 #>
 function ConvertFrom-UrlToAscii {
     [CmdletBinding()]
@@ -436,16 +441,20 @@ Set-AgentModeAlias -Name 'url-decode' -Target 'ConvertFrom-UrlToAscii'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to hexadecimal representation.
+
 .DESCRIPTION
     Converts a URL/percent encoded string to hexadecimal string representation.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToHex
-    Converts URL encoding to hex.
+
 .OUTPUTS
     System.String
     The hexadecimal representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToHex
+    Converts URL encoding to hex.
 #>
 function ConvertFrom-UrlToHex {
     [CmdletBinding()]
@@ -468,18 +477,23 @@ Set-AgentModeAlias -Name 'url-to-hex' -Target 'ConvertFrom-UrlToHex'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to binary representation.
+
 .DESCRIPTION
     Converts a URL/percent encoded string to binary string representation.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between binary bytes. Default is a space.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToBinary
-    Converts URL encoding to binary with spaces.
+
 .OUTPUTS
     System.String
     The binary representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToBinary
+    Converts URL encoding to binary with spaces.
 #>
 function ConvertFrom-UrlToBinary {
     [CmdletBinding()]
@@ -503,16 +517,20 @@ Set-AgentModeAlias -Name 'url-to-binary' -Target 'ConvertFrom-UrlToBinary'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to ModHex representation.
+
 .DESCRIPTION
     Converts a URL/percent encoded string to ModHex string representation.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToModHex
-    Converts URL encoding to ModHex.
+
 .OUTPUTS
     System.String
     The ModHex representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToModHex
+    Converts URL encoding to ModHex.
 #>
 function ConvertFrom-UrlToModHex {
     [CmdletBinding()]
@@ -535,16 +553,20 @@ Set-AgentModeAlias -Name 'url-to-modhex' -Target 'ConvertFrom-UrlToModHex'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to Base32 representation.
+
 .DESCRIPTION
     Converts a URL/percent encoded string to Base32 string representation.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToBase32
-    Converts URL encoding to Base32.
+
 .OUTPUTS
     System.String
     The Base32 representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToBase32
+    Converts URL encoding to Base32.
 #>
 function ConvertFrom-UrlToBase32 {
     [CmdletBinding()]
@@ -567,18 +589,23 @@ Set-AgentModeAlias -Name 'url-to-base32' -Target 'ConvertFrom-UrlToBase32'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to octal representation.
+
 .DESCRIPTION
     Converts a URL/percent encoded string to octal string representation.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between octal bytes. Default is a space.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToOctal
-    Converts URL encoding to octal.
+
 .OUTPUTS
     System.String
     The octal representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToOctal
+    Converts URL encoding to octal.
 #>
 function ConvertFrom-UrlToOctal {
     [CmdletBinding()]
@@ -602,18 +629,23 @@ Set-AgentModeAlias -Name 'url-to-octal' -Target 'ConvertFrom-UrlToOctal'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to decimal representation.
+
 .DESCRIPTION
     Converts a URL/percent encoded string to decimal string representation.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between decimal values. Default is a space.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToDecimal
-    Converts URL encoding to decimal.
+
 .OUTPUTS
     System.String
     The decimal representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToDecimal
+    Converts URL encoding to decimal.
 #>
 function ConvertFrom-UrlToDecimal {
     [CmdletBinding()]
@@ -637,18 +669,23 @@ Set-AgentModeAlias -Name 'url-to-decimal' -Target 'ConvertFrom-UrlToDecimal'
 <#
 .SYNOPSIS
     Converts URL/percent encoded string to Roman numeral representation.
+
 .DESCRIPTION
     Converts a URL/percent encoded string to Roman numeral string representation.
+
 .PARAMETER InputObject
     The URL/percent encoded string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between Roman numerals. Default is a space.
-.EXAMPLE
-    "Hello%20World" | ConvertFrom-UrlToRoman
-    Converts URL encoding to Roman numerals.
+
 .OUTPUTS
     System.String
     The Roman numeral representation of the input URL encoded string.
+
+.EXAMPLE
+    "Hello%20World" | ConvertFrom-UrlToRoman
+    Converts URL encoding to Roman numerals.
 #>
 function ConvertFrom-UrlToRoman {
     [CmdletBinding()]

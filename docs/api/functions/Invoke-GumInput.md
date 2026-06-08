@@ -29,9 +29,9 @@ Placeholder text shown in the input field.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GumInput -Prompt 'Branch:' -Placeholder 'feature/my-change'
-``
+```
 
 ## Aliases
 

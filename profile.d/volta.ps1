@@ -96,14 +96,14 @@ if (Test-CachedCommand volta) {
     Set-AgentModeAlias -Name 'voltaremove' -Target 'Remove-VoltaTool'
     # Volta upgrade - update Volta itself
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates Volta to the latest version.
     .DESCRIPTION
         Updates Volta itself to the latest version.
     .EXAMPLE
-        Update-VoltaSelf
+    Update-VoltaSelf
         Updates Volta to the latest version.
-    #>
+#>
     function Update-VoltaSelf {
         [CmdletBinding()]
         param()

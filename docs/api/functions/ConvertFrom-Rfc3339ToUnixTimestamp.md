@@ -30,11 +30,11 @@ System.Double Returns a Unix timestamp (seconds since epoch).
 
 ### Example 1
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Rfc3339ToUnixTimestamp
-    
-    Converts RFC 3339 string to Unix timestamp.
-``
+```
+
+Converts RFC 3339 string to Unix timestamp.
 
 ## Aliases
 

@@ -30,11 +30,11 @@ System.String Returns the Base62 encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "SGVsbG8gV29ybGQ=" | ConvertFrom-Base64ToBase62
-    
-    Converts Base64 to Base62 format.
-``
+```
+
+Converts Base64 to Base62 format.
 
 ## Aliases
 

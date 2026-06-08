@@ -25,7 +25,6 @@ idempotent, non-destructive way.
 
 .EXAMPLE
     Enable-Aliases
-
     Enables all user-defined aliases for the current session.
 #>
 function Enable-Aliases {

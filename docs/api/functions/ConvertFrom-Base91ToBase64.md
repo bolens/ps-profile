@@ -30,11 +30,11 @@ System.String Returns the Base64 encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 ">OwJh>Io0Tv!8PE" | ConvertFrom-Base91ToBase64
-    
-    Converts Base91 to Base64 format.
-``
+```
+
+Converts Base91 to Base64 format.
 
 ## Aliases
 

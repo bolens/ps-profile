@@ -38,19 +38,19 @@ System.String Returns an ISO 8601 formatted date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-Date | ConvertTo-Iso8601FromDateTime
-    
-    Converts the current date/time to ISO 8601 format.
-``
+```
+
+Converts the current date/time to ISO 8601 format.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-Date | ConvertTo-Iso8601FromDateTime -IncludeMilliseconds -IncludeTimezone
-    
-    Converts with milliseconds and timezone information.
-``
+```
+
+Converts with milliseconds and timezone information.
 
 ## Aliases
 

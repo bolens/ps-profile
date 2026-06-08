@@ -23,8 +23,7 @@ $script:RepoRootPattern = $null
 .PARAMETER RepoRoot
     The repository root directory path.
 .EXAMPLE
-    Initialize-OutputUtils
-
+    Initialize-OutputUtils -RepoRoot 'value'
 #>
 function Initialize-OutputUtils {
     param(
@@ -50,8 +49,7 @@ function Initialize-OutputUtils {
 .OUTPUTS
     System.String
 .EXAMPLE
-    ConvertTo-RepoRelativePath
-
+    ConvertTo-RepoRelativePath -PathString 'value'
 #>
 function ConvertTo-RepoRelativePath {
     param([string]$PathString)

@@ -27,10 +27,11 @@ System.String. Output from bd blocked command.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-BeadsBlocked
-        Gets all blocked issues.
-``
+```
+
+Gets all blocked issues.
 
 ## Source
 

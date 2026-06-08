@@ -20,12 +20,15 @@ if (Test-CachedCommand pnpm) {
     <#
 .SYNOPSIS
         Installs development packages using pnpm.
+
     .DESCRIPTION
         Adds packages as dev dependencies to the project using pnpm.
-.EXAMPLE
-    Invoke-PnpmDevInstall typescript eslint
+
 .PARAMETER Packages
     Package names to add as development dependencies.
+
+.EXAMPLE
+    Invoke-PnpmDevInstall typescript eslint
 
 #>
     function Invoke-PnpmDevInstall {
@@ -37,14 +40,18 @@ if (Test-CachedCommand pnpm) {
     <#
 .SYNOPSIS
         Runs npm scripts using pnpm.
+
     .DESCRIPTION
         Executes package.json scripts using pnpm instead of npm.
-.EXAMPLE
-    Invoke-PnpmRun -Script build -Args @('--watch')
+
 .PARAMETER Script
     package.json script name to execute.
+
 .PARAMETER Args
     Additional arguments forwarded to the script command.
+
+.EXAMPLE
+    Invoke-PnpmRun -Script build -Args @('--watch')
 
 #>
     function Invoke-PnpmRun {
@@ -55,15 +62,15 @@ if (Test-CachedCommand pnpm) {
 
     # PNPM outdated - check for outdated packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Checks for outdated packages in the current project.
     .DESCRIPTION
         Lists all packages that have newer versions available.
         This is equivalent to running 'pnpm outdated'.
     .EXAMPLE
-        Test-PnpmOutdated
+    Test-PnpmOutdated
         Checks for outdated packages in the current project.
-    #>
+#>
     function Test-PnpmOutdated {
         [CmdletBinding()]
         param()
@@ -79,15 +86,15 @@ if (Test-CachedCommand pnpm) {
 
     # PNPM update - update all packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates all packages in the current project to their latest versions.
     .DESCRIPTION
         Updates all packages to their latest versions according to the version ranges
         specified in package.json. This is equivalent to running 'pnpm update'.
     .EXAMPLE
-        Update-PnpmPackages
+    Update-PnpmPackages
         Updates all packages in the current project.
-    #>
+#>
     function Update-PnpmPackages {
         [CmdletBinding()]
         param()
@@ -103,14 +110,14 @@ if (Test-CachedCommand pnpm) {
 
     # PNPM self-update - update pnpm itself
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates pnpm to the latest version.
     .DESCRIPTION
         Updates pnpm itself to the latest version using 'pnpm add -g pnpm@latest'.
     .EXAMPLE
-        Update-PnpmSelf
+    Update-PnpmSelf
         Updates pnpm to the latest version.
-    #>
+#>
     function Update-PnpmSelf {
         [CmdletBinding()]
         param()

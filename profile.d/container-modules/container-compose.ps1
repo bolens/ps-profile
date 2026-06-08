@@ -6,7 +6,7 @@
 # docker-compose / docker compose up
 if (-not (Test-Path Function:Start-ContainerCompose)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Starts container services using compose (Docker-first).
     .DESCRIPTION
         Runs 'compose up -d' using the available container engine, preferring Docker over Podman.
@@ -14,8 +14,8 @@ if (-not (Test-Path Function:Start-ContainerCompose)) {
     .PARAMETER args
         Additional arguments forwarded to compose up -d.
     .EXAMPLE
-        Start-ContainerCompose
-    #>
+    Start-ContainerCompose -args @('--version')
+#>
     function Start-ContainerCompose {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -41,7 +41,7 @@ if (-not (Test-Path Function:Start-ContainerCompose)) {
 # docker-compose down
 if (-not (Test-Path Function:Stop-ContainerCompose)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Stops container services using compose (Docker-first).
     .DESCRIPTION
         Runs 'compose down' using the available container engine, preferring Docker over Podman.
@@ -49,8 +49,8 @@ if (-not (Test-Path Function:Stop-ContainerCompose)) {
     .PARAMETER args
         Additional arguments forwarded to compose down.
     .EXAMPLE
-        Stop-ContainerCompose
-    #>
+    Stop-ContainerCompose -args @('--version')
+#>
     function Stop-ContainerCompose {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -76,7 +76,7 @@ if (-not (Test-Path Function:Stop-ContainerCompose)) {
 # docker-compose logs -f
 if (-not (Test-Path Function:Get-ContainerComposeLogs)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Shows container logs using compose (Docker-first).
     .DESCRIPTION
         Runs 'compose logs -f' using the available container engine, preferring Docker over Podman.
@@ -84,8 +84,8 @@ if (-not (Test-Path Function:Get-ContainerComposeLogs)) {
     .PARAMETER args
         Additional arguments forwarded to compose logs -f.
     .EXAMPLE
-        Get-ContainerComposeLogs
-    #>
+    Get-ContainerComposeLogs -args @('--version')
+#>
     function Get-ContainerComposeLogs {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo
@@ -111,7 +111,7 @@ if (-not (Test-Path Function:Get-ContainerComposeLogs)) {
 # prune system for whichever engine
 if (-not (Test-Path Function:Clear-ContainerSystem)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Prunes unused container system resources (Docker-first).
     .DESCRIPTION
         Runs 'system prune -f' using the available container engine, preferring Docker over Podman.
@@ -119,8 +119,8 @@ if (-not (Test-Path Function:Clear-ContainerSystem)) {
     .PARAMETER args
         Additional arguments forwarded to system prune -f.
     .EXAMPLE
-        Clear-ContainerSystem
-    #>
+    Clear-ContainerSystem -args @('--version')
+#>
     function Clear-ContainerSystem {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
         $info = Get-ContainerEngineInfo

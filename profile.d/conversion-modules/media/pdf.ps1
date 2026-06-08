@@ -68,8 +68,7 @@ Set-AgentModeAlias -Name 'pdf-to-text' -Target 'ConvertFrom-PdfToText'
 .PARAMETER OutputPath
     The path for the output merged PDF file.
 .EXAMPLE
-    Merge-Pdf
-
+    Merge-Pdf -InputPaths @() -OutputPath ./output.file
 #>
 function Merge-Pdf {
     param([string[]]$InputPaths, [string]$OutputPath)

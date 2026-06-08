@@ -42,19 +42,19 @@ System.String. Path to the output directory.
 
 ### Example 1
 
-`powershell
+```powershell
 Extract-AndroidApk -InputFile "app.apk"
-        
-        Extracts resources from an APK file.
-``
+```
+
+Extracts resources from an APK file.
 
 ### Example 2
 
-`powershell
+```powershell
 Extract-AndroidApk -InputFile "app.apk" -Decompile
-        
-        Extracts and decompiles an APK file to smali.
-``
+```
+
+Extracts and decompiles an APK file to smali.
 
 ## Source
 

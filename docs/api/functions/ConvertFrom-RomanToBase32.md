@@ -30,10 +30,11 @@ System.String The Base32 representation of the input Roman numeral string.
 
 ### Example 1
 
-`powershell
+```powershell
 "LXXII CV" | ConvertFrom-RomanToBase32
-    Converts Roman numerals to Base32.
-``
+```
+
+Converts Roman numerals to Base32.
 
 ## Aliases
 

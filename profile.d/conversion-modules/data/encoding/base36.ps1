@@ -239,18 +239,22 @@ function Initialize-FileConversion-CoreEncodingBase36 {
 <#
 .SYNOPSIS
     Converts ASCII text to Base36 encoding.
+
 .DESCRIPTION
     Encodes ASCII/UTF-8 text to Base36 format.
     Base36 is an alphanumeric encoding using 0-9 and A-Z.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base36 encoded string.
+
 .EXAMPLE
     "Hello World" | ConvertFrom-AsciiToBase36
     
     Converts text to Base36 format.
-.OUTPUTS
-    System.String
-    Returns the Base36 encoded string.
 #>
 function ConvertFrom-AsciiToBase36 {
     param(
@@ -266,17 +270,21 @@ Set-Alias -Name ascii-to-base36 -Value ConvertFrom-AsciiToBase36 -Scope Global -
 <#
 .SYNOPSIS
     Converts Base36 encoding to ASCII text.
+
 .DESCRIPTION
     Decodes Base36 encoded string back to ASCII/UTF-8 text.
+
 .PARAMETER InputObject
     The Base36 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "91IXPRL3" | ConvertFrom-Base36ToAscii
     
     Converts Base36 to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-Base36ToAscii {
     param(
@@ -292,17 +300,21 @@ Set-Alias -Name base36-to-ascii -Value ConvertFrom-Base36ToAscii -Scope Global -
 <#
 .SYNOPSIS
     Converts hexadecimal string to Base36 encoding.
+
 .DESCRIPTION
     Encodes a hexadecimal string to Base36 format.
+
 .PARAMETER InputObject
     The hexadecimal string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base36 encoded string.
+
 .EXAMPLE
     "48656C6C6F" | ConvertFrom-HexToBase36
     
     Converts hex to Base36 format.
-.OUTPUTS
-    System.String
-    Returns the Base36 encoded string.
 #>
 function ConvertFrom-HexToBase36 {
     param(
@@ -318,17 +330,21 @@ Set-Alias -Name hex-to-base36 -Value ConvertFrom-HexToBase36 -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base36 encoding to hexadecimal string.
+
 .DESCRIPTION
     Decodes Base36 encoded string to hexadecimal format.
+
 .PARAMETER InputObject
     The Base36 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the hexadecimal string.
+
 .EXAMPLE
     "91IXPRL3" | ConvertFrom-Base36ToHex
     
     Converts Base36 to hex format.
-.OUTPUTS
-    System.String
-    Returns the hexadecimal string.
 #>
 function ConvertFrom-Base36ToHex {
     param(
@@ -344,17 +360,21 @@ Set-Alias -Name base36-to-hex -Value ConvertFrom-Base36ToHex -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base64 encoding to Base36 encoding.
+
 .DESCRIPTION
     Converts a Base64 encoded string to Base36 format.
+
 .PARAMETER InputObject
     The Base64 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base36 encoded string.
+
 .EXAMPLE
     "SGVsbG8gV29ybGQ=" | ConvertFrom-Base64ToBase36
     
     Converts Base64 to Base36 format.
-.OUTPUTS
-    System.String
-    Returns the Base36 encoded string.
 #>
 function ConvertFrom-Base64ToBase36 {
     param(
@@ -370,17 +390,21 @@ Set-Alias -Name base64-to-base36 -Value ConvertFrom-Base64ToBase36 -Scope Global
 <#
 .SYNOPSIS
     Converts Base36 encoding to Base64 encoding.
+
 .DESCRIPTION
     Converts a Base36 encoded string to Base64 format.
+
 .PARAMETER InputObject
     The Base36 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base64 encoded string.
+
 .EXAMPLE
     "91IXPRL3" | ConvertFrom-Base36ToBase64
     
     Converts Base36 to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the Base64 encoded string.
 #>
 function ConvertFrom-Base36ToBase64 {
     param(

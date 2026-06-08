@@ -42,19 +42,19 @@ System.String. Resource information in the specified format.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-KubeResources -ResourceType "pods"
-        
-        Lists all pods in the current namespace.
-``
+```
+
+Lists all pods in the current namespace.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-KubeResources -ResourceType "deployments" -Namespace "production" -OutputFormat "yaml"
-        
-        Gets deployments in production namespace as YAML.
-``
+```
+
+Gets deployments in production namespace as YAML.
 
 ## Source
 

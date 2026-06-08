@@ -50,27 +50,27 @@ System.String. Path to the converted video file.
 
 ### Example 1
 
-`powershell
+```powershell
 Convert-Video -InputPath "input.mp4" -OutputPath "output.mkv"
-        
-        Converts input.mp4 to output.mkv using ffmpeg with default settings.
-``
+```
+
+Converts input.mp4 to output.mkv using ffmpeg with default settings.
 
 ### Example 2
 
-`powershell
+```powershell
 Convert-Video -InputPath "input.mp4" -OutputPath "output.mkv" -Codec "hevc" -Quality 20
-        
-        Converts to HEVC codec with quality 20.
-``
+```
+
+Converts to HEVC codec with quality 20.
 
 ### Example 3
 
-`powershell
+```powershell
 Convert-Video -InputPath "input.mp4" -OutputPath "output.mkv" -UseHandbrake -Preset "Fast 1080p30"
-        
-        Converts using Handbrake with a preset.
-``
+```
+
+Converts using Handbrake with a preset.
 
 ## Source
 

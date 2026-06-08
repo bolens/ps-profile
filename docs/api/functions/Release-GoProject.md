@@ -30,24 +30,27 @@ System.String. Output from goreleaser execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Release-GoProject
-        Creates a release using goreleaser.
-``
+```
+
+Creates a release using goreleaser.
 
 ### Example 2
 
-`powershell
+```powershell
 Release-GoProject --snapshot
-        Creates a snapshot release (dry-run).
-``
+```
+
+Creates a snapshot release (dry-run).
 
 ### Example 3
 
-`powershell
+```powershell
 Release-GoProject --skip-publish
-        Builds release artifacts without publishing.
-``
+```
+
+Builds release artifacts without publishing.
 
 ## Aliases
 

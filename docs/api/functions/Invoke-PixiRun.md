@@ -29,13 +29,9 @@ Additional arguments forwarded to the command.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-PixiRun -Command python -Args @('script.py')
-.PARAMETER Command
-    Command to run inside the pixi environment.
-.PARAMETER Args
-    Additional arguments forwarded to the command.
-``
+```
 
 ## Aliases
 

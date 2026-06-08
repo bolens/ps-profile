@@ -25,15 +25,9 @@ Arguments to pass to nuxi build.
 
 ### Example 1
 
-`powershell
-Build-NuxtApp
-``
-
-### Example 2
-
-`powershell
+```powershell
 Build-NuxtApp --prerender
-``
+```
 
 ## Aliases
 

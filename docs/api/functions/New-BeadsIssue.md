@@ -54,17 +54,19 @@ System.String. Output from bd create command.
 
 ### Example 1
 
-`powershell
+```powershell
 New-BeadsIssue -Title "Fix bug" -Priority 1 -Type bug
-        Creates a P1 bug issue.
-``
+```
+
+Creates a P1 bug issue.
 
 ### Example 2
 
-`powershell
+```powershell
 New-BeadsIssue -Title "Add feature" -Description "Detailed description" -Type feature
-        Creates a feature issue with description.
-``
+```
+
+Creates a feature issue with description.
 
 ## Source
 

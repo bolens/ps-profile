@@ -41,9 +41,9 @@ JPEG quality (1-100, default: 90). Higher values mean better quality but larger 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-SvgToJpeg -InputPath "image.svg" -OutputPath "image.jpg" -Width 2048 -Height 2048 -Quality 95
-``
+```
 
 ## Aliases
 

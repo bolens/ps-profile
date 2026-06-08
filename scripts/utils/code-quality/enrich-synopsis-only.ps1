@@ -21,6 +21,7 @@ $script:EnrichmentSkipFileNames = @(
     'add-comment-help.ps1'
     'CommentHelp.psm1'
     'DocParserRegex.psm1'
+    'RegexUtilities.psm1'
 )
 
 function Add-DescriptionToHelpBlock {

@@ -126,6 +126,12 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
     if ($testExecutionPath -and -not [string]::IsNullOrWhiteSpace($testExecutionPath) -and (Test-Path -LiteralPath $testExecutionPath)) {
         . $testExecutionPath
     }
+
+    # Load TestBackup (depends on TestPaths and TestExecution)
+    $testBackupPath = Join-Path $testSupportDir 'TestBackup.ps1'
+    if ($testBackupPath -and -not [string]::IsNullOrWhiteSpace($testBackupPath) -and (Test-Path -LiteralPath $testBackupPath)) {
+        . $testBackupPath
+    }
     
     # Load TestNpmHelpers (standalone)
     $testNpmHelpersPath = Join-Path $testSupportDir 'TestNpmHelpers.ps1'

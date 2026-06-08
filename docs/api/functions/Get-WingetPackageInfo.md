@@ -33,17 +33,19 @@ Source to search in.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-WingetPackageInfo Git.Git
-        Shows detailed information about the Git.Git package.
-``
+```
+
+Shows detailed information about the Git.Git package.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-WingetPackageInfo Microsoft.VisualStudioCode
-        Shows information for Visual Studio Code.
-``
+```
+
+Shows information for Visual Studio Code.
 
 ## Aliases
 

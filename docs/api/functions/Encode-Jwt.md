@@ -38,10 +38,11 @@ System.String The encoded JWT token string.
 
 ### Example 1
 
-`powershell
+```powershell
 Encode-Jwt -Payload @{sub="user123"; exp=1234567890} -Secret "mysecret"
-    Creates a JWT token with the specified payload.
-``
+```
+
+Creates a JWT token with the specified payload.
 
 ## Aliases
 

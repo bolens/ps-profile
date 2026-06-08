@@ -25,17 +25,19 @@ Path to save the export file. Defaults to "scoopfile.json" in current directory.
 
 ### Example 1
 
-`powershell
-Export-ScoopPackages
-        Exports packages to scoopfile.json in current directory.
-``
+```powershell
+Export-ScoopPackages -Path ./path
+```
+
+Exports packages to scoopfile.json in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-ScoopPackages -Path "C:\backup\scoop-packages.json"
-        Exports packages to a specific file.
-``
+```
+
+Exports packages to a specific file.
 
 ## Aliases
 

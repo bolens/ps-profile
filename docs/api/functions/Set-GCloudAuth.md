@@ -25,15 +25,15 @@ Arguments to pass to gcloud auth.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-GCloudAuth login
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Set-GCloudAuth list
-``
+```
 
 ## Aliases
 

@@ -42,19 +42,19 @@ System.String. Path to the downloaded file.
 
 ### Example 1
 
-`powershell
+```powershell
 Download-Video -Url "https://www.youtube.com/watch?v=example"
-        
-        Downloads a video from YouTube.
-``
+```
+
+Downloads a video from YouTube.
 
 ### Example 2
 
-`powershell
+```powershell
 Download-Video -Url "https://www.youtube.com/watch?v=example" -AudioOnly
-        
-        Downloads audio only from a video.
-``
+```
+
+Downloads audio only from a video.
 
 ## Source
 

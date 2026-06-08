@@ -25,10 +25,11 @@ Package repository URL to remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-SwiftPackage -URL https://github.com/apple/swift-algorithms.git
-        Provides instructions for removing Swift Algorithms package.
-``
+```
+
+Provides instructions for removing Swift Algorithms package.
 
 ## Aliases
 

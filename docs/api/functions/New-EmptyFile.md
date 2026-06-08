@@ -29,19 +29,15 @@ Literal file paths to create or touch without wildcard expansion.
 
 ### Example 1
 
-`powershell
+```powershell
 New-EmptyFile ./notes.txt
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-EmptyFile -LiteralPath 'C:\temp\marker.txt'
-.PARAMETER Path
-    One or more file paths to create or touch.
-.PARAMETER LiteralPath
-    Literal file paths to create or touch without wildcard expansion.
-``
+```
 
 ## Aliases
 

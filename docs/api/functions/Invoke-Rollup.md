@@ -25,15 +25,15 @@ Arguments to pass to rollup.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Rollup --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Rollup -c rollup.config.js
-``
+```
 
 ## Aliases
 

@@ -34,11 +34,11 @@ System.DateTime Returns a DateTime object in the target timezone.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-Date | ConvertTo-TimeZone -TimeZone "UTC"
-    
-    Converts the current local date/time to UTC.
-``
+```
+
+Converts the current local date/time to UTC.
 
 ## Aliases
 

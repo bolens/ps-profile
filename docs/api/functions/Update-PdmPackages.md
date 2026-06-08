@@ -25,17 +25,19 @@ Package names to update (optional, updates all if omitted).
 
 ### Example 1
 
-`powershell
-Update-PdmPackages
-        Updates all packages.
-``
+```powershell
+Update-PdmPackages -Packages 'package-name'
+```
+
+Updates all packages.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-PdmPackages requests
-        Updates requests package.
-``
+```
+
+Updates requests package.
 
 ## Aliases
 

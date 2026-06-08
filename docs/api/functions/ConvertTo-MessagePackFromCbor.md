@@ -29,9 +29,9 @@ The path for the output MessagePack file. If not specified, uses input path with
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-MessagePackFromCbor -InputPath ./input.file
-``
+```
 
 ## Aliases
 

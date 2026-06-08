@@ -27,16 +27,16 @@ When set, returns the writer-oriented format (e.g. Obsidian export uses gfm+wiki
 
 ## Outputs
 
-System.String .EXAMPLE Get-MarkdownDialectPandocFormat -Dialect obsidian -ForOutput
+System.String
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 Get-MarkdownDialectPandocFormat -Dialect obsidian -ForOutput
-``
+```
 
 ## Source
 

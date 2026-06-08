@@ -29,9 +29,9 @@ Path for the output BMP file. If not specified, uses input path with .bmp extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-BmpFromJpeg -InputPath "image.jpg" -OutputPath "image.bmp"
-``
+```
 
 ## Aliases
 

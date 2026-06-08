@@ -25,15 +25,15 @@ AWS region name (e.g., "us-east-1", "eu-west-1").
 
 ### Example 1
 
-`powershell
+```powershell
 Set-AwsRegion -Region "us-east-1"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Set-AwsRegion -Region "eu-west-1"
-``
+```
 
 ## Aliases
 

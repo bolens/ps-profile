@@ -29,10 +29,11 @@ Maven artifact ID.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-MavenDependency -GroupId org.springframework -ArtifactId spring-core
-        Removes Spring Core dependency.
-``
+```
+
+Removes Spring Core dependency.
 
 ## Aliases
 

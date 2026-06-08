@@ -30,19 +30,19 @@ System.String Returns the decoded ASCII text.
 
 ### Example 1
 
-`powershell
+```powershell
 ".... . .-.. .-.. ---  .-- --- .-. .-.. -.." | ConvertFrom-MorseToAscii
-    
-    Converts Morse Code to text.
-``
+```
+
+Converts Morse Code to text.
 
 ### Example 2
 
-`powershell
+```powershell
 "... --- ..." | ConvertFrom-MorseToAscii
-    
-    Returns "SOS"
-``
+```
+
+Returns "SOS"
 
 ## Aliases
 

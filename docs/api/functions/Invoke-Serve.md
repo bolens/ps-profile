@@ -25,15 +25,9 @@ Arguments to pass to serve.
 
 ### Example 1
 
-`powershell
-Invoke-Serve
-``
-
-### Example 2
-
-`powershell
+```powershell
 Invoke-Serve -p 3000
-``
+```
 
 ## Aliases
 

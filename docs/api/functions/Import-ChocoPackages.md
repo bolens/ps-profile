@@ -29,17 +29,19 @@ Auto-confirm all prompts.
 
 ### Example 1
 
-`powershell
-Import-ChocoPackages
-        Restores packages from packages.config in current directory.
-``
+```powershell
+Import-ChocoPackages -Path ./path
+```
+
+Restores packages from packages.config in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-ChocoPackages -Path "C:\backup\choco-packages.config"
-        Restores packages from a specific file.
-``
+```
+
+Restores packages from a specific file.
 
 ## Aliases
 

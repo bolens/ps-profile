@@ -27,9 +27,9 @@ System.String
 
 ### Example 1
 
-`powershell
+```powershell
 Get-FromClipboard
-``
+```
 
 ## Aliases
 

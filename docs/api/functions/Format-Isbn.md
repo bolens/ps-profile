@@ -38,15 +38,15 @@ System.String
 
 ### Example 1
 
-`powershell
+```powershell
 Format-Isbn -Isbn "9780306406157"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Format-Isbn -Isbn "9780201367860" -Hyphenation Registrant
-``
+```
 
 ## Aliases
 

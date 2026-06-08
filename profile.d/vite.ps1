@@ -96,9 +96,6 @@ function New-ViteProject {
     Arguments to pass to vite dev.
 
 .EXAMPLE
-    Start-ViteDev
-
-.EXAMPLE
     Start-ViteDev --port 3000
 #>
 function Start-ViteDev {
@@ -126,9 +123,6 @@ function Start-ViteDev {
 
 .PARAMETER Arguments
     Arguments to pass to vite build.
-
-.EXAMPLE
-    Build-ViteApp
 
 .EXAMPLE
     Build-ViteApp --mode production

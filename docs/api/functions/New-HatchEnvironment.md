@@ -25,17 +25,19 @@ Environment name (optional).
 
 ### Example 1
 
-`powershell
-New-HatchEnvironment
-        Creates default environment.
-``
+```powershell
+New-HatchEnvironment -Name 'name'
+```
+
+Creates default environment.
 
 ### Example 2
 
-`powershell
+```powershell
 New-HatchEnvironment -Name dev
-        Creates named environment.
-``
+```
+
+Creates named environment.
 
 ## Aliases
 

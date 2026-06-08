@@ -12,12 +12,15 @@ if (Test-CachedCommand uv) {
     <#
 .SYNOPSIS
         Python package manager using uv instead of pip.
+
     .DESCRIPTION
         Replacement for pip that uses uv for faster Python package management.
-.EXAMPLE
-    Invoke-Pip install requests
+
 .PARAMETER Arguments
     Arguments forwarded to uv pip.
+
+.EXAMPLE
+    Invoke-Pip install requests
 
 #>
     function Invoke-Pip {
@@ -33,14 +36,18 @@ if (Test-CachedCommand uv) {
     <#
 .SYNOPSIS
         Runs Python commands in temporary virtual environments using uv.
+
     .DESCRIPTION
         Executes Python commands with their dependencies automatically managed in isolated environments.
-.EXAMPLE
-    Invoke-UVRun -Command python -Args @('--version')
+
 .PARAMETER Command
     Python module or script to run with uv run.
+
 .PARAMETER Args
     Additional arguments passed after the command.
+
+.EXAMPLE
+    Invoke-UVRun -Command python -Args @('--version')
 
 #>
     function Invoke-UVRun {
@@ -54,12 +61,15 @@ if (Test-CachedCommand uv) {
     <#
 .SYNOPSIS
         Installs Python tools globally using uv.
+
     .DESCRIPTION
         Installs Python applications as standalone executables using uv's tool management.
-.EXAMPLE
-    Install-UVTool 'package-name'
+
 .PARAMETER Package
     Python package name to install as a global uv tool.
+
+.EXAMPLE
+    Install-UVTool 'package-name'
 
 #>
     function Install-UVTool {
@@ -70,12 +80,15 @@ if (Test-CachedCommand uv) {
     <#
 .SYNOPSIS
         Creates Python virtual environments using uv.
+
     .DESCRIPTION
         Creates virtual environments much faster than traditional venv or virtualenv.
-.EXAMPLE
-    New-UVVenv
+
 .PARAMETER Path
     Directory path where the virtual environment should be created.
+
+.EXAMPLE
+    New-UVVenv -Path .venv
 
 #>
     function New-UVVenv {
@@ -84,15 +97,15 @@ if (Test-CachedCommand uv) {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Upgrades all outdated Python packages using uv.
     .DESCRIPTION
         Lists all outdated packages and upgrades them to their latest versions.
         This is a uv-compatible replacement for pip-based upgrade commands.
     .EXAMPLE
-        Update-UVOutdatedPackages
+    Update-UVOutdatedPackages
         Upgrades all outdated packages in the current environment.
-    #>
+#>
     function Update-UVOutdatedPackages {
         [CmdletBinding()]
         param()
@@ -114,15 +127,15 @@ if (Test-CachedCommand uv) {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Upgrades all globally installed uv tools to their latest versions.
     .DESCRIPTION
         Upgrades all Python tools that were installed globally using uv tool install.
         This is equivalent to running 'uv tool upgrade --all'.
     .EXAMPLE
-        Update-UVTools
+    Update-UVTools
         Upgrades all globally installed uv tools.
-    #>
+#>
     function Update-UVTools {
         [CmdletBinding()]
         param()
@@ -134,12 +147,15 @@ if (Test-CachedCommand uv) {
     <#
 .SYNOPSIS
         Runs tools installed with UV.
+
     .DESCRIPTION
         Executes tools that were installed using uv tool install.
-.EXAMPLE
-    Invoke-UVTool ruff --version
+
 .PARAMETER Arguments
     Arguments forwarded to uv tool run.
+
+.EXAMPLE
+    Invoke-UVTool ruff --version
 
 #>
     function Invoke-UVTool {
@@ -155,12 +171,15 @@ if (Test-CachedCommand uv) {
     <#
 .SYNOPSIS
         Adds dependencies to UV project.
+
     .DESCRIPTION
         Adds packages as dependencies to the current UV project.
-.EXAMPLE
-    Add-UVDependency
+
 .PARAMETER Arguments
-    Arguments forwarded to uv pip.
+    Package names and flags forwarded to uv add.
+
+.EXAMPLE
+    Add-UVDependency requests
 
 #>
     function Add-UVDependency {
@@ -176,13 +195,15 @@ if (Test-CachedCommand uv) {
     <#
 .SYNOPSIS
         Syncs UV project dependencies.
+
     .DESCRIPTION
         Installs and synchronizes all project dependencies.
+
+.PARAMETER Arguments
+    Optional flags forwarded to uv sync.
+
 .EXAMPLE
     Sync-UVDependencies
-.PARAMETER Arguments
-    Arguments forwarded to uv pip.
-
 #>
     function Sync-UVDependencies {
         [CmdletBinding()]

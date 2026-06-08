@@ -29,9 +29,9 @@ Path for the output PDF file. If not specified, uses input path with .pdf extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OdsToPdf -InputPath "spreadsheet.ods" -OutputPath "spreadsheet.pdf"
-``
+```
 
 ## Aliases
 

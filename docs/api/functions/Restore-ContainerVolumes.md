@@ -38,19 +38,19 @@ System.String. Name of the restored volume.
 
 ### Example 1
 
-`powershell
+```powershell
 Restore-ContainerVolumes -BackupPath "volume-backup.tar.gz"
-        
-        Restores volumes from backup archive.
-``
+```
+
+Restores volumes from backup archive.
 
 ### Example 2
 
-`powershell
+```powershell
 Restore-ContainerVolumes -BackupPath "backup.tar.gz" -Volume "my-volume" -CreateVolume
-        
-        Restores to my-volume, creating it if needed.
-``
+```
+
+Restores to my-volume, creating it if needed.
 
 ## Source
 

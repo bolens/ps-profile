@@ -23,16 +23,16 @@ Partial ISBN value.
 
 ## Outputs
 
-PSCustomObject .EXAMPLE Complete-Isbn -Isbn '978030640615'
+PSCustomObject
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 Complete-Isbn -Isbn '978030640615'
-``
+```
 
 ## Aliases
 

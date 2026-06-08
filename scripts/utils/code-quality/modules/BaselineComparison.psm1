@@ -53,8 +53,7 @@ if ($jsonUtilitiesModulePath -and -not [string]::IsNullOrWhiteSpace($jsonUtiliti
 .OUTPUTS
     Baseline comparison results
 .EXAMPLE
-    Compare-PerformanceBaseline
-
+    Compare-PerformanceBaseline -TestResult 'value'
 #>
 function Compare-PerformanceBaseline {
     param(
@@ -191,8 +190,7 @@ function Compare-PerformanceBaseline {
 .OUTPUTS
     Regression report content
 .EXAMPLE
-    New-PerformanceRegressionReport
-
+    New-PerformanceRegressionReport -Comparison 'value'
 #>
 function New-PerformanceRegressionReport {
     param(

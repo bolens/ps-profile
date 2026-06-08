@@ -38,19 +38,19 @@ System.Boolean. True if import successful.
 
 ### Example 1
 
-`powershell
+```powershell
 Import-Database -DatabaseType PostgreSQL -Database mydb -InputPath "backup.sql"
-    
-    Imports PostgreSQL database from SQL file.
-``
+```
+
+Imports PostgreSQL database from SQL file.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-Database -DatabaseType MongoDB -Database mydb -InputPath "backup.json"
-    
-    Imports MongoDB data from JSON file.
-``
+```
+
+Imports MongoDB data from JSON file.
 
 ## Aliases
 

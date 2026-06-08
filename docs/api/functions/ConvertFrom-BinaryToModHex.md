@@ -30,17 +30,19 @@ System.String The ModHex representation of the input binary string.
 
 ### Example 1
 
-`powershell
+```powershell
 "01001000 01101001" | ConvertFrom-BinaryToModHex
-    Converts binary to ModHex.
-``
+```
+
+Converts binary to ModHex.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-BinaryToModHex -InputObject "11111111"
-    Converts binary to ModHex.
-``
+```
+
+Converts binary to ModHex.
 
 ## Aliases
 

@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-HttpHeadersFromJson -InputPath "headers.json"
-    
-    Converts headers.json to headers.headers.
-``
+```
+
+Converts headers.json to headers.headers.
 
 ## Aliases
 

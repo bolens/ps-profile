@@ -37,6 +37,7 @@ try {
     .SYNOPSIS
         Initializes a prompt framework with standardized error handling and fallback.
     
+
     .DESCRIPTION
         Provides a standardized way to initialize prompt frameworks with:
         - Command availability checking
@@ -44,27 +45,37 @@ try {
         - Automatic fallback to alternative prompt
         - Error handling and recovery
     
+
     .PARAMETER FrameworkName
         Name of the prompt framework (e.g., 'Starship', 'OhMyPosh').
     
+
     .PARAMETER CommandName
         Name of the CLI command (e.g., 'starship', 'oh-my-posh').
     
+
     .PARAMETER InitScript
         Script block that performs the initialization.
         Should handle all framework-specific setup.
     
+
     .PARAMETER FallbackPrompt
         Optional script block for fallback prompt initialization.
         Called if command is not available or initialization fails.
     
+
     .PARAMETER CheckInitialized
         Optional script block to check if framework is already initialized.
         Should return $true if already initialized, $false otherwise.
     
+
     .PARAMETER InstallHint
         Installation hint for missing tool warning.
     
+
+    .OUTPUTS
+        System.Boolean. True if initialization successful, false otherwise.
+
     .EXAMPLE
         Initialize-PromptFramework -FrameworkName 'Starship' -CommandName 'starship' `
             -InitScript { Invoke-StarshipInit } `
@@ -72,9 +83,6 @@ try {
             -CheckInitialized { Test-StarshipInitialized }
         
         Initializes Starship with fallback to smart prompt.
-    
-    .OUTPUTS
-        System.Boolean. True if initialization successful, false otherwise.
     #>
     function Initialize-PromptFramework {
         [CmdletBinding()]
@@ -256,8 +264,7 @@ try {
     .OUTPUTS
         System.Boolean. True if command is available, false otherwise.
 .EXAMPLE
-    Test-PromptCommandAvailable
-
+    Test-PromptCommandAvailable -CommandName 'Get-GitStatus' -InstallHint 'value'
 #>
     function Test-PromptCommandAvailable {
         [CmdletBinding()]

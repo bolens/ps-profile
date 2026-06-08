@@ -25,11 +25,9 @@ Plain text to encode for use in a URL query or path segment.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-UrlEncoded -text 'hello world'
-.PARAMETER text
-    Plain text to encode for use in a URL query or path segment.
-``
+```
 
 ## Aliases
 

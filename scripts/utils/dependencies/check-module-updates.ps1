@@ -1,8 +1,7 @@
 <#
-scripts/utils/dependencies/check-module-updates.ps1
-
 .SYNOPSIS
     Checks for available updates to PowerShell modules.
+
 
 .DESCRIPTION
     Checks for available updates to PowerShell modules in the Modules directory and other
@@ -11,94 +10,77 @@ scripts/utils/dependencies/check-module-updates.ps1
 
     Supports scheduling automatic updates, email notifications, and update history tracking.
 
+
 .PARAMETER Update
     If specified, automatically updates all modules that have available updates. Otherwise,
     only reports available updates without installing them.
 
+
 .PARAMETER DryRun
     If specified, shows what would be updated without actually installing updates.
+
 
 .PARAMETER ModuleFilter
     Array of module names to check. If not specified, checks all configured modules.
 
+
 .PARAMETER ReportFile
     Path to save the update report JSON file. If not specified and -Update is used, saves to scripts/data/.
+
 
 .PARAMETER Schedule
     If specified, creates or updates a Windows Scheduled Task to run this script automatically.
     Requires -ScheduleFrequency and optionally -ScheduleTime.
 
+
 .PARAMETER ScheduleFrequency
     Frequency for scheduled updates. Can be an UpdateFrequency enum value or string for backward compatibility.
     Valid values: Daily, Weekly, Monthly. Required when using -Schedule.
 
+
 .PARAMETER ScheduleTime
     Time to run scheduled updates (HH:mm format, 24-hour). Defaults to 02:00 if not specified.
+
 
 .PARAMETER ScheduleDays
     Days of week for Weekly schedule (e.g., Monday,Wednesday,Friday). Comma-separated.
 
+
 .PARAMETER ScheduleDayOfMonth
     Day of month for Monthly schedule (1-31). Defaults to 1.
+
 
 .PARAMETER RemoveSchedule
     If specified, removes the scheduled task instead of creating/updating it.
 
+
 .PARAMETER EmailTo
     Email address(es) to send notifications to. Comma-separated for multiple recipients.
+
 
 .PARAMETER EmailFrom
     Email address to send notifications from. Required if -EmailTo is specified.
 
+
 .PARAMETER EmailSmtpServer
     SMTP server address. Defaults to localhost if not specified.
+
 
 .PARAMETER EmailSmtpPort
     SMTP server port. Defaults to 25 if not specified.
 
+
 .PARAMETER EmailSmtpCredential
     Credential for SMTP authentication. Optional.
+
 
 .PARAMETER EmailOnlyOnUpdates
     If specified, only sends email when updates are available. Otherwise sends email for all runs.
 
+
 .PARAMETER TrackHistory
     If specified, saves update history to scripts/data/module-update-history.json.
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1
-
-    Checks for available module updates and displays them.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -Update
-
-    Checks for updates and automatically installs them.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -ReportFile updates.json
-
-    Checks for updates and saves report to updates.json.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -Schedule -ScheduleFrequency Daily -ScheduleTime "03:00" -Update
-
-    Schedules daily automatic updates at 3:00 AM.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -EmailTo "admin@example.com" -EmailFrom "noreply@example.com" -EmailSmtpServer "smtp.example.com" -EmailOnlyOnUpdates
-
-    Sends email notifications only when updates are available.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -Update -TrackHistory
-
-    Updates modules and saves history to track update records.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -RemoveSchedule
-
-    Removes the scheduled task.
 
 .NOTES
     Exit Codes:
@@ -113,6 +95,47 @@ scripts/utils/dependencies/check-module-updates.ps1
 
     Requires access to PowerShell Gallery. Network connectivity may be required.
     Scheduling requires administrator privileges on Windows.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1
+
+    Checks for available module updates and displays them.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -Update
+
+    Checks for updates and automatically installs them.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -ReportFile updates.json
+
+    Checks for updates and saves report to updates.json.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -Schedule -ScheduleFrequency Daily -ScheduleTime "03:00" -Update
+
+    Schedules daily automatic updates at 3:00 AM.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -EmailTo "admin@example.com" -EmailFrom "noreply@example.com" -EmailSmtpServer "smtp.example.com" -EmailOnlyOnUpdates
+
+    Sends email notifications only when updates are available.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -Update -TrackHistory
+
+    Updates modules and saves history to track update records.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\dependencies\check-module-updates.ps1 -RemoveSchedule
+
+    Removes the scheduled task.
 #>
 
 param(

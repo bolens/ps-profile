@@ -29,17 +29,19 @@ Package source URL.
 
 ### Example 1
 
-`powershell
-Restore-NuGetPackages
-        Restores packages in current directory.
-``
+```powershell
+Restore-NuGetPackages -Path ./path -Source ./source
+```
+
+Restores packages in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Restore-NuGetPackages -Path MyProject.sln
-        Restores packages for solution.
-``
+```
+
+Restores packages for solution.
 
 ## Aliases
 

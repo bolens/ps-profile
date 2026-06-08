@@ -70,24 +70,27 @@ PSCustomObject with Description, Pattern, Conversion, Session, and optional Sess
 
 ### Example 1
 
-`powershell
-Start-RegexDescriptionBuilder
-    Starts the interactive regex description builder.
-``
+```powershell
+Start-RegexDescriptionBuilder -Description 'value' -Segments @()
+```
+
+Starts the interactive regex description builder.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-RegexDescriptionBuilder -Segments "starts with 'svc-'", 'digits' -Anchored -NonInteractive
-    Builds and converts a description without prompts.
-``
+```
+
+Builds and converts a description without prompts.
 
 ### Example 3
 
-`powershell
+```powershell
 Start-RegexDescriptionBuilder -Description 'email' -SaveSession -SessionPath ./email-regex.json
-    Builds and persists a regex session file.
-``
+```
+
+Builds and persists a regex session file.
 
 ## Aliases
 

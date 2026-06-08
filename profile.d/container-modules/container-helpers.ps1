@@ -6,6 +6,7 @@
 <#
 .SYNOPSIS
     Gets the preferred container engine (docker/podman) based on availability and user preference.
+
 .DESCRIPTION
     Determines which container engine to use based on:
     1. User preference via $env:CONTAINER_ENGINE_PREFERENCE ('docker' or 'podman')
@@ -21,14 +22,16 @@
     - DockerComposeAvailable: $true if docker-compose or docker compose is available
     - PodmanComposeAvailable: $true if podman-compose or podman compose is available
     - InstallationCommand: Installation command for missing engines
+
+.OUTPUTS
+    System.Collections.Hashtable
+    Hashtable with Engine, Available, DockerAvailable, PodmanAvailable, and InstallationCommand keys.
+
 .EXAMPLE
     $engineInfo = Get-ContainerEnginePreference
     if (-not $engineInfo.Available) {
         Write-Host "Install a container engine: $($engineInfo.InstallationCommand)"
     }
-.OUTPUTS
-    System.Collections.Hashtable
-    Hashtable with Engine, Available, DockerAvailable, PodmanAvailable, and InstallationCommand keys.
 #>
 function Get-ContainerEnginePreference {
     # Return cached result if available (prevents recursion)

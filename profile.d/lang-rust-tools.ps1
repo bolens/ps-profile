@@ -33,28 +33,33 @@ try {
     .SYNOPSIS
         Installs Rust binaries using cargo-binstall.
     
+
     .DESCRIPTION
         Wrapper function for cargo-binstall, a fast binary installer for Rust tools.
         cargo-binstall downloads pre-built binaries instead of compiling from source,
         making installation much faster than cargo install.
     
+
     .PARAMETER Packages
         Package names to install.
         Can be used multiple times or as an array.
     
+
     .PARAMETER Version
         Specific version to install (--version).
     
+
+    .OUTPUTS
+        System.String. Output from cargo-binstall execution.
+
     .EXAMPLE
         Install-RustBinary cargo-watch
         Installs cargo-watch using cargo-binstall.
     
+
     .EXAMPLE
         Install-RustBinary cargo-audit --version 0.18.0
         Installs a specific version of cargo-audit.
-    
-    .OUTPUTS
-        System.String. Output from cargo-binstall execution.
     #>
     function Install-RustBinary {
         [CmdletBinding()]
@@ -118,36 +123,42 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Watches files and runs cargo commands on changes.
     
+
     .DESCRIPTION
         Wrapper function for cargo-watch, a file watcher that automatically runs
         cargo commands when files change. Useful for continuous testing and building.
     
+
     .PARAMETER Command
         Cargo command to run (e.g., 'test', 'build', 'run').
         Defaults to 'check' if not specified.
     
+
     .PARAMETER Arguments
         Additional arguments to pass to cargo-watch.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from cargo-watch execution.
+
     .EXAMPLE
-        Watch-RustProject
+    Watch-RustProject -Command 'pwsh -NoProfile -File scripts/test.ps1'
         Watches for changes and runs 'cargo check'.
     
+
     .EXAMPLE
         Watch-RustProject -Command test
         Watches for changes and runs 'cargo test'.
     
+
     .EXAMPLE
         Watch-RustProject -Command run -- --release
         Watches for changes and runs 'cargo run --release'.
-    
-    .OUTPUTS
-        System.String. Output from cargo-watch execution.
-    #>
+#>
     function Watch-RustProject {
         [CmdletBinding()]
         [OutputType([string])]

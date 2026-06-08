@@ -18,18 +18,16 @@ Add-UVDependency
 
 ### -Arguments
 
-Arguments forwarded to uv pip.
+Package names and flags forwarded to uv add.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Add-UVDependency
-.PARAMETER Arguments
-    Arguments forwarded to uv pip.
-``
+```powershell
+Add-UVDependency requests
+```
 
 ## Aliases
 

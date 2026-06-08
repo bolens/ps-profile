@@ -25,15 +25,15 @@ Arguments to pass to nuxi.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Nuxt --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Nuxt init my-app
-``
+```
 
 ## Aliases
 

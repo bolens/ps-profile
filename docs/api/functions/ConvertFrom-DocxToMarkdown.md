@@ -29,9 +29,9 @@ The path for the output Markdown file. If not specified, uses input path with .m
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-DocxToMarkdown -InputPath ./input.file
-``
+```
 
 ## Aliases
 

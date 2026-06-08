@@ -30,19 +30,19 @@ System.String Returns the MIME type string, or empty string if not found.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-MimeTypeFromExtension -Extension "json"
-    
-    Returns "application/json".
-``
+```
+
+Returns "application/json".
 
 ### Example 2
 
-`powershell
+```powershell
 ".html" | Get-MimeTypeFromExtension
-    
-    Returns "text/html" from pipeline.
-``
+```
+
+Returns "text/html" from pipeline.
 
 ## Aliases
 

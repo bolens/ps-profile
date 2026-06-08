@@ -27,16 +27,16 @@ The root element name for the XML document.
 
 ## Outputs
 
-System.Xml.XmlDocument representing the XML structure. .EXAMPLE Convert-JsonToXml
+System.Xml.XmlDocument representing the XML structure.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Convert-JsonToXml
-``
+```powershell
+Convert-JsonToXml -JsonObject 'value'
+```
 
 ## Source
 

@@ -25,15 +25,15 @@ Arguments to pass to ngrok.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Ngrok version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Ngrok http 8080
-``
+```
 
 ## Aliases
 

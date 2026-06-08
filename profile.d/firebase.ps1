@@ -64,9 +64,6 @@ function Invoke-Firebase {
     Arguments to pass to firebase deploy.
 
 .EXAMPLE
-    Publish-FirebaseDeployment
-
-.EXAMPLE
     Publish-FirebaseDeployment --only hosting
 #>
 function Publish-FirebaseDeployment {
@@ -94,9 +91,6 @@ function Publish-FirebaseDeployment {
 
 .PARAMETER Arguments
     Arguments to pass to firebase serve.
-
-.EXAMPLE
-    Start-FirebaseServer
 
 .EXAMPLE
     Start-FirebaseServer --only hosting

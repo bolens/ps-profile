@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-DjvuToPng -InputPath "document.djvu"
-    
-    Converts document.djvu to document.png.
-``
+```
+
+Converts document.djvu to document.png.
 
 ## Aliases
 

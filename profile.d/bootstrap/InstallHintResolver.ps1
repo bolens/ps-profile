@@ -26,6 +26,7 @@
 <#
 .SYNOPSIS
     Gets a preference-aware install hint for a tool.
+
 .DESCRIPTION
     Generates an install hint string that respects user preferences for:
     - Python package managers (PS_PYTHON_PACKAGE_MANAGER)
@@ -41,30 +42,36 @@
     - Elixir package managers (PS_ELIXIR_PACKAGE_MANAGER)
     
     Falls back to sensible defaults if preferences are not set or tools are not available.
+
 .PARAMETER ToolName
     Name of the tool to get install hint for.
+
 .PARAMETER ToolType
     Type of tool: 'python-package', 'node-package', 'python-runtime', 'rust-package', 
     'go-package', 'java-build-tool', 'ruby-package', 'php-package', 'dotnet-package', 
     'dart-package', 'elixir-package', or 'generic'.
     If not specified, attempts to auto-detect based on tool name.
+
 .PARAMETER DefaultInstallCommand
     Default install command to use if preference detection fails.
     For Python packages, should include {package} placeholder.
     For Node packages, should include {package} placeholder.
+
+.OUTPUTS
+    System.String
+    Formatted install hint (e.g., "Install with: uv tool install pipenv").
+
 .EXAMPLE
     $hint = Get-PreferenceAwareInstallHint -ToolName 'pipenv' -ToolType 'python-package'
     Write-MissingToolWarning -Tool 'pipenv' -InstallHint $hint
     
     Gets install hint for pipenv using preferred Python package manager.
+
 .EXAMPLE
     $hint = Get-PreferenceAwareInstallHint -ToolName 'typescript' -ToolType 'node-package'
     Write-MissingToolWarning -Tool 'typescript' -InstallHint $hint
     
     Gets install hint for typescript using preferred Node package manager.
-.OUTPUTS
-    System.String
-    Formatted install hint (e.g., "Install with: uv tool install pipenv").
 #>
 function global:Get-PreferenceAwareInstallHint {
     [CmdletBinding()]
@@ -1159,8 +1166,7 @@ function global:Invoke-MissingToolWarning {
     .PARAMETER AdditionalHint
         Optional text appended to the resolved install hint when not already present.
 .EXAMPLE
-    Invoke-MissingToolWarning
-
+    Invoke-MissingToolWarning -ToolName 'docker'
 #>
     [CmdletBinding()]
     param(

@@ -30,8 +30,7 @@ if (Test-Path $docPathsModule) {
 .OUTPUTS
     None. Files are removed directly.
 .EXAMPLE
-    Remove-StaleDocumentation
-
+    Remove-StaleDocumentation -DocsPath 'docs/api' -DocumentedCommandNames $documented
 #>
 function Remove-StaleDocumentation {
     [CmdletBinding()]

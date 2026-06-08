@@ -38,27 +38,32 @@ try {
     .SYNOPSIS
         Runs Bruno API collections.
     
+
     .DESCRIPTION
         Executes Bruno API collections for testing REST APIs.
         Bruno is a lightweight, fast, and modern API client.
     
+
     .PARAMETER CollectionPath
         Path to the Bruno collection file or directory.
         If not specified, uses current directory.
     
+
     .PARAMETER Environment
         Environment name to use for the collection.
     
+
+    .OUTPUTS
+        System.String. Output from Bruno execution.
+
     .EXAMPLE
         Invoke-Bruno -CollectionPath "./api-collection"
         Runs the Bruno collection in the specified directory.
     
+
     .EXAMPLE
         Invoke-Bruno -Environment "production"
         Runs the Bruno collection using the production environment.
-    
-    .OUTPUTS
-        System.String. Output from Bruno execution.
     #>
     function Invoke-Bruno {
         [CmdletBinding()]
@@ -138,31 +143,37 @@ try {
     .SYNOPSIS
         Executes Hurl test files.
     
+
     .DESCRIPTION
         Runs HTTP requests defined in Hurl test files.
         Hurl is a command-line tool that runs HTTP requests defined in a simple plain text format.
     
+
     .PARAMETER TestFile
         Path to the Hurl test file (.hurl).
         If not specified, searches for .hurl files in current directory.
     
+
     .PARAMETER Variable
         Set a variable for the test execution (can be used multiple times).
         Format: "name=value"
     
+
     .PARAMETER Output
         Output file path for the response.
     
+
+    .OUTPUTS
+        System.String. Output from Hurl execution.
+
     .EXAMPLE
         Invoke-Hurl -TestFile "./api-tests.hurl"
         Runs the specified Hurl test file.
     
+
     .EXAMPLE
         Invoke-Hurl -TestFile "./test.hurl" -Variable "base_url=https://api.example.com"
         Runs the test with a variable set.
-    
-    .OUTPUTS
-        System.String. Output from Hurl execution.
     #>
     function Invoke-Hurl {
         [CmdletBinding()]
@@ -249,37 +260,45 @@ try {
     .SYNOPSIS
         Makes HTTP requests using httpie.
     
+
     .DESCRIPTION
         Executes HTTP requests using httpie, a user-friendly command-line HTTP client.
         Supports GET, POST, PUT, DELETE, PATCH, and other HTTP methods.
     
+
     .PARAMETER Method
         HTTP method (GET, POST, PUT, DELETE, PATCH, etc.).
         Defaults to GET if not specified.
     
+
     .PARAMETER Url
         The URL to request.
     
+
     .PARAMETER Body
         Request body (for POST, PUT, PATCH requests).
     
+
     .PARAMETER Header
         Custom headers (can be used multiple times).
         Format: "Header-Name: value"
     
+
     .PARAMETER Output
         Output file path for the response.
     
+
+    .OUTPUTS
+        System.String. HTTP response from httpie.
+
     .EXAMPLE
         Invoke-Httpie -Method GET -Url "https://api.example.com/users"
         Makes a GET request to the specified URL.
     
+
     .EXAMPLE
         Invoke-Httpie -Method POST -Url "https://api.example.com/users" -Body '{"name":"John"}'
         Makes a POST request with a JSON body.
-    
-    .OUTPUTS
-        System.String. HTTP response from httpie.
     #>
     function Invoke-Httpie {
         [CmdletBinding()]
@@ -385,31 +404,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Starts HTTP Toolkit proxy server.
     
+
     .DESCRIPTION
         Launches HTTP Toolkit, an HTTP debugging proxy that intercepts and inspects HTTP/HTTPS traffic.
         Useful for debugging API calls, inspecting requests/responses, and testing applications.
     
+
     .PARAMETER Port
         Port number for the proxy server.
         Defaults to 8000 if not specified.
     
+
     .PARAMETER Passthrough
         If specified, starts the proxy in passthrough mode (does not intercept traffic).
     
+
+    .OUTPUTS
+        System.Diagnostics.Process. Process object for the HTTP Toolkit proxy.
+
     .EXAMPLE
-        Start-HttpToolkit
+    Start-HttpToolkit -Port 1
         Starts HTTP Toolkit on the default port (8000).
     
+
     .EXAMPLE
         Start-HttpToolkit -Port 9000
         Starts HTTP Toolkit on port 9000.
-    
-    .OUTPUTS
-        System.Diagnostics.Process. Process object for the HTTP Toolkit proxy.
-    #>
+#>
     function Start-HttpToolkit {
         [CmdletBinding()]
         [OutputType([System.Diagnostics.Process])]
@@ -464,27 +488,32 @@ try {
     .SYNOPSIS
         Runs Insomnia API requests or collections.
     
+
     .DESCRIPTION
         Executes Insomnia API requests or collections using the Insomnia CLI.
         Insomnia is a powerful API client with support for REST, GraphQL, gRPC, and more.
     
+
     .PARAMETER CollectionPath
         Path to the Insomnia collection file or directory.
         If not specified, uses current directory.
     
+
     .PARAMETER Environment
         Environment name to use for the collection.
     
+
+    .OUTPUTS
+        System.String. Output from Insomnia execution.
+
     .EXAMPLE
         Invoke-Insomnia -CollectionPath "./api-collection"
         Runs the Insomnia collection in the specified directory.
     
+
     .EXAMPLE
         Invoke-Insomnia -Environment "production"
         Runs the Insomnia collection using the production environment.
-    
-    .OUTPUTS
-        System.String. Output from Insomnia execution.
     #>
     function Invoke-Insomnia {
         [CmdletBinding()]
@@ -564,34 +593,41 @@ try {
     .SYNOPSIS
         Runs Postman collections using Newman CLI.
     
+
     .DESCRIPTION
         Executes Postman collections using Newman, the command-line companion for Postman.
         Newman allows you to run and test Postman collections from the command line.
     
+
     .PARAMETER CollectionPath
         Path to the Postman collection file (JSON).
         Can be a local file path or a Postman collection URL.
     
+
     .PARAMETER Environment
         Path to Postman environment file (JSON).
     
+
     .PARAMETER Reporters
         Reporters to use for output (cli, json, html, junit).
         Can be used multiple times.
     
+
     .PARAMETER OutputFile
         Output file path for reports.
     
+
+    .OUTPUTS
+        System.String. Output from Newman execution.
+
     .EXAMPLE
         Invoke-Postman -CollectionPath "./collection.json"
         Runs the Postman collection.
     
+
     .EXAMPLE
         Invoke-Postman -CollectionPath "./collection.json" -Environment "./env.json" -Reporters "html", "json"
         Runs the collection with environment and generates HTML and JSON reports.
-    
-    .OUTPUTS
-        System.String. Output from Newman execution.
     #>
     function Invoke-Postman {
         [CmdletBinding()]

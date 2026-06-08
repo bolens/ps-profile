@@ -25,15 +25,9 @@ Arguments to pass to ng serve.
 
 ### Example 1
 
-`powershell
-Start-AngularDev
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-AngularDev --port 4200
-``
+```
 
 ## Aliases
 

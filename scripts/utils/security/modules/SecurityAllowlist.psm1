@@ -66,8 +66,7 @@ function Get-DefaultAllowlist {
 .OUTPUTS
     Hashtable with merged allowlist data.
 .EXAMPLE
-    Get-AllowlistFromFile
-
+    Get-AllowlistFromFile -AllowlistFile 'value' -DefaultAllowlist @{}
 #>
 function Get-AllowlistFromFile {
     [CmdletBinding()]
@@ -123,8 +122,7 @@ function Get-AllowlistFromFile {
 .OUTPUTS
     System.Boolean. True if the command is allowed, false otherwise.
 .EXAMPLE
-    Test-AllowedCommand
-
+    Test-AllowedCommand -Command 'pwsh -NoProfile -File scripts/test.ps1' -Allowlist @{}
 #>
 function Test-AllowedCommand {
     [CmdletBinding()]
@@ -162,8 +160,7 @@ function Test-AllowedCommand {
 .OUTPUTS
     System.Boolean. True if the file matches an allowed pattern, false otherwise.
 .EXAMPLE
-    Test-AllowedFile
-
+    Test-AllowedFile -FilePath ./Taskfile.yml -Allowlist @{}
 #>
 function Test-AllowedFile {
     [CmdletBinding()]
@@ -201,8 +198,7 @@ function Test-AllowedFile {
 .OUTPUTS
     System.Boolean. True if the line matches an allowed pattern, false otherwise.
 .EXAMPLE
-    Test-AllowedSecretPattern
-
+    Test-AllowedSecretPattern -Line 'value' -Allowlist @{}
 #>
 function Test-AllowedSecretPattern {
     [CmdletBinding()]

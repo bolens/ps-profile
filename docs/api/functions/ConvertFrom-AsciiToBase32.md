@@ -30,17 +30,19 @@ System.String The Base32 representation of the input text.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello" | ConvertFrom-AsciiToBase32
-    Converts "Hello" to Base32 representation.
-``
+```
+
+Converts "Hello" to Base32 representation.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-AsciiToBase32 -InputObject "World"
-    Converts "World" to Base32 representation.
-``
+```
+
+Converts "World" to Base32 representation.
 
 ## Aliases
 

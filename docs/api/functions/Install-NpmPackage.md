@@ -37,24 +37,27 @@ Install as production dependency (--save-prod, default).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-NpmPackage express
-        Installs express as a production dependency.
-``
+```
+
+Installs express as a production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-NpmPackage typescript -Dev
-        Installs typescript as a dev dependency.
-``
+```
+
+Installs typescript as a dev dependency.
 
 ### Example 3
 
-`powershell
+```powershell
 Install-NpmPackage nodemon -Global
-        Installs nodemon globally.
-``
+```
+
+Installs nodemon globally.
 
 ## Aliases
 

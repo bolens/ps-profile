@@ -34,17 +34,19 @@ System.Diagnostics.Process. Process object for the HTTP Toolkit proxy.
 
 ### Example 1
 
-`powershell
-Start-HttpToolkit
-        Starts HTTP Toolkit on the default port (8000).
-``
+```powershell
+Start-HttpToolkit -Port 1
+```
+
+Starts HTTP Toolkit on the default port (8000).
 
 ### Example 2
 
-`powershell
+```powershell
 Start-HttpToolkit -Port 9000
-        Starts HTTP Toolkit on port 9000.
-``
+```
+
+Starts HTTP Toolkit on port 9000.
 
 ## Aliases
 

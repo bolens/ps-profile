@@ -254,7 +254,15 @@ function New-CommentHelpBlock {
                 }
             }
 
-            $paramDesc = "The $paramName parameter."
+            $paramDesc = switch ($paramName) {
+                'Path' { 'File or directory path.' }
+                'LiteralPath' { 'Literal file path without wildcard expansion.' }
+                'InputObject' { 'Object to process or serialize.' }
+                'Name' { 'Name of the target item.' }
+                'Value' { 'Value to assign or compare.' }
+                'Force' { 'Bypasses confirmation prompts when set.' }
+                default { "Value passed to the $paramName parameter." }
+            }
             if ($isMandatory) {
                 $paramDesc = "$paramDesc (Required)"
             }

@@ -38,11 +38,11 @@ System.String. Generated output path.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-OutputPathFromInput -InputPath 'document.md' -OutputExtension '.html'
-        
-        Returns 'document.html'.
-``
+```
+
+Returns 'document.html'.
 
 ## Source
 

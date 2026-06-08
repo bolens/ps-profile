@@ -25,15 +25,15 @@ Arguments to pass to artisan.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-LaravelArtisan --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-LaravelArtisan make:controller MyController
-``
+```
 
 ## Aliases
 

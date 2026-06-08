@@ -64,9 +64,6 @@ function Invoke-Terraform {
     Arguments to pass to terraform init.
 
 .EXAMPLE
-    Initialize-Terraform
-
-.EXAMPLE
     Initialize-Terraform -upgrade
 #>
 function Initialize-Terraform {
@@ -94,9 +91,6 @@ function Initialize-Terraform {
 
 .PARAMETER Arguments
     Arguments to pass to terraform plan.
-
-.EXAMPLE
-    Get-TerraformPlan
 
 .EXAMPLE
     Get-TerraformPlan -out=tfplan
@@ -128,9 +122,6 @@ function Get-TerraformPlan {
     Arguments to pass to terraform apply.
 
 .EXAMPLE
-    Invoke-TerraformApply
-
-.EXAMPLE
     Invoke-TerraformApply -auto-approve
 #>
 function Invoke-TerraformApply {
@@ -158,9 +149,6 @@ function Invoke-TerraformApply {
 
 .PARAMETER Arguments
     Arguments to pass to terraform destroy.
-
-.EXAMPLE
-    Remove-TerraformInfrastructure
 
 .EXAMPLE
     Remove-TerraformInfrastructure -auto-approve

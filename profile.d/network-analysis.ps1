@@ -36,7 +36,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Wireshark network protocol analyzer.
     
     .DESCRIPTION
@@ -51,8 +51,7 @@ try {
         Optional network interface name to start capturing on.
     
     .EXAMPLE
-        Start-Wireshark
-        
+    Start-Wireshark -CaptureFile 'value' -Interface 'value'
         Launches Wireshark with default settings.
     
     .EXAMPLE
@@ -64,7 +63,7 @@ try {
         Start-Wireshark -Interface "Ethernet"
         
         Starts Wireshark capturing on the specified interface.
-    #>
+#>
     function Start-Wireshark {
         [CmdletBinding()]
         param(
@@ -236,40 +235,46 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets IP address geolocation and information.
     
+
     .DESCRIPTION
         Uses nali or ipinfo-cli to get geolocation and other information
         about an IP address.
     
+
     .PARAMETER IpAddress
         IP address to query. If not specified, queries the public IP.
     
+
     .PARAMETER Tool
         Tool to use: nali or ipinfo. Defaults to nali.
     
+
     .PARAMETER OutputFormat
         Output format: text, json. Defaults to text.
     
+
+    .OUTPUTS
+        System.String. IP information in the specified format.
+
     .EXAMPLE
-        Get-IpInfo
-        
+    Get-IpInfo -IpAddress 'value' -Tool 'value'
         Gets information about the current public IP address.
     
+
     .EXAMPLE
         Get-IpInfo -IpAddress "8.8.8.8"
         
         Gets information about the specified IP address.
     
+
     .EXAMPLE
         Get-IpInfo -IpAddress "8.8.8.8" -Tool "ipinfo" -OutputFormat "json"
         
         Gets IP information using ipinfo-cli in JSON format.
-    
-    .OUTPUTS
-        System.String. IP information in the specified format.
-    #>
+#>
     function Get-IpInfo {
         [CmdletBinding()]
         [OutputType([string])]
@@ -475,37 +480,45 @@ try {
     .SYNOPSIS
         Sends a push notification using ntfy.
     
+
     .DESCRIPTION
         Sends push notifications to devices using the ntfy service.
         Supports custom topics, priorities, and message formatting.
     
+
     .PARAMETER Message
         Notification message text.
     
+
     .PARAMETER Topic
         Ntfy topic name. Defaults to a random topic if not specified.
     
+
     .PARAMETER Title
         Optional notification title.
     
+
     .PARAMETER Priority
         Notification priority: low, default, high, urgent. Defaults to default.
     
+
     .PARAMETER Server
         Optional ntfy server URL. Defaults to ntfy.sh.
     
+
+    .OUTPUTS
+        System.String. Notification delivery status.
+
     .EXAMPLE
         Send-NtfyNotification -Message "Task completed successfully"
         
         Sends a notification with the specified message.
     
+
     .EXAMPLE
         Send-NtfyNotification -Message "Alert!" -Title "System Alert" -Priority "urgent" -Topic "alerts"
         
         Sends an urgent notification to the alerts topic.
-    
-    .OUTPUTS
-        System.String. Notification delivery status.
     #>
     function Send-NtfyNotification {
         [CmdletBinding()]

@@ -49,24 +49,27 @@ Margin size in modules. Default is 4.
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCode -Data "https://example.com" -OutputPath "qrcode.png"
-    Generates a QR code for the URL.
-``
+```
+
+Generates a QR code for the URL.
 
 ### Example 2
 
-`powershell
+```powershell
 New-QrCode -Data "Hello World" -OutputPath "hello.png" -Size 300 -ErrorCorrectionLevel H
-    Generates a larger QR code with high error correction.
-``
+```
+
+Generates a larger QR code with high error correction.
 
 ### Example 3
 
-`powershell
+```powershell
 New-QrCode -Data "Custom Colors" -OutputPath "custom.png" -DarkColor "#FF0000" -LightColor "#FFFF00"
-    Generates a QR code with red foreground and yellow background.
-``
+```
+
+Generates a QR code with red foreground and yellow background.
 
 ## Aliases
 

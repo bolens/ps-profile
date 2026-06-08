@@ -29,10 +29,11 @@ Package version requirement.
 
 ### Example 1
 
-`powershell
+```powershell
 Add-SwiftPackage -URL https://github.com/apple/swift-algorithms.git -Version '1.0.0'
-        Provides instructions for adding Swift Algorithms package.
-``
+```
+
+Provides instructions for adding Swift Algorithms package.
 
 ## Aliases
 

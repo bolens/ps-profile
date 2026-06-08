@@ -46,21 +46,21 @@ PSCustomObject, System.String
 
 ### Example 1
 
-`powershell
+```powershell
 Get-IsbnInfo -Isbn "978-0-306-40615-7"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Get-IsbnInfo -Isbn "ISBN-10: 0-306-40615-2" -OutputFormat BibTeX
-``
+```
 
 ### Example 3
 
-`powershell
+```powershell
 Get-Content isbns.txt | Get-IsbnInfo -OutputFormat Table
-``
+```
 
 ## Aliases
 

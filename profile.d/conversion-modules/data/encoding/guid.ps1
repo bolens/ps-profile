@@ -244,17 +244,21 @@ function Initialize-FileConversion-CoreEncodingGuid {
 <#
 .SYNOPSIS
     Converts a GUID to hexadecimal format (no dashes).
+
 .DESCRIPTION
     Converts a GUID string to hexadecimal format without dashes or braces.
+
 .PARAMETER Guid
     The GUID string to convert (e.g., "550e8400-e29b-41d4-a716-446655440000" or "{550e8400-e29b-41d4-a716-446655440000}").
+
+.OUTPUTS
+    System.String
+    Returns the GUID in hexadecimal format without dashes.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-GuidToHex
     
     Converts GUID to hex format: "550E8400E29B41D4A716446655440000"
-.OUTPUTS
-    System.String
-    Returns the GUID in hexadecimal format without dashes.
 #>
 Set-Item -Path Function:Global:ConvertFrom-GuidToHex -Value {
     param(
@@ -273,23 +277,29 @@ Set-Alias -Name guid-to-hex -Value ConvertFrom-GuidToHex -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a hexadecimal string to GUID format.
+
 .DESCRIPTION
     Converts a 32-character hexadecimal string to standard GUID format with dashes.
+
 .PARAMETER Hex
     The hexadecimal string to convert (32 characters).
+
 .PARAMETER RegistryFormat
     Return the GUID in Windows registry format with braces.
+
+.OUTPUTS
+    System.String
+    Returns the GUID in standard format with dashes (or registry format if specified).
+
 .EXAMPLE
     "550E8400E29B41D4A716446655440000" | ConvertTo-GuidFromHex
     
     Converts hex to GUID format: "550e8400-e29b-41d4-a716-446655440000"
+
 .EXAMPLE
     "550E8400E29B41D4A716446655440000" | ConvertTo-GuidFromHex -RegistryFormat
     
     Converts hex to GUID registry format: "{550e8400-e29b-41d4-a716-446655440000}"
-.OUTPUTS
-    System.String
-    Returns the GUID in standard format with dashes (or registry format if specified).
 #>
 Set-Item -Path Function:Global:ConvertTo-GuidFromHex -Value {
     param(
@@ -309,17 +319,21 @@ Set-Alias -Name hex-to-guid -Value ConvertTo-GuidFromHex -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a GUID to Windows registry format.
+
 .DESCRIPTION
     Converts a GUID string to Windows registry format with braces.
+
 .PARAMETER Guid
     The GUID string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the GUID in Windows registry format with braces.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-GuidToRegistryFormat
     
     Converts GUID to registry format: "{550e8400-e29b-41d4-a716-446655440000}"
-.OUTPUTS
-    System.String
-    Returns the GUID in Windows registry format with braces.
 #>
 Set-Item -Path Function:Global:ConvertFrom-GuidToRegistryFormat -Value {
     param(
@@ -338,17 +352,21 @@ Set-Alias -Name guid-to-registry -Value ConvertFrom-GuidToRegistryFormat -Scope 
 <#
 .SYNOPSIS
     Converts a Windows registry format GUID to standard format.
+
 .DESCRIPTION
     Converts a GUID in Windows registry format (with braces) to standard format.
+
 .PARAMETER RegistryGuid
     The registry format GUID string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the GUID in standard format without braces.
+
 .EXAMPLE
     "{550e8400-e29b-41d4-a716-446655440000}" | ConvertTo-GuidFromRegistryFormat
     
     Converts registry format to standard GUID: "550e8400-e29b-41d4-a716-446655440000"
-.OUTPUTS
-    System.String
-    Returns the GUID in standard format without braces.
 #>
 Set-Item -Path Function:Global:ConvertTo-GuidFromRegistryFormat -Value {
     param(
@@ -367,17 +385,21 @@ Set-Alias -Name registry-to-guid -Value ConvertTo-GuidFromRegistryFormat -Scope 
 <#
 .SYNOPSIS
     Converts a GUID to Base64 format.
+
 .DESCRIPTION
     Converts a GUID string to Base64 encoded format.
+
 .PARAMETER Guid
     The GUID string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the GUID in Base64 format.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-GuidToBase64
     
     Converts GUID to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the GUID in Base64 format.
 #>
 Set-Item -Path Function:Global:ConvertFrom-GuidToBase64 -Value {
     param(
@@ -396,19 +418,24 @@ Set-Alias -Name guid-to-base64 -Value ConvertFrom-GuidToBase64 -Scope Global -Er
 <#
 .SYNOPSIS
     Converts a Base64 string to GUID format.
+
 .DESCRIPTION
     Converts a Base64 encoded string to standard GUID format.
+
 .PARAMETER Base64
     The Base64 string to convert.
+
 .PARAMETER RegistryFormat
     Return the GUID in Windows registry format with braces.
+
+.OUTPUTS
+    System.String
+    Returns the GUID in standard format (or registry format if specified).
+
 .EXAMPLE
     "VQ6EAOKbQdSnFkRmVVQAAA==" | ConvertTo-GuidFromBase64
     
     Converts Base64 to GUID format.
-.OUTPUTS
-    System.String
-    Returns the GUID in standard format (or registry format if specified).
 #>
 Set-Item -Path Function:Global:ConvertTo-GuidFromBase64 -Value {
     param(
@@ -428,17 +455,21 @@ Set-Alias -Name base64-to-guid -Value ConvertTo-GuidFromBase64 -Scope Global -Er
 <#
 .SYNOPSIS
     Converts a GUID to UUID format.
+
 .DESCRIPTION
     Converts a GUID string to UUID format (they're the same format, just different names).
+
 .PARAMETER Guid
     The GUID string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the GUID as a UUID string.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-GuidToUuid
     
     Converts GUID to UUID format (same format).
-.OUTPUTS
-    System.String
-    Returns the GUID as a UUID string.
 #>
 Set-Item -Path Function:Global:ConvertFrom-GuidToUuid -Value {
     param(
@@ -457,19 +488,24 @@ Set-Alias -Name guid-to-uuid -Value ConvertFrom-GuidToUuid -Scope Global -ErrorA
 <#
 .SYNOPSIS
     Converts a UUID to GUID format.
+
 .DESCRIPTION
     Converts a UUID string to GUID format (they're the same format, just different names).
+
 .PARAMETER Uuid
     The UUID string to convert.
+
 .PARAMETER RegistryFormat
     Return the GUID in Windows registry format with braces.
+
+.OUTPUTS
+    System.String
+    Returns the UUID as a GUID string.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertTo-GuidFromUuid
     
     Converts UUID to GUID format (same format).
-.OUTPUTS
-    System.String
-    Returns the UUID as a GUID string.
 #>
 Set-Item -Path Function:Global:ConvertTo-GuidFromUuid -Value {
     param(
@@ -489,30 +525,38 @@ Set-Alias -Name uuid-to-guid -Value ConvertTo-GuidFromUuid -Scope Global -ErrorA
 <#
 .SYNOPSIS
     Generates a new GUID (Globally Unique Identifier).
+
 .DESCRIPTION
     Generates a new GUID using .NET Guid.NewGuid().
     Can return the GUID in various formats.
+
 .PARAMETER RegistryFormat
     Return the GUID in Windows registry format with braces.
+
 .PARAMETER AsHex
     Return the GUID as hexadecimal string without dashes.
+
 .PARAMETER AsBase64
     Return the GUID as Base64 encoded string.
+
+.OUTPUTS
+    System.String
+    Returns a new GUID in the specified format.
+
 .EXAMPLE
     New-Guid
     
     Generates a new GUID in standard format.
+
 .EXAMPLE
     New-Guid -RegistryFormat
     
     Generates a new GUID in Windows registry format.
+
 .EXAMPLE
     New-Guid -AsHex
     
     Generates a new GUID in hexadecimal format.
-.OUTPUTS
-    System.String
-    Returns a new GUID in the specified format.
 #>
 Set-Item -Path Function:Global:New-Guid -Value {
     param(

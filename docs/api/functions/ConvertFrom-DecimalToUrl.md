@@ -30,10 +30,11 @@ System.String The URL/percent encoded representation of the input decimal string
 
 ### Example 1
 
-`powershell
+```powershell
 "72 105" | ConvertFrom-DecimalToUrl
-    Converts decimal to URL encoding.
-``
+```
+
+Converts decimal to URL encoding.
 
 ## Aliases
 

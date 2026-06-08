@@ -128,9 +128,6 @@ function Update-HelmRelease {
     Arguments to pass to helm list.
 
 .EXAMPLE
-    Get-HelmReleases
-
-.EXAMPLE
     Get-HelmReleases --all-namespaces
 #>
 function Get-HelmReleases {

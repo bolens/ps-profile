@@ -34,17 +34,19 @@ System.String. Output from Python execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-PythonScript script.py
-        Runs a Python script.
-``
+```
+
+Runs a Python script.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-PythonScript -Arguments @('-c', 'print("Hello")')
-        Runs a Python one-liner.
-``
+```
+
+Runs a Python one-liner.
 
 ## Source
 

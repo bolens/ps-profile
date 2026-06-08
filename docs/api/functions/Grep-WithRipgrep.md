@@ -58,27 +58,27 @@ System.String. Search results from ripgrep.
 
 ### Example 1
 
-`powershell
+```powershell
 Grep-WithRipgrep -Pattern "function"
-    
-    Searches for "function" in all files in current directory.
-``
+```
+
+Searches for "function" in all files in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Grep-WithRipgrep -Pattern "error" -FileType "ps1" -Context 3
-    
-    Searches for "error" in PowerShell files with 3 lines of context.
-``
+```
+
+Searches for "error" in PowerShell files with 3 lines of context.
 
 ### Example 3
 
-`powershell
+```powershell
 Grep-WithRipgrep -Pattern "TODO" -FilesWithMatches
-    
-    Lists only files containing "TODO".
-``
+```
+
+Lists only files containing "TODO".
 
 ## Aliases
 

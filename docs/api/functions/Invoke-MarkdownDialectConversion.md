@@ -37,9 +37,9 @@ Target dialect alias or pandoc writer format.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-MarkdownDialectConversion -InputPath note.md -From obsidian -To gfm
-``
+```
 
 ## Aliases
 

@@ -25,15 +25,9 @@ Arguments to pass to vue serve.
 
 ### Example 1
 
-`powershell
-Start-VueDev
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-VueDev --port 8080
-``
+```
 
 ## Aliases
 

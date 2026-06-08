@@ -30,17 +30,19 @@ System.Diagnostics.Process. Process object for MongoDB Compass.
 
 ### Example 1
 
-`powershell
-Start-MongoDbCompass
-        Launches MongoDB Compass GUI.
-``
+```powershell
+Start-MongoDbCompass -ConnectionString 'value'
+```
+
+Launches MongoDB Compass GUI.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-MongoDbCompass -ConnectionString "mongodb://localhost:27017"
-        Launches MongoDB Compass with a connection string.
-``
+```
+
+Launches MongoDB Compass with a connection string.
 
 ## Aliases
 

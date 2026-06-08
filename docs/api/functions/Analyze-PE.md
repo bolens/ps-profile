@@ -38,11 +38,11 @@ System.String. Analysis results or path to output file.
 
 ### Example 1
 
-`powershell
+```powershell
 Analyze-PE -InputFile "app.exe"
-        
-        Analyzes a PE file and displays results.
-``
+```
+
+Analyzes a PE file and displays results.
 
 ## Source
 

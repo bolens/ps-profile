@@ -29,10 +29,11 @@ Remote name to search.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-ConanPackage boost
-        Searches for boost packages.
-``
+```
+
+Searches for boost packages.
 
 ## Aliases
 

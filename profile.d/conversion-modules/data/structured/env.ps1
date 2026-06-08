@@ -517,20 +517,25 @@ function Initialize-FileConversion-Env {
 <#
 .SYNOPSIS
     Converts a .env file to JSON format.
+
 .DESCRIPTION
     Converts a .env file (environment variables) to JSON format.
     Parses key=value pairs and converts them to a JSON object.
+
 .PARAMETER InputPath
     The path to the .env file.
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output JSON file.
+
 .EXAMPLE
     ConvertFrom-EnvToJson -InputPath '.env'
     
     Converts .env to .env.json.
-.OUTPUTS
-    System.String
-    Returns the path to the output JSON file.
 #>
 function ConvertFrom-EnvToJson {
     param(
@@ -547,20 +552,25 @@ Set-Alias -Name env-to-json -Value ConvertFrom-EnvToJson -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a JSON file to .env format.
+
 .DESCRIPTION
     Converts a JSON object to .env file format (key=value pairs).
     Each property in the JSON object becomes a key=value line in the .env file.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output .env file. If not specified, uses input path with .env extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output .env file.
+
 .EXAMPLE
     ConvertTo-EnvFromJson -InputPath 'config.json'
     
     Converts config.json to config.env.
-.OUTPUTS
-    System.String
-    Returns the path to the output .env file.
 #>
 function ConvertTo-EnvFromJson {
     param(
@@ -577,19 +587,24 @@ Set-Alias -Name json-to-env -Value ConvertTo-EnvFromJson -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a .env file to YAML format.
+
 .DESCRIPTION
     Converts a .env file to YAML format via JSON intermediate conversion.
+
 .PARAMETER InputPath
     The path to the .env file.
+
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output YAML file.
+
 .EXAMPLE
     ConvertFrom-EnvToYaml -InputPath '.env'
     
     Converts .env to .env.yaml.
-.OUTPUTS
-    System.String
-    Returns the path to the output YAML file.
 #>
 function ConvertFrom-EnvToYaml {
     param(
@@ -606,19 +621,24 @@ Set-Alias -Name env-to-yaml -Value ConvertFrom-EnvToYaml -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a YAML file to .env format.
+
 .DESCRIPTION
     Converts a YAML file to .env format via JSON intermediate conversion.
+
 .PARAMETER InputPath
     The path to the YAML file.
+
 .PARAMETER OutputPath
     The path for the output .env file. If not specified, uses input path with .env extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output .env file.
+
 .EXAMPLE
     ConvertTo-EnvFromYaml -InputPath 'config.yaml'
     
     Converts config.yaml to config.env.
-.OUTPUTS
-    System.String
-    Returns the path to the output .env file.
 #>
 function ConvertTo-EnvFromYaml {
     param(
@@ -635,20 +655,25 @@ Set-Alias -Name yaml-to-env -Value ConvertTo-EnvFromYaml -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a .env file to INI format.
+
 .DESCRIPTION
     Converts a .env file to INI format.
     All key-value pairs are placed in an [env] section.
+
 .PARAMETER InputPath
     The path to the .env file.
+
 .PARAMETER OutputPath
     The path for the output INI file. If not specified, uses input path with .ini extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output INI file.
+
 .EXAMPLE
     ConvertFrom-EnvToIni -InputPath '.env'
     
     Converts .env to .env.ini.
-.OUTPUTS
-    System.String
-    Returns the path to the output INI file.
 #>
 function ConvertFrom-EnvToIni {
     param(
@@ -665,20 +690,25 @@ Set-Alias -Name env-to-ini -Value ConvertFrom-EnvToIni -Scope Global -ErrorActio
 <#
 .SYNOPSIS
     Converts an INI file to .env format.
+
 .DESCRIPTION
     Converts an INI file to .env format via JSON intermediate conversion.
     All sections are flattened into key=value pairs.
+
 .PARAMETER InputPath
     The path to the INI file.
+
 .PARAMETER OutputPath
     The path for the output .env file. If not specified, uses input path with .env extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output .env file.
+
 .EXAMPLE
     ConvertTo-EnvFromIni -InputPath 'config.ini'
     
     Converts config.ini to config.env.
-.OUTPUTS
-    System.String
-    Returns the path to the output .env file.
 #>
 function ConvertTo-EnvFromIni {
     param(

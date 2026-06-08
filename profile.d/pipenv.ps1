@@ -82,19 +82,19 @@ if (Test-CachedCommand pipenv) {
     Set-AgentModeAlias -Name 'pipenvremove' -Target 'Remove-PipenvPackage'
     # Pipenv update - update packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates packages using Pipenv.
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
     .PARAMETER Packages
         Package names to update (optional, updates all if omitted).
     .EXAMPLE
-        Update-PipenvPackages
+    Update-PipenvPackages -Packages 'package-name'
         Updates all packages.
     .EXAMPLE
         Update-PipenvPackages requests
         Updates requests package.
-    #>
+#>
     function Update-PipenvPackages {
         [CmdletBinding()]
         param(

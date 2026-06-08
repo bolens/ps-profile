@@ -25,15 +25,15 @@ Name of the model to run.
 
 ### Example 1
 
-`powershell
+```powershell
 Start-OllamaModel -Model "llama2"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Start-OllamaModel -Model "mistral"
-``
+```
 
 ## Aliases
 

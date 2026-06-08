@@ -29,11 +29,11 @@ Output format: json, table. Defaults to table.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-OSVScan -Path "C:\Projects\MyProject"
-    
-        Scans the project for known vulnerabilities.
-``
+```
+
+Scans the project for known vulnerabilities.
 
 ## Aliases
 

@@ -34,11 +34,11 @@ System.String Returns the path to the output HJSON file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-HjsonFromYaml -InputPath 'config.yaml'
-    
-    Converts config.yaml to config.hjson.
-``
+```
+
+Converts config.yaml to config.hjson.
 
 ## Aliases
 

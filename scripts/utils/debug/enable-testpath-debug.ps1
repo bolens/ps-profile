@@ -14,7 +14,7 @@
 
 .EXAMPLE
     .\enable-testpath-debug.ps1
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestFile 'tests/unit/test-support.tests.ps1'
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestFile 'tests/unit/test-support/test-support.tests.ps1'
 #>
 
 $env:PS_PROFILE_DEBUG_TESTPATH = 'verbose'

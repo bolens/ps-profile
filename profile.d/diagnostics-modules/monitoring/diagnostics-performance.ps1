@@ -616,7 +616,7 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Wraps the current prompt function with performance timing.
     
     .DESCRIPTION
@@ -631,10 +631,9 @@ try {
         to ensure the wrapper captures the final prompt function.
     
     .EXAMPLE
-        Update-PerformanceInsightsPrompt
-        
+    Update-PerformanceInsightsPrompt
         Wraps the current prompt function with performance timing.
-    #>
+#>
     function Update-PerformanceInsightsPrompt {
         $currentPrompt = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
         if ($currentPrompt) {

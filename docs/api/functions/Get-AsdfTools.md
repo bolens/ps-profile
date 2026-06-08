@@ -25,17 +25,19 @@ Tool name (optional, shows all if omitted).
 
 ### Example 1
 
-`powershell
-Get-AsdfTools
-        Lists all installed tools.
-``
+```powershell
+Get-AsdfTools -Tool 'value'
+```
+
+Lists all installed tools.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-AsdfTools nodejs
-        Lists installed Node.js versions.
-``
+```
+
+Lists installed Node.js versions.
 
 ## Aliases
 

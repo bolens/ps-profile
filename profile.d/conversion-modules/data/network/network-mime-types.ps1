@@ -225,21 +225,26 @@ function Initialize-FileConversion-NetworkMimeTypes {
 <#
 .SYNOPSIS
     Parses a MIME type into its components.
+
 .DESCRIPTION
     Parses a MIME type string (type/subtype; parameter=value) into its components.
+
 .PARAMETER MimeType
     The MIME type string to parse.
+
+.OUTPUTS
+    PSCustomObject
+    Returns an object with properties: Type, Subtype, Parameters, Extensions.
+
 .EXAMPLE
     Parse-MimeType -MimeType "application/json; charset=utf-8"
     
     Parses MIME type and returns components.
+
 .EXAMPLE
     "text/html" | Parse-MimeType
     
     Parses MIME type from pipeline.
-.OUTPUTS
-    PSCustomObject
-    Returns an object with properties: Type, Subtype, Parameters, Extensions.
 #>
 function Parse-MimeType {
     param(
@@ -276,21 +281,26 @@ Set-AgentModeAlias -Name 'parse-mime' -Target 'Parse-MimeType'
 <#
 .SYNOPSIS
     Gets MIME type from a file extension.
+
 .DESCRIPTION
     Returns the MIME type associated with a given file extension.
+
 .PARAMETER Extension
     The file extension (with or without leading dot).
+
+.OUTPUTS
+    System.String
+    Returns the MIME type string, or empty string if not found.
+
 .EXAMPLE
     Get-MimeTypeFromExtension -Extension "json"
     
     Returns "application/json".
+
 .EXAMPLE
     ".html" | Get-MimeTypeFromExtension
     
     Returns "text/html" from pipeline.
-.OUTPUTS
-    System.String
-    Returns the MIME type string, or empty string if not found.
 #>
 function Get-MimeTypeFromExtension {
     param(
@@ -320,21 +330,26 @@ Set-AgentModeAlias -Name 'mime-from-ext' -Target 'Get-MimeTypeFromExtension'
 <#
 .SYNOPSIS
     Gets file extension(s) from a MIME type.
+
 .DESCRIPTION
     Returns the file extension(s) associated with a given MIME type.
+
 .PARAMETER MimeType
     The MIME type string.
+
+.OUTPUTS
+    System.String[] or System.String
+    Returns the file extension(s), or empty array if not found.
+
 .EXAMPLE
     Get-ExtensionFromMimeType -MimeType "application/json"
     
     Returns "json".
+
 .EXAMPLE
     "image/png" | Get-ExtensionFromMimeType
     
     Returns "png" from pipeline.
-.OUTPUTS
-    System.String[] or System.String
-    Returns the file extension(s), or empty array if not found.
 #>
 function Get-ExtensionFromMimeType {
     param(
@@ -365,18 +380,23 @@ Set-AgentModeAlias -Name 'ext-from-mime' -Target 'Get-ExtensionFromMimeType'
 <#
 .SYNOPSIS
     Converts MIME type file to JSON format.
+
 .DESCRIPTION
     Parses a MIME type from a file and converts it to structured JSON format.
+
 .PARAMETER InputPath
     The path to the file containing the MIME type (.mime or .mimetype extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-MimeTypeToJson -InputPath "mime.mime"
     
     Converts mime.mime to mime.json.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-MimeTypeToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -398,18 +418,23 @@ Set-AgentModeAlias -Name 'mime-to-json' -Target 'ConvertFrom-MimeTypeToJson'
 <#
 .SYNOPSIS
     Converts JSON file to MIME type format.
+
 .DESCRIPTION
     Converts a structured JSON file (with MIME type components) to MIME type format.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output MIME type file. If not specified, uses input path with .mime extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-MimeTypeFromJson -InputPath "mime.json"
     
     Converts mime.json to mime.mime.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-MimeTypeFromJson {
     param([string]$InputPath, [string]$OutputPath)

@@ -8,7 +8,7 @@ Write-Host ""
 $ErrorActionPreference = 'Stop'
 Import-Module Pester -MinimumVersion 5.0 -ErrorAction Stop
 
-$result = Invoke-Pester -Path 'tests/unit/test-support.tests.ps1' -PassThru -Quiet
+$result = Invoke-Pester -Path 'tests/unit/test-support/test-support.tests.ps1' -PassThru -Quiet
 
 Write-Host ""
 Write-Host "=== Test Results ===" -ForegroundColor Cyan

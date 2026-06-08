@@ -23,16 +23,16 @@ The prompt function to check.
 
 ## Outputs
 
-System.Boolean .EXAMPLE Test-PromptNeedsReplacement
+System.Boolean
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Test-PromptNeedsReplacement
-``
+```powershell
+Test-PromptNeedsReplacement -PromptCmd 'value'
+```
 
 ## Source
 

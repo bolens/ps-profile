@@ -29,9 +29,9 @@ Path for the output RTF file. If not specified, uses input path with .rtf extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-RtfFromMarkdown -InputPath "document.md" -OutputPath "document.rtf"
-``
+```
 
 ## Aliases
 

@@ -30,10 +30,11 @@ System.String The Base32 representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "48656C6C6F" | ConvertFrom-HexToBase32
-    Converts hex to Base32.
-``
+```
+
+Converts hex to Base32.
 
 ## Aliases
 

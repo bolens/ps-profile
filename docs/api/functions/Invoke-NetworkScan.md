@@ -33,19 +33,19 @@ Output format: text, json. Defaults to text.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-NetworkScan -Target "192.168.1.0/24"
-        
-        Scans the specified network using sniffnet.
-``
+```
+
+Scans the specified network using sniffnet.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-NetworkScan -Target "192.168.1.1" -Tool "trippy"
-        
-        Performs network diagnostics on the target using trippy.
-``
+```
+
+Performs network diagnostics on the target using trippy.
 
 ## Source
 

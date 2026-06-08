@@ -34,10 +34,11 @@ System.String The binary representation of the input octal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "110 151" | ConvertFrom-OctalToBinary
-    Converts octal to binary.
-``
+```
+
+Converts octal to binary.
 
 ## Aliases
 

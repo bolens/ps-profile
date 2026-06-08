@@ -38,11 +38,11 @@ System.String. Path to the output file.
 
 ### Example 1
 
-`powershell
+```powershell
 Decompile-DotNet -InputFile "app.dll"
-        
-        Decompiles a .NET assembly to C# source.
-``
+```
+
+Decompiles a .NET assembly to C# source.
 
 ## Source
 

@@ -33,9 +33,9 @@ Audio bitrate in kbps (default: 192).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OggToMp3 -InputPath "audio.ogg" -OutputPath "audio.mp3"
-``
+```
 
 ## Aliases
 

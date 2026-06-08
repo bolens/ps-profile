@@ -38,48 +38,60 @@ try {
     .SYNOPSIS
         Registers a package manager with standardized commands.
     
+
     .DESCRIPTION
         Creates a standardized set of functions for a package manager.
         Handles install, uninstall, list, update, and run commands.
     
+
     .PARAMETER ManagerName
         Name of the package manager (e.g., 'Npm', 'Pip', 'Cargo').
     
+
     .PARAMETER CommandName
         Name of the CLI command (e.g., 'npm', 'pip', 'cargo').
     
+
     .PARAMETER InstallCommand
         Command for installing packages (default: 'install').
     
+
     .PARAMETER UninstallCommand
         Command for uninstalling packages (default: 'uninstall').
     
+
     .PARAMETER ListCommand
         Command for listing packages (default: 'list').
     
+
     .PARAMETER UpdateCommand
         Command for updating packages (default: 'update').
     
+
     .PARAMETER RunCommand
         Command for running scripts (default: 'run').
     
+
     .PARAMETER LockFile
         Optional lock file name (e.g., 'package-lock.json', 'Cargo.lock').
     
+
     .PARAMETER GlobalFlag
         Flag for global installs (e.g., '-g' for npm, '--user' for pip).
     
+
     .PARAMETER CustomCommands
         Hashtable of custom command names to script blocks.
     
+
+    .OUTPUTS
+        System.Boolean. True if registration successful, false otherwise.
+
     .EXAMPLE
         Register-PackageManager -ManagerName 'Npm' -CommandName 'npm' `
             -InstallCommand 'install' -GlobalFlag '-g' -LockFile 'package-lock.json'
         
         Registers npm package manager with standard commands.
-    
-    .OUTPUTS
-        System.Boolean. True if registration successful, false otherwise.
     #>
     function Register-PackageManager {
         [CmdletBinding()]

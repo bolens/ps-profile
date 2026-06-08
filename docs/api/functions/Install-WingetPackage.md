@@ -33,17 +33,19 @@ Source to install from (--source).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-WingetPackage Microsoft.VisualStudioCode
-        Installs Visual Studio Code.
-``
+```
+
+Installs Visual Studio Code.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-WingetPackage Git.Git -Version 2.40.0
-        Installs a specific version of Git.
-``
+```
+
+Installs a specific version of Git.
 
 ## Aliases
 

@@ -25,17 +25,19 @@ Runtime names and versions to install (e.g., 'nodejs@20', 'python@3.11').
 
 ### Example 1
 
-`powershell
+```powershell
 Install-MiseRuntime nodejs@20
-        Installs Node.js version 20.
-``
+```
+
+Installs Node.js version 20.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-MiseRuntime python@3.11,nodejs@20
-        Installs multiple runtimes.
-``
+```
+
+Installs multiple runtimes.
 
 ## Aliases
 

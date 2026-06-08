@@ -37,24 +37,27 @@ Remove from production dependencies (--save-prod, default).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-NpmPackage express
-        Removes express from production dependencies.
-``
+```
+
+Removes express from production dependencies.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-NpmPackage typescript -Dev
-        Removes typescript from dev dependencies.
-``
+```
+
+Removes typescript from dev dependencies.
 
 ### Example 3
 
-`powershell
+```powershell
 Remove-NpmPackage nodemon -Global
-        Removes nodemon from global packages.
-``
+```
+
+Removes nodemon from global packages.
 
 ## Aliases
 

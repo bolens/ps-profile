@@ -29,9 +29,9 @@ Path for the output ODP file. If not specified, uses input path with .odp extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-OdpFromPptx -InputPath "presentation.pptx" -OutputPath "presentation.odp"
-``
+```
 
 ## Aliases
 

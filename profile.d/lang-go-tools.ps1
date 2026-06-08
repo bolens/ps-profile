@@ -32,33 +32,38 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Creates Go project releases using goreleaser.
+
 
     .DESCRIPTION
         Wrapper function for goreleaser, which automates the release process for
         Go projects including building binaries for multiple platforms, creating
         archives, and publishing releases.
 
+
     .PARAMETER Arguments
         Additional arguments to pass to goreleaser.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from goreleaser execution.
+
     .EXAMPLE
-        Release-GoProject
+    Release-GoProject
         Creates a release using goreleaser.
+
 
     .EXAMPLE
         Release-GoProject --snapshot
         Creates a snapshot release (dry-run).
 
+
     .EXAMPLE
         Release-GoProject --skip-publish
         Builds release artifacts without publishing.
-
-    .OUTPUTS
-        System.String. Output from goreleaser execution.
-    #>
+#>
     function Release-GoProject {
         [CmdletBinding()]
         [OutputType([string])]
@@ -107,35 +112,41 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Runs mage build targets for Go projects.
+
 
     .DESCRIPTION
         Wrapper function for mage, a build tool for Go that uses magefiles
         (Go files) to define build targets instead of Makefiles.
 
+
     .PARAMETER Target
         Mage target to run (optional, lists targets if not specified).
+
 
     .PARAMETER Arguments
         Additional arguments to pass to mage.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from mage execution.
+
     .EXAMPLE
-        Invoke-Mage
+    Invoke-Mage -Target 'value'
         Lists available mage targets.
+
 
     .EXAMPLE
         Invoke-Mage build
         Runs the 'build' target.
 
+
     .EXAMPLE
         Invoke-Mage test -v
         Runs the 'test' target with verbose output.
-
-    .OUTPUTS
-        System.String. Output from mage execution.
-    #>
+#>
     function Invoke-Mage {
         [CmdletBinding()]
         [OutputType([string])]
@@ -202,32 +213,37 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Lints Go code using golangci-lint.
+
 
     .DESCRIPTION
         Wrapper function for golangci-lint, a fast linter for Go code that runs
         multiple linters in parallel.
 
+
     .PARAMETER Arguments
         Additional arguments to pass to golangci-lint.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from golangci-lint execution.
+
     .EXAMPLE
-        Lint-GoProject
+    Lint-GoProject
         Lints the current Go project.
+
 
     .EXAMPLE
         Lint-GoProject --fix
         Lints and automatically fixes issues where possible.
 
+
     .EXAMPLE
         Lint-GoProject ./...
         Lints all packages recursively.
-
-    .OUTPUTS
-        System.String. Output from golangci-lint execution.
-    #>
+#>
     function Lint-GoProject {
         [CmdletBinding()]
         [OutputType([string])]
@@ -276,35 +292,41 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds a Go project with common optimizations.
+
 
     .DESCRIPTION
         Wrapper function for building Go projects. This runs 'go build' with
         common flags for production builds.
 
+
     .PARAMETER Output
         Output binary name or path (optional).
+
 
     .PARAMETER Arguments
         Additional arguments to pass to go build.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from go build execution.
+
     .EXAMPLE
-        Build-GoProject
+    Build-GoProject -Output 'value'
         Builds the current Go project.
+
 
     .EXAMPLE
         Build-GoProject -Output myapp
         Builds and names the output binary 'myapp'.
 
+
     .EXAMPLE
         Build-GoProject -Arguments @('-ldflags', '-s -w')
         Builds with linker flags to strip symbols.
-
-    .OUTPUTS
-        System.String. Output from go build execution.
-    #>
+#>
     function Build-GoProject {
         [CmdletBinding()]
         [OutputType([string])]
@@ -382,38 +404,45 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Runs Go tests with common options.
+
 
     .DESCRIPTION
         Wrapper function for running Go tests. This runs 'go test' with
         common flags for verbose output and coverage.
 
+
     .PARAMETER VerboseOutput
         Enable verbose test output (-v flag).
 
+
     .PARAMETER Coverage
         Generate coverage report (-cover flag).
+
 
     .PARAMETER Arguments
         Additional arguments to pass to go test.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from go test execution.
+
     .EXAMPLE
-        Test-GoProject
+    Test-GoProject
         Runs tests in the current package.
+
 
     .EXAMPLE
         Test-GoProject -VerboseOutput
         Runs tests with verbose output.
 
+
     .EXAMPLE
         Test-GoProject -Coverage ./...
         Runs tests with coverage for all packages.
-
-    .OUTPUTS
-        System.String. Output from go test execution.
-    #>
+#>
     function Test-GoProject {
         [CmdletBinding()]
         [OutputType([string])]

@@ -25,15 +25,9 @@ Arguments to pass to next start.
 
 ### Example 1
 
-`powershell
-Start-NextJsProduction
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-NextJsProduction --port 3000
-``
+```
 
 ## Aliases
 

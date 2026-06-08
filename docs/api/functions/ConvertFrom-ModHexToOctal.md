@@ -34,10 +34,11 @@ System.String The octal representation of the input ModHex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "hkkllkkl" | ConvertFrom-ModHexToOctal
-    Converts ModHex to octal.
-``
+```
+
+Converts ModHex to octal.
 
 ## Aliases
 

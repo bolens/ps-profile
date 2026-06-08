@@ -46,19 +46,19 @@ System.String. Resource description or YAML.
 
 ### Example 1
 
-`powershell
+```powershell
 Describe-KubeResource -ResourceType "pods" -ResourceName "my-pod"
-        
-        Describes the my-pod pod.
-``
+```
+
+Describes the my-pod pod.
 
 ### Example 2
 
-`powershell
+```powershell
 Describe-KubeResource -ResourceType "deployments" -Namespace "production" -ShowYaml
-        
-        Shows YAML for all deployments in production namespace.
-``
+```
+
+Shows YAML for all deployments in production namespace.
 
 ## Source
 

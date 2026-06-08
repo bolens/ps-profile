@@ -41,9 +41,9 @@ Output format for results: Object (default), Text, or Json.
 
 ### Example 1
 
-`powershell
+```powershell
 Compare-RegexDescriptions -Left 'email' -Right 'email address' -IncludePatterns
-``
+```
 
 ## Aliases
 

@@ -25,15 +25,15 @@ Arguments to pass to Vue CLI.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Vue --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Vue create my-app
-``
+```
 
 ## Aliases
 

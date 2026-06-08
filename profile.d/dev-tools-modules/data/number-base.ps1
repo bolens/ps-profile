@@ -58,23 +58,30 @@ function Initialize-DevTools-NumberBase {
 <#
 .SYNOPSIS
     Converts numbers between different bases.
+
 .DESCRIPTION
     Converts numbers between Binary, Octal, Decimal, and Hexadecimal bases.
+
 .PARAMETER Number
     The number to convert (as a string).
+
 .PARAMETER FromBase
     The base of the input number. Default is Decimal.
+
 .PARAMETER ToBase
     The base to convert to. Default is Hexadecimal.
-.EXAMPLE
-    Convert-NumberBase -Number "255" -FromBase Decimal -ToBase Hexadecimal
-    Converts 255 from decimal to hexadecimal (FF).
-.EXAMPLE
-    Convert-NumberBase -Number "1010" -FromBase Binary -ToBase Decimal
-    Converts binary 1010 to decimal (10).
+
 .OUTPUTS
     PSCustomObject
     Object containing Original, FromBase, ToBase, and Result properties.
+
+.EXAMPLE
+    Convert-NumberBase -Number "255" -FromBase Decimal -ToBase Hexadecimal
+    Converts 255 from decimal to hexadecimal (FF).
+
+.EXAMPLE
+    Convert-NumberBase -Number "1010" -FromBase Binary -ToBase Decimal
+    Converts binary 1010 to decimal (10).
 #>
 function Convert-NumberBase {
     param(

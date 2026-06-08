@@ -33,27 +33,32 @@ try {
     .SYNOPSIS
         Runs Python scripts and commands.
 
+
     .DESCRIPTION
         Wrapper function for the Python interpreter that provides consistent
         execution across different Python installations.
 
+
     .PARAMETER Script
         Python script file to execute (optional).
+
 
     .PARAMETER Arguments
         Arguments to pass to Python or the script.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from Python execution.
+
     .EXAMPLE
         Invoke-PythonScript script.py
         Runs a Python script.
 
+
     .EXAMPLE
         Invoke-PythonScript -Arguments @('-c', 'print("Hello")')
         Runs a Python one-liner.
-
-    .OUTPUTS
-        System.String. Output from Python execution.
     #>
     function Invoke-PythonScript {
         [CmdletBinding()]
@@ -133,8 +138,9 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Creates a Python virtual environment.
+
 
     .DESCRIPTION
         Creates a Python virtual environment using the best available tool:
@@ -142,24 +148,28 @@ try {
         - python -m venv (if available) - standard library option
         Falls back gracefully if neither is available.
 
+
     .PARAMETER Path
         Path where the virtual environment should be created.
         Defaults to '.venv' in the current directory.
 
+
     .PARAMETER PythonVersion
         Python version to use (for uv only).
 
+
+    .OUTPUTS
+        System.String. Output from virtual environment creation.
+
     .EXAMPLE
-        New-PythonVirtualEnv
+    New-PythonVirtualEnv -Path ./path -PythonVersion 'value'
         Creates a virtual environment in .venv.
+
 
     .EXAMPLE
         New-PythonVirtualEnv -Path 'venv'
         Creates a virtual environment in 'venv'.
-
-    .OUTPUTS
-        System.String. Output from virtual environment creation.
-    #>
+#>
     function New-PythonVirtualEnv {
         [CmdletBinding()]
         [OutputType([string])]
@@ -252,6 +262,7 @@ try {
     .SYNOPSIS
         Creates a new Python project structure.
 
+
     .DESCRIPTION
         Creates a new Python project with a basic structure including:
         - Project directory
@@ -259,26 +270,31 @@ try {
         - .gitignore (Python-specific)
         - pyproject.toml or requirements.txt (depending on available tools)
 
+
     .PARAMETER Name
         Project name (also used as directory name).
+
 
     .PARAMETER Path
         Parent directory where the project should be created.
         Defaults to current directory.
 
+
     .PARAMETER UseUV
         Use uv for project initialization (if available).
+
+
+    .OUTPUTS
+        System.String. Path to the created project directory.
 
     .EXAMPLE
         New-PythonProject myproject
         Creates a new Python project named 'myproject'.
 
+
     .EXAMPLE
         New-PythonProject myproject -Path 'C:\Projects' -UseUV
         Creates a project using uv in the specified path.
-
-    .OUTPUTS
-        System.String. Path to the created project directory.
     #>
     function New-PythonProject {
         [CmdletBinding()]

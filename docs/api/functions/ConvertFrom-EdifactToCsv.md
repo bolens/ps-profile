@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EdifactToCsv -InputPath "message.edifact"
-    
-    Converts message.edifact to message.csv.
-``
+```
+
+Converts message.edifact to message.csv.
 
 ## Aliases
 

@@ -25,9 +25,9 @@ The path to the YAML file to convert.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-YamlToCsv -InputPath ./input.file
-``
+```
 
 ## Aliases
 

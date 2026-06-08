@@ -25,19 +25,19 @@ Optional namespace to open k9s in.
 
 ### Example 1
 
-`powershell
-Start-K9s
-        
-        Launches k9s with default settings.
-``
+```powershell
+Start-K9s -Namespace 'value'
+```
+
+Launches k9s with default settings.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-K9s -Namespace "production"
-        
-        Launches k9s in the production namespace.
-``
+```
+
+Launches k9s in the production namespace.
 
 ## Source
 

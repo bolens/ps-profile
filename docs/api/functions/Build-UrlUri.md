@@ -30,17 +30,11 @@ System.String Returns the constructed URL/URI string.
 
 ### Example 1
 
-`powershell
+```powershell
 $components = @{
-        Scheme = 'https'
-        Host = 'example.com'
-        Path = '/api/users'
-        QueryParameters = @{ id = '123' }
-    }
-    Build-UrlUri -Components $components
-    
-    Builds URL from components.
-``
+```
+
+Scheme = 'https' Host = 'example.com' Path = '/api/users' QueryParameters = @{ id = '123' } } Build-UrlUri -Components $components Builds URL from components.
 
 ## Aliases
 

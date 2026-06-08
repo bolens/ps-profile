@@ -33,9 +33,9 @@ Audio bitrate in kbps (default: 128).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-FlacToAac -InputPath "audio.flac" -OutputPath "audio.aac" -Bitrate 192
-``
+```
 
 ## Aliases
 

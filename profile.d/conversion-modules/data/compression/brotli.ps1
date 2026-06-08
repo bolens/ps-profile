@@ -119,27 +119,34 @@ function Initialize-FileConversion-CoreCompressionBrotli {
 <#
 .SYNOPSIS
     Compresses a file using Brotli compression.
+
 .DESCRIPTION
     Compresses a file using the Brotli compression algorithm.
     Brotli is a modern compression algorithm that provides better compression ratios than Gzip.
+
 .PARAMETER InputPath
     The path to the file to compress.
+
 .PARAMETER OutputPath
     The path for the output compressed file. If not specified, uses input path with .br extension.
+
 .PARAMETER Quality
     The compression quality level (Fastest, Optimal, NoCompression, SmallestSize).
     Default is Optimal.
+
+.OUTPUTS
+    System.String
+    Returns the path to the compressed file.
+
 .EXAMPLE
     Compress-Brotli -InputPath 'data.txt'
     
     Compresses data.txt to data.txt.br.
+
 .EXAMPLE
     Compress-Brotli -InputPath 'data.txt' -Quality Fastest
     
     Compresses data.txt with fastest compression.
-.OUTPUTS
-    System.String
-    Returns the path to the compressed file.
 #>
 Set-Item -Path Function:Global:Compress-Brotli -Value {
     param(
@@ -158,19 +165,24 @@ Set-Alias -Name brotli -Value Compress-Brotli -Scope Global -ErrorAction Silentl
 <#
 .SYNOPSIS
     Decompresses a Brotli compressed file.
+
 .DESCRIPTION
     Decompresses a file that was compressed using Brotli compression.
+
 .PARAMETER InputPath
     The path to the Brotli compressed file.
+
 .PARAMETER OutputPath
     The path for the output decompressed file. If not specified, removes .br extension from input path.
+
+.OUTPUTS
+    System.String
+    Returns the path to the decompressed file.
+
 .EXAMPLE
     Expand-Brotli -InputPath 'data.txt.br'
     
     Decompresses data.txt.br to data.txt.
-.OUTPUTS
-    System.String
-    Returns the path to the decompressed file.
 #>
 Set-Item -Path Function:Global:Expand-Brotli -Value {
     param(

@@ -22,9 +22,9 @@ No parameters.
 
 ### Example 1
 
-`powershell
-Install-YarnDependencies
-``
+```powershell
+Install-YarnDependencies 'package-name'
+```
 
 ## Aliases
 

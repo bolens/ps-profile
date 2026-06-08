@@ -29,17 +29,19 @@ Remove cask (GUI application).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-BrewPackage git
-        Removes git.
-``
+```
+
+Removes git.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-BrewPackage -Cask visual-studio-code
-        Removes Visual Studio Code cask.
-``
+```
+
+Removes Visual Studio Code cask.
 
 ## Aliases
 

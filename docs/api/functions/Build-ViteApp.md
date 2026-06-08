@@ -25,15 +25,9 @@ Arguments to pass to vite build.
 
 ### Example 1
 
-`powershell
-Build-ViteApp
-``
-
-### Example 2
-
-`powershell
+```powershell
 Build-ViteApp --mode production
-``
+```
 
 ## Aliases
 

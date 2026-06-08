@@ -34,19 +34,19 @@ System.Object. Credential information object.
 
 ### Example 1
 
-`powershell
+```powershell
 Export-AwsCredentials -Profile "production"
-    
-    Exports production profile credentials to environment variables.
-``
+```
+
+Exports production profile credentials to environment variables.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-AwsCredentials -Profile "dev" -ExportToEnv:$false
-    
-    Displays credentials without exporting them.
-``
+```
+
+Displays credentials without exporting them.
 
 ## Source
 

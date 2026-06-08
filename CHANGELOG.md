@@ -3,6 +3,7 @@
 ### 🚀 Features
 
 - Add bootstrap modules, doc tooling, compression/conversion utilities
+- *(conversion)* Add extended unit converters and doc tooling
 ## [1.8.0] - 2026-06-08
 
 ### 🚀 Features

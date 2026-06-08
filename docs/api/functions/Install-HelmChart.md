@@ -25,15 +25,15 @@ Arguments to pass to helm install.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-HelmChart my-release ./my-chart
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Install-HelmChart my-release bitnami/nginx
-``
+```
 
 ## Aliases
 

@@ -25,15 +25,9 @@ Arguments to pass to lazydocker.
 
 ### Example 1
 
-`powershell
-Invoke-LazyDocker
-``
-
-### Example 2
-
-`powershell
+```powershell
 Invoke-LazyDocker --help
-``
+```
 
 ## Aliases
 

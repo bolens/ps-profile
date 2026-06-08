@@ -29,17 +29,19 @@ Search for exact package name match.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-ChocoPackage git
-        Searches for packages containing "git".
-``
+```
+
+Searches for packages containing "git".
 
 ### Example 2
 
-`powershell
+```powershell
 Find-ChocoPackage git -Exact
-        Searches for exact package name "git".
-``
+```
+
+Searches for exact package name "git".
 
 ## Aliases
 

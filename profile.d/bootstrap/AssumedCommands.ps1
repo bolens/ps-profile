@@ -14,8 +14,7 @@
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Add-AssumedCommand
-
+    Add-AssumedCommand -Name 'name'
 #>
 function global:Add-AssumedCommand {
     [CmdletBinding()]
@@ -56,8 +55,7 @@ function global:Add-AssumedCommand {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Remove-AssumedCommand
-
+    Remove-AssumedCommand -Name 'name'
 #>
 function global:Remove-AssumedCommand {
     [CmdletBinding()]

@@ -25,11 +25,9 @@ DateTime value to convert. Defaults to the current local time.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-Epoch -date (Get-Date '2024-01-01')
-.PARAMETER date
-    DateTime value to convert. Defaults to the current local time.
-``
+```
 
 ## Aliases
 

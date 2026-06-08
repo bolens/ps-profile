@@ -50,22 +50,28 @@ function Initialize-DevTools-Hash {
 <#
 .SYNOPSIS
     Calculates cryptographic hash of text input.
+
 .DESCRIPTION
     Computes the hash value of text using the specified cryptographic algorithm.
     Supports MD5, SHA1, SHA256, SHA384, and SHA512 algorithms.
+
 .PARAMETER Text
     The text to hash. Can be piped.
+
 .PARAMETER Algorithm
     The hash algorithm to use. Default is SHA256.
-.EXAMPLE
-    "Hello World" | Get-TextHash
-    Calculates SHA256 hash of "Hello World".
-.EXAMPLE
-    "password" | Get-TextHash -Algorithm MD5
-    Calculates MD5 hash of "password".
+
 .OUTPUTS
     PSCustomObject
     Object containing Algorithm, Hash, and Text properties.
+
+.EXAMPLE
+    "Hello World" | Get-TextHash
+    Calculates SHA256 hash of "Hello World".
+
+.EXAMPLE
+    "password" | Get-TextHash -Algorithm MD5
+    Calculates MD5 hash of "password".
 #>
 function Get-TextHash {
     param(

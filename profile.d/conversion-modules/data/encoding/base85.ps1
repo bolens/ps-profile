@@ -260,18 +260,22 @@ function Initialize-FileConversion-CoreEncodingBase85 {
 <#
 .SYNOPSIS
     Converts ASCII text to Base85/Ascii85 encoding.
+
 .DESCRIPTION
     Encodes ASCII/UTF-8 text to Base85 format.
     Base85 is commonly used in PDF and PostScript files.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base85 encoded string.
+
 .EXAMPLE
     "Hello World" | ConvertFrom-AsciiToBase85
     
     Converts text to Base85 format.
-.OUTPUTS
-    System.String
-    Returns the Base85 encoded string.
 #>
 function ConvertFrom-AsciiToBase85 {
     param(
@@ -288,17 +292,21 @@ Set-Alias -Name ascii-to-ascii85 -Value ConvertFrom-AsciiToBase85 -Scope Global 
 <#
 .SYNOPSIS
     Converts Base85/Ascii85 encoding to ASCII text.
+
 .DESCRIPTION
     Decodes Base85 encoded string back to ASCII/UTF-8 text.
+
 .PARAMETER InputObject
     The Base85 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "87cURD]j7BEbo7" | ConvertFrom-Base85ToAscii
     
     Converts Base85 to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-Base85ToAscii {
     param(
@@ -315,17 +323,21 @@ Set-Alias -Name ascii85-to-ascii -Value ConvertFrom-Base85ToAscii -Scope Global 
 <#
 .SYNOPSIS
     Converts hexadecimal string to Base85 encoding.
+
 .DESCRIPTION
     Encodes a hexadecimal string to Base85 format.
+
 .PARAMETER InputObject
     The hexadecimal string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Base85 encoded string.
+
 .EXAMPLE
     "48656C6C6F" | ConvertFrom-HexToBase85
     
     Converts hex to Base85 format.
-.OUTPUTS
-    System.String
-    Returns the Base85 encoded string.
 #>
 function ConvertFrom-HexToBase85 {
     param(
@@ -341,17 +353,21 @@ Set-Alias -Name hex-to-base85 -Value ConvertFrom-HexToBase85 -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base85 encoding to hexadecimal string.
+
 .DESCRIPTION
     Decodes Base85 encoded string to hexadecimal format.
+
 .PARAMETER InputObject
     The Base85 encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the hexadecimal string.
+
 .EXAMPLE
     "87cURD]j7BEbo7" | ConvertFrom-Base85ToHex
     
     Converts Base85 to hex format.
-.OUTPUTS
-    System.String
-    Returns the hexadecimal string.
 #>
 function ConvertFrom-Base85ToHex {
     param(
@@ -367,17 +383,21 @@ Set-Alias -Name base85-to-hex -Value ConvertFrom-Base85ToHex -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts Base64 encoding to Base85 encoding.
+
 .DESCRIPTION
     Converts a Base64 encoded string to Base85 format.
+
 .PARAMETER InputObject
     The Base64 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base85 encoded string.
+
 .EXAMPLE
     "SGVsbG8gV29ybGQ=" | ConvertFrom-Base64ToBase85
     
     Converts Base64 to Base85 format.
-.OUTPUTS
-    System.String
-    Returns the Base85 encoded string.
 #>
 function ConvertFrom-Base64ToBase85 {
     param(
@@ -393,17 +413,21 @@ Set-Alias -Name base64-to-base85 -Value ConvertFrom-Base64ToBase85 -Scope Global
 <#
 .SYNOPSIS
     Converts Base85 encoding to Base64 encoding.
+
 .DESCRIPTION
     Converts a Base85 encoded string to Base64 format.
+
 .PARAMETER InputObject
     The Base85 encoded string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the Base64 encoded string.
+
 .EXAMPLE
     "87cURD]j7BEbo7" | ConvertFrom-Base85ToBase64
     
     Converts Base85 to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the Base64 encoded string.
 #>
 function ConvertFrom-Base85ToBase64 {
     param(

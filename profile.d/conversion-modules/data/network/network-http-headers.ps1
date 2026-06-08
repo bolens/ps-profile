@@ -168,11 +168,18 @@ function Initialize-FileConversion-NetworkHttpHeaders {
 <#
 .SYNOPSIS
     Parses HTTP headers into a hashtable.
+
 .DESCRIPTION
     Parses HTTP headers (Header-Name: value format) into a hashtable.
     Supports multi-line header values and multiple headers with the same name.
+
 .PARAMETER Headers
     The HTTP headers string to parse.
+
+.OUTPUTS
+    Hashtable
+    Returns a hashtable with header names as keys and values.
+
 .EXAMPLE
     $headers = @"
 Content-Type: application/json
@@ -181,13 +188,11 @@ Authorization: Bearer token123
     Parse-HttpHeaders -Headers $headers
     
     Parses headers and returns hashtable.
+
 .EXAMPLE
     Get-Content headers.txt | Parse-HttpHeaders
     
     Parses headers from pipeline.
-.OUTPUTS
-    Hashtable
-    Returns a hashtable with header names as keys and values.
 #>
 function Parse-HttpHeaders {
     param(
@@ -218,10 +223,17 @@ Set-AgentModeAlias -Name 'parse-headers' -Target 'Parse-HttpHeaders'
 <#
 .SYNOPSIS
     Builds HTTP headers from a hashtable.
+
 .DESCRIPTION
     Constructs HTTP headers string from a hashtable or object containing header name-value pairs.
+
 .PARAMETER Headers
     Hashtable or object with HTTP headers.
+
+.OUTPUTS
+    System.String
+    Returns the constructed HTTP headers string.
+
 .EXAMPLE
     $headers = @{
         'Content-Type' = 'application/json'
@@ -230,9 +242,6 @@ Set-AgentModeAlias -Name 'parse-headers' -Target 'Parse-HttpHeaders'
     Build-HttpHeaders -Headers $headers
     
     Builds headers string from hashtable.
-.OUTPUTS
-    System.String
-    Returns the constructed HTTP headers string.
 #>
 function Build-HttpHeaders {
     param(
@@ -257,18 +266,23 @@ Set-AgentModeAlias -Name 'build-headers' -Target 'Build-HttpHeaders'
 <#
 .SYNOPSIS
     Converts HTTP headers file to JSON format.
+
 .DESCRIPTION
     Parses HTTP headers from a file and converts them to structured JSON format.
+
 .PARAMETER InputPath
     The path to the file containing HTTP headers (.headers or .http extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-HttpHeadersToJson -InputPath "headers.headers"
     
     Converts headers.headers to headers.json.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-HttpHeadersToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -290,18 +304,23 @@ Set-AgentModeAlias -Name 'headers-to-json' -Target 'ConvertFrom-HttpHeadersToJso
 <#
 .SYNOPSIS
     Converts JSON file to HTTP headers format.
+
 .DESCRIPTION
     Converts a structured JSON file (with header name-value pairs) to HTTP headers format.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output HTTP headers file. If not specified, uses input path with .headers extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-HttpHeadersFromJson -InputPath "headers.json"
     
     Converts headers.json to headers.headers.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-HttpHeadersFromJson {
     param([string]$InputPath, [string]$OutputPath)

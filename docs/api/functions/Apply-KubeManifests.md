@@ -50,27 +50,27 @@ System.String. Apply output from kubectl.
 
 ### Example 1
 
-`powershell
+```powershell
 Apply-KubeManifests -Path "manifests/"
-        
-        Applies all manifests in the manifests directory.
-``
+```
+
+Applies all manifests in the manifests directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Apply-KubeManifests -Path "k8s/" -Recursive -DryRun
-        
-        Performs dry-run of all manifests recursively.
-``
+```
+
+Performs dry-run of all manifests recursively.
 
 ### Example 3
 
-`powershell
+```powershell
 Apply-KubeManifests -Path "deployment.yaml" -Namespace "production" -ServerSide
-        
-        Applies deployment.yaml to production namespace using server-side apply.
-``
+```
+
+Applies deployment.yaml to production namespace using server-side apply.
 
 ## Source
 

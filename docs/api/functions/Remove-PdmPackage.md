@@ -33,17 +33,19 @@ Remove from specific group (--group).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-PdmPackage requests
-        Removes requests from production dependencies.
-``
+```
+
+Removes requests from production dependencies.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-PdmPackage pytest -Dev
-        Removes pytest from dev dependencies.
-``
+```
+
+Removes pytest from dev dependencies.
 
 ## Aliases
 

@@ -154,28 +154,35 @@ function Initialize-FileConversion-MediaColorsConvert {
         <#
         .SYNOPSIS
             Converts a color from one format to another.
+
         .DESCRIPTION
             Converts colors between RGB, RGBA, HEX, HSL, HSLA, HWB, HWBA, CMYK, CMYKA, NCOL, NCOLA, LAB, LABa, OKLAB, OKLABa, LCH, LCHa, OKLCH, OKLCHa, and named color formats.
             Supports parsing colors in any of these formats and converting to any other format.
+
         .PARAMETER Color
             The color string to convert. Can be in any supported format (RGB, RGBA, HEX, HSL, HSLA, HWB, HWBA, CMYK, CMYKA, NCOL, NCOLA, LAB, LABa, OKLAB, OKLABa, LCH, LCHa, OKLCH, OKLCHa, or named color).
+
         .PARAMETER ToFormat
             The target format for conversion. Valid values: rgb, rgba, hex, hsl, hsla, hwb, hwba, cmyk, cmyka, ncol, ncola, lab, laba, oklab, oklaba, lch, lcha, oklch, oklcha, name.
+
+        .OUTPUTS
+            System.String
+            Returns the color in the specified format.
+
         .EXAMPLE
             Convert-Color -Color "#ff0000" -ToFormat "rgb"
             
             Converts the hex color #ff0000 to RGB format.
+
         .EXAMPLE
             Convert-Color -Color "rgb(255, 0, 0)" -ToFormat "hsl"
             
             Converts RGB red to HSL format.
+
         .EXAMPLE
             Convert-Color -Color "red" -ToFormat "hex"
             
             Converts the named color "red" to hex format.
-        .OUTPUTS
-            System.String
-            Returns the color in the specified format.
         #>
         param(
             [Parameter(Mandatory, ValueFromPipeline)]
@@ -199,21 +206,26 @@ function Initialize-FileConversion-MediaColorsConvert {
         <#
         .SYNOPSIS
             Parses a color string and returns RGB/RGBA values.
+
         .DESCRIPTION
             Parses a color string in any supported format and returns an object with r, g, b, and optionally a (alpha) properties.
+
         .PARAMETER Color
             The color string to parse. Can be in any supported format.
+
+        .OUTPUTS
+            System.Collections.Hashtable
+            Returns a hashtable with r, g, b, and optionally a properties.
+
         .EXAMPLE
             Parse-Color -Color "#ff0000"
             
             Returns an object with r=255, g=0, b=0.
+
         .EXAMPLE
             Parse-Color -Color "rgba(255, 0, 0, 0.5)"
             
             Returns an object with r=255, g=0, b=0, a=0.5.
-        .OUTPUTS
-            System.Collections.Hashtable
-            Returns a hashtable with r, g, b, and optionally a properties.
         #>
         param(
             [Parameter(Mandatory, ValueFromPipeline)]

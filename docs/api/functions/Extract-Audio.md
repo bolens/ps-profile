@@ -42,19 +42,19 @@ System.String. Path to the extracted audio file.
 
 ### Example 1
 
-`powershell
+```powershell
 Extract-Audio -InputPath "video.mp4" -OutputPath "audio.mp3"
-        
-        Extracts audio from video.mp4 and saves as audio.mp3.
-``
+```
+
+Extracts audio from video.mp4 and saves as audio.mp3.
 
 ### Example 2
 
-`powershell
+```powershell
 Extract-Audio -InputPath "video.mp4" -OutputPath "audio.flac" -AudioCodec "flac"
-        
-        Extracts audio as FLAC format.
-``
+```
+
+Extracts audio as FLAC format.
 
 ## Source
 

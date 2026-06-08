@@ -25,15 +25,15 @@ Arguments to pass to composer.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Composer --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Composer install
-``
+```
 
 ## Aliases
 

@@ -54,10 +54,11 @@ PSCustomObject containing conversion details and match results.
 
 ### Example 1
 
-`powershell
+```powershell
 Test-RegexFromDescription -Description 'email' -Input 'user@example.com'
-    Generates an email regex and tests the input.
-``
+```
+
+Generates an email regex and tests the input.
 
 ## Aliases
 

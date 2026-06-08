@@ -30,17 +30,19 @@ System.String. Output from Kotlin compiler execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Compile-Kotlin Main.kt
-        Compiles Main.kt.
-``
+```
+
+Compiles Main.kt.
 
 ### Example 2
 
-`powershell
+```powershell
 Compile-Kotlin -include-runtime -d app.jar Main.kt
-        Compiles with runtime included into a JAR.
-``
+```
+
+Compiles with runtime included into a JAR.
 
 ## Aliases
 

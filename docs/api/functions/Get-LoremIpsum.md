@@ -38,17 +38,19 @@ System.String The generated Lorem Ipsum text.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-LoremIpsum -Words 100
-    Generates 100 words of Lorem Ipsum text.
-``
+```
+
+Generates 100 words of Lorem Ipsum text.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-LoremIpsum -Paragraphs 3 -StartWithLorem
-    Generates 3 paragraphs starting with "Lorem ipsum".
-``
+```
+
+Generates 3 paragraphs starting with "Lorem ipsum".
 
 ## Aliases
 

@@ -43,19 +43,19 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'asdfadd' -Target 'Install-AsdfTool'
     # asdf list - list installed tools
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Lists installed asdf tools.
     .DESCRIPTION
         Shows all installed tool versions.
     .PARAMETER Tool
         Tool name (optional, shows all if omitted).
     .EXAMPLE
-        Get-AsdfTools
+    Get-AsdfTools -Tool 'value'
         Lists all installed tools.
     .EXAMPLE
         Get-AsdfTools nodejs
         Lists installed Node.js versions.
-    #>
+#>
     function Get-AsdfTools {
         [CmdletBinding()]
         param(
@@ -99,14 +99,14 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'asdfremove' -Target 'Remove-AsdfTool'
     # asdf update - update asdf
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates asdf to the latest version.
     .DESCRIPTION
         Updates asdf itself to the latest version.
     .EXAMPLE
-        Update-AsdfSelf
+    Update-AsdfSelf
         Updates asdf to the latest version.
-    #>
+#>
     function Update-AsdfSelf {
         [CmdletBinding()]
         param()

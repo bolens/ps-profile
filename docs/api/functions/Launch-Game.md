@@ -34,11 +34,11 @@ None.
 
 ### Example 1
 
-`powershell
+```powershell
 Launch-Game -RomPath "game.iso"
-        
-        Launches a game ROM with the appropriate emulator.
-``
+```
+
+Launches a game ROM with the appropriate emulator.
 
 ## Source
 

@@ -33,7 +33,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Podman Desktop GUI.
     
     .DESCRIPTION
@@ -41,10 +41,9 @@ try {
         images, and volumes.
     
     .EXAMPLE
-        Start-PodmanDesktop
-        
+    Start-PodmanDesktop
         Launches Podman Desktop GUI.
-    #>
+#>
     function Start-PodmanDesktop {
         [CmdletBinding()]
         param()
@@ -72,7 +71,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Rancher Desktop GUI.
     
     .DESCRIPTION
@@ -80,10 +79,9 @@ try {
         Provides a GUI for managing containers, images, and Kubernetes clusters.
     
     .EXAMPLE
-        Start-RancherDesktop
-        
+    Start-RancherDesktop
         Launches Rancher Desktop GUI.
-    #>
+#>
     function Start-RancherDesktop {
         [CmdletBinding()]
         param()
@@ -111,35 +109,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Converts Docker Compose files to Kubernetes manifests.
     
+
     .DESCRIPTION
         Uses kompose to convert docker-compose.yml files to Kubernetes
         deployment and service manifests.
     
+
     .PARAMETER ComposeFile
         Path to the docker-compose.yml file. Defaults to docker-compose.yml in current directory.
     
+
     .PARAMETER OutputPath
         Directory where Kubernetes manifests will be saved. Defaults to current directory.
     
+
     .PARAMETER Format
         Output format: yaml, json. Defaults to yaml.
     
+
+    .OUTPUTS
+        System.String. Path to the output directory.
+
     .EXAMPLE
-        Convert-ComposeToK8s
-        
+    Convert-ComposeToK8s -InputObject $data
         Converts docker-compose.yml in current directory to Kubernetes manifests.
     
+
     .EXAMPLE
         Convert-ComposeToK8s -ComposeFile "docker-compose.prod.yml" -OutputPath "k8s/"
         
         Converts the specified compose file and saves manifests to k8s/ directory.
-    
-    .OUTPUTS
-        System.String. Path to the output directory.
-    #>
+#>
     function Convert-ComposeToK8s {
         [CmdletBinding(SupportsShouldProcess = $true)]
         [OutputType([string])]
@@ -207,31 +210,37 @@ try {
     .SYNOPSIS
         Deploys to Balena devices.
     
+
     .DESCRIPTION
         Provides helper functions for Balena IoT container deployments.
         Supports pushing applications to Balena devices.
     
+
     .PARAMETER Action
         Action to perform: push, logs, ssh, status. Defaults to push.
     
+
     .PARAMETER Application
         Balena application name.
     
+
     .PARAMETER Device
         Optional device UUID or name.
     
+
+    .OUTPUTS
+        System.String. Deployment status or command output.
+
     .EXAMPLE
         Deploy-Balena -Application "my-app" -Action "push"
         
         Pushes the current directory to Balena application.
     
+
     .EXAMPLE
         Deploy-Balena -Application "my-app" -Action "logs" -Device "device-uuid"
         
         Shows logs from a specific device.
-    
-    .OUTPUTS
-        System.String. Deployment status or command output.
     #>
     function Deploy-Balena {
         [CmdletBinding()]
@@ -323,40 +332,46 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Cleans up containers, images, and volumes.
     
+
     .DESCRIPTION
         Removes stopped containers, unused images, and optionally volumes.
         Works with both Docker and Podman.
     
+
     .PARAMETER RemoveVolumes
         Also remove unused volumes.
     
+
     .PARAMETER RemoveAll
         Remove all containers and images, not just unused ones.
     
+
     .PARAMETER PruneSystem
         Prune the entire system (all unused resources).
     
+
+    .OUTPUTS
+        System.String. Output from cleanup commands.
+
     .EXAMPLE
-        Clean-Containers
-        
+    Clean-Containers
         Removes stopped containers and unused images.
     
+
     .EXAMPLE
         Clean-Containers -RemoveVolumes
         
         Also removes unused volumes.
     
+
     .EXAMPLE
         Clean-Containers -PruneSystem
         
         Prunes all unused system resources.
-    
-    .OUTPUTS
-        System.String. Output from cleanup commands.
-    #>
+#>
     function Clean-Containers {
         [CmdletBinding(SupportsShouldProcess = $true)]
         [OutputType([string])]
@@ -449,33 +464,40 @@ try {
     .SYNOPSIS
         Exports container logs to a file.
     
+
     .DESCRIPTION
         Saves container logs to a file. Works with both Docker and Podman.
     
+
     .PARAMETER Container
         Container name or ID. If not specified, exports logs for all containers.
     
+
     .PARAMETER OutputPath
         Path to save log file. Defaults to container-logs-{timestamp}.txt.
     
+
     .PARAMETER Tail
         Number of lines to show from the end of logs. Defaults to all.
     
+
     .PARAMETER Since
         Show logs since timestamp (e.g., "2023-01-01T00:00:00").
     
+
+    .OUTPUTS
+        System.String. Path to the exported log file.
+
     .EXAMPLE
         Export-ContainerLogs -Container "my-container"
         
         Exports logs for my-container.
     
+
     .EXAMPLE
         Export-ContainerLogs -Container "my-container" -OutputPath "logs.txt" -Tail 100
         
         Exports last 100 lines to logs.txt.
-    
-    .OUTPUTS
-        System.String. Path to the exported log file.
     #>
     function Export-ContainerLogs {
         [CmdletBinding()]
@@ -565,35 +587,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets container resource usage statistics.
     
+
     .DESCRIPTION
         Displays real-time or one-time statistics for containers.
         Works with both Docker and Podman.
     
+
     .PARAMETER Container
         Container name or ID. If not specified, shows stats for all containers.
     
+
     .PARAMETER NoStream
         Disable streaming (show stats once and exit).
     
+
     .PARAMETER Format
         Output format: table, json. Defaults to table.
     
+
+    .OUTPUTS
+        System.String. Container statistics output.
+
     .EXAMPLE
-        Get-ContainerStats
-        
+    Get-ContainerStats -Container 'value' -Format 'value'
         Shows real-time stats for all containers.
     
+
     .EXAMPLE
         Get-ContainerStats -Container "my-container" -NoStream
         
         Shows one-time stats for my-container.
-    
-    .OUTPUTS
-        System.String. Container statistics output.
-    #>
+#>
     function Get-ContainerStats {
         [CmdletBinding()]
         [OutputType([string])]
@@ -661,30 +688,36 @@ try {
     .SYNOPSIS
         Backs up container volumes to a tar archive.
     
+
     .DESCRIPTION
         Creates a backup of container volumes. Works with both Docker and Podman.
     
+
     .PARAMETER Volume
         Volume name. If not specified, backs up all volumes.
     
+
     .PARAMETER OutputPath
         Path to save backup file. Defaults to volume-backup-{timestamp}.tar.gz.
     
+
     .PARAMETER Compress
         Compress the backup archive (gzip).
     
+
+    .OUTPUTS
+        System.String. Path to the backup file.
+
     .EXAMPLE
         Backup-ContainerVolumes -Volume "my-volume"
         
         Backs up my-volume to a tar file.
     
+
     .EXAMPLE
         Backup-ContainerVolumes -Compress
         
         Backs up all volumes to a compressed archive.
-    
-    .OUTPUTS
-        System.String. Path to the backup file.
     #>
     function Backup-ContainerVolumes {
         [CmdletBinding(SupportsShouldProcess = $true)]
@@ -800,30 +833,36 @@ try {
     .SYNOPSIS
         Restores container volumes from a backup archive.
     
+
     .DESCRIPTION
         Restores volumes from a backup tar archive. Works with both Docker and Podman.
     
+
     .PARAMETER BackupPath
         Path to the backup archive file.
     
+
     .PARAMETER Volume
         Volume name to restore to. If not specified, creates a new volume.
     
+
     .PARAMETER CreateVolume
         Create a new volume if it doesn't exist.
     
+
+    .OUTPUTS
+        System.String. Name of the restored volume.
+
     .EXAMPLE
         Restore-ContainerVolumes -BackupPath "volume-backup.tar.gz"
         
         Restores volumes from backup archive.
     
+
     .EXAMPLE
         Restore-ContainerVolumes -BackupPath "backup.tar.gz" -Volume "my-volume" -CreateVolume
         
         Restores to my-volume, creating it if needed.
-    
-    .OUTPUTS
-        System.String. Name of the restored volume.
     #>
     function Restore-ContainerVolumes {
         [CmdletBinding(SupportsShouldProcess = $true)]
@@ -907,32 +946,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Performs health checks on all running containers.
     
+
     .DESCRIPTION
         Checks the health status of all running containers.
         Works with both Docker and Podman.
     
+
     .PARAMETER Container
         Container name or ID. If not specified, checks all containers.
     
+
     .PARAMETER Format
         Output format: table, json. Defaults to table.
     
+
+    .OUTPUTS
+        System.Object. Health check results.
+
     .EXAMPLE
-        Health-CheckContainers
-        
+    Health-CheckContainers -Container 'value' -Format 'value'
         Checks health of all running containers.
     
+
     .EXAMPLE
         Health-CheckContainers -Container "my-container" -Format json
         
         Checks health of my-container in JSON format.
-    
-    .OUTPUTS
-        System.Object. Health check results.
-    #>
+#>
     function Health-CheckContainers {
         [CmdletBinding()]
         [OutputType([object])]

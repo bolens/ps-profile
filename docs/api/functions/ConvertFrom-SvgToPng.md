@@ -37,9 +37,9 @@ Output height in pixels (default: 1024).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-SvgToPng -InputPath "image.svg" -OutputPath "image.png" -Width 2048 -Height 2048
-``
+```
 
 ## Aliases
 

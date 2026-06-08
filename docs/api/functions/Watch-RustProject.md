@@ -34,24 +34,27 @@ System.String. Output from cargo-watch execution.
 
 ### Example 1
 
-`powershell
-Watch-RustProject
-        Watches for changes and runs 'cargo check'.
-``
+```powershell
+Watch-RustProject -Command 'pwsh -NoProfile -File scripts/test.ps1'
+```
+
+Watches for changes and runs 'cargo check'.
 
 ### Example 2
 
-`powershell
+```powershell
 Watch-RustProject -Command test
-        Watches for changes and runs 'cargo test'.
-``
+```
+
+Watches for changes and runs 'cargo test'.
 
 ### Example 3
 
-`powershell
+```powershell
 Watch-RustProject -Command run -- --release
-        Watches for changes and runs 'cargo run --release'.
-``
+```
+
+Watches for changes and runs 'cargo run --release'.
 
 ## Aliases
 

@@ -34,10 +34,11 @@ System.String The Roman numeral representation of the input binary string.
 
 ### Example 1
 
-`powershell
+```powershell
 "01001000 01101001" | ConvertFrom-BinaryToRoman
-    Converts binary to Roman numerals.
-``
+```
+
+Converts binary to Roman numerals.
 
 ## Aliases
 

@@ -34,11 +34,11 @@ System.String Returns the path to the output INI file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-EnvToIni -InputPath '.env'
-    
-    Converts .env to .env.ini.
-``
+```
+
+Converts .env to .env.ini.
 
 ## Aliases
 

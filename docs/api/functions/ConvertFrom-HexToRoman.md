@@ -34,10 +34,11 @@ System.String The Roman numeral representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "4865" | ConvertFrom-HexToRoman
-    Converts hex to Roman numerals.
-``
+```
+
+Converts hex to Roman numerals.
 
 ## Aliases
 

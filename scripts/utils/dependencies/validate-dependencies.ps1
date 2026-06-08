@@ -1,8 +1,7 @@
 <#
-scripts/utils/validate-dependencies.ps1
-
 .SYNOPSIS
     Validates that all required dependencies are installed and available.
+
 
 .DESCRIPTION
     Checks PowerShell version, required modules, and optional external tools
@@ -10,29 +9,33 @@ scripts/utils/validate-dependencies.ps1
     directory). Reports missing dependencies and
     provides installation instructions.
 
+
 .PARAMETER InstallMissing
     If specified, attempts to install missing PowerShell modules automatically.
+
 
 .PARAMETER RequirementsFile
     Path to specific requirements file (optional). If not specified, uses the
     modular requirements loader (requirements/load-requirements.ps1) which
     automatically loads all category files.
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1
-
-    Validates all dependencies and reports status.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1 -InstallMissing
-
-    Validates dependencies and installs missing PowerShell modules.
 
 .NOTES
     Exit Codes:
     - 0 (EXIT_SUCCESS): All required dependencies are available
     - 1 (EXIT_VALIDATION_FAILURE): Required dependencies are missing
     - 2 (EXIT_SETUP_ERROR): Error reading requirements file or installing modules
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1
+
+    Validates all dependencies and reports status.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1 -InstallMissing
+
+    Validates dependencies and installs missing PowerShell modules.
 #>
 
 param(

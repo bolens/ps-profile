@@ -23,16 +23,16 @@ The XML element to convert to a JSON object.
 
 ## Outputs
 
-PSCustomObject representing the XML structure in JSON-compatible format. .EXAMPLE Convert-XmlToJsonObject
+PSCustomObject representing the XML structure in JSON-compatible format.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Convert-XmlToJsonObject
-``
+```powershell
+Convert-XmlToJsonObject -InputObject $data
+```
 
 ## Source
 

@@ -30,17 +30,19 @@ System.String The generated UUID string.
 
 ### Example 1
 
-`powershell
-New-Uuid
-    Generates a random UUID v4.
-``
+```powershell
+New-Uuid -Version '1.0.0'
+```
+
+Generates a random UUID v4.
 
 ### Example 2
 
-`powershell
+```powershell
 New-Uuid -Version v1
-    Generates a time-based UUID v1 (simplified).
-``
+```
+
+Generates a time-based UUID v1 (simplified).
 
 ## Aliases
 

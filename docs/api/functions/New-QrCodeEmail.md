@@ -45,10 +45,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeEmail -Email "contact@example.com" -Subject "Hello" -Body "Message body"
-    Generates an email QR code with subject and body.
-``
+```
+
+Generates an email QR code with subject and body.
 
 ## Aliases
 

@@ -25,10 +25,11 @@ Runtime names and versions to remove (e.g., 'nodejs@20', 'python@3.11').
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-MiseRuntime nodejs@20
-        Removes Node.js version 20.
-``
+```
+
+Removes Node.js version 20.
 
 ## Aliases
 

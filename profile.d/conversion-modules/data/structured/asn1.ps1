@@ -357,19 +357,24 @@ function Initialize-FileConversion-Asn1 {
 <#
 .SYNOPSIS
     Converts ASN.1 schema file to JSON format.
+
 .DESCRIPTION
     Parses an ASN.1 (Abstract Syntax Notation One) schema definition file and converts it to structured JSON format.
     Supports basic ASN.1 types: INTEGER, OCTET STRING, SEQUENCE, CHOICE, etc.
+
 .PARAMETER InputPath
     The path to the ASN.1 file (.asn1 or .asn extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-Asn1ToJson -InputPath "schema.asn1"
     
     Converts schema.asn1 to schema.json.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-Asn1ToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -391,19 +396,24 @@ Set-AgentModeAlias -Name 'asn1-to-json' -Target 'ConvertFrom-Asn1ToJson'
 <#
 .SYNOPSIS
     Converts JSON file to ASN.1 format.
+
 .DESCRIPTION
     Converts a structured JSON file (with ASN.1 module structure) to ASN.1 schema definition format.
     The JSON should have a Module structure with Types containing Name and Specification.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output ASN.1 file. If not specified, uses input path with .asn1 extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-Asn1FromJson -InputPath "schema.json"
     
     Converts schema.json to schema.asn1.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-Asn1FromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -425,19 +435,24 @@ Set-AgentModeAlias -Name 'json-to-asn1' -Target 'ConvertTo-Asn1FromJson'
 <#
 .SYNOPSIS
     Converts ASN.1 schema file to XML format.
+
 .DESCRIPTION
     Parses an ASN.1 schema definition file and converts it to structured XML format.
     Each type becomes an XML element with TypeSpec and Components.
+
 .PARAMETER InputPath
     The path to the ASN.1 file (.asn1 or .asn extension).
+
 .PARAMETER OutputPath
     The path for the output XML file. If not specified, uses input path with .xml extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-Asn1ToXml -InputPath "schema.asn1"
     
     Converts schema.asn1 to schema.xml.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-Asn1ToXml {
     param([string]$InputPath, [string]$OutputPath)

@@ -29,9 +29,9 @@ Path for the output ODS file. If not specified, uses input path with .ods extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-OdsFromCsv -InputPath "spreadsheet.csv" -OutputPath "spreadsheet.ods"
-``
+```
 
 ## Aliases
 

@@ -29,9 +29,9 @@ The path for the output SuperJSON file. If not specified, uses input path with .
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-SuperJsonFromCsv -InputPath ./input.file
-``
+```
 
 ## Aliases
 

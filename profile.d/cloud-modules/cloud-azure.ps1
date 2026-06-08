@@ -24,28 +24,33 @@ try {
     .SYNOPSIS
         Switches the active Azure subscription.
     
+
     .DESCRIPTION
         Changes the active Azure subscription for the current session.
         Uses Azure CLI to list and set subscriptions.
     
+
     .PARAMETER SubscriptionId
         Subscription ID or name to switch to.
     
+
     .PARAMETER List
         List all available subscriptions instead of switching.
     
+
+    .OUTPUTS
+        System.String. Subscription information or list of subscriptions.
+
     .EXAMPLE
         Set-AzureSubscription -SubscriptionId "my-subscription-id"
         
         Switches to the specified subscription.
     
+
     .EXAMPLE
         Set-AzureSubscription -List
         
         Lists all available subscriptions.
-    
-    .OUTPUTS
-        System.String. Subscription information or list of subscriptions.
     #>
     function Set-AzureSubscription {
         [CmdletBinding()]

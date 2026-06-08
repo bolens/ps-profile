@@ -30,10 +30,11 @@ System.String The URL/percent encoded representation of the input Roman numeral 
 
 ### Example 1
 
-`powershell
+```powershell
 "LXXII CV" | ConvertFrom-RomanToUrl
-    Converts Roman numerals to URL encoding.
-``
+```
+
+Converts Roman numerals to URL encoding.
 
 ## Aliases
 

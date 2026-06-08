@@ -104,30 +104,38 @@ function Initialize-FileConversion-CoreCompressionZstd {
 <#
 .SYNOPSIS
     Compresses a file using Zstandard (zstd) compression.
+
 .DESCRIPTION
     Compresses a file using the Zstandard (zstd) compression algorithm.
     Zstandard provides a good balance between compression ratio and speed.
     Requires the zstd command-line tool to be installed.
+
 .PARAMETER InputPath
     The path to the file to compress.
+
 .PARAMETER OutputPath
     The path for the output compressed file. If not specified, uses input path with .zst extension.
+
 .PARAMETER CompressionLevel
     The compression level (1-22, or -1 for default). Higher values provide better compression but are slower.
     Default is 3.
+
+.OUTPUTS
+    System.String
+    Returns the path to the compressed file.
+
+.NOTES
+    Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd).
+
 .EXAMPLE
     Compress-Zstd -InputPath 'data.txt'
     
     Compresses data.txt to data.txt.zst.
+
 .EXAMPLE
     Compress-Zstd -InputPath 'data.txt' -CompressionLevel 10
     
     Compresses data.txt with compression level 10.
-.NOTES
-    Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd).
-.OUTPUTS
-    System.String
-    Returns the path to the compressed file.
 #>
 Set-Item -Path Function:Global:Compress-Zstd -Value {
     param(
@@ -146,22 +154,28 @@ Set-Alias -Name zstd -Value Compress-Zstd -Scope Global -ErrorAction SilentlyCon
 <#
 .SYNOPSIS
     Decompresses a Zstandard (zstd) compressed file.
+
 .DESCRIPTION
     Decompresses a file that was compressed using Zstandard (zstd) compression.
     Requires the zstd command-line tool to be installed.
+
 .PARAMETER InputPath
     The path to the zstd compressed file.
+
 .PARAMETER OutputPath
     The path for the output decompressed file. If not specified, removes .zst extension from input path.
+
+.OUTPUTS
+    System.String
+    Returns the path to the decompressed file.
+
+.NOTES
+    Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd).
+
 .EXAMPLE
     Expand-Zstd -InputPath 'data.txt.zst'
     
     Decompresses data.txt.zst to data.txt.
-.NOTES
-    Requires zstd command-line tool (see Get-ConversionToolMissingMessage -ToolName zstd).
-.OUTPUTS
-    System.String
-    Returns the path to the decompressed file.
 #>
 Set-Item -Path Function:Global:Expand-Zstd -Value {
     param(

@@ -25,10 +25,11 @@ Package names to remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-CargoPackage cargo-watch
-    Removes cargo-watch from global installation.
-``
+```
+
+Removes cargo-watch from global installation.
 
 ## Source
 

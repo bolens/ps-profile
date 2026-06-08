@@ -38,31 +38,37 @@ try {
     .SYNOPSIS
         Decompiles Java or Dex files using jadx.
     
+
     .DESCRIPTION
         Decompiles Java class files or Android Dex files to Java source code using jadx.
         Supports .class, .jar, .dex, and .apk files.
     
+
     .PARAMETER InputFile
         Path to the Java/Dex file to decompile.
     
+
     .PARAMETER OutputPath
         Directory to save decompiled source. Defaults to current directory.
     
+
     .PARAMETER DecompileResources
         Also decompile resources (for APK files).
     
+
+    .OUTPUTS
+        System.String. Path to the output directory.
+
     .EXAMPLE
         Decompile-Java -InputFile "app.dex"
         
         Decompiles a Dex file to Java source.
     
+
     .EXAMPLE
         Decompile-Java -InputFile "app.apk" -DecompileResources
         
         Decompiles an APK file including resources.
-    
-    .OUTPUTS
-        System.String. Path to the output directory.
     #>
     function Decompile-Java {
         [CmdletBinding()]
@@ -145,26 +151,31 @@ try {
     .SYNOPSIS
         Decompiles .NET assemblies using dnspy or dnspyex.
     
+
     .DESCRIPTION
         Decompiles .NET assemblies (.dll, .exe) to C# source code.
         Prefers dnspyex if available, falls back to dnspy.
     
+
     .PARAMETER InputFile
         Path to the .NET assembly to decompile.
     
+
     .PARAMETER OutputPath
         Directory to save decompiled source. Defaults to current directory.
     
+
     .PARAMETER OutputFormat
         Output format: 'cs' (C#) or 'il' (IL). Defaults to 'cs'.
     
+
+    .OUTPUTS
+        System.String. Path to the output file.
+
     .EXAMPLE
         Decompile-DotNet -InputFile "app.dll"
         
         Decompiles a .NET assembly to C# source.
-    
-    .OUTPUTS
-        System.String. Path to the output file.
     #>
     function Decompile-DotNet {
         [CmdletBinding()]
@@ -264,26 +275,31 @@ try {
     .SYNOPSIS
         Analyzes PE (Portable Executable) files.
     
+
     .DESCRIPTION
         Analyzes Windows PE files (.exe, .dll) for metadata, imports, exports, and structure.
         Prefers pe-bear if available, falls back to exeinfo-pe or detect-it-easy.
     
+
     .PARAMETER InputFile
         Path to the PE file to analyze.
     
+
     .PARAMETER OutputPath
         File to save analysis results. Optional.
     
+
     .PARAMETER Detailed
         Show detailed analysis information.
     
+
+    .OUTPUTS
+        System.String. Analysis results or path to output file.
+
     .EXAMPLE
         Analyze-PE -InputFile "app.exe"
         
         Analyzes a PE file and displays results.
-    
-    .OUTPUTS
-        System.String. Analysis results or path to output file.
     #>
     function Analyze-PE {
         [CmdletBinding()]
@@ -419,34 +435,41 @@ try {
     .SYNOPSIS
         Extracts and decompiles Android APK files.
     
+
     .DESCRIPTION
         Extracts Android APK files using apktool.
         Can extract resources, decompile to smali, or both.
     
+
     .PARAMETER InputFile
         Path to the APK file to extract.
     
+
     .PARAMETER OutputPath
         Directory to save extracted files. Defaults to current directory.
     
+
     .PARAMETER Decompile
         Decompile to smali code (default: extract resources only).
     
+
     .PARAMETER NoResources
         Do not extract resources.
     
+
+    .OUTPUTS
+        System.String. Path to the output directory.
+
     .EXAMPLE
         Extract-AndroidApk -InputFile "app.apk"
         
         Extracts resources from an APK file.
     
+
     .EXAMPLE
         Extract-AndroidApk -InputFile "app.apk" -Decompile
         
         Extracts and decompiles an APK file to smali.
-    
-    .OUTPUTS
-        System.String. Path to the output directory.
     #>
     function Extract-AndroidApk {
         [CmdletBinding()]
@@ -539,29 +562,35 @@ try {
     .SYNOPSIS
         Dumps IL2CPP metadata from Unity games.
     
+
     .DESCRIPTION
         Extracts IL2CPP metadata and type information from Unity games.
         Requires the game's global-metadata.dat file and the IL2CPP binary.
     
+
     .PARAMETER MetadataFile
         Path to global-metadata.dat file.
     
+
     .PARAMETER BinaryFile
         Path to the IL2CPP binary (GameAssembly.dll or libil2cpp.so).
     
+
     .PARAMETER OutputPath
         Directory to save dumped metadata. Defaults to current directory.
     
+
     .PARAMETER UnityVersion
         Unity version (optional, for better compatibility).
     
+
+    .OUTPUTS
+        System.String. Path to the output directory.
+
     .EXAMPLE
         Dump-IL2CPP -MetadataFile "global-metadata.dat" -BinaryFile "GameAssembly.dll"
         
         Dumps IL2CPP metadata from a Unity game.
-    
-    .OUTPUTS
-        System.String. Path to the output directory.
     #>
     function Dump-IL2CPP {
         [CmdletBinding()]

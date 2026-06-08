@@ -42,19 +42,19 @@ System.String. Secret values in the specified format.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-DopplerSecrets -Project "my-project" -Config "dev"
-        
-        Gets all secrets from the specified project and config.
-``
+```
+
+Gets all secrets from the specified project and config.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-DopplerSecrets -Project "my-project" -Config "prod" -Secret "API_KEY"
-        
-        Gets a specific secret value.
-``
+```
+
+Gets a specific secret value.
 
 ## Source
 

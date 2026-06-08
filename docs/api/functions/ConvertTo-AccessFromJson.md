@@ -33,9 +33,9 @@ Optional. Format to create: 'accdb' (default) or 'mdb'.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-AccessFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

@@ -29,9 +29,9 @@ The path for the output Delta Lake table directory. If not specified, uses input
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-DeltaFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

@@ -46,9 +46,9 @@ System.String. Path to the saved cover image when -PassThru is used.
 
 ### Example 1
 
-`powershell
+```powershell
 Save-IsbnCover -Isbn "978-0-306-40615-7" -OutputPath "./cover.jpg"
-``
+```
 
 ## Aliases
 

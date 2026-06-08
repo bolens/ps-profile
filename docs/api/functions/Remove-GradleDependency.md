@@ -25,10 +25,11 @@ Dependency notation to remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-GradleDependency 'org.springframework:spring-core:6.0.0'
-        Provides instructions for removing Spring Core dependency.
-``
+```
+
+Provides instructions for removing Spring Core dependency.
 
 ## Aliases
 

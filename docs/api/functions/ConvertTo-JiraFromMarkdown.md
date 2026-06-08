@@ -37,9 +37,9 @@ Target dialect.
 
 ### Example 1
 
-`powershell
+```powershell
 Convert-MarkdownDialect -InputPath note.md -From obsidian -To gfm
-``
+```
 
 ## Aliases
 

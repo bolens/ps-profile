@@ -16,8 +16,7 @@
 .OUTPUTS
     PSCustomObject representing the XML structure in JSON-compatible format.
 .EXAMPLE
-    Convert-XmlToJsonObject
-
+    Convert-XmlToJsonObject -InputObject $data
 #>
 function Convert-XmlToJsonObject {
     param([System.Xml.XmlElement]$Element)
@@ -74,8 +73,7 @@ function Convert-XmlToJsonObject {
 .OUTPUTS
     System.Xml.XmlDocument representing the XML structure.
 .EXAMPLE
-    Convert-JsonToXml
-
+    Convert-JsonToXml -JsonObject 'value'
 #>
 function Convert-JsonToXml {
     param(

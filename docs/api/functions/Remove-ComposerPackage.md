@@ -29,17 +29,19 @@ Remove from dev dependencies (--dev).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-ComposerPackage monolog/monolog
-    Removes monolog from production dependencies.
-``
+```
+
+Removes monolog from production dependencies.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-ComposerPackage phpunit/phpunit -Dev
-    Removes phpunit from dev dependencies.
-``
+```
+
+Removes phpunit from dev dependencies.
 
 ## Aliases
 

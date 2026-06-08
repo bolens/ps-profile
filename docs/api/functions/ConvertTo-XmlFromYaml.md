@@ -29,9 +29,9 @@ Optional destination XML path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-XmlFromYaml -InputPath ./config.yaml
-``
+```
 
 ## Aliases
 

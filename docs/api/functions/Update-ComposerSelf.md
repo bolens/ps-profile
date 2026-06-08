@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-ComposerSelf
-    Updates Composer to the latest version.
-``
+```
+
+Updates Composer to the latest version.
 
 ## Aliases
 

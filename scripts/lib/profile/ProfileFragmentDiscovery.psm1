@@ -44,8 +44,7 @@ function Initialize-FragmentDiscovery {
         - DisabledSet: HashSet of disabled fragment names
         - NonBootstrapFragments: Non-bootstrap fragments in order
 .EXAMPLE
-    Initialize-FragmentDiscovery
-
+    Initialize-FragmentDiscovery -AllFragments @() -FragmentLoadingModule 'value' -FragmentLoadingModuleExists -PerformanceConfig @{} -FragmentLibDir 'value'
 #>
     [CmdletBinding()]
     param(

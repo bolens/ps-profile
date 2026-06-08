@@ -25,15 +25,15 @@ Arguments to pass to yarn remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-YarnPackage express
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-YarnPackage typescript -D
-``
+```
 
 ## Aliases
 

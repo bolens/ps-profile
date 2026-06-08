@@ -25,15 +25,9 @@ Arguments to pass to vite dev.
 
 ### Example 1
 
-`powershell
-Start-ViteDev
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-ViteDev --port 3000
-``
+```
 
 ## Aliases
 

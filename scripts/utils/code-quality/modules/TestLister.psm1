@@ -31,8 +31,7 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 .OUTPUTS
     Hashtable with TestFiles (array), TestCount (int), and Tests (array of hashtables with Name, File, Describe, Context)
 .EXAMPLE
-    Get-TestList
-
+    Get-TestList -TestPaths @('tests/unit')
 #>
 function Get-TestList {
     [CmdletBinding()]
@@ -137,8 +136,7 @@ function Get-TestList {
 .OUTPUTS
     None - writes to console
 .EXAMPLE
-    Show-TestList
-
+    Show-TestList -TestList @{}
 #>
 function Show-TestList {
     [CmdletBinding()]

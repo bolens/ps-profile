@@ -39,16 +39,16 @@ Additional arguments forwarded to job.
 
 ## Outputs
 
-CLI output from job. .EXAMPLE Sync-JoplinObsidianNotes
+CLI output from job.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 Sync-JoplinObsidianNotes
-``
+```
 
 ## Aliases
 

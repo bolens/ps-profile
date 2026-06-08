@@ -25,15 +25,15 @@ Arguments to pass to terraform.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Terraform version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Terraform init
-``
+```
 
 ## Aliases
 

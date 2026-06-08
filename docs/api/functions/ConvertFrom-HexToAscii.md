@@ -30,17 +30,19 @@ System.String The ASCII text representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "48656C6C6F" | ConvertFrom-HexToAscii
-    Converts "48656C6C6F" to "Hello".
-``
+```
+
+Converts "48656C6C6F" to "Hello".
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-HexToAscii -InputObject "48 65 6C 6C 6F"
-    Converts hex with spaces to "Hello".
-``
+```
+
+Converts hex with spaces to "Hello".
 
 ## Aliases
 

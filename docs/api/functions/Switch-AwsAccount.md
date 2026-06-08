@@ -34,19 +34,19 @@ System.Boolean. True if switch and test (if not skipped) are successful.
 
 ### Example 1
 
-`powershell
+```powershell
 Switch-AwsAccount -ProfileName "production"
-    
-    Switches to production profile and tests connection.
-``
+```
+
+Switches to production profile and tests connection.
 
 ### Example 2
 
-`powershell
+```powershell
 Switch-AwsAccount -ProfileName "dev" -SkipTest
-    
-    Switches to dev profile without testing connection.
-``
+```
+
+Switches to dev profile without testing connection.
 
 ## Aliases
 

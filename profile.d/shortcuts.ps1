@@ -107,8 +107,7 @@ if (-not (Test-Path Function:vsc)) {
 .PARAMETER p
     The path to the file to open.
 .EXAMPLE
-    Open-Editor
-
+    Open-Editor -p 'value'
 #>
 if (-not (Test-Path Function:Open-Editor)) {
     function Open-Editor {

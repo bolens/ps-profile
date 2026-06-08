@@ -29,10 +29,11 @@ Include programs installed outside of Chocolatey.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-ChocoPackage
-        Lists all installed Chocolatey packages.
-``
+```
+
+Lists all installed Chocolatey packages.
 
 ## Aliases
 

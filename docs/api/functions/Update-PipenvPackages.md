@@ -25,17 +25,19 @@ Package names to update (optional, updates all if omitted).
 
 ### Example 1
 
-`powershell
-Update-PipenvPackages
-        Updates all packages.
-``
+```powershell
+Update-PipenvPackages -Packages 'package-name'
+```
+
+Updates all packages.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-PipenvPackages requests
-        Updates requests package.
-``
+```
+
+Updates requests package.
 
 ## Aliases
 

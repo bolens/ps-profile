@@ -51,8 +51,7 @@ if ($testCacheDbModule -and (Test-Path -LiteralPath $testCacheDbModule)) {
 .OUTPUTS
     Cache status information
 .EXAMPLE
-    Get-TestCacheStatus
-
+    Get-TestCacheStatus -CachePath 'value' -TestPaths @('tests/unit')
 #>
 function Get-TestCacheStatus {
     param(
@@ -162,8 +161,7 @@ function Get-TestCacheStatus {
 .OUTPUTS
     None
 .EXAMPLE
-    Save-TestCache
-
+    Save-TestCache -TestResult 'value' -TestPaths @('tests/unit')
 #>
 function Save-TestCache {
     param(

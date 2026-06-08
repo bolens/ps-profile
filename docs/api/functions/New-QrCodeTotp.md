@@ -57,10 +57,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeTotp -Secret "JBSWY3DPEHPK3PXP" -Issuer "GitHub" -AccountName "user@example.com"
-    Generates a TOTP QR code for GitHub authentication.
-``
+```
+
+Generates a TOTP QR code for GitHub authentication.
 
 ## Aliases
 

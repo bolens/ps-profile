@@ -198,18 +198,23 @@ function Initialize-FileConversion-DocumentFb2 {
 <#
 .SYNOPSIS
     Converts FB2 file to Markdown.
+
 .DESCRIPTION
     Uses pandoc to convert a FictionBook (FB2) e-book file to Markdown format.
+
 .PARAMETER InputPath
     The path to the FB2 file (.fb2 or .fbz extension).
+
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-Fb2ToMarkdown -InputPath "book.fb2"
     
     Converts book.fb2 to book.md.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-Fb2ToMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -231,18 +236,23 @@ Set-AgentModeAlias -Name 'fb2-to-markdown' -Target 'ConvertFrom-Fb2ToMarkdown'
 <#
 .SYNOPSIS
     Converts FB2 file to HTML.
+
 .DESCRIPTION
     Uses pandoc to convert a FictionBook (FB2) e-book file to HTML format.
+
 .PARAMETER InputPath
     The path to the FB2 file (.fb2 or .fbz extension).
+
 .PARAMETER OutputPath
     The path for the output HTML file. If not specified, uses input path with .html extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-HtmlFromFb2 -InputPath "book.fb2"
     
     Converts book.fb2 to book.html.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-HtmlFromFb2 {
     param([string]$InputPath, [string]$OutputPath)
@@ -264,18 +274,23 @@ Set-AgentModeAlias -Name 'fb2-to-html' -Target 'ConvertTo-HtmlFromFb2'
 <#
 .SYNOPSIS
     Converts FB2 file to PDF.
+
 .DESCRIPTION
     Uses pandoc to convert a FictionBook (FB2) e-book file to PDF format.
+
 .PARAMETER InputPath
     The path to the FB2 file (.fb2 or .fbz extension).
+
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-PdfFromFb2 -InputPath "book.fb2"
     
     Converts book.fb2 to book.pdf.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-PdfFromFb2 {
     param([string]$InputPath, [string]$OutputPath)
@@ -297,18 +312,23 @@ Set-AgentModeAlias -Name 'fb2-to-pdf' -Target 'ConvertTo-PdfFromFb2'
 <#
 .SYNOPSIS
     Converts FB2 file to DOCX.
+
 .DESCRIPTION
     Uses pandoc to convert a FictionBook (FB2) e-book file to Microsoft Word DOCX format.
+
 .PARAMETER InputPath
     The path to the FB2 file (.fb2 or .fbz extension).
+
 .PARAMETER OutputPath
     The path for the output DOCX file. If not specified, uses input path with .docx extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-DocxFromFb2 -InputPath "book.fb2"
     
     Converts book.fb2 to book.docx.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-DocxFromFb2 {
     param([string]$InputPath, [string]$OutputPath)
@@ -330,18 +350,23 @@ Set-AgentModeAlias -Name 'fb2-to-docx' -Target 'ConvertTo-DocxFromFb2'
 <#
 .SYNOPSIS
     Converts FB2 file to LaTeX.
+
 .DESCRIPTION
     Uses pandoc to convert a FictionBook (FB2) e-book file to LaTeX format.
+
 .PARAMETER InputPath
     The path to the FB2 file (.fb2 or .fbz extension).
+
 .PARAMETER OutputPath
     The path for the output LaTeX file. If not specified, uses input path with .tex extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-LaTeXFromFb2 -InputPath "book.fb2"
     
     Converts book.fb2 to book.tex.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-LaTeXFromFb2 {
     param([string]$InputPath, [string]$OutputPath)

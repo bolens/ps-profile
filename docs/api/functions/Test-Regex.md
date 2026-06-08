@@ -42,17 +42,19 @@ PSCustomObject Object containing match information (Success, Value, Index, Lengt
 
 ### Example 1
 
-`powershell
+```powershell
 Test-Regex -Pattern "\d+" -Input "Hello 123 World"
-    Tests the pattern against the input and returns match details.
-``
+```
+
+Tests the pattern against the input and returns match details.
 
 ### Example 2
 
-`powershell
+```powershell
 Test-Regex -Pattern "\w+" -Input "Hello World" -AllMatches
-    Returns all word matches in the input.
-``
+```
+
+Returns all word matches in the input.
 
 ## Aliases
 

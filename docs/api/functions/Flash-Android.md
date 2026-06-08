@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Flash-Android
-        
-        Launches PixelFlasher.
-``
+```powershell
+Flash-Android -FirmwarePath 'value'
+```
+
+Launches PixelFlasher.
 
 ### Example 2
 
-`powershell
+```powershell
 Flash-Android -FirmwarePath "firmware.zip"
-        
-        Launches PixelFlasher with firmware file path.
-``
+```
+
+Launches PixelFlasher with firmware file path.
 
 ## Source
 

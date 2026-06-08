@@ -33,9 +33,9 @@ AVIF quality (1-100, default: 90). Higher values mean better quality but larger 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-AvifFromPng -InputPath "image.png" -OutputPath "image.avif" -Quality 95
-``
+```
 
 ## Aliases
 

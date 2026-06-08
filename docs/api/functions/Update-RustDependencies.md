@@ -30,17 +30,19 @@ System.String. Output from cargo update execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-RustDependencies
-        Updates all dependencies in the current project.
-``
+```
+
+Updates all dependencies in the current project.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-RustDependencies --package serde
-        Updates only the serde package.
-``
+```
+
+Updates only the serde package.
 
 ## Aliases
 

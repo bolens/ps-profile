@@ -30,19 +30,19 @@ System.DateTime Returns a DateTime object representing the RFC 3339 date/time.
 
 ### Example 1
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Rfc3339ToDateTime
-    
-    Converts an RFC 3339 string to a DateTime object.
-``
+```
+
+Converts an RFC 3339 string to a DateTime object.
 
 ### Example 2
 
-`powershell
+```powershell
 '2021-01-01T12:30:45.123+05:00' | ConvertFrom-Rfc3339ToDateTime
-    
-    Converts an RFC 3339 string with timezone and milliseconds.
-``
+```
+
+Converts an RFC 3339 string with timezone and milliseconds.
 
 ## Aliases
 

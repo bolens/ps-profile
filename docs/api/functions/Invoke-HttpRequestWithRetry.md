@@ -37,9 +37,9 @@ Maximum retry attempts. Default is 3.
 
 ### Example 1
 
-`powershell
-Invoke-HttpRequestWithRetry
-``
+```powershell
+Invoke-HttpRequestWithRetry -Uri 'value'
+```
 
 ## Source
 

@@ -37,9 +37,9 @@ The path to the Avro schema file (.avsc) to use when reading the data. Optional 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-AvroToJsonWithSchemaEvolution -InputPath ./input.file
-``
+```
 
 ## Aliases
 

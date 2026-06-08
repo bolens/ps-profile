@@ -38,19 +38,19 @@ System.String. Scan results in the specified format.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GitLeaksScan -RepositoryPath "C:\Projects\MyRepo"
-    
-        Scans the specified repository for secrets.
-``
+```
+
+Scans the specified repository for secrets.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GitLeaksScan -OutputFormat "sarif" -ReportPath "scan-results.sarif"
-    
-        Scans current directory and saves results in SARIF format.
-``
+```
+
+Scans current directory and saves results in SARIF format.
 
 ## Aliases
 

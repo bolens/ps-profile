@@ -29,9 +29,9 @@ The path for the output EDN file. If not specified, uses input path with .edn ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-EdnFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

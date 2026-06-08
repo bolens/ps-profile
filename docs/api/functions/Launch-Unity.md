@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Unity
-        
-        Launches Unity Hub.
-``
+```powershell
+Launch-Unity -ProjectPath 'value'
+```
+
+Launches Unity Hub.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Unity -ProjectPath "C:\Projects\MyGame"
-        
-        Launches Unity and opens a project.
-``
+```
+
+Launches Unity and opens a project.
 
 ## Source
 

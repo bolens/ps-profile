@@ -115,8 +115,7 @@ function Get-TestEnvironment {
 .OUTPUTS
     Health check results
 .EXAMPLE
-    Test-TestEnvironmentHealth
-
+    Test-TestEnvironmentHealth -RepoRoot 'value'
 #>
 function Test-TestEnvironmentHealth {
     param(

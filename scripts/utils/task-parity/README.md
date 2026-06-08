@@ -53,7 +53,7 @@ pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate 
 - **Argument Normalization**: Handles different argument placeholder formats:
   - Taskfile: `{{.CLI_ARGS}}`
   - Makefile: `$(ARGS)`
-  - Justfile: `{{arguments()}}`
+  - Justfile: `*ARGS` recipe parameter with `{{ ARGS }}` (indented recipe body)
   - package.json: (no arguments typically)
 
 ## Output

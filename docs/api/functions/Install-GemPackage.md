@@ -33,17 +33,19 @@ Specific version to install (--version).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-GemPackage rails
-        Installs rails globally.
-``
+```
+
+Installs rails globally.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-GemPackage rails -User
-        Installs rails to user directory.
-``
+```
+
+Installs rails to user directory.
 
 ## Aliases
 

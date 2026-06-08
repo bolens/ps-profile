@@ -30,10 +30,11 @@ System.String The hexadecimal representation of the input URL encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello%20World" | ConvertFrom-UrlToHex
-    Converts URL encoding to hex.
-``
+```
+
+Converts URL encoding to hex.
 
 ## Aliases
 

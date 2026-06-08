@@ -175,7 +175,7 @@ if (Test-CachedCommand npm) {
     Set-AgentModeAlias -Name 'npmupgrade' -Target 'Update-NpmSelf'
     # NPM export global - backup global packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports globally installed npm packages to a backup file.
     .DESCRIPTION
         Creates a package.json file containing all globally installed npm packages.
@@ -183,12 +183,12 @@ if (Test-CachedCommand npm) {
     .PARAMETER Path
         Path to save the export file. Defaults to "npm-global-packages.json" in current directory.
     .EXAMPLE
-        Export-NpmGlobalPackages
+    Export-NpmGlobalPackages -Path ./path
         Exports global packages to npm-global-packages.json in current directory.
     .EXAMPLE
         Export-NpmGlobalPackages -Path "C:\backup\npm-global.json"
         Exports global packages to a specific file.
-    #>
+#>
     function Export-NpmGlobalPackages {
         [CmdletBinding()]
         param(
@@ -220,7 +220,7 @@ if (Test-CachedCommand npm) {
     Set-AgentModeAlias -Name 'npmbackup' -Target 'Export-NpmGlobalPackages'
     # NPM import global - restore global packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores globally installed npm packages from a backup file.
     .DESCRIPTION
         Installs all packages listed in a package.json file as global packages.
@@ -228,12 +228,12 @@ if (Test-CachedCommand npm) {
     .PARAMETER Path
         Path to the package.json file to import. Defaults to "npm-global-packages.json" in current directory.
     .EXAMPLE
-        Import-NpmGlobalPackages
+    Import-NpmGlobalPackages -Path ./path
         Restores global packages from npm-global-packages.json in current directory.
     .EXAMPLE
         Import-NpmGlobalPackages -Path "C:\backup\npm-global.json"
         Restores global packages from a specific file.
-    #>
+#>
     function Import-NpmGlobalPackages {
         [CmdletBinding()]
         param(

@@ -30,10 +30,11 @@ System.String The Base32-encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello" | ConvertTo-Base32
-    Encodes the text to Base32.
-``
+```
+
+Encodes the text to Base32.
 
 ## Aliases
 

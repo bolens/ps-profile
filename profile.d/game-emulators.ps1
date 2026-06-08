@@ -33,32 +33,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches the Dolphin emulator (GameCube/Wii).
     
+
     .DESCRIPTION
         Launches Dolphin emulator. Prefers dolphin-dev, falls back to dolphin-nightly or dolphin.
         Optionally opens a ROM file.
     
+
     .PARAMETER RomPath
         Optional path to a ROM file to launch.
     
+
     .PARAMETER Fullscreen
         Launch in fullscreen mode.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Start-Dolphin
-        
+    Start-Dolphin -RomPath 'value'
         Launches Dolphin emulator.
     
+
     .EXAMPLE
         Start-Dolphin -RomPath "game.iso" -Fullscreen
         
         Launches Dolphin with a ROM in fullscreen mode.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Start-Dolphin {
         [CmdletBinding()]
         param(
@@ -131,32 +135,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches the Ryujinx emulator (Nintendo Switch).
     
+
     .DESCRIPTION
         Launches Ryujinx emulator. Prefers ryujinx-canary, falls back to ryujinx.
         Optionally opens a ROM file.
     
+
     .PARAMETER RomPath
         Optional path to a ROM file to launch.
     
+
     .PARAMETER Fullscreen
         Launch in fullscreen mode.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Start-Ryujinx
-        
+    Start-Ryujinx -RomPath 'value'
         Launches Ryujinx emulator.
     
+
     .EXAMPLE
         Start-Ryujinx -RomPath "game.nsp" -Fullscreen
         
         Launches Ryujinx with a ROM in fullscreen mode.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Start-Ryujinx {
         [CmdletBinding()]
         param(
@@ -226,35 +234,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches RetroArch multi-system emulator frontend.
     
+
     .DESCRIPTION
         Launches RetroArch, a multi-system emulator frontend supporting many consoles.
         Optionally opens a ROM file.
     
+
     .PARAMETER RomPath
         Optional path to a ROM file to launch.
     
+
     .PARAMETER Core
         Core to use (e.g., 'snes9x', 'mupen64plus', 'mednafen_psx').
     
+
     .PARAMETER Fullscreen
         Launch in fullscreen mode.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Start-RetroArch
-        
+    Start-RetroArch -RomPath 'value' -Core 'value'
         Launches RetroArch.
     
+
     .EXAMPLE
         Start-RetroArch -RomPath "game.sfc" -Core "snes9x" -Fullscreen
         
         Launches RetroArch with a ROM using the SNES9x core in fullscreen.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Start-RetroArch {
         [CmdletBinding()]
         param(
@@ -331,21 +344,22 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Lists available emulators on the system.
     
+
     .DESCRIPTION
         Checks for installed emulators and returns a list of available ones.
         Groups by console/system.
     
-    .EXAMPLE
-        Get-EmulatorList
-        
-        Lists all available emulators.
-    
+
     .OUTPUTS
         System.Object[]. Array of emulator information objects.
-    #>
+
+    .EXAMPLE
+    Get-EmulatorList
+        Lists all available emulators.
+#>
     function Get-EmulatorList {
         [CmdletBinding()]
         [OutputType([object[]])]
@@ -443,23 +457,27 @@ try {
     .SYNOPSIS
         Launches a game ROM with the appropriate emulator based on file extension.
     
+
     .DESCRIPTION
         Detects the appropriate emulator based on ROM file extension and launches it.
         Supports common ROM formats (.iso, .nsp, .xci, .gcm, .wbfs, .rvz, .wad, .n64, .z64, .v64, .3ds, .cia, .nds, .snes, .sfc, .smc, .ps3, .ps2, .psx, .iso, .cso, .vpk, .xex, .xbe, .gdi, .chd, .zip, .7z).
     
+
     .PARAMETER RomPath
         Path to the ROM file to launch.
     
+
     .PARAMETER Fullscreen
         Launch in fullscreen mode.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
         Launch-Game -RomPath "game.iso"
         
         Launches a game ROM with the appropriate emulator.
-    
-    .OUTPUTS
-        None.
     #>
     function Launch-Game {
         [CmdletBinding()]

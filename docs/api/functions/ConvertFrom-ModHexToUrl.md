@@ -30,10 +30,11 @@ System.String The URL/percent encoded representation of the input ModHex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "hkkllkkl" | ConvertFrom-ModHexToUrl
-    Converts ModHex to URL encoding.
-``
+```
+
+Converts ModHex to URL encoding.
 
 ## Aliases
 

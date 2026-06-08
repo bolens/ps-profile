@@ -30,10 +30,11 @@ System.String The ModHex representation of the input Roman numeral string.
 
 ### Example 1
 
-`powershell
+```powershell
 "LXXII CV" | ConvertFrom-RomanToModHex
-    Converts Roman numerals to ModHex.
-``
+```
+
+Converts Roman numerals to ModHex.
 
 ## Aliases
 

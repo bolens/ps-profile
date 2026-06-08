@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-Asn1ToJson -InputPath "schema.asn1"
-    
-    Converts schema.asn1 to schema.json.
-``
+```
+
+Converts schema.asn1 to schema.json.
 
 ## Aliases
 

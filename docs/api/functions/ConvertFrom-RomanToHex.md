@@ -30,10 +30,11 @@ System.String The hexadecimal representation of the input Roman numeral string.
 
 ### Example 1
 
-`powershell
+```powershell
 "LXXII CV" | ConvertFrom-RomanToHex
-    Converts Roman numerals to hex.
-``
+```
+
+Converts Roman numerals to hex.
 
 ## Aliases
 

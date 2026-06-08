@@ -37,10 +37,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodePhone -PhoneNumber "+1234567890"
-    Generates a phone call QR code.
-``
+```
+
+Generates a phone call QR code.
 
 ## Aliases
 

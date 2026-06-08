@@ -33,17 +33,19 @@ Install globally (default).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-PipPackage requests
-        Installs requests globally.
-``
+```
+
+Installs requests globally.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-PipPackage requests -User
-        Installs requests to user directory.
-``
+```
+
+Installs requests to user directory.
 
 ## Aliases
 

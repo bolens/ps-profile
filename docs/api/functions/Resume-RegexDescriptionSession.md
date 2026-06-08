@@ -37,15 +37,15 @@ Optional output path when -GenerateTest is specified.
 
 ### Example 1
 
-`powershell
+```powershell
 Resume-RegexDescriptionSession -Path ./email.json
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Resume-RegexDescriptionSession -Path ./email.json -GenerateTest -TestPath ./email.tests.ps1
-``
+```
 
 ## Aliases
 

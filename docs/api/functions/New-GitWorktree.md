@@ -42,19 +42,19 @@ System.String. Path to the created worktree.
 
 ### Example 1
 
-`powershell
+```powershell
 New-GitWorktree -Path "../myrepo-feature" -Branch "feature/new-feature"
-        
-        Creates a new worktree at ../myrepo-feature and checks out the feature/new-feature branch.
-``
+```
+
+Creates a new worktree at ../myrepo-feature and checks out the feature/new-feature branch.
 
 ### Example 2
 
-`powershell
+```powershell
 New-GitWorktree -Path "../myrepo-hotfix" -CreateBranch
-        
-        Creates a new worktree and a new branch.
-``
+```
+
+Creates a new worktree and a new branch.
 
 ## Source
 

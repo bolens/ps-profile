@@ -259,20 +259,25 @@ function Get-NodeModuleSearchPaths {
 <#
 .SYNOPSIS
     Executes a Node.js script with proper NODE_PATH configuration.
+
 .DESCRIPTION
     Executes a Node.js script, automatically setting NODE_PATH to include
     pnpm's global node_modules directory if available. This ensures packages
     installed via pnpm can be found by Node.js.
+
 .PARAMETER ScriptPath
     The path to the Node.js script to execute.
+
 .PARAMETER Arguments
     Arguments to pass to the Node.js script.
-.EXAMPLE
-    Invoke-NodeScript -ScriptPath "script.js" -Arguments "arg1", "arg2"
-    Executes the Node.js script with the specified arguments.
+
 .OUTPUTS
     System.String
     The output from the Node.js script.
+
+.EXAMPLE
+    Invoke-NodeScript -ScriptPath "script.js" -Arguments "arg1", "arg2"
+    Executes the Node.js script with the specified arguments.
 #>
 function Invoke-NodeScript {
     param(
@@ -451,11 +456,17 @@ function Invoke-NodeScript {
 <#
 .SYNOPSIS
     Sets up NODE_PATH environment variable for Node.js execution.
+
 .DESCRIPTION
     Configures NODE_PATH to include pnpm's global node_modules directory
     if available. Returns a script block that restores the original NODE_PATH
     when disposed. Use this for manual node execution when you need to manage
     the environment yourself.
+
+.OUTPUTS
+    ScriptBlock
+    A script block that restores the original NODE_PATH when invoked.
+
 .EXAMPLE
     $restore = Set-NodePathForPnpm
     try {
@@ -464,9 +475,6 @@ function Invoke-NodeScript {
     finally {
         & $restore
     }
-.OUTPUTS
-    ScriptBlock
-    A script block that restores the original NODE_PATH when invoked.
 #>
 function Set-NodePathForPnpm {
     $moduleSearchPaths = @(Get-NodeModuleSearchPaths)
@@ -496,6 +504,7 @@ function Set-NodePathForPnpm {
 <#
 .SYNOPSIS
     Gets the preferred Node.js package manager based on availability and user preference.
+
 .DESCRIPTION
     Determines which Node.js package manager to use based on:
     1. User preference via $env:PS_NODE_PACKAGE_MANAGER ('pnpm', 'npm', 'yarn', 'bun', or 'auto')
@@ -508,15 +517,17 @@ function Set-NodePathForPnpm {
     - InstallCommand: Command template for installing packages (e.g., 'pnpm add -g {package}')
     - GlobalFlag: Flag for global installation (e.g., '-g', '--global')
     - LocalFlag: Flag for local installation (usually empty)
+
+.OUTPUTS
+    System.Collections.Hashtable
+    Hashtable with Manager, Available, InstallCommand, GlobalFlag, and LocalFlag keys.
+
 .EXAMPLE
     $pmInfo = Get-NodePackageManagerPreference
     if ($pmInfo.Available) {
         $installCmd = $pmInfo.InstallCommand -f 'superjson'
         Write-Host "Install with: $installCmd"
     }
-.OUTPUTS
-    System.Collections.Hashtable
-    Hashtable with Manager, Available, InstallCommand, GlobalFlag, and LocalFlag keys.
 #>
 function Get-NodePackageManagerPreference {
     # Check user preference
@@ -623,19 +634,24 @@ function Get-NodePackageManagerPreference {
 <#
 .SYNOPSIS
     Gets installation command for a Node.js package using the preferred package manager.
+
 .DESCRIPTION
     Returns the installation command for a Node.js package using the preferred package manager.
     Supports global and local installation modes.
+
 .PARAMETER PackageName
     The name of the package to install.
+
 .PARAMETER Global
     If true, install globally. If false, install locally.
-.EXAMPLE
-    $cmd = Get-NodePackageInstallCommand -PackageName 'superjson' -Global
-    Write-Host "Run: $cmd"
+
 .OUTPUTS
     System.String
     The installation command string.
+
+.EXAMPLE
+    $cmd = Get-NodePackageInstallCommand -PackageName 'superjson' -Global
+    Write-Host "Run: $cmd"
 #>
 function Get-NodePackageInstallCommand {
     param(
@@ -667,19 +683,24 @@ function Get-NodePackageInstallCommand {
 <#
 .SYNOPSIS
     Gets installation recommendation message for missing Node.js packages.
+
 .DESCRIPTION
     Returns a formatted installation recommendation message for one or more Node.js packages.
     Uses the preferred package manager and formats the message appropriately.
+
 .PARAMETER PackageNames
     One or more package names to include in the recommendation.
+
 .PARAMETER Global
     If true, recommend global installation. If false, recommend local installation.
-.EXAMPLE
-    $msg = Get-NodePackageInstallRecommendation -PackageNames 'superjson', 'json5'
-    Write-Host $msg
+
 .OUTPUTS
     System.String
     The installation recommendation message.
+
+.EXAMPLE
+    $msg = Get-NodePackageInstallRecommendation -PackageNames 'superjson', 'json5'
+    Write-Host $msg
 #>
 function Get-NodePackageInstallRecommendation {
     param(
@@ -725,19 +746,25 @@ $script:EmbeddedNodeInstallPlaceholder = '__NODE_INSTALL_CMD__'
 <#
 .SYNOPSIS
     Injects preference-aware Node.js package install commands into embedded script text.
+
 .DESCRIPTION
     Replaces __NODE_INSTALL_CMD__ placeholders in embedded JavaScript scripts with the
     output of Get-NodePackageInstallRecommendation.
+
 .PARAMETER Script
     Embedded JavaScript script text that may contain __NODE_INSTALL_CMD__ placeholders.
+
 .PARAMETER PackageNames
     Node package names to include in the install recommendation.
+
 .PARAMETER Global
     Recommend global installation when supported by the active package manager.
-.EXAMPLE
-    $script = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'superjson' -Global
+
 .OUTPUTS
     System.String
+
+.EXAMPLE
+    $script = Expand-EmbeddedNodeInstallHints -Script $nodeScript -PackageNames 'superjson' -Global
 #>
 function Expand-EmbeddedNodeInstallHints {
     [CmdletBinding()]
@@ -763,23 +790,32 @@ function Expand-EmbeddedNodeInstallHints {
 <#
 .SYNOPSIS
     Replaces __NODE_INSTALL_CMD__ in a PowerShell error message at runtime.
-.PARAMETER Message
-    Optional message written before exiting.
-.PARAMETER PackageNames
-    PackageNames parameter.
-.PARAMETER Global
-    Global parameter.
-.EXAMPLE
+
 .DESCRIPTION
     Replaces __NODE_INSTALL_CMD__ in a PowerShell error message at runtime.
+
+.PARAMETER Message
+    Optional message written before exiting.
+
+.PARAMETER PackageNames
+    PackageNames parameter.
+
+.PARAMETER Global
+    Global parameter.
+
     .PARAMETER Message
     Optional message written before exiting.
+
     .PARAMETER PackageNames
     PackageNames parameter.
+
     .PARAMETER Global
     Global parameter.
+
+.EXAMPLE
+
     .EXAMPLE
-    Resolve-NodeInstallHintMessage
+    Resolve-NodeInstallHintMessage -Message 'message' -PackageNames @()
 #>
 function Resolve-NodeInstallHintMessage {
     [CmdletBinding()]

@@ -25,15 +25,15 @@ Arguments to pass to firebase.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Firebase --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Firebase login
-``
+```
 
 ## Aliases
 

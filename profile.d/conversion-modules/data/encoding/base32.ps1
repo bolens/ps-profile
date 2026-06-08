@@ -393,19 +393,24 @@ function Initialize-FileConversion-CoreEncodingBase32 {
 <#
 .SYNOPSIS
     Converts Base32 string to ASCII text.
+
 .DESCRIPTION
     Converts a Base32 string back to ASCII text. Base32 uses the alphabet A-Z, 2-7 (32 characters).
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped. Padding characters (=) are automatically handled.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToAscii
-    Converts Base32 to "Hello".
-.EXAMPLE
-    ConvertFrom-Base32ToAscii -InputObject "MZXW6YTBOI======"
-    Converts Base32 string to ASCII.
+
 .OUTPUTS
     System.String
     The ASCII text representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToAscii
+    Converts Base32 to "Hello".
+
+.EXAMPLE
+    ConvertFrom-Base32ToAscii -InputObject "MZXW6YTBOI======"
+    Converts Base32 string to ASCII.
 #>
 function ConvertFrom-Base32ToAscii {
     [CmdletBinding()]
@@ -428,16 +433,20 @@ Set-AgentModeAlias -Name 'base32-to-ascii' -Target 'ConvertFrom-Base32ToAscii'
 <#
 .SYNOPSIS
     Converts Base32 string to hexadecimal representation.
+
 .DESCRIPTION
     Converts a Base32 string to hexadecimal string representation.
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToHex
-    Converts Base32 to hex.
+
 .OUTPUTS
     System.String
     The hexadecimal representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToHex
+    Converts Base32 to hex.
 #>
 function ConvertFrom-Base32ToHex {
     [CmdletBinding()]
@@ -460,18 +469,23 @@ Set-AgentModeAlias -Name 'base32-to-hex' -Target 'ConvertFrom-Base32ToHex'
 <#
 .SYNOPSIS
     Converts Base32 string to binary representation.
+
 .DESCRIPTION
     Converts a Base32 string to binary string representation.
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between binary bytes. Default is a space.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToBinary
-    Converts Base32 to binary with spaces.
+
 .OUTPUTS
     System.String
     The binary representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToBinary
+    Converts Base32 to binary with spaces.
 #>
 function ConvertFrom-Base32ToBinary {
     [CmdletBinding()]
@@ -495,16 +509,20 @@ Set-AgentModeAlias -Name 'base32-to-binary' -Target 'ConvertFrom-Base32ToBinary'
 <#
 .SYNOPSIS
     Converts Base32 string to ModHex representation.
+
 .DESCRIPTION
     Converts a Base32 string to ModHex string representation.
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToModHex
-    Converts Base32 to ModHex.
+
 .OUTPUTS
     System.String
     The ModHex representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToModHex
+    Converts Base32 to ModHex.
 #>
 function ConvertFrom-Base32ToModHex {
     [CmdletBinding()]
@@ -527,18 +545,23 @@ Set-AgentModeAlias -Name 'base32-to-modhex' -Target 'ConvertFrom-Base32ToModHex'
 <#
 .SYNOPSIS
     Converts Base32 string to octal representation.
+
 .DESCRIPTION
     Converts a Base32 string to octal string representation.
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between octal bytes. Default is a space.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToOctal
-    Converts Base32 to octal.
+
 .OUTPUTS
     System.String
     The octal representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToOctal
+    Converts Base32 to octal.
 #>
 function ConvertFrom-Base32ToOctal {
     [CmdletBinding()]
@@ -562,18 +585,23 @@ Set-AgentModeAlias -Name 'base32-to-octal' -Target 'ConvertFrom-Base32ToOctal'
 <#
 .SYNOPSIS
     Converts Base32 string to decimal representation.
+
 .DESCRIPTION
     Converts a Base32 string to decimal string representation.
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between decimal values. Default is a space.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToDecimal
-    Converts Base32 to decimal.
+
 .OUTPUTS
     System.String
     The decimal representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToDecimal
+    Converts Base32 to decimal.
 #>
 function ConvertFrom-Base32ToDecimal {
     [CmdletBinding()]
@@ -597,18 +625,23 @@ Set-AgentModeAlias -Name 'base32-to-decimal' -Target 'ConvertFrom-Base32ToDecima
 <#
 .SYNOPSIS
     Converts Base32 string to Roman numeral representation.
+
 .DESCRIPTION
     Converts a Base32 string to Roman numeral string representation.
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between Roman numerals. Default is a space.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToRoman
-    Converts Base32 to Roman numerals.
+
 .OUTPUTS
     System.String
     The Roman numeral representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToRoman
+    Converts Base32 to Roman numerals.
 #>
 function ConvertFrom-Base32ToRoman {
     [CmdletBinding()]
@@ -632,16 +665,20 @@ Set-AgentModeAlias -Name 'base32-to-roman' -Target 'ConvertFrom-Base32ToRoman'
 <#
 .SYNOPSIS
     Converts Base32 string to URL/percent encoded representation.
+
 .DESCRIPTION
     Converts a Base32 string to URL/percent encoded string representation.
+
 .PARAMETER InputObject
     The Base32 string to convert. Can be piped.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32ToUrl
-    Converts Base32 to URL encoding.
+
 .OUTPUTS
     System.String
     The URL/percent encoded representation of the input Base32 string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32ToUrl
+    Converts Base32 to URL encoding.
 #>
 function ConvertFrom-Base32ToUrl {
     [CmdletBinding()]

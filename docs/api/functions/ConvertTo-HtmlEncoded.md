@@ -30,10 +30,11 @@ System.String The HTML-encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "<script>" | ConvertTo-HtmlEncoded
-    Returns "&lt;script&gt;".
-``
+```
+
+Returns "&lt;script&gt;".
 
 ## Aliases
 

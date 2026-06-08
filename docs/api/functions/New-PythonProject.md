@@ -38,17 +38,19 @@ System.String. Path to the created project directory.
 
 ### Example 1
 
-`powershell
+```powershell
 New-PythonProject myproject
-        Creates a new Python project named 'myproject'.
-``
+```
+
+Creates a new Python project named 'myproject'.
 
 ### Example 2
 
-`powershell
+```powershell
 New-PythonProject myproject -Path 'C:\Projects' -UseUV
-        Creates a project using uv in the specified path.
-``
+```
+
+Creates a project using uv in the specified path.
 
 ## Source
 

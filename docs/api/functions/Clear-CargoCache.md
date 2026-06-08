@@ -34,24 +34,27 @@ System.String. Output from cargo cache cleanup execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Clear-CargoCache
-        Cleans up unused cache entries automatically.
-``
+```
+
+Cleans up unused cache entries automatically.
 
 ### Example 2
 
-`powershell
+```powershell
 Clear-CargoCache -Autoclean
-        Uses cargo cache --autoclean for automatic cleanup.
-``
+```
+
+Uses cargo cache --autoclean for automatic cleanup.
 
 ### Example 3
 
-`powershell
+```powershell
 Clear-CargoCache -All
-        Removes all cache entries (aggressive cleanup).
-``
+```
+
+Removes all cache entries (aggressive cleanup).
 
 ## Aliases
 

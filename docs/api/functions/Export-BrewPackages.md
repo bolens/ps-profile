@@ -33,24 +33,27 @@ Overwrite existing Brewfile if it exists.
 
 ### Example 1
 
-`powershell
-Export-BrewPackages
-        Exports packages to Brewfile in current directory.
-``
+```powershell
+Export-BrewPackages -Path ./path
+```
+
+Exports packages to Brewfile in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-BrewPackages -Path "~/backup/Brewfile"
-        Exports packages to a specific file.
-``
+```
+
+Exports packages to a specific file.
 
 ### Example 3
 
-`powershell
+```powershell
 Export-BrewPackages -Describe
-        Exports packages with descriptions included.
-``
+```
+
+Exports packages with descriptions included.
 
 ## Aliases
 

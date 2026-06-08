@@ -43,23 +43,30 @@ function Initialize-DevTools-Lorem {
 <#
 .SYNOPSIS
     Generates Lorem Ipsum placeholder text.
+
 .DESCRIPTION
     Generates Lorem Ipsum placeholder text with specified number of words or paragraphs.
+
 .PARAMETER Words
     Number of words to generate. Default is 50.
+
 .PARAMETER Paragraphs
     Number of paragraphs to generate. Default is 1.
+
 .PARAMETER StartWithLorem
     If specified, starts the first paragraph with "Lorem ipsum".
-.EXAMPLE
-    Get-LoremIpsum -Words 100
-    Generates 100 words of Lorem Ipsum text.
-.EXAMPLE
-    Get-LoremIpsum -Paragraphs 3 -StartWithLorem
-    Generates 3 paragraphs starting with "Lorem ipsum".
+
 .OUTPUTS
     System.String
     The generated Lorem Ipsum text.
+
+.EXAMPLE
+    Get-LoremIpsum -Words 100
+    Generates 100 words of Lorem Ipsum text.
+
+.EXAMPLE
+    Get-LoremIpsum -Paragraphs 3 -StartWithLorem
+    Generates 3 paragraphs starting with "Lorem ipsum".
 #>
 function Get-LoremIpsum {
     param(

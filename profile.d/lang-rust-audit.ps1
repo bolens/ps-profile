@@ -31,28 +31,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Audits Rust project dependencies for security vulnerabilities.
     
+
     .DESCRIPTION
         Wrapper function for cargo-audit, which checks Rust dependencies against
         the RustSec advisory database for known security vulnerabilities.
     
+
     .PARAMETER Arguments
         Additional arguments to pass to cargo-audit.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from cargo-audit execution.
+
     .EXAMPLE
-        Audit-RustProject
+    Audit-RustProject
         Audits the current Rust project for security vulnerabilities.
     
+
     .EXAMPLE
         Audit-RustProject --deny warnings
         Audits and treats warnings as errors.
-    
-    .OUTPUTS
-        System.String. Output from cargo-audit execution.
-    #>
+#>
     function Audit-RustProject {
         [CmdletBinding()]
         [OutputType([string])]
@@ -101,28 +105,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Checks for outdated Rust dependencies.
     
+
     .DESCRIPTION
         Wrapper function for cargo-outdated, which checks Rust project dependencies
         for available updates and displays version information.
     
+
     .PARAMETER Arguments
         Additional arguments to pass to cargo-outdated.
         Can be used multiple times or as an array.
     
+
+    .OUTPUTS
+        System.String. Output from cargo-outdated execution.
+
     .EXAMPLE
-        Test-RustOutdated
+    Test-RustOutdated
         Checks for outdated dependencies in the current project.
     
+
     .EXAMPLE
         Test-RustOutdated --aggressive
         Checks for more aggressive updates including minor version bumps.
-    
-    .OUTPUTS
-        System.String. Output from cargo-outdated execution.
-    #>
+#>
     function Test-RustOutdated {
         [CmdletBinding()]
         [OutputType([string])]

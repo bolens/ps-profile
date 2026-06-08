@@ -34,17 +34,19 @@ System.String. Output from Insomnia execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Insomnia -CollectionPath "./api-collection"
-        Runs the Insomnia collection in the specified directory.
-``
+```
+
+Runs the Insomnia collection in the specified directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Insomnia -Environment "production"
-        Runs the Insomnia collection using the production environment.
-``
+```
+
+Runs the Insomnia collection using the production environment.
 
 ## Aliases
 

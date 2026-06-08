@@ -33,12 +33,11 @@ If specified, stops loading on first error.
 
 ### Example 1
 
-`powershell
+```powershell
 Import-FragmentModules -FragmentRoot $PSScriptRoot -Modules @(
-        @{ ModulePath = @('dev-tools-modules', 'build', 'build-tools.ps1'); Context = 'build-tools' },
-        @{ ModulePath = @('dev-tools-modules', 'build', 'testing-frameworks.ps1'); Context = 'testing' }
-    )
-``
+```
+
+@{ ModulePath = @('dev-tools-modules', 'build', 'build-tools.ps1'); Context = 'build-tools' }, @{ ModulePath = @('dev-tools-modules', 'build', 'testing-frameworks.ps1'); Context = 'testing' } )
 
 ## Source
 

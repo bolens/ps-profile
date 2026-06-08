@@ -25,15 +25,15 @@ Text pattern to search for.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-RipgrepText -Pattern "function"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Find-RipgrepText -Pattern "error"
-``
+```
 
 ## Aliases
 

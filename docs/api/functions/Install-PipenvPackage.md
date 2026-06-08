@@ -29,17 +29,19 @@ Install as dev dependency (--dev).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-PipenvPackage requests
-        Installs requests as production dependency.
-``
+```
+
+Installs requests as production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-PipenvPackage pytest -Dev
-        Installs pytest as dev dependency.
-``
+```
+
+Installs pytest as dev dependency.
 
 ## Aliases
 

@@ -25,9 +25,9 @@ Path to the session JSON file.
 
 ### Example 1
 
-`powershell
+```powershell
 Import-RegexDescriptionSession -Path ./email.json
-``
+```
 
 ## Aliases
 

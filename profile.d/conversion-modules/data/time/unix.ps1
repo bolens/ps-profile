@@ -115,21 +115,26 @@ function Initialize-FileConversion-CoreTimeUnix {
 <#
 .SYNOPSIS
     Converts a Unix timestamp to a DateTime object.
+
 .DESCRIPTION
     Converts a Unix timestamp (seconds since January 1, 1970 UTC) to a DateTime object.
+
 .PARAMETER UnixTimestamp
     The Unix timestamp to convert (as integer or floating-point number).
+
+.OUTPUTS
+    System.DateTime
+    Returns a DateTime object representing the timestamp.
+
 .EXAMPLE
     1609459200 | ConvertFrom-UnixTimestampToDateTime
     
     Converts the Unix timestamp 1609459200 to a DateTime object.
+
 .EXAMPLE
     1609459200.5 | ConvertFrom-UnixTimestampToDateTime
     
     Converts a Unix timestamp with fractional seconds.
-.OUTPUTS
-    System.DateTime
-    Returns a DateTime object representing the timestamp.
 #>
 function ConvertFrom-UnixTimestampToDateTime {
     param(
@@ -144,21 +149,26 @@ Set-AgentModeAlias -Name 'unix-to-datetime' -Target 'ConvertFrom-UnixTimestampTo
 <#
 .SYNOPSIS
     Converts a DateTime object to a Unix timestamp.
+
 .DESCRIPTION
     Converts a DateTime object to a Unix timestamp (seconds since January 1, 1970 UTC).
+
 .PARAMETER DateTime
     The DateTime object to convert.
+
+.OUTPUTS
+    System.Int64
+    Returns a Unix timestamp as a long integer.
+
 .EXAMPLE
     Get-Date | ConvertTo-UnixTimestampFromDateTime
     
     Converts the current date/time to a Unix timestamp.
+
 .EXAMPLE
     [DateTime]::Parse('2021-01-01') | ConvertTo-UnixTimestampFromDateTime
     
     Converts a specific date to a Unix timestamp.
-.OUTPUTS
-    System.Int64
-    Returns a Unix timestamp as a long integer.
 #>
 function ConvertTo-UnixTimestampFromDateTime {
     param(
@@ -173,17 +183,21 @@ Set-AgentModeAlias -Name 'datetime-to-unix' -Target 'ConvertTo-UnixTimestampFrom
 <#
 .SYNOPSIS
     Converts a Unix timestamp to ISO 8601 format.
+
 .DESCRIPTION
     Converts a Unix timestamp to ISO 8601 date/time format string.
+
 .PARAMETER UnixTimestamp
     The Unix timestamp to convert.
+
+.OUTPUTS
+    System.String
+    Returns an ISO 8601 formatted date/time string.
+
 .EXAMPLE
     1609459200 | ConvertFrom-UnixTimestampToIso8601
     
     Converts the Unix timestamp to ISO 8601 format.
-.OUTPUTS
-    System.String
-    Returns an ISO 8601 formatted date/time string.
 #>
 function ConvertFrom-UnixTimestampToIso8601 {
     param(
@@ -198,17 +212,21 @@ Set-AgentModeAlias -Name 'unix-to-iso8601' -Target 'ConvertFrom-UnixTimestampToI
 <#
 .SYNOPSIS
     Converts an ISO 8601 date/time string to a Unix timestamp.
+
 .DESCRIPTION
     Converts an ISO 8601 formatted date/time string to a Unix timestamp.
+
 .PARAMETER Iso8601String
     The ISO 8601 formatted date/time string to convert.
+
+.OUTPUTS
+    System.Int64
+    Returns a Unix timestamp as a long integer.
+
 .EXAMPLE
     '2021-01-01T00:00:00Z' | ConvertTo-UnixTimestampFromIso8601
     
     Converts an ISO 8601 string to a Unix timestamp.
-.OUTPUTS
-    System.Int64
-    Returns a Unix timestamp as a long integer.
 #>
 function ConvertTo-UnixTimestampFromIso8601 {
     param(
@@ -223,24 +241,30 @@ Set-AgentModeAlias -Name 'iso8601-to-unix' -Target 'ConvertTo-UnixTimestampFromI
 <#
 .SYNOPSIS
     Converts a Unix timestamp to a human-readable date/time string.
+
 .DESCRIPTION
     Converts a Unix timestamp to a human-readable date/time format.
+
 .PARAMETER UnixTimestamp
     The Unix timestamp to convert.
+
 .PARAMETER Format
     The format string to use (default: 'F' for full date/time).
     See DateTime.ToString() format strings for options.
+
+.OUTPUTS
+    System.String
+    Returns a human-readable date/time string.
+
 .EXAMPLE
     1609459200 | ConvertFrom-UnixTimestampToHumanReadable
     
     Converts the Unix timestamp to a human-readable format.
+
 .EXAMPLE
     1609459200 | ConvertFrom-UnixTimestampToHumanReadable -Format 'yyyy-MM-dd'
     
     Converts the Unix timestamp using a custom format.
-.OUTPUTS
-    System.String
-    Returns a human-readable date/time string.
 #>
 function ConvertFrom-UnixTimestampToHumanReadable {
     param(

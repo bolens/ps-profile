@@ -21,38 +21,44 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Generates a changelog using git-cliff.
     
+
     .DESCRIPTION
         Creates a changelog from Git history using git-cliff. Supports
         various output formats and configuration options.
     
+
     .PARAMETER OutputPath
         Path to save the changelog file. Defaults to CHANGELOG.md.
     
+
     .PARAMETER ConfigPath
         Path to git-cliff configuration file.
     
+
     .PARAMETER Tag
         Git tag to use as the starting point for the changelog.
     
+
     .PARAMETER Latest
         Generate changelog only for the latest tag.
     
+
+    .OUTPUTS
+        System.String. Path to the generated changelog file.
+
     .EXAMPLE
-        New-GitChangelog
-        
+    New-GitChangelog -OutputPath ./output.file -ConfigPath 'value'
         Generates a changelog in the current directory.
     
+
     .EXAMPLE
         New-GitChangelog -OutputPath "docs/CHANGELOG.md" -Latest
         
         Generates a changelog for the latest tag and saves it to docs/CHANGELOG.md.
-    
-    .OUTPUTS
-        System.String. Path to the generated changelog file.
-    #>
+#>
     function New-GitChangelog {
         [CmdletBinding()]
         [OutputType([string])]

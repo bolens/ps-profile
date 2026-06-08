@@ -33,9 +33,9 @@ Error category for better organization.
 
 ### Example 1
 
-`powershell
-Write-ProfileError
-``
+```powershell
+Write-ProfileError -ErrorRecord 'value'
+```
 
 ## Source
 

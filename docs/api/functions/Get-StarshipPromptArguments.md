@@ -27,16 +27,16 @@ The exit code of the last command.
 
 ## Outputs
 
-System.String[] .EXAMPLE Get-StarshipPromptArguments
+System.String[]
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Get-StarshipPromptArguments
-``
+```powershell
+Get-StarshipPromptArguments -LastCommandSucceeded -LastExitCode 1
+```
 
 ## Source
 

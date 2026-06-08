@@ -34,10 +34,11 @@ System.String The octal representation of the input hex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "4865" | ConvertFrom-HexToOctal
-    Converts hex to octal.
-``
+```
+
+Converts hex to octal.
 
 ## Aliases
 

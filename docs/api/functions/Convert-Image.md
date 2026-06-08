@@ -29,9 +29,9 @@ The path for the output image file with desired format.
 
 ### Example 1
 
-`powershell
-Convert-Image
-``
+```powershell
+Convert-Image -InputObject $data
+```
 
 ## Aliases
 

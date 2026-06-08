@@ -34,10 +34,11 @@ System.String The octal representation of the input Roman numeral string.
 
 ### Example 1
 
-`powershell
+```powershell
 "LXXII CV" | ConvertFrom-RomanToOctal
-    Converts Roman numerals to octal.
-``
+```
+
+Converts Roman numerals to octal.
 
 ## Aliases
 

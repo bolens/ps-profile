@@ -25,15 +25,15 @@ Arguments to pass to rustup install.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-RustupToolchain stable
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Install-RustupToolchain nightly
-``
+```
 
 ## Aliases
 

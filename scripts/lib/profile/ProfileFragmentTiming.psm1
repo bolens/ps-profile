@@ -44,8 +44,7 @@ function Initialize-FragmentTiming {
 .PARAMETER Action
     The script block to execute and measure.
 .EXAMPLE
-    Measure-FragmentLoadTime
-
+    Measure-FragmentLoadTime -FragmentName 'git.ps1' -Action 'value'
 #>
 function Measure-FragmentLoadTime {
     [CmdletBinding()]

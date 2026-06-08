@@ -33,9 +33,9 @@ Maximum number of retry attempts.
 
 ### Example 1
 
-`powershell
-Invoke-SafeFragmentLoad
-``
+```powershell
+Invoke-SafeFragmentLoad -FragmentPath 'value' -FragmentName 'git.ps1'
+```
 
 ## Source
 

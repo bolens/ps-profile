@@ -30,17 +30,19 @@ System.String The ASCII text representation of the input URL encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello%20World" | ConvertFrom-UrlToAscii
-    Converts "Hello%20World" to "Hello World".
-``
+```
+
+Converts "Hello%20World" to "Hello World".
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-UrlToAscii -InputObject "test%40example.com"
-    Converts URL encoding to "test@example.com".
-``
+```
+
+Converts URL encoding to "test@example.com".
 
 ## Aliases
 

@@ -25,10 +25,11 @@ Package names to add.
 
 ### Example 1
 
-`powershell
+```powershell
 Add-JuliaPackage JSON
-        Adds JSON package.
-``
+```
+
+Adds JSON package.
 
 ## Aliases
 

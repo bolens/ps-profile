@@ -34,17 +34,19 @@ PSCustomObject Object containing Algorithm, Hash, and Text properties.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello World" | Get-TextHash
-    Calculates SHA256 hash of "Hello World".
-``
+```
+
+Calculates SHA256 hash of "Hello World".
 
 ### Example 2
 
-`powershell
+```powershell
 "password" | Get-TextHash -Algorithm MD5
-    Calculates MD5 hash of "password".
-``
+```
+
+Calculates MD5 hash of "password".
 
 ## Aliases
 

@@ -25,15 +25,9 @@ Arguments to pass to nuxi dev.
 
 ### Example 1
 
-`powershell
-Start-NuxtDev
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-NuxtDev --port 3000
-``
+```
 
 ## Aliases
 

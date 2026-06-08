@@ -16,7 +16,6 @@
     The path to the Python interpreter, or $null if not found.
 .EXAMPLE
     Get-PythonPath
-
 #>
 function Get-PythonPath {
     param(
@@ -262,22 +261,28 @@ function Get-PythonPath {
 <#
 .SYNOPSIS
     Executes a Python script with proper environment configuration.
+
 .DESCRIPTION
     Executes a Python script, automatically using the virtual environment
     Python if available in the repository root. This ensures packages
     installed in the virtual environment can be found.
+
 .PARAMETER ScriptPath
     The path to the Python script to execute.
+
 .PARAMETER Arguments
     Arguments to pass to the Python script.
+
 .PARAMETER RepoRoot
     Optional repository root path for virtual environment detection.
-.EXAMPLE
-    Invoke-PythonScript -ScriptPath "script.py" -Arguments "arg1", "arg2"
-    Executes the Python script with the specified arguments.
+
 .OUTPUTS
     System.String
     The output from the Python script.
+
+.EXAMPLE
+    Invoke-PythonScript -ScriptPath "script.py" -Arguments "arg1", "arg2"
+    Executes the Python script with the specified arguments.
 #>
 function Invoke-PythonScript {
     param(
@@ -538,6 +543,7 @@ function Invoke-PythonScript {
 <#
 .SYNOPSIS
     Gets the preferred data frame library (pandas or polars) based on availability and user preference.
+
 .DESCRIPTION
     Determines which data frame library to use based on:
     1. User preference via $env:PS_DATA_FRAME_LIB ('pandas', 'polars', or 'auto')
@@ -548,16 +554,19 @@ function Invoke-PythonScript {
     - Library: 'pandas' or 'polars'
     - Available: $true if the library is available
     - BothAvailable: $true if both libraries are available
+
 .PARAMETER PythonCmd
     Optional Python command path. If not provided, uses Get-PythonPath.
+
+.OUTPUTS
+    System.Collections.Hashtable
+    Hashtable with Library, Available, and BothAvailable keys.
+
 .EXAMPLE
     $libInfo = Get-DataFrameLibraryPreference
     if ($libInfo.Available) {
         Write-Host "Using $($libInfo.Library)"
     }
-.OUTPUTS
-    System.Collections.Hashtable
-    Hashtable with Library, Available, and BothAvailable keys.
 #>
 function Get-DataFrameLibraryPreference {
     param(
@@ -661,6 +670,7 @@ function Get-DataFrameLibraryPreference {
 <#
 .SYNOPSIS
     Gets the preferred Python package manager based on availability and user preference.
+
 .DESCRIPTION
     Determines which Python package manager to use based on:
     1. User preference via $env:PS_PYTHON_PACKAGE_MANAGER ('uv', 'pip', 'conda', 'poetry', 'pipenv', or 'auto')
@@ -673,17 +683,20 @@ function Get-DataFrameLibraryPreference {
     - InstallCommand: Command template for installing packages (e.g., 'uv pip install {package}')
     - GlobalFlag: Flag for global installation (e.g., '--system', '--user', '--global')
     - LocalFlag: Flag for local installation (e.g., '--user', '')
+
 .PARAMETER PythonCmd
     Optional Python command path. If not provided, uses Get-PythonPath.
+
+.OUTPUTS
+    System.Collections.Hashtable
+    Hashtable with Manager, Available, InstallCommand, GlobalFlag, and LocalFlag keys.
+
 .EXAMPLE
     $pmInfo = Get-PythonPackageManagerPreference
     if ($pmInfo.Available) {
         $installCmd = $pmInfo.InstallCommand -f 'pandas'
         Write-Host "Install with: $installCmd"
     }
-.OUTPUTS
-    System.Collections.Hashtable
-    Hashtable with Manager, Available, InstallCommand, GlobalFlag, and LocalFlag keys.
 #>
 function Get-PythonPackageManagerPreference {
     param(
@@ -806,21 +819,27 @@ function Get-PythonPackageManagerPreference {
 <#
 .SYNOPSIS
     Gets installation command for a Python package using the preferred package manager.
+
 .DESCRIPTION
     Returns the installation command for a Python package using the preferred package manager.
     Supports global and local installation modes.
+
 .PARAMETER PackageName
     The name of the package to install.
+
 .PARAMETER Global
     If true, install globally. If false, install locally.
+
 .PARAMETER PythonCmd
     Optional Python command path.
-.EXAMPLE
-    $cmd = Get-PythonPackageInstallCommand -PackageName 'pandas' -Global
-    Write-Host "Run: $cmd"
+
 .OUTPUTS
     System.String
     The installation command string.
+
+.EXAMPLE
+    $cmd = Get-PythonPackageInstallCommand -PackageName 'pandas' -Global
+    Write-Host "Run: $cmd"
 #>
 function Get-PythonPackageInstallCommand {
     param(
@@ -853,6 +872,7 @@ function Get-PythonPackageInstallCommand {
 <#
 .SYNOPSIS
     Gets the preferred Parquet library (pyarrow or fastparquet) based on availability and user preference.
+
 .DESCRIPTION
     Determines which Parquet library to use based on:
     1. User preference via $env:PS_PARQUET_LIB ('pyarrow', 'fastparquet', or 'auto')
@@ -863,16 +883,19 @@ function Get-PythonPackageInstallCommand {
     - Library: 'pyarrow' or 'fastparquet'
     - Available: $true if the library is available
     - BothAvailable: $true if both libraries are available
+
 .PARAMETER PythonCmd
     Optional Python command path. If not provided, uses Get-PythonPath.
+
+.OUTPUTS
+    System.Collections.Hashtable
+    Hashtable with Library, Available, and BothAvailable keys.
+
 .EXAMPLE
     $libInfo = Get-ParquetLibraryPreference
     if ($libInfo.Available) {
         Write-Host "Using $($libInfo.Library)"
     }
-.OUTPUTS
-    System.Collections.Hashtable
-    Hashtable with Library, Available, and BothAvailable keys.
 #>
 function Get-ParquetLibraryPreference {
     param(
@@ -976,6 +999,7 @@ function Get-ParquetLibraryPreference {
 <#
 .SYNOPSIS
     Gets the preferred scientific data library (netCDF4/h5py or xarray) based on availability and user preference.
+
 .DESCRIPTION
     Determines which scientific data library to use based on:
     1. User preference via $env:PS_SCIENTIFIC_LIB ('netcdf4', 'h5py', 'xarray', or 'auto')
@@ -988,16 +1012,19 @@ function Get-ParquetLibraryPreference {
     - XarrayAvailable: $true if xarray is available
     - Netcdf4Available: $true if netCDF4 is available
     - H5pyAvailable: $true if h5py is available
+
 .PARAMETER PythonCmd
     Optional Python command path. If not provided, uses Get-PythonPath.
+
+.OUTPUTS
+    System.Collections.Hashtable
+    Hashtable with Library, Available, and availability flags.
+
 .EXAMPLE
     $libInfo = Get-ScientificLibraryPreference
     if ($libInfo.Available) {
         Write-Host "Using $($libInfo.Library)"
     }
-.OUTPUTS
-    System.Collections.Hashtable
-    Hashtable with Library, Available, and availability flags.
 #>
 function Get-ScientificLibraryPreference {
     param(
@@ -1132,21 +1159,27 @@ function Get-ScientificLibraryPreference {
 <#
 .SYNOPSIS
     Gets installation recommendation message for missing Python packages.
+
 .DESCRIPTION
     Returns a formatted installation recommendation message for one or more Python packages.
     Uses the preferred package manager and formats the message appropriately.
+
 .PARAMETER PackageNames
     One or more package names to include in the recommendation.
+
 .PARAMETER Global
     If true, recommend global installation. If false, recommend local installation.
+
 .PARAMETER PythonCmd
     Optional Python command path.
-.EXAMPLE
-    $msg = Get-PythonPackageInstallRecommendation -PackageNames 'pandas', 'polars'
-    Write-Host $msg
+
 .OUTPUTS
     System.String
     The installation recommendation message.
+
+.EXAMPLE
+    $msg = Get-PythonPackageInstallRecommendation -PackageNames 'pandas', 'polars'
+    Write-Host $msg
 #>
 function Get-PythonPackageInstallRecommendation {
     param(
@@ -1186,19 +1219,25 @@ $script:EmbeddedPythonInstallPlaceholder = '__PYTHON_INSTALL_CMD__'
 <#
 .SYNOPSIS
     Injects preference-aware Python package install commands into embedded script text.
+
 .DESCRIPTION
     Replaces __PYTHON_INSTALL_CMD__ placeholders in embedded Python scripts with the
     output of Get-PythonPackageInstallRecommendation.
+
 .PARAMETER Script
     Embedded Python script text that may contain __PYTHON_INSTALL_CMD__ placeholders.
+
 .PARAMETER PackageNames
     Python package names to include in the install recommendation.
+
 .PARAMETER Global
     Recommend global/system installation when supported by the active package manager.
-.EXAMPLE
-    $script = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas','polars' -Global
+
 .OUTPUTS
     System.String
+
+.EXAMPLE
+    $script = Expand-EmbeddedPythonInstallHints -Script $pythonScript -PackageNames 'pandas','polars' -Global
 #>
 function Expand-EmbeddedPythonInstallHints {
     [CmdletBinding()]
@@ -1224,27 +1263,38 @@ function Expand-EmbeddedPythonInstallHints {
 <#
 .SYNOPSIS
     Replaces __PYTHON_INSTALL_CMD__ in a PowerShell error message at runtime.
-.PARAMETER Message
-    Optional message written before exiting.
-.PARAMETER PackageNames
-    PackageNames parameter.
-.PARAMETER Global
-    Global parameter.
-.PARAMETER PythonCmd
-    PythonCmd parameter.
-.EXAMPLE
+
 .DESCRIPTION
     Replaces __PYTHON_INSTALL_CMD__ in a PowerShell error message at runtime.
+
+.PARAMETER Message
+    Optional message written before exiting.
+
+.PARAMETER PackageNames
+    PackageNames parameter.
+
+.PARAMETER Global
+    Global parameter.
+
+.PARAMETER PythonCmd
+    PythonCmd parameter.
+
     .PARAMETER Message
     Optional message written before exiting.
+
     .PARAMETER PackageNames
     PackageNames parameter.
+
     .PARAMETER Global
     Global parameter.
+
     .PARAMETER PythonCmd
     PythonCmd parameter.
+
+.EXAMPLE
+
     .EXAMPLE
-    Resolve-PythonInstallHintMessage
+    Resolve-PythonInstallHintMessage -Message 'message' -PackageNames @()
 #>
 function Resolve-PythonInstallHintMessage {
     [CmdletBinding()]

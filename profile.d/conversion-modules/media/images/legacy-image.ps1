@@ -48,8 +48,7 @@ function Initialize-FileConversion-MediaImages {
 .PARAMETER OutputPath
     The path for the output image file with desired format.
 .EXAMPLE
-    Convert-Image
-
+    Convert-Image -InputObject $data
 #>
 function Convert-Image {
     param([string]$InputPath, [string]$OutputPath)
@@ -72,8 +71,7 @@ Set-AgentModeAlias -Name 'image-convert' -Target 'Convert-Image'
 .PARAMETER Height
     The desired height.
 .EXAMPLE
-    Resize-Image
-
+    Resize-Image -InputPath ./input.file -OutputPath ./output.file
 #>
 function Resize-Image {
     param([string]$InputPath, [string]$OutputPath, [int]$Width, [int]$Height)

@@ -25,15 +25,15 @@ Name of the new Laravel project.
 
 ### Example 1
 
-`powershell
+```powershell
 New-LaravelApp my-app
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-LaravelApp my-blog
-``
+```
 
 ## Aliases
 

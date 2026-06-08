@@ -30,17 +30,19 @@ System.String. Output from LM Studio CLI execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-LMStudio list
-        Lists available models in LM Studio.
-``
+```
+
+Lists available models in LM Studio.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-LMStudio serve
-        Starts the LM Studio server.
-``
+```
+
+Starts the LM Studio server.
 
 ## Aliases
 

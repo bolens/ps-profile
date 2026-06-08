@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Blockbench
-        
-        Launches Blockbench.
-``
+```powershell
+Launch-Blockbench -ProjectPath 'value'
+```
+
+Launches Blockbench.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Blockbench -ProjectPath "model.bbmodel"
-        
-        Launches Blockbench and opens a project file.
-``
+```
+
+Launches Blockbench and opens a project file.
 
 ## Source
 

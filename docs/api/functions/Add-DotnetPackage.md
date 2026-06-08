@@ -33,17 +33,19 @@ Project file path (--project).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-DotnetPackage Newtonsoft.Json
-        Adds Newtonsoft.Json to the current project.
-``
+```
+
+Adds Newtonsoft.Json to the current project.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-DotnetPackage Newtonsoft.Json -Version 13.0.1
-        Adds a specific version of Newtonsoft.Json.
-``
+```
+
+Adds a specific version of Newtonsoft.Json.
 
 ## Aliases
 

@@ -16,7 +16,7 @@ Open-Item
 
 ## Parameters
 
-### -p
+### -Path
 
 File path, directory, or URL to open with the system default handler.
 
@@ -25,17 +25,15 @@ File path, directory, or URL to open with the system default handler.
 
 ### Example 1
 
-`powershell
+```powershell
 Open-Item ./README.md
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Open-Item https://example.com
-.PARAMETER p
-    File path, directory, or URL to open with the system default handler.
-``
+```
 
 ## Aliases
 

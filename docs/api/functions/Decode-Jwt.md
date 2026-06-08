@@ -30,10 +30,11 @@ PSCustomObject Object containing Header, Payload, and Signature properties.
 
 ### Example 1
 
-`powershell
+```powershell
 Decode-Jwt -Token "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    Decodes the JWT token and displays header and payload.
-``
+```
+
+Decodes the JWT token and displays header and payload.
 
 ## Aliases
 

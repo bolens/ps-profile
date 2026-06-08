@@ -42,19 +42,19 @@ System.String[]. List of deleted branch names.
 
 ### Example 1
 
-`powershell
-Clean-GitBranches
-        
-        Removes all merged branches from the current branch.
-``
+```powershell
+Clean-GitBranches -TargetBranch 'value' -ExcludeBranches @()
+```
+
+Removes all merged branches from the current branch.
 
 ### Example 2
 
-`powershell
+```powershell
 Clean-GitBranches -TargetBranch "main" -DryRun
-        
-        Shows what branches would be deleted without actually deleting them.
-``
+```
+
+Shows what branches would be deleted without actually deleting them.
 
 ## Source
 

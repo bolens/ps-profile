@@ -74,16 +74,20 @@ function Initialize-DevTools-Encoding {
 <#
 .SYNOPSIS
     URL-encodes a string.
+
 .DESCRIPTION
     Encodes special characters in a string for use in URLs.
+
 .PARAMETER Text
     The text to encode. Can be piped.
-.EXAMPLE
-    "Hello World" | ConvertTo-UrlEncoded
-    Returns "Hello+World".
+
 .OUTPUTS
     System.String
     The URL-encoded string.
+
+.EXAMPLE
+    "Hello World" | ConvertTo-UrlEncoded
+    Returns "Hello+World".
 #>
 function ConvertTo-UrlEncoded {
     param([Parameter(ValueFromPipeline = $true)][string]$Text)
@@ -94,16 +98,20 @@ Set-AgentModeAlias -Name 'url-encode' -Target 'ConvertTo-UrlEncoded'
 <#
 .SYNOPSIS
     URL-decodes a string.
+
 .DESCRIPTION
     Decodes URL-encoded strings back to their original form.
+
 .PARAMETER Text
     The URL-encoded text to decode. Can be piped.
-.EXAMPLE
-    "Hello+World" | ConvertFrom-UrlEncoded
-    Returns "Hello World".
+
 .OUTPUTS
     System.String
     The URL-decoded string.
+
+.EXAMPLE
+    "Hello+World" | ConvertFrom-UrlEncoded
+    Returns "Hello World".
 #>
 function ConvertFrom-UrlEncoded {
     param([Parameter(ValueFromPipeline = $true)][string]$Text)
@@ -114,16 +122,20 @@ Set-AgentModeAlias -Name 'url-decode' -Target 'ConvertFrom-UrlEncoded'
 <#
 .SYNOPSIS
     HTML-encodes a string.
+
 .DESCRIPTION
     Encodes special characters in a string for safe use in HTML.
+
 .PARAMETER Text
     The text to encode. Can be piped.
-.EXAMPLE
-    "<script>" | ConvertTo-HtmlEncoded
-    Returns "&lt;script&gt;".
+
 .OUTPUTS
     System.String
     The HTML-encoded string.
+
+.EXAMPLE
+    "<script>" | ConvertTo-HtmlEncoded
+    Returns "&lt;script&gt;".
 #>
 function ConvertTo-HtmlEncoded {
     param([Parameter(ValueFromPipeline = $true)][string]$Text)
@@ -134,16 +146,20 @@ Set-AgentModeAlias -Name 'html-encode' -Target 'ConvertTo-HtmlEncoded'
 <#
 .SYNOPSIS
     HTML-decodes a string.
+
 .DESCRIPTION
     Decodes HTML-encoded strings back to their original form.
+
 .PARAMETER Text
     The HTML-encoded text to decode. Can be piped.
-.EXAMPLE
-    "&lt;script&gt;" | ConvertFrom-HtmlEncoded
-    Returns "<script>".
+
 .OUTPUTS
     System.String
     The HTML-decoded string.
+
+.EXAMPLE
+    "&lt;script&gt;" | ConvertFrom-HtmlEncoded
+    Returns "<script>".
 #>
 function ConvertFrom-HtmlEncoded {
     param([Parameter(ValueFromPipeline = $true)][string]$Text)

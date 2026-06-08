@@ -25,15 +25,15 @@ Arguments to pass to Angular CLI.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Angular --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Angular generate component my-component
-``
+```
 
 ## Aliases
 

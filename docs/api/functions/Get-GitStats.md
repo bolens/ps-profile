@@ -38,19 +38,19 @@ System.Management.Automation.PSCustomObject. Repository statistics.
 
 ### Example 1
 
-`powershell
-Get-GitStats
-        
-        Gets statistics for the current repository.
-``
+```powershell
+Get-GitStats -RepositoryPath 'value' -Since 'value'
+```
+
+Gets statistics for the current repository.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-GitStats -Since "2024-01-01"
-        
-        Gets statistics for commits since January 1, 2024.
-``
+```
+
+Gets statistics for commits since January 1, 2024.
 
 ## Source
 

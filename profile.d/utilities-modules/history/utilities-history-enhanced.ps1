@@ -20,8 +20,7 @@ try {
     .PARAMETER MaxResults
         Maximum number of results to return (default: 20).
 .EXAMPLE
-    Find-HistoryFuzzy
-
+    Find-HistoryFuzzy -Pattern 'search-term' -MaxResults 1
 #>
     function Find-HistoryFuzzy {
         param(
@@ -121,12 +120,15 @@ try {
     <#
 .SYNOPSIS
         Quick search in command history.
+
     .DESCRIPTION
         Searches command history for the specified pattern.
-.EXAMPLE
-    Find-HistoryQuick -Pattern 'git'
+
 .PARAMETER Pattern
     Text pattern to match against saved command history entries.
+
+.EXAMPLE
+    Find-HistoryQuick -Pattern 'git'
 
 #>
     function Find-HistoryQuick {
@@ -296,8 +298,7 @@ try {
     .PARAMETER Days
         Number of days of history to keep (default: 30).
 .EXAMPLE
-    Remove-OldHistory
-
+    Remove-OldHistory 'item'
 #>
     function Remove-OldHistory {
         param([int]$Days = 30)
@@ -326,8 +327,7 @@ try {
     .PARAMETER Pattern
         Pattern to match against command history.
 .EXAMPLE
-    Invoke-LastCommand
-
+    Invoke-LastCommand @('--help')
 #>
     function Invoke-LastCommand {
         param([string]$Pattern)
@@ -357,8 +357,7 @@ try {
     .PARAMETER Count
         Number of recent commands to show (default: 10).
 .EXAMPLE
-    Show-RecentCommands
-
+    Show-RecentCommands -Count 1
 #>
     function Show-RecentCommands {
         param([int]$Count = 10)
@@ -395,8 +394,7 @@ try {
     .PARAMETER CommandInput
         Either a number (for recent commands) or a pattern to search for.
 .EXAMPLE
-    r
-
+    r -CommandInput 'value'
 #>
     function r {
         param([string]$CommandInput)

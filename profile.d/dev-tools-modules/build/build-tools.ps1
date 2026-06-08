@@ -135,9 +135,6 @@ function Invoke-Rollup {
     Arguments to pass to serve.
 
 .EXAMPLE
-    Invoke-Serve
-
-.EXAMPLE
     Invoke-Serve -p 3000
 #>
 function Invoke-Serve {
@@ -168,9 +165,6 @@ function Invoke-Serve {
 
 .PARAMETER Arguments
     Arguments to pass to http-server.
-
-.EXAMPLE
-    Invoke-HttpServer
 
 .EXAMPLE
     Invoke-HttpServer -p 8080

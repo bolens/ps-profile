@@ -46,19 +46,19 @@ System.String. Notification delivery status.
 
 ### Example 1
 
-`powershell
+```powershell
 Send-NtfyNotification -Message "Task completed successfully"
-        
-        Sends a notification with the specified message.
-``
+```
+
+Sends a notification with the specified message.
 
 ### Example 2
 
-`powershell
+```powershell
 Send-NtfyNotification -Message "Alert!" -Title "System Alert" -Priority "urgent" -Topic "alerts"
-        
-        Sends an urgent notification to the alerts topic.
-``
+```
+
+Sends an urgent notification to the alerts topic.
 
 ## Source
 

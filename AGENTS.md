@@ -229,9 +229,9 @@ pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path prof
 
 **Test file naming:**
 
-- Unit tests: `tests/unit/*.tests.ps1` — flat directory; use prefixes (`library-`, `profile-`, `utility-`, `validation-`, `test-runner-`, `test-support*`)
+- Unit tests: `tests/unit/**/*.tests.ps1` — category subdirectories (`library/`, `profile/`, `utility/`, …); keep filename prefixes (`library-`, `profile-`, `utility-`, `validation-`, `test-runner-`, `test-support*`)
 - Integration tests: `tests/integration/**/*.tests.ps1` — domain subdirectories; short names without redundant folder prefixes
-- Performance tests: `tests/performance/*.tests.ps1` — flat directory; include `performance` in the name
+- Performance tests: `tests/performance/**/*.tests.ps1` — category subdirectories (`profile/`, `lang/`, `test-runner/`, `core/`); include `performance` in the name
 
 See [docs/guides/TESTING.md](docs/guides/TESTING.md#naming-conventions) for prefix rules, `-extended` suffix policy, and examples.
 

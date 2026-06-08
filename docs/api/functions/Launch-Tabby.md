@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Tabby
-        
-        Launches Tabby terminal.
-``
+```powershell
+Launch-Tabby -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
+```
+
+Launches Tabby terminal.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Tabby -Command "npm run dev"
-        
-        Launches Tabby and executes a command.
-``
+```
+
+Launches Tabby and executes a command.
 
 ## Source
 

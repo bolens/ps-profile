@@ -33,17 +33,19 @@ Don't run brew upgrade for outdated packages.
 
 ### Example 1
 
-`powershell
-Import-BrewPackages
-        Restores packages from Brewfile in current directory.
-``
+```powershell
+Import-BrewPackages -Path ./path
+```
+
+Restores packages from Brewfile in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-BrewPackages -Path "~/backup/Brewfile"
-        Restores packages from a specific file.
-``
+```
+
+Restores packages from a specific file.
 
 ## Aliases
 

@@ -31,29 +31,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Blockbench 3D model editor.
     
+
     .DESCRIPTION
         Launches Blockbench, a 3D model editor for block-based models.
         Supports Minecraft, Bedrock, and other block-based game formats.
     
+
     .PARAMETER ProjectPath
         Optional path to project file to open.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Blockbench
-        
+    Launch-Blockbench -ProjectPath 'value'
         Launches Blockbench.
     
+
     .EXAMPLE
         Launch-Blockbench -ProjectPath "model.bbmodel"
         
         Launches Blockbench and opens a project file.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Blockbench {
         [CmdletBinding()]
         param(
@@ -107,29 +110,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Tiled tile map editor.
     
+
     .DESCRIPTION
         Launches Tiled, a tile map editor for creating game levels and maps.
         Supports various tile map formats.
     
+
     .PARAMETER ProjectPath
         Optional path to map file to open.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Tiled
-        
+    Launch-Tiled -ProjectPath 'value'
         Launches Tiled.
     
+
     .EXAMPLE
         Launch-Tiled -ProjectPath "map.tmx"
         
         Launches Tiled and opens a map file.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Tiled {
         [CmdletBinding()]
         param(
@@ -183,32 +189,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Godot game engine.
     
+
     .DESCRIPTION
         Launches Godot game engine editor.
         Optionally opens a project.
     
+
     .PARAMETER ProjectPath
         Optional path to Godot project directory to open.
     
+
     .PARAMETER Headless
         Run in headless mode (no GUI).
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Godot
-        
+    Launch-Godot -ProjectPath 'value'
         Launches Godot editor.
     
+
     .EXAMPLE
         Launch-Godot -ProjectPath "C:\Projects\MyGame"
         
         Launches Godot and opens a project.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Godot {
         [CmdletBinding()]
         param(
@@ -272,34 +282,41 @@ try {
     .SYNOPSIS
         Builds a Godot project.
     
+
     .DESCRIPTION
         Builds a Godot project using the Godot command-line interface.
         Supports export presets and platform targets.
     
+
     .PARAMETER ProjectPath
         Path to Godot project directory.
     
+
     .PARAMETER ExportPreset
         Export preset name to use.
     
+
     .PARAMETER OutputPath
         Output directory for the build. Defaults to project directory.
     
+
     .PARAMETER Platform
         Target platform (e.g., 'windows', 'linux', 'macos', 'android', 'ios').
     
+
+    .OUTPUTS
+        System.String. Path to the built project or output directory.
+
     .EXAMPLE
         Build-GodotProject -ProjectPath "C:\Projects\MyGame"
         
         Builds a Godot project.
     
+
     .EXAMPLE
         Build-GodotProject -ProjectPath "C:\Projects\MyGame" -ExportPreset "Windows Desktop"
         
         Builds a Godot project using a specific export preset.
-    
-    .OUTPUTS
-        System.String. Path to the built project or output directory.
     #>
     function Build-GodotProject {
         [CmdletBinding()]
@@ -396,29 +413,32 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Unity Hub or Unity Editor.
     
+
     .DESCRIPTION
         Launches Unity Hub (preferred) or Unity Editor.
         Unity Hub is the recommended way to manage Unity projects and versions.
     
+
     .PARAMETER ProjectPath
         Optional path to Unity project to open.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Unity
-        
+    Launch-Unity -ProjectPath 'value'
         Launches Unity Hub.
     
+
     .EXAMPLE
         Launch-Unity -ProjectPath "C:\Projects\MyGame"
         
         Launches Unity and opens a project.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Unity {
         [CmdletBinding()]
         param(

@@ -377,20 +377,25 @@ function Initialize-FileConversion-Jsonc {
 <#
 .SYNOPSIS
     Converts a JSONC file to JSON format.
+
 .DESCRIPTION
     Converts a JSONC (JSON with Comments) file to standard JSON format.
     Removes C-style comments (// and /* */) from the file.
+
 .PARAMETER InputPath
     The path to the JSONC file.
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output JSON file.
+
 .EXAMPLE
     ConvertFrom-JsoncToJson -InputPath 'settings.jsonc'
     
     Converts settings.jsonc to settings.json.
-.OUTPUTS
-    System.String
-    Returns the path to the output JSON file.
 #>
 function ConvertFrom-JsoncToJson {
     param(
@@ -407,20 +412,25 @@ Set-Alias -Name jsonc-to-json -Value ConvertFrom-JsoncToJson -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts a JSON file to JSONC format.
+
 .DESCRIPTION
     Converts a standard JSON file to JSONC format.
     Note: Comments are not automatically added - the output is valid JSONC without comments.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output JSONC file. If not specified, uses input path with .jsonc extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output JSONC file.
+
 .EXAMPLE
     ConvertTo-JsoncFromJson -InputPath 'settings.json'
     
     Converts settings.json to settings.jsonc.
-.OUTPUTS
-    System.String
-    Returns the path to the output JSONC file.
 #>
 function ConvertTo-JsoncFromJson {
     param(
@@ -437,19 +447,24 @@ Set-Alias -Name json-to-jsonc -Value ConvertTo-JsoncFromJson -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts a JSONC file to YAML format.
+
 .DESCRIPTION
     Converts a JSONC file to YAML format via JSON intermediate conversion.
+
 .PARAMETER InputPath
     The path to the JSONC file.
+
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output YAML file.
+
 .EXAMPLE
     ConvertFrom-JsoncToYaml -InputPath 'settings.jsonc'
     
     Converts settings.jsonc to settings.yaml.
-.OUTPUTS
-    System.String
-    Returns the path to the output YAML file.
 #>
 function ConvertFrom-JsoncToYaml {
     param(
@@ -466,19 +481,24 @@ Set-Alias -Name jsonc-to-yaml -Value ConvertFrom-JsoncToYaml -Scope Global -Erro
 <#
 .SYNOPSIS
     Converts a YAML file to JSONC format.
+
 .DESCRIPTION
     Converts a YAML file to JSONC format via JSON intermediate conversion.
+
 .PARAMETER InputPath
     The path to the YAML file.
+
 .PARAMETER OutputPath
     The path for the output JSONC file. If not specified, uses input path with .jsonc extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output JSONC file.
+
 .EXAMPLE
     ConvertTo-JsoncFromYaml -InputPath 'settings.yaml'
     
     Converts settings.yaml to settings.jsonc.
-.OUTPUTS
-    System.String
-    Returns the path to the output JSONC file.
 #>
 function ConvertTo-JsoncFromYaml {
     param(

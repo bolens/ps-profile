@@ -32,9 +32,6 @@
     Arguments to pass to next dev.
 
 .EXAMPLE
-    Start-NextJsDev
-
-.EXAMPLE
     Start-NextJsDev --port 3001
 #>
 function Start-NextJsDev {
@@ -64,9 +61,6 @@ function Start-NextJsDev {
     Arguments to pass to next build.
 
 .EXAMPLE
-    Build-NextJsApp
-
-.EXAMPLE
     Build-NextJsApp --no-lint
 #>
 function Build-NextJsApp {
@@ -94,9 +88,6 @@ function Build-NextJsApp {
 
 .PARAMETER Arguments
     Arguments to pass to next start.
-
-.EXAMPLE
-    Start-NextJsProduction
 
 .EXAMPLE
     Start-NextJsProduction --port 3000

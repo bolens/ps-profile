@@ -30,10 +30,11 @@ System.String The ModHex representation of the input decimal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "72 105" | ConvertFrom-DecimalToModHex
-    Converts decimal to ModHex.
-``
+```
+
+Converts decimal to ModHex.
 
 ## Aliases
 

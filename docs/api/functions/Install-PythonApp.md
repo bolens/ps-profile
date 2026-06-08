@@ -34,17 +34,19 @@ System.String. Output from pipx install execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-PythonApp black
-        Installs black as a standalone application.
-``
+```
+
+Installs black as a standalone application.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-PythonApp pytest --include-deps
-        Installs pytest with additional dependencies.
-``
+```
+
+Installs pytest with additional dependencies.
 
 ## Aliases
 

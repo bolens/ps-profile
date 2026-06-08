@@ -25,15 +25,15 @@ Arguments to pass to kubectl get.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-KubectlResource pods
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Get-KubectlResource pods -n default
-``
+```
 
 ## Aliases
 

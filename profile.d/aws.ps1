@@ -147,25 +147,28 @@ function Set-AwsRegion {
 .SYNOPSIS
     Lists configured AWS credential profiles.
 
+
 .DESCRIPTION
     Retrieves a list of all configured AWS profiles from the credentials file.
     Shows profile names and optionally their access key IDs.
 
+
 .PARAMETER ShowKeys
     Show access key IDs (partially masked) for each profile.
 
+
+.OUTPUTS
+    System.Object[]. Array of profile information objects.
+
 .EXAMPLE
     Get-AwsCredentials
-    
     Lists all configured AWS profiles.
+
 
 .EXAMPLE
     Get-AwsCredentials -ShowKeys
     
     Lists profiles with partially masked access key IDs.
-
-.OUTPUTS
-    System.Object[]. Array of profile information objects.
 #>
 function Get-AwsCredentials {
     [CmdletBinding()]
@@ -262,25 +265,28 @@ function Get-AwsCredentials {
 .SYNOPSIS
     Tests AWS connectivity and credentials.
 
+
 .DESCRIPTION
     Verifies that AWS CLI can connect to AWS and that credentials are valid.
     Uses sts get-caller-identity to test authentication.
 
+
 .PARAMETER Profile
     Optional AWS profile to test. Uses current profile if not specified.
 
+
+.OUTPUTS
+    System.Boolean. True if connection is successful, false otherwise.
+
 .EXAMPLE
-    Test-AwsConnection
-    
+    Test-AwsConnection -Profile 'value'
     Tests connectivity with the current AWS profile.
+
 
 .EXAMPLE
     Test-AwsConnection -Profile "production"
     
     Tests connectivity with the specified profile.
-
-.OUTPUTS
-    System.Boolean. True if connection is successful, false otherwise.
 #>
 function Test-AwsConnection {
     [CmdletBinding()]
@@ -344,31 +350,37 @@ function Test-AwsConnection {
 .SYNOPSIS
     Lists AWS resources by type.
 
+
 .DESCRIPTION
     Retrieves a list of AWS resources of a specified type using AWS CLI.
     Supports common resource types like EC2 instances, S3 buckets, etc.
 
+
 .PARAMETER ResourceType
     AWS resource type (e.g., 'ec2', 's3', 'lambda', 'rds').
+
 
 .PARAMETER Service
     AWS service name (e.g., 'ec2', 's3', 'lambda').
 
+
 .PARAMETER Action
     Service action to list resources (e.g., 'describe-instances', 'list-buckets').
+
+
+.OUTPUTS
+    System.Object. Resource list from AWS CLI.
 
 .EXAMPLE
     Get-AwsResources -Service 'ec2' -Action 'describe-instances'
     
     Lists EC2 instances.
 
+
 .EXAMPLE
     Get-AwsResources -Service 's3' -Action 'list-buckets'
     
     Lists S3 buckets.
-
-.OUTPUTS
-    System.Object. Resource list from AWS CLI.
 #>
 function Get-AwsResources {
     [CmdletBinding()]
@@ -426,28 +438,33 @@ function Get-AwsResources {
 .SYNOPSIS
     Exports AWS credentials to environment variables.
 
+
 .DESCRIPTION
     Exports AWS credentials from a profile to environment variables.
     Useful for scripts that need AWS credentials but don't use profiles.
 
+
 .PARAMETER Profile
     AWS profile name to export. Uses current profile if not specified.
 
+
 .PARAMETER ExportToEnv
     Export to environment variables (default). If false, only displays values.
+
+
+.OUTPUTS
+    System.Object. Credential information object.
 
 .EXAMPLE
     Export-AwsCredentials -Profile "production"
     
     Exports production profile credentials to environment variables.
 
+
 .EXAMPLE
     Export-AwsCredentials -Profile "dev" -ExportToEnv:$false
     
     Displays credentials without exporting them.
-
-.OUTPUTS
-    System.Object. Credential information object.
 #>
 function Export-AwsCredentials {
     [CmdletBinding(SupportsShouldProcess = $true)]
@@ -530,28 +547,33 @@ function Export-AwsCredentials {
 .SYNOPSIS
     Switches AWS account/profile quickly.
 
+
 .DESCRIPTION
     A convenience function that combines setting profile and testing connection.
     Sets the AWS profile and verifies connectivity.
 
+
 .PARAMETER ProfileName
     Name of the AWS profile to switch to.
 
+
 .PARAMETER SkipTest
     Skip connection test after switching.
+
+
+.OUTPUTS
+    System.Boolean. True if switch and test (if not skipped) are successful.
 
 .EXAMPLE
     Switch-AwsAccount -ProfileName "production"
     
     Switches to production profile and tests connection.
 
+
 .EXAMPLE
     Switch-AwsAccount -ProfileName "dev" -SkipTest
     
     Switches to dev profile without testing connection.
-
-.OUTPUTS
-    System.Boolean. True if switch and test (if not skipped) are successful.
 #>
 function Switch-AwsAccount {
     [CmdletBinding()]
@@ -591,31 +613,36 @@ function Switch-AwsAccount {
 .SYNOPSIS
     Gets AWS cost information.
 
+
 .DESCRIPTION
     Retrieves AWS cost information using AWS Cost Explorer API or billing commands.
     Requires appropriate IAM permissions.
 
+
 .PARAMETER StartDate
     Start date for cost query (YYYY-MM-DD format). Defaults to first day of current month.
+
 
 .PARAMETER EndDate
     End date for cost query (YYYY-MM-DD format). Defaults to today.
 
+
 .PARAMETER Service
     Optional service name to filter costs (e.g., 'EC2', 'S3', 'Lambda').
 
+
+.OUTPUTS
+    System.Object. Cost information from AWS.
+
 .EXAMPLE
-    Get-AwsCosts
-    
+    Get-AwsCosts -StartDate 'value' -EndDate 'value'
     Gets costs for the current month.
+
 
 .EXAMPLE
     Get-AwsCosts -StartDate "2024-01-01" -EndDate "2024-01-31" -Service "EC2"
     
     Gets EC2 costs for January 2024.
-
-.OUTPUTS
-    System.Object. Cost information from AWS.
 #>
 function Get-AwsCosts {
     [CmdletBinding()]

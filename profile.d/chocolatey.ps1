@@ -116,7 +116,7 @@ if (Test-CachedCommand choco) {
     Set-AgentModeAlias -Name 'chooutdated' -Target 'Test-ChocoOutdated'
     # Chocolatey upgrade - update packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates Chocolatey packages.
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
@@ -125,12 +125,12 @@ if (Test-CachedCommand choco) {
     .PARAMETER Yes
         Auto-confirm all prompts.
     .EXAMPLE
-        Update-ChocoPackages
+    Update-ChocoPackages -Packages 'package-name'
         Updates all packages.
     .EXAMPLE
         Update-ChocoPackages git
         Updates git package.
-    #>
+#>
     function Update-ChocoPackages {
         [CmdletBinding()]
         param(
@@ -168,7 +168,7 @@ if (Test-CachedCommand choco) {
     Set-AgentModeAlias -Name 'choselfupdate' -Target 'Update-ChocoSelf'
     # Chocolatey cleanup - clean cache
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Cleans up Chocolatey cache.
     .DESCRIPTION
         Removes cached package files from Chocolatey's download cache.
@@ -179,9 +179,9 @@ if (Test-CachedCommand choco) {
     .PARAMETER Yes
         Auto-confirm all prompts.
     .EXAMPLE
-        Clear-ChocoCache
+    Clear-ChocoCache
         Cleans the download cache.
-    #>
+#>
     function Clear-ChocoCache {
         [CmdletBinding()]
         param(
@@ -232,7 +232,7 @@ if (Test-CachedCommand choco) {
     Set-AgentModeAlias -Name 'chofind' -Target 'Find-ChocoPackage'
     # Chocolatey list - list installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Lists installed Chocolatey packages.
     .DESCRIPTION
         Shows all packages currently installed via Chocolatey.
@@ -241,9 +241,9 @@ if (Test-CachedCommand choco) {
     .PARAMETER IncludePrograms
         Include programs installed outside of Chocolatey.
     .EXAMPLE
-        Get-ChocoPackage
+    Get-ChocoPackage
         Lists all installed Chocolatey packages.
-    #>
+#>
     function Get-ChocoPackage {
         [CmdletBinding()]
         param(
@@ -292,7 +292,7 @@ if (Test-CachedCommand choco) {
     Set-AgentModeAlias -Name 'choinfo' -Target 'Get-ChocoPackageInfo'
     # Chocolatey export - backup installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports installed Chocolatey packages to a backup file.
     .DESCRIPTION
         Creates a packages.config file containing all installed Chocolatey packages.
@@ -304,7 +304,7 @@ if (Test-CachedCommand choco) {
     .PARAMETER ExcludeDependencies
         Exclude dependencies from the export (only top-level packages).
     .EXAMPLE
-        Export-ChocoPackages
+    Export-ChocoPackages -Path ./path
         Exports packages to packages.config in current directory.
     .EXAMPLE
         Export-ChocoPackages -Path "C:\backup\choco-packages.config"
@@ -312,7 +312,7 @@ if (Test-CachedCommand choco) {
     .EXAMPLE
         Export-ChocoPackages -IncludeVersions
         Exports packages with version numbers included.
-    #>
+#>
     function Export-ChocoPackages {
         [CmdletBinding()]
         param(
@@ -331,7 +331,7 @@ if (Test-CachedCommand choco) {
     Set-AgentModeAlias -Name 'chobackup' -Target 'Export-ChocoPackages'
     # Chocolatey import - restore packages from backup
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores Chocolatey packages from a backup file.
     .DESCRIPTION
         Installs all packages listed in a packages.config file.
@@ -341,12 +341,12 @@ if (Test-CachedCommand choco) {
     .PARAMETER Yes
         Auto-confirm all prompts.
     .EXAMPLE
-        Import-ChocoPackages
+    Import-ChocoPackages -Path ./path
         Restores packages from packages.config in current directory.
     .EXAMPLE
         Import-ChocoPackages -Path "C:\backup\choco-packages.config"
         Restores packages from a specific file.
-    #>
+#>
     function Import-ChocoPackages {
         [CmdletBinding()]
         param(

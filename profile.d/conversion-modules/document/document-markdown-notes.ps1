@@ -189,8 +189,7 @@ Set-AgentModeAlias -Name 'wikilinks-to-md-links' -Target 'ConvertTo-MarkdownLink
 .OUTPUTS
     System.String when content is piped or -PassThru is used.
 .EXAMPLE
-    Convert-LogseqPropertiesToYamlFrontMatter
-
+    Convert-LogseqPropertiesToYamlFrontMatter -Content 'text' -InputPath ./input.file
 #>
 function Convert-LogseqPropertiesToYamlFrontMatter {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -299,8 +298,7 @@ Set-AgentModeAlias -Name 'logseq-to-yaml' -Target 'Convert-LogseqPropertiesToYam
 .OUTPUTS
     System.String when content is piped or -PassThru is used.
 .EXAMPLE
-    Convert-JoplinResourceLinksToLocal
-
+    Convert-JoplinResourceLinksToLocal -Content 'text' -InputPath ./input.file
 #>
 function Convert-JoplinResourceLinksToLocal {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -395,8 +393,7 @@ Set-AgentModeAlias -Name 'joplin-links-to-local' -Target 'Convert-JoplinResource
 .OUTPUTS
     System.String when content is piped or -PassThru is used.
 .EXAMPLE
-    Convert-NotionCalloutsToObsidian
-
+    Convert-NotionCalloutsToObsidian -Content 'text' -InputPath ./input.file
 #>
 function Convert-NotionCalloutsToObsidian {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -509,8 +506,7 @@ Set-AgentModeAlias -Name 'notion-callouts-to-obsidian' -Target 'Convert-NotionCa
 .OUTPUTS
     PSCustomObject summary with MovedResources and UpdatedFiles counts.
 .EXAMPLE
-    Convert-JoplinExportForObsidian
-
+    Convert-JoplinExportForObsidian -ExportDirectory 'value'
 #>
 function Convert-JoplinExportForObsidian {
     [CmdletBinding(SupportsShouldProcess)]
@@ -606,8 +602,7 @@ Set-AgentModeAlias -Name 'joplin-export-to-obsidian' -Target 'Convert-JoplinExpo
 .OUTPUTS
     None. Writes files via the underlying CLI.
 .EXAMPLE
-    Export-NotionPageToMarkdown
-
+    Export-NotionPageToMarkdown -Url 'https://example.com'
 #>
 function Export-NotionPageToMarkdown {
     [CmdletBinding()]
@@ -741,8 +736,7 @@ Set-AgentModeAlias -Name 'notion-to-markdown' -Target 'Export-NotionPageToMarkdo
 .OUTPUTS
     CLI output from notionify-cli.
 .EXAMPLE
-    Invoke-NotionifyCli
-
+    Invoke-NotionifyCli -Command 'pwsh -NoProfile -File scripts/test.ps1'
 #>
 function Invoke-NotionifyCli {
     [CmdletBinding()]
@@ -790,7 +784,6 @@ Set-AgentModeAlias -Name 'notionify' -Target 'Invoke-NotionifyCli'
     CLI output from job.
 .EXAMPLE
     Sync-JoplinObsidianNotes
-
 #>
 function Sync-JoplinObsidianNotes {
     [CmdletBinding()]

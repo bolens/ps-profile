@@ -284,19 +284,24 @@ function Initialize-FileConversion-CoreEncodingAscii {
 <#
 .SYNOPSIS
     Converts ASCII text to hexadecimal representation.
+
 .DESCRIPTION
     Converts ASCII text to hexadecimal string representation. Each character is converted to its UTF-8 byte representation in hex.
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
-.EXAMPLE
-    "Hello" | ConvertFrom-AsciiToHex
-    Converts "Hello" to "48656C6C6F".
-.EXAMPLE
-    ConvertFrom-AsciiToHex -InputObject "World"
-    Converts "World" to "576F726C64".
+
 .OUTPUTS
     System.String
     The hexadecimal representation of the input text.
+
+.EXAMPLE
+    "Hello" | ConvertFrom-AsciiToHex
+    Converts "Hello" to "48656C6C6F".
+
+.EXAMPLE
+    ConvertFrom-AsciiToHex -InputObject "World"
+    Converts "World" to "576F726C64".
 #>
 function ConvertFrom-AsciiToHex {
     [CmdletBinding()]
@@ -321,21 +326,27 @@ Set-AgentModeAlias -Name 'ascii-to-hex' -Target 'ConvertFrom-AsciiToHex'
 <#
 .SYNOPSIS
     Converts ASCII text to binary representation.
+
 .DESCRIPTION
     Converts ASCII text to binary string representation. Each character is converted to its UTF-8 byte representation in binary.
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between binary bytes. Default is a space.
-.EXAMPLE
-    "Hi" | ConvertFrom-AsciiToBinary
-    Converts "Hi" to "01001000 01101001".
-.EXAMPLE
-    ConvertFrom-AsciiToBinary -InputObject "AB" -Separator ""
-    Converts "AB" to "0100000101000010" (no separator).
+
 .OUTPUTS
     System.String
     The binary representation of the input text.
+
+.EXAMPLE
+    "Hi" | ConvertFrom-AsciiToBinary
+    Converts "Hi" to "01001000 01101001".
+
+.EXAMPLE
+    ConvertFrom-AsciiToBinary -InputObject "AB" -Separator ""
+    Converts "AB" to "0100000101000010" (no separator).
 #>
 function ConvertFrom-AsciiToBinary {
     [CmdletBinding()]
@@ -361,20 +372,25 @@ Set-AgentModeAlias -Name 'ascii-to-binary' -Target 'ConvertFrom-AsciiToBinary'
 <#
 .SYNOPSIS
     Converts ASCII text to ModHex representation.
+
 .DESCRIPTION
     Converts ASCII text to ModHex (modified hexadecimal) string representation. ModHex is used by YubiKey and similar devices.
     Uses characters: c, b, d, e, f, g, h, i, j, k, l, n, r, t, u, v instead of 0-9, A-F.
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
-.EXAMPLE
-    "Hello" | ConvertFrom-AsciiToModHex
-    Converts "Hello" to ModHex representation.
-.EXAMPLE
-    ConvertFrom-AsciiToModHex -InputObject "Test"
-    Converts "Test" to ModHex representation.
+
 .OUTPUTS
     System.String
     The ModHex representation of the input text.
+
+.EXAMPLE
+    "Hello" | ConvertFrom-AsciiToModHex
+    Converts "Hello" to ModHex representation.
+
+.EXAMPLE
+    ConvertFrom-AsciiToModHex -InputObject "Test"
+    Converts "Test" to ModHex representation.
 #>
 function ConvertFrom-AsciiToModHex {
     [CmdletBinding()]
@@ -397,21 +413,27 @@ Set-AgentModeAlias -Name 'ascii-to-modhex' -Target 'ConvertFrom-AsciiToModHex'
 <#
 .SYNOPSIS
     Converts ASCII text to octal representation.
+
 .DESCRIPTION
     Converts ASCII text to octal string representation. Each character is converted to its UTF-8 byte representation in octal (base 8).
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between octal bytes. Default is a space.
-.EXAMPLE
-    "Hi" | ConvertFrom-AsciiToOctal
-    Converts "Hi" to "110 151" (octal representation).
-.EXAMPLE
-    ConvertFrom-AsciiToOctal -InputObject "AB" -Separator ""
-    Converts "AB" to "101102" (no separator).
+
 .OUTPUTS
     System.String
     The octal representation of the input text.
+
+.EXAMPLE
+    "Hi" | ConvertFrom-AsciiToOctal
+    Converts "Hi" to "110 151" (octal representation).
+
+.EXAMPLE
+    ConvertFrom-AsciiToOctal -InputObject "AB" -Separator ""
+    Converts "AB" to "101102" (no separator).
 #>
 function ConvertFrom-AsciiToOctal {
     [CmdletBinding()]
@@ -435,21 +457,27 @@ Set-AgentModeAlias -Name 'ascii-to-octal' -Target 'ConvertFrom-AsciiToOctal'
 <#
 .SYNOPSIS
     Converts ASCII text to decimal representation.
+
 .DESCRIPTION
     Converts ASCII text to decimal string representation. Each character is converted to its UTF-8 byte value in decimal.
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between decimal values. Default is a space.
-.EXAMPLE
-    "Hi" | ConvertFrom-AsciiToDecimal
-    Converts "Hi" to "72 105" (decimal representation).
-.EXAMPLE
-    ConvertFrom-AsciiToDecimal -InputObject "AB" -Separator ","
-    Converts "AB" to "65,66" (comma separator).
+
 .OUTPUTS
     System.String
     The decimal representation of the input text.
+
+.EXAMPLE
+    "Hi" | ConvertFrom-AsciiToDecimal
+    Converts "Hi" to "72 105" (decimal representation).
+
+.EXAMPLE
+    ConvertFrom-AsciiToDecimal -InputObject "AB" -Separator ","
+    Converts "AB" to "65,66" (comma separator).
 #>
 function ConvertFrom-AsciiToDecimal {
     [CmdletBinding()]
@@ -473,21 +501,27 @@ Set-AgentModeAlias -Name 'ascii-to-decimal' -Target 'ConvertFrom-AsciiToDecimal'
 <#
 .SYNOPSIS
     Converts ASCII text to Roman numeral representation.
+
 .DESCRIPTION
     Converts ASCII text to Roman numeral string representation. Each character is converted to its UTF-8 byte value as a Roman numeral.
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between Roman numerals. Default is a space.
-.EXAMPLE
-    "A" | ConvertFrom-AsciiToRoman
-    Converts "A" to "LXXII" (65 in Roman).
-.EXAMPLE
-    ConvertFrom-AsciiToRoman -InputObject "Hi" -Separator ","
-    Converts "Hi" to "LXXII,CV" (comma separator).
+
 .OUTPUTS
     System.String
     The Roman numeral representation of the input text.
+
+.EXAMPLE
+    "A" | ConvertFrom-AsciiToRoman
+    Converts "A" to "LXXII" (65 in Roman).
+
+.EXAMPLE
+    ConvertFrom-AsciiToRoman -InputObject "Hi" -Separator ","
+    Converts "Hi" to "LXXII,CV" (comma separator).
 #>
 function ConvertFrom-AsciiToRoman {
     [CmdletBinding()]
@@ -511,19 +545,24 @@ Set-AgentModeAlias -Name 'ascii-to-roman' -Target 'ConvertFrom-AsciiToRoman'
 <#
 .SYNOPSIS
     Converts ASCII text to Base32 representation.
+
 .DESCRIPTION
     Converts ASCII text to Base32 string representation. Base32 uses the alphabet A-Z, 2-7 (32 characters) as defined in RFC 4648.
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
-.EXAMPLE
-    "Hello" | ConvertFrom-AsciiToBase32
-    Converts "Hello" to Base32 representation.
-.EXAMPLE
-    ConvertFrom-AsciiToBase32 -InputObject "World"
-    Converts "World" to Base32 representation.
+
 .OUTPUTS
     System.String
     The Base32 representation of the input text.
+
+.EXAMPLE
+    "Hello" | ConvertFrom-AsciiToBase32
+    Converts "Hello" to Base32 representation.
+
+.EXAMPLE
+    ConvertFrom-AsciiToBase32 -InputObject "World"
+    Converts "World" to Base32 representation.
 #>
 function ConvertFrom-AsciiToBase32 {
     [CmdletBinding()]
@@ -546,19 +585,24 @@ Set-AgentModeAlias -Name 'ascii-to-base32' -Target 'ConvertFrom-AsciiToBase32'
 <#
 .SYNOPSIS
     Converts ASCII text to URL/percent encoded representation.
+
 .DESCRIPTION
     Converts ASCII text to URL/percent encoded string representation following RFC 3986 specification.
+
 .PARAMETER InputObject
     The ASCII text to convert. Can be piped.
-.EXAMPLE
-    "Hello World" | ConvertFrom-AsciiToUrl
-    Converts "Hello World" to "Hello%20World".
-.EXAMPLE
-    ConvertFrom-AsciiToUrl -InputObject "test@example.com"
-    Converts to URL encoding.
+
 .OUTPUTS
     System.String
     The URL/percent encoded representation of the input text.
+
+.EXAMPLE
+    "Hello World" | ConvertFrom-AsciiToUrl
+    Converts "Hello World" to "Hello%20World".
+
+.EXAMPLE
+    ConvertFrom-AsciiToUrl -InputObject "test@example.com"
+    Converts to URL encoding.
 #>
 function ConvertFrom-AsciiToUrl {
     [CmdletBinding()]

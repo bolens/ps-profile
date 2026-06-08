@@ -29,19 +29,19 @@ Tagging tool to use: mp3tag, picard, or tagscanner. Defaults to mp3tag.
 
 ### Example 1
 
-`powershell
+```powershell
 Tag-Audio -AudioPath "song.mp3"
-        
-        Opens mp3tag with the specified audio file.
-``
+```
+
+Opens mp3tag with the specified audio file.
 
 ### Example 2
 
-`powershell
+```powershell
 Tag-Audio -AudioPath "C:\Music" -Tool "picard"
-        
-        Opens MusicBrainz Picard with the specified directory.
-``
+```
+
+Opens MusicBrainz Picard with the specified directory.
 
 ## Source
 

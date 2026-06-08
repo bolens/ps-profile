@@ -30,19 +30,19 @@ System.String Returns the Braille encoded string (Unicode characters).
 
 ### Example 1
 
-`powershell
+```powershell
 "HELLO" | ConvertFrom-AsciiToBraille
-    
-    Converts text to Braille Unicode format.
-``
+```
+
+Converts text to Braille Unicode format.
 
 ### Example 2
 
-`powershell
+```powershell
 "123" | ConvertFrom-AsciiToBraille
-    
-    Converts numbers to Braille (with number sign prefix).
-``
+```
+
+Converts numbers to Braille (with number sign prefix).
 
 ## Aliases
 

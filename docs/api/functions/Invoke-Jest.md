@@ -25,15 +25,15 @@ Arguments to pass to jest.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Jest --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Jest test
-``
+```
 
 ## Aliases
 

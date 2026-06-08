@@ -92,19 +92,19 @@ if (Test-CachedCommand brew) {
     Set-AgentModeAlias -Name 'brewoutdated' -Target 'Test-BrewOutdated'
     # Homebrew upgrade - update packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates Homebrew packages.
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
     .PARAMETER Packages
         Package names to update (optional, updates all if omitted).
     .EXAMPLE
-        Update-BrewPackages
+    Update-BrewPackages -Packages 'package-name'
         Updates all packages.
     .EXAMPLE
         Update-BrewPackages git
         Updates git package.
-    #>
+#>
     function Update-BrewPackages {
         [CmdletBinding()]
         param(
@@ -137,7 +137,7 @@ if (Test-CachedCommand brew) {
     Set-AgentModeAlias -Name 'brewselfupdate' -Target 'Update-BrewSelf'
     # Homebrew cleanup - clean cache and old versions
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Cleans up Homebrew cache and old package versions.
     .DESCRIPTION
         Removes old versions of installed formulae and cleans the download cache.
@@ -151,7 +151,7 @@ if (Test-CachedCommand brew) {
     .PARAMETER DryRun
         Show what would be removed without actually deleting anything.
     .EXAMPLE
-        Clear-BrewCache
+    Clear-BrewCache -Formula @() -Prune 1
         Cleans up old versions and cache for all formulae.
     .EXAMPLE
         Clear-BrewCache -Formula git
@@ -165,7 +165,7 @@ if (Test-CachedCommand brew) {
     .EXAMPLE
         Clear-BrewCache -DryRun
         Shows what would be removed without deleting.
-    #>
+#>
     function Clear-BrewCache {
         [CmdletBinding()]
         param(
@@ -233,7 +233,7 @@ if (Test-CachedCommand brew) {
     Set-AgentModeAlias -Name 'brewfind' -Target 'Find-BrewPackage'
     # Homebrew list - list installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Lists installed Homebrew packages.
     .DESCRIPTION
         Shows all packages currently installed via Homebrew.
@@ -242,7 +242,7 @@ if (Test-CachedCommand brew) {
     .PARAMETER Versions
         Show installed versions for each package.
     .EXAMPLE
-        Get-BrewPackage
+    Get-BrewPackage
         Lists all installed Homebrew formulae.
     .EXAMPLE
         Get-BrewPackage -Cask
@@ -250,7 +250,7 @@ if (Test-CachedCommand brew) {
     .EXAMPLE
         Get-BrewPackage -Versions
         Lists formulae with their installed versions.
-    #>
+#>
     function Get-BrewPackage {
         [CmdletBinding()]
         param(
@@ -302,7 +302,7 @@ if (Test-CachedCommand brew) {
     Set-AgentModeAlias -Name 'brewinfo' -Target 'Get-BrewPackageInfo'
     # Homebrew bundle dump - backup installed packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports installed Homebrew packages to a Brewfile.
     .DESCRIPTION
         Creates a Brewfile containing all installed Homebrew formulae, casks, and taps.
@@ -314,7 +314,7 @@ if (Test-CachedCommand brew) {
     .PARAMETER Force
         Overwrite existing Brewfile if it exists.
     .EXAMPLE
-        Export-BrewPackages
+    Export-BrewPackages -Path ./path
         Exports packages to Brewfile in current directory.
     .EXAMPLE
         Export-BrewPackages -Path "~/backup/Brewfile"
@@ -322,7 +322,7 @@ if (Test-CachedCommand brew) {
     .EXAMPLE
         Export-BrewPackages -Describe
         Exports packages with descriptions included.
-    #>
+#>
     function Export-BrewPackages {
         [CmdletBinding()]
         param(
@@ -344,7 +344,7 @@ if (Test-CachedCommand brew) {
     Set-AgentModeAlias -Name 'brewbackup' -Target 'Export-BrewPackages'
     # Homebrew bundle - restore packages from backup
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Restores Homebrew packages from a Brewfile.
     .DESCRIPTION
         Installs all packages listed in a Brewfile.
@@ -356,12 +356,12 @@ if (Test-CachedCommand brew) {
     .PARAMETER NoUpgrade
         Don't run brew upgrade for outdated packages.
     .EXAMPLE
-        Import-BrewPackages
+    Import-BrewPackages -Path ./path
         Restores packages from Brewfile in current directory.
     .EXAMPLE
         Import-BrewPackages -Path "~/backup/Brewfile"
         Restores packages from a specific file.
-    #>
+#>
     function Import-BrewPackages {
         [CmdletBinding()]
         param(

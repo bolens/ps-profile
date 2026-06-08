@@ -25,15 +25,9 @@ Arguments to pass to http-server.
 
 ### Example 1
 
-`powershell
-Invoke-HttpServer
-``
-
-### Example 2
-
-`powershell
+```powershell
 Invoke-HttpServer -p 8080
-``
+```
 
 ## Aliases
 

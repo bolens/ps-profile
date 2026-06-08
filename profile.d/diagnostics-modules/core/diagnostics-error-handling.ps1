@@ -31,8 +31,7 @@ try {
     .PARAMETER Category
         Error category for better organization.
 .EXAMPLE
-    Write-ProfileError
-
+    Write-ProfileError -ErrorRecord 'value'
 #>
     function Write-ProfileError {
         param(
@@ -164,8 +163,7 @@ Message: $errorMessage
     .PARAMETER ErrorRecord
         The error record to handle.
 .EXAMPLE
-    Invoke-ProfileErrorHandler
-
+    Invoke-ProfileErrorHandler @('--help')
 #>
     function Invoke-ProfileErrorHandler {
         param([System.Management.Automation.ErrorRecord]$ErrorRecord)
@@ -228,8 +226,7 @@ Message: $errorMessage
     .PARAMETER MaxRetries
         Maximum number of retry attempts.
 .EXAMPLE
-    Invoke-SafeFragmentLoad
-
+    Invoke-SafeFragmentLoad -FragmentPath 'value' -FragmentName 'git.ps1'
 #>
     function Invoke-SafeFragmentLoad {
         param(

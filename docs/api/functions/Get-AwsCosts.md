@@ -38,19 +38,19 @@ System.Object. Cost information from AWS.
 
 ### Example 1
 
-`powershell
-Get-AwsCosts
-    
-    Gets costs for the current month.
-``
+```powershell
+Get-AwsCosts -StartDate 'value' -EndDate 'value'
+```
+
+Gets costs for the current month.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-AwsCosts -StartDate "2024-01-01" -EndDate "2024-01-31" -Service "EC2"
-    
-    Gets EC2 costs for January 2024.
-``
+```
+
+Gets EC2 costs for January 2024.
 
 ## Source
 

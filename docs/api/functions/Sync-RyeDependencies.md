@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Sync-RyeDependencies
-        Syncs all dependencies.
-``
+```
+
+Syncs all dependencies.
 
 ## Aliases
 

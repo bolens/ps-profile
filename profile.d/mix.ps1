@@ -41,15 +41,15 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'mix-update' -Target 'Update-MixDependencies'
     # Mix deps.get - install dependencies
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Installs Mix dependencies.
     .DESCRIPTION
         Installs dependencies defined in mix.exs.
         This is equivalent to running 'mix deps.get'.
     .EXAMPLE
-        Install-MixDependencies
+    Install-MixDependencies 'package-name'
         Installs all dependencies.
-    #>
+#>
     function Install-MixDependencies {
         [CmdletBinding()]
         param()

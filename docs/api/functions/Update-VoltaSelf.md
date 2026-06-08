@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-VoltaSelf
-        Updates Volta to the latest version.
-``
+```
+
+Updates Volta to the latest version.
 
 ## Aliases
 

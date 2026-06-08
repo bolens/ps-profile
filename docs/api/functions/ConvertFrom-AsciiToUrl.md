@@ -30,17 +30,19 @@ System.String The URL/percent encoded representation of the input text.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello World" | ConvertFrom-AsciiToUrl
-    Converts "Hello World" to "Hello%20World".
-``
+```
+
+Converts "Hello World" to "Hello%20World".
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-AsciiToUrl -InputObject "test@example.com"
-    Converts to URL encoding.
-``
+```
+
+Converts to URL encoding.
 
 ## Aliases
 

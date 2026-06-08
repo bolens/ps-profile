@@ -46,19 +46,19 @@ None.
 
 ### Example 1
 
-`powershell
-Mirror-AndroidScreen
-        
-        Mirrors Android device screen.
-``
+```powershell
+Mirror-AndroidScreen -DeviceId 'value' -MaxSize 1
+```
+
+Mirrors Android device screen.
 
 ### Example 2
 
-`powershell
+```powershell
 Mirror-AndroidScreen -Fullscreen -StayAwake
-        
-        Mirrors Android device screen in fullscreen with stay-awake enabled.
-``
+```
+
+Mirrors Android device screen in fullscreen with stay-awake enabled.
 
 ## Source
 

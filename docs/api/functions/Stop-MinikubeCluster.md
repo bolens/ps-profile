@@ -25,15 +25,9 @@ Arguments to pass to minikube stop.
 
 ### Example 1
 
-`powershell
-Stop-MinikubeCluster
-``
-
-### Example 2
-
-`powershell
+```powershell
 Stop-MinikubeCluster --all
-``
+```
 
 ## Aliases
 

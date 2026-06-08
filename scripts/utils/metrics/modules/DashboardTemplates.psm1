@@ -33,8 +33,7 @@ scripts/utils/metrics/modules/DashboardTemplates.psm1
 .OUTPUTS
     Complete HTML dashboard as string.
 .EXAMPLE
-    New-DashboardHtml
-
+    New-DashboardHtml -CodeMetrics $codeMetrics -PerformanceMetrics $perfMetrics
 #>
 function New-DashboardHtml {
     param(
@@ -66,8 +65,7 @@ function New-DashboardHtml {
 .PARAMETER IncludeHistorical
     Includes historical charts when set.
 .EXAMPLE
-    Get-DashboardHtmlTemplate
-
+    Get-DashboardHtmlTemplate -CodeMetrics $codeMetrics -PerformanceMetrics $perfMetrics
 #>
 function Get-DashboardHtmlTemplate {
     param(

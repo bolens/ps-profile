@@ -18,18 +18,16 @@ Sync-UVDependencies
 
 ### -Arguments
 
-Arguments forwarded to uv pip.
+Optional flags forwarded to uv sync.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 Sync-UVDependencies
-.PARAMETER Arguments
-    Arguments forwarded to uv pip.
-``
+```
 
 ## Aliases
 

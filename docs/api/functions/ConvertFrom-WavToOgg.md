@@ -33,9 +33,9 @@ Audio quality (0-10, default: 5). Higher values mean better quality but larger f
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-WavToOgg -InputPath "audio.wav" -OutputPath "audio.ogg"
-``
+```
 
 ## Aliases
 

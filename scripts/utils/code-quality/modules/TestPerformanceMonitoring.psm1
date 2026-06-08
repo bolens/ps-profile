@@ -34,8 +34,7 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 .OUTPUTS
     Performance metrics object
 .EXAMPLE
-    Measure-TestPerformance
-
+    Measure-TestPerformance -ScriptBlock { }
 #>
 function Measure-TestPerformance {
     param(

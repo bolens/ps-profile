@@ -29,9 +29,9 @@ The path for the output FITS file. If not specified, uses input path with .fits 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-FitsFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

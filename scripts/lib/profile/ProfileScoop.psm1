@@ -12,8 +12,7 @@
 .PARAMETER ProfileDir
     Directory containing the profile files.
 .EXAMPLE
-    Initialize-ProfileScoop
-
+    Initialize-ProfileScoop -ProfileDir 'value'
 #>
 function Initialize-ProfileScoop {
     [CmdletBinding()]

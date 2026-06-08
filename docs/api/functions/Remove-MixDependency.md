@@ -25,10 +25,11 @@ Package name to remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-MixDependency phoenix
-        Provides instructions for removing Phoenix dependency.
-``
+```
+
+Provides instructions for removing Phoenix dependency.
 
 ## Aliases
 

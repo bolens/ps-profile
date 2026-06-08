@@ -25,15 +25,15 @@ Arguments to pass to ng new.
 
 ### Example 1
 
-`powershell
+```powershell
 New-AngularApp my-app
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-AngularApp my-app --routing --style scss
-``
+```
 
 ## Aliases
 

@@ -25,10 +25,11 @@ Tool names with optional versions.
 
 ### Example 1
 
-`powershell
+```powershell
 Pin-VoltaTool node@18
-        Pins Node.js 18 to package.json.
-``
+```
+
+Pins Node.js 18 to package.json.
 
 ## Aliases
 

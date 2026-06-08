@@ -34,24 +34,27 @@ System.String. Output from go build execution.
 
 ### Example 1
 
-`powershell
-Build-GoProject
-        Builds the current Go project.
-``
+```powershell
+Build-GoProject -Output 'value'
+```
+
+Builds the current Go project.
 
 ### Example 2
 
-`powershell
+```powershell
 Build-GoProject -Output myapp
-        Builds and names the output binary 'myapp'.
-``
+```
+
+Builds and names the output binary 'myapp'.
 
 ### Example 3
 
-`powershell
+```powershell
 Build-GoProject -Arguments @('-ldflags', '-s -w')
-        Builds with linker flags to strip symbols.
-``
+```
+
+Builds with linker flags to strip symbols.
 
 ## Aliases
 

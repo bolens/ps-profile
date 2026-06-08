@@ -29,8 +29,7 @@ if ($pathUtilsModulePath -and -not [string]::IsNullOrWhiteSpace($pathUtilsModule
 .OUTPUTS
     System.String
 .EXAMPLE
-    Convert-TestOutputLine
-
+    Convert-TestOutputLine -InputObject $data
 #>
 function Convert-TestOutputLine {
     param([string]$Text)

@@ -46,17 +46,19 @@ System.String. Output from bd ready command.
 
 ### Example 1
 
-`powershell
-Get-BeadsReady
-        Gets all ready issues.
-``
+```powershell
+Get-BeadsReady -Limit 1 -Priority 1
+```
+
+Gets all ready issues.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-BeadsReady -Limit 10 -Priority 1
-        Gets top 10 P1 ready issues.
-``
+```
+
+Gets top 10 P1 ready issues.
 
 ## Source
 

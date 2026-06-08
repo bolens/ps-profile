@@ -25,15 +25,9 @@ Arguments to pass to firebase serve.
 
 ### Example 1
 
-`powershell
-Start-FirebaseServer
-``
-
-### Example 2
-
-`powershell
+```powershell
 Start-FirebaseServer --only hosting
-``
+```
 
 ## Aliases
 

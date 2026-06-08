@@ -46,19 +46,19 @@ System.String. Formatted commit message.
 
 ### Example 1
 
-`powershell
+```powershell
 Format-GitCommit -Type "feat" -Description "Add new feature"
-        
-        Formats a feature commit message.
-``
+```
+
+Formats a feature commit message.
 
 ### Example 2
 
-`powershell
+```powershell
 Format-GitCommit -Type "fix" -Scope "api" -Description "Fix authentication bug" -Body "Resolves issue with token expiration"
-        
-        Formats a fix commit with scope and body.
-``
+```
+
+Formats a fix commit with scope and body.
 
 ## Source
 

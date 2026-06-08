@@ -199,21 +199,26 @@ except Exception as e:
 <#
 .SYNOPSIS
     Converts Ion file to JSON format.
+
 .DESCRIPTION
     Converts an Ion file (text or binary) to JSON format.
     Ion is a richly-typed, self-describing, hierarchical data serialization format.
     Requires Python and the ion-python package to be installed.
+
 .PARAMETER InputPath
     The path to the Ion file (.ion for text, .10n for binary).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output JSON file.
+
 .EXAMPLE
     ConvertFrom-IonToJson -InputPath 'data.ion'
     
     Converts data.ion to data.json.
-.OUTPUTS
-    System.String
-    Returns the path to the output JSON file.
 #>
 Set-Item -Path Function:Global:ConvertFrom-IonToJson -Value {
     param([string]$InputPath, [string]$OutputPath)
@@ -225,27 +230,34 @@ Set-AgentModeAlias -Name 'ion-to-json' -Target 'ConvertFrom-IonToJson'
 <#
 .SYNOPSIS
     Converts JSON file to Ion format.
+
 .DESCRIPTION
     Converts a JSON file to Ion format (text or binary).
     Ion is a richly-typed, self-describing, hierarchical data serialization format.
     Requires Python and the ion-python package to be installed.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output Ion file. If not specified, uses input path with .ion extension.
+
 .PARAMETER Binary
     If specified, creates binary Ion format (.10n) instead of text format (.ion).
+
+.OUTPUTS
+    System.String
+    Returns the path to the output Ion file.
+
 .EXAMPLE
     ConvertTo-IonFromJson -InputPath 'data.json'
     
     Converts data.json to data.ion (text format).
+
 .EXAMPLE
     ConvertTo-IonFromJson -InputPath 'data.json' -Binary
     
     Converts data.json to data.10n (binary format).
-.OUTPUTS
-    System.String
-    Returns the path to the output Ion file.
 #>
 Set-Item -Path Function:Global:ConvertTo-IonFromJson -Value {
     param([string]$InputPath, [string]$OutputPath, [switch]$Binary)

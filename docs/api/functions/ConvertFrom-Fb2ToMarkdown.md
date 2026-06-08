@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-Fb2ToMarkdown -InputPath "book.fb2"
-    
-    Converts book.fb2 to book.md.
-``
+```
+
+Converts book.fb2 to book.md.
 
 ## Aliases
 

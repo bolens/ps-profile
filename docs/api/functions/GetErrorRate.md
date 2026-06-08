@@ -46,14 +46,11 @@ System.Object. Result from ScriptBlock execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-WithWideEvent -OperationName "aws.s3.upload" -Context @{
-            bucket = "my-bucket"
-            key = "file.txt"
-        } -ScriptBlock {
-            aws s3 cp file.txt s3://my-bucket/file.txt
-        }
-``
+```
+
+bucket = "my-bucket" key = "file.txt" } -ScriptBlock { aws s3 cp file.txt s3://my-bucket/file.txt }
 
 ## Source
 

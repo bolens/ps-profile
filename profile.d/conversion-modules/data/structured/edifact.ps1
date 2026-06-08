@@ -309,19 +309,24 @@ function Initialize-FileConversion-Edifact {
 <#
 .SYNOPSIS
     Converts EDIFACT file to JSON format.
+
 .DESCRIPTION
     Parses an EDIFACT (Electronic Data Interchange) file and converts it to structured JSON format.
     EDIFACT segments are converted to a structured format with tags and elements.
+
 .PARAMETER InputPath
     The path to the EDIFACT file (.edifact, .edi, or .edf extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-EdifactToJson -InputPath "message.edifact"
     
     Converts message.edifact to message.json.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-EdifactToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -343,19 +348,24 @@ Set-AgentModeAlias -Name 'edifact-to-json' -Target 'ConvertFrom-EdifactToJson'
 <#
 .SYNOPSIS
     Converts JSON file to EDIFACT format.
+
 .DESCRIPTION
     Converts a structured JSON file (with EDIFACT segment structure) to EDIFACT format.
     The JSON should have an Interchange.Segments structure with Tag and Elements.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output EDIFACT file. If not specified, uses input path with .edifact extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-EdifactFromJson -InputPath "message.json"
     
     Converts message.json to message.edifact.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-EdifactFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -377,19 +387,24 @@ Set-AgentModeAlias -Name 'json-to-edifact' -Target 'ConvertTo-EdifactFromJson'
 <#
 .SYNOPSIS
     Converts EDIFACT file to XML format.
+
 .DESCRIPTION
     Parses an EDIFACT file and converts it to structured XML format.
     Each segment becomes an XML element with Tag attribute and Element children.
+
 .PARAMETER InputPath
     The path to the EDIFACT file (.edifact, .edi, or .edf extension).
+
 .PARAMETER OutputPath
     The path for the output XML file. If not specified, uses input path with .xml extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-EdifactToXml -InputPath "message.edifact"
     
     Converts message.edifact to message.xml.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-EdifactToXml {
     param([string]$InputPath, [string]$OutputPath)
@@ -411,19 +426,24 @@ Set-AgentModeAlias -Name 'edifact-to-xml' -Target 'ConvertFrom-EdifactToXml'
 <#
 .SYNOPSIS
     Converts EDIFACT file to CSV format.
+
 .DESCRIPTION
     Converts an EDIFACT file to a simplified CSV format where each segment becomes a row.
     Format: Segment,Element1,Element2,Element3,Element4,Element5
+
 .PARAMETER InputPath
     The path to the EDIFACT file (.edifact, .edi, or .edf extension).
+
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-EdifactToCsv -InputPath "message.edifact"
     
     Converts message.edifact to message.csv.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-EdifactToCsv {
     param([string]$InputPath, [string]$OutputPath)

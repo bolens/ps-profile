@@ -30,10 +30,11 @@ System.String The Base32 representation of the input octal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "110 151" | ConvertFrom-OctalToBase32
-    Converts octal to Base32.
-``
+```
+
+Converts octal to Base32.
 
 ## Aliases
 

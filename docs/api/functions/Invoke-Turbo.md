@@ -25,15 +25,15 @@ Arguments to pass to turbo.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Turbo --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Turbo build
-``
+```
 
 ## Aliases
 

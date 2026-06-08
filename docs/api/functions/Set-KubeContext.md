@@ -34,19 +34,19 @@ System.String. Context information or list of contexts.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-KubeContext -List
-        
-        Lists all available Kubernetes contexts.
-``
+```
+
+Lists all available Kubernetes contexts.
 
 ### Example 2
 
-`powershell
+```powershell
 Set-KubeContext -ContextName "my-context"
-        
-        Switches to the specified context.
-``
+```
+
+Switches to the specified context.
 
 ## Source
 

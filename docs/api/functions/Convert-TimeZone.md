@@ -38,19 +38,19 @@ System.DateTime Returns a DateTime object in the target timezone.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-Date | Convert-TimeZone -SourceTimeZone "Eastern Standard Time" -TargetTimeZone "Pacific Standard Time"
-    
-    Converts the current date/time from Eastern to Pacific timezone.
-``
+```
+
+Converts the current date/time from Eastern to Pacific timezone.
 
 ### Example 2
 
-`powershell
+```powershell
 [DateTime]::Now | Convert-TimeZone -SourceTimeZone "UTC" -TargetTimeZone "Eastern Standard Time"
-    
-    Converts UTC time to Eastern timezone.
-``
+```
+
+Converts UTC time to Eastern timezone.
 
 ## Aliases
 

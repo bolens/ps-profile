@@ -33,9 +33,9 @@ Audio bitrate in kbps (default: 128).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OggToOpus -InputPath "audio.ogg" -OutputPath "audio.opus"
-``
+```
 
 ## Aliases
 

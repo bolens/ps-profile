@@ -30,24 +30,27 @@ System.String. Output from golangci-lint execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Lint-GoProject
-        Lints the current Go project.
-``
+```
+
+Lints the current Go project.
 
 ### Example 2
 
-`powershell
+```powershell
 Lint-GoProject --fix
-        Lints and automatically fixes issues where possible.
-``
+```
+
+Lints and automatically fixes issues where possible.
 
 ### Example 3
 
-`powershell
+```powershell
 Lint-GoProject ./...
-        Lints all packages recursively.
-``
+```
+
+Lints all packages recursively.
 
 ## Aliases
 

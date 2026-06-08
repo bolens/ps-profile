@@ -30,10 +30,11 @@ System.String The ModHex representation of the input Base32 string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32ToModHex
-    Converts Base32 to ModHex.
-``
+```
+
+Converts Base32 to ModHex.
 
 ## Aliases
 

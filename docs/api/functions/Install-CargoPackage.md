@@ -29,10 +29,11 @@ Specific version to install (--version).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-CargoPackage cargo-watch
-    Installs cargo-watch globally.
-``
+```
+
+Installs cargo-watch globally.
 
 ## Source
 

@@ -114,8 +114,7 @@ if (-not $script:FragmentDependencyCache) {
 .OUTPUTS
     System.Array. Array of hashtables with FragmentName and Dependencies properties.
 .EXAMPLE
-    Invoke-ParallelDependencyParsing
-
+    Invoke-ParallelDependencyParsing -FilePaths @()
 #>
 function Invoke-ParallelDependencyParsing {
     [CmdletBinding()]

@@ -50,14 +50,11 @@ System.Boolean. True if initialization successful, false otherwise.
 
 ### Example 1
 
-`powershell
+```powershell
 Initialize-PromptFramework -FrameworkName 'Starship' -CommandName 'starship' `
-            -InitScript { Invoke-StarshipInit } `
-            -FallbackPrompt { Initialize-SmartPrompt } `
-            -CheckInitialized { Test-StarshipInitialized }
-        
-        Initializes Starship with fallback to smart prompt.
-``
+```
+
+-InitScript { Invoke-StarshipInit } ` -FallbackPrompt { Initialize-SmartPrompt } ` -CheckInitialized { Test-StarshipInitialized } Initializes Starship with fallback to smart prompt.
 
 ## Source
 

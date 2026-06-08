@@ -25,9 +25,9 @@ Additional arguments forwarded to compose logs -f.
 
 ### Example 1
 
-`powershell
-Get-ContainerComposeLogsPodman
-``
+```powershell
+Get-ContainerComposeLogsPodman -args @('--version')
+```
 
 ## Aliases
 

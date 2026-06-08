@@ -30,10 +30,11 @@ System.String The URL/percent encoded representation of the input Base32 string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32ToUrl
-    Converts Base32 to URL encoding.
-``
+```
+
+Converts Base32 to URL encoding.
 
 ## Aliases
 

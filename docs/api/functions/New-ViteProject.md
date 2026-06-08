@@ -25,15 +25,15 @@ Arguments to pass to create-vite.
 
 ### Example 1
 
-`powershell
+```powershell
 New-ViteProject my-app
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-ViteProject my-app --template react-ts
-``
+```
 
 ## Aliases
 

@@ -41,9 +41,9 @@ Delay between retries in seconds. Default is 2.
 
 ### Example 1
 
-`powershell
-Invoke-WithRetry
-``
+```powershell
+Invoke-WithRetry -ScriptBlock { }
+```
 
 ## Source
 

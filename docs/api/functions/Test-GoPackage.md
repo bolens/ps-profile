@@ -25,15 +25,9 @@ Arguments to pass to go test.
 
 ### Example 1
 
-`powershell
-Test-GoPackage
-``
-
-### Example 2
-
-`powershell
+```powershell
 Test-GoPackage -v ./...
-``
+```
 
 ## Aliases
 

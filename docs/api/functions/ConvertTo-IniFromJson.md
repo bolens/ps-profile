@@ -29,9 +29,9 @@ The path for the output INI file. If not specified, uses input path with .ini ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-IniFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

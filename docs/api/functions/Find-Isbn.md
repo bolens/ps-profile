@@ -39,16 +39,16 @@ Prompts for a single selected result.
 
 ## Outputs
 
-PSCustomObject[] .EXAMPLE Find-Isbn -Title 'Dune' -Author 'Herbert'
+PSCustomObject[]
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 Find-Isbn -Title 'Dune' -Author 'Herbert'
-``
+```
 
 ## Aliases
 

@@ -29,11 +29,11 @@ Output format: json, yaml. Defaults to json.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-TruffleHogScan -Path "C:\Projects\MyRepo"
-    
-        Scans the specified path for secrets.
-``
+```
+
+Scans the specified path for secrets.
 
 ## Aliases
 

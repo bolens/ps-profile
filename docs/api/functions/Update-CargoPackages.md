@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-CargoPackages
-    Updates all globally installed cargo packages.
-``
+```
+
+Updates all globally installed cargo packages.
 
 ## Aliases
 

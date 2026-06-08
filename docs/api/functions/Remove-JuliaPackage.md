@@ -25,10 +25,11 @@ Package names to remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-JuliaPackage JSON
-        Removes JSON package.
-``
+```
+
+Removes JSON package.
 
 ## Aliases
 

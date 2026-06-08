@@ -30,19 +30,19 @@ System.String[] or System.String Returns the file extension(s), or empty array i
 
 ### Example 1
 
-`powershell
+```powershell
 Get-ExtensionFromMimeType -MimeType "application/json"
-    
-    Returns "json".
-``
+```
+
+Returns "json".
 
 ### Example 2
 
-`powershell
+```powershell
 "image/png" | Get-ExtensionFromMimeType
-    
-    Returns "png" from pipeline.
-``
+```
+
+Returns "png" from pipeline.
 
 ## Aliases
 

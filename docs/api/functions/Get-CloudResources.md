@@ -50,11 +50,11 @@ System.Object. Resource list (parsed JSON or raw output).
 
 ### Example 1
 
-`powershell
+```powershell
 Get-CloudResources -CommandName 'aws' -Service 'ec2' -Action 'describe-instances' -OperationName 'aws.ec2.list'
-        
-        Lists EC2 instances.
-``
+```
+
+Lists EC2 instances.
 
 ## Source
 

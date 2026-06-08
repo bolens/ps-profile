@@ -210,19 +210,24 @@ function Initialize-FileConversion-CoreEncodingHex {
 <#
 .SYNOPSIS
     Converts hexadecimal string to ASCII text.
+
 .DESCRIPTION
     Converts a hexadecimal string back to ASCII text. The hex string should contain pairs of hex digits representing UTF-8 bytes.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped. Spaces and separators are automatically removed.
-.EXAMPLE
-    "48656C6C6F" | ConvertFrom-HexToAscii
-    Converts "48656C6C6F" to "Hello".
-.EXAMPLE
-    ConvertFrom-HexToAscii -InputObject "48 65 6C 6C 6F"
-    Converts hex with spaces to "Hello".
+
 .OUTPUTS
     System.String
     The ASCII text representation of the input hex string.
+
+.EXAMPLE
+    "48656C6C6F" | ConvertFrom-HexToAscii
+    Converts "48656C6C6F" to "Hello".
+
+.EXAMPLE
+    ConvertFrom-HexToAscii -InputObject "48 65 6C 6C 6F"
+    Converts hex with spaces to "Hello".
 #>
 function ConvertFrom-HexToAscii {
     [CmdletBinding()]
@@ -247,21 +252,27 @@ Set-AgentModeAlias -Name 'hex-to-ascii' -Target 'ConvertFrom-HexToAscii'
 <#
 .SYNOPSIS
     Converts hexadecimal string to binary representation.
+
 .DESCRIPTION
     Converts a hexadecimal string to binary string representation. Each hex byte is converted to an 8-bit binary value.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped. Spaces and separators are automatically removed.
+
 .PARAMETER Separator
     Optional separator between binary bytes. Default is a space.
-.EXAMPLE
-    "4865" | ConvertFrom-HexToBinary
-    Converts hex to binary with spaces.
-.EXAMPLE
-    ConvertFrom-HexToBinary -InputObject "FF" -Separator ""
-    Converts hex to binary without separator.
+
 .OUTPUTS
     System.String
     The binary representation of the input hex string.
+
+.EXAMPLE
+    "4865" | ConvertFrom-HexToBinary
+    Converts hex to binary with spaces.
+
+.EXAMPLE
+    ConvertFrom-HexToBinary -InputObject "FF" -Separator ""
+    Converts hex to binary without separator.
 #>
 function ConvertFrom-HexToBinary {
     [CmdletBinding()]
@@ -285,19 +296,24 @@ Set-AgentModeAlias -Name 'hex-to-binary' -Target 'ConvertFrom-HexToBinary'
 <#
 .SYNOPSIS
     Converts hexadecimal string to ModHex representation.
+
 .DESCRIPTION
     Converts a hexadecimal string to ModHex (modified hexadecimal) representation. ModHex uses characters: c, b, d, e, f, g, h, i, j, k, l, n, r, t, u, v.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped. Spaces and separators are automatically removed.
-.EXAMPLE
-    "4865" | ConvertFrom-HexToModHex
-    Converts hex to ModHex.
-.EXAMPLE
-    ConvertFrom-HexToModHex -InputObject "FF"
-    Converts hex to ModHex.
+
 .OUTPUTS
     System.String
     The ModHex representation of the input hex string.
+
+.EXAMPLE
+    "4865" | ConvertFrom-HexToModHex
+    Converts hex to ModHex.
+
+.EXAMPLE
+    ConvertFrom-HexToModHex -InputObject "FF"
+    Converts hex to ModHex.
 #>
 function ConvertFrom-HexToModHex {
     [CmdletBinding()]
@@ -320,18 +336,23 @@ Set-AgentModeAlias -Name 'hex-to-modhex' -Target 'ConvertFrom-HexToModHex'
 <#
 .SYNOPSIS
     Converts hexadecimal string to octal representation.
+
 .DESCRIPTION
     Converts a hexadecimal string to octal string representation.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between octal bytes. Default is a space.
-.EXAMPLE
-    "4865" | ConvertFrom-HexToOctal
-    Converts hex to octal.
+
 .OUTPUTS
     System.String
     The octal representation of the input hex string.
+
+.EXAMPLE
+    "4865" | ConvertFrom-HexToOctal
+    Converts hex to octal.
 #>
 function ConvertFrom-HexToOctal {
     [CmdletBinding()]
@@ -355,18 +376,23 @@ Set-AgentModeAlias -Name 'hex-to-octal' -Target 'ConvertFrom-HexToOctal'
 <#
 .SYNOPSIS
     Converts hexadecimal string to decimal representation.
+
 .DESCRIPTION
     Converts a hexadecimal string to decimal string representation.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between decimal values. Default is a space.
-.EXAMPLE
-    "4865" | ConvertFrom-HexToDecimal
-    Converts hex to decimal.
+
 .OUTPUTS
     System.String
     The decimal representation of the input hex string.
+
+.EXAMPLE
+    "4865" | ConvertFrom-HexToDecimal
+    Converts hex to decimal.
 #>
 function ConvertFrom-HexToDecimal {
     [CmdletBinding()]
@@ -390,18 +416,23 @@ Set-AgentModeAlias -Name 'hex-to-decimal' -Target 'ConvertFrom-HexToDecimal'
 <#
 .SYNOPSIS
     Converts hexadecimal string to Roman numeral representation.
+
 .DESCRIPTION
     Converts a hexadecimal string to Roman numeral string representation.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between Roman numerals. Default is a space.
-.EXAMPLE
-    "4865" | ConvertFrom-HexToRoman
-    Converts hex to Roman numerals.
+
 .OUTPUTS
     System.String
     The Roman numeral representation of the input hex string.
+
+.EXAMPLE
+    "4865" | ConvertFrom-HexToRoman
+    Converts hex to Roman numerals.
 #>
 function ConvertFrom-HexToRoman {
     [CmdletBinding()]
@@ -425,16 +456,20 @@ Set-AgentModeAlias -Name 'hex-to-roman' -Target 'ConvertFrom-HexToRoman'
 <#
 .SYNOPSIS
     Converts hexadecimal string to Base32 representation.
+
 .DESCRIPTION
     Converts a hexadecimal string to Base32 string representation.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped. Spaces and separators are automatically removed.
-.EXAMPLE
-    "48656C6C6F" | ConvertFrom-HexToBase32
-    Converts hex to Base32.
+
 .OUTPUTS
     System.String
     The Base32 representation of the input hex string.
+
+.EXAMPLE
+    "48656C6C6F" | ConvertFrom-HexToBase32
+    Converts hex to Base32.
 #>
 function ConvertFrom-HexToBase32 {
     [CmdletBinding()]
@@ -457,16 +492,20 @@ Set-AgentModeAlias -Name 'hex-to-base32' -Target 'ConvertFrom-HexToBase32'
 <#
 .SYNOPSIS
     Converts hexadecimal string to URL/percent encoded representation.
+
 .DESCRIPTION
     Converts a hexadecimal string to URL/percent encoded string representation.
+
 .PARAMETER InputObject
     The hexadecimal string to convert. Can be piped. Spaces and separators are automatically removed.
-.EXAMPLE
-    "48656C6C6F" | ConvertFrom-HexToUrl
-    Converts hex to URL encoding.
+
 .OUTPUTS
     System.String
     The URL/percent encoded representation of the input hex string.
+
+.EXAMPLE
+    "48656C6C6F" | ConvertFrom-HexToUrl
+    Converts hex to URL encoding.
 #>
 function ConvertFrom-HexToUrl {
     [CmdletBinding()]

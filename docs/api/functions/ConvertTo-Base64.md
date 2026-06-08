@@ -25,9 +25,9 @@ The file path or string to encode.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-Base64 -InputPath ./input.file
-``
+```
 
 ## Aliases
 

@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-TextileToMarkdown -InputPath "document.textile"
-    
-    Converts document.textile to document.md.
-``
+```
+
+Converts document.textile to document.md.
 
 ## Aliases
 

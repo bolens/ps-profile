@@ -16,7 +16,7 @@ Show-GitHubPullRequest
 
 ## Parameters
 
-### -a
+### -Arguments
 
 Arguments forwarded to gh pr view --web.
 
@@ -25,11 +25,9 @@ Arguments forwarded to gh pr view --web.
 
 ### Example 1
 
-`powershell
+```powershell
 Show-GitHubPullRequest 42
-.PARAMETER a
-    Arguments forwarded to gh pr view --web.
-``
+```
 
 ## Aliases
 

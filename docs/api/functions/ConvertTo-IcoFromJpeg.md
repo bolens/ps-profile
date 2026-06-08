@@ -29,9 +29,9 @@ Path for the output ICO file. If not specified, uses input path with .ico extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-IcoFromJpeg -InputPath "icon.jpg" -OutputPath "icon.ico"
-``
+```
 
 ## Aliases
 

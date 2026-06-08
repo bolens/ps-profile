@@ -125,7 +125,7 @@ function Remove-YarnPackage {
     Wrapper for yarn install command.
 
 .EXAMPLE
-    Install-YarnDependencies
+    Install-YarnDependencies 'package-name'
 #>
 function Install-YarnDependencies {
     [CmdletBinding()]

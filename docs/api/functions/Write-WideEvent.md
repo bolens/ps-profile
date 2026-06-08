@@ -54,28 +54,19 @@ System.Boolean. True if event was kept, false if sampled out.
 
 ### Example 1
 
-`powershell
+```powershell
 Write-WideEvent -EventName "aws.s3.upload" -Level INFO -Context @{
-            user_id = "user_123"
-            bucket = "my-bucket"
-            key = "file.txt"
-            size_bytes = 1024
-            region = "us-east-1"
-        } -DurationMs 250
-        
-        Emits a structured event for S3 upload operation.
-``
+```
+
+user_id = "user_123" bucket = "my-bucket" key = "file.txt" size_bytes = 1024 region = "us-east-1" } -DurationMs 250 Emits a structured event for S3 upload operation.
 
 ### Example 2
 
-`powershell
+```powershell
 Write-WideEvent -EventName "database.query" -Level ERROR -Context @{
-            query = "SELECT * FROM users"
-            database = "production"
-        } -ErrorRecord $error -DurationMs 500
-        
-        Emits an error event (always kept, not sampled).
-``
+```
+
+query = "SELECT * FROM users" database = "production" } -ErrorRecord $error -DurationMs 500 Emits an error event (always kept, not sampled).
 
 ## Source
 

@@ -33,9 +33,9 @@ Text encoding for the output file (default: UTF8).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-PlainTextFromHtml -InputPath "document.html" -OutputPath "document.txt" -Encoding UTF8
-``
+```
 
 ## Aliases
 

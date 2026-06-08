@@ -38,19 +38,19 @@ System.String. Deployment status or command output.
 
 ### Example 1
 
-`powershell
-Deploy-Vercel
-        
-        Deploys the current project to Vercel.
-``
+```powershell
+Deploy-Vercel -Action 'value' -ProjectPath 'value'
+```
+
+Deploys the current project to Vercel.
 
 ### Example 2
 
-`powershell
+```powershell
 Deploy-Vercel -Production
-        
-        Deploys to production environment.
-``
+```
+
+Deploys to production environment.
 
 ## Source
 

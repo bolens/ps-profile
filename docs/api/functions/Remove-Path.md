@@ -29,9 +29,9 @@ If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
 
 ### Example 1
 
-`powershell
-Remove-Path
-``
+```powershell
+Remove-Path -Path ./path
+```
 
 ## Source
 

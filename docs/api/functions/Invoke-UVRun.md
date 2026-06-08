@@ -29,13 +29,9 @@ Additional arguments passed after the command.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-UVRun -Command python -Args @('--version')
-.PARAMETER Command
-    Python module or script to run with uv run.
-.PARAMETER Args
-    Additional arguments passed after the command.
-``
+```
 
 ## Aliases
 

@@ -25,9 +25,9 @@ Path to the JSON input file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-Yaml ./config.json
-``
+```
 
 ## Aliases
 

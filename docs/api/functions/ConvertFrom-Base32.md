@@ -30,10 +30,11 @@ System.String The decoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JBSWY3DP" | ConvertFrom-Base32
-    Decodes the Base32 string.
-``
+```
+
+Decodes the Base32 string.
 
 ## Aliases
 

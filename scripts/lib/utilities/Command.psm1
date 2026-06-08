@@ -153,20 +153,25 @@ function Test-CommandAvailable {
 <#
 .SYNOPSIS
     Resolves an InstallCommand from external-tools configuration using preferred package managers.
+
 .DESCRIPTION
     Takes an InstallCommand hashtable (with Windows/Linux/MacOS keys) or string and resolves it
     to use the preferred package manager (pnpm/npm/yarn/bun for Node packages, uv/pip/conda/poetry/pipenv for Python packages).
     For non-package-manager commands (like scoop, apt, brew), returns the platform-specific command as-is.
+
 .PARAMETER InstallCommand
     The InstallCommand value from external-tools configuration. Can be a hashtable with Windows/Linux/MacOS keys or a string.
+
 .PARAMETER PackageName
     Optional package name. If not provided, attempts to extract from the command.
-.EXAMPLE
-    $cmd = Resolve-InstallCommand -InstallCommand @{ Windows = 'npm install -g qrcode'; Linux = 'npm install -g qrcode' }
-    Write-Host $cmd
+
 .OUTPUTS
     System.String
     The resolved installation command for the current platform.
+
+.EXAMPLE
+    $cmd = Resolve-InstallCommand -InstallCommand @{ Windows = 'npm install -g qrcode'; Linux = 'npm install -g qrcode' }
+    Write-Host $cmd
 #>
 function Resolve-InstallCommand {
     [CmdletBinding()]

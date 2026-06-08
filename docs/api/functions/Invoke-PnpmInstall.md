@@ -33,24 +33,27 @@ Install globally (-g).
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-PnpmInstall express
-        Installs express as a production dependency.
-``
+```
+
+Installs express as a production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-PnpmInstall typescript -Dev
-        Installs typescript as a dev dependency.
-``
+```
+
+Installs typescript as a dev dependency.
 
 ### Example 3
 
-`powershell
+```powershell
 Invoke-PnpmInstall nodemon -Global
-        Installs nodemon globally.
-``
+```
+
+Installs nodemon globally.
 
 ## Aliases
 

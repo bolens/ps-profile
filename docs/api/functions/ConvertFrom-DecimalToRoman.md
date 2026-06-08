@@ -34,10 +34,11 @@ System.String The Roman numeral representation of the input decimal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "72 105" | ConvertFrom-DecimalToRoman
-    Converts decimal to Roman numerals.
-``
+```
+
+Converts decimal to Roman numerals.
 
 ## Aliases
 

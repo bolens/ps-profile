@@ -30,27 +30,27 @@ System.DateTime Returns a DateTime object representing the parsed date.
 
 ### Example 1
 
-`powershell
+```powershell
 "tomorrow" | ConvertFrom-HumanReadableToDateTime
-    
-    Converts "tomorrow" to a DateTime object.
-``
+```
+
+Converts "tomorrow" to a DateTime object.
 
 ### Example 2
 
-`powershell
+```powershell
 "2 days ago" | ConvertFrom-HumanReadableToDateTime
-    
-    Converts "2 days ago" to a DateTime object.
-``
+```
+
+Converts "2 days ago" to a DateTime object.
 
 ### Example 3
 
-`powershell
+```powershell
 "next Monday" | ConvertFrom-HumanReadableToDateTime
-    
-    Converts "next Monday" to a DateTime object.
-``
+```
+
+Converts "next Monday" to a DateTime object.
 
 ## Aliases
 

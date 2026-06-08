@@ -33,9 +33,9 @@ Text encoding of the input file (default: UTF8). Supports UTF8, UTF16, ASCII, et
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-PlainTextToMarkdown -InputPath "document.txt" -OutputPath "document.md" -Encoding UTF8
-``
+```
 
 ## Aliases
 

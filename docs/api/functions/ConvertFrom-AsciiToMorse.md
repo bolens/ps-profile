@@ -30,19 +30,19 @@ System.String Returns the Morse Code encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "HELLO WORLD" | ConvertFrom-AsciiToMorse
-    
-    Converts text to Morse Code format.
-``
+```
+
+Converts text to Morse Code format.
 
 ### Example 2
 
-`powershell
+```powershell
 "SOS" | ConvertFrom-AsciiToMorse
-    
-    Returns "... --- ..."
-``
+```
+
+Returns "... --- ..."
 
 ## Aliases
 

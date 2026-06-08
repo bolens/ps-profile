@@ -25,11 +25,9 @@ Name filter arguments forwarded to Get-ChildItem -Recurse -Filter.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-File *.ps1
-.PARAMETER FilterArgs
-    Name filter arguments forwarded to Get-ChildItem -Recurse -Filter.
-``
+```
 
 ## Aliases
 

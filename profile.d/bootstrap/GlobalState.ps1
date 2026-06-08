@@ -121,11 +121,7 @@ foreach ($flagName in $lazyInitializationFlags) {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Get-ProfileDebugLevel
-
-#>XAMPLE
-    Test-EnvBool
-
+    Test-EnvBool -Value 'true'
 #>
 function global:Test-EnvBool {
     [CmdletBinding()]

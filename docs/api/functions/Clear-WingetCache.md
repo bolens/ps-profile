@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Clear-WingetCache
-        Cleans the winget cache.
-``
+```
+
+Cleans the winget cache.
 
 ## Aliases
 

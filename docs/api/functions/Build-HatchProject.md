@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Build-HatchProject
-        Builds the project.
-``
+```
+
+Builds the project.
 
 ## Aliases
 

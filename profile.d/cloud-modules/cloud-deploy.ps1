@@ -24,34 +24,41 @@ try {
     .SYNOPSIS
         Retrieves secrets from Doppler.
     
+
     .DESCRIPTION
         Gets secrets from Doppler secrets management service.
         Supports different output formats and project/config selection.
     
+
     .PARAMETER Project
         Doppler project name.
     
+
     .PARAMETER Config
         Doppler config name (e.g., dev, staging, prod).
     
+
     .PARAMETER Secret
         Specific secret name to retrieve. If not specified, returns all secrets.
     
+
     .PARAMETER OutputFormat
         Output format: json, env, shell. Defaults to env.
     
+
+    .OUTPUTS
+        System.String. Secret values in the specified format.
+
     .EXAMPLE
         Get-DopplerSecrets -Project "my-project" -Config "dev"
         
         Gets all secrets from the specified project and config.
     
+
     .EXAMPLE
         Get-DopplerSecrets -Project "my-project" -Config "prod" -Secret "API_KEY"
         
         Gets a specific secret value.
-    
-    .OUTPUTS
-        System.String. Secret values in the specified format.
     #>
     function Get-DopplerSecrets {
         [CmdletBinding()]
@@ -131,31 +138,37 @@ try {
     .SYNOPSIS
         Deploys to Heroku.
     
+
     .DESCRIPTION
         Provides helper functions for Heroku deployments.
         Supports git-based deployments and direct app management.
     
+
     .PARAMETER AppName
         Heroku app name.
     
+
     .PARAMETER Action
         Action to perform: deploy, logs, status, restart. Defaults to deploy.
     
+
     .PARAMETER Branch
         Git branch to deploy. Defaults to main.
     
+
+    .OUTPUTS
+        System.String. Deployment status or command output.
+
     .EXAMPLE
         Deploy-Heroku -AppName "my-app"
         
         Deploys the current git repository to Heroku.
     
+
     .EXAMPLE
         Deploy-Heroku -AppName "my-app" -Action "logs"
         
         Shows Heroku application logs.
-    
-    .OUTPUTS
-        System.String. Deployment status or command output.
     #>
     function Deploy-Heroku {
         [CmdletBinding()]
@@ -265,35 +278,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Deploys to Vercel.
     
+
     .DESCRIPTION
         Provides helper functions for Vercel deployments.
         Supports project deployment and management.
     
+
     .PARAMETER Action
         Action to perform: deploy, list, remove. Defaults to deploy.
     
+
     .PARAMETER ProjectPath
         Path to the project directory. Defaults to current directory.
     
+
     .PARAMETER Production
         Deploy to production environment.
     
+
+    .OUTPUTS
+        System.String. Deployment status or command output.
+
     .EXAMPLE
-        Deploy-Vercel
-        
+    Deploy-Vercel -Action 'value' -ProjectPath 'value'
         Deploys the current project to Vercel.
     
+
     .EXAMPLE
         Deploy-Vercel -Production
         
         Deploys to production environment.
-    
-    .OUTPUTS
-        System.String. Deployment status or command output.
-    #>
+#>
     function Deploy-Vercel {
         [CmdletBinding()]
         [OutputType([string])]
@@ -404,35 +422,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Deploys to Netlify.
     
+
     .DESCRIPTION
         Provides helper functions for Netlify deployments.
         Supports site deployment and management.
     
+
     .PARAMETER Action
         Action to perform: deploy, status, open. Defaults to deploy.
     
+
     .PARAMETER ProjectPath
         Path to the project directory. Defaults to current directory.
     
+
     .PARAMETER Production
         Deploy to production environment.
     
+
+    .OUTPUTS
+        System.String. Deployment status or command output.
+
     .EXAMPLE
-        Deploy-Netlify
-        
+    Deploy-Netlify -Action 'value' -ProjectPath 'value'
         Deploys the current project to Netlify.
     
+
     .EXAMPLE
         Deploy-Netlify -Action "status"
         
         Shows Netlify deployment status.
-    
-    .OUTPUTS
-        System.String. Deployment status or command output.
-    #>
+#>
     function Deploy-Netlify {
         [CmdletBinding()]
         [OutputType([string])]

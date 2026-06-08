@@ -34,27 +34,27 @@ System.String Returns a human-readable date string.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-Date | ConvertTo-HumanReadableFromDateTime
-    
-    Converts the current date/time to a human-readable relative string.
-``
+```
+
+Converts the current date/time to a human-readable relative string.
 
 ### Example 2
 
-`powershell
+```powershell
 (Get-Date).AddDays(-2) | ConvertTo-HumanReadableFromDateTime
-    
-    Converts a date 2 days ago to "2 days ago".
-``
+```
+
+Converts a date 2 days ago to "2 days ago".
 
 ### Example 3
 
-`powershell
+```powershell
 Get-Date | ConvertTo-HumanReadableFromDateTime -Format 'MMMM d, yyyy'
-    
-    Converts to a formatted string like "January 15, 2024".
-``
+```
+
+Converts to a formatted string like "January 15, 2024".
 
 ## Aliases
 

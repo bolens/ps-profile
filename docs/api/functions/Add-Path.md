@@ -29,9 +29,9 @@ If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
 
 ### Example 1
 
-`powershell
-Add-Path
-``
+```powershell
+Add-Path -Path ./path
+```
 
 ## Source
 

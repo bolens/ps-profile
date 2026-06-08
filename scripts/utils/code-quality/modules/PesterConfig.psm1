@@ -109,8 +109,7 @@ if ($executionConfigPath -and -not [string]::IsNullOrWhiteSpace($executionConfig
 .OUTPUTS
     PesterConfiguration
 .EXAMPLE
-    New-PesterTestConfiguration
-
+    New-PesterTestConfiguration -OutputFormat 'value' -OutputPath ./output.file
 #>
 function New-PesterTestConfiguration {
     param(

@@ -41,10 +41,11 @@ Requires that the repository contains commits before executing.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GitCommand -Subcommand 'status' -Arguments @('--short')
-    Runs `git status --short` if the current directory is a Git repository.
-``
+```
+
+Runs `git status --short` if the current directory is a Git repository.
 
 ## Source
 

@@ -1,26 +1,17 @@
 <#
-scripts/utils/spellcheck.ps1
-
 .SYNOPSIS
     Runs spellcheck on files using cspell.
+
 
 .DESCRIPTION
     Simple local spellcheck helper. If `cspell` (npm) is available on PATH, delegates
     to it for the provided paths. Otherwise prints a short notice and exits 0 (non-blocking).
     This avoids breaking environments without Node installed while providing an opt-in CI check.
 
+
 .PARAMETER Paths
     Array of file paths or glob patterns to check. Defaults to '**/*' (all files).
 
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\spellcheck.ps1
-
-    Runs spellcheck on all files in the repository.
-
-.EXAMPLE
-    pwsh -NoProfile -File scripts\utils\spellcheck.ps1 -Paths '**/*.md', '**/*.ps1'
-
-    Runs spellcheck only on markdown and PowerShell files.
 
 .NOTES
     Exit Codes:
@@ -30,6 +21,17 @@ scripts/utils/spellcheck.ps1
 
     This script is non-blocking - if cspell is not installed, it exits successfully
     to avoid breaking workflows in environments without Node.js.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\spellcheck.ps1
+
+    Runs spellcheck on all files in the repository.
+
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts\utils\spellcheck.ps1 -Paths '**/*.md', '**/*.ps1'
+
+    Runs spellcheck only on markdown and PowerShell files.
 #>
 
 param(

@@ -29,15 +29,15 @@ Provider scope for a single ISBN cache entry. Defaults to Auto.
 
 ### Example 1
 
-`powershell
-Clear-IsbnCache
-``
+```powershell
+Clear-IsbnCache -Isbn 'value' -Provider 'value'
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Clear-IsbnCache -LookupIsbn '9780306406157'
-``
+```
 
 ## Aliases
 

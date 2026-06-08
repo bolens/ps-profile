@@ -25,15 +25,15 @@ Arguments to pass to mocha.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Mocha --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Mocha test
-``
+```
 
 ## Aliases
 

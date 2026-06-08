@@ -131,16 +131,20 @@ try {
 <#
 .SYNOPSIS
     Encodes text to Base32 format.
+
 .DESCRIPTION
     Encodes text to Base32 format. Requires Node.js and base32-encode package.
+
 .PARAMETER Text
     The text to encode. Can be piped.
-.EXAMPLE
-    "Hello" | ConvertTo-Base32
-    Encodes the text to Base32.
+
 .OUTPUTS
     System.String
     The Base32-encoded string.
+
+.EXAMPLE
+    "Hello" | ConvertTo-Base32
+    Encodes the text to Base32.
 #>
 function ConvertTo-Base32 {
     param([Parameter(ValueFromPipeline = $true)][string]$Text)
@@ -151,16 +155,20 @@ Set-AgentModeAlias -Name 'base32-encode' -Target 'ConvertTo-Base32'
 <#
 .SYNOPSIS
     Decodes Base32-encoded text.
+
 .DESCRIPTION
     Decodes Base32-encoded text back to original form. Requires Node.js and base32-decode package.
+
 .PARAMETER Text
     The Base32-encoded text to decode. Can be piped.
-.EXAMPLE
-    "JBSWY3DP" | ConvertFrom-Base32
-    Decodes the Base32 string.
+
 .OUTPUTS
     System.String
     The decoded string.
+
+.EXAMPLE
+    "JBSWY3DP" | ConvertFrom-Base32
+    Decodes the Base32 string.
 #>
 function ConvertFrom-Base32 {
     param([Parameter(ValueFromPipeline = $true)][string]$Text)

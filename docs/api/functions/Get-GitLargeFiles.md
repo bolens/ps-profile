@@ -38,19 +38,19 @@ System.Management.Automation.PSCustomObject[]. Array of large file information.
 
 ### Example 1
 
-`powershell
-Get-GitLargeFiles
-        
-        Finds the 20 largest files in the repository history.
-``
+```powershell
+Get-GitLargeFiles -RepositoryPath 'value' -MinSize 1
+```
+
+Finds the 20 largest files in the repository history.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-GitLargeFiles -MinSize 5242880 -Limit 10
-        
-        Finds the 10 largest files over 5MB.
-``
+```
+
+Finds the 10 largest files over 5MB.
 
 ## Source
 

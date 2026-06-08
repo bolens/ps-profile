@@ -30,24 +30,27 @@ System.String. Output from Ant execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Build-Ant
-        Builds the current Ant project.
-``
+```
+
+Builds the current Ant project.
 
 ### Example 2
 
-`powershell
+```powershell
 Build-Ant clean
-        Cleans the project.
-``
+```
+
+Cleans the project.
 
 ### Example 3
 
-`powershell
+```powershell
 Build-Ant test
-        Runs Ant tests.
-``
+```
+
+Runs Ant tests.
 
 ## Aliases
 

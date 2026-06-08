@@ -84,7 +84,7 @@ if (Test-CachedCommand vcpkg) {
     Set-AgentModeAlias -Name 'vcpkguninstall' -Target 'Remove-VcpkgPackage'
     # vcpkg upgrade - upgrade packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Upgrades vcpkg packages.
     .DESCRIPTION
         Upgrades specified packages or all packages if no arguments provided.
@@ -93,12 +93,12 @@ if (Test-CachedCommand vcpkg) {
     .PARAMETER NoDryRun
         Actually perform upgrades (default is dry-run).
     .EXAMPLE
-        Update-VcpkgPackages
+    Update-VcpkgPackages -Packages 'package-name'
         Shows what would be upgraded (dry-run).
     .EXAMPLE
         Update-VcpkgPackages boost -NoDryRun
         Upgrades boost package.
-    #>
+#>
     function Update-VcpkgPackages {
         [CmdletBinding()]
         param(

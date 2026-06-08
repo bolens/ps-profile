@@ -25,9 +25,9 @@ Number of recent commands to show (default: 10).
 
 ### Example 1
 
-`powershell
-Show-RecentCommands
-``
+```powershell
+Show-RecentCommands -Count 1
+```
 
 ## Source
 

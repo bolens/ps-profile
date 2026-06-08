@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-WezTerm
-        
-        Launches WezTerm terminal.
-``
+```powershell
+Launch-WezTerm -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
+```
+
+Launches WezTerm terminal.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-WezTerm -Command "docker ps"
-        
-        Launches WezTerm and executes a command.
-``
+```
+
+Launches WezTerm and executes a command.
 
 ## Source
 

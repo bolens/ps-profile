@@ -36,13 +36,18 @@ Tests are organized into three suites with **domain-driven organization** for be
 
 ```
 tests/
-├── unit/                                    # Unit tests (flat directory; prefix-based names)
-│   ├── library-*.tests.ps1                # scripts/lib/ modules (and hybrid lib + profile.d)
-│   ├── profile-*.tests.ps1                # profile.d/ fragments, bootstrap helpers
-│   ├── utility-*.tests.ps1                # scripts/utils/ (includes utility-debug-*)
-│   ├── validation-*.tests.ps1             # scripts/checks/ and validation scripts
-│   ├── test-runner-*.tests.ps1            # Test runner modules and scripts
-│   └── test-support*.tests.ps1            # TestSupport modules (test-support.tests.ps1 umbrella)
+├── unit/                                    # Unit tests (category subdirectories; prefix-based names)
+│   ├── library/                             # scripts/lib/ modules (library-<module>-*.tests.ps1)
+│   ├── profile/                             # profile.d/ fragments and helpers
+│   │   ├── conversion/                      # Conversion modules (data/document/media subdirs)
+│   │   ├── lang/                            # Language tool fragments
+│   │   ├── bootstrap/                       # Bootstrap helpers
+│   │   ├── main/loader/                     # Main profile loader
+│   │   └── <fragment>/                      # Other fragment domains (git, files, fzf, …)
+│   ├── utility/                             # scripts/utils/ (debug/, run/, generate/, …)
+│   ├── validation/                          # scripts/checks/ and validation scripts
+│   ├── test-runner/                         # Test runner modules and scripts
+│   └── test-support/                        # TestSupport modules (test-support.tests.ps1 umbrella)
 │
 ├── integration/                             # Integration tests (domain subdirectories)
 │   ├── bootstrap/                           # Bootstrap function tests
@@ -85,8 +90,11 @@ tests/
 │   ├── cross-platform/                      # Cross-platform tests
 │   └── error-handling/                      # Error handling standards
 │
-├── performance/                             # Performance tests (flat directory only)
-│   └── *-performance.tests.ps1              # e.g. beads-performance.tests.ps1
+├── performance/                             # Performance tests (category subdirectories)
+│   ├── profile/                             # Fragment load-time tests (e.g. beads-performance)
+│   ├── lang/                                # Language fragment performance
+│   ├── test-runner/                         # Runner overhead benchmarks
+│   └── core/                                # Cross-cutting performance suite
 │
 ├── TestSupport.ps1                          # Thin loader for test utilities
 └── TestSupport/                             # Modular test support utilities
@@ -97,15 +105,15 @@ tests/
     └── TestNpmHelpers.ps1                   # NPM package testing
 ```
 
-> **Unit layout:** Unit tests live in a **flat** `tests/unit/` directory. Category prefixes (`library-`, `profile-`, etc.) encode the target area — not subfolders. Use `run-unit-batch.ps1 -Filter profile-` to run subsets.
+> **Unit layout:** Unit tests live under **category subdirectories** in `tests/unit/` (`library/`, `profile/`, `utility/`, etc.). Filenames keep their prefixes (`library-`, `profile-`, …) for filtering and drift linking. Use `run-unit-batch.ps1 -Filter profile-` to run subsets; discovery is recursive.
 
 > **Integration layout:** Prefer **short file names** inside domain folders. The folder provides context, so drop redundant domain prefixes (e.g. `integration/bootstrap/helper-functions.tests.ps1`, not `bootstrap-helper-functions.tests.ps1`).
 
 ### Test File Naming
 
-- **Unit tests**: `tests/unit/*.tests.ps1` (flat directory; prefix indicates target)
+- **Unit tests**: `tests/unit/**/*.tests.ps1` (recursive discovery; prefix indicates target)
 - **Integration tests**: `tests/integration/**/*.tests.ps1` (recursive discovery)
-- **Performance tests**: `tests/performance/*.tests.ps1` (flat directory only)
+- **Performance tests**: `tests/performance/**/*.tests.ps1` (recursive discovery)
 
 All test files must end with `.tests.ps1` to be discovered by the test runner. Integration and performance suites support path-based filtering; unit tests are filtered by filename prefix (e.g. `-Filter profile-` in `run-unit-batch.ps1`).
 

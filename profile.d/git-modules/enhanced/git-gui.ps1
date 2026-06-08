@@ -21,7 +21,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Git Tower GUI.
     
     .DESCRIPTION
@@ -32,15 +32,14 @@ try {
         Path to the Git repository. Defaults to current directory.
     
     .EXAMPLE
-        Invoke-GitTower
-        
+    Invoke-GitTower @('--help')
         Opens Git Tower in the current directory.
     
     .EXAMPLE
         Invoke-GitTower -RepositoryPath "C:\Projects\MyRepo"
         
         Opens Git Tower for the specified repository.
-    #>
+#>
     function Invoke-GitTower {
         [CmdletBinding()]
         param(
@@ -76,7 +75,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches GitKraken GUI.
     
     .DESCRIPTION
@@ -87,15 +86,14 @@ try {
         Path to the Git repository. Defaults to current directory.
     
     .EXAMPLE
-        Invoke-GitKraken
-        
+    Invoke-GitKraken @('--help')
         Opens GitKraken in the current directory.
     
     .EXAMPLE
         Invoke-GitKraken -RepositoryPath "C:\Projects\MyRepo"
         
         Opens GitKraken for the specified repository.
-    #>
+#>
     function Invoke-GitKraken {
         [CmdletBinding()]
         param(
@@ -134,25 +132,29 @@ try {
     .SYNOPSIS
         Runs Git Butler workflow commands.
     
+
     .DESCRIPTION
         Executes Git Butler commands for managing Git workflows and operations.
         Git Butler is a modern Git workflow tool.
     
+
     .PARAMETER Arguments
         Arguments to pass to gitbutler.
     
+
+    .OUTPUTS
+        System.String. Output from Git Butler command.
+
     .EXAMPLE
         Invoke-GitButler status
         
         Shows Git Butler status.
     
+
     .EXAMPLE
         Invoke-GitButler sync
         
         Syncs the repository with Git Butler.
-    
-    .OUTPUTS
-        System.String. Output from Git Butler command.
     #>
     function Invoke-GitButler {
         [CmdletBinding()]
@@ -205,25 +207,29 @@ try {
     .SYNOPSIS
         Runs Jujutsu version control commands.
     
+
     .DESCRIPTION
         Executes Jujutsu (jj) commands. Jujutsu is a Git-compatible version
         control system with a different mental model.
     
+
     .PARAMETER Arguments
         Arguments to pass to jj.
     
+
+    .OUTPUTS
+        System.String. Output from Jujutsu command.
+
     .EXAMPLE
         Invoke-Jujutsu init
         
         Initializes a new Jujutsu repository.
     
+
     .EXAMPLE
         Invoke-Jujutsu status
         
         Shows Jujutsu repository status.
-    
-    .OUTPUTS
-        System.String. Output from Jujutsu command.
     #>
     function Invoke-Jujutsu {
         [CmdletBinding()]

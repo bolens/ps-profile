@@ -25,15 +25,9 @@ Arguments to pass to next build.
 
 ### Example 1
 
-`powershell
-Build-NextJsApp
-``
-
-### Example 2
-
-`powershell
+```powershell
 Build-NextJsApp --no-lint
-``
+```
 
 ## Aliases
 

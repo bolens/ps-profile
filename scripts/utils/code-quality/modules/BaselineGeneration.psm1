@@ -46,8 +46,7 @@ if ($jsonUtilitiesModulePath -and -not [string]::IsNullOrWhiteSpace($jsonUtiliti
 .OUTPUTS
     Baseline data object
 .EXAMPLE
-    New-PerformanceBaseline
-
+    New-PerformanceBaseline -TestResult 'value'
 #>
 function New-PerformanceBaseline {
     param(

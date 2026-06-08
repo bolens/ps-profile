@@ -66,12 +66,11 @@ System.Boolean. True if registration successful, false otherwise.
 
 ### Example 1
 
-`powershell
+```powershell
 Register-PackageManager -ManagerName 'Npm' -CommandName 'npm' `
-            -InstallCommand 'install' -GlobalFlag '-g' -LockFile 'package-lock.json'
-        
-        Registers npm package manager with standard commands.
-``
+```
+
+-InstallCommand 'install' -GlobalFlag '-g' -LockFile 'package-lock.json' Registers npm package manager with standard commands.
 
 ## Source
 

@@ -42,19 +42,19 @@ System.String. Path to the rendered image.
 
 ### Example 1
 
-`powershell
+```powershell
 Render-3DScene -ProjectPath "scene.blend" -OutputPath "render.png"
-        
-        Renders a Blender scene to PNG.
-``
+```
+
+Renders a Blender scene to PNG.
 
 ### Example 2
 
-`powershell
+```powershell
 Render-3DScene -ProjectPath "scene.blend" -OutputPath "render.png" -Frame 10 -Engine "eevee"
-        
-        Renders frame 10 using Eevee engine.
-``
+```
+
+Renders frame 10 using Eevee engine.
 
 ## Source
 

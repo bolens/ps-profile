@@ -32,23 +32,27 @@ try {
     .SYNOPSIS
         Compiles Kotlin code.
 
+
     .DESCRIPTION
         Wrapper function for the Kotlin compiler (kotlinc).
+
 
     .PARAMETER Arguments
         Additional arguments to pass to kotlinc.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from Kotlin compiler execution.
+
     .EXAMPLE
         Compile-Kotlin Main.kt
         Compiles Main.kt.
 
+
     .EXAMPLE
         Compile-Kotlin -include-runtime -d app.jar Main.kt
         Compiles with runtime included into a JAR.
-
-    .OUTPUTS
-        System.String. Output from Kotlin compiler execution.
     #>
     function Compile-Kotlin {
         [CmdletBinding()]
@@ -101,23 +105,27 @@ try {
     .SYNOPSIS
         Compiles Scala code.
 
+
     .DESCRIPTION
         Wrapper function for the Scala compiler (scalac).
+
 
     .PARAMETER Arguments
         Additional arguments to pass to scalac.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from Scala compiler execution.
+
     .EXAMPLE
         Compile-Scala Main.scala
         Compiles Main.scala.
 
+
     .EXAMPLE
         Compile-Scala -d classes Main.scala
         Compiles to a specific output directory.
-
-    .OUTPUTS
-        System.String. Output from Scala compiler execution.
     #>
     function Compile-Scala {
         [CmdletBinding()]

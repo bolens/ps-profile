@@ -2,20 +2,15 @@
 .SYNOPSIS
     Validates or checks something in the codebase.
 
+
 .DESCRIPTION
     Performs validation checks and reports any issues found. Returns exit code 0
     if all checks pass, or exit code 1 if validation failures are found.
 
+
 .PARAMETER Path
     Optional path to check. Defaults to repository root.
 
-.EXAMPLE
-    .\check-script-template.ps1
-    Run checks on the default path.
-
-.EXAMPLE
-    .\check-script-template.ps1 -Path "profile.d"
-    Run checks on a specific path.
 
 .NOTES
     Exit codes:
@@ -23,6 +18,15 @@
     - 1: Validation failures found (expected)
     - 2: Setup/configuration error (unexpected)
     - 3: Other errors
+
+.EXAMPLE
+    .\check-script-template.ps1
+    Run checks on the default path.
+
+
+.EXAMPLE
+    .\check-script-template.ps1 -Path "profile.d"
+    Run checks on a specific path.
 #>
 
 [CmdletBinding()]

@@ -29,11 +29,11 @@ Directory to save images. Defaults to current directory.
 
 ### Example 1
 
-`powershell
+```powershell
 Download-Gallery -Url "https://example.com/gallery"
-        
-        Downloads all images from a gallery.
-``
+```
+
+Downloads all images from a gallery.
 
 ## Source
 

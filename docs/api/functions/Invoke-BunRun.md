@@ -25,15 +25,15 @@ Arguments to pass to bun run.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-BunRun build
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-BunRun dev
-``
+```
 
 ## Aliases
 

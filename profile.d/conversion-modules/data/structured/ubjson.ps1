@@ -172,21 +172,26 @@ try {
 <#
 .SYNOPSIS
     Converts UBJSON file to JSON format.
+
 .DESCRIPTION
     Converts a UBJSON (Universal Binary JSON) file to JSON format.
     UBJSON is a binary encoding of JSON that is more compact and faster to parse.
     Requires Node.js and the ubjson package to be installed.
+
 .PARAMETER InputPath
     The path to the UBJSON file (.ubjson or .ubj extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output JSON file.
+
 .EXAMPLE
     ConvertFrom-UbjsonToJson -InputPath 'data.ubjson'
     
     Converts data.ubjson to data.json.
-.OUTPUTS
-    System.String
-    Returns the path to the output JSON file.
 #>
 Set-Item -Path Function:Global:ConvertFrom-UbjsonToJson -Value {
     param([string]$InputPath, [string]$OutputPath)
@@ -198,21 +203,26 @@ Set-AgentModeAlias -Name 'ubjson-to-json' -Target 'ConvertFrom-UbjsonToJson'
 <#
 .SYNOPSIS
     Converts JSON file to UBJSON format.
+
 .DESCRIPTION
     Converts a JSON file to UBJSON (Universal Binary JSON) format.
     UBJSON is a binary encoding of JSON that is more compact and faster to parse.
     Requires Node.js and the ubjson package to be installed.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output UBJSON file. If not specified, uses input path with .ubjson extension.
+
+.OUTPUTS
+    System.String
+    Returns the path to the output UBJSON file.
+
 .EXAMPLE
     ConvertTo-UbjsonFromJson -InputPath 'data.json'
     
     Converts data.json to data.ubjson.
-.OUTPUTS
-    System.String
-    Returns the path to the output UBJSON file.
 #>
 Set-Item -Path Function:Global:ConvertTo-UbjsonFromJson -Value {
     param([string]$InputPath, [string]$OutputPath)

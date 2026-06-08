@@ -38,19 +38,19 @@ System.String. Path to the output directory.
 
 ### Example 1
 
-`powershell
-Convert-ComposeToK8s
-        
-        Converts docker-compose.yml in current directory to Kubernetes manifests.
-``
+```powershell
+Convert-ComposeToK8s -InputObject $data
+```
+
+Converts docker-compose.yml in current directory to Kubernetes manifests.
 
 ### Example 2
 
-`powershell
+```powershell
 Convert-ComposeToK8s -ComposeFile "docker-compose.prod.yml" -OutputPath "k8s/"
-        
-        Converts the specified compose file and saves manifests to k8s/ directory.
-``
+```
+
+Converts the specified compose file and saves manifests to k8s/ directory.
 
 ## Source
 

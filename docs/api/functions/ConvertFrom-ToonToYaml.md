@@ -29,9 +29,9 @@ The path for the output YAML file. If not specified, uses input path with .yaml 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-ToonToYaml -InputPath ./input.file
-``
+```
 
 ## Aliases
 

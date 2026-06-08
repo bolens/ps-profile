@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-UVOutdatedPackages
-        Upgrades all outdated packages in the current environment.
-``
+```
+
+Upgrades all outdated packages in the current environment.
 
 ## Aliases
 

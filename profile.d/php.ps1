@@ -63,8 +63,7 @@ function Invoke-Php {
     Port number for the server (default: 8000).
 
 .EXAMPLE
-    Start-PhpServer
-
+    Start-PhpServer -Port 1
 .EXAMPLE
     Start-PhpServer -Port 3000
 #>

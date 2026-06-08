@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-QrCodeFromText -InputPath "data.txt"
-    
-    Converts data.txt to data.png QR code.
-``
+```
+
+Converts data.txt to data.png QR code.
 
 ## Aliases
 

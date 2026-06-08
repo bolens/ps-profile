@@ -25,15 +25,15 @@ Arguments to pass to bun add.
 
 ### Example 1
 
-`powershell
+```powershell
 Add-BunPackage express
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Add-BunPackage -D typescript
-``
+```
 
 ## Aliases
 

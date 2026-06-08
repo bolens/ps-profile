@@ -80,19 +80,24 @@ function Initialize-FileConversion-CoreEncodingRoman {
 <#
 .SYNOPSIS
     Converts Roman numeral string to ASCII text.
+
 .DESCRIPTION
     Converts a Roman numeral string back to ASCII text. The Roman numerals should represent UTF-8 byte values (1-255).
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped. Roman numerals should be separated by spaces.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToAscii
-    Converts Roman numerals to "Hi".
-.EXAMPLE
-    ConvertFrom-RomanToAscii -InputObject "LXV LXVII"
-    Converts Roman numerals to "AB".
+
 .OUTPUTS
     System.String
     The ASCII text representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToAscii
+    Converts Roman numerals to "Hi".
+
+.EXAMPLE
+    ConvertFrom-RomanToAscii -InputObject "LXV LXVII"
+    Converts Roman numerals to "AB".
 #>
 function ConvertFrom-RomanToAscii {
     [CmdletBinding()]
@@ -115,16 +120,20 @@ Set-AgentModeAlias -Name 'roman-to-ascii' -Target 'ConvertFrom-RomanToAscii'
 <#
 .SYNOPSIS
     Converts Roman numeral string to hexadecimal representation.
+
 .DESCRIPTION
     Converts a Roman numeral string to hexadecimal string representation.
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToHex
-    Converts Roman numerals to hex.
+
 .OUTPUTS
     System.String
     The hexadecimal representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToHex
+    Converts Roman numerals to hex.
 #>
 function ConvertFrom-RomanToHex {
     [CmdletBinding()]
@@ -147,18 +156,23 @@ Set-AgentModeAlias -Name 'roman-to-hex' -Target 'ConvertFrom-RomanToHex'
 <#
 .SYNOPSIS
     Converts Roman numeral string to binary representation.
+
 .DESCRIPTION
     Converts a Roman numeral string to binary string representation.
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between binary bytes. Default is a space.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToBinary
-    Converts Roman numerals to binary.
+
 .OUTPUTS
     System.String
     The binary representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToBinary
+    Converts Roman numerals to binary.
 #>
 function ConvertFrom-RomanToBinary {
     [CmdletBinding()]
@@ -182,16 +196,20 @@ Set-AgentModeAlias -Name 'roman-to-binary' -Target 'ConvertFrom-RomanToBinary'
 <#
 .SYNOPSIS
     Converts Roman numeral string to ModHex representation.
+
 .DESCRIPTION
     Converts a Roman numeral string to ModHex string representation.
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToModHex
-    Converts Roman numerals to ModHex.
+
 .OUTPUTS
     System.String
     The ModHex representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToModHex
+    Converts Roman numerals to ModHex.
 #>
 function ConvertFrom-RomanToModHex {
     [CmdletBinding()]
@@ -214,18 +232,23 @@ Set-AgentModeAlias -Name 'roman-to-modhex' -Target 'ConvertFrom-RomanToModHex'
 <#
 .SYNOPSIS
     Converts Roman numeral string to octal representation.
+
 .DESCRIPTION
     Converts a Roman numeral string to octal string representation.
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between octal bytes. Default is a space.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToOctal
-    Converts Roman numerals to octal.
+
 .OUTPUTS
     System.String
     The octal representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToOctal
+    Converts Roman numerals to octal.
 #>
 function ConvertFrom-RomanToOctal {
     [CmdletBinding()]
@@ -249,18 +272,23 @@ Set-AgentModeAlias -Name 'roman-to-octal' -Target 'ConvertFrom-RomanToOctal'
 <#
 .SYNOPSIS
     Converts Roman numeral string to decimal representation.
+
 .DESCRIPTION
     Converts a Roman numeral string to decimal string representation.
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped.
+
 .PARAMETER Separator
     Optional separator between decimal values. Default is a space.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToDecimal
-    Converts Roman numerals to decimal.
+
 .OUTPUTS
     System.String
     The decimal representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToDecimal
+    Converts Roman numerals to decimal.
 #>
 function ConvertFrom-RomanToDecimal {
     [CmdletBinding()]
@@ -284,16 +312,20 @@ Set-AgentModeAlias -Name 'roman-to-decimal' -Target 'ConvertFrom-RomanToDecimal'
 <#
 .SYNOPSIS
     Converts Roman numeral string to Base32 representation.
+
 .DESCRIPTION
     Converts a Roman numeral string to Base32 string representation.
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToBase32
-    Converts Roman numerals to Base32.
+
 .OUTPUTS
     System.String
     The Base32 representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToBase32
+    Converts Roman numerals to Base32.
 #>
 function ConvertFrom-RomanToBase32 {
     [CmdletBinding()]
@@ -316,16 +348,20 @@ Set-AgentModeAlias -Name 'roman-to-base32' -Target 'ConvertFrom-RomanToBase32'
 <#
 .SYNOPSIS
     Converts Roman numeral string to URL/percent encoded representation.
+
 .DESCRIPTION
     Converts a Roman numeral string to URL/percent encoded string representation.
+
 .PARAMETER InputObject
     The Roman numeral string to convert. Can be piped.
-.EXAMPLE
-    "LXXII CV" | ConvertFrom-RomanToUrl
-    Converts Roman numerals to URL encoding.
+
 .OUTPUTS
     System.String
     The URL/percent encoded representation of the input Roman numeral string.
+
+.EXAMPLE
+    "LXXII CV" | ConvertFrom-RomanToUrl
+    Converts Roman numerals to URL encoding.
 #>
 function ConvertFrom-RomanToUrl {
     [CmdletBinding()]

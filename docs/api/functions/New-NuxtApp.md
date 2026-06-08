@@ -25,15 +25,15 @@ Arguments to pass to nuxi init.
 
 ### Example 1
 
-`powershell
+```powershell
 New-NuxtApp my-app
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-NuxtApp my-app --package-manager pnpm
-``
+```
 
 ## Aliases
 

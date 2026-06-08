@@ -29,9 +29,9 @@ Path for the output PPTX file. If not specified, uses input path with .pptx exte
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OdpToPptx -InputPath "presentation.odp" -OutputPath "presentation.pptx"
-``
+```
 
 ## Aliases
 

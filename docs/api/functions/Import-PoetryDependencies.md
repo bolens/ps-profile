@@ -29,17 +29,19 @@ Don't install dependencies (--no-deps flag for pip).
 
 ### Example 1
 
-`powershell
-Import-PoetryDependencies
-        Restores dependencies from requirements.txt in current directory.
-``
+```powershell
+Import-PoetryDependencies -Path ./path
+```
+
+Restores dependencies from requirements.txt in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Import-PoetryDependencies -Path "C:\backup\poetry-requirements.txt"
-        Restores dependencies from a specific file.
-``
+```
+
+Restores dependencies from a specific file.
 
 ## Aliases
 

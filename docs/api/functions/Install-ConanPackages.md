@@ -33,17 +33,19 @@ Profile name to use.
 
 ### Example 1
 
-`powershell
-Install-ConanPackages
-        Installs dependencies from current directory.
-``
+```powershell
+Install-ConanPackages 'package-name'
+```
+
+Installs dependencies from current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-ConanPackages -Build missing
-        Installs and builds missing packages.
-``
+```
+
+Installs and builds missing packages.
 
 ## Aliases
 

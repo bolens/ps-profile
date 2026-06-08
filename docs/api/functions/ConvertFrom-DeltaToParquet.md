@@ -29,9 +29,9 @@ The path for the output Parquet file. If not specified, uses input path with .pa
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-DeltaToParquet -InputPath ./input.file
-``
+```
 
 ## Aliases
 

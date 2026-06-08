@@ -14,8 +14,7 @@
 .PARAMETER ProfileVersion
     Version string for the profile (default: '1.0.0').
 .EXAMPLE
-    Initialize-ProfileVersion
-
+    Initialize-ProfileVersion -ProfileDir 'value'
 #>
 function Initialize-ProfileVersion {
     [CmdletBinding()]

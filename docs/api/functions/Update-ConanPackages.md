@@ -37,24 +37,27 @@ Profile name to use.
 
 ### Example 1
 
-`powershell
-Update-ConanPackages
-        Updates all packages in current directory.
-``
+```powershell
+Update-ConanPackages -Packages 'package-name' -Path ./path
+```
+
+Updates all packages in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-ConanPackages -Path ./conanfile.txt
-        Updates all packages in specific file.
-``
+```
+
+Updates all packages in specific file.
 
 ### Example 3
 
-`powershell
+```powershell
 Update-ConanPackages -Build outdated
-        Updates and rebuilds outdated packages.
-``
+```
+
+Updates and rebuilds outdated packages.
 
 ## Aliases
 

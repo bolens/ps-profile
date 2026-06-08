@@ -30,31 +30,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds Java projects using Maven.
+
 
     .DESCRIPTION
         Wrapper function for Maven, a build automation tool for Java projects.
+
 
     .PARAMETER Arguments
         Additional arguments to pass to mvn.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from Maven execution.
+
     .EXAMPLE
-        Build-Maven
+    Build-Maven
         Builds the current Maven project.
+
 
     .EXAMPLE
         Build-Maven clean install
         Cleans and installs the project.
 
+
     .EXAMPLE
         Build-Maven test
         Runs Maven tests.
-
-    .OUTPUTS
-        System.String. Output from Maven execution.
-    #>
+#>
     function Build-Maven {
         [CmdletBinding()]
         [OutputType([string])]
@@ -114,31 +119,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds Java projects using Gradle.
+
 
     .DESCRIPTION
         Wrapper function for Gradle, a build automation tool for Java projects.
+
 
     .PARAMETER Arguments
         Additional arguments to pass to gradle.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from Gradle execution.
+
     .EXAMPLE
-        Build-Gradle
+    Build-Gradle
         Builds the current Gradle project.
+
 
     .EXAMPLE
         Build-Gradle build
         Builds the project.
 
+
     .EXAMPLE
         Build-Gradle test
         Runs Gradle tests.
-
-    .OUTPUTS
-        System.String. Output from Gradle execution.
-    #>
+#>
     function Build-Gradle {
         [CmdletBinding()]
         [OutputType([string])]
@@ -198,31 +208,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds Java projects using Apache Ant.
+
 
     .DESCRIPTION
         Wrapper function for Apache Ant, a build tool for Java projects.
+
 
     .PARAMETER Arguments
         Additional arguments to pass to ant.
         Can be used multiple times or as an array.
 
+
+    .OUTPUTS
+        System.String. Output from Ant execution.
+
     .EXAMPLE
-        Build-Ant
+    Build-Ant
         Builds the current Ant project.
+
 
     .EXAMPLE
         Build-Ant clean
         Cleans the project.
 
+
     .EXAMPLE
         Build-Ant test
         Runs Ant tests.
-
-    .OUTPUTS
-        System.String. Output from Ant execution.
-    #>
+#>
     function Build-Ant {
         [CmdletBinding()]
         [OutputType([string])]

@@ -38,17 +38,19 @@ System.String. Output from bd close command.
 
 ### Example 1
 
-`powershell
+```powershell
 Close-BeadsIssue -IssueId bd-a1b2 -Reason "Completed"
-        Closes issue bd-a1b2 with reason "Completed".
-``
+```
+
+Closes issue bd-a1b2 with reason "Completed".
 
 ### Example 2
 
-`powershell
+```powershell
 Close-BeadsIssue -IssueId bd-a1b2,bd-f14c -Reason "Fixed"
-        Closes multiple issues.
-``
+```
+
+Closes multiple issues.
 
 ## Source
 

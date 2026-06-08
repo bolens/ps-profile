@@ -184,22 +184,27 @@ function Initialize-FileConversion-DigestHashFormat {
 <#
 .SYNOPSIS
     Converts a hash value from hexadecimal to Base64 format.
+
 .DESCRIPTION
     Converts a hash/digest value from hexadecimal representation to Base64 representation.
     Useful for converting between different hash format representations.
+
 .PARAMETER HashHex
     The hash value in hexadecimal format (e.g., "a1b2c3d4").
+
+.OUTPUTS
+    System.String
+    Returns the hash value in Base64 format.
+
 .EXAMPLE
     ConvertFrom-HashHexToBase64 -HashHex "a1b2c3d4e5f6"
     
     Converts hex hash to Base64 format.
+
 .EXAMPLE
     "a1b2c3d4" | ConvertFrom-HashHexToBase64
     
     Converts hex hash from pipeline.
-.OUTPUTS
-    System.String
-    Returns the hash value in Base64 format.
 #>
 function global:ConvertFrom-HashHexToBase64 {
     [CmdletBinding()]
@@ -238,21 +243,26 @@ Set-AgentModeAlias -Name 'hash-hex-to-base64' -Target 'ConvertFrom-HashHexToBase
 <#
 .SYNOPSIS
     Converts a hash value from Base64 to hexadecimal format.
+
 .DESCRIPTION
     Converts a hash/digest value from Base64 representation to hexadecimal representation.
+
 .PARAMETER HashBase64
     The hash value in Base64 format.
+
+.OUTPUTS
+    System.String
+    Returns the hash value in hexadecimal format (lowercase).
+
 .EXAMPLE
     ConvertFrom-HashBase64ToHex -HashBase64 "obLDxMPh+g=="
     
     Converts Base64 hash to hex format.
+
 .EXAMPLE
     "obLDxMPh+g==" | ConvertFrom-HashBase64ToHex
     
     Converts Base64 hash from pipeline.
-.OUTPUTS
-    System.String
-    Returns the hash value in hexadecimal format (lowercase).
 #>
 function global:ConvertFrom-HashBase64ToHex {
     [CmdletBinding()]
@@ -291,17 +301,21 @@ Set-AgentModeAlias -Name 'hash-base64-to-hex' -Target 'ConvertFrom-HashBase64ToH
 <#
 .SYNOPSIS
     Converts a hash value from hexadecimal to Base32 format.
+
 .DESCRIPTION
     Converts a hash/digest value from hexadecimal representation to Base32 representation (RFC 4648).
+
 .PARAMETER HashHex
     The hash value in hexadecimal format.
+
+.OUTPUTS
+    System.String
+    Returns the hash value in Base32 format.
+
 .EXAMPLE
     ConvertFrom-HashHexToBase32 -HashHex "a1b2c3d4e5f6"
     
     Converts hex hash to Base32 format.
-.OUTPUTS
-    System.String
-    Returns the hash value in Base32 format.
 #>
 function global:ConvertFrom-HashHexToBase32 {
     [CmdletBinding()]
@@ -340,17 +354,21 @@ Set-AgentModeAlias -Name 'hash-hex-to-base32' -Target 'ConvertFrom-HashHexToBase
 <#
 .SYNOPSIS
     Converts a hash value from Base32 to hexadecimal format.
+
 .DESCRIPTION
     Converts a hash/digest value from Base32 representation to hexadecimal representation.
+
 .PARAMETER HashBase32
     The hash value in Base32 format.
+
+.OUTPUTS
+    System.String
+    Returns the hash value in hexadecimal format (lowercase).
+
 .EXAMPLE
     ConvertFrom-HashBase32ToHex -HashBase32 "JBSWY3DP"
     
     Converts Base32 hash to hex format.
-.OUTPUTS
-    System.String
-    Returns the hash value in hexadecimal format (lowercase).
 #>
 function global:ConvertFrom-HashBase32ToHex {
     [CmdletBinding()]
@@ -389,17 +407,21 @@ Set-AgentModeAlias -Name 'hash-base32-to-hex' -Target 'ConvertFrom-HashBase32ToH
 <#
 .SYNOPSIS
     Converts a hash value from Base64 to Base32 format.
+
 .DESCRIPTION
     Converts a hash/digest value from Base64 representation to Base32 representation.
+
 .PARAMETER HashBase64
     The hash value in Base64 format.
+
+.OUTPUTS
+    System.String
+    Returns the hash value in Base32 format.
+
 .EXAMPLE
     ConvertFrom-HashBase64ToBase32 -HashBase64 "obLDxMPh+g=="
     
     Converts Base64 hash to Base32 format.
-.OUTPUTS
-    System.String
-    Returns the hash value in Base32 format.
 #>
 function global:ConvertFrom-HashBase64ToBase32 {
     [CmdletBinding()]
@@ -438,17 +460,21 @@ Set-AgentModeAlias -Name 'hash-base64-to-base32' -Target 'ConvertFrom-HashBase64
 <#
 .SYNOPSIS
     Converts a hash value from Base32 to Base64 format.
+
 .DESCRIPTION
     Converts a hash/digest value from Base32 representation to Base64 representation.
+
 .PARAMETER HashBase32
     The hash value in Base32 format.
+
+.OUTPUTS
+    System.String
+    Returns the hash value in Base64 format.
+
 .EXAMPLE
     ConvertFrom-HashBase32ToBase64 -HashBase32 "JBSWY3DP"
     
     Converts Base32 hash to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the hash value in Base64 format.
 #>
 function global:ConvertFrom-HashBase32ToBase64 {
     [CmdletBinding()]

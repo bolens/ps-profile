@@ -31,16 +31,16 @@ If specified, sets the machine-wide value; otherwise, the user value.
 
 ## Outputs
 
-None. This function does not return a value. .EXAMPLE Set-EnvVar
+None. This function does not return a value.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Set-EnvVar
-``
+```powershell
+Set-EnvVar -Name 'name'
+```
 
 ## Source
 

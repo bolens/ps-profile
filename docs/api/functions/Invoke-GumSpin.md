@@ -29,9 +29,9 @@ Script block executed under the spinner.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GumSpin -Title 'Fetching data...' -Script { Invoke-RestMethod https://example.com }
-``
+```
 
 ## Aliases
 

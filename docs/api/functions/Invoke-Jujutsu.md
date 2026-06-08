@@ -30,19 +30,19 @@ System.String. Output from Jujutsu command.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Jujutsu init
-        
-        Initializes a new Jujutsu repository.
-``
+```
+
+Initializes a new Jujutsu repository.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Jujutsu status
-        
-        Shows Jujutsu repository status.
-``
+```
+
+Shows Jujutsu repository status.
 
 ## Aliases
 

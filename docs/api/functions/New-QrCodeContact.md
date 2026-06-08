@@ -57,10 +57,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeContact -Name "John Doe" -Phone "+1234567890" -Email "john@example.com"
-    Generates a contact QR code with name, phone, and email.
-``
+```
+
+Generates a contact QR code with name, phone, and email.
 
 ## Aliases
 

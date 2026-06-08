@@ -32,11 +32,11 @@ System.String Returns the GUID in Windows registry format with braces.
 
 ### Example 1
 
-`powershell
+```powershell
 "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-GuidToRegistryFormat
-    
-    Converts GUID to registry format: "{550e8400-e29b-41d4-a716-446655440000}"
-``
+```
+
+Converts GUID to registry format: "{550e8400-e29b-41d4-a716-446655440000}"
 
 ## Aliases
 

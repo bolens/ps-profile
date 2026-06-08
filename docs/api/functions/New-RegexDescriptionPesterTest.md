@@ -41,15 +41,15 @@ Optional output file path for the generated test stub.
 
 ### Example 1
 
-`powershell
+```powershell
 New-RegexDescriptionPesterTest -Description 'email' -SampleMatch 'user@example.com' -SampleNoMatch 'invalid'
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-RegexDescriptionPesterTest -Description 'uuid' -Path ./uuid.tests.ps1
-``
+```
 
 ## Aliases
 

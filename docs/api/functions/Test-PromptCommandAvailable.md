@@ -27,16 +27,16 @@ Installation hint to display if command is missing.
 
 ## Outputs
 
-System.Boolean. True if command is available, false otherwise. .EXAMPLE Test-PromptCommandAvailable
+System.Boolean. True if command is available, false otherwise.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
-Test-PromptCommandAvailable
-``
+```powershell
+Test-PromptCommandAvailable -CommandName 'Get-GitStatus' -InstallHint 'value'
+```
 
 ## Source
 

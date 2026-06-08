@@ -27,11 +27,11 @@ System.Object[]. Array of editor information objects.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-EditorInfo
-        
-        Lists all available editors.
-``
+```
+
+Lists all available editors.
 
 ## Source
 

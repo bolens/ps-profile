@@ -41,24 +41,27 @@ Add as optional dependency (--optional).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-PoetryDependency requests
-        Adds requests as a production dependency.
-``
+```
+
+Adds requests as a production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-PoetryDependency pytest -Dev
-        Adds pytest as a dev dependency.
-``
+```
+
+Adds pytest as a dev dependency.
 
 ### Example 3
 
-`powershell
+```powershell
 Add-PoetryDependency sphinx -Docs
-        Adds sphinx as a docs dependency.
-``
+```
+
+Adds sphinx as a docs dependency.
 
 ## Aliases
 

@@ -25,10 +25,11 @@ Package paths to remove (e.g., github.com/user/package).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-GoDependency github.com/gin-gonic/gin
-        Removes gin from dependencies.
-``
+```
+
+Removes gin from dependencies.
 
 ## Aliases
 

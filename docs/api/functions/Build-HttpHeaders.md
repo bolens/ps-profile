@@ -30,15 +30,11 @@ System.String Returns the constructed HTTP headers string.
 
 ### Example 1
 
-`powershell
+```powershell
 $headers = @{
-        'Content-Type' = 'application/json'
-        'Authorization' = 'Bearer token123'
-    }
-    Build-HttpHeaders -Headers $headers
-    
-    Builds headers string from hashtable.
-``
+```
+
+'Content-Type' = 'application/json' 'Authorization' = 'Bearer token123' } Build-HttpHeaders -Headers $headers Builds headers string from hashtable.
 
 ## Aliases
 

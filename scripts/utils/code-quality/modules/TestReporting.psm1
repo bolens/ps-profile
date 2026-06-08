@@ -70,8 +70,7 @@ Import-Module (Join-Path $modulePath 'modules\BaselineComparison.psm1') -Disable
 .OUTPUTS
     Test analysis report object
 .EXAMPLE
-    Get-TestAnalysisReport
-
+    Get-TestAnalysisReport -TestResult 'value'
 #>
 function Get-TestAnalysisReport {
     param(

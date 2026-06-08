@@ -38,19 +38,19 @@ System.String. Container statistics output.
 
 ### Example 1
 
-`powershell
-Get-ContainerStats
-        
-        Shows real-time stats for all containers.
-``
+```powershell
+Get-ContainerStats -Container 'value' -Format 'value'
+```
+
+Shows real-time stats for all containers.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-ContainerStats -Container "my-container" -NoStream
-        
-        Shows one-time stats for my-container.
-``
+```
+
+Shows one-time stats for my-container.
 
 ## Source
 

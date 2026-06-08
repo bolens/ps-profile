@@ -30,11 +30,11 @@ System.String Returns the Base58 encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello World" | ConvertFrom-AsciiToBase58
-    
-    Converts text to Base58 format.
-``
+```
+
+Converts text to Base58 format.
 
 ## Aliases
 

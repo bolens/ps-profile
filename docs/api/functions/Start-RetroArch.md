@@ -38,19 +38,19 @@ None.
 
 ### Example 1
 
-`powershell
-Start-RetroArch
-        
-        Launches RetroArch.
-``
+```powershell
+Start-RetroArch -RomPath 'value' -Core 'value'
+```
+
+Launches RetroArch.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-RetroArch -RomPath "game.sfc" -Core "snes9x" -Fullscreen
-        
-        Launches RetroArch with a ROM using the SNES9x core in fullscreen.
-``
+```
+
+Launches RetroArch with a ROM using the SNES9x core in fullscreen.
 
 ## Source
 

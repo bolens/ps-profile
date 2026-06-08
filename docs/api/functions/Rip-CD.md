@@ -38,19 +38,19 @@ System.String. Path to the output directory.
 
 ### Example 1
 
-`powershell
+```powershell
 Rip-CD -OutputPath "C:\Music\Album"
-        
-        Rips CD to FLAC format in the specified directory.
-``
+```
+
+Rips CD to FLAC format in the specified directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Rip-CD -OutputPath "C:\Music\Album" -Format "mp3" -Quality 0
-        
-        Rips CD to MP3 format with highest quality.
-``
+```
+
+Rips CD to MP3 format with highest quality.
 
 ## Source
 

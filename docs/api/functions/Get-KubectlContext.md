@@ -22,9 +22,9 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-KubectlContext
-``
+```
 
 ## Aliases
 

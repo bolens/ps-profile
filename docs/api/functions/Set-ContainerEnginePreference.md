@@ -25,9 +25,9 @@ Preferred engine: docker or podman.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-ContainerEnginePreference -Engine podman
-``
+```
 
 ## Source
 

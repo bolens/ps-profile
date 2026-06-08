@@ -29,9 +29,9 @@ Timeout for DNS resolution. Default is 10.
 
 ### Example 1
 
-`powershell
-Resolve-HostWithRetry
-``
+```powershell
+Resolve-HostWithRetry -HostName 'value'
+```
 
 ## Source
 

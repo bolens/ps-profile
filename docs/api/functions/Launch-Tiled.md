@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Tiled
-        
-        Launches Tiled.
-``
+```powershell
+Launch-Tiled -ProjectPath 'value'
+```
+
+Launches Tiled.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Tiled -ProjectPath "map.tmx"
-        
-        Launches Tiled and opens a map file.
-``
+```
+
+Launches Tiled and opens a map file.
 
 ## Source
 

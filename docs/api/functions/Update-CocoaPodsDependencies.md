@@ -25,17 +25,19 @@ Specific pod names to update (optional, updates all if omitted).
 
 ### Example 1
 
-`powershell
-Update-CocoaPodsDependencies
-        Updates all dependencies.
-``
+```powershell
+Update-CocoaPodsDependencies -Pods @()
+```
+
+Updates all dependencies.
 
 ### Example 2
 
-`powershell
+```powershell
 Update-CocoaPodsDependencies Alamofire
-        Updates specific pod.
-``
+```
+
+Updates specific pod.
 
 ## Aliases
 

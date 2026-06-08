@@ -175,22 +175,27 @@ function Initialize-FileConversion-CoreEncodingBraille {
 <#
 .SYNOPSIS
     Converts ASCII text to Braille encoding.
+
 .DESCRIPTION
     Encodes ASCII text to Unicode Braille patterns.
     Uses standard 6-dot Braille patterns (U+2800-U+28FF).
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Braille encoded string (Unicode characters).
+
 .EXAMPLE
     "HELLO" | ConvertFrom-AsciiToBraille
     
     Converts text to Braille Unicode format.
+
 .EXAMPLE
     "123" | ConvertFrom-AsciiToBraille
     
     Converts numbers to Braille (with number sign prefix).
-.OUTPUTS
-    System.String
-    Returns the Braille encoded string (Unicode characters).
 #>
 function ConvertFrom-AsciiToBraille {
     param(
@@ -209,18 +214,22 @@ Set-Alias -Name braille -Value ConvertFrom-AsciiToBraille -Scope Global -ErrorAc
 <#
 .SYNOPSIS
     Converts Braille encoding to ASCII text.
+
 .DESCRIPTION
     Decodes Unicode Braille patterns back to ASCII text.
     Supports standard 6-dot Braille patterns.
+
 .PARAMETER InputObject
     The Braille encoded string (Unicode characters).
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     "⠓⠑⠇⠇⠕" | ConvertFrom-BrailleToAscii
     
     Converts Braille to text.
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-BrailleToAscii {
     param(

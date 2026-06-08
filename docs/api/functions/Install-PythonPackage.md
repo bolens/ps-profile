@@ -34,17 +34,19 @@ System.String. Output from package installation.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-PythonPackage requests
-        Installs requests using the best available tool.
-``
+```
+
+Installs requests using the best available tool.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-PythonPackage pytest --dev
-        Installs pytest as a dev dependency (uv only).
-``
+```
+
+Installs pytest as a dev dependency (uv only).
 
 ## Aliases
 

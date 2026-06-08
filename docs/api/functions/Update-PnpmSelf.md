@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-PnpmSelf
-        Updates pnpm to the latest version.
-``
+```
+
+Updates pnpm to the latest version.
 
 ## Aliases
 

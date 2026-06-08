@@ -22,9 +22,9 @@ No parameters.
 
 ### Example 1
 
-`powershell
-Find-CommandFuzzy
-``
+```powershell
+Find-CommandFuzzy -Pattern 'search-term'
+```
 
 ## Aliases
 

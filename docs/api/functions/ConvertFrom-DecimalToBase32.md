@@ -30,10 +30,11 @@ System.String The Base32 representation of the input decimal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "72 105" | ConvertFrom-DecimalToBase32
-    Converts decimal to Base32.
-``
+```
+
+Converts decimal to Base32.
 
 ## Aliases
 

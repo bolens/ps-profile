@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
-Install-CocoaPodsDependencies
-        Installs all dependencies.
-``
+```powershell
+Install-CocoaPodsDependencies 'package-name'
+```
+
+Installs all dependencies.
 
 ## Aliases
 

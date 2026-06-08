@@ -33,17 +33,19 @@ Remove from build dependencies (--build).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-CargoDependency serde
-    Removes serde from production dependencies.
-``
+```
+
+Removes serde from production dependencies.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-CargoDependency tokio-test -Dev
-    Removes tokio-test from dev dependencies.
-``
+```
+
+Removes tokio-test from dev dependencies.
 
 ## Source
 

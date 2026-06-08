@@ -34,19 +34,19 @@ System.String Returns a human-readable date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToHumanReadable
-    
-    Converts an ISO 8601 string to a human-readable format.
-``
+```
+
+Converts an ISO 8601 string to a human-readable format.
 
 ### Example 2
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToHumanReadable -Format 'yyyy-MM-dd'
-    
-    Converts using a custom format.
-``
+```
+
+Converts using a custom format.
 
 ## Aliases
 

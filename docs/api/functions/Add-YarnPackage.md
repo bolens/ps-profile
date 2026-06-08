@@ -25,15 +25,15 @@ Arguments to pass to yarn add.
 
 ### Example 1
 
-`powershell
+```powershell
 Add-YarnPackage express
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Add-YarnPackage -D typescript
-``
+```
 
 ## Aliases
 

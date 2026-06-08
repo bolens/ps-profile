@@ -30,10 +30,11 @@ System.String The Base32 representation of the input ModHex string.
 
 ### Example 1
 
-`powershell
+```powershell
 "hkkllkkl" | ConvertFrom-ModHexToBase32
-    Converts ModHex to Base32.
-``
+```
+
+Converts ModHex to Base32.
 
 ## Aliases
 

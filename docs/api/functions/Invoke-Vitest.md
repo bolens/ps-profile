@@ -25,15 +25,15 @@ Arguments to pass to vitest.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Vitest --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Vitest run
-``
+```
 
 ## Aliases
 

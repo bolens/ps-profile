@@ -21,35 +21,40 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Starts a Minikube Kubernetes cluster.
     
+
     .DESCRIPTION
         Starts a local Minikube Kubernetes cluster with optional configuration.
         Supports different drivers and profile management.
     
+
     .PARAMETER Profile
         Minikube profile name. Defaults to minikube.
     
+
     .PARAMETER Driver
         Minikube driver: docker, hyperv, virtualbox, etc.
     
+
     .PARAMETER Status
         Check Minikube status instead of starting.
     
+
+    .OUTPUTS
+        System.String. Minikube status or startup output.
+
     .EXAMPLE
-        Start-Minikube
-        
+    Start-Minikube -Profile 'value' -Driver 'value'
         Starts Minikube cluster with default settings.
     
+
     .EXAMPLE
         Start-Minikube -Profile "dev" -Driver "docker"
         
         Starts Minikube cluster with custom profile and driver.
-    
-    .OUTPUTS
-        System.String. Minikube status or startup output.
-    #>
+#>
     function Start-Minikube {
         [CmdletBinding()]
         [OutputType([string])]
@@ -111,7 +116,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches k9s Kubernetes TUI.
     
     .DESCRIPTION
@@ -122,15 +127,14 @@ try {
         Optional namespace to open k9s in.
     
     .EXAMPLE
-        Start-K9s
-        
+    Start-K9s -Namespace 'value'
         Launches k9s with default settings.
     
     .EXAMPLE
         Start-K9s -Namespace "production"
         
         Launches k9s in the production namespace.
-    #>
+#>
     function Start-K9s {
         [CmdletBinding()]
         param(

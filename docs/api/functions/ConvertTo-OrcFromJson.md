@@ -29,9 +29,9 @@ The path for the output ORC file. If not specified, uses input path with .orc ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-OrcFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

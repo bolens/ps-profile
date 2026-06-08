@@ -53,10 +53,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeCrypto -Address "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" -Currency bitcoin -Amount 0.001
-    Generates a Bitcoin payment QR code.
-``
+```
+
+Generates a Bitcoin payment QR code.
 
 ## Aliases
 

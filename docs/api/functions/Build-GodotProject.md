@@ -42,19 +42,19 @@ System.String. Path to the built project or output directory.
 
 ### Example 1
 
-`powershell
+```powershell
 Build-GodotProject -ProjectPath "C:\Projects\MyGame"
-        
-        Builds a Godot project.
-``
+```
+
+Builds a Godot project.
 
 ### Example 2
 
-`powershell
+```powershell
 Build-GodotProject -ProjectPath "C:\Projects\MyGame" -ExportPreset "Windows Desktop"
-        
-        Builds a Godot project using a specific export preset.
-``
+```
+
+Builds a Godot project using a specific export preset.
 
 ## Source
 

@@ -29,24 +29,27 @@ Show installed versions for each package.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-BrewPackage
-        Lists all installed Homebrew formulae.
-``
+```
+
+Lists all installed Homebrew formulae.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-BrewPackage -Cask
-        Lists all installed casks.
-``
+```
+
+Lists all installed casks.
 
 ### Example 3
 
-`powershell
+```powershell
 Get-BrewPackage -Versions
-        Lists formulae with their installed versions.
-``
+```
+
+Lists formulae with their installed versions.
 
 ## Aliases
 

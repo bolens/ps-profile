@@ -50,7 +50,9 @@ foreach ($searchPath in $searchPaths) {
     $fullPath = Join-Path $repoRoot $searchPath
     if (-not (Test-Path $fullPath)) { continue }
     
-    $files = Get-ChildItem -Path $fullPath -Recurse -Filter '*.ps1', '*.psm1' -File
+    $files = @(Get-ChildItem -Path $fullPath -Recurse -File | Where-Object {
+            $_.Extension -in '.ps1', '.psm1'
+        })
     
     foreach ($file in $files) {
         $content = Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue

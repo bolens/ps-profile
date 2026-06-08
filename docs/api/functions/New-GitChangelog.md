@@ -42,19 +42,19 @@ System.String. Path to the generated changelog file.
 
 ### Example 1
 
-`powershell
-New-GitChangelog
-        
-        Generates a changelog in the current directory.
-``
+```powershell
+New-GitChangelog -OutputPath ./output.file -ConfigPath 'value'
+```
+
+Generates a changelog in the current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 New-GitChangelog -OutputPath "docs/CHANGELOG.md" -Latest
-        
-        Generates a changelog for the latest tag and saves it to docs/CHANGELOG.md.
-``
+```
+
+Generates a changelog for the latest tag and saves it to docs/CHANGELOG.md.
 
 ## Aliases
 

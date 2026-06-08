@@ -25,15 +25,15 @@ Arguments to pass to cypress.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Cypress --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Cypress open
-``
+```
 
 ## Aliases
 

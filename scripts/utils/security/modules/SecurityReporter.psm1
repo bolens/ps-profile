@@ -34,8 +34,7 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
 .OUTPUTS
     Hashtable with BlockingIssues, WarningIssues, and ScanErrors properties.
 .EXAMPLE
-    Get-SecurityScanResults
-
+    Get-SecurityScanResults -SecurityIssues @()
 #>
 function Get-SecurityScanResults {
     [CmdletBinding()]
@@ -95,8 +94,7 @@ function Get-SecurityScanResults {
 .OUTPUTS
     None. Outputs to console.
 .EXAMPLE
-    Write-SecurityReport
-
+    Write-SecurityReport -Results @{}
 #>
 function Write-SecurityReport {
     [CmdletBinding()]

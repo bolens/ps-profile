@@ -25,10 +25,11 @@ Name of the fragment to test (without .ps1 extension).
 
 ### Example 1
 
-`powershell
+```powershell
 Test-Fragment -FragmentName 'files'
-    Loads bootstrap, env, and files fragments for testing.
-``
+```
+
+Loads bootstrap, env, and files fragments for testing.
 
 ## Source
 

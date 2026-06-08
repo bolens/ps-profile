@@ -33,9 +33,9 @@ TIFF compression method (default: lzw). Options: none, lzw, zip, jpeg.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-TiffFromPng -InputPath "image.png" -OutputPath "image.tiff" -Compression zip
-``
+```
 
 ## Aliases
 

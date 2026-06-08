@@ -29,17 +29,19 @@ Channel to install from (--channel).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-PixiPackage numpy
-        Adds numpy to the project.
-``
+```
+
+Adds numpy to the project.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-PixiPackage numpy -Channel conda-forge
-        Adds numpy from conda-forge channel.
-``
+```
+
+Adds numpy from conda-forge channel.
 
 ## Aliases
 

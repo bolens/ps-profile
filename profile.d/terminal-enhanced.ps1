@@ -30,32 +30,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Alacritty terminal emulator.
     
+
     .DESCRIPTION
         Launches Alacritty, a fast, cross-platform terminal emulator.
         Optionally executes a command in the new terminal.
     
+
     .PARAMETER Command
         Command to execute in the new terminal.
     
+
     .PARAMETER WorkingDirectory
         Working directory for the new terminal.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Alacritty
-        
+    Launch-Alacritty -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
         Launches Alacritty terminal.
     
+
     .EXAMPLE
         Launch-Alacritty -Command "git status"
         
         Launches Alacritty and executes a command.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Alacritty {
         [CmdletBinding()]
         param(
@@ -116,32 +120,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Kitty terminal emulator.
     
+
     .DESCRIPTION
         Launches Kitty, a fast, feature-rich terminal emulator.
         Optionally executes a command in the new terminal.
     
+
     .PARAMETER Command
         Command to execute in the new terminal.
     
+
     .PARAMETER WorkingDirectory
         Working directory for the new terminal.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Kitty
-        
+    Launch-Kitty -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
         Launches Kitty terminal.
     
+
     .EXAMPLE
         Launch-Kitty -Command "npm start"
         
         Launches Kitty and executes a command.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Kitty {
         [CmdletBinding()]
         param(
@@ -202,33 +210,37 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches WezTerm terminal emulator.
     
+
     .DESCRIPTION
         Launches WezTerm, a GPU-accelerated cross-platform terminal emulator.
         Prefers wezterm-nightly, falls back to wezterm.
         Optionally executes a command in the new terminal.
     
+
     .PARAMETER Command
         Command to execute in the new terminal.
     
+
     .PARAMETER WorkingDirectory
         Working directory for the new terminal.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-WezTerm
-        
+    Launch-WezTerm -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
         Launches WezTerm terminal.
     
+
     .EXAMPLE
         Launch-WezTerm -Command "docker ps"
         
         Launches WezTerm and executes a command.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-WezTerm {
         [CmdletBinding()]
         param(
@@ -281,32 +293,36 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Launches Tabby terminal emulator.
     
+
     .DESCRIPTION
         Launches Tabby, a modern terminal emulator with SSH and serial port support.
         Optionally executes a command in the new terminal.
     
+
     .PARAMETER Command
         Command to execute in the new terminal.
     
+
     .PARAMETER WorkingDirectory
         Working directory for the new terminal.
     
+
+    .OUTPUTS
+        None.
+
     .EXAMPLE
-        Launch-Tabby
-        
+    Launch-Tabby -Command 'pwsh -NoProfile -File scripts/test.ps1' -WorkingDirectory 'value'
         Launches Tabby terminal.
     
+
     .EXAMPLE
         Launch-Tabby -Command "npm run dev"
         
         Launches Tabby and executes a command.
-    
-    .OUTPUTS
-        None.
-    #>
+#>
     function Launch-Tabby {
         [CmdletBinding()]
         param(
@@ -347,40 +363,46 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Starts a tmux terminal multiplexer session.
     
+
     .DESCRIPTION
         Starts a new tmux session or attaches to an existing one.
         Supports session naming and command execution.
     
+
     .PARAMETER SessionName
         Name for the tmux session. If not provided, creates a new session.
     
+
     .PARAMETER Command
         Command to execute in the new session.
     
+
     .PARAMETER Attach
         Attach to existing session if it exists, otherwise create new one.
     
+
+    .OUTPUTS
+        System.String. Session name or nothing.
+
     .EXAMPLE
-        Start-Tmux
-        
+    Start-Tmux -SessionName 'value' -Command 'pwsh -NoProfile -File scripts/test.ps1'
         Starts a new tmux session.
     
+
     .EXAMPLE
         Start-Tmux -SessionName "dev" -Command "npm start"
         
         Starts a named tmux session and executes a command.
     
+
     .EXAMPLE
         Start-Tmux -SessionName "dev" -Attach
         
         Attaches to existing session or creates new one.
-    
-    .OUTPUTS
-        System.String. Session name or nothing.
-    #>
+#>
     function Start-Tmux {
         [CmdletBinding()]
         [OutputType([string])]
@@ -454,21 +476,22 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets information about available terminal emulators.
     
+
     .DESCRIPTION
         Checks for installed terminal emulators and returns information about them.
         Lists available terminals and their status.
     
-    .EXAMPLE
-        Get-TerminalInfo
-        
-        Lists all available terminal emulators.
-    
+
     .OUTPUTS
         System.Object[]. Array of terminal information objects.
-    #>
+
+    .EXAMPLE
+    Get-TerminalInfo
+        Lists all available terminal emulators.
+#>
     function Get-TerminalInfo {
         [CmdletBinding()]
         [OutputType([object[]])]

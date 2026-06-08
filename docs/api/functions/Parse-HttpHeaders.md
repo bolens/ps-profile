@@ -30,23 +30,19 @@ Hashtable Returns a hashtable with header names as keys and values.
 
 ### Example 1
 
-`powershell
+```powershell
 $headers = @"
-Content-Type: application/json
-Authorization: Bearer token123
-"@
-    Parse-HttpHeaders -Headers $headers
-    
-    Parses headers and returns hashtable.
-``
+```
+
+Content-Type: application/json Authorization: Bearer token123 "@ Parse-HttpHeaders -Headers $headers Parses headers and returns hashtable.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-Content headers.txt | Parse-HttpHeaders
-    
-    Parses headers from pipeline.
-``
+```
+
+Parses headers from pipeline.
 
 ## Aliases
 

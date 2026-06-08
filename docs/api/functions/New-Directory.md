@@ -33,17 +33,19 @@ Create parent directories as needed.
 
 ### Example 1
 
-`powershell
+```powershell
 mkdir -p core fragment path
-    Creates multiple directories: core, fragment, and path.
-``
+```
+
+Creates multiple directories: core, fragment, and path.
 
 ### Example 2
 
-`powershell
+```powershell
 mkdir -p parent/child/grandchild
-    Creates the full directory path including parent directories.
-``
+```
+
+Creates the full directory path including parent directories.
 
 ## Aliases
 

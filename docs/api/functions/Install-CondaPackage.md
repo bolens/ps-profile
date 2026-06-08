@@ -33,17 +33,19 @@ Channel to install from (-c/--channel).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-CondaPackage numpy
-        Installs numpy in the current environment.
-``
+```
+
+Installs numpy in the current environment.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-CondaPackage numpy -Environment myenv
-        Installs numpy in the specified environment.
-``
+```
+
+Installs numpy in the specified environment.
 
 ## Aliases
 

@@ -39,8 +39,7 @@ scripts/utils/dependencies/modules/ModuleUpdateNotifier.psm1
 .PARAMETER EmailOnlyOnUpdates
     Whether to only send email when updates are available.
 .EXAMPLE
-    Send-UpdateNotification
-
+    Send-UpdateNotification -ReportData 'value' -UpdatesAvailable
 #>
 function Send-UpdateNotification {
     [CmdletBinding()]

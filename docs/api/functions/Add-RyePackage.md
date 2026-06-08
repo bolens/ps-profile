@@ -33,17 +33,19 @@ Add as optional dependency (--optional).
 
 ### Example 1
 
-`powershell
+```powershell
 Add-RyePackage requests
-        Adds requests as production dependency.
-``
+```
+
+Adds requests as production dependency.
 
 ### Example 2
 
-`powershell
+```powershell
 Add-RyePackage pytest -Dev
-        Adds pytest as dev dependency.
-``
+```
+
+Adds pytest as dev dependency.
 
 ## Aliases
 

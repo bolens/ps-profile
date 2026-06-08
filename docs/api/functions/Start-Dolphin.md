@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Start-Dolphin
-        
-        Launches Dolphin emulator.
-``
+```powershell
+Start-Dolphin -RomPath 'value'
+```
+
+Launches Dolphin emulator.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-Dolphin -RomPath "game.iso" -Fullscreen
-        
-        Launches Dolphin with a ROM in fullscreen mode.
-``
+```
+
+Launches Dolphin with a ROM in fullscreen mode.
 
 ## Source
 

@@ -16,7 +16,7 @@ New-GitHubPullRequest
 
 ## Parameters
 
-### -a
+### -Arguments
 
 Arguments forwarded to gh pr create.
 
@@ -25,11 +25,9 @@ Arguments forwarded to gh pr create.
 
 ### Example 1
 
-`powershell
+```powershell
 New-GitHubPullRequest --title 'Fix bug' --body 'Details here'
-.PARAMETER a
-    Arguments forwarded to gh pr create.
-``
+```
 
 ## Aliases
 

@@ -40,7 +40,6 @@ function Get-TasksFromFile {
         Hashtable mapping task names to their command strings.
 .EXAMPLE
     Get-TasksFromFile -FilePath ./Taskfile.yml -FileType taskfile
-
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -91,8 +90,7 @@ function Get-TasksFromTaskfile {
 .PARAMETER FilePath
         Path to the target file.
 .EXAMPLE
-    Get-TasksFromTaskfile
-
+    Get-TasksFromTaskfile -FilePath ./Taskfile.yml
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -276,8 +274,7 @@ function Get-TasksFromMakefile {
 .PARAMETER FilePath
         Path to the target file.
 .EXAMPLE
-    Get-TasksFromMakefile
-
+    Get-TasksFromMakefile -FilePath ./Taskfile.yml
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -355,8 +352,7 @@ function Get-TasksFromPackageJson {
 .PARAMETER FilePath
         Path to the target file.
 .EXAMPLE
-    Get-TasksFromPackageJson
-
+    Get-TasksFromPackageJson -FilePath ./Taskfile.yml
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -418,8 +414,7 @@ function Get-TasksFromJustfile {
 .PARAMETER FilePath
         Path to the target file.
 .EXAMPLE
-    Get-TasksFromJustfile
-
+    Get-TasksFromJustfile -FilePath ./Taskfile.yml
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -502,8 +497,7 @@ function Get-TaskCommandSignature {
 .PARAMETER Command
         Shell command text.
 .EXAMPLE
-    Get-TaskCommandSignature
-
+    Get-TaskCommandSignature -Command 'pwsh -NoProfile -File scripts/test.ps1'
 #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -569,8 +563,7 @@ function Get-ScriptPathFromTaskCommand {
 .PARAMETER Command
         Shell command text.
 .EXAMPLE
-    Get-ScriptPathFromTaskCommand
-
+    Get-ScriptPathFromTaskCommand -Command 'pwsh -NoProfile -File scripts/test.ps1'
 #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -609,8 +602,7 @@ function Resolve-CanonicalTaskNameFromVsCodeTask {
 .PARAMETER ReferenceTasks
         Reference task metadata keyed by task name.
 .EXAMPLE
-    Resolve-CanonicalTaskNameFromVsCodeTask
-
+    Resolve-CanonicalTaskNameFromVsCodeTask -Label 'test' -Command 'pwsh -NoProfile -File scripts/test.ps1' -ReferenceTasks $refTasks
 #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -657,8 +649,7 @@ function Convert-TasksJsonToCanonicalNames {
 .PARAMETER ReferenceTasks
         Reference task metadata keyed by task name.
 .EXAMPLE
-    Convert-TasksJsonToCanonicalNames
-
+    Convert-TasksJsonToCanonicalNames -Tasks $tasks -ReferenceTasks $refTasks
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -698,8 +689,7 @@ function Get-TasksFromTasksJson {
 .PARAMETER ReferenceTasks
         Reference task metadata keyed by task name.
 .EXAMPLE
-    Get-TasksFromTasksJson
-
+    Get-TasksFromTasksJson -FilePath ./Taskfile.yml
 #>
     [CmdletBinding()]
     [OutputType([hashtable])]

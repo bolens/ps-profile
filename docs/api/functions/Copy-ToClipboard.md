@@ -25,15 +25,15 @@ The object(s) to copy. Accepts pipeline input.
 
 ### Example 1
 
-`powershell
+```powershell
 "hello" | Copy-ToClipboard
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Get-Content file.txt | Copy-ToClipboard
-``
+```
 
 ## Aliases
 

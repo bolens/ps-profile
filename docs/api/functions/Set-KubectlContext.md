@@ -25,9 +25,9 @@ Name of the context to switch to.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-KubectlContext my-context
-``
+```
 
 ## Aliases
 

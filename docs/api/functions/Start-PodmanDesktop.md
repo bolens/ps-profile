@@ -22,11 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Start-PodmanDesktop
-        
-        Launches Podman Desktop GUI.
-``
+```
+
+Launches Podman Desktop GUI.
 
 ## Source
 

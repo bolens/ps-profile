@@ -29,10 +29,11 @@ Target triplet.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-VcpkgPackage boost
-        Removes boost library.
-``
+```
+
+Removes boost library.
 
 ## Aliases
 

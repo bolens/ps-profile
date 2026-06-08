@@ -25,11 +25,9 @@ Arguments forwarded to uv pip.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Pip install requests
-.PARAMETER Arguments
-    Arguments forwarded to uv pip.
-``
+```
 
 ## Aliases
 

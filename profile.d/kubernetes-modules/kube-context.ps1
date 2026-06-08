@@ -24,28 +24,33 @@ try {
     .SYNOPSIS
         Switches the active Kubernetes context.
     
+
     .DESCRIPTION
         Changes the active Kubernetes context using kubectx (if available) or kubectl.
         Lists available contexts if no context is specified.
     
+
     .PARAMETER ContextName
         Name of the context to switch to. If not specified, lists available contexts.
     
+
     .PARAMETER List
         List all available contexts instead of switching.
     
+
+    .OUTPUTS
+        System.String. Context information or list of contexts.
+
     .EXAMPLE
         Set-KubeContext -List
         
         Lists all available Kubernetes contexts.
     
+
     .EXAMPLE
         Set-KubeContext -ContextName "my-context"
         
         Switches to the specified context.
-    
-    .OUTPUTS
-        System.String. Context information or list of contexts.
     #>
     function Set-KubeContext {
         [CmdletBinding()]
@@ -118,28 +123,33 @@ try {
     .SYNOPSIS
         Switches the active Kubernetes namespace.
     
+
     .DESCRIPTION
         Changes the active namespace using kubens (if available) or kubectl.
         Lists available namespaces if no namespace is specified.
     
+
     .PARAMETER Namespace
         Name of the namespace to switch to. If not specified, lists available namespaces.
     
+
     .PARAMETER List
         List all available namespaces instead of switching.
     
+
+    .OUTPUTS
+        System.String. Namespace information or list of namespaces.
+
     .EXAMPLE
         Set-KubeNamespace -List
         
         Lists all available Kubernetes namespaces.
     
+
     .EXAMPLE
         Set-KubeNamespace -Namespace "production"
         
         Switches to the specified namespace.
-    
-    .OUTPUTS
-        System.String. Namespace information or list of namespaces.
     #>
     function Set-KubeNamespace {
         [CmdletBinding()]

@@ -14,7 +14,7 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:RunPesterPath = Join-Path $script:TestRepoRoot 'scripts/utils/code-quality/run-pester.ps1'
-    $script:DryRunTestFile = Join-Path $script:TestRepoRoot 'tests/unit/library-common.tests.ps1'
+    $script:DryRunTestFile = Join-Path $script:TestRepoRoot 'tests/unit/library/common/library-common.tests.ps1'
     $script:TempTestDir = New-TestTempDirectory -Prefix 'BaselineComparison'
 
     $modulePath = Join-Path $script:TestRepoRoot 'scripts/utils/code-quality/modules'

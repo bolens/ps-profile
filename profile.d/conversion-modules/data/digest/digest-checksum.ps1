@@ -140,24 +140,30 @@ function Initialize-FileConversion-DigestChecksum {
 <#
 .SYNOPSIS
     Calculates CRC32 checksum for a string or file.
+
 .DESCRIPTION
     Calculates the CRC32 (Cyclic Redundancy Check) checksum for the input string or file.
     CRC32 is commonly used for error detection in data transmission and storage.
+
 .PARAMETER InputString
     The string to calculate checksum for.
+
 .PARAMETER FilePath
     The path to the file to calculate checksum for.
+
+.OUTPUTS
+    PSCustomObject
+    Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
+
 .EXAMPLE
     Get-Crc32 -InputString "Hello World"
     
     Calculates CRC32 checksum for the string.
+
 .EXAMPLE
     Get-Crc32 -FilePath "C:\temp\file.txt"
     
     Calculates CRC32 checksum for the file.
-.OUTPUTS
-    PSCustomObject
-    Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
 #>
 function global:Get-Crc32 {
     [CmdletBinding(DefaultParameterSetName = 'String')]
@@ -201,24 +207,30 @@ Set-AgentModeAlias -Name 'crc32' -Target 'Get-Crc32'
 <#
 .SYNOPSIS
     Calculates Adler32 checksum for a string or file.
+
 .DESCRIPTION
     Calculates the Adler32 checksum for the input string or file.
     Adler32 is a checksum algorithm used in zlib compression.
+
 .PARAMETER InputString
     The string to calculate checksum for.
+
 .PARAMETER FilePath
     The path to the file to calculate checksum for.
+
+.OUTPUTS
+    PSCustomObject
+    Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
+
 .EXAMPLE
     Get-Adler32 -InputString "Hello World"
     
     Calculates Adler32 checksum for the string.
+
 .EXAMPLE
     Get-Adler32 -FilePath "C:\temp\file.txt"
     
     Calculates Adler32 checksum for the file.
-.OUTPUTS
-    PSCustomObject
-    Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
 #>
 function global:Get-Adler32 {
     [CmdletBinding(DefaultParameterSetName = 'String')]
@@ -262,25 +274,32 @@ Set-AgentModeAlias -Name 'adler32' -Target 'Get-Adler32'
 <#
 .SYNOPSIS
     Calculates checksum for a string or file using specified algorithm.
+
 .DESCRIPTION
     Calculates checksum (CRC32 or Adler32) for the input string or file.
+
 .PARAMETER InputString
     The string to calculate checksum for.
+
 .PARAMETER FilePath
     The path to the file to calculate checksum for.
+
 .PARAMETER Algorithm
     The checksum algorithm to use (CRC32 or Adler32). Default is CRC32.
+
+.OUTPUTS
+    PSCustomObject
+    Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
+
 .EXAMPLE
     Get-Checksum -InputString "Hello World" -Algorithm CRC32
     
     Calculates CRC32 checksum for the string.
+
 .EXAMPLE
     Get-Checksum -FilePath "C:\temp\file.txt" -Algorithm Adler32
     
     Calculates Adler32 checksum for the file.
-.OUTPUTS
-    PSCustomObject
-    Returns an object with Algorithm, Checksum, Hex, and Decimal properties.
 #>
 function global:Get-Checksum {
     [CmdletBinding(DefaultParameterSetName = 'String')]

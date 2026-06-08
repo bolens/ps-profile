@@ -70,8 +70,7 @@ if ($moduleImportPath -and (Test-Path -LiteralPath $moduleImportPath)) {
 .PARAMETER EmailOnlyOnUpdates
     Whether to only send email when updates are available.
 .EXAMPLE
-    Register-UpdateSchedule
-
+    Register-UpdateSchedule -ScheduledTaskName 'value' -RepoRoot 'value' -ScheduleFrequency 'value'
 #>
 function Register-UpdateSchedule {
     [CmdletBinding()]
@@ -225,8 +224,7 @@ function Register-UpdateSchedule {
     .PARAMETER ScheduledTaskName
     Name of the scheduled task to remove.
 .EXAMPLE
-    Remove-UpdateSchedule
-
+    Remove-UpdateSchedule -ScheduledTaskName 'value'
 #>
 function Remove-UpdateSchedule {
     [CmdletBinding()]

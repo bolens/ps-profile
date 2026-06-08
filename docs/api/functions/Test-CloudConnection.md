@@ -50,11 +50,11 @@ System.Boolean. True if connection successful, false otherwise.
 
 ### Example 1
 
-`powershell
+```powershell
 Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Account'
-        
-        Tests AWS connection by checking caller identity.
-``
+```
+
+Tests AWS connection by checking caller identity.
 
 ## Source
 

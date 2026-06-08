@@ -29,9 +29,9 @@ Path for the output LaTeX file. If not specified, uses input path with .tex exte
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OdtToLatex -InputPath "document.odt" -OutputPath "document.tex"
-``
+```
 
 ## Aliases
 

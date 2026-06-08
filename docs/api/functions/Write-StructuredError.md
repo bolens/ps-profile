@@ -46,17 +46,11 @@ None. Error is recorded and event is emitted.
 
 ### Example 1
 
-`powershell
+```powershell
 try {
-            $result = Invoke-Aws s3 ls
-        }
-        catch {
-            Write-StructuredError -ErrorRecord $_ -OperationName "aws.s3.list" -Context @{
-                bucket = "my-bucket"
-                region = "us-east-1"
-            }
-        }
-``
+```
+
+$result = Invoke-Aws s3 ls } catch { Write-StructuredError -ErrorRecord $_ -OperationName "aws.s3.list" -Context @{ bucket = "my-bucket" region = "us-east-1" } }
 
 ## Source
 

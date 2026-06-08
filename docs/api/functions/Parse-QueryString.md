@@ -30,19 +30,19 @@ Hashtable Returns a hashtable with query parameters as keys and values.
 
 ### Example 1
 
-`powershell
+```powershell
 Parse-QueryString -QueryString "name=John&age=30&city=New York"
-    
-    Parses query string and returns hashtable.
-``
+```
+
+Parses query string and returns hashtable.
 
 ### Example 2
 
-`powershell
+```powershell
 "key1=value1&key2=value2" | Parse-QueryString
-    
-    Parses query string from pipeline.
-``
+```
+
+Parses query string from pipeline.
 
 ## Aliases
 

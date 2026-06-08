@@ -25,15 +25,15 @@ Arguments to pass to rustup.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Rustup --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Rustup show
-``
+```
 
 ## Aliases
 

@@ -45,10 +45,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 New-QrCodeLocation -Latitude 40.7128 -Longitude -74.0060
-    Generates a geolocation QR code for New York City.
-``
+```
+
+Generates a geolocation QR code for New York City.
 
 ## Aliases
 

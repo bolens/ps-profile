@@ -18,6 +18,9 @@
 .PARAMETER BackupPath
     Explicit backup file path for restore.
 
+.PARAMETER Latest
+    Restore the newest backup for the given category and source path.
+
 .PARAMETER KeepCount
     Number of newest backups to retain per source file when pruning.
 
@@ -26,6 +29,9 @@
 
 .PARAMETER Force
     Overwrite the destination file when restoring.
+
+.PARAMETER RepoRoot
+    Repository root directory. Auto-detected from the script location when omitted.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/manage-backups.ps1 -Action List -Category task-parity
@@ -73,7 +79,7 @@ if (-not $RepoRoot) {
 
 switch ($Action) {
     'List' {
-        $backups = Get-FileBackups -RepoRoot $RepoRoot -Category $Category -SourcePath $SourcePath
+        $backups = @(Get-FileBackups -RepoRoot $RepoRoot -Category $Category -SourcePath $SourcePath)
         if ($backups.Count -eq 0) {
             Write-Host 'No backups found.' -ForegroundColor Yellow
             Exit-WithCode -ExitCode $EXIT_SUCCESS
@@ -93,7 +99,7 @@ switch ($Action) {
             Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Restored backup to $restoredPath"
         }
         catch {
-            Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -ErrorRecord $_
+            Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
         }
     }
 
@@ -107,7 +113,7 @@ switch ($Action) {
             Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Removed $removed backup(s)"
         }
         catch {
-            Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -ErrorRecord $_
+            Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
         }
     }
 }

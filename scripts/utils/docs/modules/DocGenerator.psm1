@@ -28,8 +28,42 @@ if (Test-Path $docPathsModule) {
     System.Boolean
 .EXAMPLE
     Test-DocsDebugEnabled
-
 #>
+function Split-ExampleDisplayParts {
+    <#
+    .SYNOPSIS
+        Splits an example help block into a command line and optional description text.
+    #>
+    param(
+        [string]$ExampleText
+    )
+
+    if ([string]::IsNullOrWhiteSpace($ExampleText)) {
+        return @{
+            Command     = ''
+            Description = ''
+        }
+    }
+
+    $lines = @(
+        $ExampleText -split "`r?`n" |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    )
+
+    if ($lines.Count -eq 0) {
+        return @{
+            Command     = $ExampleText.Trim()
+            Description = ''
+        }
+    }
+
+    return @{
+        Command     = $lines[0]
+        Description = if ($lines.Count -gt 1) { ($lines[1..($lines.Count - 1)] -join ' ') } else { '' }
+    }
+}
+
 function Test-DocsDebugEnabled {
     param(
         [System.Management.Automation.PSCmdlet]$CallerCmdlet
@@ -61,8 +95,7 @@ function Test-DocsDebugEnabled {
 .PARAMETER CallerCmdlet
     Originating PSCmdlet for debug preference detection.
 .EXAMPLE
-    Write-DocsDebugMessage
-
+    Write-DocsDebugMessage -Message 'message'
 #>
 function Write-DocsDebugMessage {
     param(
@@ -103,8 +136,7 @@ function Write-DocsDebugMessage {
 .OUTPUTS
     System.String. Relative path from From to To.
 .EXAMPLE
-    Get-RelativePath
-
+    Get-RelativePath -From 'C:/src' -To 'C:/src/docs'
 #>
 function Get-RelativePath {
     [CmdletBinding()]
@@ -156,8 +188,7 @@ function Get-RelativePath {
 .OUTPUTS
     None. Files are written directly to disk.
 .EXAMPLE
-    Write-FunctionDocumentation
-
+    Write-FunctionDocumentation -Functions $functions -Aliases $aliases -DocsPath 'docs/api' -DocumentedCommandNames $documented
 #>
 function Write-FunctionDocumentation {
     [CmdletBinding()]
@@ -275,7 +306,12 @@ function Write-FunctionDocumentation {
 
         if ($function.Examples -and $function.Examples.Count -gt 0) {
             for ($i = 0; $i -lt $function.Examples.Count; $i++) {
-                $content += "`n`n### Example $($i + 1)`n`n```powershell`n$($function.Examples[$i])`n````"
+                $exampleParts = Split-ExampleDisplayParts -ExampleText $function.Examples[$i]
+                $content += "`n`n### Example $($i + 1)`n`n$codeFence" + "powershell`n"
+                $content += "$($exampleParts.Command)`n$codeFence"
+                if (-not [string]::IsNullOrWhiteSpace($exampleParts.Description)) {
+                    $content += "`n`n$($exampleParts.Description)"
+                }
             }
         }
         else {
@@ -378,8 +414,7 @@ function Write-FunctionDocumentation {
 .OUTPUTS
     None. Files are written directly to disk.
 .EXAMPLE
-    Write-AliasDocumentation
-
+    Write-AliasDocumentation -Aliases $aliases -DocsPath 'docs/api' -DocumentedCommandNames $documented
 #>
 function Write-AliasDocumentation {
     [CmdletBinding()]

@@ -54,20 +54,19 @@ System.Object. Connection information or process object.
 
 ### Example 1
 
-`powershell
+```powershell
 $cred = Get-Credential
-    Connect-Database -DatabaseType PostgreSQL -ServerHost localhost -Database mydb -Credential $cred
-    
-    Connects to PostgreSQL database using GUI client.
-``
+```
+
+Connect-Database -DatabaseType PostgreSQL -ServerHost localhost -Database mydb -Credential $cred Connects to PostgreSQL database using GUI client.
 
 ### Example 2
 
-`powershell
+```powershell
 Connect-Database -DatabaseType MySQL -ConnectionString "mysql://user:pass@localhost:3306/mydb"
-    
-    Connects using connection string.
-``
+```
+
+Connects using connection string.
 
 ## Aliases
 

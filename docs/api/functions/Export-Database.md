@@ -46,19 +46,19 @@ System.String. Path to exported file.
 
 ### Example 1
 
-`powershell
+```powershell
 Export-Database -DatabaseType PostgreSQL -Database mydb -OutputPath "backup.sql"
-    
-    Exports PostgreSQL database to SQL file.
-``
+```
+
+Exports PostgreSQL database to SQL file.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-Database -DatabaseType MongoDB -Database mydb -OutputPath "backup.json" -DataOnly
-    
-    Exports MongoDB data to JSON file.
-``
+```
+
+Exports MongoDB data to JSON file.
 
 ## Aliases
 

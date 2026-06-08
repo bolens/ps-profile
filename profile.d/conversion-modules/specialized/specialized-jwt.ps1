@@ -123,21 +123,27 @@ function Initialize-FileConversion-SpecializedJwt {
 <#
 .SYNOPSIS
     Converts JSON file to JWT token.
+
 .DESCRIPTION
     Reads JSON from a file and creates a JWT token with the JSON data as payload.
     Requires Node.js and jsonwebtoken package.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output JWT token file. If not specified, uses input path with .jwt extension.
+
 .PARAMETER Secret
     Optional secret key for signing the token. If not provided, uses default secret.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-JwtFromJson -InputPath "payload.json" -Secret "mysecret"
     
     Converts payload.json to payload.jwt token.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-JwtFromJson {
     param(
@@ -168,19 +174,24 @@ Set-AgentModeAlias -Name 'json-to-jwt' -Target 'ConvertTo-JwtFromJson'
 <#
 .SYNOPSIS
     Converts JWT token file to JSON format.
+
 .DESCRIPTION
     Decodes a JWT token from a file and converts it to structured JSON format with header, payload, and signature.
     Note: This does not verify the signature, only decodes the token structure.
+
 .PARAMETER InputPath
     The path to the JWT token file (.jwt or .token extension).
+
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertFrom-JwtToJson -InputPath "token.jwt"
     
     Decodes token.jwt to token.json.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertFrom-JwtToJson {
     param([string]$InputPath, [string]$OutputPath)

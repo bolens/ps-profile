@@ -34,11 +34,11 @@ System.String. Path to the merged MKV file.
 
 ### Example 1
 
-`powershell
+```powershell
 Merge-MKV -InputPaths @("part1.mkv", "part2.mkv") -OutputPath "complete.mkv"
-        
-        Merges part1.mkv and part2.mkv into complete.mkv.
-``
+```
+
+Merges part1.mkv and part2.mkv into complete.mkv.
 
 ## Source
 

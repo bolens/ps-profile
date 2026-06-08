@@ -6,23 +6,9 @@
     Scans all .psm1 files under scripts/lib recursively and compares them to
     tests/unit/library-*.tests.ps1 naming conventions (including -extended and
     -structure-extended suffixes).
-.PARAMETER ModuleName
-    Module name used for test discovery.
-.PARAMETER LibraryTestFiles
-    Existing library test files used for matching.
-.EXAMPLE
-    Test-HasLibraryTest
 
-#>ARAMETER TestFileBaseName
-    TestFileBase file name without extension.
 .EXAMPLE
-    Get-NormalizedLibraryTestStem
-
-#>ARAMETER ModuleName
-    Module name used for test discovery.
-.EXAMPLE
-    Get-NormalizedModuleStem
-
+    pwsh -NoProfile -File scripts/utils/code-quality/check-missing-tests.ps1
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -85,7 +71,7 @@ $modules = @(Get-ChildItem -Path $libPath -Filter '*.psm1' -Recurse -File |
     ForEach-Object { $_.BaseName } |
     Sort-Object -Unique)
 
-$testFiles = @(Get-ChildItem -Path $testPath -Filter 'library-*.tests.ps1' -File)
+$testFiles = @(Get-ChildItem -Path $testPath -Filter 'library-*.tests.ps1' -File -Recurse)
 
 $testedModules = [System.Collections.Generic.List[string]]::new()
 foreach ($moduleName in $modules) {

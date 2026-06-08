@@ -38,19 +38,19 @@ System.Collections.Hashtable. Results for each repository.
 
 ### Example 1
 
-`powershell
+```powershell
 Sync-GitRepos -RepositoryPaths @("C:\Repo1", "C:\Repo2")
-        
-        Syncs the specified repositories.
-``
+```
+
+Syncs the specified repositories.
 
 ### Example 2
 
-`powershell
+```powershell
 Sync-GitRepos -Recurse -MaxDepth 2
-        
-        Finds and syncs all Git repositories up to 2 levels deep.
-``
+```
+
+Finds and syncs all Git repositories up to 2 levels deep.
 
 ## Source
 

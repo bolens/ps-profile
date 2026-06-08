@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-YarnGlobalPackages
-    Updates all globally installed Yarn packages.
-``
+```
+
+Updates all globally installed Yarn packages.
 
 ## Aliases
 

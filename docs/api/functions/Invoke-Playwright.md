@@ -25,15 +25,15 @@ Arguments to pass to playwright.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Playwright --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Playwright test
-``
+```
 
 ## Aliases
 

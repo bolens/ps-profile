@@ -66,19 +66,21 @@ if (-not (Test-Path Function:Copy-ToClipboard -ErrorAction SilentlyContinue)) {
 
 if (-not (Test-Path Function:Get-FromClipboard -ErrorAction SilentlyContinue)) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Pastes content from the clipboard.
+
 
     .DESCRIPTION
         Retrieves content from the clipboard. Uses Get-Clipboard on Windows/pwsh,
         wl-paste (Wayland), xclip/xsel (X11), or pbpaste (macOS) as available.
 
-    .EXAMPLE
-        Get-FromClipboard
 
     .OUTPUTS
         System.String
-    #>
+
+    .EXAMPLE
+    Get-FromClipboard
+#>
     function Get-FromClipboard {
         try {
             if (Test-CachedCommand Get-Clipboard) {

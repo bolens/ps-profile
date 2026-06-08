@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-QueryStringFromJson -InputPath "params.json"
-    
-    Converts params.json to params.query.
-``
+```
+
+Converts params.json to params.query.
 
 ## Aliases
 

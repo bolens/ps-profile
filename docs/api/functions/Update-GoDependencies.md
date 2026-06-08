@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-GoDependencies
-        Updates all dependencies in the current module.
-``
+```
+
+Updates all dependencies in the current module.
 
 ## Aliases
 

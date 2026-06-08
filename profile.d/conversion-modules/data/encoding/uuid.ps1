@@ -198,17 +198,21 @@ function Initialize-FileConversion-CoreEncodingUuid {
 <#
 .SYNOPSIS
     Converts a UUID to hexadecimal format (no dashes).
+
 .DESCRIPTION
     Converts a UUID string to hexadecimal format without dashes.
+
 .PARAMETER Uuid
     The UUID string to convert (e.g., "550e8400-e29b-41d4-a716-446655440000").
+
+.OUTPUTS
+    System.String
+    Returns the UUID in hexadecimal format without dashes.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-UuidToHex
     
     Converts UUID to hex format: "550E8400E29B41D4A716446655440000"
-.OUTPUTS
-    System.String
-    Returns the UUID in hexadecimal format without dashes.
 #>
 Set-Item -Path Function:Global:ConvertFrom-UuidToHex -Value {
     param(
@@ -227,17 +231,21 @@ Set-Alias -Name uuid-to-hex -Value ConvertFrom-UuidToHex -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a hexadecimal string to UUID format.
+
 .DESCRIPTION
     Converts a 32-character hexadecimal string to standard UUID format with dashes.
+
 .PARAMETER Hex
     The hexadecimal string to convert (32 characters, with or without dashes).
+
+.OUTPUTS
+    System.String
+    Returns the UUID in standard format with dashes.
+
 .EXAMPLE
     "550E8400E29B41D4A716446655440000" | ConvertTo-UuidFromHex
     
     Converts hex to UUID format: "550e8400-e29b-41d4-a716-446655440000"
-.OUTPUTS
-    System.String
-    Returns the UUID in standard format with dashes.
 #>
 Set-Item -Path Function:Global:ConvertTo-UuidFromHex -Value {
     param(
@@ -256,17 +264,21 @@ Set-Alias -Name hex-to-uuid -Value ConvertTo-UuidFromHex -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Converts a UUID to Base64 format.
+
 .DESCRIPTION
     Converts a UUID string to Base64 encoded format.
+
 .PARAMETER Uuid
     The UUID string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the UUID in Base64 format.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-UuidToBase64
     
     Converts UUID to Base64 format.
-.OUTPUTS
-    System.String
-    Returns the UUID in Base64 format.
 #>
 Set-Item -Path Function:Global:ConvertFrom-UuidToBase64 -Value {
     param(
@@ -285,17 +297,21 @@ Set-Alias -Name uuid-to-base64 -Value ConvertFrom-UuidToBase64 -Scope Global -Er
 <#
 .SYNOPSIS
     Converts a Base64 string to UUID format.
+
 .DESCRIPTION
     Converts a Base64 encoded string to standard UUID format.
+
 .PARAMETER Base64
     The Base64 string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the UUID in standard format with dashes.
+
 .EXAMPLE
     "VQ6EAOKbQdSnFkRmVVQAAA==" | ConvertTo-UuidFromBase64
     
     Converts Base64 to UUID format.
-.OUTPUTS
-    System.String
-    Returns the UUID in standard format with dashes.
 #>
 Set-Item -Path Function:Global:ConvertTo-UuidFromBase64 -Value {
     param(
@@ -314,17 +330,21 @@ Set-Alias -Name base64-to-uuid -Value ConvertTo-UuidFromBase64 -Scope Global -Er
 <#
 .SYNOPSIS
     Converts a UUID to Base32 format.
+
 .DESCRIPTION
     Converts a UUID string to Base32 encoded format.
+
 .PARAMETER Uuid
     The UUID string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the UUID in Base32 format.
+
 .EXAMPLE
     "550e8400-e29b-41d4-a716-446655440000" | ConvertFrom-UuidToBase32
     
     Converts UUID to Base32 format.
-.OUTPUTS
-    System.String
-    Returns the UUID in Base32 format.
 #>
 Set-Item -Path Function:Global:ConvertFrom-UuidToBase32 -Value {
     param(
@@ -343,17 +363,21 @@ Set-Alias -Name uuid-to-base32 -Value ConvertFrom-UuidToBase32 -Scope Global -Er
 <#
 .SYNOPSIS
     Converts a Base32 string to UUID format.
+
 .DESCRIPTION
     Converts a Base32 encoded string to standard UUID format.
+
 .PARAMETER Base32
     The Base32 string to convert.
+
+.OUTPUTS
+    System.String
+    Returns the UUID in standard format with dashes.
+
 .EXAMPLE
     "K5VQK4VQK4VQK4VQK4VQK4VQ" | ConvertTo-UuidFromBase32
     
     Converts Base32 to UUID format.
-.OUTPUTS
-    System.String
-    Returns the UUID in standard format with dashes.
 #>
 Set-Item -Path Function:Global:ConvertTo-UuidFromBase32 -Value {
     param(
@@ -372,26 +396,33 @@ Set-Alias -Name base32-to-uuid -Value ConvertTo-UuidFromBase32 -Scope Global -Er
 <#
 .SYNOPSIS
     Generates a new UUID (GUID).
+
 .DESCRIPTION
     Generates a new UUID (Universally Unique Identifier) using .NET Guid.NewGuid().
     Can return the UUID in various formats.
+
 .PARAMETER AsHex
     Return the UUID as hexadecimal string without dashes.
+
 .PARAMETER AsBase64
     Return the UUID as Base64 encoded string.
+
 .PARAMETER AsBase32
     Return the UUID as Base32 encoded string.
+
+.OUTPUTS
+    System.String
+    Returns a new UUID in the specified format.
+
 .EXAMPLE
     New-Uuid
     
     Generates a new UUID in standard format.
+
 .EXAMPLE
     New-Uuid -AsHex
     
     Generates a new UUID in hexadecimal format.
-.OUTPUTS
-    System.String
-    Returns a new UUID in the specified format.
 #>
 Set-Item -Path Function:Global:New-Uuid -Value {
     param(

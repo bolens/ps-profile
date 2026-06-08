@@ -14,8 +14,7 @@
 .OUTPUTS
     System.Boolean. Returns $true when the repository context is valid.
 .EXAMPLE
-    Test-GitRepositoryContext
-
+    Test-GitRepositoryContext -CommandName 'Get-GitStatus'
 #>
 function Test-GitRepositoryContext {
     param([string]$CommandName = 'git command')
@@ -46,8 +45,7 @@ function Test-GitRepositoryContext {
 .OUTPUTS
     System.Boolean. Returns $true when the repository contains commits.
 .EXAMPLE
-    Test-GitRepositoryHasCommits
-
+    Test-GitRepositoryHasCommits -CommandName 'Get-GitStatus'
 #>
 function Test-GitRepositoryHasCommits {
     param([string]$CommandName = 'git command')

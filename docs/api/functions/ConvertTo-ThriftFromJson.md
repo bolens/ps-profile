@@ -33,9 +33,9 @@ The path to the compiled Thrift schema. Required.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-ThriftFromJson -InputPath ./input.file
-``
+```
 
 ## Aliases
 

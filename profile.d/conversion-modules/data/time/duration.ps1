@@ -213,26 +213,32 @@ function Initialize-FileConversion-CoreTimeDuration {
 <#
 .SYNOPSIS
     Converts a human-readable duration string to a TimeSpan object.
+
 .DESCRIPTION
     Converts natural language duration expressions to TimeSpan objects.
     Supports expressions like "2 hours", "30 minutes", "1 day 3 hours 15 minutes", etc.
+
 .PARAMETER DurationString
     The human-readable duration string to convert.
+
+.OUTPUTS
+    System.TimeSpan
+    Returns a TimeSpan object representing the duration.
+
 .EXAMPLE
     "2 hours" | ConvertFrom-DurationToTimeSpan
     
     Converts "2 hours" to a TimeSpan object.
+
 .EXAMPLE
     "1 day 3 hours 15 minutes" | ConvertFrom-DurationToTimeSpan
     
     Converts a complex duration to a TimeSpan object.
+
 .EXAMPLE
     "3600" | ConvertFrom-DurationToTimeSpan
     
     Converts a number (assumed to be seconds) to a TimeSpan object.
-.OUTPUTS
-    System.TimeSpan
-    Returns a TimeSpan object representing the duration.
 #>
 function ConvertFrom-DurationToTimeSpan {
     param(
@@ -247,27 +253,34 @@ Set-AgentModeAlias -Name 'duration-to-timespan' -Target 'ConvertFrom-DurationToT
 <#
 .SYNOPSIS
     Converts a TimeSpan object to a human-readable duration string.
+
 .DESCRIPTION
     Converts a TimeSpan object to a human-readable duration string.
+
 .PARAMETER TimeSpan
     The TimeSpan object to convert.
+
 .PARAMETER Format
     The format to use: 'long' (default) for "2 days 3 hours", 'short' for "2d 3h", 'iso8601' for "P2DT3H", or a custom format string.
+
+.OUTPUTS
+    System.String
+    Returns a human-readable duration string.
+
 .EXAMPLE
     New-TimeSpan -Days 2 -Hours 3 -Minutes 15 | ConvertTo-DurationFromTimeSpan
     
     Converts a TimeSpan to "2 days 3 hours 15 minutes".
+
 .EXAMPLE
     New-TimeSpan -Hours 2 | ConvertTo-DurationFromTimeSpan -Format 'short'
     
     Converts to "2h".
+
 .EXAMPLE
     New-TimeSpan -Days 1 -Hours 2 -Minutes 3 | ConvertTo-DurationFromTimeSpan -Format 'iso8601'
     
     Converts to "P1DT2H3M" (ISO 8601 duration format).
-.OUTPUTS
-    System.String
-    Returns a human-readable duration string.
 #>
 function ConvertTo-DurationFromTimeSpan {
     param(

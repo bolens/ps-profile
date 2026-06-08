@@ -29,10 +29,11 @@ Profile name to use.
 
 ### Example 1
 
-`powershell
+```powershell
 New-ConanPackage ./conanfile.py
-        Creates package from recipe.
-``
+```
+
+Creates package from recipe.
 
 ## Aliases
 

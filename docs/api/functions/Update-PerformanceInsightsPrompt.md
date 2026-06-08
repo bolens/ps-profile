@@ -22,11 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-PerformanceInsightsPrompt
-        
-        Wraps the current prompt function with performance timing.
-``
+```
+
+Wraps the current prompt function with performance timing.
 
 ## Notes
 

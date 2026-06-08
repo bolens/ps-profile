@@ -34,27 +34,27 @@ None.
 
 ### Example 1
 
-`powershell
-Edit-WithNeovim
-        
-        Opens Neovim in current directory.
-``
+```powershell
+Edit-WithNeovim -Path ./path
+```
+
+Opens Neovim in current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Edit-WithNeovim -Path "script.ps1"
-        
-        Opens a file in Neovim.
-``
+```
+
+Opens a file in Neovim.
 
 ### Example 3
 
-`powershell
+```powershell
 Edit-WithNeovim -Path "script.ps1" -UseGui
-        
-        Opens a file in Neovim GUI.
-``
+```
+
+Opens a file in Neovim GUI.
 
 ## Source
 

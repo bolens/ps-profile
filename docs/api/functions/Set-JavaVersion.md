@@ -34,17 +34,19 @@ System.String. Current Java version information.
 
 ### Example 1
 
-`powershell
+```powershell
 Set-JavaVersion -Version 17
-        Switches to Java 17 (if available).
-``
+```
+
+Switches to Java 17 (if available).
 
 ### Example 2
 
-`powershell
+```powershell
 Set-JavaVersion -JavaHome "C:\Program Files\Java\jdk-17"
-        Sets JAVA_HOME to the specified path.
-``
+```
+
+Sets JAVA_HOME to the specified path.
 
 ## Source
 

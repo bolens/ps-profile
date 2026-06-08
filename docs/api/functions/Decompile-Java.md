@@ -38,19 +38,19 @@ System.String. Path to the output directory.
 
 ### Example 1
 
-`powershell
+```powershell
 Decompile-Java -InputFile "app.dex"
-        
-        Decompiles a Dex file to Java source.
-``
+```
+
+Decompiles a Dex file to Java source.
 
 ### Example 2
 
-`powershell
+```powershell
 Decompile-Java -InputFile "app.apk" -DecompileResources
-        
-        Decompiles an APK file including resources.
-``
+```
+
+Decompiles an APK file including resources.
 
 ## Source
 

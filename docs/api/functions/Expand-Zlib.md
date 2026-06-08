@@ -35,11 +35,11 @@ The path for the output decompressed file. If not specified, removes .zlib exten
 
 ### Example 1
 
-`powershell
+```powershell
 Expand-Zlib -InputPath "data.txt.zlib" -OutputPath "data.txt"
-    
-    Decompresses data.txt.zlib to data.txt.
-``
+```
+
+Decompresses data.txt.zlib to data.txt.
 
 ## Aliases
 

@@ -15,18 +15,22 @@ if ($null -ne (Get-Variable -Name 'ProfileUpdatesLoaded' -Scope Global -ErrorAct
 <#
 .SYNOPSIS
     Checks for profile updates and displays changelog.
+
 .DESCRIPTION
     Checks if the profile repository has new commits and displays a summary
     of recent changes. Only shows updates once per day to avoid spam.
-.EXAMPLE
-    Test-ProfileUpdates
-.EXAMPLE
-    Test-ProfileUpdates -Force -MaxChanges 5
+
 .PARAMETER Force
     Bypasses the once-per-day check and fetches updates immediately.
+
 .PARAMETER MaxChanges
     Maximum number of recent commits to include in the changelog summary.
 
+.EXAMPLE
+    Test-ProfileUpdates -MaxChanges 1
+
+.EXAMPLE
+    Test-ProfileUpdates -Force -MaxChanges 5
 #>
 function Test-ProfileUpdates {
     param(

@@ -33,17 +33,19 @@ Source to search in.
 
 ### Example 1
 
-`powershell
+```powershell
 Find-WingetPackage git
-        Searches for packages containing "git".
-``
+```
+
+Searches for packages containing "git".
 
 ### Example 2
 
-`powershell
+```powershell
 Find-WingetPackage Git.Git -Exact
-        Searches for exact package ID "Git.Git".
-``
+```
+
+Searches for exact package ID "Git.Git".
 
 ## Aliases
 

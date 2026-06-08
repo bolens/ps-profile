@@ -25,10 +25,11 @@ Package names to remove.
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-PixiPackage numpy
-        Removes numpy from the project.
-``
+```
+
+Removes numpy from the project.
 
 ## Aliases
 

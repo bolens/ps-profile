@@ -29,9 +29,9 @@ The path for the output text file. If not specified, uses input path with .txt e
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-PdfToText -InputPath ./input.file
-``
+```
 
 ## Aliases
 

@@ -98,26 +98,33 @@ function Initialize-FileConversion-CoreCompressionLz4 {
 <#
 .SYNOPSIS
     Compresses a file using LZ4 compression.
+
 .DESCRIPTION
     Compresses a file using the LZ4 compression algorithm.
     LZ4 is a fast compression algorithm with high compression and decompression speeds.
+
 .PARAMETER InputPath
     The path to the file to compress.
+
 .PARAMETER OutputPath
     The path for the output compressed file. If not specified, uses input path with .lz4 extension.
+
 .PARAMETER CompressionLevel
     The compression level (1-9). Default is 1 (fastest). Higher levels provide better compression but are slower.
+
+.OUTPUTS
+    System.String
+    Returns the path to the compressed file.
+
 .EXAMPLE
     Compress-Lz4 -InputPath 'data.txt'
     
     Compresses data.txt to data.txt.lz4.
+
 .EXAMPLE
     Compress-Lz4 -InputPath 'data.txt' -CompressionLevel 9
     
     Compresses data.txt with maximum compression level.
-.OUTPUTS
-    System.String
-    Returns the path to the compressed file.
 #>
 Set-Item -Path Function:Global:Compress-Lz4 -Value {
     param(
@@ -136,19 +143,24 @@ Set-Alias -Name lz4 -Value Compress-Lz4 -Scope Global -ErrorAction SilentlyConti
 <#
 .SYNOPSIS
     Decompresses an LZ4 compressed file.
+
 .DESCRIPTION
     Decompresses a file that was compressed using LZ4 compression.
+
 .PARAMETER InputPath
     The path to the LZ4 compressed file.
+
 .PARAMETER OutputPath
     The path for the output decompressed file. If not specified, removes .lz4 extension from input path.
+
+.OUTPUTS
+    System.String
+    Returns the path to the decompressed file.
+
 .EXAMPLE
     Expand-Lz4 -InputPath 'data.txt.lz4'
     
     Decompresses data.txt.lz4 to data.txt.
-.OUTPUTS
-    System.String
-    Returns the path to the decompressed file.
 #>
 Set-Item -Path Function:Global:Expand-Lz4 -Value {
     param(

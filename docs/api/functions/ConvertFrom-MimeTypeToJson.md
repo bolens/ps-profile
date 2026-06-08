@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-MimeTypeToJson -InputPath "mime.mime"
-    
-    Converts mime.mime to mime.json.
-``
+```
+
+Converts mime.mime to mime.json.
 
 ## Aliases
 

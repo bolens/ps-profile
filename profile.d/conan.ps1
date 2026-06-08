@@ -11,7 +11,7 @@
 if (Test-CachedCommand conan) {
     # Conan install - install packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Installs C++ packages using Conan.
     .DESCRIPTION
         Installs packages from conanfile.txt or conanfile.py. Supports --build and --profile flags.
@@ -22,12 +22,12 @@ if (Test-CachedCommand conan) {
     .PARAMETER Profile
         Profile name to use.
     .EXAMPLE
-        Install-ConanPackages
+    Install-ConanPackages 'package-name'
         Installs dependencies from current directory.
     .EXAMPLE
         Install-ConanPackages -Build missing
         Installs and builds missing packages.
-    #>
+#>
     function Install-ConanPackages {
         [CmdletBinding()]
         param(
@@ -112,7 +112,7 @@ if (Test-CachedCommand conan) {
     Set-AgentModeAlias -Name 'conansearch' -Target 'Find-ConanPackage'
     # Conan update - update packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates Conan packages.
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
@@ -126,7 +126,7 @@ if (Test-CachedCommand conan) {
     .PARAMETER Profile
         Profile name to use.
     .EXAMPLE
-        Update-ConanPackages
+    Update-ConanPackages -Packages 'package-name' -Path ./path
         Updates all packages in current directory.
     .EXAMPLE
         Update-ConanPackages -Path ./conanfile.txt
@@ -134,7 +134,7 @@ if (Test-CachedCommand conan) {
     .EXAMPLE
         Update-ConanPackages -Build outdated
         Updates and rebuilds outdated packages.
-    #>
+#>
     function Update-ConanPackages {
         [CmdletBinding()]
         param(

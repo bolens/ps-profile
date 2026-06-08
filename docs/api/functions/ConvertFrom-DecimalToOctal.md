@@ -34,10 +34,11 @@ System.String The octal representation of the input decimal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "72 105" | ConvertFrom-DecimalToOctal
-    Converts decimal to octal.
-``
+```
+
+Converts decimal to octal.
 
 ## Aliases
 

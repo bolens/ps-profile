@@ -33,9 +33,9 @@ Audio bitrate in kbps (default: 128).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-OpusToAac -InputPath "audio.opus" -OutputPath "audio.aac"
-``
+```
 
 ## Aliases
 

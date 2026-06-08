@@ -34,24 +34,27 @@ System.String. Output from mage execution.
 
 ### Example 1
 
-`powershell
-Invoke-Mage
-        Lists available mage targets.
-``
+```powershell
+Invoke-Mage -Target 'value'
+```
+
+Lists available mage targets.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Mage build
-        Runs the 'build' target.
-``
+```
+
+Runs the 'build' target.
 
 ### Example 3
 
-`powershell
+```powershell
 Invoke-Mage test -v
-        Runs the 'test' target with verbose output.
-``
+```
+
+Runs the 'test' target with verbose output.
 
 ## Aliases
 

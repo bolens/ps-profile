@@ -25,15 +25,15 @@ Arguments to pass to gcloud projects.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-GCloudProjects list
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Get-GCloudProjects describe my-project
-``
+```
 
 ## Aliases
 

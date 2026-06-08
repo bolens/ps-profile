@@ -25,15 +25,15 @@ Arguments to pass to az.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Azure --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Azure account list
-``
+```
 
 ## Aliases
 

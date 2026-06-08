@@ -38,11 +38,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-BarcodeFromText -InputPath "data.txt" -Format CODE128
-    
-    Converts data.txt to data.png barcode.
-``
+```
+
+Converts data.txt to data.png barcode.
 
 ## Aliases
 

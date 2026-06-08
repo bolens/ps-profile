@@ -25,15 +25,15 @@ Arguments to pass to azd.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-AzureDeveloper --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-AzureDeveloper init
-``
+```
 
 ## Aliases
 

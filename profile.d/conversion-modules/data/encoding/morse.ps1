@@ -165,23 +165,28 @@ function Initialize-FileConversion-CoreEncodingMorse {
 <#
 .SYNOPSIS
     Converts ASCII text to Morse Code encoding.
+
 .DESCRIPTION
     Encodes ASCII text to International Morse Code format.
     Uses dots (.) and dashes (-) to represent characters.
     Words are separated by double spaces, letters within words by single spaces.
+
 .PARAMETER InputObject
     The text string to encode.
+
+.OUTPUTS
+    System.String
+    Returns the Morse Code encoded string.
+
 .EXAMPLE
     "HELLO WORLD" | ConvertFrom-AsciiToMorse
     
     Converts text to Morse Code format.
+
 .EXAMPLE
     "SOS" | ConvertFrom-AsciiToMorse
     
     Returns "... --- ..."
-.OUTPUTS
-    System.String
-    Returns the Morse Code encoded string.
 #>
 function ConvertFrom-AsciiToMorse {
     param(
@@ -198,22 +203,27 @@ Set-Alias -Name morse -Value ConvertFrom-AsciiToMorse -Scope Global -ErrorAction
 <#
 .SYNOPSIS
     Converts Morse Code encoding to ASCII text.
+
 .DESCRIPTION
     Decodes Morse Code encoded string back to ASCII text.
     Supports International Morse Code standard.
+
 .PARAMETER InputObject
     The Morse Code encoded string to decode.
+
+.OUTPUTS
+    System.String
+    Returns the decoded ASCII text.
+
 .EXAMPLE
     ".... . .-.. .-.. ---  .-- --- .-. .-.. -.." | ConvertFrom-MorseToAscii
     
     Converts Morse Code to text.
+
 .EXAMPLE
     "... --- ..." | ConvertFrom-MorseToAscii
     
     Returns "SOS"
-.OUTPUTS
-    System.String
-    Returns the decoded ASCII text.
 #>
 function ConvertFrom-MorseToAscii {
     param(

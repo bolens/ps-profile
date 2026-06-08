@@ -29,9 +29,9 @@ The path for the output CSV file. If not specified, uses input path with .csv ex
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-MessagePackToCsv -InputPath ./input.file
-``
+```
 
 ## Aliases
 

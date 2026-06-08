@@ -33,9 +33,9 @@ Audio bitrate in kbps (default: 192).
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-FlacToMp3 -InputPath "audio.flac" -OutputPath "audio.mp3" -Bitrate 256
-``
+```
 
 ## Aliases
 

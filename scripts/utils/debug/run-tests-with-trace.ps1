@@ -17,23 +17,21 @@ Write-Host "   Test File: $TestFile" -ForegroundColor Gray
 Write-Host "   Any Test-SafePath calls with null/empty paths will be logged below" -ForegroundColor Gray
 Write-Host ""
 
-# Run the test
+$escapedTestFile = $TestFile.Replace("'", "''")
+
 try {
-    $result = pwsh -NoProfile -Command @"
+    pwsh -NoProfile -Command @"
         `$ErrorActionPreference = 'Stop'
         Import-Module Pester -MinimumVersion 5.0 -ErrorAction Stop
-        `$result = Invoke-Pester -Path '$TestFile' -PassThru -Quiet
+        `$result = Invoke-Pester -Path '$escapedTestFile' -PassThru -Quiet
         Write-Host "`n=== Test Results ===" -ForegroundColor Cyan
         Write-Host "Passed: `$(`$result.PassedCount)"
         Write-Host "Failed: `$(`$result.FailedCount)"
         Write-Host "Skipped: `$(`$result.SkippedCount)"
         exit `$result.FailedCount
 "@
-    
-    exit $result
+    exit $LASTEXITCODE
 }
 finally {
-    # Clean up
     Remove-Item Env:\PS_PROFILE_DEBUG_TESTPATH -ErrorAction SilentlyContinue
 }
-

@@ -25,9 +25,9 @@ Pattern to match against command history.
 
 ### Example 1
 
-`powershell
-Invoke-LastCommand
-``
+```powershell
+Invoke-LastCommand @('--help')
+```
 
 ## Source
 

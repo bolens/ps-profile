@@ -29,10 +29,11 @@ Dependency notation (e.g., 'org.springframework:spring-core:6.0.0').
 
 ### Example 1
 
-`powershell
+```powershell
 Add-GradleDependency -Configuration implementation -Dependency 'org.springframework:spring-core:6.0.0'
-        Provides instructions for adding Spring Core dependency.
-``
+```
+
+Provides instructions for adding Spring Core dependency.
 
 ## Aliases
 

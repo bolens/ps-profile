@@ -30,17 +30,19 @@ System.String The ModHex representation of the input text.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello" | ConvertFrom-AsciiToModHex
-    Converts "Hello" to ModHex representation.
-``
+```
+
+Converts "Hello" to ModHex representation.
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-AsciiToModHex -InputObject "Test"
-    Converts "Test" to ModHex representation.
-``
+```
+
+Converts "Test" to ModHex representation.
 
 ## Aliases
 

@@ -42,19 +42,19 @@ System.String. Log output stream.
 
 ### Example 1
 
-`powershell
+```powershell
 Tail-KubeLogs -Pattern "my-app"
-        
-        Tails logs from all pods matching "my-app".
-``
+```
+
+Tails logs from all pods matching "my-app".
 
 ### Example 2
 
-`powershell
+```powershell
 Tail-KubeLogs -Pattern "nginx" -Namespace "production" -Container "web"
-        
-        Tails logs from nginx pods in production namespace, container web.
-``
+```
+
+Tails logs from nginx pods in production namespace, container web.
 
 ## Source
 

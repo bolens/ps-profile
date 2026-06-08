@@ -34,15 +34,15 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-QrCodeToText -InputPath "qrcode.png"
-    
-    Decodes qrcode.png to qrcode.txt.
-``
+```
+
+Decodes qrcode.png to qrcode.txt.
 
 ## Notes
 
-Full QR code decoding requires additional libraries. This function currently indicates the requirement.
+Full QR code decoding requires additional libraries. This function currently indicates the requirement. .EXAMPLE ConvertFrom-QrCodeToText -InputPath "qrcode.png" Decodes qrcode.png to qrcode.txt.
 
 
 ## Aliases

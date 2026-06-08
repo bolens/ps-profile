@@ -29,15 +29,15 @@ Destination path (local or remote).
 
 ### Example 1
 
-`powershell
+```powershell
 Copy-RcloneFile -Source "remote:path" -Destination "local:path"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Copy-RcloneFile -Source "local:path" -Destination "remote:path"
-``
+```
 
 ## Aliases
 

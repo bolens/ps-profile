@@ -37,17 +37,19 @@ Auto-confirm all prompts.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-ChocoPackage git
-        Installs git.
-``
+```
+
+Installs git.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-ChocoPackage git -Version 2.40.0
-        Installs specific version of git.
-``
+```
+
+Installs specific version of git.
 
 ## Aliases
 

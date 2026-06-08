@@ -25,15 +25,9 @@ Arguments to pass to firebase deploy.
 
 ### Example 1
 
-`powershell
-Publish-FirebaseDeployment
-``
-
-### Example 2
-
-`powershell
+```powershell
 Publish-FirebaseDeployment --only hosting
-``
+```
 
 ## Aliases
 

@@ -29,9 +29,9 @@ The path for the output NetCDF file. If not specified, uses input path with .nc 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-NetCdfFromParquet -InputPath ./input.file
-``
+```
 
 ## Aliases
 

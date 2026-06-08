@@ -38,19 +38,19 @@ System.String. Deployment status or command output.
 
 ### Example 1
 
-`powershell
+```powershell
 Deploy-Balena -Application "my-app" -Action "push"
-        
-        Pushes the current directory to Balena application.
-``
+```
+
+Pushes the current directory to Balena application.
 
 ### Example 2
 
-`powershell
+```powershell
 Deploy-Balena -Application "my-app" -Action "logs" -Device "device-uuid"
-        
-        Shows logs from a specific device.
-``
+```
+
+Shows logs from a specific device.
 
 ## Source
 

@@ -25,15 +25,15 @@ Name of the model to download.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-OllamaModel -Model "llama2"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Get-OllamaModel -Model "mistral"
-``
+```
 
 ## Aliases
 

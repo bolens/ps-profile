@@ -29,17 +29,19 @@ Install as cask (GUI application).
 
 ### Example 1
 
-`powershell
+```powershell
 Install-BrewPackage git
-        Installs git.
-``
+```
+
+Installs git.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-BrewPackage -Cask visual-studio-code
-        Installs Visual Studio Code as a cask.
-``
+```
+
+Installs Visual Studio Code as a cask.
 
 ## Aliases
 

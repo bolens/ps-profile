@@ -53,12 +53,11 @@ Error correction level: L (low ~7%), M (medium ~15%), Q (quartile ~25%), H (high
 
 ### Example 1
 
-`powershell
+```powershell
 $start = Get-Date "2024-12-25 10:00"
-    $end = Get-Date "2024-12-25 12:00"
-    New-QrCodeCalendar -Title "Meeting" -StartTime $start -EndTime $end -Location "Conference Room"
-    Generates a calendar event QR code.
-``
+```
+
+$end = Get-Date "2024-12-25 12:00" New-QrCodeCalendar -Title "Meeting" -StartTime $start -EndTime $end -Location "Conference Room" Generates a calendar event QR code.
 
 ## Aliases
 

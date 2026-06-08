@@ -33,19 +33,19 @@ Tunnel protocol: http, tcp, ssh, rdp. Defaults to http.
 
 ### Example 1
 
-`powershell
+```powershell
 Start-CloudflareTunnel -Url "http://localhost:8080"
-        
-        Creates an HTTP tunnel to the local service.
-``
+```
+
+Creates an HTTP tunnel to the local service.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-CloudflareTunnel -Url "tcp://localhost:22" -Protocol "ssh"
-        
-        Creates an SSH tunnel.
-``
+```
+
+Creates an SSH tunnel.
 
 ## Source
 

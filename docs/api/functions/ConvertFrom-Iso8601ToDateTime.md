@@ -30,19 +30,19 @@ System.DateTime Returns a DateTime object representing the ISO 8601 date/time.
 
 ### Example 1
 
-`powershell
+```powershell
 '2021-01-01T00:00:00Z' | ConvertFrom-Iso8601ToDateTime
-    
-    Converts an ISO 8601 string to a DateTime object.
-``
+```
+
+Converts an ISO 8601 string to a DateTime object.
 
 ### Example 2
 
-`powershell
+```powershell
 '2021-01-01T12:30:45.123+05:00' | ConvertFrom-Iso8601ToDateTime
-    
-    Converts an ISO 8601 string with timezone and milliseconds.
-``
+```
+
+Converts an ISO 8601 string with timezone and milliseconds.
 
 ## Aliases
 

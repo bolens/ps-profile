@@ -27,11 +27,11 @@ System.Object[]. Array of terminal information objects.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-TerminalInfo
-        
-        Lists all available terminal emulators.
-``
+```
+
+Lists all available terminal emulators.
 
 ## Source
 

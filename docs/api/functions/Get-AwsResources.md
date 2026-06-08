@@ -38,19 +38,19 @@ System.Object. Resource list from AWS CLI.
 
 ### Example 1
 
-`powershell
+```powershell
 Get-AwsResources -Service 'ec2' -Action 'describe-instances'
-    
-    Lists EC2 instances.
-``
+```
+
+Lists EC2 instances.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-AwsResources -Service 's3' -Action 'list-buckets'
-    
-    Lists S3 buckets.
-``
+```
+
+Lists S3 buckets.
 
 ## Source
 

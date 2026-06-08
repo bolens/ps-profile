@@ -103,15 +103,19 @@ function Initialize-FileUtilities-HeadTail {
 .SYNOPSIS
     Shows the first N lines of a file or pipeline input.
 
+
 .DESCRIPTION
     Displays the beginning of a file or pipeline input. Defaults to 10 lines.
     Similar to the Unix 'head' command but designed for PowerShell pipelines.
 
+
 .PARAMETER InputObject
     Objects to process from the pipeline.
 
+
 .PARAMETER Lines
     The number of lines to display. Default is 10.
+
 
 .PARAMETER fileArgs
     File paths to read from when not using pipeline input.
@@ -120,9 +124,20 @@ function Initialize-FileUtilities-HeadTail {
     System.Object
     Objects from the pipeline or file paths as strings.
 
+
 .OUTPUTS
     System.String
     The first N lines of the input.
+
+
+.NOTES
+    This function buffers all pipeline input before processing, so it may use more memory for large inputs.
+    For very large files, consider using Get-Content with Select-Object directly.
+
+.LINK
+    Get-FileTail
+    Get-Content
+    Select-Object
 
 .EXAMPLE
     PS C:\> 1..20 | head
@@ -139,6 +154,7 @@ function Initialize-FileUtilities-HeadTail {
 
     Shows the first 10 numbers from the pipeline.
 
+
 .EXAMPLE
     PS C:\> 1..20 | head -Lines 5
     1
@@ -148,6 +164,7 @@ function Initialize-FileUtilities-HeadTail {
     5
 
     Shows the first 5 numbers from the pipeline.
+
 
 .EXAMPLE
     PS C:\> 1..20 | head -10
@@ -164,26 +181,19 @@ function Initialize-FileUtilities-HeadTail {
 
     Shows the first 10 numbers from the pipeline using Unix-style syntax.
 
+
 .EXAMPLE
     PS C:\> head README.md
     # First 10 lines of README.md
 
     Shows the first 10 lines of the README.md file.
 
+
 .EXAMPLE
     PS C:\> head README.md -Lines 5
     # First 5 lines of README.md
 
     Shows the first 5 lines of the README.md file.
-
-.NOTES
-    This function buffers all pipeline input before processing, so it may use more memory for large inputs.
-    For very large files, consider using Get-Content with Select-Object directly.
-
-.LINK
-    Get-FileTail
-    Get-Content
-    Select-Object
 #>
 function Get-FileHead {
     param([Parameter(Position = 0)] $Path, [Parameter(ValueFromPipeline = $true)] $InputObject, [int]$Lines = 10)
@@ -228,15 +238,19 @@ Set-AgentModeAlias -Name 'head' -Target 'Get-FileHead'
 .SYNOPSIS
     Shows the last N lines of a file or pipeline input.
 
+
 .DESCRIPTION
     Displays the end of a file or pipeline input. Defaults to 10 lines.
     Similar to the Unix 'tail' command but designed for PowerShell pipelines.
 
+
 .PARAMETER InputObject
     Objects to process from the pipeline.
 
+
 .PARAMETER Lines
     The number of lines to display. Default is 10.
+
 
 .PARAMETER fileArgs
     File paths to read from when not using pipeline input.
@@ -245,9 +259,20 @@ Set-AgentModeAlias -Name 'head' -Target 'Get-FileHead'
     System.Object
     Objects from the pipeline or file paths as strings.
 
+
 .OUTPUTS
     System.String
     The last N lines of the input.
+
+
+.NOTES
+    This function buffers all pipeline input before processing, so it may use more memory for large inputs.
+    For very large files, consider using Get-Content with Select-Object directly.
+
+.LINK
+    Get-FileHead
+    Get-Content
+    Select-Object
 
 .EXAMPLE
     PS C:\> 1..20 | tail
@@ -264,6 +289,7 @@ Set-AgentModeAlias -Name 'head' -Target 'Get-FileHead'
 
     Shows the last 10 numbers from the pipeline.
 
+
 .EXAMPLE
     PS C:\> 1..20 | tail -Lines 5
     16
@@ -273,6 +299,7 @@ Set-AgentModeAlias -Name 'head' -Target 'Get-FileHead'
     20
 
     Shows the last 5 numbers from the pipeline.
+
 
 .EXAMPLE
     PS C:\> 1..20 | tail -20
@@ -299,26 +326,19 @@ Set-AgentModeAlias -Name 'head' -Target 'Get-FileHead'
 
     Shows all 20 numbers from the pipeline using Unix-style syntax.
 
+
 .EXAMPLE
     PS C:\> tail logfile.txt
     # Last 10 lines of logfile.txt
 
     Shows the last 10 lines of the logfile.txt file.
 
+
 .EXAMPLE
     PS C:\> tail logfile.txt -Lines 20
     # Last 20 lines of logfile.txt
 
     Shows the last 20 lines of the logfile.txt file.
-
-.NOTES
-    This function buffers all pipeline input before processing, so it may use more memory for large inputs.
-    For very large files, consider using Get-Content with Select-Object directly.
-
-.LINK
-    Get-FileHead
-    Get-Content
-    Select-Object
 #>
 function Get-FileTail {
     param([Parameter(Position = 0)] $Path, [Parameter(ValueFromPipeline = $true)] $InputObject, [int]$Lines = 10)

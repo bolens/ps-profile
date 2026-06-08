@@ -32,8 +32,7 @@ if (Test-Path $docPathsModule) {
 .OUTPUTS
     None. File is written directly to disk.
 .EXAMPLE
-    Write-DocumentationIndex
-
+    Write-DocumentationIndex -Functions $functions -Aliases $aliases -DocsPath 'docs/api'
 #>
 function Write-DocumentationIndex {
     [CmdletBinding()]

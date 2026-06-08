@@ -30,17 +30,19 @@ System.Diagnostics.Process. Process object for TablePlus.
 
 ### Example 1
 
-`powershell
-Start-TablePlus
-        Launches TablePlus.
-``
+```powershell
+Start-TablePlus -Connection 'value'
+```
+
+Launches TablePlus.
 
 ### Example 2
 
-`powershell
+```powershell
 Start-TablePlus -Connection "my-connection"
-        Launches TablePlus with a specific connection.
-``
+```
+
+Launches TablePlus with a specific connection.
 
 ## Aliases
 

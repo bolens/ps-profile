@@ -25,15 +25,15 @@ Path to the YAML file to convert.
 
 ### Example 1
 
-`powershell
+```powershell
 Convert-YqToJson -File "config.yaml"
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Convert-YqToJson -File "data.yaml"
-``
+```
 
 ## Aliases
 

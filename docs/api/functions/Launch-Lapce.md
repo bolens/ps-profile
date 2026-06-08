@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Lapce
-        
-        Launches Lapce.
-``
+```powershell
+Launch-Lapce -Path ./path
+```
+
+Launches Lapce.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Lapce -Path "C:\Projects\MyApp"
-        
-        Opens a directory in Lapce.
-``
+```
+
+Opens a directory in Lapce.
 
 ## Source
 

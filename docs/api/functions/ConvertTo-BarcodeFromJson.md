@@ -38,11 +38,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-BarcodeFromJson -InputPath "data.json" -Format CODE128
-    
-    Converts data.json to data.png barcode.
-``
+```
+
+Converts data.json to data.png barcode.
 
 ## Aliases
 

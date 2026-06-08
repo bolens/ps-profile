@@ -34,11 +34,11 @@ None. Creates output file at specified or default path.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-HtmlFromFb2 -InputPath "book.fb2"
-    
-    Converts book.fb2 to book.html.
-``
+```
+
+Converts book.fb2 to book.html.
 
 ## Aliases
 

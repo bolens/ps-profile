@@ -30,11 +30,11 @@ System.String Returns the hexadecimal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JxF12TrwUP45BMd" | ConvertFrom-Base58ToHex
-    
-    Converts Base58 to hex format.
-``
+```
+
+Converts Base58 to hex format.
 
 ## Aliases
 

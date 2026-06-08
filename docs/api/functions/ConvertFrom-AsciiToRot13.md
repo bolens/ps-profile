@@ -30,19 +30,19 @@ System.String Returns the ROT13 encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello World" | ConvertFrom-AsciiToRot13
-    
-    Converts text to ROT13 format.
-``
+```
+
+Converts text to ROT13 format.
 
 ### Example 2
 
-`powershell
+```powershell
 "Uryyb Jbeyq" | ConvertFrom-Rot13ToAscii
-    
-    Decodes ROT13 back to original text.
-``
+```
+
+Decodes ROT13 back to original text.
 
 ## Aliases
 

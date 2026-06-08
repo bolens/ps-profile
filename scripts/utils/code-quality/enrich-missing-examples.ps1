@@ -20,6 +20,9 @@ $script:EnrichmentSkipFileNames = @(
     'add-comment-help.ps1'
     'CommentHelp.psm1'
     'DocParserRegex.psm1'
+    'RegexUtilities.psm1'
+    'improve-bare-examples.ps1'
+    'cleanup-help-examples.ps1'
 )
 
 function Add-ExampleToHelpBlock {
@@ -52,6 +55,8 @@ function Add-ExampleToHelpBlock {
         '^Format-' { "    $FunctionName -InputObject (Get-Content ./data.json -Raw | ConvertFrom-Json)" }
         '^ConvertFrom-' { "    $FunctionName -InputPath ./input.file" }
         '^ConvertTo-' { "    $FunctionName -InputPath ./input.file" }
+        '^Invoke-' { "    $FunctionName @('--help')" }
+        '^Install-' { "    $FunctionName 'package-name'" }
         default { "    $FunctionName" }
     }
 

@@ -46,19 +46,19 @@ System.String Returns the path to the compressed file.
 
 ### Example 1
 
-`powershell
+```powershell
 Compress-Brotli -InputPath 'data.txt'
-    
-    Compresses data.txt to data.txt.br.
-``
+```
+
+Compresses data.txt to data.txt.br.
 
 ### Example 2
 
-`powershell
+```powershell
 Compress-Brotli -InputPath 'data.txt' -Quality Fastest
-    
-    Compresses data.txt with fastest compression.
-``
+```
+
+Compresses data.txt with fastest compression.
 
 ## Aliases
 

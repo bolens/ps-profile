@@ -30,11 +30,11 @@ System.String Returns the decoded ASCII text.
 
 ### Example 1
 
-`powershell
+```powershell
 "Uryyb Jbeyq" | ConvertFrom-Rot13ToAscii
-    
-    Converts ROT13 to text.
-``
+```
+
+Converts ROT13 to text.
 
 ## Aliases
 

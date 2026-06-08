@@ -83,14 +83,14 @@ if (Test-CachedCommand rye) {
     Set-AgentModeAlias -Name 'ryeuninstall' -Target 'Remove-RyePackage'
     # Rye sync - sync dependencies
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Syncs dependencies using Rye.
     .DESCRIPTION
         Installs dependencies from pyproject.toml and updates lock file.
     .EXAMPLE
-        Sync-RyeDependencies
+    Sync-RyeDependencies
         Syncs all dependencies.
-    #>
+#>
     function Sync-RyeDependencies {
         [CmdletBinding()]
         param()
@@ -100,19 +100,19 @@ if (Test-CachedCommand rye) {
     Set-AgentModeAlias -Name 'ryesync' -Target 'Sync-RyeDependencies'
     # Rye update - update packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates packages using Rye.
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
     .PARAMETER Packages
         Package names to update. Optional - updates all if omitted.
     .EXAMPLE
-        Update-RyePackages
+    Update-RyePackages -Packages 'package-name'
         Updates all packages.
     .EXAMPLE
         Update-RyePackages requests
         Updates requests package.
-    #>
+#>
     function Update-RyePackages {
         [CmdletBinding()]
         param(

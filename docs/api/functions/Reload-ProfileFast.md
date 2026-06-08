@@ -25,17 +25,19 @@ Enables fast reload mode, skipping expensive operations like update checks and g
 
 ### Example 1
 
-`powershell
+```powershell
 Reload-Profile
-    Reloads the profile normally.
-``
+```
+
+Reloads the profile normally.
 
 ### Example 2
 
-`powershell
+```powershell
 Reload-Profile -Fast
-    Reloads the profile in fast mode, skipping expensive operations.
-``
+```
+
+Reloads the profile in fast mode, skipping expensive operations.
 
 ## Aliases
 

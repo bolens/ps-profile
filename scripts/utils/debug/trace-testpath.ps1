@@ -13,7 +13,7 @@
     A specific test path pattern to match.
 
 .EXAMPLE
-    .\trace-testpath.ps1 -TestFile 'tests/unit/test-support.tests.ps1'
+    .\trace-testpath.ps1 -TestFile 'tests/unit/test-support/test-support.tests.ps1'
 
     Runs the test file with Test-Path tracing enabled.
 #>
@@ -111,17 +111,20 @@ function global:Test-Path {
     }
 }
 
+$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$runner = Join-Path $repoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
+
 # Run the test
 try {
     if ($TestPath) {
-        pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestPath $TestPath
+        pwsh -NoProfile -File $runner -Suite Unit -Path $TestPath
     }
     else {
-        pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestFile $TestFile
+        pwsh -NoProfile -File $runner -Suite Unit -Path $TestFile
     }
+    exit $LASTEXITCODE
 }
 finally {
-    # Clean up
     Remove-Item Env:\PS_PROFILE_DEBUG_TESTPATH -ErrorAction SilentlyContinue
     Remove-Item Function:\global:Test-Path -ErrorAction SilentlyContinue
 }

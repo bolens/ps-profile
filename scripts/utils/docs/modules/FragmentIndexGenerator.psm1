@@ -25,8 +25,7 @@ scripts/utils/docs/modules/FragmentIndexGenerator.psm1
 .OUTPUTS
     None. File is written directly to disk.
 .EXAMPLE
-    Write-FragmentIndex
-
+    Write-FragmentIndex -FragmentsPath 'value' -ProfilePath 'value'
 #>
 function Write-FragmentIndex {
     [CmdletBinding()]

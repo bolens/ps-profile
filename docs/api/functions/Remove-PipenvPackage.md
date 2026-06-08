@@ -29,17 +29,19 @@ Remove from dev dependencies (--dev).
 
 ### Example 1
 
-`powershell
+```powershell
 Remove-PipenvPackage requests
-        Removes requests from production dependencies.
-``
+```
+
+Removes requests from production dependencies.
 
 ### Example 2
 
-`powershell
+```powershell
 Remove-PipenvPackage pytest -Dev
-        Removes pytest from dev dependencies.
-``
+```
+
+Removes pytest from dev dependencies.
 
 ## Aliases
 

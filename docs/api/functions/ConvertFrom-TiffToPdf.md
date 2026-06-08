@@ -29,9 +29,9 @@ Path for the output PDF file. If not specified, uses input path with .pdf extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-TiffToPdf -InputPath "image.tiff" -OutputPath "image.pdf"
-``
+```
 
 ## Aliases
 

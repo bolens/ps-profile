@@ -34,17 +34,19 @@ System.String The octal representation of the input text.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hi" | ConvertFrom-AsciiToOctal
-    Converts "Hi" to "110 151" (octal representation).
-``
+```
+
+Converts "Hi" to "110 151" (octal representation).
 
 ### Example 2
 
-`powershell
+```powershell
 ConvertFrom-AsciiToOctal -InputObject "AB" -Separator ""
-    Converts "AB" to "101102" (no separator).
-``
+```
+
+Converts "AB" to "101102" (no separator).
 
 ## Aliases
 

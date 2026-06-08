@@ -30,11 +30,11 @@ System.String Returns the Base64 encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "JxF12TrwUP45BMd" | ConvertFrom-Base58ToBase64
-    
-    Converts Base58 to Base64 format.
-``
+```
+
+Converts Base58 to Base64 format.
 
 ## Aliases
 

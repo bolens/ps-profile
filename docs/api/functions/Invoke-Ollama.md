@@ -25,15 +25,15 @@ Arguments to pass to ollama.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Ollama list
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Ollama --version
-``
+```
 
 ## Aliases
 

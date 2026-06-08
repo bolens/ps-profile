@@ -34,17 +34,19 @@ System.String. Output from Bruno execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Bruno -CollectionPath "./api-collection"
-        Runs the Bruno collection in the specified directory.
-``
+```
+
+Runs the Bruno collection in the specified directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Bruno -Environment "production"
-        Runs the Bruno collection using the production environment.
-``
+```
+
+Runs the Bruno collection using the production environment.
 
 ## Aliases
 

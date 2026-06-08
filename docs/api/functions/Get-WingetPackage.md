@@ -25,10 +25,11 @@ Filter by source.
 
 ### Example 1
 
-`powershell
-Get-WingetPackage
-        Lists all installed winget packages.
-``
+```powershell
+Get-WingetPackage -Source ./source
+```
+
+Lists all installed winget packages.
 
 ## Aliases
 

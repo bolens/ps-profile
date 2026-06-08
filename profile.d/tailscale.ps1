@@ -63,9 +63,6 @@ function Invoke-Tailscale {
     Arguments to pass to tailscale up.
 
 .EXAMPLE
-    Connect-TailscaleNetwork
-
-.EXAMPLE
     Connect-TailscaleNetwork --accept-routes
 #>
 function Connect-TailscaleNetwork {

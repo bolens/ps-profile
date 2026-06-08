@@ -1997,8 +1997,7 @@ function global:Get-ToolInstallMethodRegistry {
 .OUTPUTS
     System.String
 .EXAMPLE
-    Get-ToolSpecificInstallMethod
-
+    Get-ToolSpecificInstallMethod -ToolName 'docker'
 #>
 function global:Get-ToolSpecificInstallMethod {
     [CmdletBinding()]
@@ -2142,8 +2141,7 @@ function global:Get-ToolSpecificInstallMethod {
 .OUTPUTS
     System.Boolean
 .EXAMPLE
-    Test-CommandAvailable
-
+    Test-CommandAvailable -CommandName 'Get-GitStatus'
 #>
 function global:Test-CommandAvailable {
     [CmdletBinding()]
@@ -2197,8 +2195,7 @@ function global:Test-CommandAvailable {
 .OUTPUTS
     System.String
 .EXAMPLE
-    Get-InstallMethodFallbackChain
-
+    Get-InstallMethodFallbackChain -PreferredMethod 'value' -FallbackMethods @()
 #>
 function global:Get-InstallMethodFallbackChain {
     [CmdletBinding()]
@@ -2262,8 +2259,7 @@ function global:Get-InstallMethodFallbackChain {
 .OUTPUTS
     System.Collections.Hashtable
 .EXAMPLE
-    Get-SystemPackageManagerFallbackChain
-
+    Get-SystemPackageManagerFallbackChain -ToolName 'docker'
 #>
 function global:Get-SystemPackageManagerFallbackChain {
     [CmdletBinding()]
@@ -2369,8 +2365,7 @@ function global:Get-SystemPackageManagerFallbackChain {
 .OUTPUTS
     System.Collections.Hashtable
 .EXAMPLE
-    Test-PreferenceAwareInstallPreferences
-
+    Test-PreferenceAwareInstallPreferences -PreferenceType 'value'
 #>
 function global:Test-PreferenceAwareInstallPreferences {
     [CmdletBinding()]
@@ -2504,8 +2499,7 @@ function global:Test-PreferenceAwareInstallPreferences {
 .OUTPUTS
     System.Collections.Hashtable
 .EXAMPLE
-    Set-PreferenceAwareInstallPreferences
-
+    Set-PreferenceAwareInstallPreferences -Name 'name' -Value 'value'
 #>
 function global:Set-PreferenceAwareInstallPreferences {
     [CmdletBinding()]

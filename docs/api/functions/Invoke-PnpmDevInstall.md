@@ -25,11 +25,9 @@ Package names to add as development dependencies.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-PnpmDevInstall typescript eslint
-.PARAMETER Packages
-    Package names to add as development dependencies.
-``
+```
 
 ## Aliases
 

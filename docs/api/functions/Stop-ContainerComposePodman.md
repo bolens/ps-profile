@@ -25,9 +25,9 @@ Additional arguments forwarded to compose down.
 
 ### Example 1
 
-`powershell
-Stop-ContainerComposePodman
-``
+```powershell
+Stop-ContainerComposePodman -args @('--version')
+```
 
 ## Aliases
 

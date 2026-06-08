@@ -30,24 +30,27 @@ System.String. Output from Gradle execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Build-Gradle
-        Builds the current Gradle project.
-``
+```
+
+Builds the current Gradle project.
 
 ### Example 2
 
-`powershell
+```powershell
 Build-Gradle build
-        Builds the project.
-``
+```
+
+Builds the project.
 
 ### Example 3
 
-`powershell
+```powershell
 Build-Gradle test
-        Runs Gradle tests.
-``
+```
+
+Runs Gradle tests.
 
 ## Aliases
 

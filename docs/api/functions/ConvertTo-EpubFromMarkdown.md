@@ -29,9 +29,9 @@ The path for the output EPUB file. If not specified, uses input path with .epub 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-EpubFromMarkdown -InputPath "book.md" -OutputPath "book.epub"
-``
+```
 
 ## Aliases
 

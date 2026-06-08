@@ -30,24 +30,27 @@ System.String. Output from Maven execution.
 
 ### Example 1
 
-`powershell
+```powershell
 Build-Maven
-        Builds the current Maven project.
-``
+```
+
+Builds the current Maven project.
 
 ### Example 2
 
-`powershell
+```powershell
 Build-Maven clean install
-        Cleans and installs the project.
-``
+```
+
+Cleans and installs the project.
 
 ### Example 3
 
-`powershell
+```powershell
 Build-Maven test
-        Runs Maven tests.
-``
+```
+
+Runs Maven tests.
 
 ## Aliases
 

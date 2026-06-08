@@ -42,17 +42,19 @@ PSCustomObject, System.String, or JSON depending on -OutputFormat.
 
 ### Example 1
 
-`powershell
+```powershell
 Explain-RegexPattern -Pattern '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
-    Explains an email regex pattern.
-``
+```
+
+Explains an email regex pattern.
 
 ### Example 2
 
-`powershell
+```powershell
 Explain-RegexPattern -Pattern '^user-\d+$' -OutputFormat Text
-    Returns a plain-text explanation.
-``
+```
+
+Returns a plain-text explanation.
 
 ## Aliases
 

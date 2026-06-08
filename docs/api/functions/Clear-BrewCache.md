@@ -37,38 +37,43 @@ Show what would be removed without actually deleting anything.
 
 ### Example 1
 
-`powershell
-Clear-BrewCache
-        Cleans up old versions and cache for all formulae.
-``
+```powershell
+Clear-BrewCache -Formula @() -Prune 1
+```
+
+Cleans up old versions and cache for all formulae.
 
 ### Example 2
 
-`powershell
+```powershell
 Clear-BrewCache -Formula git
-        Cleans up old versions and cache for git formula only.
-``
+```
+
+Cleans up old versions and cache for git formula only.
 
 ### Example 3
 
-`powershell
+```powershell
 Clear-BrewCache -Scrub
-        Removes all cache files, including those for latest versions.
-``
+```
+
+Removes all cache files, including those for latest versions.
 
 ### Example 4
 
-`powershell
+```powershell
 Clear-BrewCache -Prune 30
-        Removes cache files older than 30 days.
-``
+```
+
+Removes cache files older than 30 days.
 
 ### Example 5
 
-`powershell
+```powershell
 Clear-BrewCache -DryRun
-        Shows what would be removed without deleting.
-``
+```
+
+Shows what would be removed without deleting.
 
 ## Aliases
 

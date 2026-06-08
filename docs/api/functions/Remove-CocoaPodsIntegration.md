@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
-Remove-CocoaPodsIntegration
-        Removes CocoaPods from project.
-``
+```powershell
+Remove-CocoaPodsIntegration 'item'
+```
+
+Removes CocoaPods from project.
 
 ## Aliases
 

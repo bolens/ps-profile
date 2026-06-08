@@ -33,9 +33,9 @@ Optional sheet name to convert. If not specified, converts the first sheet.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-ExcelFromOds -InputPath "spreadsheet.ods" -OutputPath "spreadsheet.xlsx"
-``
+```
 
 ## Aliases
 

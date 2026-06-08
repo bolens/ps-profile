@@ -42,19 +42,19 @@ System.String. Path to the exported log file.
 
 ### Example 1
 
-`powershell
+```powershell
 Export-ContainerLogs -Container "my-container"
-        
-        Exports logs for my-container.
-``
+```
+
+Exports logs for my-container.
 
 ### Example 2
 
-`powershell
+```powershell
 Export-ContainerLogs -Container "my-container" -OutputPath "logs.txt" -Tail 100
-        
-        Exports last 100 lines to logs.txt.
-``
+```
+
+Exports last 100 lines to logs.txt.
 
 ## Source
 

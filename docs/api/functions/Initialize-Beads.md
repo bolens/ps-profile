@@ -42,17 +42,19 @@ System.String. Output from bd init command.
 
 ### Example 1
 
-`powershell
-Initialize-Beads
-        Initializes Beads in the current repository.
-``
+```powershell
+Initialize-Beads -Branch 'main'
+```
+
+Initializes Beads in the current repository.
 
 ### Example 2
 
-`powershell
+```powershell
 Initialize-Beads -Contributor
-        Initializes Beads for contributor workflow.
-``
+```
+
+Initializes Beads for contributor workflow.
 
 ## Source
 

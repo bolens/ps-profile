@@ -25,15 +25,15 @@ Arguments to pass to vue create.
 
 ### Example 1
 
-`powershell
+```powershell
 New-VueApp my-app
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 New-VueApp my-app --default
-``
+```
 
 ## Aliases
 

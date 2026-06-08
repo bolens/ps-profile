@@ -31,20 +31,69 @@ File paths to read from when not using pipeline input.
 
 ## Inputs
 
-System.Object Objects from the pipeline or file paths as strings. .OUTPUTS System.String The first N lines of the input. .EXAMPLE PS C:\> 1..20 | head 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -Lines 5 1 2 3 4 5 Shows the first 5 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -10 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline using Unix-style syntax. .EXAMPLE PS C:\> head README.md # First 10 lines of README.md Shows the first 10 lines of the README.md file. .EXAMPLE PS C:\> head README.md -Lines 5 # First 5 lines of README.md Shows the first 5 lines of the README.md file. .NOTES This function buffers all pipeline input before processing, so it may use more memory for large inputs. For very large files, consider using Get-Content with Select-Object directly.
+System.Object Objects from the pipeline or file paths as strings. .OUTPUTS System.String The first N lines of the input. .NOTES This function buffers all pipeline input before processing, so it may use more memory for large inputs. For very large files, consider using Get-Content with Select-Object directly.
 
 
 ## Outputs
 
-System.String The first N lines of the input. .EXAMPLE PS C:\> 1..20 | head 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -Lines 5 1 2 3 4 5 Shows the first 5 numbers from the pipeline. .EXAMPLE PS C:\> 1..20 | head -10 1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline using Unix-style syntax. .EXAMPLE PS C:\> head README.md # First 10 lines of README.md Shows the first 10 lines of the README.md file. .EXAMPLE PS C:\> head README.md -Lines 5 # First 5 lines of README.md Shows the first 5 lines of the README.md file.
+System.String The first N lines of the input.
 
 
 ## Examples
 
 ### Example 1
 
-`powershell
+```powershell
 PS C:\> 1..20 | head
+```
+
+1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline.
+
+### Example 2
+
+```powershell
+PS C:\> 1..20 | head -Lines 5
+```
+
+1 2 3 4 5 Shows the first 5 numbers from the pipeline.
+
+### Example 3
+
+```powershell
+PS C:\> 1..20 | head -10
+```
+
+1 2 3 4 5 6 7 8 9 10 Shows the first 10 numbers from the pipeline using Unix-style syntax.
+
+### Example 4
+
+```powershell
+PS C:\> head README.md
+```
+
+# First 10 lines of README.md Shows the first 10 lines of the README.md file.
+
+### Example 5
+
+```powershell
+PS C:\> head README.md -Lines 5
+```
+
+# First 5 lines of README.md Shows the first 5 lines of the README.md file.
+
+## Notes
+
+This function buffers all pipeline input before processing, so it may use more memory for large inputs. For very large files, consider using Get-Content with Select-Object directly.
+
+
+## Related Links
+
+- Get-FileTail
+    Get-Content
+    Select-Object
+
+.EXAMPLE
+    PS C:\> 1..20 | head
     1
     2
     3
@@ -57,12 +106,10 @@ PS C:\> 1..20 | head
     10
 
     Shows the first 10 numbers from the pipeline.
-``
 
-### Example 2
 
-`powershell
-PS C:\> 1..20 | head -Lines 5
+.EXAMPLE
+    PS C:\> 1..20 | head -Lines 5
     1
     2
     3
@@ -70,12 +117,10 @@ PS C:\> 1..20 | head -Lines 5
     5
 
     Shows the first 5 numbers from the pipeline.
-``
 
-### Example 3
 
-`powershell
-PS C:\> 1..20 | head -10
+.EXAMPLE
+    PS C:\> 1..20 | head -10
     1
     2
     3
@@ -88,36 +133,20 @@ PS C:\> 1..20 | head -10
     10
 
     Shows the first 10 numbers from the pipeline using Unix-style syntax.
-``
 
-### Example 4
 
-`powershell
-PS C:\> head README.md
+.EXAMPLE
+    PS C:\> head README.md
     # First 10 lines of README.md
 
     Shows the first 10 lines of the README.md file.
-``
 
-### Example 5
 
-`powershell
-PS C:\> head README.md -Lines 5
+.EXAMPLE
+    PS C:\> head README.md -Lines 5
     # First 5 lines of README.md
 
     Shows the first 5 lines of the README.md file.
-``
-
-## Notes
-
-This function buffers all pipeline input before processing, so it may use more memory for large inputs. For very large files, consider using Get-Content with Select-Object directly.
-
-
-## Related Links
-
-- Get-FileTail
-    Get-Content
-    Select-Object
 
 
 ## Aliases

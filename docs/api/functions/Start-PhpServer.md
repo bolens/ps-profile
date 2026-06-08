@@ -25,15 +25,15 @@ Port number for the server (default: 8000).
 
 ### Example 1
 
-`powershell
-Start-PhpServer
-``
+```powershell
+Start-PhpServer -Port 1
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Start-PhpServer -Port 3000
-``
+```
 
 ## Aliases
 

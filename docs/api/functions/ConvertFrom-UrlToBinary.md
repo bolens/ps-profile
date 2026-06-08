@@ -34,10 +34,11 @@ System.String The binary representation of the input URL encoded string.
 
 ### Example 1
 
-`powershell
+```powershell
 "Hello%20World" | ConvertFrom-UrlToBinary
-    Converts URL encoding to binary with spaces.
-``
+```
+
+Converts URL encoding to binary with spaces.
 
 ## Aliases
 

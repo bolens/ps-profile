@@ -42,12 +42,11 @@ None. Warning is recorded.
 
 ### Example 1
 
-`powershell
+```powershell
 Write-StructuredWarning -Message "Slow query detected" -OperationName "database.query" -Context @{
-            query = "SELECT * FROM users"
-            duration_ms = 2500
-        }
-``
+```
+
+query = "SELECT * FROM users" duration_ms = 2500 }
 
 ## Source
 

@@ -25,15 +25,15 @@ Arguments to pass to tailscale.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Tailscale status
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Tailscale ping hostname
-``
+```
 
 ## Aliases
 

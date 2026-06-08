@@ -98,19 +98,26 @@ function Get-PythonRequirementsFromFile {
 .SYNOPSIS
         Parses package names from requirements.txt (strips version specifiers).
 
+
+.DESCRIPTION
+    Parses package names from requirements.txt (strips version specifiers).
+
     .PARAMETER Path
         requirements.txt file path.
+
+
+    .PARAMETER Path
+    requirements.txt file path.
 
     .OUTPUTS
         System.String[]
 
-    .EXAMPLE
-.DESCRIPTION
-    Parses package names from requirements.txt (strips version specifiers).
-    .PARAMETER Path
-    requirements.txt file path.
+
     .OUTPUTS
     System.String[]
+
+    .EXAMPLE
+
     .EXAMPLE
         Get-PythonRequirementsFromFile -Path (Join-Path $repoRoot 'requirements.txt')
 #>
@@ -144,24 +151,33 @@ function Get-LinuxRequirementsFromFile {
 .SYNOPSIS
         Parses a distro section from requirements/linux.txt.
 
+
+.DESCRIPTION
+    Parses a distro section from requirements/linux.txt.
+
     .PARAMETER Path
         Path to requirements/linux.txt.
+
 
     .PARAMETER Section
         apt, pacman, or dnf (matches # --- section headers).
 
+
+    .PARAMETER Path
+    Path to requirements/linux.txt.
+
+    .PARAMETER Section
+    apt, pacman, or dnf (matches # --- section headers).
+
     .OUTPUTS
         System.String[]
 
-    .EXAMPLE
-.DESCRIPTION
-    Parses a distro section from requirements/linux.txt.
-    .PARAMETER Path
-    Path to requirements/linux.txt.
-    .PARAMETER Section
-    apt, pacman, or dnf (matches # --- section headers).
+
     .OUTPUTS
     System.String[]
+
+    .EXAMPLE
+
     .EXAMPLE
         Get-LinuxRequirementsFromFile -Path $linuxManifest -Section 'apt'
 #>
@@ -210,19 +226,26 @@ function Get-NpmRequirementsFromPackageJson {
 .SYNOPSIS
         Returns dependency package names from package.json.
 
+
+.DESCRIPTION
+    Returns dependency package names from package.json.
+
     .PARAMETER Path
         package.json file path.
+
+
+    .PARAMETER Path
+    package.json file path.
 
     .OUTPUTS
         System.String[]
 
-    .EXAMPLE
-.DESCRIPTION
-    Returns dependency package names from package.json.
-    .PARAMETER Path
-    package.json file path.
+
     .OUTPUTS
     System.String[]
+
+    .EXAMPLE
+
     .EXAMPLE
         Get-NpmRequirementsFromPackageJson -Path (Join-Path $repoRoot 'package.json')
 #>
@@ -324,24 +347,33 @@ function Get-SystemRequirementsPackages {
 .SYNOPSIS
         Loads system package names for the detected or specified package manager.
 
+
+.DESCRIPTION
+    Loads system package names for the detected or specified package manager.
+
     .PARAMETER RepoRoot
         Repository root containing requirements manifests.
+
 
     .PARAMETER PackageManager
         Optional package manager override (scoop, apt, pacman, dnf).
 
+
+    .PARAMETER RepoRoot
+    Repository root containing requirements manifests.
+
+    .PARAMETER PackageManager
+    Optional package manager override (scoop, apt, pacman, dnf).
+
     .OUTPUTS
         System.String[]
 
-    .EXAMPLE
-.DESCRIPTION
-    Loads system package names for the detected or specified package manager.
-    .PARAMETER RepoRoot
-    Repository root containing requirements manifests.
-    .PARAMETER PackageManager
-    Optional package manager override (scoop, apt, pacman, dnf).
+
     .OUTPUTS
     System.String[]
+
+    .EXAMPLE
+
     .EXAMPLE
         Get-SystemRequirementsPackages -RepoRoot $repoRoot
 #>
@@ -376,24 +408,33 @@ function Get-SystemPackageInstallCommand {
 .SYNOPSIS
         Builds a bulk install command for missing system packages.
 
+
+.DESCRIPTION
+    Builds a bulk install command for missing system packages.
+
     .PARAMETER PackageNames
         Package names to install.
+
 
     .PARAMETER PackageManager
         Target package manager (scoop, apt, pacman, dnf).
 
+
+    .PARAMETER PackageNames
+    Package names to install.
+
+    .PARAMETER PackageManager
+    Target package manager (scoop, apt, pacman, dnf).
+
     .OUTPUTS
         System.String
 
-    .EXAMPLE
-.DESCRIPTION
-    Builds a bulk install command for missing system packages.
-    .PARAMETER PackageNames
-    Package names to install.
-    .PARAMETER PackageManager
-    Target package manager (scoop, apt, pacman, dnf).
+
     .OUTPUTS
     System.String
+
+    .EXAMPLE
+
     .EXAMPLE
         Get-SystemPackageInstallCommand -PackageNames 'git','jq' -PackageManager 'apt'
 #>

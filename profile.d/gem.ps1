@@ -135,26 +135,31 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     # ridk comes with Ruby when installed via Scoop on Windows
     if (Test-CachedCommand ridk) {
         <#
-        .SYNOPSIS
+.SYNOPSIS
             Installs MSYS2 development tools using Ruby Installer Development Kit.
+
         .DESCRIPTION
             Runs 'ridk install' to install MSYS2 development tools needed for building
             native Ruby gems on Windows. This is typically required after installing
             Ruby from Scoop to enable compilation of native extensions.
+
         .PARAMETER Components
             Optional components to install. If not specified, runs 'ridk install'
             which will prompt for component selection.
-        .EXAMPLE
-            Install-RubyDevKit
-            Installs MSYS2 development tools (will prompt for component selection).
-        .EXAMPLE
-            Install-RubyDevKit -Components 1,2,3
-            Installs specific MSYS2 components.
+
         .NOTES
             This command is only available on Windows when Ruby is installed via Scoop.
             After installing Ruby (see `Get-PlatformInstallHint -ToolName ruby`), run this command to set up
             the development environment for building native gems.
-        #>
+
+        .EXAMPLE
+    Install-RubyDevKit 'package-name'
+            Installs MSYS2 development tools (will prompt for component selection).
+
+        .EXAMPLE
+            Install-RubyDevKit -Components 1,2,3
+            Installs specific MSYS2 components.
+#>
         function Install-RubyDevKit {
             [CmdletBinding()]
             param(

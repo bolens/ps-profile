@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
+```powershell
 Update-AsdfSelf
-        Updates asdf to the latest version.
-``
+```
+
+Updates asdf to the latest version.
 
 ## Aliases
 

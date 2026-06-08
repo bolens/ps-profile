@@ -30,17 +30,19 @@ PSCustomObject or ordered hashtable depending on whether -Name is specified.
 
 ### Example 1
 
-`powershell
-Get-RegexDescriptionCatalog
-    Lists all supported catalog entries.
-``
+```powershell
+Get-RegexDescriptionCatalog -Name 'name'
+```
+
+Lists all supported catalog entries.
 
 ### Example 2
 
-`powershell
+```powershell
 Get-RegexDescriptionCatalog -Name 'iban'
-    Returns the IBAN catalog entry.
-``
+```
+
+Returns the IBAN catalog entry.
 
 ## Aliases
 

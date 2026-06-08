@@ -30,10 +30,11 @@ System.String The hexadecimal representation of the input octal string.
 
 ### Example 1
 
-`powershell
+```powershell
 "110 151" | ConvertFrom-OctalToHex
-    Converts octal to hex.
-``
+```
+
+Converts octal to hex.
 
 ## Aliases
 

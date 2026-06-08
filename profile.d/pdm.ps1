@@ -89,19 +89,19 @@ if (Test-CachedCommand pdm) {
     Set-AgentModeAlias -Name 'pdmuninstall' -Target 'Remove-PdmPackage'
     # PDM update - update packages
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Updates packages using PDM.
     .DESCRIPTION
         Updates specified packages or all packages if no arguments provided.
     .PARAMETER Packages
         Package names to update (optional, updates all if omitted).
     .EXAMPLE
-        Update-PdmPackages
+    Update-PdmPackages -Packages 'package-name'
         Updates all packages.
     .EXAMPLE
         Update-PdmPackages requests
         Updates requests package.
-    #>
+#>
     function Update-PdmPackages {
         [CmdletBinding()]
         param(

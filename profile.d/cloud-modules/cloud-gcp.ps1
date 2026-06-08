@@ -24,28 +24,33 @@ try {
     .SYNOPSIS
         Switches the active GCP project.
     
+
     .DESCRIPTION
         Changes the active Google Cloud Platform project for the current session.
         Uses gcloud to list and set projects.
     
+
     .PARAMETER ProjectId
         Project ID to switch to.
     
+
     .PARAMETER List
         List all available projects instead of switching.
     
+
+    .OUTPUTS
+        System.String. Project information or list of projects.
+
     .EXAMPLE
         Set-GcpProject -ProjectId "my-project-id"
         
         Switches to the specified project.
     
+
     .EXAMPLE
         Set-GcpProject -List
         
         Lists all available projects.
-    
-    .OUTPUTS
-        System.String. Project information or list of projects.
     #>
     function Set-GcpProject {
         [CmdletBinding()]

@@ -179,16 +179,18 @@ if ($failedPaths.Count -gt 0) {
 }
 
 # Save report to JSON (matching CI behavior)
-$reportData = $results | ForEach-Object {
-    [PSCustomObject]@{
-        FilePath = $_.ScriptName
-        RuleName = $_.RuleName
-        Severity = $_.Severity
-        Message  = $_.Message
-        Line     = $_.Line
-        Column   = $_.Column
+$reportData = @(
+    $results | ForEach-Object {
+        [PSCustomObject]@{
+            FilePath = $_.ScriptName
+            RuleName = $_.RuleName
+            Severity = $_.Severity
+            Message  = $_.Message
+            Line     = $_.Line
+            Column   = $_.Column
+        }
     }
-}
+)
 $dataDir = Join-Path $repoRoot 'scripts' 'data'
 $out = Join-Path $dataDir 'psscriptanalyzer-report.json'
 Write-JsonFile -Path $out -InputObject $reportData -Depth 5 -EnsureDirectory

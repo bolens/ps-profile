@@ -38,11 +38,11 @@ System.String Returns an ISO 8601 formatted date/time string.
 
 ### Example 1
 
-`powershell
+```powershell
 1609459200 | ConvertTo-Iso8601FromUnixTimestamp
-    
-    Converts a Unix timestamp to ISO 8601 format.
-``
+```
+
+Converts a Unix timestamp to ISO 8601 format.
 
 ## Aliases
 

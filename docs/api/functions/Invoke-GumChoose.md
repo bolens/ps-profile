@@ -29,9 +29,9 @@ Header text shown above the chooser.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-GumChoose -Options 'dev', 'staging', 'prod' -Prompt 'Environment'
-``
+```
 
 ## Aliases
 

@@ -25,19 +25,19 @@ Path to the Git repository. Defaults to current directory.
 
 ### Example 1
 
-`powershell
-Invoke-GitKraken
-        
-        Opens GitKraken in the current directory.
-``
+```powershell
+Invoke-GitKraken @('--help')
+```
+
+Opens GitKraken in the current directory.
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-GitKraken -RepositoryPath "C:\Projects\MyRepo"
-        
-        Opens GitKraken for the specified repository.
-``
+```
+
+Opens GitKraken for the specified repository.
 
 ## Aliases
 

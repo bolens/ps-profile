@@ -34,27 +34,27 @@ System.String Returns a human-readable duration string.
 
 ### Example 1
 
-`powershell
+```powershell
 New-TimeSpan -Days 2 -Hours 3 -Minutes 15 | ConvertTo-DurationFromTimeSpan
-    
-    Converts a TimeSpan to "2 days 3 hours 15 minutes".
-``
+```
+
+Converts a TimeSpan to "2 days 3 hours 15 minutes".
 
 ### Example 2
 
-`powershell
+```powershell
 New-TimeSpan -Hours 2 | ConvertTo-DurationFromTimeSpan -Format 'short'
-    
-    Converts to "2h".
-``
+```
+
+Converts to "2h".
 
 ### Example 3
 
-`powershell
+```powershell
 New-TimeSpan -Days 1 -Hours 2 -Minutes 3 | ConvertTo-DurationFromTimeSpan -Format 'iso8601'
-    
-    Converts to "P1DT2H3M" (ISO 8601 duration format).
-``
+```
+
+Converts to "P1DT2H3M" (ISO 8601 duration format).
 
 ## Aliases
 

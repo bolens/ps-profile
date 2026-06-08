@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     The full unit suite is large and can crash in a single session on some hosts.
-    Default mode runs one run-pester process per *.tests.ps1 under tests/unit.
+    Default mode runs one run-pester process per *.tests.ps1 under tests/unit (recursive).
 
 .PARAMETER Filter
     Optional glob-style name filter (e.g. profile-, library-).
@@ -37,7 +37,7 @@ if (-not (Test-Path -LiteralPath $unitRoot)) {
 }
 
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
-$files = @(Get-ChildItem -Path $unitRoot -Filter '*.tests.ps1' -File | Sort-Object Name)
+$files = @(Get-ChildItem -Path $unitRoot -Filter '*.tests.ps1' -File -Recurse | Sort-Object FullName)
 if (-not [string]::IsNullOrWhiteSpace($Filter)) {
     $files = @($files | Where-Object { $_.Name -like "*$Filter*" })
 }

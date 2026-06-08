@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Edit-WithCursor
-        
-        Opens current directory in Cursor.
-``
+```powershell
+Edit-WithCursor -Path ./path
+```
+
+Opens current directory in Cursor.
 
 ### Example 2
 
-`powershell
+```powershell
 Edit-WithCursor -Path "C:\Projects\MyApp"
-        
-        Opens a directory in Cursor.
-``
+```
+
+Opens a directory in Cursor.
 
 ## Source
 

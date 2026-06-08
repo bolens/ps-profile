@@ -50,19 +50,19 @@ System.String. Port forwarding status or process information.
 
 ### Example 1
 
-`powershell
+```powershell
 PortForward-KubeService -Resource "my-pod" -LocalPort 8080 -RemotePort 80
-        
-        Forwards local port 8080 to pod port 80.
-``
+```
+
+Forwards local port 8080 to pod port 80.
 
 ### Example 2
 
-`powershell
+```powershell
 PortForward-KubeService -Resource "my-service" -ResourceType "service" -LocalPort 8080 -RemotePort 80
-        
-        Forwards local port 8080 to service port 80.
-``
+```
+
+Forwards local port 8080 to service port 80.
 
 ## Source
 

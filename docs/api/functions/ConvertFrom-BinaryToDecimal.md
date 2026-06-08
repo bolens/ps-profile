@@ -34,10 +34,11 @@ System.String The decimal representation of the input binary string.
 
 ### Example 1
 
-`powershell
+```powershell
 "01001000 01101001" | ConvertFrom-BinaryToDecimal
-    Converts binary to decimal.
-``
+```
+
+Converts binary to decimal.
 
 ## Aliases
 

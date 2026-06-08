@@ -16,8 +16,7 @@
 .OUTPUTS
     Hashtable with keys: DisabledFragments, LoadOrderOverride, EnvironmentSets, FeatureFlags, PerformanceConfig, AllFragments, ProfileDExists
 .EXAMPLE
-    Initialize-FragmentConfiguration
-
+    Initialize-FragmentConfiguration -ProfileDir 'value' -FragmentConfigModule 'value'
 #>
 function Initialize-FragmentConfiguration {
     [CmdletBinding()]
@@ -279,7 +278,6 @@ function Initialize-FragmentConfiguration {
     The value to normalize.
 .EXAMPLE
     Test-EnvBool
-
 #>
 function Test-EnvBool {
     [CmdletBinding()]

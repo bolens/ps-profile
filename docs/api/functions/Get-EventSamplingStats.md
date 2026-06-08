@@ -27,11 +27,11 @@ EventSamplingStats. Sampling statistics with type-safe properties and helper met
 
 ### Example 1
 
-`powershell
+```powershell
 Get-EventSamplingStats
-        
-        Returns sampling statistics.
-``
+```
+
+Returns sampling statistics.
 
 ## Source
 

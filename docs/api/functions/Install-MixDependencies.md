@@ -22,10 +22,11 @@ No parameters.
 
 ### Example 1
 
-`powershell
-Install-MixDependencies
-        Installs all dependencies.
-``
+```powershell
+Install-MixDependencies 'package-name'
+```
+
+Installs all dependencies.
 
 ## Aliases
 

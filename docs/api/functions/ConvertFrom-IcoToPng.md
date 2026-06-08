@@ -29,9 +29,9 @@ Path for the output PNG file. If not specified, uses input path with .png extens
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-IcoToPng -InputPath "icon.ico" -OutputPath "icon.png"
-``
+```
 
 ## Aliases
 

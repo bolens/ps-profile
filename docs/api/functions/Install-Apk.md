@@ -42,19 +42,19 @@ System.Boolean. True if installation succeeded, false otherwise.
 
 ### Example 1
 
-`powershell
+```powershell
 Install-Apk -ApkPath "app.apk"
-        
-        Installs an APK file on Android device.
-``
+```
+
+Installs an APK file on Android device.
 
 ### Example 2
 
-`powershell
+```powershell
 Install-Apk -ApkPath "app.apk" -ReplaceExisting -GrantPermissions
-        
-        Installs APK, replacing existing app and granting all permissions.
-``
+```
+
+Installs APK, replacing existing app and granting all permissions.
 
 ## Source
 

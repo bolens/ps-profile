@@ -29,30 +29,42 @@
 .SYNOPSIS
     Connects to a database using available client tools.
 
+
 .DESCRIPTION
     Provides a universal interface for connecting to various database types.
     Automatically detects available database client tools and uses the appropriate one.
 
+
 .PARAMETER DatabaseType
     Database type: PostgreSQL, MySQL, SQLite, MongoDB, SQLServer, Oracle.
+
 
 .PARAMETER ConnectionString
     Database connection string or connection parameters.
 
+
 .PARAMETER ServerHost
     Database host name or IP address.
+
 
 .PARAMETER Port
     Database port number.
 
+
 .PARAMETER Database
     Database name.
+
 
 .PARAMETER Credential
     PSCredential object containing username and password.
 
+
 .PARAMETER UseGui
     Use GUI client if available (default: true).
+
+
+.OUTPUTS
+    System.Object. Connection information or process object.
 
 .EXAMPLE
     $cred = Get-Credential
@@ -60,13 +72,11 @@
     
     Connects to PostgreSQL database using GUI client.
 
+
 .EXAMPLE
     Connect-Database -DatabaseType MySQL -ConnectionString "mysql://user:pass@localhost:3306/mydb"
     
     Connects using connection string.
-
-.OUTPUTS
-    System.Object. Connection information or process object.
 #>
 function Connect-Database {
     [CmdletBinding()]
@@ -231,34 +241,41 @@ function Connect-Database {
 .SYNOPSIS
     Executes a database query.
 
+
 .DESCRIPTION
     Executes a SQL or database query using available command-line tools.
     Supports PostgreSQL, MySQL, SQLite, and MongoDB.
 
+
 .PARAMETER DatabaseType
     Database type: PostgreSQL, MySQL, SQLite, MongoDB.
+
 
 .PARAMETER Query
     SQL query or database command to execute.
 
+
 .PARAMETER Database
     Database name or connection string.
 
+
 .PARAMETER OutputFormat
     Output format: table, json, csv. Defaults to table.
+
+
+.OUTPUTS
+    System.Object. Query results.
 
 .EXAMPLE
     Query-Database -DatabaseType PostgreSQL -Database mydb -Query "SELECT * FROM users LIMIT 10"
     
     Executes a PostgreSQL query.
 
+
 .EXAMPLE
     Query-Database -DatabaseType MongoDB -Database mydb -Query "db.users.find().limit(10)"
     
     Executes a MongoDB query.
-
-.OUTPUTS
-    System.Object. Query results.
 #>
 function Query-Database {
     [CmdletBinding()]
@@ -360,37 +377,45 @@ function Query-Database {
 .SYNOPSIS
     Exports a database to a file.
 
+
 .DESCRIPTION
     Exports database schema and/or data to a file using database-specific tools.
     Supports PostgreSQL, MySQL, SQLite, and MongoDB.
 
+
 .PARAMETER DatabaseType
     Database type: PostgreSQL, MySQL, SQLite, MongoDB.
+
 
 .PARAMETER Database
     Database name or connection string.
 
+
 .PARAMETER OutputPath
     Path to output file.
+
 
 .PARAMETER SchemaOnly
     Export only schema (no data).
 
+
 .PARAMETER DataOnly
     Export only data (no schema).
+
+
+.OUTPUTS
+    System.String. Path to exported file.
 
 .EXAMPLE
     Export-Database -DatabaseType PostgreSQL -Database mydb -OutputPath "backup.sql"
     
     Exports PostgreSQL database to SQL file.
 
+
 .EXAMPLE
     Export-Database -DatabaseType MongoDB -Database mydb -OutputPath "backup.json" -DataOnly
     
     Exports MongoDB data to JSON file.
-
-.OUTPUTS
-    System.String. Path to exported file.
 #>
 function Export-Database {
     [CmdletBinding()]
@@ -496,31 +521,37 @@ function Export-Database {
 .SYNOPSIS
     Imports a database from a file.
 
+
 .DESCRIPTION
     Imports database schema and/or data from a file using database-specific tools.
     Supports PostgreSQL, MySQL, SQLite, and MongoDB.
 
+
 .PARAMETER DatabaseType
     Database type: PostgreSQL, MySQL, SQLite, MongoDB.
+
 
 .PARAMETER Database
     Target database name.
 
+
 .PARAMETER InputPath
     Path to input file.
+
+
+.OUTPUTS
+    System.Boolean. True if import successful.
 
 .EXAMPLE
     Import-Database -DatabaseType PostgreSQL -Database mydb -InputPath "backup.sql"
     
     Imports PostgreSQL database from SQL file.
 
+
 .EXAMPLE
     Import-Database -DatabaseType MongoDB -Database mydb -InputPath "backup.json"
     
     Imports MongoDB data from JSON file.
-
-.OUTPUTS
-    System.Boolean. True if import successful.
 #>
 function Import-Database {
     [CmdletBinding()]
@@ -602,34 +633,41 @@ function Import-Database {
 .SYNOPSIS
     Creates a backup of a database.
 
+
 .DESCRIPTION
     Creates a backup of a database using database-specific backup tools.
     Supports PostgreSQL, MySQL, SQLite, and MongoDB.
 
+
 .PARAMETER DatabaseType
     Database type: PostgreSQL, MySQL, SQLite, MongoDB.
+
 
 .PARAMETER Database
     Database name or connection string.
 
+
 .PARAMETER BackupPath
     Path to backup file. Defaults to database name with timestamp.
 
+
 .PARAMETER Compress
     Compress the backup file.
+
+
+.OUTPUTS
+    System.String. Path to backup file.
 
 .EXAMPLE
     Backup-Database -DatabaseType PostgreSQL -Database mydb
     
     Creates a PostgreSQL backup.
 
+
 .EXAMPLE
     Backup-Database -DatabaseType MySQL -Database mydb -BackupPath "backup.sql" -Compress
     
     Creates a compressed MySQL backup.
-
-.OUTPUTS
-    System.String. Path to backup file.
 #>
 function Backup-Database {
     [CmdletBinding()]
@@ -688,31 +726,37 @@ function Backup-Database {
 .SYNOPSIS
     Restores a database from a backup.
 
+
 .DESCRIPTION
     Restores a database from a backup file using database-specific restore tools.
     Supports PostgreSQL, MySQL, SQLite, and MongoDB.
 
+
 .PARAMETER DatabaseType
     Database type: PostgreSQL, MySQL, SQLite, MongoDB.
+
 
 .PARAMETER Database
     Target database name.
 
+
 .PARAMETER BackupPath
     Path to backup file.
+
+
+.OUTPUTS
+    System.Boolean. True if restore successful.
 
 .EXAMPLE
     Restore-Database -DatabaseType PostgreSQL -Database mydb -BackupPath "backup.dump"
     
     Restores PostgreSQL database from backup.
 
+
 .EXAMPLE
     Restore-Database -DatabaseType MySQL -Database mydb -BackupPath "backup.sql.gz"
     
     Restores MySQL database from compressed backup.
-
-.OUTPUTS
-    System.Boolean. True if restore successful.
 #>
 function Restore-Database {
     [CmdletBinding(SupportsShouldProcess = $true)]
@@ -764,34 +808,41 @@ function Restore-Database {
 .SYNOPSIS
     Gets database schema information.
 
+
 .DESCRIPTION
     Retrieves schema information (tables, columns, indexes, etc.) from a database.
     Supports PostgreSQL, MySQL, SQLite, and MongoDB.
 
+
 .PARAMETER DatabaseType
     Database type: PostgreSQL, MySQL, SQLite, MongoDB.
+
 
 .PARAMETER Database
     Database name or connection string.
 
+
 .PARAMETER TableName
     Optional specific table name to get schema for.
 
+
 .PARAMETER OutputFormat
     Output format: table, json. Defaults to table.
+
+
+.OUTPUTS
+    System.Object. Schema information.
 
 .EXAMPLE
     Get-DatabaseSchema -DatabaseType PostgreSQL -Database mydb
     
     Gets schema for all tables in PostgreSQL database.
 
+
 .EXAMPLE
     Get-DatabaseSchema -DatabaseType MySQL -Database mydb -TableName users -OutputFormat json
     
     Gets schema for specific table in JSON format.
-
-.OUTPUTS
-    System.Object. Schema information.
 #>
 function Get-DatabaseSchema {
     [CmdletBinding()]

@@ -24,34 +24,41 @@ try {
     .SYNOPSIS
         Gets Kubernetes resource information.
     
+
     .DESCRIPTION
         Retrieves detailed information about Kubernetes resources using kubectl.
         Supports different output formats and resource types.
     
+
     .PARAMETER ResourceType
         Kubernetes resource type (e.g., pods, services, deployments).
     
+
     .PARAMETER ResourceName
         Optional specific resource name.
     
+
     .PARAMETER Namespace
         Kubernetes namespace. Defaults to current namespace.
     
+
     .PARAMETER OutputFormat
         Output format: wide, yaml, json. Defaults to wide.
     
+
+    .OUTPUTS
+        System.String. Resource information in the specified format.
+
     .EXAMPLE
         Get-KubeResources -ResourceType "pods"
         
         Lists all pods in the current namespace.
     
+
     .EXAMPLE
         Get-KubeResources -ResourceType "deployments" -Namespace "production" -OutputFormat "yaml"
         
         Gets deployments in production namespace as YAML.
-    
-    .OUTPUTS
-        System.String. Resource information in the specified format.
     #>
     function Get-KubeResources {
         [CmdletBinding()]
@@ -125,40 +132,49 @@ try {
     .SYNOPSIS
         Executes commands in Kubernetes pods.
     
+
     .DESCRIPTION
         Runs commands inside Kubernetes pods using kubectl exec.
         Supports interactive and non-interactive execution.
     
+
     .PARAMETER Pod
         Pod name or pattern to match.
     
+
     .PARAMETER Command
         Command to execute. Defaults to shell (/bin/sh or /bin/bash).
     
+
     .PARAMETER Container
         Optional container name if pod has multiple containers.
     
+
     .PARAMETER Namespace
         Kubernetes namespace. Defaults to current namespace.
     
+
     .PARAMETER Interactive
         Run command interactively (default: false).
     
+
     .PARAMETER Tty
         Allocate a TTY for the command (default: false).
     
+
+    .OUTPUTS
+        System.String. Command output.
+
     .EXAMPLE
         Exec-KubePod -Pod "my-app" -Command "ls -la"
         
         Executes ls -la in my-app pod.
     
+
     .EXAMPLE
         Exec-KubePod -Pod "nginx" -Container "web" -Command "/bin/sh" -Interactive -Tty
         
         Opens interactive shell in nginx pod, web container.
-    
-    .OUTPUTS
-        System.String. Command output.
     #>
     function Exec-KubePod {
         [CmdletBinding()]
@@ -233,40 +249,49 @@ try {
     .SYNOPSIS
         Forwards ports from Kubernetes services or pods to local machine.
     
+
     .DESCRIPTION
         Creates port forwarding from Kubernetes resources to local ports.
         Supports both services and pods.
     
+
     .PARAMETER Resource
         Resource name (pod or service).
     
+
     .PARAMETER ResourceType
         Resource type: pod or service. Defaults to pod.
     
+
     .PARAMETER LocalPort
         Local port to forward to. Defaults to same as remote port.
     
+
     .PARAMETER RemotePort
         Remote port to forward from. Required for services.
     
+
     .PARAMETER Namespace
         Kubernetes namespace. Defaults to current namespace.
     
+
     .PARAMETER Address
         Local address to bind to. Defaults to localhost.
     
+
+    .OUTPUTS
+        System.String. Port forwarding status or process information.
+
     .EXAMPLE
         PortForward-KubeService -Resource "my-pod" -LocalPort 8080 -RemotePort 80
         
         Forwards local port 8080 to pod port 80.
     
+
     .EXAMPLE
         PortForward-KubeService -Resource "my-service" -ResourceType "service" -LocalPort 8080 -RemotePort 80
         
         Forwards local port 8080 to service port 80.
-    
-    .OUTPUTS
-        System.String. Port forwarding status or process information.
     #>
     function PortForward-KubeService {
         [CmdletBinding()]
@@ -352,37 +377,45 @@ try {
     .SYNOPSIS
         Gets detailed description of Kubernetes resources.
     
+
     .DESCRIPTION
         Provides enhanced describe functionality for Kubernetes resources
         with better formatting and filtering options.
     
+
     .PARAMETER ResourceType
         Kubernetes resource type (e.g., pods, services, deployments).
     
+
     .PARAMETER ResourceName
         Resource name. If not specified, describes all resources of the type.
     
+
     .PARAMETER Namespace
         Kubernetes namespace. Defaults to current namespace.
     
+
     .PARAMETER ShowEvents
         Include events in the description (default: true).
     
+
     .PARAMETER ShowYaml
         Show resource YAML instead of describe output.
     
+
+    .OUTPUTS
+        System.String. Resource description or YAML.
+
     .EXAMPLE
         Describe-KubeResource -ResourceType "pods" -ResourceName "my-pod"
         
         Describes the my-pod pod.
     
+
     .EXAMPLE
         Describe-KubeResource -ResourceType "deployments" -Namespace "production" -ShowYaml
         
         Shows YAML for all deployments in production namespace.
-    
-    .OUTPUTS
-        System.String. Resource description or YAML.
     #>
     function Describe-KubeResource {
         [CmdletBinding()]
@@ -490,45 +523,55 @@ try {
     .SYNOPSIS
         Applies multiple Kubernetes manifest files.
     
+
     .DESCRIPTION
         Applies Kubernetes manifests from files or directories.
         Supports recursive directory processing and dry-run mode.
     
+
     .PARAMETER Path
         Path to manifest file or directory containing manifests.
     
+
     .PARAMETER Recursive
         Process directories recursively (default: false).
     
+
     .PARAMETER DryRun
         Perform a dry-run without actually applying (default: false).
     
+
     .PARAMETER Namespace
         Kubernetes namespace to apply to. Overrides namespace in manifests.
     
+
     .PARAMETER ServerSide
         Use server-side apply (default: false).
     
+
     .PARAMETER Force
         Force apply even if resources already exist (default: false).
     
+
+    .OUTPUTS
+        System.String. Apply output from kubectl.
+
     .EXAMPLE
         Apply-KubeManifests -Path "manifests/"
         
         Applies all manifests in the manifests directory.
     
+
     .EXAMPLE
         Apply-KubeManifests -Path "k8s/" -Recursive -DryRun
         
         Performs dry-run of all manifests recursively.
     
+
     .EXAMPLE
         Apply-KubeManifests -Path "deployment.yaml" -Namespace "production" -ServerSide
         
         Applies deployment.yaml to production namespace using server-side apply.
-    
-    .OUTPUTS
-        System.String. Apply output from kubectl.
     #>
     function Apply-KubeManifests {
         [CmdletBinding(SupportsShouldProcess = $true)]

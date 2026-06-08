@@ -33,9 +33,9 @@ HEIC quality (1-100, default: 90). Higher values mean better quality but larger 
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertTo-HeicFromJpeg -InputPath "image.jpg" -OutputPath "image.heic" -Quality 95
-``
+```
 
 ## Aliases
 

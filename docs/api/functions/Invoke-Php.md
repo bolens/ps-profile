@@ -25,15 +25,15 @@ Arguments to pass to php.
 
 ### Example 1
 
-`powershell
+```powershell
 Invoke-Php --version
-``
+```
 
 ### Example 2
 
-`powershell
+```powershell
 Invoke-Php script.php
-``
+```
 
 ## Aliases
 

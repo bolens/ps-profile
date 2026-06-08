@@ -123,19 +123,24 @@ function Initialize-FileConversion-SpecializedQrCode {
 <#
 .SYNOPSIS
     Converts text file to QR Code image.
+
 .DESCRIPTION
     Reads text from a file and generates a QR code image containing that text.
     Requires Node.js and qrcode package.
+
 .PARAMETER InputPath
     The path to the text file (.txt or .text extension).
+
 .PARAMETER OutputPath
     The path for the output QR code image file. If not specified, uses input path with .png extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-QrCodeFromText -InputPath "data.txt"
     
     Converts data.txt to data.png QR code.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-QrCodeFromText {
     param([string]$InputPath, [string]$OutputPath)
@@ -162,19 +167,24 @@ Set-AgentModeAlias -Name 'text-to-qrcode' -Target 'ConvertTo-QrCodeFromText'
 <#
 .SYNOPSIS
     Converts JSON file to QR Code image.
+
 .DESCRIPTION
     Reads JSON from a file and generates a QR code image containing the JSON data.
     Requires Node.js and qrcode package.
+
 .PARAMETER InputPath
     The path to the JSON file.
+
 .PARAMETER OutputPath
     The path for the output QR code image file. If not specified, uses input path with .png extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
 .EXAMPLE
     ConvertTo-QrCodeFromJson -InputPath "data.json"
     
     Converts data.json to data.png QR code.
-.OUTPUTS
-    None. Creates output file at specified or default path.
 #>
 function ConvertTo-QrCodeFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -201,21 +211,27 @@ Set-AgentModeAlias -Name 'json-to-qrcode' -Target 'ConvertTo-QrCodeFromJson'
 <#
 .SYNOPSIS
     Converts QR Code image to text.
+
 .DESCRIPTION
     Decodes a QR code image and extracts the text data.
     Note: Full decoding requires additional image processing libraries (qrcode-reader, zbar, etc.).
+
 .PARAMETER InputPath
     The path to the QR code image file (.png, .jpg, .jpeg, .gif, .bmp).
+
 .PARAMETER OutputPath
     The path for the output text file. If not specified, uses input path with .txt extension.
+
+.OUTPUTS
+    None. Creates output file at specified or default path.
+
+.NOTES
+    Full QR code decoding requires additional libraries. This function currently indicates the requirement.
+
 .EXAMPLE
     ConvertFrom-QrCodeToText -InputPath "qrcode.png"
     
     Decodes qrcode.png to qrcode.txt.
-.OUTPUTS
-    None. Creates output file at specified or default path.
-.NOTES
-    Full QR code decoding requires additional libraries. This function currently indicates the requirement.
 #>
 function ConvertFrom-QrCodeToText {
     param([string]$InputPath, [string]$OutputPath)

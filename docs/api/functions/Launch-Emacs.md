@@ -34,19 +34,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-Emacs
-        
-        Launches Emacs.
-``
+```powershell
+Launch-Emacs -Path ./path
+```
+
+Launches Emacs.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-Emacs -Path "script.ps1"
-        
-        Opens a file in Emacs.
-``
+```
+
+Opens a file in Emacs.
 
 ## Source
 

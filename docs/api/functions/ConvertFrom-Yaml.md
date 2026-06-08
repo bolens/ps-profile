@@ -25,9 +25,9 @@ Path to the YAML input file.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-Yaml ./config.yaml
-``
+```
 
 ## Aliases
 

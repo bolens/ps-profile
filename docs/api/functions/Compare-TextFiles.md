@@ -34,10 +34,11 @@ System.Boolean Returns $true if files are identical, $false if different.
 
 ### Example 1
 
-`powershell
+```powershell
 Compare-TextFiles -File1 "file1.txt" -File2 "file2.txt"
-    Compares the two files and shows differences.
-``
+```
+
+Compares the two files and shows differences.
 
 ## Aliases
 

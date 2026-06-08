@@ -30,19 +30,19 @@ None.
 
 ### Example 1
 
-`powershell
-Launch-FreeCAD
-        
-        Launches FreeCAD.
-``
+```powershell
+Launch-FreeCAD -ProjectPath 'value'
+```
+
+Launches FreeCAD.
 
 ### Example 2
 
-`powershell
+```powershell
 Launch-FreeCAD -ProjectPath "model.FCStd"
-        
-        Launches FreeCAD and opens a project file.
-``
+```
+
+Launches FreeCAD and opens a project file.
 
 ## Source
 

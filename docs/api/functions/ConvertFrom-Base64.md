@@ -25,9 +25,9 @@ The base64 string to decode.
 
 ### Example 1
 
-`powershell
+```powershell
 ConvertFrom-Base64 -InputPath ./input.file
-``
+```
 
 ## Aliases
 
