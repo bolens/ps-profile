@@ -61,4 +61,38 @@ Describe 'sync-profile-fragments.ps1 execution' {
             }
         }
     }
+
+    It 'Writes .profile-fragments.json for an isolated profile directory' {
+        $repo = New-TestTempDirectory -Prefix 'SyncFragmentsApply'
+        try {
+            $fragmentDir = Join-Path $repo 'scripts' 'utils' 'fragment'
+            $profileDir = Join-Path $repo 'profile.d'
+            $null = New-Item -ItemType Directory -Path $fragmentDir -Force
+            $null = New-Item -ItemType Directory -Path $profileDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:SyncFragmentsScript -Destination (Join-Path $fragmentDir 'sync-profile-fragments.ps1') -Force
+
+            Set-Content -LiteralPath (Join-Path $profileDir 'sync-fixture.ps1') -Value @'
+# Environment: minimal
+function Get-SyncFragmentsFixture {
+    'fixture'
+}
+'@ -Encoding UTF8
+
+            $configPath = Join-Path $repo '.profile-fragments.json'
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'sync-profile-fragments.ps1') -ArgumentList @(
+                '-ProfileDir', $repo
+            )
+
+            $result.ExitCode | Should -Be 0
+            Test-Path -LiteralPath $configPath | Should -BeTrue
+            $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+            $config.environments | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

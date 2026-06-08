@@ -668,6 +668,96 @@ Describe 'utilities-isbn-extended.ps1 - utilities and workflows' {
     }
 }
 
+Describe 'utilities-isbn-extended.ps1 - ISBN watch folder processing' {
+    BeforeEach {
+        $script:WatchHandle = $null
+        Clear-TestCommandInvocationCapture
+        Clear-IsbnCache
+        $script:IsbnCacheDir = New-TestTempDirectory -Prefix 'IsbnWatchCache'
+        $env:PS_PROFILE_ISBN_CACHE_DIR = $script:IsbnCacheDir
+
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            return [PSCustomObject]@{
+                'ISBN:9780306406157' = [PSCustomObject]@{
+                    title       = 'Watched Book'
+                    identifiers = [PSCustomObject]@{ isbn_13 = @('9780306406157') }
+                    url         = 'https://openlibrary.org/books/OLWATCH'
+                }
+            }
+        }
+
+        Get-IsbnInfo -Isbn '978-0-306-40615-7' -OutputFormat Object -ErrorAction Stop | Out-Null
+        Clear-TestCommandInvocationCapture
+
+        Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+            throw 'Network should not be used during watch processing'
+        }
+    }
+
+    AfterEach {
+        Get-EventSubscriber | ForEach-Object {
+            Unregister-Event -SubscriptionId $_.SubscriptionId -ErrorAction SilentlyContinue
+        }
+        if ($null -ne $script:WatchHandle) {
+            $script:WatchHandle.Dispose()
+            $script:WatchHandle = $null
+        }
+    }
+
+    It 'Throws when the watch directory does not exist' {
+        $missingDir = Join-Path (New-TestTempDirectory -Prefix 'IsbnWatchMissingParent') 'missing-watch'
+
+        { Start-IsbnWatchFolder -Path $missingDir -ErrorAction Stop } | Should -Throw '*Watch folder not found*'
+    }
+
+    It 'Processes new files and writes lookup output using cached metadata' {
+        $watchDir = New-TestTempDirectory -Prefix 'IsbnWatchProcess'
+        $outputDir = New-TestTempDirectory -Prefix 'IsbnWatchOutput'
+        $script:WatchHandle = Start-IsbnWatchFolder -Path $watchDir -OutputFormat Text -OutputDirectory $outputDir
+
+        $scanFile = Join-Path $watchDir 'incoming.txt'
+        Set-Content -LiteralPath $scanFile -Value 'Inventory ISBN 978-0-306-40615-7' -Encoding UTF8
+
+        $outputFile = Join-Path $outputDir '9780306406157-Text.txt'
+        $deadline = [datetime]::UtcNow.AddSeconds(5)
+        while (-not (Test-Path -LiteralPath $outputFile) -and [datetime]::UtcNow -lt $deadline) {
+            Start-Sleep -Milliseconds 100
+        }
+
+        Test-Path -LiteralPath $outputFile | Should -Be $true
+        (Get-Content -LiteralPath $outputFile -Raw) | Should -Match 'Watched Book'
+        $global:TestCommandInvocationCaptures.Count | Should -Be 0
+    }
+
+    It 'Invokes OnIsbnFound when a matching ISBN is discovered in a new file' {
+        $watchDir = New-TestTempDirectory -Prefix 'IsbnWatchCallback'
+        $markerPath = Join-Path (New-TestTempDirectory -Prefix 'IsbnWatchMarker') 'callback.txt'
+        $script:WatchHandle = Start-IsbnWatchFolder -Path $watchDir -OutputFormat Object -OnIsbnFound {
+            param($Book, $Lookup, $SourcePath)
+
+            [PSCustomObject]@{
+                Title  = $Book.Title
+                Lookup = $Lookup
+                Source = $SourcePath
+            } | ConvertTo-Json -Compress | Set-Content -LiteralPath $markerPath -Encoding UTF8
+        }
+
+        $scanFile = Join-Path $watchDir 'callback-source.txt'
+        Set-Content -LiteralPath $scanFile -Value 'Scanning 978-0-306-40615-7' -Encoding UTF8
+
+        $deadline = [datetime]::UtcNow.AddSeconds(5)
+        while (-not (Test-Path -LiteralPath $markerPath) -and [datetime]::UtcNow -lt $deadline) {
+            Start-Sleep -Milliseconds 100
+        }
+
+        Test-Path -LiteralPath $markerPath | Should -Be $true
+        $marker = Get-Content -LiteralPath $markerPath -Raw | ConvertFrom-Json
+        $marker.Title | Should -Be 'Watched Book'
+        $marker.Lookup | Should -Be '9780306406157'
+        $marker.Source | Should -Be $scanFile
+    }
+}
+
 Describe 'utilities-isbn-extended.ps1 - formatter edge cases' {
     BeforeEach {
         Clear-TestCommandInvocationCapture

@@ -42,4 +42,24 @@ Test-Path ''
             }
         }
     }
+
+    It 'Logs null LiteralPath Test-Path calls after the interception wrapper is loaded' {
+        $probeScript = Join-Path (New-TestTempDirectory -Prefix 'InterceptLiteralPathProbe') 'probe.ps1'
+        try {
+            Set-Content -LiteralPath $probeScript -Value @"
+. '$($script:InterceptTestPathScript)'
+Test-Path -LiteralPath ''
+"@ -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath $probeScript
+
+            $result.Output | Should -Match 'interception enabled|NULL/EMPTY path|LiteralPath'
+        }
+        finally {
+            $parent = Split-Path -Parent $probeScript
+            if (Test-Path -LiteralPath $parent) {
+                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

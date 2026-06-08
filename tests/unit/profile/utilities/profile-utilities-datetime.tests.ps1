@@ -15,6 +15,7 @@ BeforeAll {
         $current = $current.Parent
     }
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:LibPath = Get-TestPath -RelativePath 'scripts/lib' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
     . (Join-Path $script:ProfileDir 'utilities.ps1')
@@ -61,19 +62,79 @@ Describe 'utilities-datetime.ps1 - epoch conversion' {
 }
 
 Describe 'utilities-datetime.ps1 - Get-DateTime and aliases' {
-    BeforeEach {
-        foreach ($name in @('Format-DateTime', 'Format-LocaleDate')) {
-            if (Get-Command $name -ErrorAction SilentlyContinue) {
+    Context 'when Format-DateTime is available' {
+        BeforeAll {
+            Remove-Module DateTimeFormatting -ErrorAction SilentlyContinue -Force
+            Remove-Module Formatting -ErrorAction SilentlyContinue -Force
+            foreach ($name in @('Format-DateTime', 'Format-LocaleDate')) {
                 Remove-Item -Path "Function:\global:$name" -Force -ErrorAction SilentlyContinue
             }
+
+            $formattingPath = Join-Path $script:LibPath 'core' 'Formatting.psm1'
+            if (Test-Path -LiteralPath $formattingPath) {
+                Import-Module $formattingPath -DisableNameChecking -ErrorAction Stop -Force
+            }
+
+            $dateTimeFormattingPath = Join-Path $script:LibPath 'core' 'DateTimeFormatting.psm1'
+            Import-Module $dateTimeFormattingPath -DisableNameChecking -ErrorAction Stop -Force
+        }
+
+        AfterAll {
+            Remove-Module DateTimeFormatting -ErrorAction SilentlyContinue -Force
+            Remove-Module Formatting -ErrorAction SilentlyContinue -Force
+        }
+
+        It 'Delegates to Format-DateTime with the standard timestamp format' {
+            Get-Command Format-DateTime -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+            $output = Get-DateTime
+
+            $output | Should -Match '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+            [datetime]::ParseExact($output, 'yyyy-MM-dd HH:mm:ss', $null) | Should -Not -BeNullOrEmpty
         }
     }
 
-    It 'Get-DateTime falls back to Get-Date formatting when format helpers are unavailable' {
-        $output = Get-DateTime
+    Context 'when only Format-LocaleDate is available' {
+        BeforeEach {
+            Remove-Module DateTimeFormatting -ErrorAction SilentlyContinue -Force
+            foreach ($name in @('Format-DateTime', 'Format-LocaleDate')) {
+                Remove-Item -Path "Function:\global:$name" -Force -ErrorAction SilentlyContinue
+            }
 
-        $output | Should -Match '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
-        [datetime]::ParseExact($output, 'yyyy-MM-dd HH:mm:ss', $null) | Should -Not -BeNullOrEmpty
+            Set-Item -Path Function:\global:Format-LocaleDate -Value {
+                param(
+                    [datetime]$Date,
+                    [string]$Format
+                )
+
+                if ($Format -ne 'yyyy-MM-dd HH:mm:ss') {
+                    throw "Unexpected format: $Format"
+                }
+
+                return '2000-01-02 03:04:05'
+            }.GetNewClosure() -Force
+        }
+
+        It 'Delegates to Format-LocaleDate when Format-DateTime is unavailable' {
+            Get-Command Format-DateTime -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            Get-DateTime | Should -Be '2000-01-02 03:04:05'
+        }
+    }
+
+    Context 'when no formatting helpers are available' {
+        BeforeEach {
+            Remove-Module DateTimeFormatting -ErrorAction SilentlyContinue -Force
+            foreach ($name in @('Format-DateTime', 'Format-LocaleDate')) {
+                Remove-Item -Path "Function:\global:$name" -Force -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Falls back to Get-Date formatting when format helpers are unavailable' {
+            $output = Get-DateTime
+
+            $output | Should -Match '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+            [datetime]::ParseExact($output, 'yyyy-MM-dd HH:mm:ss', $null) | Should -Not -BeNullOrEmpty
+        }
     }
 
     It 'Registers epoch conversion aliases that resolve to the underlying functions' {

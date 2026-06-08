@@ -47,4 +47,26 @@ Describe 'optimize-git-performance.ps1 execution' {
             }
         }
     }
+
+    It 'Writes expected git performance settings into the isolated git config' {
+        $tempHome = New-TestTempDirectory -Prefix 'git-optimize-config'
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:OptimizeGitPerfScript -EnvironmentVariables @{
+                HOME        = $tempHome
+                USERPROFILE = $tempHome
+            }
+
+            $result.ExitCode | Should -Be 0
+            $gitConfigPath = Join-Path $tempHome '.gitconfig'
+            Test-Path -LiteralPath $gitConfigPath | Should -BeTrue
+            $gitConfig = Get-Content -LiteralPath $gitConfigPath -Raw
+            $gitConfig | Should -Match 'preloadindex\s*=\s*true'
+            $gitConfig | Should -Match 'untrackedCache\s*=\s*true'
+        }
+        finally {
+            if (Test-Path -LiteralPath $tempHome) {
+                Remove-Item -LiteralPath $tempHome -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

@@ -90,4 +90,22 @@ Describe 'validate-dependencies.ps1 execution' {
             }
         }
     }
+
+    It 'Fails setup when the requirements file path does not exist' {
+        $missingRequirements = Join-Path (New-TestTempDirectory -Prefix 'ValidateDepsMissing') 'missing-requirements.psd1'
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:ValidateDependenciesScript -ArgumentList @(
+                '-RequirementsFile', $missingRequirements
+            )
+
+            $result.ExitCode | Should -Be 2
+            $result.Output | Should -Match 'Requirements file not found|missing-requirements\.psd1'
+        }
+        finally {
+            $parent = Split-Path -Parent $missingRequirements
+            if (Test-Path -LiteralPath $parent) {
+                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

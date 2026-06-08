@@ -75,4 +75,78 @@ Describe 'network-mime-types.ps1 - extension mapping' {
         $ext = Get-ExtensionFromMimeType -MimeType $mime
         Get-MimeTypeFromExtension -Extension $ext | Should -Be $mime
     }
+
+    It 'Returns empty results for unknown extensions and MIME types' {
+        Get-MimeTypeFromExtension -Extension 'not-a-real-ext' | Should -Be ''
+        Get-MimeTypeFromExtension -Extension '' | Should -Be ''
+        @(Get-ExtensionFromMimeType -MimeType 'application/x-unknown-type') | Should -BeNullOrEmpty
+        @(Get-ExtensionFromMimeType -MimeType '') | Should -BeNullOrEmpty
+    }
+
+    It 'Strips MIME parameters before resolving extensions' {
+        Get-ExtensionFromMimeType -MimeType 'text/html; charset=utf-8' | Should -Be 'html'
+    }
+
+    It 'Supports pipeline input for extension helpers' {
+        'json' | Get-MimeTypeFromExtension | Should -Be 'application/json'
+        'image/png' | Get-ExtensionFromMimeType | Should -Be 'png'
+    }
+}
+
+Describe 'network-mime-types.ps1 - file conversions' {
+    It 'ConvertFrom-MimeTypeToJson writes structured JSON for a MIME file' {
+        $workDir = New-TestTempDirectory -Prefix 'MimeJson'
+        $mimePath = Join-Path $workDir 'sample.mime'
+        Set-Content -LiteralPath $mimePath -Value 'application/json; charset=utf-8' -Encoding UTF8 -NoNewline
+
+        { ConvertFrom-MimeTypeToJson -InputPath $mimePath -ErrorAction Stop } | Should -Not -Throw
+
+        $jsonPath = Join-Path $workDir 'sample.json'
+        Test-Path -LiteralPath $jsonPath | Should -Be $true
+
+        $parsed = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
+        $parsed.Type | Should -Be 'application'
+        $parsed.Subtype | Should -Be 'json'
+        $parsed.Parameters.charset | Should -Be 'utf-8'
+        $parsed.Extensions | Should -Contain 'json'
+    }
+
+    It 'ConvertTo-MimeTypeFromJson rebuilds MIME text from JSON components' {
+        $workDir = New-TestTempDirectory -Prefix 'JsonMime'
+        $jsonPath = Join-Path $workDir 'sample.json'
+        $outputPath = Join-Path $workDir 'sample.mime'
+
+        @{
+            Type       = 'text'
+            Subtype    = 'plain'
+            Parameters = @{ charset = 'utf-8' }
+        } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $jsonPath -Encoding UTF8
+
+        { ConvertTo-MimeTypeFromJson -InputPath $jsonPath -OutputPath $outputPath -ErrorAction Stop } | Should -Not -Throw
+
+        $mimeText = Get-Content -LiteralPath $outputPath -Raw
+        $mimeText | Should -Match 'text/plain'
+        $mimeText | Should -Match 'charset=utf-8'
+    }
+
+    It 'Round-trips MIME content through JSON file conversion helpers' {
+        $workDir = New-TestTempDirectory -Prefix 'MimeRoundTrip'
+        $mimePath = Join-Path $workDir 'roundtrip.mime'
+        $jsonPath = Join-Path $workDir 'roundtrip.json'
+        $restoredPath = Join-Path $workDir 'roundtrip-restored.mime'
+        $original = 'application/pdf'
+
+        Set-Content -LiteralPath $mimePath -Value $original -Encoding UTF8 -NoNewline
+        ConvertFrom-MimeTypeToJson -InputPath $mimePath -OutputPath $jsonPath -ErrorAction Stop
+        ConvertTo-MimeTypeFromJson -InputPath $jsonPath -OutputPath $restoredPath -ErrorAction Stop
+
+        (Get-Content -LiteralPath $restoredPath -Raw).Trim() | Should -Be $original
+    }
+
+    It 'Does not create JSON output when the MIME input file is missing' {
+        $missingPath = Join-Path (New-TestTempDirectory -Prefix 'MimeMissing') 'missing.mime'
+
+        { ConvertFrom-MimeTypeToJson -InputPath $missingPath -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
+        Test-Path -LiteralPath ($missingPath -replace '\.mime$', '.json') | Should -Be $false
+    }
 }
