@@ -147,18 +147,18 @@ foreach ($p in $Path) {
             # 3. Pattern matching fails to find the correct source file
             $testToSourceMappings = @{
                 # Module Loading tests
-                'library-module-loading'            = @('ModuleLoading.ps1')
-                'library-module-loading-additional' = @('ModuleLoading.ps1')
+                'profile-module-loading'            = @('ModuleLoading.ps1')
+                'profile-module-loading-additional' = @('ModuleLoading.ps1')
                 'module-loading-standard'           = @('ModuleLoading.ps1')
                 
                 # Function Registration tests
-                'library-tool-wrapper'              = @('FunctionRegistration.ps1')
+                'profile-tool-wrapper'              = @('FunctionRegistration.ps1')
                 
                 # Bootstrap integration tests (test multiple files)
-                'bootstrap-helper-functions'        = @('FunctionRegistration.ps1', 'CommandCache.ps1', 'ModulePathCache.ps1')
-                'bootstrap-idempotency'             = @('FunctionRegistration.ps1')
-                'bootstrap-performance'             = @('FunctionRegistration.ps1', 'CommandCache.ps1')
-                'bootstrap-scoping'                 = @('FunctionRegistration.ps1')
+                'helper-functions'                  = @('FunctionRegistration.ps1', 'CommandCache.ps1', 'ModulePathCache.ps1')
+                'load-idempotency'                  = @('FunctionRegistration.ps1')
+                'load-performance'                  = @('FunctionRegistration.ps1', 'CommandCache.ps1')
+                'scoping'                           = @('FunctionRegistration.ps1')
                 
                 # Command/Cache tests
                 'library-command'                   = @('CommandCache.ps1')
@@ -304,12 +304,12 @@ if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
         
         # Direct mappings for known source files
         # NOTE: Add mappings incrementally when pattern matching doesn't find all relevant tests.
-        # Most source files follow patterns (e.g., ModuleLoading.ps1 → library-module-loading*.tests.ps1).
+        # Most source files follow patterns (e.g., ModuleLoading.ps1 → profile-module-loading*.tests.ps1).
         $sourceToTestMappings = @{
-            'ModuleLoading'        = @('library-module-loading*.tests.ps1', 'library-module-loading-additional*.tests.ps1', 'module-loading-standard*.tests.ps1')
-            'FunctionRegistration' = @('library-tool-wrapper*.tests.ps1', 'bootstrap-helper-functions*.tests.ps1', 'bootstrap-idempotency*.tests.ps1', 'bootstrap-performance*.tests.ps1', 'bootstrap-scoping*.tests.ps1')
-            'CommandCache'         = @('library-command*.tests.ps1', 'bootstrap-helper-functions*.tests.ps1', 'bootstrap-performance*.tests.ps1')
-            'ModulePathCache'      = @('bootstrap-helper-functions*.tests.ps1')
+            'ModuleLoading'        = @('profile-module-loading*.tests.ps1', 'profile-module-loading-additional*.tests.ps1', 'module-loading-standard*.tests.ps1')
+            'FunctionRegistration' = @('profile-tool-wrapper*.tests.ps1', 'helper-functions*.tests.ps1', 'load-idempotency*.tests.ps1', 'load-performance*.tests.ps1', 'scoping*.tests.ps1')
+            'CommandCache'         = @('library-command*.tests.ps1', 'helper-functions*.tests.ps1', 'load-performance*.tests.ps1')
+            'ModulePathCache'      = @('helper-functions*.tests.ps1')
             'CacheKey'             = @('library-cache-key*.tests.ps1')
             'JsonUtilities'        = @('library-json-utilities*.tests.ps1', 'library-json-utilities-extended*.tests.ps1')
             'EnvFile'              = @('library-envfile*.tests.ps1')

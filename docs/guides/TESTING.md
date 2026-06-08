@@ -36,25 +36,17 @@ Tests are organized into three suites with **domain-driven organization** for be
 
 ```
 tests/
-├── unit/                                    # Unit tests (isolated, fast)
-│   ├── library/                             # Library module tests
-│   │   ├── core/                            # Core library modules
-│   │   ├── fragment/                        # Fragment management
-│   │   ├── path/                            # Path utilities
-│   │   ├── file/                            # File utilities
-│   │   ├── runtime/                         # Runtime detection
-│   │   ├── utilities/                       # Utility modules
-│   │   ├── metrics/                         # Metrics modules
-│   │   ├── performance/                     # Performance modules
-│   │   ├── code-analysis/                   # Code analysis modules
-│   │   └── parallel/                        # Parallel execution
-│   ├── profile/                             # Profile function tests
-│   ├── utilities/                           # Utility function tests
-│   ├── validation/                          # Validation script tests
-│   └── common/                              # Common/shared tests
+├── unit/                                    # Unit tests (flat directory; prefix-based names)
+│   ├── library-*.tests.ps1                # scripts/lib/ modules (and hybrid lib + profile.d)
+│   ├── profile-*.tests.ps1                # profile.d/ fragments, bootstrap helpers
+│   ├── utility-*.tests.ps1                # scripts/utils/ (includes utility-debug-*)
+│   ├── validation-*.tests.ps1             # scripts/checks/ and validation scripts
+│   ├── test-runner-*.tests.ps1            # Test runner modules and scripts
+│   └── test-support*.tests.ps1            # TestSupport modules (test-support.tests.ps1 umbrella)
 │
-├── integration/                             # Integration tests
+├── integration/                             # Integration tests (domain subdirectories)
 │   ├── bootstrap/                           # Bootstrap function tests
+│   ├── cloud-provider/                      # Cloud provider base/helpers
 │   ├── conversion/                          # Conversion utilities
 │   │   ├── data/                            # Data format conversions
 │   │   │   ├── base64/                      # Base64 encoding
@@ -65,35 +57,36 @@ tests/
 │   │   │   ├── database/                    # Database formats
 │   │   │   ├── digest/                      # Hash/checksum formats
 │   │   │   ├── encoding/                    # Encoding formats
+│   │   │   ├── error-handling/              # Conversion error paths
 │   │   │   ├── network/                     # Network formats
 │   │   │   ├── scientific/                  # Scientific formats
 │   │   │   ├── specialized/                 # Specialized formats
 │   │   │   ├── structured/                  # Structured formats
 │   │   │   ├── text-formats/                # Text formats
 │   │   │   ├── time/                        # Time formats
-│   │   │   └── units/                      # Unit conversions
+│   │   │   └── units/                       # Unit conversions
 │   │   ├── document/                        # Document conversions
-│   │   └── media/                          # Media conversions
+│   │   └── media/                           # Media conversions
 │   │       ├── audio/                       # Audio formats
 │   │       ├── colors/                      # Color conversions
 │   │       ├── images/                      # Image formats
 │   │       └── video/                       # Video formats
-│   ├── filesystem/                         # Filesystem utilities
+│   ├── filesystem/                          # Filesystem utilities
 │   ├── fragments/                           # Fragment management
-│   ├── profile/                             # Profile loading
+│   ├── profile/                             # Profile loading and structure
 │   ├── tools/                               # Development tools
 │   │   ├── containers/                      # Container tools
 │   │   └── network/                         # Network utilities
-│   ├── system/                             # System utilities
+│   ├── system/                              # System utilities
 │   ├── terminal/                            # Terminal/prompt tools
 │   ├── test-runner/                         # Test runner tests
 │   ├── utilities/                           # Utility functions
+│   ├── validation/                          # Validation pipeline integration
 │   ├── cross-platform/                      # Cross-platform tests
-│   └── error-handling/                      # Error handling
+│   └── error-handling/                      # Error handling standards
 │
-├── performance/                             # Performance tests
-│   ├── performance.tests.ps1
-│   └── test-runner-performance.tests.ps1
+├── performance/                             # Performance tests (flat directory only)
+│   └── *-performance.tests.ps1              # e.g. beads-performance.tests.ps1
 │
 ├── TestSupport.ps1                          # Thin loader for test utilities
 └── TestSupport/                             # Modular test support utilities
@@ -104,13 +97,17 @@ tests/
     └── TestNpmHelpers.ps1                   # NPM package testing
 ```
 
+> **Unit layout:** Unit tests live in a **flat** `tests/unit/` directory. Category prefixes (`library-`, `profile-`, etc.) encode the target area — not subfolders. Use `run-unit-batch.ps1 -Filter profile-` to run subsets.
+
+> **Integration layout:** Prefer **short file names** inside domain folders. The folder provides context, so drop redundant domain prefixes (e.g. `integration/bootstrap/helper-functions.tests.ps1`, not `bootstrap-helper-functions.tests.ps1`).
+
 ### Test File Naming
 
-- **Unit tests**: `tests/unit/**/*.tests.ps1` (recursive discovery)
+- **Unit tests**: `tests/unit/*.tests.ps1` (flat directory; prefix indicates target)
 - **Integration tests**: `tests/integration/**/*.tests.ps1` (recursive discovery)
-- **Performance tests**: `tests/performance/*.tests.ps1`
+- **Performance tests**: `tests/performance/*.tests.ps1` (flat directory only)
 
-All test files must end with `.tests.ps1` to be discovered by the test runner. The test runner supports **recursive discovery**, so tests can be organized in subdirectories for better organization.
+All test files must end with `.tests.ps1` to be discovered by the test runner. Integration and performance suites support path-based filtering; unit tests are filtered by filename prefix (e.g. `-Filter profile-` in `run-unit-batch.ps1`).
 
 ### TestSupport Path Resolution
 
@@ -1299,23 +1296,50 @@ function Test-MyHelper {
 
 **Unit Tests (`tests/unit/`):**
 
-- Use category prefixes for consistency:
-  - `library-*` - Tests for `scripts/lib/` modules (e.g., `library-command.tests.ps1`)
-  - `profile-*` - Tests for `profile.d/` fragments (e.g., `profile-security-tools.tests.ps1`)
-  - `utility-*` - Tests for utility scripts (e.g., `utility-docs-generation.tests.ps1`)
-  - `validation-*` - Tests for validation scripts (e.g., `validation-idempotency.tests.ps1`)
-  - `test-runner-*` - Tests for test runner modules/scripts (e.g., `test-runner-run-pester.tests.ps1`)
-  - `test-support-*` - Tests for test support modules (e.g., `test-support.tests.ps1`)
-- Use kebab-case: `library-command.tests.ps1`
-- Match the feature/component being tested
+Use category prefixes so the target is obvious from the filename:
+
+| Prefix | Target | Example |
+|--------|--------|---------|
+| `library-*` | `scripts/lib/` modules | `library-cache.tests.ps1` |
+| `profile-*` | `profile.d/` fragments and bootstrap helpers | `profile-module-loading.tests.ps1` |
+| `utility-*` | `scripts/utils/` scripts (non-lib) | `utility-docs-generation.tests.ps1` |
+| `utility-debug-*` | `scripts/utils/debug/` scripts | `utility-debug-trace-testpath-extended.tests.ps1` |
+| `validation-*` | `scripts/checks/` and validation scripts | `validation-idempotency.tests.ps1` |
+| `test-runner-*` | Test runner modules/scripts | `test-runner-run-pester.tests.ps1` |
+| `test-support*` | TestSupport modules | `test-support-paths.tests.ps1` |
+
+Rules:
+
+- Use **kebab-case**: `profile-command-cache-mgmt-extended.tests.ps1`
+- Match the feature or module under test
+- **`library-*` vs `profile-*`:** If the primary subject is a `profile.d` bootstrap/fragment file, use `profile-*` even when the test loads bootstrap helpers. Reserve `library-*` for `scripts/lib/` (or tests that primarily exercise lib modules). Hybrid tests that import both may stay `library-*` (e.g. `library-write-missing-tool-warning-message-extended.tests.ps1`).
+- **`library-profile-*`:** Unit tests for `scripts/lib/profile/` modules (distinct from `profile-*` fragment tests).
 
 **Integration Tests (`tests/integration/`):**
 
 - Use descriptive names that match the feature/component
-- Simplify names where folder context makes prefixes redundant (e.g., `utilities-*.tests.ps1` in `system/` folder instead of `system-utilities-*.tests.ps1`)
+- **Drop redundant domain prefixes** when the folder already provides context:
+  - `integration/bootstrap/helper-functions.tests.ps1` (not `bootstrap-helper-functions.tests.ps1`)
+  - `integration/profile/loading.tests.ps1` (not `profile-loading.tests.ps1`)
+  - `integration/test-runner/runner-integration.tests.ps1` (not `test-runner-integration.tests.ps1`)
 - Use kebab-case: `fragment-loading.tests.ps1`
+- Avoid basename collisions across suites (e.g. unit `profile-fragments-smoke.tests.ps1` vs integration `profile/fragments-integration.tests.ps1`)
 
-#### Test Names
+**Performance Tests (`tests/performance/`):**
+
+- Flat directory only (no subfolders)
+- Include `performance` in the name: `beads-performance.tests.ps1`
+
+#### Extended (`*-extended`) suffix
+
+Many tests use a `-extended` suffix for additional edge-case or regression coverage:
+
+- **Paired:** `validation-idempotency.tests.ps1` + `validation-idempotency-extended.tests.ps1`
+- **Extended-only:** `utility-debug-check-profile-log-extended.tests.ps1` (no base file) — **valid** when the suite is intentionally scoped to extended scenarios only
+
+Do not create empty base files solely to satisfy pairing. Prefer `-extended` when adding coverage that is clearly supplementary to an existing file, or when the entire file is edge-case focused.
+
+#### Test Names (inside Describe/It blocks)
 
 - Use descriptive, action-oriented names
 - Start with what is being tested

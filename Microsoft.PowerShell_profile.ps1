@@ -212,7 +212,7 @@ catch {
 # or PowerShell configuration despite -NoProfile being used. Exit early to respect
 # the -NoProfile flag. This prevents the profile from loading when -NoProfile is used.
 try {
-    if ([string]::IsNullOrWhiteSpace($PSCommandPath)) {
+    if ([string]::IsNullOrWhiteSpace($PSCommandPath) -and -not $env:PS_PROFILE_TEST_MODE) {
         # Profile was loaded via non-standard mechanism (likely module manifest)
         # Exit early to respect -NoProfile flag
         $msg = "[profile] Early exit: PSCommandPath is empty (NoProfile detected)"
@@ -425,7 +425,7 @@ try {
     }
     catch { }
     
-    if (-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) {
+    if ((-not $Host -or -not $Host.UI -or -not $Host.UI.RawUI) -and -not $env:PS_PROFILE_TEST_MODE) {
         $hostInfo = if ($Host) { $Host.Name } else { "null" }
         $uiInfo = if ($Host -and $Host.UI) { "present" } else { "null" }
         $rawUiInfo = if ($Host -and $Host.UI -and $Host.UI.RawUI) { "present" } else { "null" }

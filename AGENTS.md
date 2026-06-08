@@ -228,9 +228,11 @@ pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path prof
 
 **Test file naming:**
 
-- Unit tests: `tests/unit/*.tests.ps1`
-- Integration tests: `tests/integration/**/*.tests.ps1` (recursive discovery, domain-organized)
-- Performance tests: `tests/performance/*.tests.ps1`
+- Unit tests: `tests/unit/*.tests.ps1` — flat directory; use prefixes (`library-`, `profile-`, `utility-`, `validation-`, `test-runner-`, `test-support*`)
+- Integration tests: `tests/integration/**/*.tests.ps1` — domain subdirectories; short names without redundant folder prefixes
+- Performance tests: `tests/performance/*.tests.ps1` — flat directory; include `performance` in the name
+
+See [docs/guides/TESTING.md](docs/guides/TESTING.md#naming-conventions) for prefix rules, `-extended` suffix policy, and examples.
 
 ### 5. Code Quality Standards
 

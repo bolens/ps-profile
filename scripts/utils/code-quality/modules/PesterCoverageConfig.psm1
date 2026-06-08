@@ -36,13 +36,13 @@ function Set-PesterCodeCoverage {
             # Try to map test files to source files (similar to analyze-coverage.ps1)
             $testToSourceMappings = @{
                 'alias'                      = @('FunctionRegistration.ps1')
-                'library-tool-wrapper'       = @('FunctionRegistration.ps1')
-                'bootstrap-helper-functions' = @('FunctionRegistration.ps1', 'CommandCache.ps1', 'ModulePathCache.ps1')
-                'bootstrap-idempotency'      = @('FunctionRegistration.ps1')
-                'bootstrap-performance'      = @('FunctionRegistration.ps1', 'CommandCache.ps1')
-                'bootstrap-scoping'          = @('FunctionRegistration.ps1')
+                'profile-tool-wrapper'       = @('FunctionRegistration.ps1')
+                'helper-functions' = @('FunctionRegistration.ps1', 'CommandCache.ps1', 'ModulePathCache.ps1')
+                'load-idempotency' = @('FunctionRegistration.ps1')
+                'load-performance' = @('FunctionRegistration.ps1', 'CommandCache.ps1')
+                'scoping'          = @('FunctionRegistration.ps1')
                 'library-command'            = @('CommandCache.ps1')
-                'library-module-loading'     = @('ModuleLoading.ps1')
+                'profile-module-loading'     = @('ModuleLoading.ps1')
             }
             
             foreach ($testPath in $TestPaths) {

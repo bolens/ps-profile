@@ -129,8 +129,8 @@ function Filter-TestPaths {
 
     # List of test-runner test files to exclude
     $testRunnerTestFiles = @(
-        'test-runner-integration.tests.ps1',
-        'test-runner-error-handling.tests.ps1',
+        'runner-integration.tests.ps1',
+        'runner-error-handling.tests.ps1',
         'baseline-comparison.tests.ps1',
         'test-runner-performance.tests.ps1',
         'test-runner-run-pester.tests.ps1'

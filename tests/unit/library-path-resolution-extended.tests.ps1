@@ -50,29 +50,22 @@ Describe 'PathResolution extended scenarios' {
         }
 
         It 'Returns null for invalid script paths when ErrorAction is SilentlyContinue' {
-            $outsideRoot = Join-Path ([System.IO.Path]::GetTempPath()) "PathResolutionExtended-$(Get-Random)"
+            # Outside the repository: system temp is required; register for AfterEach cleanup.
+            $outsideRoot = Join-Path ([System.IO.Path]::GetTempPath()) "PathResolutionOutside-$(Get-Random)"
             $invalidPath = Join-Path $outsideRoot 'scripts/missing.ps1'
             New-Item -ItemType Directory -Path (Split-Path $invalidPath) -Force | Out-Null
+            Register-TestCleanupPath -Path $outsideRoot
 
-            try {
-                Get-RepoRootSafe -ScriptPath $invalidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-            }
-            finally {
-                Remove-Item -LiteralPath $outsideRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Get-RepoRootSafe -ScriptPath $invalidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
         }
 
         It 'Throws for invalid script paths by default' {
-            $outsideRoot = Join-Path ([System.IO.Path]::GetTempPath()) "PathResolutionExtended-$(Get-Random)"
+            $outsideRoot = Join-Path ([System.IO.Path]::GetTempPath()) "PathResolutionOutside-$(Get-Random)"
             $invalidPath = Join-Path $outsideRoot 'scripts/missing.ps1'
             New-Item -ItemType Directory -Path (Split-Path $invalidPath) -Force | Out-Null
+            Register-TestCleanupPath -Path $outsideRoot
 
-            try {
-                { Get-RepoRootSafe -ScriptPath $invalidPath } | Should -Throw
-            }
-            finally {
-                Remove-Item -LiteralPath $outsideRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            { Get-RepoRootSafe -ScriptPath $invalidPath } | Should -Throw
         }
     }
 }

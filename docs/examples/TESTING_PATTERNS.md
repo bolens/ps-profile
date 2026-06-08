@@ -116,10 +116,12 @@ BeforeAll {
 
 ## Test Organization
 
+See [Testing Guide — Naming Conventions](../guides/TESTING.md#naming-conventions) for prefix rules (`library-*`, `profile-*`, `utility-debug-*`, etc.), integration short names, and `-extended` suffix policy.
+
 ### Unit Tests
 
 ```powershell
-# tests/unit/library-module-loading.tests.ps1
+# tests/unit/profile-module-loading.tests.ps1
 
 . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 

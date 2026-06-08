@@ -289,6 +289,143 @@ Describe 'Developer Tools Integration Tests' {
             $result = Test-Regex -Pattern 'hello' -Input "HELLO" -IgnoreCase
             $result.Success | Should -Be $true
         }
+
+        It 'ConvertTo-RegexFromDescription converts catalog entries' {
+            Get-Command ConvertTo-RegexFromDescription -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+
+            $result = ConvertTo-RegexFromDescription -Description 'email'
+            $result.IsValid | Should -Be $true
+            $result.Pattern | Should -Match '@'
+        }
+
+        It 'ConvertTo-RegexFromDescription composes natural language phrases' {
+            $pattern = ConvertTo-RegexFromDescription -Description "starts with 'svc-' followed by digits" -Anchored -PatternOnly
+            $pattern | Should -Be '^svc-\d+$'
+
+            $match = Test-Regex -Pattern $pattern -Input 'svc-123'
+            $match.Success | Should -Be $true
+        }
+
+        It 'Get-RegexDescriptionCatalog exposes catalog entries' {
+            Get-Command Get-RegexDescriptionCatalog -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+
+            $entry = Get-RegexDescriptionCatalog -Name 'iban'
+            $entry.Pattern | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Search-RegexDescriptions finds related catalog entries' {
+            $results = Search-RegexDescriptions -Query 'postal'
+            $results.Name | Should -Contain 'uk-postcode'
+            $results.Name | Should -Contain 'ca-postal-code'
+        }
+
+        It 'Test-RegexFromDescription converts and tests in one step' {
+            $result = Test-RegexFromDescription -Description 'email' -Input 'user@example.com'
+            $result.Pattern | Should -Match '@'
+            $result.Match.Success | Should -Be $true
+        }
+
+        It 'ConvertTo-RegexFromDescription validates sample text' {
+            $result = ConvertTo-RegexFromDescription `
+                -Description 'ipv4' `
+                -SampleMatch '192.168.0.1' `
+                -SampleNoMatch '999.999.999.999'
+
+            $result.SampleResults.Count | Should -Be 2
+            ($result.SampleResults | ForEach-Object { $_.Success }) | Should -Not -Contain $false
+        }
+
+        It 'Get-RegexDescriptionCatalog returns pipeline-friendly objects' {
+            $entries = Get-RegexDescriptionCatalog
+            $entries | Should -Not -BeNullOrEmpty
+            $entries[0].Name | Should -Not -BeNullOrEmpty
+            $entries[0].Aliases | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Explain-RegexPattern describes catalog patterns' {
+            Get-Command Explain-RegexPattern -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+
+            $pattern = (Get-RegexDescriptionCatalog -Name 'uuid').Pattern
+            $result = Explain-RegexPattern -Pattern $pattern
+            $result.CatalogName | Should -Be 'uuid'
+            $result.Description | Should -Not -BeNullOrEmpty
+        }
+
+        It 'ConvertTo-RegexFromDescription supports text output format' {
+            $text = ConvertTo-RegexFromDescription -Description 'email' -OutputFormat Text
+            $text | Should -Match 'Pattern:'
+            $text | Should -Match '@'
+        }
+
+        It 'Show-RegexDescriptionCatalog renders a table' {
+            Get-Command Show-RegexDescriptionCatalog -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+
+            $table = Show-RegexDescriptionCatalog -Query 'email'
+            $table | Should -Match 'email'
+        }
+
+        It 'Test-RegexDescriptionRoundTrip validates description consistency' {
+            $result = Test-RegexDescriptionRoundTrip -Description 'uuid'
+            $result.IsConsistent | Should -Be $true
+            $result.Pattern | Should -Not -BeNullOrEmpty
+        }
+
+        It 'Export-RegexDescriptionCatalog exports markdown content' {
+            $markdown = Export-RegexDescriptionCatalog -Format Markdown
+            $markdown | Should -Match '## uuid'
+        }
+
+        It 'Start-RegexDescriptionBuilder supports non-interactive segments' {
+            $result = Start-RegexDescriptionBuilder `
+                -Segments "starts with 'svc-'", 'digits' `
+                -Anchored `
+                -NonInteractive
+
+            $result.Pattern | Should -Be '^svc-\d+$'
+            $result.Description | Should -Match 'svc-'
+        }
+
+        It 'Save-RegexDescriptionSession persists builder output' {
+            $sessionPath = Join-Path $TestDrive 'builder-session.json'
+            $result = Start-RegexDescriptionBuilder `
+                -Description 'email' `
+                -SampleMatch 'user@example.com' `
+                -NonInteractive `
+                -SaveSession `
+                -SessionPath $sessionPath
+
+            Test-Path -LiteralPath $sessionPath | Should -Be $true
+            $result.SessionPath | Should -Be (Resolve-Path -LiteralPath $sessionPath).Path
+        }
+
+        It 'Compare-RegexDescriptions reports differences' {
+            $result = Compare-RegexDescriptions -Left 'email' -Right 'email address' -IncludePatterns
+            $result.Similarity | Should -BeGreaterThan 0
+            $result.LeftPattern | Should -Not -BeNullOrEmpty
+        }
+
+        It 'New-RegexDescriptionPesterTest generates test stubs' {
+            $stub = New-RegexDescriptionPesterTest `
+                -Description 'uuid' `
+                -SampleMatch '550e8400-e29b-41d4-a716-446655440000'
+
+            $stub | Should -Match "Describe 'NL regex:"
+        }
+
+        It 'Resume-RegexDescriptionSession loads and generates tests' {
+            $sessionPath = Join-Path $TestDrive 'resume-session.json'
+            $testPath = Join-Path $TestDrive 'resume.tests.ps1'
+            Start-RegexDescriptionBuilder `
+                -Description 'digits' `
+                -Anchored `
+                -NonInteractive `
+                -SaveSession `
+                -SessionPath $sessionPath | Out-Null
+
+            $result = Resume-RegexDescriptionSession -Path $sessionPath -GenerateTest -TestPath $testPath
+            $result.Pattern | Should -Be '^\d+$'
+            Test-Path -LiteralPath $testPath | Should -Be $true
+        }
     }
 
     Context 'Number base conversion utilities' {

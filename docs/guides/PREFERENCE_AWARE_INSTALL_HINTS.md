@@ -178,7 +178,7 @@ When the preferred package manager is unavailable, the system automatically show
 - ✅ **Implemented**: Integration tests for fallback chains
 - ✅ **Implemented**: Cross-platform tests for platform-specific suggestions
 - ✅ **Implemented**: Edge case tests (missing tools, invalid preferences, etc.)
-- See `tests/unit/preference-aware-install-hints.tests.ps1` and `tests/integration/bootstrap/preference-aware-install-hints-*.tests.ps1`
+- See `tests/unit/profile-preference-aware-install-hints.tests.ps1` and `tests/integration/bootstrap/preference-aware-install-hints-*.tests.ps1`
 
 ### 8. **Edge Cases**
 

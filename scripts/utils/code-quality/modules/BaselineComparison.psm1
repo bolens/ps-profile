@@ -125,13 +125,15 @@ function Compare-PerformanceBaseline {
         $baselineDuration = [TimeSpan]::Parse($baseline.TestSummary.Duration)
         $currentDuration = $TestResult.Time
         $durationChangePercent = (($currentDuration.TotalSeconds - $baselineDuration.TotalSeconds) / $baselineDuration.TotalSeconds) * 100
+        $isRegression = $durationChangePercent -gt $Threshold
+        $isImprovement = $durationChangePercent -lt -$Threshold
 
         $comparison.OverallChange.DurationChange = @{
             Baseline      = $baselineDuration
             Current       = $currentDuration
             ChangePercent = [Math]::Round($durationChangePercent, 2)
-            IsRegression  = $durationChangePercent > $Threshold
-            IsImprovement = $durationChangePercent -lt - $Threshold
+            IsRegression  = $isRegression
+            IsImprovement = $isImprovement
         }
     }
 

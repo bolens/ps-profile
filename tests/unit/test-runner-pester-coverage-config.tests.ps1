@@ -13,7 +13,7 @@ BeforeAll {
 
     $script:TempDir = New-TestTempDirectory -Prefix 'PesterCoverageConfigTests'
     $script:ProfileDir = Join-Path $script:TempDir 'profile.d/bootstrap'
-    $script:TestPath = Join-Path $script:TempDir 'tests/unit/bootstrap-helper-functions.tests.ps1'
+    $script:TestPath = Join-Path $script:TempDir 'tests/integration/bootstrap/helper-functions.tests.ps1'
 
     New-Item -ItemType Directory -Path $script:ProfileDir -Force | Out-Null
     New-Item -ItemType Directory -Path (Split-Path $script:TestPath) -Force | Out-Null

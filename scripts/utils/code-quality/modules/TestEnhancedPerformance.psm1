@@ -116,13 +116,15 @@ function Measure-EnhancedPerformance {
             $currentDuration = $metrics.Duration
 
             $durationChangePercent = (($currentDuration.TotalSeconds - $baselineDuration.TotalSeconds) / $baselineDuration.TotalSeconds) * 100
+            $isDegraded = $durationChangePercent -gt 10
+            $isImproved = $durationChangePercent -lt -5
 
             $metrics.PerformanceDegradation = @{
                 BaselineDuration = $baselineDuration
                 CurrentDuration  = $currentDuration
                 ChangePercent    = [Math]::Round($durationChangePercent, 2)
-                IsDegraded       = $durationChangePercent > 10  # 10% degradation threshold
-                IsImproved       = $durationChangePercent -lt -5 # 5% improvement threshold
+                IsDegraded       = $isDegraded
+                IsImproved       = $isImproved
             }
         }
 

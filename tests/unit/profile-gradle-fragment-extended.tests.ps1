@@ -1,0 +1,25 @@
+<#
+tests/unit/profile-gradle-fragment-extended.tests.ps1
+#>
+BeforeAll {
+    . $PSScriptRoot/../TestSupport.ps1
+    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/gradle.ps1'
+}
+Describe 'profile.d/gradle.ps1 extended scenarios' {
+    It 'Declares standard tier guarded by gradle availability' {
+        $c = Get-Content -LiteralPath $script:Fragment -Raw
+        $c | Should -Match 'Tier: standard'
+        $c | Should -Match 'Test-CachedCommand gradle'
+    }
+    It 'Defines Test-GradleOutdated using gradle dependencyUpdates task' {
+        $c = Get-Content -LiteralPath $script:Fragment -Raw
+        $c | Should -Match 'Test-GradleOutdated'
+        $c | Should -Match 'gradle dependencyUpdates'
+    }
+    It 'Defines Update-GradleWrapper and registers gradle-outdated alias' {
+        $c = Get-Content -LiteralPath $script:Fragment -Raw
+        $c | Should -Match 'Update-GradleWrapper'
+        $c | Should -Match "Set-AgentModeAlias -Name 'gradle-outdated'"
+    }
+}

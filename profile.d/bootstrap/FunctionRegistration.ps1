@@ -462,14 +462,18 @@ function global:New-FragmentCommandProxy {
     $existing = Get-Command -Name $CommandName -ErrorAction SilentlyContinue
     if ($existing -and $existing.CommandType -eq 'Function') {
         # Check if it's already a proxy by looking for Load-FragmentForCommand in the function body
-        $func = Get-Item -Path "Function:\global:$CommandName"
-        if ($func.ScriptBlock.ToString() -match 'Load-FragmentForCommand') {
+        $existingBody = $existing.ScriptBlock.ToString()
+        if ($existingBody -match 'Load-FragmentForCommand') {
             # Already a proxy, skip
             return $true
         }
         # Function exists and is not a proxy - don't overwrite
         return $false
     }
+
+    # Capture for closure (local proxies cannot use $using: outside remoting/runspace contexts)
+    $capturedFragmentName = $FragmentName
+    $capturedCommandName = $CommandName
 
     # Create proxy function
     $proxyBody = {
@@ -479,8 +483,8 @@ function global:New-FragmentCommandProxy {
         )
 
         # Load fragment if needed
-        $fragmentName = $using:FragmentName
-        $commandName = $using:CommandName
+        $fragmentName = $capturedFragmentName
+        $commandName = $capturedCommandName
 
         if (Get-Command Load-FragmentForCommand -ErrorAction SilentlyContinue) {
             $null = Load-FragmentForCommand -CommandName $commandName

@@ -199,7 +199,7 @@ $tools = Get-ToolRecommendations
 
 All preference awareness features are covered by comprehensive tests:
 
-- **Unit Tests**: `tests/unit/preference-aware-install-hints.tests.ps1`
+- **Unit Tests**: `tests/unit/profile-preference-aware-install-hints.tests.ps1`
 - **Integration Tests**: `tests/integration/bootstrap/preference-aware-install-hints-fallback.tests.ps1`
 - **Platform Tests**: `tests/integration/bootstrap/preference-aware-install-hints-platform.tests.ps1`
 

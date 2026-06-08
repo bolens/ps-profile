@@ -364,7 +364,7 @@ try {
 
         # Load FragmentCommandRegistry and CommandDispatcher modules (for on-demand fragment loading)
         # These enable automatic fragment loading when commands are called
-        $repoRoot = Split-Path -Parent $bootstrapModulesDir
+        $repoRoot = Split-Path -Parent $PSScriptRoot
         $fragmentLibDir = Join-Path $repoRoot 'scripts' 'lib' 'fragment'
         
         # Load FragmentCommandRegistry module

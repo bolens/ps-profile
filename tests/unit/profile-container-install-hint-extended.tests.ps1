@@ -1,0 +1,73 @@
+<#
+tests/unit/profile-container-install-hint-extended.tests.ps1
+
+.SYNOPSIS
+    Extended unit tests for container engine install hint helpers.
+#>
+
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+
+    $bootstrapDir = Get-TestPath -RelativePath 'profile.d\bootstrap' -StartPath $PSScriptRoot -EnsureExists
+    foreach ($bootstrapFile in @(
+            'GlobalState.ps1'
+            'CommandCache.ps1'
+            'AssumedCommands.ps1'
+            'MissingToolWarnings.ps1'
+            'ToolInstallRegistry.ps1'
+            'InstallHintResolver.ps1'
+        )) {
+        . (Join-Path $bootstrapDir $bootstrapFile)
+    }
+}
+
+Describe 'Container install hint extended scenarios' {
+    Context 'Get-ContainerEngineInstallHint' {
+        It 'Returns the generic fallback when platform hints are unavailable' {
+            $originalPlatformHint = Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue
+            Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
+            Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
+
+            try {
+                Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+                $hint = Get-ContainerEngineInstallHint
+                $hint | Should -Match 'docker'
+                $hint | Should -Match 'podman'
+            }
+            finally {
+                if ($null -ne $originalPlatformHint) {
+                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
+                }
+            }
+        }
+
+        It 'Includes separate docker and podman guidance when platform hints are available' {
+            $hint = Get-ContainerEngineInstallHint
+            $hint | Should -Match 'docker'
+            $hint | Should -Match 'podman'
+        }
+    }
+
+    Context 'Get-ContainerInstallationCommand' {
+        It 'Strips the Install with prefix from the combined hint' {
+            $command = Get-ContainerInstallationCommand
+            $command | Should -Not -Match '^Install with:'
+            $command | Should -Match 'docker'
+        }
+
+        It 'Falls back to scoop guidance when Get-ContainerEngineInstallHint is unavailable' {
+            $originalHint = Get-Command Get-ContainerEngineInstallHint -ErrorAction SilentlyContinue
+            Remove-Item Function:\Get-ContainerEngineInstallHint -Force -ErrorAction SilentlyContinue
+            Remove-Item Function:\global:Get-ContainerEngineInstallHint -Force -ErrorAction SilentlyContinue
+
+            try {
+                Get-ContainerInstallationCommand | Should -Match 'scoop install docker'
+            }
+            finally {
+                if ($null -ne $originalHint) {
+                    Set-Item -Path Function:\global:Get-ContainerEngineInstallHint -Value $originalHint.ScriptBlock -Force
+                }
+            }
+        }
+    }
+}

@@ -134,9 +134,9 @@ $global:FragmentLoadCount++
                 . $script:InvokeProfileSilently
                 $secondLoad = $global:FragmentLoadCount
 
-                # Fragment should be idempotent (or at least handle multiple loads)
-                # Exact behavior depends on fragment design, but shouldn't crash
-                $secondLoad | Should -BeGreaterThan $firstLoad -Because "fragment should handle multiple loads without crashing"
+                # Fragment should load at least once; repeated profile loads must not crash
+                $firstLoad | Should -BeGreaterOrEqual 1 -Because 'test fragment should load on first profile invocation'
+                $secondLoad | Should -BeGreaterOrEqual $firstLoad -Because 'fragment should handle multiple profile loads without crashing'
             }
             catch {
                 $errorDetails = @{

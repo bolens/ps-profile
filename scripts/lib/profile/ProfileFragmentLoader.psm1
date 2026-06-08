@@ -265,12 +265,12 @@ function Initialize-FragmentLoading {
     if (-not $cacheInitModule -or -not (Get-Command -Module ProfileFragmentCacheInitialization Initialize-FragmentCacheForLoading -ErrorAction SilentlyContinue)) {
         # Fallback implementation (simplified)
         $fragmentCacheModule = Join-Path $FragmentLibDir 'FragmentCache.psm1'
-        if (Test-Path -LiteralPath $fragmentCachele) {
+        if (Test-Path -LiteralPath $fragmentCacheModule) {
             try {
                 # Check if module file has changed and reload if necessary
-                $needsReload = Test-AndReloadModuleIfChanged -ModulePath $fragmentCachele -ModuleName 'FragmentCache' -Hbug -DebugLevel $debugLevel
-                if ($needsReload -or -not (Get-Module FragmentCacheSilentlyContinue)) {
-                    Import-Module $fragmentCachele -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                $needsReload = Test-AndReloadModuleIfChanged -ModulePath $fragmentCacheModule -ModuleName 'FragmentCache' -HasDebug $hasDebug -DebugLevel $debugLevel
+                if ($needsReload -or -not (Get-Module FragmentCache -ErrorAction SilentlyContinue)) {
+                    Import-Module $fragmentCacheModule -DisableNameChecking -ErrorAction SilentlyContinue -Force
                 }
                 if (Get-Command Initialize-FragmentCache -ErrorAction SilentlyContinue) {
                     # Suppress return value
@@ -495,22 +495,7 @@ function Initialize-FragmentLoading {
         }
     }
     
-    # Fallback to inline pre-registration if module not available or failed
-    if (-not $preRegisterStats -and $FragmentsToLoad.Count -gt 0) {
-            
-        # Check explicit lazy load setting (takes precedence)
-        # Warning: fallback to inline logic
-        if ($hasDebug -and $debugLevel -ge 2) {
-            Write-Host "  [profile-fragment-loader] Pre-registration module failed, falling back to inline logic: $($_.Exception.Message)" -ForegroundColor DarkGray
-        }
-        $normalized = $env:PS_PROFILE_LAZY_LOAD_FRAGMENTS.Trim().ToLowerInvariant()
-        $lazyLoadEnabled = ($normalized -eq '1' -or $normalized -eq 'true')
-    }
-    # Check inverse: if PS_PROFILE_LOAD_ALL_FRAGMENTS is explicitly set to true, disable lazy loading
-    elseif ($env:PS_PROFILE_LOAD_ALL_FRAGMENTS) {
-        $normalized = $env:PS_PROFILE_LOAD_ALL_FRAGMENTS.Trim().ToLowerInvariant()
-        $lazyLoadEnabled = -not ($normalized -eq '1' -or $normalized -eq 'true')
-    }
+    # Inline pre-registration (when module unavailable) runs below when $preRegisterEnabled is true.
 
     # Pre-register commands from fragments using AST parsing (if enabled)
     # This enables on-demand fragment loading by populating the registry before fragments are loaded
