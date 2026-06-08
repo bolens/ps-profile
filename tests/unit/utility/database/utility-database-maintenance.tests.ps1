@@ -53,6 +53,26 @@ Describe 'database-maintenance.ps1 execution' {
         $result.ExitCode | Should -BeIn @(1, 2)
     }
 
+    It 'Accepts statistics action with JSON output format' {
+        $result = Invoke-DatabaseMaintenanceScript -ArgumentList @('-Action', 'statistics', '-OutputFormat', 'json')
+
+        $result.Output | Should -Not -Match 'Unable to find type \[DatabaseAction\]'
+        if ($result.Output -match 'SqliteDatabase\.psm1 was not found') {
+            $result.ExitCode | Should -BeIn @(1, 2, 3)
+            return
+        }
+
+        $result.Output | Should -Match 'statistics|database|Database'
+        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+    }
+
+    It 'Accepts optimize action without enum load errors' {
+        $result = Invoke-DatabaseMaintenanceScript -ArgumentList @('-Action', 'optimize')
+
+        $result.Output | Should -Not -Match 'Unable to find type \[DatabaseAction\]'
+        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+    }
+
     It 'Rejects unknown maintenance actions' {
         $result = Invoke-DatabaseMaintenanceScript -ArgumentList @('-Action', 'definitely-not-a-db-action')
 

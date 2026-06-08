@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-diagnostics-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-diagnostics-fragment-extended.tests.ps1
+# Execution tests for diagnostics.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,58 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/diagnostics.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:SavedDebug = $env:PS_PROFILE_DEBUG
+    $env:PS_PROFILE_DEBUG = '1'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+
+    $importCommand = Get-Command Import-FragmentModule -ErrorAction SilentlyContinue
+    $script:TestImportFragmentModuleBody = if ($importCommand) { $importCommand.ScriptBlock } else { $null }
 }
+
+AfterAll {
+    $env:PS_PROFILE_DEBUG = $script:SavedDebug
+}
+
+function script:Reset-DiagnosticsFragmentState {
+    Remove-Variable -Name 'PSProfileDiagnosticsLoaded' -Scope Global -ErrorAction SilentlyContinue
+    foreach ($commandName in @(
+            'Show-ProfileDiagnostic'
+            'Show-ProfileStartupTime'
+            'Test-ProfileHealth'
+            'Show-CommandUsageStats'
+        )) {
+        Remove-Item -Path "Function:\$commandName" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "Function:\global:$commandName" -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Describe 'profile.d/diagnostics.ps1 extended scenarios' {
-    It 'Declares standard tier with bootstrap dependency' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    BeforeEach {
+        if ($script:TestImportFragmentModuleBody) {
+            Set-Item -Path Function:\Import-FragmentModule -Value $script:TestImportFragmentModuleBody -Force
+        }
+
+        Reset-DiagnosticsFragmentState
     }
-    It 'Loads diagnostics-profile module from diagnostics-modules/core' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'diagnostics-modules'
-        $c | Should -Match 'diagnostics-profile\.ps1'
+
+    It 'Registers diagnostic commands when PS_PROFILE_DEBUG is set during load' {
+        . (Join-Path $script:ProfileDir 'diagnostics.ps1')
+
+        Get-Command Test-ProfileHealth -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Show-ProfileDiagnostic -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Show-ProfileStartupTime -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        (Get-Variable -Name 'PSProfileDiagnosticsLoaded' -Scope Global -ErrorAction Stop).Value | Should -Be $true
     }
-    It 'Uses Import-FragmentModule with manual fallback loading' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Import-FragmentModule'
-        $c | Should -Match 'Fallback: manual loading'
+
+    It 'Skips re-initialization when diagnostics commands remain registered' {
+        . (Join-Path $script:ProfileDir 'diagnostics.ps1')
+        $firstHealth = Get-Command Test-ProfileHealth -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'diagnostics.ps1')
+
+        (Get-Command Test-ProfileHealth -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstHealth.ScriptBlock.ToString()
     }
 }

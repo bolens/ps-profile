@@ -461,21 +461,11 @@ try {
     }
 
     # Register functions and aliases
-    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
-        Set-AgentModeFunction -Name 'Download-Video' -Body ${function:Download-Video}
-        Set-AgentModeFunction -Name 'Download-Gallery' -Body ${function:Download-Gallery}
-        Set-AgentModeFunction -Name 'Download-Playlist' -Body ${function:Download-Playlist}
-        Set-AgentModeFunction -Name 'Archive-WebPage' -Body ${function:Archive-WebPage}
-        Set-AgentModeFunction -Name 'Download-Twitch' -Body ${function:Download-Twitch}
-    }
-    else {
-        # Fallback: direct function registration
-        Set-Item -Path Function:Download-Video -Value ${function:Download-Video} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Download-Gallery -Value ${function:Download-Gallery} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Download-Playlist -Value ${function:Download-Playlist} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Archive-WebPage -Value ${function:Archive-WebPage} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Download-Twitch -Value ${function:Download-Twitch} -Force -ErrorAction SilentlyContinue
-    }
+    Set-AgentModeFunction -Name 'Download-Video' -Body ${function:Download-Video}
+    Set-AgentModeFunction -Name 'Download-Gallery' -Body ${function:Download-Gallery}
+    Set-AgentModeFunction -Name 'Download-Playlist' -Body ${function:Download-Playlist}
+    Set-AgentModeFunction -Name 'Archive-WebPage' -Body ${function:Archive-WebPage}
+    Set-AgentModeFunction -Name 'Download-Twitch' -Body ${function:Download-Twitch}
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {

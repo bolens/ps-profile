@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-homebrew-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-homebrew-fragment-extended.tests.ps1
+# Execution tests for homebrew.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/homebrew.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/homebrew.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by brew availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'if \(Test-CachedCommand brew\)'
+    It 'Registers Homebrew helpers when brew is available' {
+        Set-TestCommandAvailabilityState -CommandName 'brew' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'homebrew.ps1')
+
+        Get-Command Install-BrewPackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Test-BrewOutdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command brewinstall -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Install-BrewPackage with cask support for GUI apps' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Install-BrewPackage'
-        $c | Should -Match '\[switch\]\$Cask'
+
+    It 'Skips Homebrew helper registration when brew is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'brew' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'homebrew.ps1')
+
+        Get-Command Install-BrewPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers brewinstall and brewoutdated aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'brewinstall'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'brewoutdated'"
+
+    It 'Emits missing-tool warning when brew is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'brew' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('homebrew', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'homebrew.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'brew not found'
     }
 }

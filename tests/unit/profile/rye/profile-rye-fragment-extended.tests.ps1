@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-rye-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-rye-fragment-extended.tests.ps1
+# Execution tests for rye.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/rye.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/rye.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by rye availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'if \(Test-CachedCommand rye\)'
+    It 'Registers rye helpers when rye is available' {
+        Set-TestCommandAvailabilityState -CommandName 'rye' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'rye.ps1')
+
+        Get-Command Add-RyePackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Sync-RyeDependencies -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ryeadd -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Add-RyePackage with dev and optional flags' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Add-RyePackage'
-        $c | Should -Match '\[switch\]\$Optional'
+
+    It 'Skips rye helper registration when rye is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'rye' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'rye.ps1')
+
+        Get-Command Add-RyePackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers ryeadd and ryesync aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'ryeadd'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'ryesync'"
+
+    It 'Emits missing-tool warning when rye is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'rye' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('rye', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'rye.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'rye not found'
     }
 }

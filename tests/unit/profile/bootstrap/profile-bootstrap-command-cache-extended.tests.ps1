@@ -27,10 +27,9 @@ Describe 'profile.d/bootstrap/CommandCache.ps1 extended scenarios' {
         $c | Should -Match 'CacheTTLMinutes'
         $c | Should -Match 'Get-CachedExternalCommand'
     }
-    It 'Provides cache management and legacy Test-HasCommand wrapper' {
+    It 'Provides cache management helpers' {
         $c = Get-Content -LiteralPath $script:Fragment -Raw
         $c | Should -Match 'Clear-TestCachedCommandCache'
         $c | Should -Match 'Remove-TestCachedCommandCacheEntry'
-        $c | Should -Match 'Test-HasCommand'
     }
 }

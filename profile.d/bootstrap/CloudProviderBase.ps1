@@ -617,19 +617,10 @@ try {
     }
 
     # Register functions
-    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
-        Set-AgentModeFunction -Name 'Invoke-CloudCommand' -Body ${function:Invoke-CloudCommand}
-        Set-AgentModeFunction -Name 'Set-CloudProfile' -Body ${function:Set-CloudProfile}
-        Set-AgentModeFunction -Name 'Get-CloudResources' -Body ${function:Get-CloudResources}
-        Set-AgentModeFunction -Name 'Test-CloudConnection' -Body ${function:Test-CloudConnection}
-    }
-    else {
-        # Fallback: direct function registration
-        Set-Item -Path Function:Invoke-CloudCommand -Value ${function:Invoke-CloudCommand} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Set-CloudProfile -Value ${function:Set-CloudProfile} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-CloudResources -Value ${function:Get-CloudResources} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Test-CloudConnection -Value ${function:Test-CloudConnection} -Force -ErrorAction SilentlyContinue
-    }
+    Set-AgentModeFunction -Name 'Invoke-CloudCommand' -Body ${function:Invoke-CloudCommand}
+    Set-AgentModeFunction -Name 'Set-CloudProfile' -Body ${function:Set-CloudProfile}
+    Set-AgentModeFunction -Name 'Get-CloudResources' -Body ${function:Get-CloudResources}
+    Set-AgentModeFunction -Name 'Test-CloudConnection' -Body ${function:Test-CloudConnection}
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {

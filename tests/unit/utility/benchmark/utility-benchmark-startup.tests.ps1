@@ -63,4 +63,15 @@ Describe 'benchmark-startup.ps1 execution' {
         $result.Output | Should -Match 'Measuring full profile startup'
         $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
     }
+
+    It 'Rejects non-positive RegressionThreshold values' {
+        $result = Invoke-BenchmarkStartupScript -ArgumentList @(
+            '-Iterations', '1',
+            '-WorkspaceRoot', $script:TestRepoRoot,
+            '-RegressionThreshold', '0'
+        )
+
+        $result.ExitCode | Should -Not -Be 0
+        $result.Output | Should -Match 'RegressionThreshold must be a positive number'
+    }
 }

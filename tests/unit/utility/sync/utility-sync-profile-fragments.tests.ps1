@@ -80,9 +80,19 @@ function Get-SyncFragmentsFixture {
 '@ -Encoding UTF8
 
             $configPath = Join-Path $repo '.profile-fragments.json'
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'sync-profile-fragments.ps1') -ArgumentList @(
-                '-ProfileDir', $repo
-            )
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'sync-profile-fragments.ps1') -ArgumentList @(
+                    '-ProfileDir', $repo
+                )
+            }
+            finally {
+                Pop-Location
+            }
 
             $result.ExitCode | Should -Be 0
             Test-Path -LiteralPath $configPath | Should -BeTrue

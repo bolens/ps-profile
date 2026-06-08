@@ -49,25 +49,11 @@ function Write-SubModuleError {
     }
 }
 
-# Load LaTeX detection utilities using standardized module loading
-if (Get-Command Import-FragmentModule -ErrorAction SilentlyContinue) {
-    $null = Import-FragmentModule `
-        -FragmentRoot $PSScriptRoot `
-        -ModulePath @('files', 'LaTeXDetection.ps1') `
-        -Context "Fragment: files (LaTeXDetection.ps1)"
-}
-else {
-    # Fallback for environments where Import-FragmentModule is not yet available
-    $latexDetectionPath = Join-Path $PSScriptRoot 'files' 'LaTeXDetection.ps1'
-    if (Test-Path -LiteralPath $latexDetectionPath -ErrorAction SilentlyContinue) {
-        try {
-            . $latexDetectionPath
-        }
-        catch {
-            Write-SubModuleError -ErrorRecord $_ -ModuleName 'LaTeXDetection.ps1'
-        }
-    }
-}
+# Load LaTeX detection utilities
+$null = Import-FragmentModule `
+    -FragmentRoot $PSScriptRoot `
+    -ModulePath @('files', 'LaTeXDetection.ps1') `
+    -Context "Fragment: files (LaTeXDetection.ps1)"
 
 # Import Node.js helper module (provides Node.js detection and execution utilities)
 # Used by conversion and dev-tools modules that require Node.js
@@ -87,24 +73,10 @@ if (Test-Path -LiteralPath $nodeJsModulePath -ErrorAction SilentlyContinue) {
 # ===============================================
 # Load module registry that maps Ensure-* functions to module paths.
 # This enables deferred loading - modules are only loaded when their Ensure function is called.
-if (Get-Command Import-FragmentModule -ErrorAction SilentlyContinue) {
-    $null = Import-FragmentModule `
-        -FragmentRoot $PSScriptRoot `
-        -ModulePath @('files-module-registry.ps1') `
-        -Context "Fragment: files (Module Registry)"
-}
-else {
-    # Fallback for environments where Import-FragmentModule is not yet available
-    $moduleRegistryPath = Join-Path $PSScriptRoot 'files-module-registry.ps1'
-    if (Test-Path -LiteralPath $moduleRegistryPath -ErrorAction SilentlyContinue) {
-        try {
-            . $moduleRegistryPath
-        }
-        catch {
-            Write-SubModuleError -ErrorRecord $_ -ModuleName 'Module Registry'
-        }
-    }
-}
+$null = Import-FragmentModule `
+    -FragmentRoot $PSScriptRoot `
+    -ModulePath @('files-module-registry.ps1') `
+    -Context "Fragment: files (Module Registry)"
 
 # Lazy bulk initializer for data format conversion helpers
 # This function is called automatically when any data conversion function is first used.

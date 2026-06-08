@@ -47,23 +47,6 @@ Describe 'profile.d/git-enhanced.ps1 extended scenarios' {
         Test-FragmentLoaded -FragmentName 'git-enhanced' | Should -Be $true
     }
 
-    It 'Loads enhanced git modules through the fallback foreach loader' {
-        Remove-Item -Path Function:\Import-FragmentModules -Force -ErrorAction SilentlyContinue
-
-        try {
-            . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
-
-            Get-Command Sync-GitRepos -ErrorAction Stop | Should -Not -BeNullOrEmpty
-            Get-Command Format-GitCommit -ErrorAction Stop | Should -Not -BeNullOrEmpty
-            Test-FragmentLoaded -FragmentName 'git-enhanced' | Should -Be $true
-        }
-        finally {
-            if ($global:TestImportFragmentModulesBody) {
-                Set-Item -Path Function:\Import-FragmentModules -Value $global:TestImportFragmentModulesBody -Force
-            }
-        }
-    }
-
     It 'Skips re-initialization when git-enhanced is already loaded' {
         . (Join-Path $script:ProfileDir 'git-enhanced.ps1')
         Test-FragmentLoaded -FragmentName 'git-enhanced' | Should -Be $true

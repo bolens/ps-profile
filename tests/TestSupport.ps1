@@ -231,25 +231,6 @@ if ($null -eq $script:TestSupportDefaultAssumedCommandsSet) {
     }
 }
 
-# Deprecated Test-HasCommand shim so Pester Mock -CommandName Test-HasCommand works
-# before bootstrap loads. Bootstrap replaces this with a Test-CachedCommand wrapper.
-if (-not (Get-Command Test-HasCommand -ErrorAction SilentlyContinue)) {
-    function global:Test-HasCommand {
-        [CmdletBinding()]
-        [OutputType([bool])]
-        param(
-            [Parameter(Mandatory, Position = 0)]
-            [string]$Name
-        )
-
-        if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) {
-            return Test-CachedCommand -Name $Name
-        }
-
-        return $null -ne (Get-Command -Name $Name -ErrorAction SilentlyContinue)
-    }
-}
-
 # Reset cross-file pollution before initializing mocks for each test file
 if (Get-Command Reset-TestIsolationState -ErrorAction SilentlyContinue) {
     Reset-TestIsolationState

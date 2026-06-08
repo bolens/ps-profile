@@ -75,4 +75,29 @@ Describe 'run-security-scan.ps1 execution' {
         $result = Invoke-SecurityScanScript -ArgumentList @('-Path', $script:SecurityFixtureDir)
         $result.Output | Should -Match 'PSAvoidUsingInvokeExpression|PSAvoidUsingInvokeExpress|Invoke-Expression'
     }
+
+    It 'Loads a custom allowlist file when AllowlistFile is specified' {
+        $workDir = New-TestTempDirectory -Prefix 'SecurityScanAllowlist'
+        $allowlistPath = Join-Path $workDir 'allowlist.json'
+        $emptyDir = Join-Path $workDir 'scan-target'
+        New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
+        try {
+            @{
+                FilePatterns = @('insecure\.ps1$')
+            } | ConvertTo-Json | Set-Content -LiteralPath $allowlistPath -Encoding UTF8
+
+            $result = Invoke-SecurityScanScript -ArgumentList @(
+                '-Path', $emptyDir,
+                '-AllowlistFile', $allowlistPath
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'no issues found|Security scan completed'
+        }
+        finally {
+            if (Test-Path -LiteralPath $workDir) {
+                Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

@@ -93,4 +93,47 @@ Describe 'run-markdownlint.ps1 execution' {
             }
         }
     }
+
+    It 'Passes when markdownlint finds no violations in an isolated repository' {
+        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
+            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
+            return
+        }
+
+        $repo = New-TestTempDirectory -Prefix 'MarkdownlintCleanRepo'
+        try {
+            $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:RunMarkdownlintScript -Destination (Join-Path $runnerDir 'run-markdownlint.ps1') -Force
+            @(
+                '# Clean Markdown Fixture'
+                ''
+                'This file should pass markdownlint.'
+            ) | Set-Content -LiteralPath (Join-Path $repo 'clean-markdown.md') -Encoding UTF8
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                git add clean-markdown.md
+                git commit -m 'init clean markdown' -q
+
+                $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
+                $exitCode = $LASTEXITCODE
+            }
+            finally {
+                Pop-Location
+            }
+
+            $exitCode | Should -Be 0
+            $output | Should -Match 'markdownlint passed'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

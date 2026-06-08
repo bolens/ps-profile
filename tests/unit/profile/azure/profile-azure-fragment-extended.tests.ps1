@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-azure-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-azure-fragment-extended.tests.ps1
+# Execution tests for azure.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,43 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/azure.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'azure.ps1')
 }
+
 Describe 'profile.d/azure.ps1 extended scenarios' {
-    It 'Declares standard tier for cloud and development Azure helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Environment: cloud, development'
+    It 'Registers Invoke-Azure and Invoke-AzureDeveloper helpers' {
+        Get-Command Invoke-Azure -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-AzureDeveloper -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-Azure and Invoke-AzureDeveloper CLI wrappers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'function Invoke-Azure'
-        $c | Should -Match 'function Invoke-AzureDeveloper'
+
+    It 'Invoke-Azure warns when az is unavailable' {
+        Mark-TestCommandsUnavailable -CommandNames @('az')
+        Set-TestCommandAvailabilityState -CommandName 'az' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('az', [ref]$null)
+        }
+
+        $output = Invoke-Azure --version 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'az not found'
     }
-    It 'Uses Test-CachedCommand for az and azd availability checks' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-CachedCommand'
-        $c | Should -Match 'PowerShell.Profile.Azure'
+
+    It 'Invoke-AzureDeveloper warns when azd is unavailable' {
+        Mark-TestCommandsUnavailable -CommandNames @('azd')
+        Set-TestCommandAvailabilityState -CommandName 'azd' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('azd', [ref]$null)
+        }
+
+        $output = Invoke-AzureDeveloper --version 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'azd not found'
     }
 }

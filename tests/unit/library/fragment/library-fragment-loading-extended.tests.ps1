@@ -24,8 +24,8 @@ BeforeAll {
         Import-Module $fileContentModulePath -DisableNameChecking -ErrorAction SilentlyContinue
     }
 
-    $fragmentLoadingPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentLoading.psm1' -StartPath $PSScriptRoot -EnsureExists
-    Import-Module $fragmentLoadingPath -DisableNameChecking -Force
+    $script:FragmentLoadingPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentLoading.psm1' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module $script:FragmentLoadingPath -DisableNameChecking -Force
 
     $script:TempDir = New-TestTempDirectory -Prefix 'FragmentLoadingExtended'
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
@@ -50,6 +50,11 @@ AfterAll {
 }
 
 Describe 'FragmentLoading extended scenarios' {
+    BeforeEach {
+        Remove-Module FragmentLoader -ErrorAction SilentlyContinue -Force
+        Import-Module $script:FragmentLoadingPath -DisableNameChecking -Force
+    }
+
     Context 'Get-FragmentDependencies' {
         It 'Ignores duplicate dependency declarations' {
             $fragmentPath = Join-Path $script:TempDir 'dup-deps.ps1'
@@ -312,7 +317,7 @@ Describe 'FragmentLoading extended scenarios' {
 
         It 'Treats bootstrap fragments as core tier' {
             $path = Join-Path $script:TempDir 'bootstrap.ps1'
-            Set-Content -LiteralPath $path -Value '# bootstrap' -Encoding UTF8
+            Set-Content -LiteralPath $path -Value "# Tier: core`n# bootstrap" -Encoding UTF8
             Get-FragmentTier -FragmentFile $path | Should -Be 'core'
         }
 
@@ -323,19 +328,24 @@ Describe 'FragmentLoading extended scenarios' {
         It 'Emits level 3 verbose tracing when tier parsing fails without structured logging' {
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '3'
-
-            function global:Read-FileContent {
-                param([string]$Path)
-                throw 'tier parse verbose probe'
-            }
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            $filePath = Join-Path $script:TempDir 'tier-verbose-fail.ps1'
 
             try {
-                $filePath = Join-Path $script:TempDir 'tier-verbose-fail.ps1'
                 Set-Content -LiteralPath $filePath -Value '# Tier: core' -Encoding UTF8
+                if ($IsLinux -or $IsMacOS) {
+                    chmod 000 $filePath
+                }
+
                 Get-FragmentTier -FragmentFile $filePath | Should -Be 'optional'
             }
             finally {
-                Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+                if ($IsLinux -or $IsMacOS) {
+                    if (Test-Path -LiteralPath $filePath) {
+                        chmod 644 $filePath
+                    }
+                }
+
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
                 }
@@ -476,6 +486,105 @@ Describe 'FragmentLoading extended scenarios' {
         }
     }
 
+    Context 'Invoke-ParallelDependencyParsing' {
+        It 'Returns error metadata for missing file paths' {
+            $missingPath = Join-Path $script:TempDir 'missing-parallel-parse.ps1'
+            $global:TestParallelParsePaths = @($missingPath)
+
+            InModuleScope -ModuleName FragmentLoading {
+                $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
+                @($results).Count | Should -BeGreaterThan 0
+            }
+        }
+
+        It 'Parses dependencies for multiple files in one parallel batch' {
+            $global:TestParallelParsePaths = 1..4 | ForEach-Object {
+                $path = Join-Path $script:TempDir "5$($_)-parallel-batch.ps1"
+                Set-Content -LiteralPath $path -Value "#Requires -Fragment 'bootstrap'" -Encoding UTF8
+                $path
+            }
+
+            InModuleScope -ModuleName FragmentLoading {
+                $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
+                @($results | Where-Object { $_.FragmentName }).Count | Should -Be 4
+            }
+        }
+
+        It 'Reports scriptblock errors from parallel parsing when debug is enabled' {
+            $previousDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+            $path = Join-Path $script:TempDir '50-scriptblock-error.ps1'
+            Set-Content -LiteralPath $path -Value '#Requires -Fragment ''unclosed' -Encoding UTF8
+            $global:TestParallelParsePaths = @($path)
+
+            try {
+                InModuleScope -ModuleName FragmentLoading {
+                    $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
+                    @($results).Count | Should -BeGreaterThan 0
+                }
+            }
+            finally {
+                Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+                if ($null -eq $previousDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $previousDebug
+                }
+            }
+        }
+
+        It 'Parses both Requires and Dependencies declarations in one file' {
+            $path = Join-Path $script:TempDir 'combo-deps.ps1'
+            Set-Content -LiteralPath $path -Value @'
+#Requires -Fragment 'bootstrap'
+# Dependencies: env, utilities
+'@ -Encoding UTF8
+            $global:TestParallelParsePaths = @($path)
+
+            try {
+                InModuleScope -ModuleName FragmentLoading {
+                    $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
+                    $parsed = @($results)
+                    $parsed.Count | Should -BeGreaterThan 0
+                    $parsed[0].FragmentName | Should -Be 'combo-deps'
+                    $parsed[0].Dependencies | Should -Contain 'bootstrap'
+                    $parsed[0].Dependencies | Should -Contain 'env'
+                }
+            }
+            finally {
+                Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Reports scriptblock read failures when locked files block readers' {
+            Enable-TestStructuredLogging
+            $path = Join-Path $script:TempDir 'locked-parallel-parse.ps1'
+            Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
+            $fileStream = [System.IO.File]::Open(
+                $path,
+                [System.IO.FileMode]::Open,
+                [System.IO.FileAccess]::Read,
+                [System.IO.FileShare]::None)
+            $global:TestParallelParsePaths = @($path)
+
+            try {
+                InModuleScope -ModuleName FragmentLoading {
+                    $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
+                    $parsed = @($results)
+                    $parsed.Count | Should -BeGreaterThan 0
+                    $parsed[0].FragmentName | Should -Be 'locked-parallel-parse'
+                    @($parsed[0].Dependencies).Count | Should -Be 0
+                }
+            }
+            finally {
+                $fileStream.Dispose()
+                Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+    }
+
     Context 'Get-FragmentDependencies cache invalidation' {
         It 'Refreshes cached dependencies after the fragment file changes' {
             $fragmentPath = Join-Path $script:TempDir 'refresh-deps.ps1'
@@ -494,31 +603,23 @@ Describe 'FragmentLoading extended scenarios' {
     Context 'Get-FragmentTiers' {
         It 'Excludes bootstrap fragments when ExcludeBootstrap is specified' {
             $bootstrapPath = Join-Path $script:TempDir 'bootstrap.ps1'
-            $corePath = Join-Path $script:TempDir '05-tier-core.ps1'
-            Set-Content -LiteralPath $bootstrapPath -Value '# bootstrap' -Encoding UTF8
-            Set-Content -LiteralPath $corePath -Value '# core' -Encoding UTF8
+            $corePath = Join-Path $script:TempDir 'core-tier.ps1'
+            Set-Content -LiteralPath $bootstrapPath -Value @'
+# Tier: core
+# bootstrap
+'@ -Encoding UTF8
+            Set-Content -LiteralPath $corePath -Value @'
+# Tier: core
+# core
+'@ -Encoding UTF8
 
             $tiers = Get-FragmentTiers -FragmentFiles @(
                 (Get-Item -LiteralPath $bootstrapPath)
                 (Get-Item -LiteralPath $corePath)
             ) -ExcludeBootstrap
 
-            @($tiers.Tier0 | ForEach-Object { $_.BaseName }) | Should -Contain '05-tier-core'
+            @($tiers.Tier0 | ForEach-Object { $_.BaseName }) | Should -Contain 'core-tier'
             @($tiers.Tier0 | ForEach-Object { $_.BaseName }) | Should -Not -Contain 'bootstrap'
-        }
-
-        It 'Buckets fragments into tier lists by numeric prefix' {
-            $corePath = Join-Path $script:TempDir '05-core-tier.ps1'
-            $optionalPath = Join-Path $script:TempDir '75-optional-tier.ps1'
-            Set-Content -LiteralPath $corePath -Value '# core' -Encoding UTF8
-            Set-Content -LiteralPath $optionalPath -Value '# optional' -Encoding UTF8
-
-            $coreFile = Get-Item -LiteralPath $corePath
-            $optionalFile = Get-Item -LiteralPath $optionalPath
-            $tiers = Get-FragmentTiers -FragmentFiles @($coreFile, $optionalFile)
-
-            @($tiers.Tier0 | ForEach-Object { $_.BaseName }) | Should -Contain '05-core-tier'
-            @($tiers.Tier3 | ForEach-Object { $_.BaseName }) | Should -Contain '75-optional-tier'
         }
     }
 }

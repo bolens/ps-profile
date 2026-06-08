@@ -79,4 +79,32 @@ Describe 'psa_to_reviewdog.ps1 execution' {
             }
         }
     }
+
+    It 'Converts an empty PSScriptAnalyzer report into reviewdog output with zero diagnostics' {
+        $workDir = New-TestTempDirectory -Prefix 'PsaReviewdogEmpty'
+        $reportPath = Join-Path $workDir 'empty-report.json'
+        try {
+            '[]' | Set-Content -LiteralPath $reportPath -Encoding UTF8
+
+            Push-Location $workDir
+            try {
+                $result = Invoke-TestScriptFile -ScriptPath $script:PsaToReviewdogScript -ArgumentList @(
+                    '-ReportPath', $reportPath
+                )
+
+                $result.ExitCode | Should -Be 0
+                $result.Output | Should -Match 'Converted 0 items'
+                $converted = Get-Content -LiteralPath (Join-Path $workDir 'psa_for_reviewdog.rdjson') -Raw | ConvertFrom-Json
+                $converted.diagnostics.Count | Should -Be 0
+            }
+            finally {
+                Pop-Location
+            }
+        }
+        finally {
+            if (Test-Path -LiteralPath $workDir) {
+                Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

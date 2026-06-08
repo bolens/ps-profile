@@ -49,8 +49,11 @@ function global:Invoke-PreCommitScript {
     )
 
     $scriptPath = Join-Path $RepositoryRoot 'scripts' 'git' 'pre-commit.ps1'
-    & pwsh -NoProfile -File $scriptPath 2>&1 | Out-Null
-    return $LASTEXITCODE
+    $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
+    return [pscustomobject]@{
+        ExitCode = $LASTEXITCODE
+        Output   = $output
+    }
 }
 
 BeforeAll {
@@ -78,7 +81,26 @@ Describe 'pre-commit.ps1 execution' {
         }
         $repo = New-PreCommitTestRepository -FormatExitCode 0 -ValidateExitCode 0
         try {
-            Invoke-PreCommitScript -RepositoryRoot $repo | Should -Be 0
+            Invoke-PreCommitScript -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -Be 0
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Announces formatting before validation in hook output' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+        $repo = New-PreCommitTestRepository -FormatExitCode 0 -ValidateExitCode 0
+        try {
+            $result = Invoke-PreCommitScript -RepositoryRoot $repo
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Running code formatting'
+            $result.Output | Should -Match 'Running profile validation|Running validation'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {
@@ -94,7 +116,9 @@ Describe 'pre-commit.ps1 execution' {
         }
         $repo = New-PreCommitTestRepository -FormatExitCode 1 -ValidateExitCode 0
         try {
-            Invoke-PreCommitScript -RepositoryRoot $repo | Should -Be 1
+            $result = Invoke-PreCommitScript -RepositoryRoot $repo
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'formatting failed|Code formatting failed'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {
@@ -110,7 +134,9 @@ Describe 'pre-commit.ps1 execution' {
         }
         $repo = New-PreCommitTestRepository -FormatExitCode 0 -ValidateExitCode 1
         try {
-            Invoke-PreCommitScript -RepositoryRoot $repo | Should -Be 1
+            $result = Invoke-PreCommitScript -RepositoryRoot $repo
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'validation failed|Validation checks failed'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {
@@ -126,7 +152,9 @@ Describe 'pre-commit.ps1 execution' {
         }
         $repo = New-PreCommitTestRepository -OmitValidateScript
         try {
-            Invoke-PreCommitScript -RepositoryRoot $repo | Should -BeIn @(1, 2)
+            $result = Invoke-PreCommitScript -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'validate-profile|not found|Setup'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

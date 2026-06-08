@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-aliases-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-aliases-fragment-extended.tests.ps1
+# Execution tests for aliases.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,51 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/aliases.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'aliases.ps1')
 }
+
+function script:Reset-AliasesFragmentState {
+    Remove-Variable -Name 'AliasesLoaded' -Scope Global -ErrorAction SilentlyContinue
+    foreach ($name in @('Get-ChildItemEnhanced', 'Get-ChildItemEnhancedAll', 'Show-Path')) {
+        Remove-Item -Path "Function:\global:$name" -Force -ErrorAction SilentlyContinue
+    }
+    foreach ($aliasName in @('ll', 'la')) {
+        Remove-Item -Path "Alias:\global:$aliasName" -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Describe 'profile.d/aliases.ps1 extended scenarios' {
-    It 'Declares standard tier with bootstrap dependency' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    BeforeEach {
+        Reset-AliasesFragmentState
     }
-    It 'Defines Enable-Aliases function with idempotent AliasesLoaded guard' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'function Enable-Aliases'
-        $c | Should -Match 'AliasesLoaded'
+
+    It 'Enable-Aliases registers ll, la, and Show-Path helpers' {
+        Enable-Aliases
+
+        Get-Alias ll -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Alias la -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Show-Path -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        (Get-Variable -Name 'AliasesLoaded' -Scope Global -ErrorAction Stop).Value | Should -Be $true
     }
-    It 'Registers aliases in a non-destructive idempotent way' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'idempotent'
-        $c | Should -Match 'non-destructive'
+
+    It 'Show-Path returns PATH entries as a string array' {
+        Enable-Aliases
+
+        $pathEntries = @(Show-Path)
+        @($pathEntries).Count | Should -BeGreaterThan 0
+        $pathEntries[0] | Should -BeOfType [string]
+    }
+
+    It 'Skips re-registration when AliasesLoaded is already set' {
+        Enable-Aliases
+        $firstShowPath = Get-Command Show-Path -ErrorAction Stop
+
+        Enable-Aliases
+
+        (Get-Command Show-Path -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstShowPath.ScriptBlock.ToString()
     }
 }

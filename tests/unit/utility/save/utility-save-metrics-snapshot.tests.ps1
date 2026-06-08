@@ -68,4 +68,27 @@ Describe 'save-metrics-snapshot.ps1 execution' {
             }
         }
     }
+
+    It 'Creates the output directory when it does not exist yet' {
+        $parentDir = New-TestTempDirectory -Prefix 'MetricsSnapshotParent'
+        $outputDir = Join-Path $parentDir 'nested' 'snapshots'
+        try {
+            Test-Path -LiteralPath $outputDir | Should -BeFalse
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:SaveSnapshotScript -ArgumentList @(
+                '-OutputPath', $outputDir,
+                '-IncludeCodeMetrics:False',
+                '-IncludePerformanceMetrics:False'
+            )
+
+            $result.ExitCode | Should -Be 0
+            Test-Path -LiteralPath $outputDir | Should -BeTrue
+            @(Get-ChildItem -LiteralPath $outputDir -Filter '*.json').Count | Should -BeGreaterThan 0
+        }
+        finally {
+            if (Test-Path -LiteralPath $parentDir) {
+                Remove-Item -LiteralPath $parentDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

@@ -110,4 +110,56 @@ Describe 'track-coverage-trends.ps1 execution' {
             }
         }
     }
+
+    It 'Analyzes coverage trends when historical snapshots exist in the history directory' {
+        $fixtureDir = New-TestTempDirectory -Prefix 'CoverageTrendHistoryData'
+        $historyDir = Join-Path $fixtureDir 'history'
+        $coverageXml = Join-Path $fixtureDir 'coverage.xml'
+        New-Item -ItemType Directory -Path $historyDir -Force | Out-Null
+
+        $olderSnapshot = @{
+            Timestamp       = (Get-Date).AddDays(-2).ToUniversalTime().ToString('o')
+            CoveragePercent = 50.0
+            TotalLines      = 100
+            CoveredLines    = 50
+        }
+        $newerSnapshot = @{
+            Timestamp       = (Get-Date).AddDays(-1).ToUniversalTime().ToString('o')
+            CoveragePercent = 75.0
+            TotalLines      = 100
+            CoveredLines    = 75
+        }
+        $olderSnapshot | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $historyDir 'coverage-20260101-120000.json') -Encoding UTF8
+        $newerSnapshot | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $historyDir 'coverage-20260102-120000.json') -Encoding UTF8
+
+        @'
+<?xml version="1.0" encoding="utf-8"?>
+<Coverage>
+    <Module ModulePath="C:\test\Sample.psm1">
+        <Function FunctionName="Test-Sample">
+            <Line Number="1" Covered="true" />
+            <Line Number="2" Covered="true" />
+            <Line Number="3" Covered="false" />
+            <Line Number="4" Covered="false" />
+        </Function>
+    </Module>
+</Coverage>
+'@ | Set-Content -LiteralPath $coverageXml -Encoding UTF8
+
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:TrackCoverageScript -ArgumentList @(
+                '-CoverageXmlPath', $coverageXml,
+                '-HistoryPath', $historyDir,
+                '-Days', '30'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Analyzing 2 historical snapshots|Coverage Trends|historical snapshots'
+        }
+        finally {
+            if (Test-Path -LiteralPath $fixtureDir) {
+                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

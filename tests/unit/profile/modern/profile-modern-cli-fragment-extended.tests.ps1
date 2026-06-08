@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-modern-cli-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-modern-cli-fragment-extended.tests.ps1
+# Execution tests for modern-cli.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,37 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/modern-cli.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'modern-cli.ps1')
 }
+
 Describe 'profile.d/modern-cli.ps1 extended scenarios' {
-    It 'Declares standard tier for web and development environments' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Environment: web, development'
+    It 'Loads enhanced CLI wrapper functions from cli-modules' {
+        Get-Command Find-WithFd -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Grep-WithRipgrep -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command View-WithBat -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Navigate-WithZoxide -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Dot-sources modern-cli.ps1 from cli-modules directory' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'cli-modules'
-        $c | Should -Match 'modern-cli\.ps1'
+
+    It 'Registers guarded tool wrapper functions for common modern CLI tools' {
+        Get-Command bat -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command fd -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command zoxide -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Uses Write-ProfileError for fragment load failures when debug is enabled' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Write-ProfileError'
-        $c | Should -Match 'Fragment: modern-cli'
+
+    It 'Find-WithFd warns when fd is unavailable' {
+        Mark-TestCommandsUnavailable -CommandNames @('fd')
+        Set-TestCommandAvailabilityState -CommandName 'fd' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('fd', [ref]$null)
+        }
+
+        $output = Find-WithFd -Pattern 'modern-cli-probe' 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'fd not found'
     }
 }

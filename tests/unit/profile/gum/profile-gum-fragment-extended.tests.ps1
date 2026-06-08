@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-gum-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-gum-fragment-extended.tests.ps1
+# Execution tests for gum.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,32 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/gum.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'gum.ps1')
 }
+
 Describe 'profile.d/gum.ps1 extended scenarios' {
-    It 'Declares standard tier for Charmbracelet gum terminal UI helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'github.com/charmbracelet/gum'
+    It 'Registers gum confirm and choose helper functions' {
+        Get-Command Invoke-GumConfirm -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-GumChoose -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command confirm -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command choose -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-GumConfirm Invoke-GumChoose and Invoke-GumInput prompts' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-GumConfirm'
-        $c | Should -Match 'Invoke-GumChoose'
+
+    It 'Registers gum input, spin, and style helper functions' {
+        Get-Command Invoke-GumInput -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-GumSpin -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-GumStyle -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command input -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command spin -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command style -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Registers confirm and choose shorthand aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-Alias -Name confirm -Value Invoke-GumConfirm"
-        $c | Should -Match "Set-Alias -Name choose -Value Invoke-GumChoose"
+
+    It 'Preserves gum helper bodies on repeated fragment loads' {
+        $firstConfirm = Get-Command Invoke-GumConfirm -ErrorAction Stop
+        . (Join-Path $script:ProfileDir 'gum.ps1')
+        (Get-Command Invoke-GumConfirm -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstConfirm.ScriptBlock.ToString()
     }
 }

@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-pixi-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-pixi-fragment-extended.tests.ps1
+# Execution tests for pixi.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/pixi.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/pixi.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by pixi availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'if \(Test-CachedCommand pixi\)'
+    It 'Registers pixi helpers when pixi is available' {
+        Set-TestCommandAvailabilityState -CommandName 'pixi' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'pixi.ps1')
+
+        Get-Command Add-PixiPackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-PixiRun -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command pixi-add -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-PixiInstall and Invoke-PixiRun environment helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-PixiInstall'
-        $c | Should -Match 'Invoke-PixiRun'
+
+    It 'Skips pixi helper registration when pixi is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'pixi' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'pixi.ps1')
+
+        Get-Command Add-PixiPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers pxadd and pxrun shorthand aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-Alias -Name pxadd"
-        $c | Should -Match "Set-Alias -Name pxrun"
+
+    It 'Emits missing-tool warning when pixi is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'pixi' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('pixi', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'pixi.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'pixi not found'
     }
 }

@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-cloud-enhanced-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-cloud-enhanced-fragment-extended.tests.ps1
+# Execution tests for cloud-enhanced.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,47 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/cloud-enhanced.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts/lib/fragment/FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop -Force
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+
+    $importCommand = Get-Command Import-FragmentModules -ErrorAction SilentlyContinue
+    $script:TestImportFragmentModulesBody = if ($importCommand) { $importCommand.ScriptBlock } else { $null }
 }
+
+function script:Reset-CloudEnhancedFragmentState {
+    foreach ($fragmentName in @('cloud-enhanced', 'cloud-azure', 'cloud-gcp', 'cloud-deploy')) {
+        Clear-FragmentLoaded -FragmentName $fragmentName -ErrorAction SilentlyContinue
+    }
+}
+
 Describe 'profile.d/cloud-enhanced.ps1 extended scenarios' {
-    It 'Declares standard tier and loads modular cloud-modules helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'cloud-modules'
-        $c | Should -Match 'cloud-deploy\.ps1'
+    BeforeEach {
+        if ($script:TestImportFragmentModulesBody) {
+            Set-Item -Path Function:\Import-FragmentModules -Value $script:TestImportFragmentModulesBody -Force
+        }
+
+        Reset-CloudEnhancedFragmentState
     }
-    It 'Uses Test-FragmentLoaded and Import-FragmentModules for idempotent loading' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "FragmentName 'cloud-enhanced'"
-        $c | Should -Match 'Import-FragmentModules'
+
+    It 'Loads azure, gcp, and deploy helpers through Import-FragmentModules' {
+        . (Join-Path $script:ProfileDir 'cloud-enhanced.ps1')
+
+        Get-Command Set-AzureSubscription -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Set-GcpProject -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Deploy-Vercel -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Test-FragmentLoaded -FragmentName 'cloud-enhanced' | Should -Be $true
     }
-    It 'Marks fragment loaded after azure gcp and deploy modules are registered' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'cloud-azure\.ps1'
-        $c | Should -Match 'cloud-gcp\.ps1'
-        $c | Should -Match "Set-FragmentLoaded -FragmentName 'cloud-enhanced'"
+
+    It 'Skips re-initialization when cloud-enhanced is already loaded' {
+        . (Join-Path $script:ProfileDir 'cloud-enhanced.ps1')
+        $firstAzure = Get-Command Set-AzureSubscription -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'cloud-enhanced.ps1')
+
+        (Get-Command Set-AzureSubscription -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstAzure.ScriptBlock.ToString()
     }
 }

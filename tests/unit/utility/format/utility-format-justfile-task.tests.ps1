@@ -47,4 +47,14 @@ Describe 'Format-JustfileTask' {
         $recipe | Should -Not -Match '\*ARGS'
         $recipe | Should -Match '    pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1'
     }
+
+    It 'Supports hyphenated task names in generated justfile recipes' {
+        $recipe = Format-JustfileTask `
+            -TaskName 'quality-check' `
+            -Command 'pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1' `
+            -Description 'Run quality checks'
+
+        $recipe | Should -Match '(?m)^quality-check:\s*$'
+        $recipe | Should -Match '# Run quality checks'
+    }
 }

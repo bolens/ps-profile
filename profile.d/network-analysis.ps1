@@ -597,21 +597,11 @@ try {
     }
 
     # Register functions and aliases
-    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
-        Set-AgentModeFunction -Name 'Start-Wireshark' -Body ${function:Start-Wireshark}
-        Set-AgentModeFunction -Name 'Invoke-NetworkScan' -Body ${function:Invoke-NetworkScan}
-        Set-AgentModeFunction -Name 'Get-IpInfo' -Body ${function:Get-IpInfo}
-        Set-AgentModeFunction -Name 'Start-CloudflareTunnel' -Body ${function:Start-CloudflareTunnel}
-        Set-AgentModeFunction -Name 'Send-NtfyNotification' -Body ${function:Send-NtfyNotification}
-    }
-    else {
-        # Fallback: direct function registration
-        Set-Item -Path Function:Start-Wireshark -Value ${function:Start-Wireshark} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Invoke-NetworkScan -Value ${function:Invoke-NetworkScan} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-IpInfo -Value ${function:Get-IpInfo} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Start-CloudflareTunnel -Value ${function:Start-CloudflareTunnel} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Send-NtfyNotification -Value ${function:Send-NtfyNotification} -Force -ErrorAction SilentlyContinue
-    }
+    Set-AgentModeFunction -Name 'Start-Wireshark' -Body ${function:Start-Wireshark}
+    Set-AgentModeFunction -Name 'Invoke-NetworkScan' -Body ${function:Invoke-NetworkScan}
+    Set-AgentModeFunction -Name 'Get-IpInfo' -Body ${function:Get-IpInfo}
+    Set-AgentModeFunction -Name 'Start-CloudflareTunnel' -Body ${function:Start-CloudflareTunnel}
+    Set-AgentModeFunction -Name 'Send-NtfyNotification' -Body ${function:Send-NtfyNotification}
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {

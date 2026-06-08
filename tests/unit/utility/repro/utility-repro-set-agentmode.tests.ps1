@@ -47,4 +47,37 @@ Describe 'repro_set_agentmode.ps1 execution' {
             }
         }
     }
+
+    It 'Passes when bootstrap.ps1 is present in an isolated repository' {
+        $repo = New-TestTempDirectory -Prefix 'ReproBootstrapPass'
+        try {
+            $scriptsDir = Join-Path $repo 'scripts'
+            $profileDir = Join-Path $repo 'profile.d'
+            $null = New-Item -ItemType Directory -Path $scriptsDir -Force
+            $null = New-Item -ItemType Directory -Path $profileDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'profile.d' 'bootstrap.ps1') -Destination (Join-Path $profileDir 'bootstrap.ps1') -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'profile.d' 'bootstrap') -Destination (Join-Path $profileDir 'bootstrap') -Recurse -Force
+            Copy-Item -LiteralPath $script:ReproSetAgentModeScript -Destination (Join-Path $scriptsDir 'repro_set_agentmode.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $scriptsDir 'repro_set_agentmode.ps1')
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'repro_set_agentmode: PASSED'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

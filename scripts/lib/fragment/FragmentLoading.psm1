@@ -441,6 +441,11 @@ function Invoke-ParallelDependencyParsing {
         # Wait for all to complete using polling (STA-compatible)
         $pollIntervalMs = 50  # Check every 50ms
         $timeoutMs = 30000    # 30 second timeout
+        $overrideTimeoutMs = 0
+        if ($env:PS_PROFILE_PARALLEL_PARSE_TIMEOUT_MS -and [int]::TryParse($env:PS_PROFILE_PARALLEL_PARSE_TIMEOUT_MS, [ref]$overrideTimeoutMs) -and $overrideTimeoutMs -gt 0) {
+            $timeoutMs = $overrideTimeoutMs
+        }
+
         $elapsedMs = 0
         $allCompleted = $false
 
@@ -789,6 +794,10 @@ function Invoke-ParallelDependencyParsing {
             finally {
                 try {
                     if ($rs.PowerShell) {
+                        if ($rs.Handle -and -not $rs.Handle.IsCompleted) {
+                            $rs.PowerShell.Stop()
+                        }
+
                         $rs.PowerShell.Dispose()
                     }
                 }
@@ -917,7 +926,7 @@ function Invoke-ParallelDependencyParsing {
         }
     }
 
-    return $results
+    return @($results.ToArray())
 }
 
 <#
@@ -1528,7 +1537,6 @@ function Get-FragmentLoadOrder {
 .DESCRIPTION
     Parses a fragment file to extract the tier declaration from header comments.
     Supports explicit tier declarations: # Tier: core|essential|standard|optional
-    Falls back to numeric prefix-based tier detection for backward compatibility.
 
 .PARAMETER FragmentFile
     The fragment file to parse. Can be a FileInfo object or path string.
@@ -1596,41 +1604,6 @@ function Get-FragmentTier {
             }
         }
 
-        # Fallback: Check for numeric prefix (backward compatibility)
-        $fileInfo = if ($FragmentFile -is [System.IO.FileInfo]) {
-            $FragmentFile
-        }
-        else {
-            Get-Item -Path $filePath -ErrorAction SilentlyContinue
-        }
-
-        if ($fileInfo) {
-            $baseName = $fileInfo.BaseName
-
-            # Special case: bootstrap is always core
-            if ($baseName -eq '00-bootstrap' -or $baseName -eq 'bootstrap') {
-                return 'core'
-            }
-
-            # Extract numeric prefix for backward compatibility
-            if ($baseName -match '^(\d+)-') {
-                $prefix = [int]$matches[1]
-
-                if ($prefix -ge 0 -and $prefix -le 9) {
-                    return 'core'
-                }
-                elseif ($prefix -ge 10 -and $prefix -le 29) {
-                    return 'essential'
-                }
-                elseif ($prefix -ge 30 -and $prefix -le 69) {
-                    return 'standard'
-                }
-                elseif ($prefix -ge 70 -and $prefix -le 99) {
-                    return 'optional'
-                }
-            }
-        }
-
         # Default to optional if no tier specified
         return 'optional'
     }
@@ -1670,9 +1643,7 @@ function Get-FragmentTier {
 
 .DESCRIPTION
     Groups fragments into tiers (core, essential, standard, optional) based on
-    explicit tier declarations or numeric prefixes (for backward compatibility).
-    Supports both named fragments (with explicit tier declarations) and numbered
-    fragments (for migration period).
+    explicit tier declarations in fragment headers.
 
 .PARAMETER FragmentFiles
     Array of fragment files to group.
@@ -1713,7 +1684,6 @@ function Get-FragmentTiers {
             continue
         }
 
-        # Get tier using new function (supports both explicit declarations and numeric prefixes)
         $tier = Get-FragmentTier -FragmentFile $file
 
         # Map tier names to tier numbers

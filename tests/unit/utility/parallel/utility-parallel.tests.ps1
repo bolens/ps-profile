@@ -30,5 +30,12 @@ Describe 'Invoke-Parallel' {
             $result.Count | Should -Be 1
             $result[0] | Should -Be 2
         }
+
+        It 'Processes multiple items preserving result count' {
+            $result = Invoke-Parallel -Items @(1, 2, 3) -ScriptBlock { $_ + 10 }
+            $result.Count | Should -Be 3
+            $result | Should -Contain 11
+            $result | Should -Contain 13
+        }
     }
 }

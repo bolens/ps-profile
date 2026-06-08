@@ -82,4 +82,33 @@ Describe 'check-task-parity.ps1 execution' {
             }
         }
     }
+
+    It 'Reports task parity for an isolated repository with minimal runner files' {
+        $repo = New-TestTempDirectory -Prefix 'TaskParityIsolated'
+        try {
+            Set-Content -LiteralPath (Join-Path $repo 'package.json') -Value '{"name":"parity-fixture","scripts":{"test":"echo test"}}' -Encoding UTF8
+            Set-Content -LiteralPath (Join-Path $repo 'Taskfile.yml') -Value "version: '3'`ntasks:`n  test:`n    cmds:`n      - echo test" -Encoding UTF8
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                git add package.json Taskfile.yml
+                git commit -m 'init task parity fixture' -q
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result = Invoke-CheckTaskParityScript -ArgumentList @('-RepoRoot', $repo)
+            $result.Output | Should -Match 'task|parity|Taskfile|package\.json'
+            $result.ExitCode | Should -BeIn @(0, 1)
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

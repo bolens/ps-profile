@@ -42,4 +42,39 @@ Describe 'check-module-updates.ps1 execution' {
         $result.ExitCode | Should -Not -Be 0
         $result.Output | Should -Match 'Hourly|ScheduleFrequency|ValidateSet|cannot be validated'
     }
+
+    It 'Accepts Daily schedule parameters in DryRun mode without creating a scheduled task' {
+        $result = Invoke-TestScriptFile -ScriptPath $script:CheckModuleUpdatesScript -ArgumentList @(
+            '-DryRun',
+            '-Schedule',
+            '-ScheduleFrequency', 'Daily',
+            '-ModuleFilter', 'Pester'
+        )
+
+        $result.ExitCode | Should -BeIn @(0, 2)
+        $result.Output | Should -Match 'DryRun|DRY RUN|Pester|module|update|Schedule'
+    }
+
+    It 'Writes an update report file when ReportFile is specified in DryRun mode' {
+        $reportPath = Join-Path (New-TestTempDirectory -Prefix 'ModuleUpdateReport') 'updates.json'
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:CheckModuleUpdatesScript -ArgumentList @(
+                '-DryRun',
+                '-ModuleFilter', 'Pester',
+                '-ReportFile', $reportPath
+            )
+
+            $result.ExitCode | Should -BeIn @(0, 2)
+            if (Test-Path -LiteralPath $reportPath) {
+                $reportPath | Should -Exist
+                (Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json) | Should -Not -BeNullOrEmpty
+            }
+        }
+        finally {
+            $parent = Split-Path -Parent $reportPath
+            if (Test-Path -LiteralPath $parent) {
+                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

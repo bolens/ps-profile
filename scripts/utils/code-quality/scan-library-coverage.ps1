@@ -40,6 +40,7 @@ $explicitTestPatterns = @{
     'PlatformPaths'  = @('library-platform-paths*')
     'MetricsSnapshot' = @('library-metrics-snapshot*')
     'ProfileFragmentLoader' = @('library-profile-fragment-loader*')
+    'ProfileFragmentLoadingOrchestration' = @('library-profile-fragment-loading-orchestration*', 'library-profile-fragment-loader*')
     'FragmentLoading' = @('library-fragment-loading*')
     'Parallel' = @('library-parallel*')
 }

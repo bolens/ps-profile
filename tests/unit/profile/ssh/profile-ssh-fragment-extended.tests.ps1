@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-ssh-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-ssh-fragment-extended.tests.ps1
+# Execution tests for ssh.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,50 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/ssh.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/ssh.ps1 extended scenarios' {
-    It 'Declares essential tier for server and development SSH helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Environment: server, development'
+    It 'Registers SSH helper functions and aliases when the fragment loads' {
+        . (Join-Path $script:ProfileDir 'ssh.ps1')
+
+        Get-Command Get-SSHKeys -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Add-SSHKeyIfNotLoaded -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Start-SSHAgent -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ssh-list -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ssh-add-if -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ssh-agent-start -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines SSH key and agent helpers with idempotent guards' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-SSHKeys'
-        $c | Should -Match 'Add-SSHKeyIfNotLoaded'
-        $c | Should -Match 'Start-SSHAgent'
+
+    It 'Add-SSHKeyIfNotLoaded warns and returns when no key path is provided' {
+        . (Join-Path $script:ProfileDir 'ssh.ps1')
+
+        $warnings = @()
+        $previousWarningPreference = $WarningPreference
+        try {
+            $WarningPreference = 'Continue'
+            Add-SSHKeyIfNotLoaded 3>&1 | ForEach-Object {
+                if ($_ -is [System.Management.Automation.WarningRecord]) {
+                    $warnings += $_.Message
+                }
+            }
+        }
+        finally {
+            $WarningPreference = $previousWarningPreference
+        }
+
+        $warnings -join ' ' | Should -Match 'Usage: Add-SSHKeyIfNotLoaded'
     }
-    It 'Registers ssh-list, ssh-add-if, and ssh-agent-start aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'ssh-list'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'ssh-add-if'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'ssh-agent-start'"
+
+    It 'Preserves existing SSH helper bodies on repeated fragment loads' {
+        . (Join-Path $script:ProfileDir 'ssh.ps1')
+        $firstKeys = Get-Command Get-SSHKeys -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'ssh.ps1')
+
+        (Get-Command Get-SSHKeys -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstKeys.ScriptBlock.ToString()
     }
 }

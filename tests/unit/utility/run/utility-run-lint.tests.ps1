@@ -111,9 +111,9 @@ function Get-RunLintFixture {
 
         $repo = New-TestTempDirectory -Prefix 'RunLintViolationRepo'
         try {
-            $profileDir = Join-Path $repo 'profile.d'
+            $violationDir = Join-Path $repo 'scripts' 'lint-fixtures'
             $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
-            $null = New-Item -ItemType Directory -Path $profileDir -Force
+            $null = New-Item -ItemType Directory -Path $violationDir -Force
             $null = New-Item -ItemType Directory -Path $runnerDir -Force
             Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
             Copy-Item -LiteralPath $script:RunLintScript -Destination (Join-Path $runnerDir 'run-lint.ps1') -Force
@@ -121,7 +121,7 @@ function Get-RunLintFixture {
             if (Test-Path -LiteralPath $settingsSource) {
                 Copy-Item -LiteralPath $settingsSource -Destination (Join-Path $repo 'PSScriptAnalyzerSettings.psd1') -Force
             }
-            Set-Content -LiteralPath (Join-Path $profileDir 'lint-violation.ps1') -Value @'
+            Set-Content -LiteralPath (Join-Path $violationDir 'lint-violation.ps1') -Value @'
 function Get-LintViolationFixture {
     ConvertTo-SecureString 'secret' -AsPlainText -Force
 }
@@ -132,7 +132,7 @@ function Get-LintViolationFixture {
                 git init -q | Out-Null
                 git config user.email 'fixture@example.com'
                 git config user.name 'Fixture'
-                git add profile.d/lint-violation.ps1
+                git add scripts/lint-fixtures/lint-violation.ps1
                 if (Test-Path -LiteralPath (Join-Path $repo 'PSScriptAnalyzerSettings.psd1')) {
                     git add PSScriptAnalyzerSettings.psd1
                 }
@@ -145,7 +145,11 @@ function Get-LintViolationFixture {
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $runnerDir 'run-lint.ps1')
 
             $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'Saved report to|Error-level|PSScriptAnalyzer'
+            $result.Output | Should -Match 'Saved report to|Errors found by PSScriptAnalyzer'
+            $reportFile = Get-ChildItem -LiteralPath $repo -Filter 'psscriptanalyzer-report.json' -Recurse -File -ErrorAction SilentlyContinue |
+                Select-Object -First 1
+            $reportFile | Should -Not -BeNullOrEmpty
+            @((Get-Content -LiteralPath $reportFile.FullName -Raw | ConvertFrom-Json)).Count | Should -BeGreaterThan 0
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

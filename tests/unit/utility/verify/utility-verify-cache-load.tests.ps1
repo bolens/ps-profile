@@ -39,4 +39,39 @@ Describe 'verify-cache-load.ps1 execution' {
             $result.ExitCode | Should -Not -Be 0
         }
     }
+
+    It 'Reports cache module status without loading the full profile in an isolated layout' {
+        $repo = New-TestTempDirectory -Prefix 'VerifyCacheLoadIsolated'
+        try {
+            $utilsDir = Join-Path $repo 'scripts' 'utils'
+            $null = New-Item -ItemType Directory -Path $utilsDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:VerifyCacheLoadScript -Destination (Join-Path $utilsDir 'verify-cache-load.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $output = & pwsh -NoProfile -Command @"
+`$env:PROFILE = Join-Path '$($repo.Replace("'", "''"))' 'missing-profile.ps1'
+& '$((Join-Path $utilsDir 'verify-cache-load.ps1').Replace("'", "''"))'
+"@ 2>&1 | Out-String
+                $exitCode = $LASTEXITCODE
+            }
+            finally {
+                Pop-Location
+            }
+
+            $output | Should -Match 'Fragment Cache Verification'
+            $output | Should -Match 'Profile load failed|Profile loaded in'
+            $exitCode | Should -Not -Be 0
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

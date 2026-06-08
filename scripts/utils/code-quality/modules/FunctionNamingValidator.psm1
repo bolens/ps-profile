@@ -178,7 +178,6 @@ function Test-IsBootstrapFunction {
             'Set-AgentModeFunction',
             'Set-AgentModeAlias',
             'Test-CachedCommand',
-            'Test-HasCommand',
             'Test-IsWindows',
             'Test-IsLinux',
             'Test-IsMacOS',

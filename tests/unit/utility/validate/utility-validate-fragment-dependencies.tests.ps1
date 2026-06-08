@@ -58,4 +58,45 @@ function Get-ValidateFragmentDepsFixture {
             }
         }
     }
+
+    It 'Passes when an isolated profile fragment has no unresolved dependencies' {
+        $repo = New-TestTempDirectory -Prefix 'ValidateFragmentDepsPass'
+        try {
+            $fragmentDir = Join-Path $repo 'scripts' 'utils' 'fragment'
+            $profileDir = Join-Path $repo 'profile.d'
+            $null = New-Item -ItemType Directory -Path $fragmentDir -Force
+            $null = New-Item -ItemType Directory -Path $profileDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:ValidateDepsScript -Destination (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1') -Force
+
+            Set-Content -LiteralPath (Join-Path $profileDir 'utilities.ps1') -Value @'
+# Fixture fragment without dependencies.
+function Get-ValidateFragmentDepsFixture {
+    'ok'
+}
+'@ -Encoding UTF8
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                git add profile.d/utilities.ps1
+                git commit -m 'init fragment deps fixture' -q
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1')
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'All dependencies are valid|Validating dependencies'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

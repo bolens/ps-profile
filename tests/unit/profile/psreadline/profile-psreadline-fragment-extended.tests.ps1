@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-psreadline-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-psreadline-fragment-extended.tests.ps1
+# Execution tests for psreadline.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,44 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/psreadline.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts/lib/fragment/FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop -Force
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-PSReadLineFragmentState {
+    Clear-FragmentLoaded -FragmentName 'psreadline' -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/psreadline.ps1 extended scenarios' {
-    It 'Declares essential tier for command-line editing configuration' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    BeforeEach {
+        Reset-PSReadLineFragmentState
     }
-    It 'Imports PSReadLine only when the module is list-available' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-Module -ListAvailable -Name PSReadLine'
-        $c | Should -Match 'Import-Module PSReadLine'
+
+    It 'Marks the psreadline fragment loaded after dot-sourcing' {
+        . (Join-Path $script:ProfileDir 'psreadline.ps1')
+
+        Test-FragmentLoaded -FragmentName 'psreadline' | Should -Be $true
     }
-    It 'Configures prediction and key handlers with SilentlyContinue error handling' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Set-PSReadLineOption -PredictionSource'
-        $c | Should -Match 'Set-PSReadLineKeyHandler'
+
+    It 'Imports PSReadLine when the module is list-available' {
+        if (-not (Get-Module -ListAvailable -Name PSReadLine -ErrorAction SilentlyContinue)) {
+            Set-ItResult -Inconclusive -Because 'PSReadLine module is not installed in this environment'
+            return
+        }
+
+        . (Join-Path $script:ProfileDir 'psreadline.ps1')
+
+        Get-Module -Name PSReadLine -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Skips re-initialization when psreadline is already loaded' {
+        . (Join-Path $script:ProfileDir 'psreadline.ps1')
+        Test-FragmentLoaded -FragmentName 'psreadline' | Should -Be $true
+
+        . (Join-Path $script:ProfileDir 'psreadline.ps1')
+        Test-FragmentLoaded -FragmentName 'psreadline' | Should -Be $true
     }
 }

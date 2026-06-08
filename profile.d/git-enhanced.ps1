@@ -30,23 +30,7 @@ try {
         @{ ModulePath = @('git-modules', 'enhanced', 'git-workflow.ps1'); Context = 'Fragment: git-enhanced (git-workflow.ps1)' }
     )
 
-    if (Get-Command Import-FragmentModules -ErrorAction SilentlyContinue) {
-        $null = Import-FragmentModules -FragmentRoot $PSScriptRoot -Modules $modules
-    }
-    else {
-        foreach ($entry in $modules) {
-            $modulePath = $PSScriptRoot
-            foreach ($segment in $entry.ModulePath) {
-                $modulePath = Join-Path $modulePath $segment
-            }
-            if (Test-Path -LiteralPath $modulePath) {
-                . $modulePath
-            }
-            elseif ($env:PS_PROFILE_DEBUG) {
-                Write-Warning "git-enhanced: module not found: $modulePath"
-            }
-        }
-    }
+    $null = Import-FragmentModules -FragmentRoot $PSScriptRoot -Modules $modules
 
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
         Set-FragmentLoaded -FragmentName 'git-enhanced'

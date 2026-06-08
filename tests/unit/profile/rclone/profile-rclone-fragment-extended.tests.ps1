@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-rclone-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-rclone-fragment-extended.tests.ps1
+# Execution tests for rclone.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/rclone.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'rclone.ps1')
 }
+
 Describe 'profile.d/rclone.ps1 extended scenarios' {
-    It 'Declares essential tier for rclone remote sync helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'PowerShell.Profile.Rclone'
+    It 'Registers rclone file transfer helpers and aliases' {
+        Get-Command Copy-RcloneFile -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-RcloneFileList -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command rcopy -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Copy-RcloneFile for remote and local path transfers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Copy-RcloneFile'
-        $c | Should -Match 'rclone copy'
+
+    It 'Copy-RcloneFile warns when rclone is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'rclone' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('rclone', [ref]$null)
+        }
+
+        $output = Copy-RcloneFile 'src' 'dst' 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'rclone not found'
     }
-    It 'Registers rcopy and rls shorthand aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'rcopy'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'rls'"
+
+    It 'Preserves existing rclone helper bodies on repeated fragment loads' {
+        $firstCopy = Get-Command Copy-RcloneFile -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'rclone.ps1')
+
+        (Get-Command Copy-RcloneFile -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstCopy.ScriptBlock.ToString()
     }
 }

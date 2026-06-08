@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-chocolatey-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-chocolatey-fragment-extended.tests.ps1
+# Execution tests for chocolatey.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,52 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/chocolatey.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/chocolatey.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by choco availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'if \(Test-CachedCommand choco\)'
+    It 'Registers Chocolatey helpers when choco is available' {
+        Set-TestCommandAvailabilityState -CommandName 'choco' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'chocolatey.ps1')
+
+        Get-Command Install-ChocoPackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Test-ChocoOutdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command choinstall -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Install-ChocoPackage with version and source parameters' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Install-ChocoPackage'
-        $c | Should -Match '\[string\]\$Version'
+
+    It 'Skips Chocolatey helper registration when choco is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'chocolatey.ps1')
+
+        Get-Command Install-ChocoPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers choinstall and chooutdated aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'choinstall'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'chooutdated'"
+
+    It 'Emits missing-tool warning when choco is unavailable at load time' {
+        if (Get-Command Test-ToolAvailableOnPlatform -ErrorAction SilentlyContinue) {
+            if (-not (Test-ToolAvailableOnPlatform -Tool 'chocolatey')) {
+                Set-ItResult -Inconclusive -Because 'Chocolatey install hints are only emitted on Windows'
+            }
+        }
+
+        Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('chocolatey', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'chocolatey.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'choco not found'
     }
 }

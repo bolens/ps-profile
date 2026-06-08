@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-clipboard-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-clipboard-fragment-extended.tests.ps1
+# Execution tests for clipboard.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,32 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/clipboard.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'clipboard.ps1')
 }
+
 Describe 'profile.d/clipboard.ps1 extended scenarios' {
-    It 'Declares essential tier for cross-platform clipboard helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    It 'Registers Copy-ToClipboard and cb alias' {
+        Get-Command Copy-ToClipboard -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command cb -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        (Get-Alias cb).ResolvedCommandName | Should -Be 'Copy-ToClipboard'
     }
-    It 'Defines Copy-ToClipboard and Get-FromClipboard with platform tools' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Copy-ToClipboard'
-        $c | Should -Match 'Get-FromClipboard'
-        $c | Should -Match 'Test-CachedCommand Set-Clipboard'
-        $c | Should -Match 'wl-copy'
+
+    It 'Registers Get-FromClipboard and pb alias' {
+        Get-Command Get-FromClipboard -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command pb -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        (Get-Alias pb).ResolvedCommandName | Should -Be 'Get-FromClipboard'
     }
-    It 'Registers cb and pb clipboard aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'cb'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'pb'"
+
+    It 'Copy-ToClipboard executes without error when Set-Clipboard is available' {
+        Mark-TestCommandsUnavailable -CommandNames @('Set-Clipboard', 'Get-Clipboard')
+        Set-TestCommandAvailabilityState -CommandName 'Set-Clipboard' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        { 'clipboard fragment probe' | Copy-ToClipboard } | Should -Not -Throw
     }
 }

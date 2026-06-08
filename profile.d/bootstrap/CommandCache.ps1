@@ -12,8 +12,7 @@
     Provides cached command availability checks to avoid repeated lookups.
     Cache entries expire after the specified number of minutes.
     
-    This function implements the core command detection logic directly,
-    avoiding circular dependencies with Test-HasCommand.
+    This function implements the core command detection logic directly.
 
 .PARAMETER Name
     The name of the command to check.
@@ -27,7 +26,7 @@
 
 .NOTES
     This is the recommended function for command detection in new code.
-    It provides better performance than Test-HasCommand through caching.
+    It provides cached lookups to avoid repeated command resolution.
 
 .EXAMPLE
     if (Test-CachedCommand -Name 'git') {
@@ -69,7 +68,7 @@ function global:Test-CachedCommand {
     }
 
     # Cache miss or expired: perform actual command lookup
-    # Core implementation (extracted from Test-HasCommand to avoid circular dependency)
+    # Core implementation
     $result = $false
 
     # Check function provider first (avoids triggering module autoload which can be slow)
@@ -520,34 +519,3 @@ function global:Remove-TestCachedCommandCacheEntry {
     $removedEntry = $null
     return $global:TestCachedCommandCache.TryRemove($cacheKey, [ref]$removedEntry)
 }
-
-<#
-.SYNOPSIS
-    Tests whether a command is available (deprecated).
-.DESCRIPTION
-    Deprecated compatibility wrapper for Test-CachedCommand.
-    Prefer Test-CachedCommand for new code.
-.PARAMETER Name
-    The name of the command to check.
-.PARAMETER CacheTTLMinutes
-    Cache duration in minutes. Defaults to 5 minutes.
-.OUTPUTS
-    System.Boolean
-.EXAMPLE
-    Test-HasCommand -Name 'name'
-#>
-function global:Test-HasCommand {
-    [CmdletBinding()]
-    [OutputType([bool])]
-    param(
-        [Parameter(Mandatory, Position = 0)]
-        [string]$Name,
-
-        [Parameter()]
-        [ValidateRange(0, 1440)]
-        [int]$CacheTTLMinutes = 5
-    )
-
-    Test-CachedCommand -Name $Name -CacheTTLMinutes $CacheTTLMinutes
-}
-

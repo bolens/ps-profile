@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-maven-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-maven-fragment-extended.tests.ps1
+# Execution tests for maven.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/maven.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/maven.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by mvn availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Test-CachedCommand mvn'
+    It 'Registers maven helpers when mvn is available' {
+        Set-TestCommandAvailabilityState -CommandName 'mvn' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'maven.ps1')
+
+        Get-Command Test-MavenOutdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Add-MavenDependency -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command maven-outdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Test-MavenOutdated using versions-maven-plugin display updates' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-MavenOutdated'
-        $c | Should -Match 'versions:display-dependency-updates'
+
+    It 'Skips maven helper registration when mvn is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'mvn' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'maven.ps1')
+
+        Get-Command Test-MavenOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers maven-outdated and maven-add aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'maven-outdated'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'maven-add'"
+
+    It 'Emits missing-tool warning when mvn is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'mvn' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('maven', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'maven.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'mvn not found'
     }
 }

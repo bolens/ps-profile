@@ -86,10 +86,10 @@ Describe 'Command cache management extended scenarios' {
         }
     }
 
-    Context 'Test-HasCommand compatibility wrapper' {
-        It 'Delegates availability checks to Test-CachedCommand' {
+    Context 'Test-CachedCommand availability' {
+        It 'Detects available commands' {
             Set-TestCommandAvailabilityState -CommandName 'pwsh' -Available $true
-            Test-HasCommand -Name 'pwsh' | Should -Be $true
+            Test-CachedCommand -Name 'pwsh' | Should -Be $true
         }
     }
 }

@@ -716,23 +716,12 @@ function Get-AwsCosts {
 }
 
 # Register new functions
-if (Get-Command -Name 'Set-AgentModeFunction' -ErrorAction SilentlyContinue) {
-    Set-AgentModeFunction -Name 'Get-AwsCredentials' -Body ${function:Get-AwsCredentials}
-    Set-AgentModeFunction -Name 'Test-AwsConnection' -Body ${function:Test-AwsConnection}
-    Set-AgentModeFunction -Name 'Get-AwsResources' -Body ${function:Get-AwsResources}
-    Set-AgentModeFunction -Name 'Export-AwsCredentials' -Body ${function:Export-AwsCredentials}
-    Set-AgentModeFunction -Name 'Switch-AwsAccount' -Body ${function:Switch-AwsAccount}
-    Set-AgentModeFunction -Name 'Get-AwsCosts' -Body ${function:Get-AwsCosts}
-}
-else {
-    # Fallback: direct function registration
-    Set-Item -Path Function:Get-AwsCredentials -Value ${function:Get-AwsCredentials} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Test-AwsConnection -Value ${function:Test-AwsConnection} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Get-AwsResources -Value ${function:Get-AwsResources} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Export-AwsCredentials -Value ${function:Export-AwsCredentials} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Switch-AwsAccount -Value ${function:Switch-AwsAccount} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Get-AwsCosts -Value ${function:Get-AwsCosts} -Force -ErrorAction SilentlyContinue
-}
+Set-AgentModeFunction -Name 'Get-AwsCredentials' -Body ${function:Get-AwsCredentials}
+Set-AgentModeFunction -Name 'Test-AwsConnection' -Body ${function:Test-AwsConnection}
+Set-AgentModeFunction -Name 'Get-AwsResources' -Body ${function:Get-AwsResources}
+Set-AgentModeFunction -Name 'Export-AwsCredentials' -Body ${function:Export-AwsCredentials}
+Set-AgentModeFunction -Name 'Switch-AwsAccount' -Body ${function:Switch-AwsAccount}
+Set-AgentModeFunction -Name 'Get-AwsCosts' -Body ${function:Get-AwsCosts}
 
 # Create aliases for short forms
 Set-AgentModeAlias -Name 'aws' -Target 'Invoke-Aws'

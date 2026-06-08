@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-system-monitor-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-system-monitor-fragment-extended.tests.ps1
+# Execution tests for system-monitor.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,41 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/system-monitor.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-SystemMonitorFragmentState {
+    Remove-Variable -Name 'SystemMonitorLoaded' -Scope Global -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/system-monitor.ps1 extended scenarios' {
-    It 'Declares optional tier for server and development monitoring' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: optional'
-        $c | Should -Match 'Environment: server, development'
+    BeforeEach {
+        Reset-SystemMonitorFragmentState
     }
-    It 'Loads diagnostics-system-monitor module from diagnostics-modules/monitoring' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'diagnostics-modules'
-        $c | Should -Match 'diagnostics-system-monitor\.ps1'
+
+    It 'Loads system monitor commands from diagnostics-system-monitor module' {
+        . (Join-Path $script:ProfileDir 'system-monitor.ps1')
+
+        Get-Command Show-SystemDashboard -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Show-SystemStatus -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        (Get-Variable -Name 'SystemMonitorLoaded' -Scope Global -ErrorAction Stop).Value | Should -Be $true
     }
-    It 'Reports module load failures through Write-ProfileError when debug is enabled' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Write-ProfileError'
-        $c | Should -Match 'system-monitor'
+
+    It 'Show-SystemStatus executes without throwing' {
+        . (Join-Path $script:ProfileDir 'system-monitor.ps1')
+
+        { Show-SystemStatus } | Should -Not -Throw
+    }
+
+    It 'Skips re-initialization when system monitor helpers are already loaded' {
+        . (Join-Path $script:ProfileDir 'system-monitor.ps1')
+        $firstStatus = Get-Command Show-SystemStatus -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'system-monitor.ps1')
+
+        (Get-Command Show-SystemStatus -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstStatus.ScriptBlock.ToString()
     }
 }

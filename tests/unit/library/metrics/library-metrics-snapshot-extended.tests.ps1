@@ -380,6 +380,26 @@ Describe 'MetricsSnapshot extended scenarios' {
             }
         }
 
+        It 'Walks parent directories for .git when Get-RepoRoot is not available' {
+            $repoRoot = Join-Path $script:TempDir 'no-get-repo-root'
+            New-Item -ItemType Directory -Path (Join-Path $repoRoot '.git') -Force | Out-Null
+            $outputDir = Join-Path $repoRoot 'history'
+
+            Remove-Module PathResolution -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Get-RepoRoot -ErrorAction SilentlyContinue -Force
+
+            $previousLocation = Get-Location
+            try {
+                Set-Location -LiteralPath $repoRoot
+                $snapshotPath = Save-MetricsSnapshot -OutputPath $outputDir
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Set-Location -LiteralPath $previousLocation.Path
+                Import-Module (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -DisableNameChecking -Force
+            }
+        }
+
         It 'Creates the output directory manually when Ensure-DirectoryExists is unavailable' {
             $repoRoot = Join-Path $script:TempDir 'manual-directory-repo'
             $outputDir = Join-Path $repoRoot 'manual-history'
@@ -393,6 +413,64 @@ Describe 'MetricsSnapshot extended scenarios' {
             }
             finally {
                 Import-Module (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -DisableNameChecking -Force
+            }
+        }
+
+        It 'Warns with Write-Warning when code metrics loading fails without structured logging or debug' {
+            $repoRoot = Join-Path $script:TempDir 'code-metrics-warning-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            @{ TotalFiles = 9 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $dataDir 'code-metrics.json') -Encoding UTF8
+
+            function global:Read-JsonFile {
+                param([string]$Path)
+                throw 'code metrics warning probe'
+            }
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludeCodeMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Remove-Item -Path Function:Read-JsonFile -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -Force
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Throws when repository root cannot be detected from the current directory' {
+            $isolatedDir = Join-Path ([System.IO.Path]::GetTempPath()) "MetricsSnapshotNoGit-$([Guid]::NewGuid().ToString('N'))"
+            New-Item -ItemType Directory -Path $isolatedDir -Force | Out-Null
+
+            function global:Get-RepoRoot {
+                param([string]$ScriptPath)
+                throw 'repo root detection probe'
+            }
+
+            Remove-Module PathResolution -ErrorAction SilentlyContinue -Force
+            $previousLocation = Get-Location
+
+            try {
+                Set-Location -LiteralPath $isolatedDir
+                { Save-MetricsSnapshot } | Should -Throw '*Could not determine repository root*'
+            }
+            finally {
+                Set-Location -LiteralPath $previousLocation.Path
+                Remove-Item -Path Function:Get-RepoRoot -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -DisableNameChecking -Force
+                if (Test-Path -LiteralPath $isolatedDir) {
+                    Remove-Item -LiteralPath $isolatedDir -Recurse -Force -ErrorAction SilentlyContinue
+                }
             }
         }
     }

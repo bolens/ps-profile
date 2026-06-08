@@ -83,4 +83,14 @@ Describe 'export-metrics.ps1 execution' {
             }
         }
     }
+
+    It 'Exports metrics as a human-readable table to stdout' {
+        $result = Invoke-ExportMetricsScript -ArgumentList @(
+            '-OutputFormat', 'Table',
+            '-IncludeCodeMetrics:False'
+        )
+
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'Exporting metrics|MetricType|Timestamp|Code Metrics'
+    }
 }

@@ -16,7 +16,16 @@ function global:New-NewFragmentFixtureRepository {
     Copy-Item -LiteralPath $script:NewFragmentScript -Destination (Join-Path $fragmentDir 'new-fragment.ps1') -Force
 
     New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d') -Force | Out-Null
-    New-Item -ItemType Directory -Path (Join-Path $repo '.git') -Force | Out-Null
+
+    Push-Location $repo
+    try {
+        git init -q | Out-Null
+        git config user.email 'fixture@example.com'
+        git config user.name 'Fixture'
+    }
+    finally {
+        Pop-Location
+    }
 
     return $repo
 }
@@ -43,11 +52,17 @@ Describe 'new-fragment.ps1 execution' {
         $fragmentName = 'fixture-feature'
         $fragmentNumber = 88
         try {
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
-                '-Name', $fragmentName,
-                '-Number', "$fragmentNumber",
-                '-Description', 'Fixture fragment for new-fragment tests'
-            )
+            Push-Location $repo
+            try {
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
+                    '-Name', $fragmentName,
+                    '-Number', "$fragmentNumber",
+                    '-Description', 'Fixture fragment for new-fragment tests'
+                )
+            }
+            finally {
+                Pop-Location
+            }
 
             $result.ExitCode | Should -Be 0
             $fragmentPath = Join-Path $repo 'profile.d' ('{0:D2}-{1}.ps1' -f $fragmentNumber, $fragmentName)

@@ -302,4 +302,17 @@ function Add-ExampleToHelpBlock {
             }
         }
     }
+
+    It 'Reports zero shallow issues when the scan directory contains no PowerShell files' {
+        $emptyDir = New-TestTempDirectory -Prefix 'ShallowHelpEmptyDir'
+        try {
+            $output = & pwsh -NoProfile -File $script:ScanShallowHelpScript -Path $emptyDir -MinIssues 1 2>&1 | Out-String
+            $output | Should -Match 'Total shallow \(1\+ issues\): 0'
+        }
+        finally {
+            if (Test-Path -LiteralPath $emptyDir) {
+                Remove-Item -LiteralPath $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

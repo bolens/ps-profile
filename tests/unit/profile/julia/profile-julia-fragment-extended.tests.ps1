@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-julia-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-julia-fragment-extended.tests.ps1
+# Execution tests for julia.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/julia.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/julia.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by julia availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Test-CachedCommand julia'
+    It 'Registers Julia package helpers when julia is available' {
+        Set-TestCommandAvailabilityState -CommandName 'julia' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'julia.ps1')
+
+        Get-Command Add-JuliaPackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Update-JuliaPackages -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command julia-add -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Update-JuliaPackages using Pkg.update via julia -e' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Update-JuliaPackages'
-        $c | Should -Match 'Pkg.update'
+
+    It 'Skips Julia helper registration when julia is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'julia' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'julia.ps1')
+
+        Get-Command Add-JuliaPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers julia-update and julia-add aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'julia-update'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'julia-add'"
+
+    It 'Emits missing-tool warning when julia is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'julia' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('julia', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'julia.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'julia not found'
     }
 }

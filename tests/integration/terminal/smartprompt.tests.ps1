@@ -10,7 +10,7 @@ BeforeAll {
         $current = $current.Parent
     }
     try {
-        # Load bootstrap first to get Test-HasCommand
+        # Load bootstrap first to get Test-CachedCommand
         $global:__psprofile_fragment_loaded = @{}
         $profileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $profileDir -or [string]::IsNullOrWhiteSpace($profileDir)) {

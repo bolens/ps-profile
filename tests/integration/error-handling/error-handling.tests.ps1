@@ -2,7 +2,7 @@
 
 BeforeAll {
     try {
-        # Load the bootstrap fragment first to ensure Test-HasCommand is available
+        # Load the bootstrap fragment first to ensure Test-CachedCommand is available
         $bootstrapFragment = Get-TestPath "profile.d\bootstrap.ps1" -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $bootstrapFragment -or [string]::IsNullOrWhiteSpace($bootstrapFragment)) {
             throw "Get-TestPath returned null or empty value for bootstrapFragment"

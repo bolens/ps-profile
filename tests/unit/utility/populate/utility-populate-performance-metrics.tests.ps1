@@ -41,4 +41,39 @@ Describe 'populate-performance-metrics.ps1 execution' {
         $result.ExitCode | Should -BeIn @(1, 2)
         $result.Output | Should -Match 'Performance Metrics Database|not found'
     }
+
+    It 'Runs against an isolated repository copy without loading the real profile tree' {
+        $repo = New-TestTempDirectory -Prefix 'PopulateMetricsIsolated'
+        try {
+            $databaseDir = Join-Path $repo 'scripts' 'utils' 'database'
+            New-Item -ItemType Directory -Path $databaseDir -Force | Out-Null
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:PopulateMetricsScript -Destination (Join-Path $databaseDir 'populate-performance-metrics.ps1') -Force
+            New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d') -Force | Out-Null
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $databaseDir 'populate-performance-metrics.ps1') -ArgumentList @(
+                '-IncludeStartupBenchmark:False',
+                '-IncludeCodeMetrics:False',
+                '-IncludeDocumentationMetrics:False'
+            )
+
+            $result.Output | Should -Match 'Populating Performance Metrics|Performance Metrics Database|metrics'
+            $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

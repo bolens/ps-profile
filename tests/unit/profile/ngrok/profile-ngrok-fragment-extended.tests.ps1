@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-ngrok-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-ngrok-fragment-extended.tests.ps1
+# Execution tests for ngrok.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/ngrok.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'ngrok.ps1')
 }
+
 Describe 'profile.d/ngrok.ps1 extended scenarios' {
-    It 'Declares standard tier for web and development tunnel helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Environment: web, development'
+    It 'Registers ngrok tunnel helpers and aliases' {
+        Get-Command Invoke-Ngrok -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Start-NgrokHttpTunnel -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ngrok -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-Ngrok guarded by Test-CachedCommand ngrok' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-Ngrok'
-        $c | Should -Match 'Test-CachedCommand ngrok'
+
+    It 'Invoke-Ngrok warns when ngrok is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'ngrok' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('ngrok', [ref]$null)
+        }
+
+        $output = Invoke-Ngrok version 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'ngrok not found'
     }
-    It 'Registers ngrok and ngrok-http tunnel aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'ngrok'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'ngrok-http'"
+
+    It 'Preserves existing ngrok helper bodies on repeated fragment loads' {
+        $firstNgrok = Get-Command Invoke-Ngrok -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'ngrok.ps1')
+
+        (Get-Command Invoke-Ngrok -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstNgrok.ScriptBlock.ToString()
     }
 }

@@ -942,25 +942,13 @@ WHERE table_schema = 'public'
 }
 
 # Register new functions
-if (Get-Command -Name 'Set-AgentModeFunction' -ErrorAction SilentlyContinue) {
-    Set-AgentModeFunction -Name 'Connect-Database' -Body ${function:Connect-Database}
-    Set-AgentModeFunction -Name 'Query-Database' -Body ${function:Query-Database}
-    Set-AgentModeFunction -Name 'Export-Database' -Body ${function:Export-Database}
-    Set-AgentModeFunction -Name 'Import-Database' -Body ${function:Import-Database}
-    Set-AgentModeFunction -Name 'Backup-Database' -Body ${function:Backup-Database}
-    Set-AgentModeFunction -Name 'Restore-Database' -Body ${function:Restore-Database}
-    Set-AgentModeFunction -Name 'Get-DatabaseSchema' -Body ${function:Get-DatabaseSchema}
-}
-else {
-    # Fallback: direct function registration
-    Set-Item -Path Function:Connect-Database -Value ${function:Connect-Database} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Query-Database -Value ${function:Query-Database} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Export-Database -Value ${function:Export-Database} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Import-Database -Value ${function:Import-Database} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Backup-Database -Value ${function:Backup-Database} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Restore-Database -Value ${function:Restore-Database} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Get-DatabaseSchema -Value ${function:Get-DatabaseSchema} -Force -ErrorAction SilentlyContinue
-}
+Set-AgentModeFunction -Name 'Connect-Database' -Body ${function:Connect-Database}
+Set-AgentModeFunction -Name 'Query-Database' -Body ${function:Query-Database}
+Set-AgentModeFunction -Name 'Export-Database' -Body ${function:Export-Database}
+Set-AgentModeFunction -Name 'Import-Database' -Body ${function:Import-Database}
+Set-AgentModeFunction -Name 'Backup-Database' -Body ${function:Backup-Database}
+Set-AgentModeFunction -Name 'Restore-Database' -Body ${function:Restore-Database}
+Set-AgentModeFunction -Name 'Get-DatabaseSchema' -Body ${function:Get-DatabaseSchema}
 
 # Create aliases for short forms
 Set-AgentModeAlias -Name 'db-connect' -Target 'Connect-Database'

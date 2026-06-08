@@ -56,73 +56,33 @@ try {
     }
     
     # Load Starship helper modules
-    # Use standardized module loading if available, otherwise fall back to manual loading
     $modulesLoaded = $false
-    if (Get-Command Import-FragmentModules -ErrorAction SilentlyContinue) {
-        try {
-            $modules = @(
-                @{ ModulePath = @('starship', 'StarshipHelpers.ps1'); Context = 'Fragment: starship (StarshipHelpers.ps1)' },
-                @{ ModulePath = @('starship', 'StarshipPrompt.ps1'); Context = 'Fragment: starship (StarshipPrompt.ps1)' },
-                @{ ModulePath = @('starship', 'StarshipModule.ps1'); Context = 'Fragment: starship (StarshipModule.ps1)' },
-                @{ ModulePath = @('starship', 'StarshipInit.ps1'); Context = 'Fragment: starship (StarshipInit.ps1)' },
-                @{ ModulePath = @('starship', 'StarshipVSCode.ps1'); Context = 'Fragment: starship (StarshipVSCode.ps1)' },
-                @{ ModulePath = @('starship', 'SmartPrompt.ps1'); Context = 'Fragment: starship (SmartPrompt.ps1)' }
-            )
-            
-            $result = Import-FragmentModules -FragmentRoot $PSScriptRoot -Modules $modules
-            $modulesLoaded = $result.SuccessCount -gt 0
-            
-            if ($env:PS_PROFILE_DEBUG -and $result.FailureCount -gt 0) {
-                Write-Verbose "Loaded $($result.SuccessCount) starship modules (failed: $($result.FailureCount))"
-            }
-        }
-        catch {
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord $_ -OperationName 'fragment.starship.module-load' -Context @{
-                    fragment_name  = 'starship'
-                    loading_method = 'Import-FragmentModules'
-                }
-            }
-            elseif ($env:PS_PROFILE_DEBUG) {
-                Write-Warning "Failed to load starship modules: $($_.Exception.Message)"
-            }
+    try {
+        $modules = @(
+            @{ ModulePath = @('starship', 'StarshipHelpers.ps1'); Context = 'Fragment: starship (StarshipHelpers.ps1)' },
+            @{ ModulePath = @('starship', 'StarshipPrompt.ps1'); Context = 'Fragment: starship (StarshipPrompt.ps1)' },
+            @{ ModulePath = @('starship', 'StarshipModule.ps1'); Context = 'Fragment: starship (StarshipModule.ps1)' },
+            @{ ModulePath = @('starship', 'StarshipInit.ps1'); Context = 'Fragment: starship (StarshipInit.ps1)' },
+            @{ ModulePath = @('starship', 'StarshipVSCode.ps1'); Context = 'Fragment: starship (StarshipVSCode.ps1)' },
+            @{ ModulePath = @('starship', 'SmartPrompt.ps1'); Context = 'Fragment: starship (SmartPrompt.ps1)' }
+        )
+
+        $result = Import-FragmentModules -FragmentRoot $PSScriptRoot -Modules $modules
+        $modulesLoaded = $result.SuccessCount -gt 0
+
+        if ($env:PS_PROFILE_DEBUG -and $result.FailureCount -gt 0) {
+            Write-Verbose "Loaded $($result.SuccessCount) starship modules (failed: $($result.FailureCount))"
         }
     }
-    else {
-        # Fallback: manual loading for environments where Import-FragmentModules is not yet available
-        $starshipModulesDir = Join-Path $PSScriptRoot 'starship'
-        
-        if ($starshipModulesDir -and -not [string]::IsNullOrWhiteSpace($starshipModulesDir) -and (Test-Path -LiteralPath $starshipModulesDir)) {
-            $moduleFiles = @(
-                'StarshipHelpers.ps1',
-                'StarshipPrompt.ps1',
-                'StarshipModule.ps1',
-                'StarshipInit.ps1',
-                'StarshipVSCode.ps1',
-                'SmartPrompt.ps1'
-            )
-            
-            foreach ($moduleFile in $moduleFiles) {
-                $modulePath = Join-Path $starshipModulesDir $moduleFile
-                if ($modulePath -and -not [string]::IsNullOrWhiteSpace($modulePath) -and (Test-Path -LiteralPath $modulePath)) {
-                    try {
-                        . $modulePath
-                        $modulesLoaded = $true
-                    }
-                    catch {
-                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment.starship.module-load-manual' -Context @{
-                                fragment_name  = 'starship'
-                                module_file    = $moduleFile
-                                loading_method = 'manual'
-                            }
-                        }
-                        elseif ($env:PS_PROFILE_DEBUG) {
-                            Write-Warning "Failed to load $moduleFile : $($_.Exception.Message)"
-                        }
-                    }
-                }
+    catch {
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment.starship.module-load' -Context @{
+                fragment_name  = 'starship'
+                loading_method = 'Import-FragmentModules'
             }
+        }
+        elseif ($env:PS_PROFILE_DEBUG) {
+            Write-Warning "Failed to load starship modules: $($_.Exception.Message)"
         }
     }
     

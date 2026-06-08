@@ -305,6 +305,30 @@ Describe 'Parallel extended scenarios' {
             @($result)[0] | Should -Be 'pair:3:7'
         }
 
+        It 'Falls back to Write-Warning for timeouts when structured logging is unavailable' {
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                $result = Get-InvokeParallelTaskResults -Output @(9 | Invoke-Parallel -ScriptBlock {
+                        Start-Sleep -Seconds 2
+                        $_
+                    } -TimeoutSeconds 1)
+
+                @($result).Count | Should -BeLessOrEqual 1
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
         It 'Emits level 3 timeout diagnostics without structured logging enabled' {
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '3'
@@ -318,6 +342,83 @@ Describe 'Parallel extended scenarios' {
                 @($result).Count | Should -BeLessOrEqual 1
             }
             finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Logs successful parallel completion at debug level 2' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $originalVerbose = $VerbosePreference
+            $env:PS_PROFILE_DEBUG = '2'
+            $VerbosePreference = 'Continue'
+
+            try {
+                $result = 1, 2, 3 | Invoke-Parallel -ScriptBlock { $_ + 1 }
+                @($result).Count | Should -Be 3
+                $result | Should -Contain 2
+                $result | Should -Contain 4
+            }
+            finally {
+                $VerbosePreference = $originalVerbose
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-Error for task failures when structured logging is unavailable' {
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            try {
+                $result = @(4, 5) | Invoke-Parallel -ScriptBlock {
+                    if ($_ -eq 5) { throw 'bare task failure probe' }
+                    $_
+                }
+
+                @($result).Count | Should -Be 1
+                @($result)[0] | Should -Be 4
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-Warning for per-task timeouts at debug level 1 without structured logging' {
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                InModuleScope -ModuleName Parallel {
+                    Mock Start-Sleep { }
+                    $global:TestParallelTimeoutOutput = @(6 | Invoke-Parallel -ScriptBlock {
+                            Start-Sleep -Seconds 60
+                            $_
+                        } -TimeoutSeconds 1)
+                }
+
+                $result = Get-InvokeParallelTaskResults -Output $global:TestParallelTimeoutOutput
+                @($result).Count | Should -BeLessOrEqual 1
+            }
+            finally {
+                Remove-Variable -Name TestParallelTimeoutOutput -Scope Global -ErrorAction SilentlyContinue
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
                 }

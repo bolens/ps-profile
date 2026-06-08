@@ -7,7 +7,8 @@ tests/unit/utility-pre-push.tests.ps1
 
 function global:New-PrePushTestRepository {
     param(
-        [int]$ValidateExitCode = 0
+        [int]$ValidateExitCode = 0,
+        [switch]$OmitValidateScript
     )
 
     $repo = New-TestTempDirectory -Prefix 'PrePushRepo'
@@ -15,9 +16,11 @@ function global:New-PrePushTestRepository {
     New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
 
-    $checksDir = Join-Path $scriptsDir 'checks'
-    New-Item -ItemType Directory -Path $checksDir -Force | Out-Null
-    Set-Content -LiteralPath (Join-Path $checksDir 'validate-profile.ps1') -Value "exit $ValidateExitCode" -NoNewline
+    if (-not $OmitValidateScript) {
+        $checksDir = Join-Path $scriptsDir 'checks'
+        New-Item -ItemType Directory -Path $checksDir -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $checksDir 'validate-profile.ps1') -Value "exit $ValidateExitCode" -NoNewline
+    }
 
     $hooksDir = Join-Path $repo '.git' 'hooks'
     New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
@@ -86,7 +89,23 @@ Describe 'pre-push.ps1 execution' {
     It 'Fails when validate-profile returns a non-zero exit code' {
         $repo = New-PrePushTestRepository -ValidateExitCode 1
         try {
-            Invoke-PrePushHook -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -BeIn @(1, 2)
+            $result = Invoke-PrePushHook -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'validate-profile failed|pre-push: validate-profile failed'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Fails when validate-profile.ps1 is missing from the repository' {
+        $repo = New-PrePushTestRepository -OmitValidateScript
+        try {
+            $result = Invoke-PrePushHook -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2, 3)
+            $result.Output | Should -Match 'validate-profile|Cannot bind|not found|failed'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

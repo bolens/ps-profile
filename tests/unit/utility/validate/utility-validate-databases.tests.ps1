@@ -57,4 +57,11 @@ Describe 'validate-databases.ps1 execution' {
         $result.ExitCode | Should -Not -Be 0
         $result.Output | Should -Match 'OutputFormat|ValidateSet|cannot be validated'
     }
+
+    It 'Reports validation summary in table output format' {
+        $result = Invoke-ValidateDatabasesScript -ArgumentList @('-OutputFormat', 'Table')
+
+        $result.Output | Should -Match 'Validating SQLite Database Implementation|SQLite'
+        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+    }
 }

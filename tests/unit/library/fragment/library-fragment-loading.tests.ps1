@@ -263,68 +263,6 @@ Write-Host "Test"
         }
     }
 
-    Context 'When fragment has numeric prefix (backward compatibility)' {
-        It 'Maps 00-09 to core tier' {
-            $tempFragment = Join-Path $testDataDir '05-fragment.ps1'
-            Set-Content -Path $tempFragment -Value '# Test fragment'
-
-            $tier = Get-FragmentTier -FragmentFile $tempFragment
-            $tier | Should -Be 'core'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
-        }
-
-        It 'Maps 10-29 to essential tier' {
-            $tempFragment = Join-Path $testDataDir '15-fragment.ps1'
-            Set-Content -Path $tempFragment -Value '# Test fragment'
-
-            $tier = Get-FragmentTier -FragmentFile $tempFragment
-            $tier | Should -Be 'essential'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
-        }
-
-        It 'Maps 30-69 to standard tier' {
-            $tempFragment = Join-Path $testDataDir '35-fragment.ps1'
-            Set-Content -Path $tempFragment -Value '# Test fragment'
-
-            $tier = Get-FragmentTier -FragmentFile $tempFragment
-            $tier | Should -Be 'standard'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
-        }
-
-        It 'Maps 70-99 to optional tier' {
-            $tempFragment = Join-Path $testDataDir '75-fragment.ps1'
-            Set-Content -Path $tempFragment -Value '# Test fragment'
-
-            $tier = Get-FragmentTier -FragmentFile $tempFragment
-            $tier | Should -Be 'optional'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
-        }
-
-        It 'Recognizes bootstrap fragment as core' {
-            $tempFragment = Join-Path $testDataDir 'bootstrap.ps1'
-            Set-Content -Path $tempFragment -Value '# Bootstrap fragment'
-
-            $tier = Get-FragmentTier -FragmentFile $tempFragment
-            $tier | Should -Be 'core'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
-        }
-
-        It 'Recognizes named bootstrap fragment as core' {
-            $tempFragment = Join-Path $testDataDir 'bootstrap.ps1'
-            Set-Content -Path $tempFragment -Value '# Bootstrap fragment'
-
-            $tier = Get-FragmentTier -FragmentFile $tempFragment
-            $tier | Should -Be 'core'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
-        }
-    }
-
     Context 'When fragment has no tier declaration' {
         It 'Defaults to optional tier' {
             $tempFragment = Join-Path $testDataDir 'fragment-no-tier.ps1'
@@ -350,32 +288,6 @@ Write-Host "Test"
 }
 
 Describe 'Get-FragmentTiers' {
-    Context 'When fragments use numeric prefixes (backward compatibility)' {
-        It 'Groups fragments by tier correctly' {
-            $tempDir = Join-Path $testDataDir 'fragment-tiers-test'
-            if (Test-Path $tempDir) {
-                Remove-Item $tempDir -Recurse -Force
-            }
-            New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
-
-            # Create fragments in different tiers
-            Set-Content -Path (Join-Path $tempDir '05-fragment.ps1') -Value '# Tier 0'
-            Set-Content -Path (Join-Path $tempDir '15-fragment.ps1') -Value '# Tier 1'
-            Set-Content -Path (Join-Path $tempDir '35-fragment.ps1') -Value '# Tier 2'
-            Set-Content -Path (Join-Path $tempDir '75-fragment.ps1') -Value '# Tier 3'
-
-            $fragments = Get-ChildItem -Path $tempDir -Filter '*.ps1'
-            $tiers = Get-FragmentTiers -FragmentFiles $fragments
-
-            $tiers.Tier0.BaseName | Should -Contain '05-fragment'
-            $tiers.Tier1.BaseName | Should -Contain '15-fragment'
-            $tiers.Tier2.BaseName | Should -Contain '35-fragment'
-            $tiers.Tier3.BaseName | Should -Contain '75-fragment'
-
-            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-        }
-    }
-
     Context 'When fragments use explicit tier declarations' {
         It 'Groups fragments by explicit tier declarations' {
             $tempDir = Join-Path $testDataDir 'fragment-tiers-explicit-test'
@@ -414,40 +326,6 @@ Describe 'Get-FragmentTiers' {
         }
     }
 
-    Context 'When fragments mix explicit declarations and numeric prefixes' {
-        It 'Handles mixed fragment types correctly' {
-            $tempDir = Join-Path $testDataDir 'fragment-tiers-mixed-test'
-            if (Test-Path $tempDir) {
-                Remove-Item $tempDir -Recurse -Force
-            }
-            New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
-
-            # Mix of numbered and named fragments
-            Set-Content -Path (Join-Path $tempDir '05-numbered.ps1') -Value '# Numbered fragment'
-            Set-Content -Path (Join-Path $tempDir 'named-core.ps1') -Value @'
-# Tier: core
-# Named fragment
-'@
-            Set-Content -Path (Join-Path $tempDir '15-numbered.ps1') -Value '# Numbered fragment'
-            Set-Content -Path (Join-Path $tempDir 'named-essential.ps1') -Value @'
-# Tier: essential
-# Named fragment
-'@
-
-            $fragments = Get-ChildItem -Path $tempDir -Filter '*.ps1'
-            $tiers = Get-FragmentTiers -FragmentFiles $fragments
-
-            # Both numbered and named core fragments should be in Tier0
-            $tiers.Tier0.BaseName | Should -Contain '05-numbered'
-            $tiers.Tier0.BaseName | Should -Contain 'named-core'
-            # Both numbered and named essential fragments should be in Tier1
-            $tiers.Tier1.BaseName | Should -Contain '15-numbered'
-            $tiers.Tier1.BaseName | Should -Contain 'named-essential'
-
-            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-        }
-    }
-
     It 'Excludes bootstrap when ExcludeBootstrap is specified' {
         $tempDir = Join-Path $testDataDir 'fragment-tiers-bootstrap-test'
         if (Test-Path $tempDir) {
@@ -455,19 +333,20 @@ Describe 'Get-FragmentTiers' {
         }
         New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
 
-        Set-Content -Path (Join-Path $tempDir 'bootstrap.ps1') -Value '# Bootstrap'
         Set-Content -Path (Join-Path $tempDir 'bootstrap.ps1') -Value @'
 # Tier: core
 # Bootstrap
 '@
-        Set-Content -Path (Join-Path $tempDir '05-fragment.ps1') -Value '# Tier 0'
+        Set-Content -Path (Join-Path $tempDir 'core-fragment.ps1') -Value @'
+# Tier: core
+# Core fragment
+'@
 
         $fragments = Get-ChildItem -Path $tempDir -Filter '*.ps1'
         $tiers = Get-FragmentTiers -FragmentFiles $fragments -ExcludeBootstrap
 
         $tiers.Tier0.BaseName | Should -Not -Contain 'bootstrap'
-        $tiers.Tier0.BaseName | Should -Not -Contain 'bootstrap'
-        $tiers.Tier0.BaseName | Should -Contain '05-fragment'
+        $tiers.Tier0.BaseName | Should -Contain 'core-fragment'
 
         Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     }

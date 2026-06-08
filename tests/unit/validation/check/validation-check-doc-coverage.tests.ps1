@@ -45,4 +45,39 @@ Describe 'check-doc-coverage.ps1 execution' {
         $result.Output | Should -Match 'Documentation coverage summary|Documented functions'
         $result.ExitCode | Should -BeIn @(0, 1)
     }
+
+    It 'Fails in strict mode when documented functions lack generated markdown files' {
+        $fixtureRoot = New-TestTempDirectory -Prefix 'DocCoverageStrict'
+        $profilePath = Join-Path $fixtureRoot 'profile.d'
+        $docsPath = Join-Path $fixtureRoot 'docs' 'api'
+        New-Item -ItemType Directory -Path $profilePath -Force | Out-Null
+        New-Item -ItemType Directory -Path $docsPath -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $profilePath '00-fixture.ps1') -Value @'
+<#
+.SYNOPSIS
+    Fixture function for strict documentation coverage tests.
+.DESCRIPTION
+    Detailed description for fixture.
+#>
+function Get-DocCoverageStrictFixture {
+    'ok'
+}
+'@ -Encoding UTF8
+
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:CheckDocCoverageScript -ArgumentList @(
+                '-ProfilePath', $profilePath,
+                '-DocsPath', $docsPath,
+                '-Strict'
+            )
+
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'Missing markdown|blocking issue|Documentation coverage check failed'
+        }
+        finally {
+            if (Test-Path -LiteralPath $fixtureRoot) {
+                Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-shortcuts-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-shortcuts-fragment-extended.tests.ps1
+# Execution tests for shortcuts.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/shortcuts.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:EditorCommands = @(
+        'code', 'code-insiders', 'codium', 'nvim', 'vim', 'emacs', 'micro', 'nano',
+        'notepad++', 'sublime_text', 'atom', 'gedit', 'kate', 'leafpad', 'mousepad', 'xedit', 'notepad'
+    )
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'shortcuts.ps1')
 }
+
+function script:Reset-ShortcutsCommandAvailability {
+    Mark-TestCommandsUnavailable -CommandNames $script:EditorCommands
+    if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+        Clear-TestCachedCommandCache | Out-Null
+    }
+}
+
 Describe 'profile.d/shortcuts.ps1 extended scenarios' {
-    It 'Declares essential tier for editor and navigation shortcuts' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    BeforeEach {
+        Reset-ShortcutsCommandAvailability
     }
-    It 'Defines Get-AvailableEditor using Test-CachedCommand preference list' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-AvailableEditor'
-        $c | Should -Match 'Test-CachedCommand'
-        $c | Should -Match 'Open-VSCode'
+    It 'Registers editor and navigation shortcut commands and aliases' {
+        Get-Command Get-AvailableEditor -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Open-VSCode -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Open-Editor -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-ProjectRoot -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command vsc -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command e -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command project-root -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Registers vsc, e, and project-root aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'vsc'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'e'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'project-root'"
+
+    It 'Get-AvailableEditor returns the first available editor from the preference list' {
+        Set-TestCommandAvailabilityState -CommandName 'nano' -Available $true
+
+        $editor = Get-AvailableEditor
+        $editor | Should -Not -BeNullOrEmpty
+        $editor.Command | Should -Be 'nano'
+    }
+
+    It 'Get-AvailableEditor returns null when no preferred editors are available' {
+        Get-AvailableEditor | Should -BeNullOrEmpty
     }
 }

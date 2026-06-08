@@ -626,23 +626,12 @@ try {
     }
 
     # Register functions
-    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
-        Set-AgentModeFunction -Name 'Write-WideEvent' -Body ${function:Write-WideEvent}
-        Set-AgentModeFunction -Name 'Write-StructuredError' -Body ${function:Write-StructuredError}
-        Set-AgentModeFunction -Name 'Write-StructuredWarning' -Body ${function:Write-StructuredWarning}
-        Set-AgentModeFunction -Name 'Invoke-WithWideEvent' -Body ${function:Invoke-WithWideEvent}
-        Set-AgentModeFunction -Name 'Get-EventSamplingStats' -Body ${function:Get-EventSamplingStats}
-        Set-AgentModeFunction -Name 'Clear-EventCollection' -Body ${function:Clear-EventCollection}
-    }
-    else {
-        # Fallback: direct function registration
-        Set-Item -Path Function:Write-WideEvent -Value ${function:Write-WideEvent} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Write-StructuredError -Value ${function:Write-StructuredError} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Write-StructuredWarning -Value ${function:Write-StructuredWarning} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Invoke-WithWideEvent -Value ${function:Invoke-WithWideEvent} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-EventSamplingStats -Value ${function:Get-EventSamplingStats} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Clear-EventCollection -Value ${function:Clear-EventCollection} -Force -ErrorAction SilentlyContinue
-    }
+    Set-AgentModeFunction -Name 'Write-WideEvent' -Body ${function:Write-WideEvent}
+    Set-AgentModeFunction -Name 'Write-StructuredError' -Body ${function:Write-StructuredError}
+    Set-AgentModeFunction -Name 'Write-StructuredWarning' -Body ${function:Write-StructuredWarning}
+    Set-AgentModeFunction -Name 'Invoke-WithWideEvent' -Body ${function:Invoke-WithWideEvent}
+    Set-AgentModeFunction -Name 'Get-EventSamplingStats' -Body ${function:Get-EventSamplingStats}
+    Set-AgentModeFunction -Name 'Clear-EventCollection' -Body ${function:Clear-EventCollection}
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {

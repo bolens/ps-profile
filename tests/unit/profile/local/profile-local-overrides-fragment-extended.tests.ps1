@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-local-overrides-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-local-overrides-fragment-extended.tests.ps1
+# Execution tests for local-overrides.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,68 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/local-overrides.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:SavedOverrideFlag = $env:PS_PROFILE_ENABLE_LOCAL_OVERRIDES
+    if (Test-Path -Path Variable:global:ProfileFragmentRoot) {
+        $script:SavedFragmentRoot = $global:ProfileFragmentRoot
+    }
+    else {
+        $script:SavedFragmentRoot = $null
+    }
 }
+
+AfterAll {
+    $env:PS_PROFILE_ENABLE_LOCAL_OVERRIDES = $script:SavedOverrideFlag
+    if ($null -eq $script:SavedFragmentRoot) {
+        Remove-Variable -Name 'ProfileFragmentRoot' -Scope Global -ErrorAction SilentlyContinue
+    }
+    else {
+        $global:ProfileFragmentRoot = $script:SavedFragmentRoot
+    }
+    Remove-Variable -Name 'LocalOverrideProbe' -Scope Global -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/local-overrides.ps1 extended scenarios' {
-    It 'Declares standard tier for machine-specific overrides' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    It 'Does not load overrides when PS_PROFILE_ENABLE_LOCAL_OVERRIDES is disabled' {
+        $env:PS_PROFILE_ENABLE_LOCAL_OVERRIDES = $null
+        Remove-Variable -Name 'LocalOverrideProbe' -Scope Global -ErrorAction SilentlyContinue
+
+        { . (Join-Path $script:ProfileDir 'local-overrides.ps1') } | Should -Not -Throw
+        Get-Variable -Name 'LocalOverrideProbe' -Scope Global -ErrorAction SilentlyContinue |
+            Should -BeNullOrEmpty
     }
-    It 'Gates loading on PS_PROFILE_ENABLE_LOCAL_OVERRIDES environment flag' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'PS_PROFILE_ENABLE_LOCAL_OVERRIDES'
-        $c | Should -Match "PS_PROFILE_ENABLE_LOCAL_OVERRIDES -eq '1'"
+
+    It 'Loads override file content when local overrides are enabled' {
+        $overrideDir = New-TestTempDirectory -Prefix 'local-overrides-fragment'
+        $overridePath = Join-Path $overrideDir 'local-overrides.ps1'
+        Set-Content -LiteralPath $overridePath -Value '$global:LocalOverrideProbe = "loaded"' -Encoding UTF8
+
+        try {
+            $global:ProfileFragmentRoot = $overrideDir
+            $env:PS_PROFILE_ENABLE_LOCAL_OVERRIDES = '1'
+            Remove-Variable -Name 'LocalOverrideProbe' -Scope Global -ErrorAction SilentlyContinue
+
+            . (Join-Path $script:ProfileDir 'local-overrides.ps1')
+
+            (Get-Variable -Name 'LocalOverrideProbe' -Scope Global -ErrorAction Stop).Value |
+                Should -Be 'loaded'
+        }
+        finally {
+            Remove-TestArtifacts
+        }
     }
-    It 'Resolves local-overrides.ps1 via ProfileFragmentRoot or PSScriptRoot' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'ProfileFragmentRoot'
-        $c | Should -Match 'local-overrides.ps1'
+
+    It 'Ignores missing override files without throwing when enabled' {
+        $overrideDir = New-TestTempDirectory -Prefix 'local-overrides-missing'
+        try {
+            $global:ProfileFragmentRoot = $overrideDir
+            $env:PS_PROFILE_ENABLE_LOCAL_OVERRIDES = '1'
+
+            { . (Join-Path $script:ProfileDir 'local-overrides.ps1') } | Should -Not -Throw
+        }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 }

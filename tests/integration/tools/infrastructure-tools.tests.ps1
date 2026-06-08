@@ -79,7 +79,7 @@ Describe 'Infrastructure Tools Integration Tests' {
 
         It 'k alias handles missing tool gracefully and recommends installation' {
             Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false -Scope It
-            # Directly mock Test-HasCommand to ensure it takes precedence (working pattern from tfd test)
+            # Directly mock Test-CachedCommand to ensure it takes precedence (working pattern from tfd test)
             $output = k version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'

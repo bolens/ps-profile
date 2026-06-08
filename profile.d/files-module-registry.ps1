@@ -282,61 +282,22 @@ function Load-EnsureModules {
     $loadedCount = 0
     $failedCount = 0
     
-    # Use standardized Import-FragmentModule if available, otherwise fall back to direct loading
-    $useStandardizedLoading = Get-Command Import-FragmentModule -ErrorAction SilentlyContinue
-    
     foreach ($module in $modules) {
-        if ($useStandardizedLoading) {
-            # Use standardized module loading
-            # Convert registry format (Dir = 'conversion-modules/helpers', File = 'helpers-xml.ps1')
-            # to ModulePath array format: @('conversion-modules', 'helpers', 'helpers-xml.ps1')
-            $pathSegments = $module.Dir -split '/'
-            $modulePath = $pathSegments + $module.File
-            
-            $context = "Fragment: $EnsureFunctionName ($($module.File))"
-            
-            $success = Import-FragmentModule `
-                -FragmentRoot $BaseDir `
-                -ModulePath $modulePath `
-                -Context $context `
-                -CacheResults
-            
-            if ($success) {
-                $loadedCount++
-            }
-            else {
-                $failedCount++
-            }
+        $pathSegments = $module.Dir -split '/'
+        $modulePath = $pathSegments + $module.File
+        $context = "Fragment: $EnsureFunctionName ($($module.File))"
+
+        $success = Import-FragmentModule `
+            -FragmentRoot $BaseDir `
+            -ModulePath $modulePath `
+            -Context $context `
+            -CacheResults
+
+        if ($success) {
+            $loadedCount++
         }
         else {
-            # Fallback: direct dot-sourcing (for environments where Import-FragmentModule is not available)
-            $modulePath = Join-Path $BaseDir $module.Dir $module.File
-            
-            # Use cached path check if available
-            $moduleExists = if ($modulePath -and -not [string]::IsNullOrWhiteSpace($modulePath)) {
-                if (Get-Command Test-ModulePath -ErrorAction SilentlyContinue) {
-                    Test-ModulePath -Path $modulePath
-                }
-                else {
-                    Test-Path -LiteralPath $modulePath -ErrorAction SilentlyContinue
-                }
-            }
-            else {
-                $false
-            }
-            
-            if ($moduleExists) {
-                try {
-                    Invoke-GlobalProfileScript -Path $modulePath
-                    $loadedCount++
-                }
-                catch {
-                    $failedCount++
-                    if ($env:PS_PROFILE_DEBUG) {
-                        Write-Verbose "Failed to load module $($module.File): $($_.Exception.Message)"
-                    }
-                }
-            }
+            $failedCount++
         }
     }
     

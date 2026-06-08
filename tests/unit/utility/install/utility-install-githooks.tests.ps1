@@ -5,15 +5,38 @@ tests/unit/utility-install-githooks.tests.ps1
     Behavioral unit tests for scripts/git/install-githooks.ps1.
 #>
 
+function global:New-InstallGitHooksTestRepository {
+    $repo = New-TestTempDirectory -Prefix 'InstallHooksRepo'
+    $scriptsDir = Join-Path $repo 'scripts'
+    $scriptsGitDir = Join-Path $scriptsDir 'git'
+    New-Item -ItemType Directory -Path $scriptsGitDir -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
+    Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'git' 'hooks') -Destination (Join-Path $scriptsGitDir 'hooks') -Recurse -Force
+    Copy-Item -LiteralPath $script:InstallHooksScript -Destination (Join-Path $scriptsGitDir 'install-githooks.ps1') -Force
+
+    Push-Location $repo
+    try {
+        git init -q | Out-Null
+        git config user.email 'fixture@example.com'
+        git config user.name 'Fixture'
+    }
+    finally {
+        Pop-Location
+    }
+
+    return $repo
+}
+
 function global:Invoke-InstallGitHooksScript {
     param(
         [string]$RepositoryRoot,
         [string[]]$ExtraArgs
     )
 
+    $scriptPath = Join-Path $RepositoryRoot 'scripts' 'git' 'install-githooks.ps1'
     Push-Location $RepositoryRoot
     try {
-        $output = & pwsh -NoProfile -File $script:InstallHooksScript @ExtraArgs 2>&1 | Out-String
+        $output = & pwsh -NoProfile -File $scriptPath @ExtraArgs 2>&1 | Out-String
         return [pscustomobject]@{
             ExitCode = $LASTEXITCODE
             Output   = $output
@@ -42,20 +65,15 @@ BeforeAll {
 
 Describe 'install-githooks.ps1 execution' {
     It 'DryRun reports hook installation without writing hook files' {
-        $repo = New-TestTempDirectory -Prefix 'InstallHooksRepo'
+        $repo = New-InstallGitHooksTestRepository
         try {
-            $scriptsDir = Join-Path $repo 'scripts'
-            New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'git' 'hooks') -Destination (Join-Path $scriptsDir 'git' 'hooks') -Recurse -Force
-            New-Item -ItemType Directory -Path (Join-Path $repo '.git') -Force | Out-Null
-
             $result = Invoke-InstallGitHooksScript -RepositoryRoot $repo -ExtraArgs @('-DryRun')
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'DRY RUN'
             $result.Output | Should -Match 'commit-msg'
             $result.Output | Should -Match 'pre-push'
-            @(Get-ChildItem -Path (Join-Path $repo '.git') -File -ErrorAction SilentlyContinue).Count | Should -Be 0
+            Test-Path -LiteralPath (Join-Path $repo '.git' 'commit-msg') | Should -BeFalse
+            Test-Path -LiteralPath (Join-Path $repo '.git' 'pre-push') | Should -BeFalse
         }
         finally {
             if (Test-Path -LiteralPath $repo) {
@@ -65,21 +83,9 @@ Describe 'install-githooks.ps1 execution' {
     }
 
     It 'Installs hook wrappers into .git for each scripts/git/hooks script' {
-        $repo = New-TestTempDirectory -Prefix 'InstallHooksRepoReal'
+        $repo = New-InstallGitHooksTestRepository
         try {
-            $scriptsDir = Join-Path $repo 'scripts'
-            $scriptsGitDir = Join-Path $scriptsDir 'git'
-            $null = New-Item -ItemType Directory -Path (Join-Path $repo '.git') -Force
-            $null = New-Item -ItemType Directory -Path $scriptsGitDir -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'git' 'hooks') -Destination (Join-Path $scriptsGitDir 'hooks') -Recurse -Force
-            Copy-Item -LiteralPath $script:InstallHooksScript -Destination (Join-Path $scriptsGitDir 'install-githooks.ps1') -Force
-
-            $output = & pwsh -NoProfile -File (Join-Path $scriptsGitDir 'install-githooks.ps1') 2>&1 | Out-String
-            $result = [pscustomobject]@{
-                ExitCode = $LASTEXITCODE
-                Output   = $output
-            }
+            $result = Invoke-InstallGitHooksScript -RepositoryRoot $repo
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Git hooks installed|Installing hook'
 
@@ -89,6 +95,23 @@ Describe 'install-githooks.ps1 execution' {
             Test-Path -LiteralPath $prePushHook | Should -BeTrue
             Get-Content -LiteralPath $commitMsgHook -Raw | Should -Match 'commit-msg\.ps1'
             Get-Content -LiteralPath $prePushHook -Raw | Should -Match 'pre-push\.ps1'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Reinstalls hooks idempotently when run a second time' {
+        $repo = New-InstallGitHooksTestRepository
+        try {
+            $first = Invoke-InstallGitHooksScript -RepositoryRoot $repo
+            $second = Invoke-InstallGitHooksScript -RepositoryRoot $repo
+
+            $first.ExitCode | Should -Be 0
+            $second.ExitCode | Should -Be 0
+            Test-Path -LiteralPath (Join-Path $repo '.git' 'pre-push') | Should -BeTrue
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

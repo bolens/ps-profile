@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-conda-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-conda-fragment-extended.tests.ps1
+# Execution tests for conda.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/conda.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/conda.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by conda availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Test-CachedCommand conda'
+    It 'Registers conda helpers when conda is available' {
+        Set-TestCommandAvailabilityState -CommandName 'conda' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'conda.ps1')
+
+        Get-Command Install-CondaPackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Test-CondaOutdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command conda-install -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Update-CondaPackages wrapping conda update --all' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Update-CondaPackages'
-        $c | Should -Match 'conda update --all'
+
+    It 'Skips conda helper registration when conda is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'conda' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'conda.ps1')
+
+        Get-Command Install-CondaPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Provides Test-CondaOutdated and conda-update aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-CondaOutdated'
-        $c | Should -Match "Set-AgentModeAlias -Name 'conda-update'"
+
+    It 'Emits missing-tool warning when conda is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'conda' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('conda', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'conda.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'conda not found'
     }
 }

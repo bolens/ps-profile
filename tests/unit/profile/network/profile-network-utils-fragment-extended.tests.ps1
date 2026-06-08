@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-network-utils-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-network-utils-fragment-extended.tests.ps1
+# Execution tests for network-utils.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,43 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/network-utils.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-NetworkUtilsFragmentState {
+    Remove-Variable -Name 'NetworkUtilsLoaded' -Scope Global -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/network-utils.ps1 extended scenarios' {
-    It 'Declares optional tier for server and development environments' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: optional'
-        $c | Should -Match 'Environment: server, development'
+    BeforeEach {
+        Reset-NetworkUtilsFragmentState
     }
-    It 'Loads utilities-network-advanced module from utilities-modules/network' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'utilities-modules'
-        $c | Should -Match 'utilities-network-advanced\.ps1'
+
+    It 'Loads advanced network utility commands from utilities-network-advanced module' {
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
+
+        Get-Command Test-NetworkConnectivity -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-HttpRequestWithRetry -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Resolve-HostWithRetry -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        (Get-Variable -Name 'NetworkUtilsLoaded' -Scope Global -ErrorAction Stop).Value | Should -Be $true
     }
-    It 'Reports module load failures through Write-ProfileError when debug is enabled' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Write-ProfileError'
-        $c | Should -Match 'Fragment: network-utils'
+
+    It 'Invoke-WithRetry executes without error for a simple script block' {
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
+
+        $result = Invoke-WithRetry -ScriptBlock { 'network-utils probe' } -MaxRetries 1
+        $result | Should -Be 'network-utils probe'
+    }
+
+    It 'Skips re-initialization when network utilities are already loaded' {
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
+        $firstConnectivity = Get-Command Test-NetworkConnectivity -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
+
+        (Get-Command Test-NetworkConnectivity -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstConnectivity.ScriptBlock.ToString()
     }
 }

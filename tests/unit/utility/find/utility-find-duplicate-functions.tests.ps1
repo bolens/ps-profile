@@ -34,7 +34,20 @@ function Test-DuplicateFixtureShared { 'b' }
 '@
     }
 
-    New-Item -ItemType Directory -Path (Join-Path $repo '.git') -Force | Out-Null
+    Push-Location $repo
+    try {
+        git init -q | Out-Null
+        git config user.email 'fixture@example.com'
+        git config user.name 'Fixture'
+        git add profile.d/00-unique.ps1
+        if ($IncludeDuplicateDefinition) {
+            git add profile.d/01-dup-a.ps1 profile.d/02-dup-b.ps1
+        }
+        git commit -m 'init duplicate fixture' -q
+    }
+    finally {
+        Pop-Location
+    }
 
     return $repo
 }

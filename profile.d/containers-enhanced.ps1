@@ -1072,31 +1072,16 @@ try {
     }
 
     # Register functions and aliases
-    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
-        Set-AgentModeFunction -Name 'Start-PodmanDesktop' -Body ${function:Start-PodmanDesktop}
-        Set-AgentModeFunction -Name 'Start-RancherDesktop' -Body ${function:Start-RancherDesktop}
-        Set-AgentModeFunction -Name 'Convert-ComposeToK8s' -Body ${function:Convert-ComposeToK8s}
-        Set-AgentModeFunction -Name 'Deploy-Balena' -Body ${function:Deploy-Balena}
-        Set-AgentModeFunction -Name 'Clean-Containers' -Body ${function:Clean-Containers}
-        Set-AgentModeFunction -Name 'Export-ContainerLogs' -Body ${function:Export-ContainerLogs}
-        Set-AgentModeFunction -Name 'Get-ContainerStats' -Body ${function:Get-ContainerStats}
-        Set-AgentModeFunction -Name 'Backup-ContainerVolumes' -Body ${function:Backup-ContainerVolumes}
-        Set-AgentModeFunction -Name 'Restore-ContainerVolumes' -Body ${function:Restore-ContainerVolumes}
-        Set-AgentModeFunction -Name 'Health-CheckContainers' -Body ${function:Health-CheckContainers}
-    }
-    else {
-        # Fallback: direct function registration
-        Set-Item -Path Function:Start-PodmanDesktop -Value ${function:Start-PodmanDesktop} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Start-RancherDesktop -Value ${function:Start-RancherDesktop} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Convert-ComposeToK8s -Value ${function:Convert-ComposeToK8s} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Deploy-Balena -Value ${function:Deploy-Balena} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Clean-Containers -Value ${function:Clean-Containers} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Export-ContainerLogs -Value ${function:Export-ContainerLogs} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-ContainerStats -Value ${function:Get-ContainerStats} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Backup-ContainerVolumes -Value ${function:Backup-ContainerVolumes} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Restore-ContainerVolumes -Value ${function:Restore-ContainerVolumes} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Health-CheckContainers -Value ${function:Health-CheckContainers} -Force -ErrorAction SilentlyContinue
-    }
+    Set-AgentModeFunction -Name 'Start-PodmanDesktop' -Body ${function:Start-PodmanDesktop}
+    Set-AgentModeFunction -Name 'Start-RancherDesktop' -Body ${function:Start-RancherDesktop}
+    Set-AgentModeFunction -Name 'Convert-ComposeToK8s' -Body ${function:Convert-ComposeToK8s}
+    Set-AgentModeFunction -Name 'Deploy-Balena' -Body ${function:Deploy-Balena}
+    Set-AgentModeFunction -Name 'Clean-Containers' -Body ${function:Clean-Containers}
+    Set-AgentModeFunction -Name 'Export-ContainerLogs' -Body ${function:Export-ContainerLogs}
+    Set-AgentModeFunction -Name 'Get-ContainerStats' -Body ${function:Get-ContainerStats}
+    Set-AgentModeFunction -Name 'Backup-ContainerVolumes' -Body ${function:Backup-ContainerVolumes}
+    Set-AgentModeFunction -Name 'Restore-ContainerVolumes' -Body ${function:Restore-ContainerVolumes}
+    Set-AgentModeFunction -Name 'Health-CheckContainers' -Body ${function:Health-CheckContainers}
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {

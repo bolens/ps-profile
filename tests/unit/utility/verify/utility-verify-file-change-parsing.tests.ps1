@@ -24,14 +24,67 @@ BeforeAll {
 
 Describe 'verify-file-change-parsing.ps1 execution' {
     It 'Fails fast when FragmentCacheInitialization is not available' {
-        if (Test-Path -LiteralPath $script:CacheInitModule) {
-            Set-ItResult -Skipped -Because 'FragmentCacheInitialization module is present; prerequisite failure path is not testable'
+        $repo = New-TestTempDirectory -Prefix 'VerifyFileChangeMissingModule'
+        try {
+            $utilsDir = Join-Path $repo 'scripts' 'utils'
+            $null = New-Item -ItemType Directory -Path $utilsDir -Force
+            Copy-Item -LiteralPath $script:VerifyFileChangeParsingScript -Destination (Join-Path $utilsDir 'verify-file-change-parsing.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $utilsDir 'verify-file-change-parsing.ps1')
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result.ExitCode | Should -BeIn @(0, 1)
+            $result.Output | Should -Match 'FragmentCacheInitialization module not found'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Completes file change parsing verification when fragment cache modules are available' {
+        if (-not (Test-Path -LiteralPath $script:CacheInitModule)) {
+            Set-ItResult -Skipped -Because 'FragmentCacheInitialization module is not present'
             return
         }
 
-        $result = Invoke-TestScriptFile -ScriptPath $script:VerifyFileChangeParsingScript
+        $repo = New-TestTempDirectory -Prefix 'VerifyFileChangePass'
+        try {
+            $utilsDir = Join-Path $repo 'scripts' 'utils'
+            $null = New-Item -ItemType Directory -Path $utilsDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:VerifyFileChangeParsingScript -Destination (Join-Path $utilsDir 'verify-file-change-parsing.ps1') -Force
 
-        $result.ExitCode | Should -Not -Be 0
-        $result.Output | Should -Match 'FragmentCacheInitialization module not found'
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $utilsDir 'verify-file-change-parsing.ps1')
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'File Change Parsing Verification'
+            $result.Output | Should -Match 'Verification Complete'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
     }
 }

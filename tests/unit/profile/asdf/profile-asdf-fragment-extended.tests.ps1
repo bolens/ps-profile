@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-asdf-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-asdf-fragment-extended.tests.ps1
+# Execution tests for asdf.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/asdf.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/asdf.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by asdf availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Test-CachedCommand asdf'
+    It 'Registers asdf helpers when asdf is available' {
+        Set-TestCommandAvailabilityState -CommandName 'asdf' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'asdf.ps1')
+
+        Get-Command Install-AsdfTool -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-AsdfTools -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command asdfinstall -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Install-AsdfTool for multi-language version installs' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Install-AsdfTool'
-        $c | Should -Match 'asdf install'
+
+    It 'Skips asdf helper registration when asdf is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'asdf' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'asdf.ps1')
+
+        Get-Command Install-AsdfTool -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers asdfinstall and asdfadd aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'asdfinstall'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'asdfadd'"
+
+    It 'Emits missing-tool warning when asdf is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'asdf' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('asdf', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'asdf.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'asdf not found'
     }
 }

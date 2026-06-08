@@ -93,4 +93,35 @@ Describe 'generate-command-wrappers.ps1 execution' {
             }
         }
     }
+
+    It 'Fails validation when a specific command name is not registered' {
+        $outputDir = New-TestTempDirectory -Prefix 'WrapperUnknownCommand'
+        try {
+            $output = & pwsh -NoProfile -File $script:GenerateScript -CommandName 'Definitely-Not-Registered-Command' -OutputPath $outputDir 2>&1 | Out-String
+            $LASTEXITCODE | Should -Be 1
+            $output | Should -Match 'No commands to generate wrappers for|No commands found in registry'
+        }
+        finally {
+            if (Test-Path -LiteralPath $outputDir) {
+                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'DryRun reports a wrapper plan for a registered alias command' {
+        $null = Register-FragmentCommand -CommandName 'gs' -FragmentName 'git' -CommandType 'Alias'
+        $outputDir = New-TestTempDirectory -Prefix 'WrapperAliasDryRun'
+
+        try {
+            $output = & $script:GenerateScript -DryRun -CommandName 'gs' -OutputPath $outputDir *>&1 | Out-String
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Match '\[GENERATE\] gs|Found 1 command'
+            Test-Path -LiteralPath (Join-Path $outputDir 'gs.ps1') | Should -Be $false
+        }
+        finally {
+            if (Test-Path -LiteralPath $outputDir) {
+                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

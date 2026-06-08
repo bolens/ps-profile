@@ -755,23 +755,12 @@ try {
     }
 
     # Register functions and aliases
-    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
-        Set-AgentModeFunction -Name 'Convert-Video' -Body ${function:Convert-Video}
-        Set-AgentModeFunction -Name 'Extract-Audio' -Body ${function:Extract-Audio}
-        Set-AgentModeFunction -Name 'Tag-Audio' -Body ${function:Tag-Audio}
-        Set-AgentModeFunction -Name 'Rip-CD' -Body ${function:Rip-CD}
-        Set-AgentModeFunction -Name 'Get-MediaInfo' -Body ${function:Get-MediaInfo}
-        Set-AgentModeFunction -Name 'Merge-MKV' -Body ${function:Merge-MKV}
-    }
-    else {
-        # Fallback: direct function registration
-        Set-Item -Path Function:Convert-Video -Value ${function:Convert-Video} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Extract-Audio -Value ${function:Extract-Audio} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Tag-Audio -Value ${function:Tag-Audio} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Rip-CD -Value ${function:Rip-CD} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Get-MediaInfo -Value ${function:Get-MediaInfo} -Force -ErrorAction SilentlyContinue
-        Set-Item -Path Function:Merge-MKV -Value ${function:Merge-MKV} -Force -ErrorAction SilentlyContinue
-    }
+    Set-AgentModeFunction -Name 'Convert-Video' -Body ${function:Convert-Video}
+    Set-AgentModeFunction -Name 'Extract-Audio' -Body ${function:Extract-Audio}
+    Set-AgentModeFunction -Name 'Tag-Audio' -Body ${function:Tag-Audio}
+    Set-AgentModeFunction -Name 'Rip-CD' -Body ${function:Rip-CD}
+    Set-AgentModeFunction -Name 'Get-MediaInfo' -Body ${function:Get-MediaInfo}
+    Set-AgentModeFunction -Name 'Merge-MKV' -Body ${function:Merge-MKV}
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {

@@ -1312,7 +1312,6 @@ Use category prefixes so the target is obvious from the filename:
 | `library-*` | `scripts/lib/` modules | `library-cache.tests.ps1` |
 | `profile-*` | `profile.d/` fragments and bootstrap helpers | `profile-module-loading.tests.ps1` |
 | `utility-*` | `scripts/utils/` scripts (non-lib) | `utility-docs-generation.tests.ps1` |
-| `utility-debug-*` | `scripts/utils/debug/` scripts | `utility-debug-trace-testpath-extended.tests.ps1` |
 | `validation-*` | `scripts/checks/` and validation scripts | `validation-idempotency.tests.ps1` |
 | `test-runner-*` | Test runner modules/scripts | `test-runner-run-pester.tests.ps1` |
 | `test-support*` | TestSupport modules | `test-support-paths.tests.ps1` |
@@ -1344,7 +1343,7 @@ Rules:
 Many tests use a `-extended` suffix for additional edge-case or regression coverage:
 
 - **Paired:** `validation-idempotency.tests.ps1` + `validation-idempotency-extended.tests.ps1`
-- **Extended-only:** `utility-debug-check-profile-log-extended.tests.ps1` (no base file) — **valid** when the suite is intentionally scoped to extended scenarios only
+- **Extended-only:** `validation-idempotency-extended.tests.ps1` (no base file) — **valid** when the suite is intentionally scoped to extended scenarios only
 
 Do not create empty base files solely to satisfy pairing. Prefer `-extended` when adding coverage that is clearly supplementary to an existing file, or when the entire file is edge-case focused.
 

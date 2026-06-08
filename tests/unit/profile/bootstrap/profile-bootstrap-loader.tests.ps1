@@ -131,7 +131,10 @@ Describe 'bootstrap.ps1 - module failure handling' {
         }
     }
 
-    It 'Reports later bootstrap module load failures through Write-ProfileError when PS_PROFILE_DEBUG is set' -TestCases @(
+    It 'Reports bootstrap module load failures through Write-ProfileError when PS_PROFILE_DEBUG is set' -TestCases @(
+        @{ ModuleName = 'GlobalState.ps1' }
+        @{ ModuleName = 'ErrorHandlingStandard.ps1' }
+        @{ ModuleName = 'CommandCache.ps1' }
         @{ ModuleName = 'FunctionRegistration.ps1' }
         @{ ModuleName = 'ModulePathCache.ps1' }
         @{ ModuleName = 'ModuleLoading.ps1' }
@@ -159,14 +162,38 @@ Describe 'bootstrap.ps1 - module failure handling' {
         Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
     }
 
-    It 'Falls back to Write-Warning when Write-ProfileError is unavailable during module load failures' {
-        $modulePath = Join-Path $script:ProfileDir 'bootstrap' 'UserHome.ps1'
+    It 'Falls back to Write-Warning when Write-ProfileError is unavailable during module load failures' -TestCases @(
+        @{ ModuleName = 'CloudProviderBase.ps1' }
+        @{ ModuleName = 'PromptBase.ps1' }
+        @{ ModuleName = 'PackageManagerBase.ps1' }
+        @{ ModuleName = 'AssumedCommands.ps1' }
+        @{ ModuleName = 'BatchLoadingSummary.ps1' }
+        @{ ModuleName = 'EmbeddedInstallHints.ps1' }
+        @{ ModuleName = 'FragmentWarnings.ps1' }
+        @{ ModuleName = 'FunctionRegistration.ps1' }
+        @{ ModuleName = 'InstallHintResolver.ps1' }
+        @{ ModuleName = 'MissingToolWarnings.ps1' }
+        @{ ModuleName = 'ModuleLoading.ps1' }
+        @{ ModuleName = 'ModulePathCache.ps1' }
+        @{ ModuleName = 'PlatformPaths.ps1' }
+        @{ ModuleName = 'SafeTestPath.ps1' }
+        @{ ModuleName = 'ToolInstallRegistry.ps1' }
+        @{ ModuleName = 'UserHome.ps1' }
+    ) {
+        param($ModuleName)
+
+        $modulePath = Join-Path $script:BootstrapModulesDir $ModuleName
         $originalBytes = Backup-TestFileBytes -Path $modulePath
         $previousDebug = $env:PS_PROFILE_DEBUG
         $profileError = Get-Command Write-ProfileError -ErrorAction SilentlyContinue
         $profileErrorBody = if ($profileError) { $profileError.ScriptBlock } else { $null }
 
         Remove-Item -Path Function:\Write-ProfileError -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path Function:\global:Write-ProfileError -Force -ErrorAction SilentlyContinue
+
+        if (Get-Command Remove-TestCachedCommandCacheEntry -ErrorAction SilentlyContinue) {
+            Remove-TestCachedCommandCacheEntry -Name 'Write-ProfileError' | Out-Null
+        }
 
         try {
             Write-TestFileLiteralContent -Path $modulePath -Content 'throw "bootstrap loader failure"'
@@ -176,13 +203,15 @@ Describe 'bootstrap.ps1 - module failure handling' {
                 . $script:BootstrapPath 3>&1 2>&1
             ) | Out-String
 
-            $output | Should -Match 'Failed to load bootstrap module UserHome.ps1'
+            $output | Should -Match "Failed to load bootstrap module $ModuleName"
             $output | Should -Match 'bootstrap loader failure'
         }
         finally {
             Restore-TestFileBytes -Path $modulePath -Bytes $originalBytes
+            Remove-Item -Path Function:\Write-ProfileError -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path Function:\global:Write-ProfileError -Force -ErrorAction SilentlyContinue
             if ($profileErrorBody) {
-                Set-Item -Path Function:\Write-ProfileError -Value $profileErrorBody -Force
+                Set-Item -Path Function:\global:Write-ProfileError -Value $profileErrorBody -Force
             }
             if ($null -eq $previousDebug) {
                 Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue

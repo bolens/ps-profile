@@ -65,6 +65,7 @@ Describe 'validate-dependencies.ps1 execution' {
                 '-RequirementsFile', $requirementsFile
             )
             $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Dependencies|validation|passed|success'
         }
         finally {
             $parent = Split-Path -Parent $requirementsFile

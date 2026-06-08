@@ -29,7 +29,7 @@ Describe 'profile.d/utilities.ps1 extended scenarios' {
 
         Get-Command ConvertTo-IsbnNormalized -ErrorAction Stop | Should -Not -BeNullOrEmpty
         Get-Command Find-Isbn -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Format-DateTime -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ConvertFrom-Epoch -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
 
     It 'Loads utility modules from the utilities-modules subdirectory' {

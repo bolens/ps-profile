@@ -69,4 +69,27 @@ Describe 'optimize-git-performance.ps1 execution' {
             }
         }
     }
+
+    It 'Completes successfully when run twice against the same isolated HOME' {
+        $tempHome = New-TestTempDirectory -Prefix 'git-optimize-repeat'
+        try {
+            $first = Invoke-TestScriptFile -ScriptPath $script:OptimizeGitPerfScript -EnvironmentVariables @{
+                HOME        = $tempHome
+                USERPROFILE = $tempHome
+            }
+            $second = Invoke-TestScriptFile -ScriptPath $script:OptimizeGitPerfScript -EnvironmentVariables @{
+                HOME        = $tempHome
+                USERPROFILE = $tempHome
+            }
+
+            $first.ExitCode | Should -Be 0
+            $second.ExitCode | Should -Be 0
+            $second.Output | Should -Match 'Git performance optimizations applied'
+        }
+        finally {
+            if (Test-Path -LiteralPath $tempHome) {
+                Remove-Item -LiteralPath $tempHome -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

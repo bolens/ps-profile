@@ -55,4 +55,12 @@ Describe 'run-test-verification.ps1 execution' {
         $result.Output | Should -Match 'Bogus|ValidateSet|parameter'
         $result.ExitCode | Should -Not -Be 0
     }
+
+    It 'Runs Phase4 tool detection verification without enum load errors' {
+        $result = Invoke-RunTestVerificationScript -ArgumentList @('-Phase', 'Phase4')
+
+        $result.Output | Should -Not -Match 'Unable to find type \[TestPhase\]'
+        $result.Output | Should -Match 'Phase 4'
+        $result.ExitCode | Should -Be 0
+    }
 }

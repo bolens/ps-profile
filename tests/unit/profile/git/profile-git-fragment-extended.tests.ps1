@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-git-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-git-fragment-extended.tests.ps1
+# Execution tests for git.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,50 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/git.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts/lib/fragment/FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop -Force
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
 }
+
+function script:Reset-GitFragmentState {
+    Clear-FragmentLoaded -FragmentName 'git' -ErrorAction SilentlyContinue
+    Set-Variable -Name 'GitInitialized' -Scope Global -Value $false -Force
+}
+
 Describe 'profile.d/git.ps1 extended scenarios' {
-    It 'Declares essential tier depending on bootstrap and env' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    BeforeEach {
+        Reset-GitFragmentState
     }
-    It 'Uses Ensure-Git with Load-EnsureModules for deferred git-modules loading' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Ensure-Git'
-        $c | Should -Match 'git-modules'
+
+    It 'Registers lightweight git stubs and lazy shortcuts when the fragment loads' {
+        . (Join-Path $script:ProfileDir 'git.ps1')
+
+        Get-Command Get-GitCurrentBranch -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Format-PromptGitSegment -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-GitStatus -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command gs -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Test-FragmentLoaded -FragmentName 'git' | Should -Be $true
     }
-    It 'Registers lazy git helpers with Register-LazyFunction aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Register-LazyFunction'
-        $c | Should -Match "Alias 'gs'"
+
+    It 'Loads git module helpers through Ensure-Git deferred initialization' {
+        . (Join-Path $script:ProfileDir 'git.ps1')
+
+        Ensure-Git
+
+        Get-Command Invoke-GitCommand -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Test-GitRepositoryContext -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Skips re-initialization when git fragment is already loaded' {
+        . (Join-Path $script:ProfileDir 'git.ps1')
+        $firstBranch = Get-Command Get-GitCurrentBranch -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'git.ps1')
+
+        (Get-Command Get-GitCurrentBranch -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstBranch.ScriptBlock.ToString()
     }
 }

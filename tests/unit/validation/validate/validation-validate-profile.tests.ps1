@@ -40,7 +40,17 @@ function global:New-ValidateProfileTestRepository {
         Set-Content -LiteralPath $target -Value "exit $($_.ExitCode)" -NoNewline
     }
 
-    New-Item -ItemType Directory -Path (Join-Path $repo '.git') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d') -Force | Out-Null
+
+    Push-Location $repo
+    try {
+        git init -q | Out-Null
+        git config user.email 'fixture@example.com'
+        git config user.name 'Fixture'
+    }
+    finally {
+        Pop-Location
+    }
 
     return $repo
 }
@@ -49,8 +59,17 @@ function global:Invoke-ValidateProfileScript {
     param([string]$RepositoryRoot)
 
     $scriptPath = Join-Path $RepositoryRoot 'scripts' 'checks' 'validate-profile.ps1'
-    & pwsh -NoProfile -File $scriptPath 2>&1 | Out-Null
-    return $LASTEXITCODE
+    Push-Location $RepositoryRoot
+    try {
+        $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
+        return [pscustomobject]@{
+            ExitCode = $LASTEXITCODE
+            Output   = $output
+        }
+    }
+    finally {
+        Pop-Location
+    }
 }
 
 BeforeAll {
@@ -73,7 +92,8 @@ Describe 'validate-profile.ps1 execution' {
     It 'Passes when all stubbed validation checks succeed' {
         $repo = New-ValidateProfileTestRepository
         try {
-            Invoke-ValidateProfileScript -RepositoryRoot $repo | Should -Be 0
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -Be 0
         }
         finally {
             if (Test-Path -LiteralPath $repo) {
@@ -85,7 +105,9 @@ Describe 'validate-profile.ps1 execution' {
     It 'Fails when the security scan stub returns a non-zero exit code' {
         $repo = New-ValidateProfileTestRepository -SecurityExitCode 1
         try {
-            Invoke-ValidateProfileScript -RepositoryRoot $repo | Should -BeIn @(1, 2)
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'security scan failed|Running security scan'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {
@@ -97,7 +119,79 @@ Describe 'validate-profile.ps1 execution' {
     It 'Fails when the lint stub returns a non-zero exit code' {
         $repo = New-ValidateProfileTestRepository -LintExitCode 1
         try {
-            Invoke-ValidateProfileScript -RepositoryRoot $repo | Should -BeIn @(1, 2)
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'lint failed|Running lint'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Fails when the spellcheck stub returns a non-zero exit code' {
+        $repo = New-ValidateProfileTestRepository -SpellcheckExitCode 1
+        try {
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'spellcheck failed|Running spellcheck'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Fails when the idempotency stub returns a non-zero exit code' {
+        $repo = New-ValidateProfileTestRepository -IdempotencyExitCode 1
+        try {
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'idempotency failed|Running idempotency'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Fails when the comment-help stub returns a non-zero exit code' {
+        $repo = New-ValidateProfileTestRepository -CommentHelpExitCode 1
+        try {
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'comment-based help check failed|Running comment-based help check'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Fails when the duplicate-functions stub returns a non-zero exit code' {
+        $repo = New-ValidateProfileTestRepository -DuplicateExitCode 1
+        try {
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -BeIn @(1, 2)
+            $result.Output | Should -Match 'duplicate functions failed|Running duplicate functions'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Reports the full validation success message when all stubbed checks pass' {
+        $repo = New-ValidateProfileTestRepository
+        try {
+            $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Validation: security \+ lint \+ spellcheck \+ comment help \+ idempotency \+ duplicate functions passed'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

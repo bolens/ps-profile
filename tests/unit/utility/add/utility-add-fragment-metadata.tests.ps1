@@ -66,9 +66,19 @@ function Get-AddFragmentMetadataFixture {
 }
 '@ -Encoding UTF8
 
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'add-fragment-metadata.ps1') -ArgumentList @(
-                '-Fragment', 'env'
-            )
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'add-fragment-metadata.ps1') -ArgumentList @(
+                    '-Fragment', 'env'
+                )
+            }
+            finally {
+                Pop-Location
+            }
 
             $result.ExitCode | Should -Be 0
             $updated = Get-Content -LiteralPath (Join-Path $profileDir 'env.ps1') -Raw

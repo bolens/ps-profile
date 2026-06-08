@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-dev-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-dev-fragment-extended.tests.ps1
+# Execution tests for dev.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,35 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/dev.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
 }
+
 Describe 'profile.d/dev.ps1 extended scenarios' {
-    It 'Declares standard tier for development shortcuts' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Environment: web, development'
+    It 'Registers idempotent docker and language shortcut wrappers' {
+        . (Join-Path $script:ProfileDir 'dev.ps1')
+
+        Get-Command d -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command dc -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command n -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command py -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Registers idempotent docker wrapper functions guarded by Test-Path Function' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Test-Path Function:d"
-        $c | Should -Match 'docker @Args'
+
+    It 'Registers podman, npm, and cargo shortcut wrappers' {
+        . (Join-Path $script:ProfileDir 'dev.ps1')
+
+        Get-Command pd -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ni -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command cr -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Provides npm and python shortcut wrappers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Test-Path Function:n"
-        $c | Should -Match "Test-Path Function:py"
+
+    It 'Preserves existing shortcut bodies on repeated fragment loads' {
+        . (Join-Path $script:ProfileDir 'dev.ps1')
+        $firstDocker = Get-Command d -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'dev.ps1')
+
+        (Get-Command d -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstDocker.ScriptBlock.ToString()
     }
 }

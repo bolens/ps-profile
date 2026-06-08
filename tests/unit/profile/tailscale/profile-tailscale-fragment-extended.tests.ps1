@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-tailscale-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-tailscale-fragment-extended.tests.ps1
+# Execution tests for tailscale.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/tailscale.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'tailscale.ps1')
 }
+
 Describe 'profile.d/tailscale.ps1 extended scenarios' {
-    It 'Declares standard tier for Tailscale VPN helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'PowerShell.Profile.Tailscale'
+    It 'Registers tailscale network helpers and aliases' {
+        Get-Command Invoke-Tailscale -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-TailscaleStatus -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ts-status -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-Tailscale guarded by command availability checks' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-Tailscale'
-        $c | Should -Match 'Test-CachedCommand'
+
+    It 'Invoke-Tailscale warns when tailscale is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'tailscale' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('tailscale', [ref]$null)
+        }
+
+        $output = Invoke-Tailscale version 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'tailscale not found'
     }
-    It 'Registers tailscale and ts-status shorthand aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'tailscale'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'ts-status'"
+
+    It 'Preserves existing tailscale helper bodies on repeated fragment loads' {
+        $firstTailscale = Get-Command Invoke-Tailscale -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'tailscale.ps1')
+
+        (Get-Command Invoke-Tailscale -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstTailscale.ScriptBlock.ToString()
     }
 }

@@ -821,19 +821,10 @@ function View-WithBat {
 }
 
 # Register enhanced functions
-if (Get-Command -Name 'Set-AgentModeFunction' -ErrorAction SilentlyContinue) {
-    Set-AgentModeFunction -Name 'Find-WithFd' -Body ${function:Find-WithFd}
-    Set-AgentModeFunction -Name 'Grep-WithRipgrep' -Body ${function:Grep-WithRipgrep}
-    Set-AgentModeFunction -Name 'Navigate-WithZoxide' -Body ${function:Navigate-WithZoxide}
-    Set-AgentModeFunction -Name 'View-WithBat' -Body ${function:View-WithBat}
-}
-else {
-    # Fallback: direct function registration
-    Set-Item -Path Function:Find-WithFd -Value ${function:Find-WithFd} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Grep-WithRipgrep -Value ${function:Grep-WithRipgrep} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:Navigate-WithZoxide -Value ${function:Navigate-WithZoxide} -Force -ErrorAction SilentlyContinue
-    Set-Item -Path Function:View-WithBat -Value ${function:View-WithBat} -Force -ErrorAction SilentlyContinue
-}
+Set-AgentModeFunction -Name 'Find-WithFd' -Body ${function:Find-WithFd}
+Set-AgentModeFunction -Name 'Grep-WithRipgrep' -Body ${function:Grep-WithRipgrep}
+Set-AgentModeFunction -Name 'Navigate-WithZoxide' -Body ${function:Navigate-WithZoxide}
+Set-AgentModeFunction -Name 'View-WithBat' -Body ${function:View-WithBat}
 
 # Create aliases for short forms
 Set-AgentModeAlias -Name 'ffd' -Target 'Find-WithFd'

@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-open-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-open-fragment-extended.tests.ps1
+# Execution tests for open.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,26 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/open.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'open.ps1')
 }
+
 Describe 'profile.d/open.ps1 extended scenarios' {
-    It 'Declares standard tier for cross-platform open helper' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Environment: web, development'
+    It 'Registers the Open-Item helper function' {
+        $openCommand = Get-Command Open-Item -ErrorAction Stop
+        $openCommand.CommandType | Should -Be 'Function'
     }
-    It 'Defines Open-Item with xdg-open and open fallbacks on non-Windows' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'function Open-Item'
-        $c | Should -Match 'Test-CachedCommand xdg-open'
-        $c | Should -Match 'Test-CachedCommand open'
+
+    It 'Open-Item returns without throwing when no path is provided' {
+        { Open-Item } | Should -Not -Throw
     }
-    It 'Registers open alias targeting Open-Item' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'open' -Target 'Open-Item'"
+
+    It 'Preserves Open-Item on repeated fragment loads' {
+        $firstOpen = Get-Command Open-Item -ErrorAction Stop
+        . (Join-Path $script:ProfileDir 'open.ps1')
+        (Get-Command Open-Item -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstOpen.ScriptBlock.ToString()
     }
 }

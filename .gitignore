@@ -326,11 +326,8 @@ coverage.html
 .nyc_output/
 coverage/
 
-# Generated data files with coverage
-scripts/data/coverage.xml
-scripts/data/coverage/
-scripts/data/performance-baseline.json
-scripts/data/psscriptanalyzer-report.json
+# Generated runtime data (coverage, metrics, benchmarks, reports)
+scripts/data/
 
 # Ephemeral test fixtures created under scripts/ for path-resolution tests
 scripts/.test-fixtures/
@@ -391,9 +388,6 @@ scripts/**/*.csv
 # Generated command wrapper scripts
 scripts/bin/
 
-# Performance and metrics data
-scripts/data/performance-baseline.json
-scripts/data/psscriptanalyzer-report.json
 
 # =============================================================================
 # Logs and Debug Files

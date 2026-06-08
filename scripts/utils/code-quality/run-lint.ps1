@@ -120,7 +120,7 @@ foreach ($p in $paths) {
         $pathDuration = ((Get-Date) - $pathStartTime).TotalMilliseconds
         
         if ($r) {
-            $results.AddRange($r)
+            $results.AddRange(@($r))
             
             # Level 2: Path analysis timing
             if ($debugLevel -ge 2) {

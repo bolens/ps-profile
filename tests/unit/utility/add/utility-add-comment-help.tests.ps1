@@ -75,4 +75,22 @@ Describe 'add-comment-help.ps1 execution' {
             }
         }
     }
+
+    It 'Fails when the requested analysis path does not exist' {
+        $missingPath = Join-Path (New-TestTempDirectory -Prefix 'CommentHelpMissing') 'does-not-exist'
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:AddCommentHelpScript -ArgumentList @(
+                '-Path', $missingPath
+            )
+
+            $result.ExitCode | Should -Not -Be 0
+            $result.Output | Should -Match 'Path|not found|does not exist|does-not-exist'
+        }
+        finally {
+            $parent = Split-Path -Parent $missingPath
+            if (Test-Path -LiteralPath $parent) {
+                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

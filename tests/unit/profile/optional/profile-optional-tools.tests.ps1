@@ -33,7 +33,6 @@ BeforeAll {
         
         $script:NaviFragmentPath = Join-Path $script:ProfileDir 'navi.ps1'
         $script:GumFragmentPath = Join-Path $script:ProfileDir 'gum.ps1'
-        $script:OriginalTestHasCommand = Get-Command Test-HasCommand -ErrorAction SilentlyContinue
 
         function script:Set-TestNaviCaptureMock {
             $global:TestNaviCallHistory = $script:naviCallHistory
@@ -53,15 +52,6 @@ BeforeAll {
         }
         Write-Error "Failed to initialize optional tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
         throw
-    }
-}
-
-AfterAll {
-    if ($script:OriginalTestHasCommand) {
-        Set-Item -Path Function:Test-HasCommand -Value $script:OriginalTestHasCommand.ScriptBlock -Force
-    }
-    elseif (Get-Command Test-HasCommand -ErrorAction SilentlyContinue) {
-        Remove-Item -Path Function:Test-HasCommand -Force
     }
 }
 
@@ -104,12 +94,6 @@ Describe 'Profile optional tool helpers' {
             }
             if (Get-Command -Name navi -CommandType Function -ErrorAction SilentlyContinue) {
                 Remove-Item -Path Function:navi -Force
-            }
-            if ($script:OriginalTestHasCommand) {
-                Set-Item -Path Function:Test-HasCommand -Value $script:OriginalTestHasCommand.ScriptBlock -Force
-            }
-            elseif (Get-Command Test-HasCommand -ErrorAction SilentlyContinue) {
-                Remove-Item -Path Function:Test-HasCommand -Force
             }
         }
 

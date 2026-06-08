@@ -116,7 +116,7 @@ BeforeAll {
 
 ## Test Organization
 
-See [Testing Guide — Naming Conventions](../guides/TESTING.md#naming-conventions) for prefix rules (`library-*`, `profile-*`, `utility-debug-*`, etc.), integration short names, and `-extended` suffix policy.
+See [Testing Guide — Naming Conventions](../guides/TESTING.md#naming-conventions) for prefix rules (`library-*`, `profile-*`, `utility-*`, etc.), integration short names, and `-extended` suffix policy.
 
 ### Unit Tests
 

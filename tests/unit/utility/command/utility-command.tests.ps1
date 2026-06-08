@@ -34,5 +34,14 @@ Describe 'Test-CommandAvailable' {
 
             $first | Should -Be $second
         }
+
+        It 'Returns true for pwsh when PowerShell Core is installed' {
+            if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'pwsh is not installed'
+                return
+            }
+
+            Test-CommandAvailable -CommandName 'pwsh' | Should -Be $true
+        }
     }
 }

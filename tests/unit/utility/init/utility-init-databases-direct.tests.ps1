@@ -47,6 +47,37 @@ Describe 'init-databases-direct.ps1 execution' {
         }
     }
 
+    It 'Succeeds idempotently when run twice against the same cache directory' {
+        if (-not $script:SqliteAvailable) {
+            Set-ItResult -Skipped -Because 'sqlite3 is not installed'
+            return
+        }
+
+        $cacheDir = New-TestTempDirectory -Prefix 'InitDatabasesDirectIdempotent'
+        try {
+            $first = Invoke-TestScriptFile -ScriptPath $script:InitDatabasesDirectScript -EnvironmentVariables @{
+                PS_PROFILE_CACHE_DIR = $cacheDir
+            }
+            $dbCountAfterFirst = @(Get-ChildItem -LiteralPath $cacheDir -Filter '*.db' -File).Count
+
+            $second = Invoke-TestScriptFile -ScriptPath $script:InitDatabasesDirectScript -EnvironmentVariables @{
+                PS_PROFILE_CACHE_DIR = $cacheDir
+            }
+            $dbCountAfterSecond = @(Get-ChildItem -LiteralPath $cacheDir -Filter '*.db' -File).Count
+
+            $first.ExitCode | Should -Be 0
+            $second.ExitCode | Should -Be 0
+            $second.Output | Should -Match 'All databases initialized successfully'
+            $dbCountAfterSecond | Should -Be $dbCountAfterFirst
+            $dbCountAfterSecond | Should -BeGreaterOrEqual 3
+        }
+        finally {
+            if (Test-Path -LiteralPath $cacheDir) {
+                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
     It 'Reports SQLite not found when sqlite3 is unavailable on PATH' {
         if (-not $script:SqliteAvailable) {
             Set-ItResult -Skipped -Because 'sqlite3 is not installed; cannot verify missing-sqlite path'

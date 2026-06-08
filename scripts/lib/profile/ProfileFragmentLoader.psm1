@@ -847,21 +847,30 @@ function Initialize-FragmentLoading {
         }
     }
     
+    $orchestrationHandled = $false
     if ($orchestrationModule) {
         $orchestrationCmd = Get-Command -Module ProfileFragmentLoadingOrchestration Invoke-FragmentLoadingOrchestration -ErrorAction SilentlyContinue
         if ($orchestrationCmd) {
-            # Create scriptblocks for progress functions
-            $writeHeader = { Write-BatchProgressTableHeader }
-            $writeRow = { 
+            # Create scriptblocks that resolve progress helpers from ProfileFragmentLoader module scope
+            $writeHeader = {
+                $cmd = Get-Command Write-BatchProgressTableHeader -Module ProfileFragmentLoader -ErrorAction SilentlyContinue
+                if ($cmd) {
+                    & $cmd
+                }
+            }
+            $writeRow = {
                 param(
                     [int]$BatchNumber,
                     [int]$TotalBatches,
                     [int]$FragmentCount,
                     [string[]]$FragmentNames
                 )
-                Write-BatchProgressRow -BatchNumber $BatchNumber -TotalBatches $TotalBatches -FragmentCount $FragmentCount -FragmentNames $FragmentNames
+                $cmd = Get-Command Write-BatchProgressRow -Module ProfileFragmentLoader -ErrorAction SilentlyContinue
+                if ($cmd) {
+                    & $cmd -BatchNumber $BatchNumber -TotalBatches $TotalBatches -FragmentCount $FragmentCount -FragmentNames $FragmentNames
+                }
             }
-            
+
             # Call orchestration function
             # Ensure DisabledSet is not null (use empty HashSet if null)
             $disabledSetParam = if ($null -eq $DisabledSet) {
@@ -887,32 +896,34 @@ function Initialize-FragmentLoading {
                 -FragmentLoadingBatchSize $script:FragmentLoadingBatchSize `
                 -WriteBatchProgressTableHeader $writeHeader `
                 -WriteBatchProgressRow $writeRow
-            return
+            $orchestrationHandled = $true
         }
     }
-    
-    # Fallback: If orchestration module is not available, use inline implementation
-    # This maintains backward compatibility but should not normally be needed
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        Write-StructuredWarning -Message "ProfileFragmentLoadingOrchestration module not available, using fallback implementation" -OperationName 'profile-fragment-loader.orchestration' -Context @{
-            orchestration_module_path = $orchestrationModulePath
-        } -Code 'OrchestrationModuleUnavailable'
-    }
-    
-    # Fallback implementation (simplified sequential loading only)
-    foreach ($frag in $FragmentsToLoad) {
-        if ($frag.BaseName -and $DisabledSet -and $DisabledSet.Contains($frag.BaseName)) {
-            continue
+
+    if (-not $orchestrationHandled) {
+        # Fallback: If orchestration module is not available, use inline implementation
+        # This maintains backward compatibility but should not normally be needed
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "ProfileFragmentLoadingOrchestration module not available, using fallback implementation" -OperationName 'profile-fragment-loader.orchestration' -Context @{
+                orchestration_module_path = $orchestrationModulePath
+            } -Code 'OrchestrationModuleUnavailable'
         }
-        
-        try {
-            $null = . $frag.FullName
-            [void]$allSucceeded.Add($frag.BaseName)
-        }
-        catch {
-            if (-not $failedNames.Contains($frag.BaseName)) {
-                $allFailed.Add(@{ Name = $frag.BaseName; Error = $_.Exception.Message })
-                [void]$failedNames.Add($frag.BaseName)
+
+        # Fallback implementation (simplified sequential loading only)
+        foreach ($frag in $FragmentsToLoad) {
+            if ($frag.BaseName -and $DisabledSet -and $DisabledSet.Contains($frag.BaseName)) {
+                continue
+            }
+
+            try {
+                $null = . $frag.FullName
+                [void]$allSucceeded.Add($frag.BaseName)
+            }
+            catch {
+                if (-not $failedNames.Contains($frag.BaseName)) {
+                    $allFailed.Add(@{ Name = $frag.BaseName; Error = $_.Exception.Message })
+                    [void]$failedNames.Add($frag.BaseName)
+                }
             }
         }
     }

@@ -53,7 +53,13 @@ Describe 'create-release.ps1 execution' {
         $repo = New-CreateReleaseTestRepository
         try {
             $scriptPath = Join-Path $repo 'scripts' 'utils' 'release' 'create-release.ps1'
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
+            Push-Location $repo
+            try {
+                $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
+            }
+            finally {
+                Pop-Location
+            }
 
             $result.ExitCode | Should -BeIn @(0, 1, 2)
             $result.Output | Should -Match 'Analyzing commits|Breaking changes|features|fixes|DryRun|release'
@@ -82,12 +88,54 @@ Describe 'create-release.ps1 execution' {
             }
 
             $scriptPath = Join-Path $repo 'scripts' 'utils' 'release' 'create-release.ps1'
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
+            Push-Location $repo
+            try {
+                $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
+            }
+            finally {
+                Pop-Location
+            }
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Features: [1-9]'
             $result.Output | Should -Match 'Recommended version bump: minor'
             $result.Output | Should -Match 'DRY RUN'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'DryRun recommends a major version bump when breaking commits are present' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+
+        $repo = New-CreateReleaseTestRepository
+        try {
+            Push-Location $repo
+            try {
+                & git commit --allow-empty -m 'feat!: remove deprecated profile hook' -q 2>$null
+            }
+            finally {
+                Pop-Location
+            }
+
+            $scriptPath = Join-Path $repo 'scripts' 'utils' 'release' 'create-release.ps1'
+            Push-Location $repo
+            try {
+                $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Breaking changes: [1-9]'
+            $result.Output | Should -Match 'Recommended version bump: major'
         }
         finally {
             if (Test-Path -LiteralPath $repo) {

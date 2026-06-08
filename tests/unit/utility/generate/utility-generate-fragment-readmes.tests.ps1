@@ -84,11 +84,29 @@ function Get-FragmentReadmeFixture {
 }
 '@ -Encoding UTF8
 
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                git add profile.d/fixture.ps1
+                git commit -m 'init fragment readme fixture' -q
+            }
+            finally {
+                Pop-Location
+            }
+
             $scriptPath = Join-Path $docsDir 'generate-fragment-readmes.ps1'
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
-                '-Force',
-                '-OutputPath', $outputDir
-            )
+            Push-Location $repo
+            try {
+                $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+                    '-Force',
+                    '-OutputPath', $outputDir
+                )
+            }
+            finally {
+                Pop-Location
+            }
 
             $result.ExitCode | Should -Be 0
             $expectedReadme = Join-Path $outputDir 'fixture.md'

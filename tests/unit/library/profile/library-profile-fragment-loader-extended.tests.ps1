@@ -44,6 +44,33 @@ Export-ModuleMember -Function Get-ReloadProbeValue
     }
 
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
+    $script:OrchestrationModulePath = Join-Path (Split-Path $script:LoaderPath -Parent) 'ProfileFragmentLoadingOrchestration.psm1'
+    $script:OrchestrationHiddenPath = "$script:OrchestrationModulePath.test-hidden"
+}
+
+function script:Ensure-TestOrchestrationModule {
+    Remove-Module ProfileFragmentLoadingOrchestration -ErrorAction SilentlyContinue -Force
+    Import-Module $script:OrchestrationModulePath -DisableNameChecking -Force -ErrorAction Stop
+}
+
+function script:Hide-TestOrchestrationModule {
+    Remove-Module ProfileFragmentLoadingOrchestration -ErrorAction SilentlyContinue -Force
+    if (Test-Path -LiteralPath $script:OrchestrationModulePath) {
+        if (Test-Path -LiteralPath $script:OrchestrationHiddenPath) {
+            Remove-Item -LiteralPath $script:OrchestrationHiddenPath -Force -ErrorAction SilentlyContinue
+        }
+        Move-Item -LiteralPath $script:OrchestrationModulePath -Destination $script:OrchestrationHiddenPath -Force
+    }
+}
+
+function script:Restore-TestOrchestrationModule {
+    Remove-Module ProfileFragmentLoadingOrchestration -ErrorAction SilentlyContinue -Force
+    if (Test-Path -LiteralPath $script:OrchestrationHiddenPath) {
+        if (Test-Path -LiteralPath $script:OrchestrationModulePath) {
+            Remove-Item -LiteralPath $script:OrchestrationModulePath -Force -ErrorAction SilentlyContinue
+        }
+        Move-Item -LiteralPath $script:OrchestrationHiddenPath -Destination $script:OrchestrationModulePath -Force
+    }
 }
 
 function script:Enable-TestStructuredLogging {
@@ -186,6 +213,7 @@ function script:Invoke-ProfileLoaderInit {
 }
 
 AfterAll {
+    Restore-TestOrchestrationModule
     Remove-Module -Name $script:ModuleName -ErrorAction SilentlyContinue -Force
     Remove-Module -Name ProfileFragmentLoader -ErrorAction SilentlyContinue -Force
 
@@ -336,22 +364,24 @@ Describe 'ProfileFragmentLoader extended scenarios' {
         }
 
         It 'Loads multiple fragments when parallel loading is enabled' {
+            $markerA = Join-Path $script:TempDir 'parallel-a.marker'
+            $markerB = Join-Path $script:TempDir 'parallel-b.marker'
             $fixture = New-ProfileLoaderFixture `
                 -Prefix 'parallel-profile.d' `
                 -FragmentName '20-parallel-a.ps1' `
-                -FragmentBody '$global:ProfileFragmentLoaderParallelA = $true' `
+                -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
                 -AdditionalFragments @(
-                '30-parallel-b.ps1|$global:ProfileFragmentLoaderParallelB = $true'
+                "30-parallel-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8"
             )
 
             try {
-                Remove-Variable -Name ProfileFragmentLoaderParallelA, ProfileFragmentLoaderParallelB -Scope Global -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
                 { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true } | Should -Not -Throw
-                $global:ProfileFragmentLoaderParallelA | Should -Be $true
-                $global:ProfileFragmentLoaderParallelB | Should -Be $true
+                (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
+                (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
             }
             finally {
-                Remove-Variable -Name ProfileFragmentLoaderParallelA, ProfileFragmentLoaderParallelB -Scope Global -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
             }
         }
 
@@ -463,22 +493,24 @@ $global:ProfileFragmentLoaderChildProbe = ''loaded'''
         }
 
         It 'Runs dependency analysis output when parallel loading and debug are enabled' {
+            $markerA = Join-Path $script:TempDir 'dep-a.marker'
+            $markerB = Join-Path $script:TempDir 'dep-b.marker'
             $fixture = New-ProfileLoaderFixture `
                 -Prefix 'dep-debug-profile.d' `
                 -FragmentName '20-dep-a.ps1' `
-                -FragmentBody '$global:ProfileFragmentLoaderDepA = $true' `
-                -AdditionalFragments @('30-dep-b.ps1|$global:ProfileFragmentLoaderDepB = $true')
+                -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
+                -AdditionalFragments @("30-dep-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8")
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '2'
 
             try {
-                Remove-Variable -Name ProfileFragmentLoaderDepA, ProfileFragmentLoaderDepB -Scope Global -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
                 { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true } | Should -Not -Throw
-                $global:ProfileFragmentLoaderDepA | Should -Be $true
-                $global:ProfileFragmentLoaderDepB | Should -Be $true
+                (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
+                (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
             }
             finally {
-                Remove-Variable -Name ProfileFragmentLoaderDepA, ProfileFragmentLoaderDepB -Scope Global -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
                 }
@@ -494,7 +526,13 @@ $global:ProfileFragmentLoaderChildProbe = ''loaded'''
             Enable-TestStructuredLogging
             $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-warning-profile.d'
 
-            { Invoke-ProfileLoaderInit -Fixture $fixture } | Should -Not -Throw
+            Hide-TestOrchestrationModule
+            try {
+                { Invoke-ProfileLoaderInit -Fixture $fixture } | Should -Not -Throw
+            }
+            finally {
+                Restore-TestOrchestrationModule
+            }
         }
 
         It 'Survives cache pre-warming failures when sqlite helpers are available' {
@@ -564,13 +602,34 @@ function Get-ProfileLoaderProxyProbe {
             }
         }
 
+        It 'Uses Write-Warning when dependency grouping fails without structured helpers' {
+            $fixture = New-ProfileLoaderFixture -Prefix 'grouping-warning-profile.d'
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+
+            Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+            Mock Get-FragmentDependencyLevels {
+                throw 'dependency grouping warning probe'
+            } -ModuleName FragmentLoading
+
+            try {
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -DebugLevel '1' } | Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentLoading -Force -ErrorAction SilentlyContinue
+                Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+            }
+        }
+
         It 'Falls back to sequential loading when dependency grouping fails' {
             Enable-TestStructuredLogging
+            $markerA = Join-Path $script:TempDir 'group-a.marker'
+            $markerB = Join-Path $script:TempDir 'group-b.marker'
             $fixture = New-ProfileLoaderFixture `
                 -Prefix 'grouping-fail-profile.d' `
                 -FragmentName '20-group-a.ps1' `
-                -FragmentBody '$global:ProfileFragmentLoaderGroupA = $true' `
-                -AdditionalFragments @('30-group-b.ps1|$global:ProfileFragmentLoaderGroupB = $true')
+                -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
+                -AdditionalFragments @("30-group-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8")
 
             Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
             Mock Get-FragmentDependencyLevels {
@@ -578,15 +637,15 @@ function Get-ProfileLoaderProxyProbe {
             } -ModuleName FragmentLoading
 
             try {
-                Remove-Variable -Name ProfileFragmentLoaderGroupA, ProfileFragmentLoaderGroupB -Scope Global -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
                 Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -DebugLevel '1'
-                $global:ProfileFragmentLoaderGroupA | Should -Be $true
-                $global:ProfileFragmentLoaderGroupB | Should -Be $true
+                (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
+                (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
             }
             finally {
                 Remove-Module FragmentLoading -Force -ErrorAction SilentlyContinue
                 Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
-                Remove-Variable -Name ProfileFragmentLoaderGroupA, ProfileFragmentLoaderGroupB -Scope Global -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
             }
         }
 
@@ -599,6 +658,111 @@ function Get-ProfileLoaderProxyProbe {
         It 'Skips pre-registration with debug tracing when eager loading is enabled' {
             $fixture = New-ProfileLoaderFixture -Prefix 'pre-register-skip-profile.d'
             { Invoke-ProfileLoaderInit -Fixture $fixture -DebugLevel '2' } | Should -Not -Throw
+        }
+
+        It 'Records dependency parsing metadata when batch helpers are loaded' {
+            Ensure-TestOrchestrationModule
+            $extras = 2..4 | ForEach-Object { "2$($_)-dep-meta.ps1|# fragment $_" }
+            $fixture = New-ProfileLoaderFixture -Prefix 'dep-meta-profile.d' -AdditionalFragments $extras
+
+            try {
+                Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -LoadBatchLoadingSummary $true
+                $global:BatchLoadingInfo.DependencyParsingTime | Should -BeGreaterOrEqual 0
+                $global:BatchLoadingInfo.DependencyLevels | Should -BeGreaterThan 0
+            }
+            finally {
+                if ($global:BatchLoadingInfo) {
+                    $global:BatchLoadingInfo = $null
+                }
+            }
+        }
+
+        It 'Uses Write-StructuredError when bootstrap loading fails without debug output' {
+            Enable-TestStructuredLogging
+            $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-structured-profile.d'
+            $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+            Set-Content -LiteralPath $bootstrapPath -Value 'throw "bootstrap structured probe"' -Encoding UTF8
+            $bootstrap = Get-Item -LiteralPath $bootstrapPath
+            $previousErrorAction = $ErrorActionPreference
+
+            try {
+                $ErrorActionPreference = 'Continue'
+                { Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) } | Should -Not -Throw
+            }
+            finally {
+                $ErrorActionPreference = $previousErrorAction
+            }
+        }
+    }
+
+    Context 'Orchestration module integration' {
+        BeforeEach {
+            Ensure-TestOrchestrationModule
+        }
+
+        It 'Loads fragments through the orchestration module' {
+            $fixture = New-ProfileLoaderFixture `
+                -Prefix 'orchestration-load-profile.d' `
+                -FragmentBody '$global:ProfileFragmentLoaderOrchestrationProbe = $true'
+
+            try {
+                Remove-Variable -Name ProfileFragmentLoaderOrchestrationProbe -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture
+                $global:ProfileFragmentLoaderOrchestrationProbe | Should -Be $true
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderOrchestrationProbe -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Skips disabled fragments when orchestration handles loading' {
+            $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-disabled-profile.d' -FragmentBody '$global:ProfileFragmentLoaderOrchestrationDisabled = $true'
+            $disabled = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+            [void]$disabled.Add('20-loader-probe')
+
+            try {
+                Remove-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -DisabledSet $disabled
+                Get-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue |
+                    Should -BeNullOrEmpty
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Records fragment results after orchestration completes' {
+            $fixture = New-ProfileLoaderFixture `
+                -Prefix 'orchestration-summary-profile.d' `
+                -FragmentBody '$global:ProfileFragmentLoaderOrchSummary = $true'
+
+            try {
+                Remove-Variable -Name ProfileFragmentLoaderOrchSummary -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -LoadBatchLoadingSummary $true
+                $global:BatchLoadingInfo.SucceededFragments.Count | Should -BeGreaterThan 0
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderOrchSummary -Scope Global -ErrorAction SilentlyContinue
+                if ($global:BatchLoadingInfo) {
+                    $global:BatchLoadingInfo = $null
+                }
+            }
+        }
+
+        It 'Loads many fragments in batches through the orchestration module' {
+            $extras = 2..11 | ForEach-Object { "2$($_)-orch-batch.ps1|`$global:ProfileFragmentLoaderOrchBatch$_ = `$true" }
+            $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-batch-profile.d' -AdditionalFragments $extras
+
+            try {
+                { Invoke-ProfileLoaderInit -Fixture $fixture -DebugLevel '1' } | Should -Not -Throw
+                $global:ProfileFragmentLoaderOrchBatch2 | Should -Be $true
+                $global:ProfileFragmentLoaderOrchBatch11 | Should -Be $true
+            }
+            finally {
+                2..11 | ForEach-Object {
+                    Remove-Variable -Name "ProfileFragmentLoaderOrchBatch$_" -Scope Global -ErrorAction SilentlyContinue
+                }
+            }
         }
     }
 

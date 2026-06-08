@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-poetry-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-poetry-fragment-extended.tests.ps1
+# Execution tests for poetry.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/poetry.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/poetry.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by poetry availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'if \(Test-CachedCommand poetry\)'
+    It 'Registers poetry helpers when poetry is available' {
+        Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'poetry.ps1')
+
+        Get-Command Install-PoetryDependencies -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Test-PoetryOutdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command poetry-add -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Add-PoetryDependency with dev test and docs group flags' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Add-PoetryDependency'
-        $c | Should -Match '--group dev'
+
+    It 'Skips poetry helper registration when poetry is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'poetry.ps1')
+
+        Get-Command Install-PoetryDependencies -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers poetry-install and poetry-add aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'poetry-install'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'poetry-add'"
+
+    It 'Emits missing-tool warning when poetry is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('poetry', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'poetry.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'poetry not found'
     }
 }

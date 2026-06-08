@@ -97,4 +97,20 @@ Describe 'check-script-standards.ps1 execution' {
             }
         }
     }
+
+    It 'Fails parameter validation when the requested path does not exist' {
+        $missingPath = Join-Path (New-TestTempDirectory -Prefix 'ScriptStandardsMissingPath') 'does-not-exist'
+        try {
+            $result = Invoke-ScriptStandardsCheck -ScriptsPath $missingPath
+
+            $result.ExitCode | Should -Not -Be 0
+            $result.Output | Should -Match 'Path does not exist|does not exist'
+        }
+        finally {
+            $parent = Split-Path -Parent $missingPath
+            if (Test-Path -LiteralPath $parent) {
+                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

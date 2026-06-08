@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-rustup-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-rustup-fragment-extended.tests.ps1
+# Execution tests for rustup.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/rustup.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'rustup.ps1')
 }
+
 Describe 'profile.d/rustup.ps1 extended scenarios' {
-    It 'Declares standard tier for Rustup toolchain helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    It 'Registers rustup and cargo helper aliases' {
+        Get-Command Invoke-Rustup -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Update-RustupToolchain -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command rustup -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-Rustup guarded by Test-CachedCommand rustup' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'function Invoke-Rustup'
-        $c | Should -Match 'Test-CachedCommand rustup'
+
+    It 'Invoke-Rustup warns when rustup is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'rustup' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('rustup', [ref]$null)
+        }
+
+        $output = Invoke-Rustup --version 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'rustup not found'
     }
-    It 'Registers rustup alias and documents PowerShell.Profile.Rustup module' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'rustup'"
-        $c | Should -Match 'PowerShell.Profile.Rustup'
+
+    It 'Preserves existing rustup helper bodies on repeated fragment loads' {
+        $firstRustup = Get-Command Invoke-Rustup -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'rustup.ps1')
+
+        (Get-Command Invoke-Rustup -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstRustup.ScriptBlock.ToString()
     }
 }

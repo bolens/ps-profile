@@ -50,4 +50,15 @@ Describe 'setup.ps1 execution' {
         $result.Output | Should -Match 'Setting up development environment'
         $result.Output | Should -Match 'Setup Summary:'
     }
+
+    It 'Lists Pester and PSScriptAnalyzer in module check output when modules are installed' {
+        if (-not $script:DevModulesAvailable) {
+            Set-ItResult -Skipped -Because 'Pester or PSScriptAnalyzer is not installed'
+            return
+        }
+
+        $result = Invoke-DevSetupScript
+        $result.Output | Should -Match 'Pester'
+        $result.Output | Should -Match 'PSScriptAnalyzer'
+    }
 }

@@ -48,7 +48,7 @@ Describe 'CommandCache external lookup extended scenarios' {
         }
     }
 
-    Context 'Test-HasCommand' {
+    Context 'Test-CachedCommand' {
         AfterEach {
             if (Get-Command Clear-TestCommandAvailabilityStub -ErrorAction SilentlyContinue) {
                 Clear-TestCommandAvailabilityStub
@@ -56,14 +56,14 @@ Describe 'CommandCache external lookup extended scenarios' {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        It 'Delegates to Test-CachedCommand for available commands' {
+        It 'Detects available commands' {
             $commandName = "HasCommandTest_$([Guid]::NewGuid().ToString('N'))"
             try {
                 Set-TestCommandAvailabilityState -CommandName $commandName -Available $true
                 Set-Item -Path "Function:\$commandName" -Value { 'ok' } -Force
                 Clear-TestCachedCommandCache | Out-Null
 
-                Test-HasCommand -Name $commandName | Should -Be $true
+                Test-CachedCommand -Name $commandName | Should -Be $true
             }
             finally {
                 Remove-Item -Path "Function:\$commandName" -Force -ErrorAction SilentlyContinue
@@ -71,7 +71,7 @@ Describe 'CommandCache external lookup extended scenarios' {
         }
 
         It 'Returns false for commands that are not available' {
-            Test-HasCommand -Name 'totally-missing-command-xyz' | Should -Be $false
+            Test-CachedCommand -Name 'totally-missing-command-xyz' | Should -Be $false
         }
     }
 

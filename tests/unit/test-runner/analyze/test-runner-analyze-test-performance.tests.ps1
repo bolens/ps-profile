@@ -48,4 +48,79 @@ Describe 'analyze-test-performance.ps1 execution' {
         $result.Output | Should -Match 'Bogus|ValidateSet|cannot be validated'
         $result.ExitCode | Should -Not -Be 0
     }
+
+    It 'Exits successfully when no unit test paths exist in an isolated repository' {
+        $repo = New-TestTempDirectory -Prefix 'AnalyzePerfEmptyRepo'
+        try {
+            $codeQualityDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $modulesDir = Join-Path $codeQualityDir 'modules'
+            $null = New-Item -ItemType Directory -Path $modulesDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:AnalyzeTestPerformanceScript -Destination (Join-Path $codeQualityDir 'analyze-test-performance.ps1') -Force
+            Get-ChildItem -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'utils' 'code-quality' 'modules') -Filter '*.psm1' |
+                Copy-Item -Destination $modulesDir -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $result = Invoke-AnalyzeTestPerformanceScript -ArgumentList @('-Suite', 'Unit')
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'No test paths found for suite: Unit'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Analyzes a single fast unit test file in an isolated repository' {
+        $repo = New-TestTempDirectory -Prefix 'AnalyzePerfSingleTest'
+        try {
+            $codeQualityDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $modulesDir = Join-Path $codeQualityDir 'modules'
+            $unitDir = Join-Path $repo 'tests' 'unit'
+            $testFile = Join-Path $unitDir 'perf-sample.tests.ps1'
+            $null = New-Item -ItemType Directory -Path $modulesDir -Force
+            $null = New-Item -ItemType Directory -Path $unitDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:AnalyzeTestPerformanceScript -Destination (Join-Path $codeQualityDir 'analyze-test-performance.ps1') -Force
+            Get-ChildItem -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'utils' 'code-quality' 'modules') -Filter '*.psm1' |
+                Copy-Item -Destination $modulesDir -Force
+            Set-Content -LiteralPath $testFile -Value @'
+Describe 'perf sample' {
+    It 'passes quickly' { $true | Should -BeTrue }
+}
+'@ -Encoding UTF8
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+
+                $result = Invoke-AnalyzeTestPerformanceScript -ArgumentList @('-Suite', 'Unit', '-TopN', '5')
+            }
+            finally {
+                Pop-Location
+            }
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Analyzing test performance for suite: Unit'
+            $result.Output | Should -Match 'Test Performance Analysis Report|=== Summary ==='
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }

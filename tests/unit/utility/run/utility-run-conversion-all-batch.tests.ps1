@@ -97,4 +97,44 @@ exit 1
             }
         }
     }
+
+    It 'Discovers and runs all conversion sub-batches when RelativePath is omitted' {
+        $tempRepo = New-TestTempDirectory -Prefix 'ConversionAllDiscoverStub'
+        try {
+            $runnerDir = Join-Path $tempRepo 'scripts' 'utils' 'code-quality'
+            $documentDir = Join-Path $tempRepo 'tests' 'integration' 'conversion' 'document'
+            $mediaDir = Join-Path $tempRepo 'tests' 'integration' 'conversion' 'media'
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType Directory -Path $documentDir -Force
+            $null = New-Item -ItemType Directory -Path $mediaDir -Force
+            $null = New-Item -ItemType File -Path (Join-Path $documentDir 'doc-sample.tests.ps1') -Force
+            $null = New-Item -ItemType File -Path (Join-Path $mediaDir 'media-sample.tests.ps1') -Force
+
+            $stubRunner = @'
+param(
+    [string]$RelativePath,
+    [switch]$Quiet
+)
+Write-Host "Batch: $RelativePath"
+Write-Host '1P / 0F / 0S'
+exit 0
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-conversion-integration-batch.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:RunConversionAllBatchScript -ArgumentList @(
+                '-RepoRoot', $tempRepo,
+                '-Quiet'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Conversion all-batch'
+            $result.Output | Should -Match '=== document ==='
+            $result.Output | Should -Match '=== media ==='
+        }
+        finally {
+            if (Test-Path -LiteralPath $tempRepo) {
+                Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }
