@@ -1,3 +1,18 @@
+# [1.7.0](https://github.com/bolens/ps-profile/compare/v1.6.0...v1.7.0) (2026-06-08)
+
+
+### Bug Fixes
+
+* **bootstrap,conversion:** alternate command lookup and alias cleanup ([50844de](https://github.com/bolens/ps-profile/commit/50844de9d76bde01d6f5796bc48b37e1c0da4419))
+* **profile:** fix fragment loader typos and test-mode profile bypass ([100dd61](https://github.com/bolens/ps-profile/commit/100dd61b56ef965d022499740f4acd6f6c0e8803))
+
+
+### Features
+
+* **profile:** add unit/doc conversion modules, remove monolithic fragments ([967d8a3](https://github.com/bolens/ps-profile/commit/967d8a3d10994c325788fb51227b3c00ada06153))
+* **profile:** rebuild enhanced fragments as modular structure, expand docs ([5f2e08f](https://github.com/bolens/ps-profile/commit/5f2e08ffd172c69132ab1aa09c7c93e0fee6f85e))
+* **utilities:** add ISBN and regex-description utilities ([90ce144](https://github.com/bolens/ps-profile/commit/90ce14434b7c7794546c13ea3a79b8909df73d3d))
+
 # [1.6.0](https://github.com/bolens/ps-profile/compare/v1.5.0...v1.6.0) (2026-05-29)
 
 
