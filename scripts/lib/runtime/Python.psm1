@@ -1164,7 +1164,7 @@ function Get-PythonPackageInstallRecommendation {
     }
     
     $packages = $PackageNames -join ' '
-    $installCmd = $pmInfo.InstallCommand -f $packages
+    $installCmd = $pmInfo.InstallCommand.Replace('{package}', $packages)
     $flag = if ($Global) { $pmInfo.GlobalFlag } else { $pmInfo.LocalFlag }
     
     if ($flag) {

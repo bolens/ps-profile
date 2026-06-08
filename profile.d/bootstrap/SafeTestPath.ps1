@@ -46,11 +46,7 @@ function global:Test-NullSafePath {
         [Parameter(ParameterSetName = 'Path')]
         [Parameter(ParameterSetName = 'LiteralPath')]
         [ValidateSet('Container', 'Leaf', 'Any')]
-        [string]$PathType,
-        
-        [Parameter(ParameterSetName = 'Path')]
-        [Parameter(ParameterSetName = 'LiteralPath')]
-        [System.Management.Automation.ActionPreference]$ErrorAction = 'SilentlyContinue'
+        [string]$PathType
     )
     
     # Determine which path to use
@@ -87,8 +83,8 @@ function global:Test-NullSafePath {
         $testPathParams['PathType'] = $PathType
     }
     
-    $testPathParams['ErrorAction'] = $ErrorAction
-    
+    $testPathParams['ErrorAction'] = 'SilentlyContinue'
+
     # Call Test-Path
     return Test-Path @testPathParams
 }

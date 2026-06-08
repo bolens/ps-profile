@@ -68,7 +68,7 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
         }
 
         It 'Imports required modules successfully when Required is specified' {
-            $module = Import-ModuleSafely -ModulePath $script:ModuleFile -Required -ErrorAction Stop
+            $module = Import-ModuleSafely -ModulePath $script:ModuleFile -Required $true -ErrorAction Stop
 
             $module.Name | Should -Be 'ExtendedImport'
             $module.ExportedCommands.Keys | Should -Contain 'Get-ExtendedImportValue'

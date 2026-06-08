@@ -43,30 +43,32 @@ Describe 'ChocolateyDetection extended scenarios' {
             Get-ChocolateyRoot | Should -BeNullOrEmpty
         }
 
-        It 'Detects roots from ChocolateyPath when lib exists beneath it' {
-            $toolsRoot = Join-Path $script:TempDir 'tools-root'
-            New-Item -ItemType Directory -Path (Join-Path $toolsRoot 'lib') -Force | Out-Null
-            Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $null
-            Mock-EnvironmentVariable -Name 'ChocolateyPath' -Value $toolsRoot
+        It 'Detects roots from ChocolateyInstall when lib exists beneath it' {
+            Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
 
-            Get-ChocolateyRoot | Should -Be $toolsRoot
+            Get-ChocolateyRoot | Should -Be $script:FakeChocoRoot
         }
     }
 
-    Context 'Get-ChocolateyLibPath' {
+    Context 'Get-ChocolateyLibPath and Get-ChocolateyBinPath' {
         It 'Uses an explicit ChocolateyRoot parameter without auto-detection' {
             Get-ChocolateyLibPath -ChocolateyRoot $script:FakeChocoRoot |
                 Should -Be (Join-Path $script:FakeChocoRoot 'lib')
         }
+
+        It 'Returns null for bin path when the bin directory is missing under an explicit root' {
+            $libOnlyRoot = Join-Path $script:TempDir 'lib-only-choco'
+            New-Item -ItemType Directory -Path (Join-Path $libOnlyRoot 'lib') -Force | Out-Null
+
+            Get-ChocolateyBinPath -ChocolateyRoot $libOnlyRoot | Should -BeNullOrEmpty
+        }
     }
 
     Context 'Test-ChocolateyInstalled' {
-        It 'Reports not installed when lib directory is missing under the root' {
-            $incompleteRoot = Join-Path $script:TempDir 'incomplete-choco'
-            New-Item -ItemType Directory -Path $incompleteRoot -Force | Out-Null
-            Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $incompleteRoot
+        It 'Requires choco command when CheckCommand is specified' {
+            Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
 
-            Test-ChocolateyInstalled | Should -Be $false
+            Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
     }
 }

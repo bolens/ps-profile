@@ -538,6 +538,9 @@ function Setup-CapturingCommandMock {
 
     [void]$global:TestRegisteredMockCommands.Add($CommandName)
 
+    Remove-Item -Path "Alias:\$CommandName" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "Alias:\global:$CommandName" -Force -ErrorAction SilentlyContinue
+
     $global:TestCommandCaptureState = @{
         ExitCode = $ExitCode
         Output   = $Output

@@ -55,5 +55,34 @@ Describe 'TestRetry extended scenarios' {
             $script:attemptCounter | Should -Be 1
             $result.FailedCount | Should -Be 2
         }
+
+        It 'Retries failed test counts when RetryOnFailure is enabled' {
+            $script:attemptCounter = 0
+
+            $result = Invoke-TestWithRetry -ScriptBlock {
+                $script:attemptCounter++
+                if ($script:attemptCounter -lt 2) {
+                    return @{ PassedCount = 0; FailedCount = 1 }
+                }
+
+                return @{ PassedCount = 2; FailedCount = 0 }
+            } -MaxRetries 2 -RetryOnFailure -RetryDelaySeconds 0 -WarningAction SilentlyContinue
+
+            $script:attemptCounter | Should -Be 2
+            $result.FailedCount | Should -Be 0
+        }
+
+        It 'Does not retry beyond MaxRetries zero' {
+            $script:attemptCounter = 0
+
+            {
+                Invoke-TestWithRetry -ScriptBlock {
+                    $script:attemptCounter++
+                    throw 'single attempt failure'
+                } -MaxRetries 0 -RetryDelaySeconds 0 -WarningAction SilentlyContinue
+            } | Should -Throw '*single attempt failure*'
+
+            $script:attemptCounter | Should -Be 1
+        }
     }
 }

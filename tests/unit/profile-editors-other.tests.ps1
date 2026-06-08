@@ -14,6 +14,11 @@ function global:Reset-TestEditorCommandAvailability {
     Clear-TestCachedCommandCache | Out-Null
 
     foreach ($command in $managedEditorCommands) {
+        if (Get-Command Set-TestCommandAvailabilityState -ErrorAction SilentlyContinue) {
+            Set-TestCommandAvailabilityState -CommandName $command -Available $false
+            continue
+        }
+
         Remove-Item -Path "Function:\$command" -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "Function:\global:$command" -Force -ErrorAction SilentlyContinue
 
