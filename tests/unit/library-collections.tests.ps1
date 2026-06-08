@@ -49,55 +49,14 @@ AfterAll {
     Remove-Module Collections -ErrorAction SilentlyContinue -Force
 }
 
-function global:Install-TestReflectionWrappers {
-    $mockReflectionPath = Join-Path $PSScriptRoot '..\TestSupport\Mocking\MockReflection.psm1'
-    if (Test-Path -LiteralPath $mockReflectionPath) {
-        Import-Module $mockReflectionPath -DisableNameChecking -ErrorAction Stop -Force -Global
-    }
-
-    $functionsToExport = @('Invoke-MakeGenericTypeWrapper', 'Invoke-CreateInstanceWrapper', 'Invoke-TypeConstructorWrapper')
-    foreach ($funcName in $functionsToExport) {
-        $moduleFunc = Get-Command $funcName -ErrorAction SilentlyContinue -All | Where-Object { $_.Source -eq 'MockReflection' } | Select-Object -First 1
-        if ($moduleFunc) {
-            Set-Item -Path "Function:\global:$funcName" -Value $moduleFunc.ScriptBlock -Force -ErrorAction SilentlyContinue
-        }
-        elseif (-not (Get-Command $funcName -ErrorAction SilentlyContinue -Scope Global)) {
-            switch ($funcName) {
-                'Invoke-MakeGenericTypeWrapper' {
-                    function global:Invoke-MakeGenericTypeWrapper {
-                        param([type]$GenericTypeDefinition, [type[]]$TypeArguments)
-                        return $GenericTypeDefinition.MakeGenericType($TypeArguments)
-                    }
-                }
-                'Invoke-CreateInstanceWrapper' {
-                    function global:Invoke-CreateInstanceWrapper {
-                        param([type]$Type)
-                        return [System.Activator]::CreateInstance($Type)
-                    }
-                }
-                'Invoke-TypeConstructorWrapper' {
-                    function global:Invoke-TypeConstructorWrapper {
-                        param([type]$Type)
-                        return $Type::new()
-                    }
-                }
-            }
-        }
-    }
-}
-
 function global:Reset-TestCollectionsModule {
-    Install-TestReflectionWrappers
     Remove-Module Collections -ErrorAction SilentlyContinue -Force
     Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
 }
 
 Describe 'Collections Module Functions' {
     BeforeAll {
-        # Ensure wrapper functions are available for all tests
-        Install-TestReflectionWrappers
-
-        # Verify wrapper functions work by testing them
+        # Verify wrapper functions from TestSupport are available
         try {
             $testListType = [System.Collections.Generic.List`1].MakeGenericType([object])
             $testResult = Invoke-CreateInstanceWrapper -Type $testListType
@@ -511,7 +470,6 @@ Describe 'Collections Module Functions' {
     Context 'Error Path Testing with TestSupport Stubs' {
         AfterAll {
             Reset-TestCollectionsModule
-            Remove-Module MockReflection -ErrorAction SilentlyContinue -Force
         }
 
         It 'New-ObjectList handles MakeGenericType returning null' {

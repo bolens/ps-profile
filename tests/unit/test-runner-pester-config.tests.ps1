@@ -229,5 +229,33 @@ Describe 'PesterConfig Module Tests' {
 
             $config.Filter.ExcludeTag.Value | Should -Contain 'Slow'
         }
+
+        It 'Parses multiple TestName patterns separated by or' {
+            $config = New-PesterConfiguration
+
+            $config = Set-PesterTestFilters -Config $config -TestName 'PatternOne or PatternTwo'
+
+            @($config.Filter.FullName.Value) | Should -Contain 'PatternOne'
+            @($config.Filter.FullName.Value) | Should -Contain 'PatternTwo'
+        }
+
+        It 'Parses comma and semicolon separated TestName patterns' {
+            $config = New-PesterConfiguration
+
+            $config = Set-PesterTestFilters -Config $config -TestName 'Alpha, Beta; Gamma'
+
+            @($config.Filter.FullName.Value) | Should -Contain 'Alpha'
+            @($config.Filter.FullName.Value) | Should -Contain 'Beta'
+            @($config.Filter.FullName.Value) | Should -Contain 'Gamma'
+        }
+    }
+
+    Context 'Set-PesterExecutionOptions extended' {
+        It 'Configures SkipRemainingOnFailure' {
+            $config = New-PesterConfiguration
+            $config = Set-PesterExecutionOptions -Config $config -SkipRemainingOnFailure
+
+            $config.Run.SkipRemainingOnFailure.Value | Should -Be 'Block'
+        }
     }
 }

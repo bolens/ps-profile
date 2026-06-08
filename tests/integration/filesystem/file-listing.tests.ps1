@@ -18,8 +18,8 @@ Describe 'File Listing Functions Integration Tests' {
         $null = . $listingModule
 
         # Avoid eza --git / bat in tests (can hang or block on large repos / TTY).
-        Mock-CommandAvailabilityPester -CommandName 'eza' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'bat' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'eza' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'bat' -Available $false
     }
 
     Context 'File listing functions' {

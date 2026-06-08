@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for security tools fragment (security-tools.ps1).
@@ -47,12 +51,14 @@ Describe 'Security Tools Integration Tests' {
 
     Context 'GitLeaks helpers (Invoke-GitLeaksScan)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'gitleaks' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'gitleaks' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('gitleaks')
+            Set-TestCommandAvailabilityState -CommandName 'gitleaks' -Available $true
             Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
             Remove-Item Alias:\gitleaks-scan -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'security-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                'gitleaks-scan' = 'Invoke-GitLeaksScan'
+            }
         }
 
         It 'Creates Invoke-GitLeaksScan function' {
@@ -79,7 +85,9 @@ Describe 'Security Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('gitleaks', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'gitleaks' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('gitleaks')
+            Set-TestCommandAvailabilityState -CommandName 'gitleaks' -Available $false
+            Set-Alias -Name gitleaks-scan -Value Invoke-GitLeaksScan -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = gitleaks-scan -RepositoryPath (Get-Location).Path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'gitleaks not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gitleaks'
@@ -88,12 +96,14 @@ Describe 'Security Tools Integration Tests' {
 
     Context 'TruffleHog helpers (Invoke-TruffleHogScan)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'trufflehog' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'trufflehog' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('trufflehog')
+            Set-TestCommandAvailabilityState -CommandName 'trufflehog' -Available $true
             Remove-Item Function:\Invoke-TruffleHogScan -ErrorAction SilentlyContinue
             Remove-Item Alias:\trufflehog-scan -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'security-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                'trufflehog-scan' = 'Invoke-TruffleHogScan'
+            }
         }
 
         It 'Creates Invoke-TruffleHogScan function' {
@@ -120,7 +130,9 @@ Describe 'Security Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('trufflehog', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'trufflehog' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('trufflehog')
+            Set-TestCommandAvailabilityState -CommandName 'trufflehog' -Available $false
+            Set-Alias -Name trufflehog-scan -Value Invoke-TruffleHogScan -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = trufflehog-scan -Path (Get-Location).Path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'trufflehog not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'trufflehog'
@@ -129,12 +141,14 @@ Describe 'Security Tools Integration Tests' {
 
     Context 'OSV-Scanner helpers (Invoke-OSVScan)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'osv-scanner' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'osv-scanner' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('osv-scanner')
+            Set-TestCommandAvailabilityState -CommandName 'osv-scanner' -Available $true
             Remove-Item Function:\Invoke-OSVScan -ErrorAction SilentlyContinue
             Remove-Item Alias:\osv-scan -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'security-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                'osv-scan' = 'Invoke-OSVScan'
+            }
         }
 
         It 'Creates Invoke-OSVScan function' {
@@ -161,7 +175,9 @@ Describe 'Security Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('osv-scanner', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'osv-scanner' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('osv-scanner')
+            Set-TestCommandAvailabilityState -CommandName 'osv-scanner' -Available $false
+            Set-Alias -Name osv-scan -Value Invoke-OSVScan -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = osv-scan -Path (Get-Location).Path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'osv-scanner not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'osv-scanner'
@@ -170,12 +186,14 @@ Describe 'Security Tools Integration Tests' {
 
     Context 'YARA helpers (Invoke-YaraScan)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'yara' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'yara' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('yara')
+            Set-TestCommandAvailabilityState -CommandName 'yara' -Available $true
             Remove-Item Function:\Invoke-YaraScan -ErrorAction SilentlyContinue
             Remove-Item Alias:\yara-scan -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'security-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                'yara-scan' = 'Invoke-YaraScan'
+            }
         }
 
         It 'Creates Invoke-YaraScan function' {
@@ -202,7 +220,9 @@ Describe 'Security Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('yara', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'yara' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('yara')
+            Set-TestCommandAvailabilityState -CommandName 'yara' -Available $false
+            Set-Alias -Name yara-scan -Value Invoke-YaraScan -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = yara-scan -File (Get-Location).Path -Rules (Get-Location).Path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'yara not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'yara'
@@ -211,12 +231,14 @@ Describe 'Security Tools Integration Tests' {
 
     Context 'ClamAV helpers (Invoke-ClamAVScan)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'clamscan' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'clamscan' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('clamscan')
+            Set-TestCommandAvailabilityState -CommandName 'clamscan' -Available $true
             Remove-Item Function:\Invoke-ClamAVScan -ErrorAction SilentlyContinue
             Remove-Item Alias:\clamav-scan -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'security-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                'clamav-scan' = 'Invoke-ClamAVScan'
+            }
         }
 
         It 'Creates Invoke-ClamAVScan function' {
@@ -243,7 +265,9 @@ Describe 'Security Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('clamscan', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'clamscan' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('clamscan')
+            Set-TestCommandAvailabilityState -CommandName 'clamscan' -Available $false
+            Set-Alias -Name clamav-scan -Value Invoke-ClamAVScan -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = clamav-scan -Path (Get-Location).Path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern '(clamav|clamscan) not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'clamav'
@@ -252,12 +276,16 @@ Describe 'Security Tools Integration Tests' {
 
     Context 'Dangerzone helpers (Invoke-DangerzoneConvert)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'dangerzone' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'dangerzone' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('dangerzone')
+            Set-TestCommandAvailabilityState -CommandName 'dangerzone' -Available $true
             Remove-Item Function:\Invoke-DangerzoneConvert -ErrorAction SilentlyContinue
             Remove-Item Alias:\dangerzone -ErrorAction SilentlyContinue
+            Remove-Item Alias:\dangerzone-convert -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'security-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                dangerzone           = 'Invoke-DangerzoneConvert'
+                'dangerzone-convert' = 'Invoke-DangerzoneConvert'
+            }
         }
 
         It 'Creates Invoke-DangerzoneConvert function' {
@@ -288,7 +316,9 @@ Describe 'Security Tools Integration Tests' {
             if (Get-Command Clear-CommandCache -ErrorAction SilentlyContinue) {
                 Clear-CommandCache -CommandName 'dangerzone' -ErrorAction SilentlyContinue
             }
-            Mock-CommandAvailabilityPester -CommandName 'dangerzone' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('dangerzone')
+            Set-TestCommandAvailabilityState -CommandName 'dangerzone' -Available $false
+            Set-Alias -Name dangerzone -Value Invoke-DangerzoneConvert -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = dangerzone -InputPath (Get-Location).Path -OutputPath (Get-Location).Path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'dangerzone not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'dangerzone'
@@ -317,7 +347,7 @@ Describe 'Security Tools Integration Tests' {
             $afterFunction = Get-Command Invoke-GitLeaksScan -ErrorAction SilentlyContinue
             $afterFunction | Should -Not -BeNullOrEmpty -Because "Function should still exist after reload"
             # Function should still be callable with tool unavailable (idempotency)
-            Mock-CommandAvailabilityPester -CommandName 'gitleaks' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'gitleaks' -Available $false
             { Invoke-GitLeaksScan -RepositoryPath (Get-Location).Path -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }

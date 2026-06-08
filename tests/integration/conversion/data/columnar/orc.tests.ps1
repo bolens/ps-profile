@@ -18,18 +18,8 @@ Describe 'Apache ORC Format Conversion Tests' {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
-        # Check for Python availability
-        $script:PythonAvailable = $false
-        if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {
-            try {
-                $pythonPath = Get-PythonPath
-                if ($pythonPath) {
-                    $script:PythonAvailable = $true
-                }
-            }
-            catch {
-                $script:PythonAvailable = $false
-            }
+                foreach ($entry in (Get-ConversionPythonTestContext -ProfileDir $script:ProfileDir).GetEnumerator()) {
+            Set-Variable -Scope Script -Name $entry.Key -Value $entry.Value
         }
     }
 

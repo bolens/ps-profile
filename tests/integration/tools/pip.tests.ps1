@@ -45,9 +45,12 @@ Describe 'pip Tools Integration Tests' {
 
     Context 'pip helpers (pip.ps1)' {
         BeforeAll {
-            # Mock pip as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'pip' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'pip' -Available $true
             . (Join-Path $script:ProfileDir 'pip.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-PipOutdated function' {
@@ -60,17 +63,13 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Test-PipOutdated calls pip list --outdated' {
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list' -and $args -contains '--outdated') {
-                    Write-Output 'Package    Version  Latest'
-                    Write-Output 'package1  1.0.0    1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pip' -Output @(
+                'Package    Version  Latest'
+                'package1  1.0.0    1.2.0'
+            )
 
             Test-PipOutdated
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-PipOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,40 +83,19 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Update-PipPackages calls pip list --outdated and upgrades packages' {
-            $mockFreezeOutput = @('package1==1.0.0', 'package2==2.0.0')
-            $script:callCount = 0
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $script:callCount++
-                $args = $ArgumentList
-                if ($args -contains 'freeze') {
-                    $mockFreezeOutput | ForEach-Object { Write-Output $_ }
-                }
-                elseif ($args -contains 'list' -and $args -contains '--outdated') {
-                    Write-Output 'Package    Version  Latest'
-                    Write-Output 'package1  1.0.0    1.2.0'
-                }
-                elseif ($args -contains 'install' -and $args -contains '--upgrade') {
-                    Write-Output "Upgraded $($args[-1])"
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pip' -Output @(
+                'Package    Version  Latest'
+                'package1  1.0.0    1.2.0'
+                'Upgraded package1'
+            )
 
             Get-Command Update-PipPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             { Update-PipPackages | Out-Null } | Should -Not -Throw
-            $script:callCount | Should -BeGreaterOrEqual 2
+            $global:TestCommandInvocationCaptures.Count | Should -BeGreaterOrEqual 2
         }
 
         It 'Update-PipPackages handles empty package list gracefully' {
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'freeze') {
-                    Write-Output @()
-                }
-                elseif ($args -contains 'list' -and $args -contains '--outdated') {
-                    Write-Output @('Package    Version  Latest')
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pip'
 
             $output = Update-PipPackages 6>&1 | Out-String
             $output | Should -Match 'No packages found to upgrade'
@@ -133,16 +111,10 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Update-PipSelf calls pip install --upgrade pip' {
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install' -and $args -contains '--upgrade' -and $args -contains 'pip') {
-                    Write-Output 'pip updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'pip updated successfully'
 
             Update-PipSelf
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-PipSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -156,35 +128,21 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Export-PipPackages calls pip freeze' {
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'requests==2.31.0'
-                Write-Output 'pandas==2.0.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output @(
+                'requests==2.31.0'
+                'pandas==2.0.0'
+            )
             { Export-PipPackages -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'freeze'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'freeze'
         }
 
         It 'Export-PipPackages with User passes --user flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'requests==2.31.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'requests==2.31.0'
             { Export-PipPackages -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -User -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'freeze'
-                $script:capturedArgs | Should -Contain '--user'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'freeze'
+                Assert-TestCommandInvocationContains '--user'
         }
 
         It 'Creates Import-PipPackages function' {
@@ -199,43 +157,23 @@ Describe 'pip Tools Integration Tests' {
         It 'Import-PipPackages calls pip install -r' {
             $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Packages installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Packages installed successfully'
             { Import-PipPackages -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '-r'
-                $script:capturedArgs | Should -Contain $testFile
-            }
-
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '-r'
+                Assert-TestCommandInvocationContains $testFile
             Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
 
         It 'Import-PipPackages with User passes --user flag' {
             $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Packages installed'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Packages installed'
             { Import-PipPackages -Path $testFile -User -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '--user'
-            }
-
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '--user'
             Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
 
@@ -264,36 +202,20 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Install-PipPackage calls pip install with packages' {
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Package installed successfully'
             { Install-PipPackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain 'requests'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains 'requests'
         }
 
         It 'Install-PipPackage with User passes --user flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Package installed successfully'
             { Install-PipPackage requests -User -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '--user'
-                $script:capturedArgs | Should -Contain 'requests'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '--user'
+                Assert-TestCommandInvocationContains 'requests'
         }
 
         It 'Creates Remove-PipPackage function' {
@@ -311,48 +233,26 @@ Describe 'pip Tools Integration Tests' {
         }
 
         It 'Remove-PipPackage calls pip uninstall with packages' {
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package uninstalled successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Package uninstalled successfully'
             { Remove-PipPackage requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'uninstall'
-                $script:capturedArgs | Should -Contain 'requests'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'uninstall'
+                Assert-TestCommandInvocationContains 'requests'
         }
 
         It 'Remove-PipPackage with User passes --user flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package uninstalled successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Package uninstalled successfully'
             { Remove-PipPackage requests -User -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'uninstall'
-                $script:capturedArgs | Should -Contain '--user'
-                $script:capturedArgs | Should -Contain 'requests'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'uninstall'
+                Assert-TestCommandInvocationContains '--user'
+                Assert-TestCommandInvocationContains 'requests'
         }
 
         It 'Import-PipPackages handles missing file gracefully' {
-            $script:capturedArgs = $null
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages installed'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Packages installed'
             { Import-PipPackages -Path (Get-TestArtifactPath -FileName 'nonexistent.txt') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 0 -Exactly
+            $global:TestCommandInvocationCaptures.Count | Should -Be 0
         }
     }
 
@@ -378,7 +278,7 @@ Describe 'pip Tools Integration Tests' {
             Remove-Item Function:pip -ErrorAction SilentlyContinue
             Remove-Item Function:global:pip -ErrorAction SilentlyContinue
 
-            Mock-CommandAvailabilityPester -CommandName 'pip' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pip' -Available $false
             $script:MissingPipOutput = & { . (Join-Path $script:ProfileDir 'pip.ps1') } 2>&1 3>&1 | Out-String
         }
 
@@ -405,7 +305,7 @@ Describe 'pip Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('pip', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'pip' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pip' -Available $false
 
             $output = Install-PipPackage requests 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pip not found'

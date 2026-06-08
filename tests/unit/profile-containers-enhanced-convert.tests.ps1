@@ -38,7 +38,7 @@ Describe 'containers-enhanced.ps1 - Convert-ComposeToK8s' {
 
     Context 'Compose file validation' {
         It 'Returns error when compose file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'kompose'
+            Set-TestCommandAvailabilityState -CommandName 'kompose'
             $missingFile = Join-Path (New-TestTempDirectory -Prefix 'KomposeMissing') 'nonexistent.yml'
 
             { Convert-ComposeToK8s -ComposeFile $missingFile -ErrorAction Stop } | Should -Throw

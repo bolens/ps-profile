@@ -2,6 +2,8 @@
 
 This guide demonstrates how to write tests following the project's standardized patterns, including test structure, TestSupport usage, and best practices.
 
+> **See also:** [Testing Guide](../guides/TESTING.md) (canonical reference for running tests and runner flags), [Test Stub Guide](../guides/TEST_VERIFICATION_MOCKING_GUIDE.md) (stub APIs), [Coverage Verification](../guides/VERIFY_COVERAGE.md). Full index: [Related Testing Documentation](../guides/TESTING.md#related-testing-documentation).
+
 ## Overview
 
 Tests in this project follow these patterns:
@@ -10,7 +12,7 @@ Tests in this project follow these patterns:
 - **Pester 5.0+** - Modern Pester syntax with `Should` assertions
 - **Test Structure** - `BeforeAll`, `AfterAll`, `BeforeEach`, `AfterEach` blocks
 - **Path Resolution** - Use `Get-TestRepoRoot` and `Get-TestPath` for paths
-- **Mocking** - Use TestSupport mocking framework for external dependencies
+- **Stubs** - Use TestSupport stubs for external commands, network, and environment state
 
 ## Basic Test Structure
 
@@ -188,49 +190,40 @@ Describe 'Module Loading Integration' {
 }
 ```
 
-## Mocking
+## Stubs (External Dependencies)
 
-### Mocking Commands
+### Command availability and capture
 
 ```powershell
 BeforeAll {
-    # Load TestSupport (includes mocking framework)
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
 }
 
 Describe 'Function with External Command' {
     Context 'When command is available' {
         It 'Executes command successfully' {
-            # Mock the command
-            Mock Test-CachedCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $true }
-            Mock docker -MockWith { "Docker version 20.10.0" }
+            Setup-CapturingCommandMock -CommandName 'docker' -Output 'Docker version 20.10.0'
 
-            # Test the function
             $result = Invoke-Docker ps
 
-            # Verify
-            Should -Invoke docker -Exactly -Times 1
+            Assert-TestCommandInvokedExactlyOnce
             $result | Should -Not -BeNullOrEmpty
         }
     }
 
     Context 'When command is not available' {
         It 'Shows warning message' {
-            # Mock command as unavailable
-            Mock Test-CachedCommand -ParameterFilter { $Name -eq 'docker' } -MockWith { $false }
-            Mock Write-MissingToolWarning -MockWith { }
+            Mark-TestCommandsUnavailable -CommandNames 'docker'
 
-            # Test the function
-            Invoke-Docker ps
-
-            # Verify warning was shown
-            Should -Invoke Write-MissingToolWarning -Exactly -Times 1
+            { Invoke-Docker ps } | Should -Not -Throw
         }
     }
 }
 ```
 
-### Mocking File System
+See `docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md` for network, environment, and argument-capture patterns.
+
+### File system (real temp paths)
 
 ```powershell
 BeforeAll {
@@ -389,3 +382,16 @@ When writing tests:
 - Use `BeforeEach` for test-specific setup
 - Always verify function/module availability before testing
 - Tests should run in any order (no dependencies between tests)
+
+## Related Testing Documentation
+
+| Guide | Purpose |
+| ----- | ------- |
+| [Testing Guide](../guides/TESTING.md) | **Primary** — structure, running tests, runner flags, batch scripts |
+| [Testing Patterns](../examples/TESTING_PATTERNS.md) | This doc — code examples for writing tests |
+| [Test Stub Guide](../guides/TEST_VERIFICATION_MOCKING_GUIDE.md) | TestSupport stubs, command capture, environment isolation |
+| [Coverage Verification](../guides/VERIFY_COVERAGE.md) | `analyze-coverage.ps1` per-module verification |
+| [Development Guide](../guides/DEVELOPMENT.md) | Setup, workflow, advanced runner features |
+| [Tool Requirements](../guides/TOOL_REQUIREMENTS.md) | Required and optional tools for test suites |
+| [Examples Index](README.md#testing-patterns) | All code examples |
+| [Contributing](../../CONTRIBUTING.md) | Validation workflow before commits |

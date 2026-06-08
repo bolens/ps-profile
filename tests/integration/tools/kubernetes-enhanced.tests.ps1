@@ -79,7 +79,7 @@ Describe 'kubernetes-enhanced.ps1 - Graceful Degradation' {
         }
 
         foreach ($cmd in @('kubectx', 'kubectl', 'kubens', 'stern', 'minikube', 'k9s')) {
-            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
         }
     }
 
@@ -146,9 +146,10 @@ Describe 'kubernetes-enhanced.ps1 - Graceful Degradation' {
     }
     
     It 'Apply-KubeManifests handles missing tool gracefully' {
-        Mock Test-Path -MockWith { return $true }
+        $manifestDir = Join-Path $TestDrive 'manifests'
+        New-Item -ItemType Directory -Path $manifestDir -Force | Out-Null
         $output = & {
-            Apply-KubeManifests -Path 'manifests/' -ErrorAction SilentlyContinue
+            Apply-KubeManifests -Path $manifestDir -ErrorAction SilentlyContinue
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'

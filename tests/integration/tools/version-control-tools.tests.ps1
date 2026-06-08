@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for version control tool fragments (gh).
@@ -41,11 +45,13 @@ Describe 'Version Control Tools Integration Tests' {
 
     Context 'GitHub CLI helpers (gh.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'gh' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'gh' } -MockWith { $null }
-            # Mock gh command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('gh')
+            Set-TestCommandAvailabilityState -CommandName 'gh' -Available $true
             . (Join-Path $script:ProfileDir 'gh.ps1')
+            Register-TestFragmentAliases @{
+                'gh-open' = 'Open-GitHubRepository'
+                'gh-pr'   = 'Invoke-GitHubPullRequest'
+            }
         }
 
         It 'Creates Open-GitHubRepository function' {
@@ -61,7 +67,9 @@ Describe 'Version Control Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('gh', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('gh')
+            Set-TestCommandAvailabilityState -CommandName 'gh' -Available $false
+            Set-Alias -Name gh-open -Value Open-GitHubRepository -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = gh-open 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'gh not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gh'

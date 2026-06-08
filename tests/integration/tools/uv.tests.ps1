@@ -45,10 +45,13 @@ Describe 'uv Tools Integration Tests' {
 
     Context 'uv helpers (uv.ps1)' {
         BeforeAll {
-            # Mock uv as available so functions are created
-            # Mock-CommandAvailabilityPester handles Test-CachedCommand mocking internally
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true
+            # Set-TestCommandAvailabilityState handles Test-CachedCommand mocking internally
+            Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
             . (Join-Path $script:ProfileDir 'uv.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-Pip function' {
@@ -67,20 +70,12 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Invoke-Pip calls uv pip with arguments' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Package installed successfully'
             { Invoke-Pip install requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'pip'
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain 'requests'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'pip'
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains 'requests'
         }
 
         It 'Creates Invoke-UVRun function' {
@@ -93,19 +88,11 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Invoke-UVRun calls uv run with command and args' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Command executed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Command executed successfully'
             { Invoke-UVRun -Command 'python' -Args @('--version') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'run'
-                $script:capturedArgs | Should -Contain 'python'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'run'
+                Assert-TestCommandInvocationContains 'python'
         }
 
         It 'Creates Install-UVTool function' {
@@ -118,20 +105,12 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Install-UVTool calls uv tool install with package' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Tool installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Tool installed successfully'
             { Install-UVTool -Package 'black' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'tool'
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain 'black'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'tool'
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains 'black'
         }
 
         It 'Creates New-UVVenv function' {
@@ -144,35 +123,19 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'New-UVVenv calls uv venv with path' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Virtual environment created successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Virtual environment created successfully'
             { New-UVVenv -Path '.venv' -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'venv'
-                $script:capturedArgs | Should -Contain '.venv'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'venv'
+                Assert-TestCommandInvocationContains '.venv'
         }
 
         It 'New-UVVenv uses default path when not specified' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Virtual environment created successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Virtual environment created successfully'
             { New-UVVenv -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'venv'
-                $script:capturedArgs | Should -Contain '.venv'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'venv'
+                Assert-TestCommandInvocationContains '.venv'
         }
 
         It 'Creates Update-UVOutdatedPackages function' {
@@ -185,40 +148,19 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Update-UVOutdatedPackages calls uv pip list --outdated and upgrades packages' {
-            $mockFreezeOutput = @('package1==1.0.0', 'package2==2.0.0', 'package3==3.0.0')
-            $script:uvCallCount = 0
-            Mock -CommandName uv -MockWith {
-                param([string[]]$ArgumentList)
-                $script:uvCallCount++
-                $args = $ArgumentList
-                if ($args -contains 'pip' -and $args -contains 'freeze') {
-                    $mockFreezeOutput | ForEach-Object { Write-Output $_ }
-                }
-                elseif ($args -contains 'pip' -and $args -contains 'list' -and $args -contains '--outdated') {
-                    Write-Output 'Package    Version  Latest'
-                    Write-Output 'package1   1.0.0    1.1.0'
-                }
-                elseif ($args -contains 'pip' -and $args -contains 'install' -and $args -contains '--upgrade') {
-                    Write-Output "Upgraded $($args[-1])"
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'uv' -Output @(
+                'Package    Version  Latest'
+                'package1   1.0.0    1.1.0'
+                'Upgraded package1'
+            )
 
             Get-Command Update-UVOutdatedPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             { Update-UVOutdatedPackages | Out-Null } | Should -Not -Throw
-            $script:uvCallCount | Should -BeGreaterOrEqual 2
+            $global:TestCommandInvocationCaptures.Count | Should -BeGreaterOrEqual 2
         }
 
         It 'Update-UVOutdatedPackages handles empty package list gracefully' {
-            Mock -CommandName uv -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'pip' -and $args -contains 'freeze') {
-                    Write-Output @()
-                }
-                elseif ($args -contains 'pip' -and $args -contains 'list' -and $args -contains '--outdated') {
-                    Write-Output @('Package    Version  Latest')
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'uv'
 
             $output = Update-UVOutdatedPackages 6>&1 | Out-String
             $output | Should -Match 'No packages found to upgrade'
@@ -234,29 +176,13 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Update-UVTools calls uv tool upgrade --all' {
-            $wasCalled = $false
-            Mock -CommandName uv -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'tool' -and $args -contains 'upgrade' -and $args -contains '--all') {
-                    $script:wasCalled = $true
-                    Write-Output 'All tools upgraded successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'All tools upgraded successfully'
 
             { Update-UVTools -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            # If the mock was called, verify it was called with correct arguments
-            if ($wasCalled) {
-                Should -Invoke uv -ParameterFilter {
-                    $ArgumentList -contains 'tool' -and
-                    $ArgumentList -contains 'upgrade' -and
-                    $ArgumentList -contains '--all'
-                } -Times 1 -Exactly
-            }
-            else {
-                # If mock wasn't called, the function should still exist and be callable
-                Get-Command Update-UVTools -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            }
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'tool'
+            Assert-TestCommandInvocationContains 'upgrade'
+            Assert-TestCommandInvocationContains '--all'
         }
 
         It 'Creates Invoke-UVTool function' {
@@ -275,20 +201,12 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Invoke-UVTool calls uv tool run with arguments' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Tool executed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Tool executed successfully'
             { Invoke-UVTool black --version -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'tool'
-                $script:capturedArgs | Should -Contain 'run'
-                $script:capturedArgs | Should -Contain 'black'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'tool'
+                Assert-TestCommandInvocationContains 'run'
+                Assert-TestCommandInvocationContains 'black'
         }
 
         It 'Creates Add-UVDependency function' {
@@ -301,19 +219,11 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Add-UVDependency calls uv add with arguments' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Dependency added successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Dependency added successfully'
             { Add-UVDependency requests -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'add'
-                $script:capturedArgs | Should -Contain 'requests'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'add'
+                Assert-TestCommandInvocationContains 'requests'
         }
 
         It 'Creates Sync-UVDependencies function' {
@@ -326,18 +236,10 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'Sync-UVDependencies calls uv sync with arguments' {
-            $script:capturedArgs = $null
-            Mock -CommandName uv -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Dependencies synced successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'uv' -Output 'Dependencies synced successfully'
             { Sync-UVDependencies -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'uv' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'sync'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'sync'
         }
     }
 
@@ -365,7 +267,7 @@ Describe 'uv Tools Integration Tests' {
         }
 
         It 'uv fragment handles missing tool gracefully and recommends installation' {
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'uv' -Available $false
             $output = & { . (Join-Path $script:ProfileDir 'uv.ps1') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'uv not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'uv'

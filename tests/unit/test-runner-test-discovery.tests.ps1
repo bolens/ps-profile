@@ -191,4 +191,99 @@ Describe 'TestDiscovery Module Tests' {
             $result | Should -Contain $expectedFallback
         }
     }
+
+    Context 'Get-ShuffledTestPaths' {
+        It 'Returns a single path unchanged' {
+            $path = Join-Path $script:TestRepoRoot 'tests/unit/library-common.tests.ps1'
+            $result = Get-ShuffledTestPaths -TestPaths @($path)
+
+            $result | Should -Be @($path)
+        }
+
+        It 'Returns all paths without duplicates' {
+            $paths = @(
+                (Join-Path $script:TestRepoRoot 'tests/unit/a.tests.ps1'),
+                (Join-Path $script:TestRepoRoot 'tests/unit/b.tests.ps1'),
+                (Join-Path $script:TestRepoRoot 'tests/unit/c.tests.ps1')
+            )
+
+            $result = Get-ShuffledTestPaths -TestPaths $paths
+
+            $result.Count | Should -Be 3
+            @($result | Sort-Object) | Should -Be @($paths | Sort-Object)
+        }
+
+        It 'Can produce a different order across multiple shuffles' {
+            $paths = 1..8 | ForEach-Object { Join-Path $script:TestRepoRoot "tests/unit/file-$_.tests.ps1" }
+            $orders = [System.Collections.Generic.HashSet[string]]::new()
+
+            1..20 | ForEach-Object {
+                $shuffled = Get-ShuffledTestPaths -TestPaths $paths
+                $null = $orders.Add(($shuffled -join '|'))
+            }
+
+            $orders.Count | Should -BeGreaterThan 1
+        }
+    }
+
+    Context 'Filter-TestPaths' {
+        It 'Expands directories and excludes test-runner test files' {
+            $unitDir = Join-Path $script:TestRepoRoot 'tests/unit'
+            $result = Filter-TestPaths -TestPaths @($unitDir) -TestRunnerScriptPath $null
+
+            $result.Count | Should -BeGreaterThan 0
+            ($result | ForEach-Object { Split-Path -Leaf $_ }) | Should -Not -Contain 'test-runner-run-pester.tests.ps1'
+        }
+
+        It 'Allows explicit test-runner file when it is the only path' {
+            $runnerTest = Join-Path $script:TestRepoRoot 'tests/unit/test-runner-run-pester.tests.ps1'
+            if (-not (Test-Path -LiteralPath $runnerTest)) {
+                Set-ItResult -Skipped -Because 'test-runner-run-pester.tests.ps1 not found'
+                return
+            }
+
+            $result = Filter-TestPaths -TestPaths @($runnerTest) -TestRunnerScriptPath $null
+            $result | Should -Contain $runnerTest
+        }
+
+        It 'Excludes the test runner script path itself' {
+            $unitDir = Join-Path $script:TestRepoRoot 'tests/unit'
+            $runnerScript = Join-Path $script:TestRepoRoot 'scripts/utils/code-quality/run-pester.ps1'
+            $result = Filter-TestPaths -TestPaths @($unitDir, $runnerScript) -TestRunnerScriptPath $runnerScript
+
+            $result | Should -Not -Contain $runnerScript
+        }
+
+        It 'Skips paths that do not exist' {
+            $validFile = Join-Path $script:TestRepoRoot 'tests/unit/library-common.tests.ps1'
+            $result = Filter-TestPaths -TestPaths @('nonexistent-path-xyz', $validFile) -TestRunnerScriptPath $null
+
+            $result | Should -Contain $validFile
+            $result | Should -Not -Contain 'nonexistent-path-xyz'
+        }
+    }
+
+    Context 'Write-TestDiscoveryInfo' {
+        It 'Emits suite discovery output when no TestFile override is provided' {
+            $paths = @(
+                (Join-Path $script:TestRepoRoot 'tests/unit'),
+                (Join-Path $script:TestRepoRoot 'tests/integration')
+            )
+            $output = Write-TestDiscoveryInfo -TestPaths $paths -Suite 'All' -TestFile ''
+            @($output | ForEach-Object { "$_" }) -join ' ' | Should -Match 'all suites'
+        }
+
+        It 'Emits a warning when TestFile overrides suite selection' {
+            $testFile = Join-Path $script:TestRepoRoot 'tests/unit/library-common.tests.ps1'
+            if (-not (Test-Path -LiteralPath $testFile)) {
+                Set-ItResult -Skipped -Because 'library-common.tests.ps1 not found'
+                return
+            }
+
+            $output = Write-TestDiscoveryInfo -TestPaths @($testFile) -Suite 'Unit' -TestFile $testFile *>&1 |
+                ForEach-Object { "$_" }
+
+            ($output -join ' ') | Should -Match 'overriding Suite'
+        }
+    }
 }

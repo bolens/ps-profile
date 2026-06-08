@@ -45,9 +45,12 @@ Describe 'Mojo Tools Integration Tests' {
 
     Context 'Mojo helpers (mojo.ps1)' {
         BeforeAll {
-            # Mock mojo as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'mojo' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'mojo' -Available $true
             . (Join-Path $script:ProfileDir 'mojo.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-MojoRun function' {
@@ -78,16 +81,10 @@ Describe 'Mojo Tools Integration Tests' {
         }
 
         It 'Update-MojoSelf calls mojo update' {
-            Mock -CommandName mojo -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Mojo updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mojo' -Output 'Mojo updated successfully'
 
             Update-MojoSelf
-            Should -Invoke -CommandName 'mojo' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-MojoSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -108,7 +105,7 @@ Describe 'Mojo Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'mojo' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'mojo' -Available $false
             $script:MissingMojoOutput = & { . (Join-Path $script:ProfileDir 'mojo.ps1') } 2>&1 3>&1 | Out-String
         }
 

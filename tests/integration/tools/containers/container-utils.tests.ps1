@@ -1,7 +1,10 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\..\TestSupport.ps1')
+}
+
 Describe "Container Utils Module" {
     BeforeAll {
         try {
-            # Load the bootstrap fragment first
             $bootstrapFragment = Get-TestPath "profile.d\bootstrap.ps1" -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $bootstrapFragment -or [string]::IsNullOrWhiteSpace($bootstrapFragment)) {
                 throw "BootstrapFragment is null or empty"
@@ -11,7 +14,6 @@ Describe "Container Utils Module" {
             }
             . $bootstrapFragment
 
-            # Load the container utils fragment directly
             $containerUtilsFragment = Get-TestPath "profile.d\containers.ps1" -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $containerUtilsFragment -or [string]::IsNullOrWhiteSpace($containerUtilsFragment)) {
                 throw "ContainerUtilsFragment is null or empty"
@@ -34,27 +36,17 @@ Describe "Container Utils Module" {
 
     Context "Test-ContainerEngine" {
         BeforeEach {
-            # Clear cached container engine info between tests
-            if (Get-Variable -Name '__ContainerEngineInfo' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEngineInfo' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            # Clear environment preference
+            Set-Variable -Name '__ContainerEngineInfo' -Scope Script -Value $null -Force -ErrorAction SilentlyContinue
             Remove-Item Env:\CONTAINER_ENGINE_PREFERENCE -ErrorAction SilentlyContinue
-            # Clear any cached command detection
-            if (Get-Variable -Name '__CommandCache' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__CommandCache' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
+            Set-Variable -Name '__CommandCache' -Scope Script -Value $null -Force -ErrorAction SilentlyContinue
         }
 
         It "Should return container engine info when docker is available" {
-            # Mock command availability using standardized framework
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $true -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-
-            # Mock docker command to simulate compose subcommand success
-            Mock -CommandName 'docker' {
-                $global:LASTEXITCODE = 0
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker = $true
+                podman = $false
             }
+            Setup-CapturingCommandMock -CommandName 'docker' -ExitCode 0
 
             $result = Test-ContainerEngine
 
@@ -64,17 +56,13 @@ Describe "Container Utils Module" {
         }
 
         It "Should return container engine info when podman is available" {
-            # Mock command availability using standardized framework
-            # Must mock docker-compose and podman-compose too
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $true -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
-
-            # Mock podman command to simulate compose subcommand success
-            Mock -CommandName 'podman' {
-                $global:LASTEXITCODE = 0
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker           = $false
+                'docker-compose' = $false
+                podman           = $true
+                'podman-compose' = $false
             }
+            Setup-CapturingCommandMock -CommandName 'podman' -ExitCode 0
 
             $result = Test-ContainerEngine
 
@@ -86,14 +74,11 @@ Describe "Container Utils Module" {
         It "Should respect environment preference for docker" {
             $env:CONTAINER_ENGINE_PREFERENCE = 'docker'
 
-            # Mock both commands as available
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $true -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $true -Scope It
-
-            # Mock docker command to simulate compose subcommand success
-            Mock -CommandName 'docker' {
-                $global:LASTEXITCODE = 0
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker = $true
+                podman = $true
             }
+            Setup-CapturingCommandMock -CommandName 'docker' -ExitCode 0
 
             $result = Test-ContainerEngine
 
@@ -101,21 +86,17 @@ Describe "Container Utils Module" {
             $result.Engine | Should -Be 'docker'
             $result.Preferred | Should -Be 'docker'
 
-            # Clean up
             Remove-Item Env:\CONTAINER_ENGINE_PREFERENCE -ErrorAction SilentlyContinue
         }
 
         It "Should respect environment preference for podman" {
             $env:CONTAINER_ENGINE_PREFERENCE = 'podman'
 
-            # Mock both commands as available
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $true -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $true -Scope It
-
-            # Mock podman command to simulate compose subcommand success
-            Mock -CommandName 'podman' {
-                $global:LASTEXITCODE = 0
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker = $true
+                podman = $true
             }
+            Setup-CapturingCommandMock -CommandName 'podman' -ExitCode 0
 
             $result = Test-ContainerEngine
 
@@ -123,17 +104,11 @@ Describe "Container Utils Module" {
             $result.Engine | Should -Be 'podman'
             $result.Preferred | Should -Be 'podman'
 
-            # Clean up
             Remove-Item Env:\CONTAINER_ENGINE_PREFERENCE -ErrorAction SilentlyContinue
         }
 
         It "Should handle no container engines available" {
-            # Mock both commands as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            # Also mock docker-compose and podman-compose as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
+            Initialize-ContainerEngineUnavailableMocks
 
             $result = Test-ContainerEngine
 
@@ -145,27 +120,14 @@ Describe "Container Utils Module" {
 
     Context "Get-ContainerEnginePreference" {
         BeforeEach {
-            # Clear cached container engine info between tests
-            if (Get-Variable -Name '__ContainerEngineInfo' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEngineInfo' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
-            # Clear environment preference
+            Set-Variable -Name '__ContainerEngineInfo' -Scope Script -Value $null -Force -ErrorAction SilentlyContinue
+            Set-Variable -Name '__ContainerEnginePreference' -Scope Script -Value $null -Force -ErrorAction SilentlyContinue
             Remove-Item Env:\CONTAINER_ENGINE_PREFERENCE -ErrorAction SilentlyContinue
-            # Clear any cached command detection
-            if (Get-Variable -Name '__CommandCache' -Scope Script -ErrorAction SilentlyContinue) {
-                Remove-Variable -Name '__CommandCache' -Scope Script -Force -ErrorAction SilentlyContinue
-            }
+            Set-Variable -Name '__CommandCache' -Scope Script -Value $null -Force -ErrorAction SilentlyContinue
         }
 
         It "Returns container engine preference object with all required fields" {
-            # Mock all container commands as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false -Scope It
+            Initialize-ContainerEngineUnavailableMocks
             
             $result = Get-ContainerEnginePreference
             $result | Should -BeOfType [hashtable]
@@ -190,18 +152,13 @@ Describe "Container Utils Module" {
         }
 
         It "Detects docker availability correctly" {
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $true
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false
-
-            # Mock docker compose version check
-            Mock -CommandName docker -MockWith { 
-                if ($args[0] -eq 'compose' -and $args[1] -eq 'version') {
-                    $global:LASTEXITCODE = 0
-                    return "Docker Compose version 2.0.0"
-                }
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker           = $true
+                'docker-compose' = $false
+                podman           = $false
+                'podman-compose' = $false
             }
+            Set-TestContainerComposeVersionMock -Engine docker
             
             $result = Get-ContainerEnginePreference
             $result.DockerAvailable | Should -Be $true
@@ -209,18 +166,13 @@ Describe "Container Utils Module" {
         }
 
         It "Detects podman availability correctly" {
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $true
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false
-
-            # Mock podman compose version check
-            Mock -CommandName podman -MockWith { 
-                if ($args[0] -eq 'compose' -and $args[1] -eq 'version') {
-                    $global:LASTEXITCODE = 0
-                    return "Podman Compose version 1.0.0"
-                }
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker           = $false
+                'docker-compose' = $false
+                podman           = $true
+                'podman-compose' = $false
             }
+            Set-TestContainerComposeVersionMock -Engine podman
             
             $result = Get-ContainerEnginePreference
             $result.PodmanAvailable | Should -Be $true
@@ -228,10 +180,12 @@ Describe "Container Utils Module" {
         }
 
         It "Handles docker-compose standalone command" {
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $true
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $false
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker           = $false
+                'docker-compose' = $true
+                podman           = $false
+                'podman-compose' = $false
+            }
 
             $result = Get-ContainerEnginePreference
             $result.DockerComposeAvailable | Should -Be $true
@@ -239,10 +193,12 @@ Describe "Container Utils Module" {
         }
 
         It "Handles podman-compose standalone command" {
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'docker-compose' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'podman-compose' -Available $true
+            Initialize-ContainerEngineAvailabilityMocks -Availability @{
+                docker           = $false
+                'docker-compose' = $false
+                podman           = $false
+                'podman-compose' = $true
+            }
 
             $result = Get-ContainerEnginePreference
             $result.PodmanComposeAvailable | Should -Be $true
@@ -257,7 +213,6 @@ Describe "Container Utils Module" {
 
             $env:CONTAINER_ENGINE_PREFERENCE | Should -Be 'docker'
 
-            # Clean up
             Remove-Item Env:\CONTAINER_ENGINE_PREFERENCE -ErrorAction SilentlyContinue
         }
 
@@ -266,7 +221,6 @@ Describe "Container Utils Module" {
 
             $env:CONTAINER_ENGINE_PREFERENCE | Should -Be 'podman'
 
-            # Clean up
             Remove-Item Env:\CONTAINER_ENGINE_PREFERENCE -ErrorAction SilentlyContinue
         }
 
@@ -275,4 +229,3 @@ Describe "Container Utils Module" {
         }
     }
 }
-

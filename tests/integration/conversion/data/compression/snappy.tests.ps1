@@ -20,19 +20,9 @@ Describe 'Snappy Compression Tests' {
         
         # Check if native tools are available
         $script:SnappyAvailable = (Get-Command snappy -ErrorAction SilentlyContinue) -ne $null
-        
-        # Check if Python is available for Snappy fallback
-        $script:PythonAvailable = $false
-        if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {
-            try {
-                $pythonPath = Get-PythonPath
-                if ($pythonPath) {
-                    $script:PythonAvailable = $true
-                }
-            }
-            catch {
-                $script:PythonAvailable = $false
-            }
+
+                foreach ($entry in (Get-ConversionPythonTestContext -ProfileDir $script:ProfileDir).GetEnumerator()) {
+            Set-Variable -Scope Script -Name $entry.Key -Value $entry.Value
         }
     }
 

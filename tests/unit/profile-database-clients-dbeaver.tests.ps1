@@ -39,7 +39,7 @@ Describe 'database-clients.ps1 - Start-DBeaver' {
 
     Context 'Tool available' {
         It 'Starts dbeaver without workspace' {
-            Setup-AvailableCommandMock -CommandName 'dbeaver'
+            Set-TestCommandAvailabilityState -CommandName 'dbeaver'
 
             $result = Start-DBeaver
 
@@ -49,7 +49,7 @@ Describe 'database-clients.ps1 - Start-DBeaver' {
         }
 
         It 'Starts dbeaver with workspace directory' {
-            Setup-AvailableCommandMock -CommandName 'dbeaver'
+            Set-TestCommandAvailabilityState -CommandName 'dbeaver'
 
             $result = Start-DBeaver -Workspace $script:TestWorkspace
 
@@ -60,14 +60,14 @@ Describe 'database-clients.ps1 - Start-DBeaver' {
         }
 
         It 'Returns error when workspace directory does not exist' {
-            Setup-AvailableCommandMock -CommandName 'dbeaver'
+            Set-TestCommandAvailabilityState -CommandName 'dbeaver'
             $missingWorkspace = Join-Path (New-TestTempDirectory -Prefix 'DBeaverMissingParent') 'nonexistent-workspace'
 
             { Start-DBeaver -Workspace $missingWorkspace -ErrorAction Stop } | Should -Throw '*Workspace directory not found*'
         }
 
         It 'Handles process start errors' {
-            Setup-AvailableCommandMock -CommandName 'dbeaver'
+            Set-TestCommandAvailabilityState -CommandName 'dbeaver'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Start-DBeaver -ErrorAction Stop } | Should -Throw '*Access denied*'

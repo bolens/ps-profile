@@ -40,7 +40,7 @@ Describe 'database-clients.ps1 - Start-SqlWorkbench' {
 
     Context 'Tool available' {
         It 'Starts sql-workbench without workspace' {
-            Setup-AvailableCommandMock -CommandName 'sql-workbench'
+            Set-TestCommandAvailabilityState -CommandName 'sql-workbench'
 
             $result = Start-SqlWorkbench
 
@@ -50,7 +50,7 @@ Describe 'database-clients.ps1 - Start-SqlWorkbench' {
         }
 
         It 'Starts sql-workbench with workspace file' {
-            Setup-AvailableCommandMock -CommandName 'sql-workbench'
+            Set-TestCommandAvailabilityState -CommandName 'sql-workbench'
 
             $result = Start-SqlWorkbench -Workspace $script:TestWorkspace
 
@@ -60,14 +60,14 @@ Describe 'database-clients.ps1 - Start-SqlWorkbench' {
         }
 
         It 'Returns error when workspace file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'sql-workbench'
+            Set-TestCommandAvailabilityState -CommandName 'sql-workbench'
             $missingWorkspace = Join-Path (New-TestTempDirectory -Prefix 'SqlWorkbenchMissing') 'workspace.xml'
 
             { Start-SqlWorkbench -Workspace $missingWorkspace -ErrorAction Stop } | Should -Throw '*Workspace file not found*'
         }
 
         It 'Handles process start errors' {
-            Setup-AvailableCommandMock -CommandName 'sql-workbench'
+            Set-TestCommandAvailabilityState -CommandName 'sql-workbench'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Start-SqlWorkbench -ErrorAction Stop } | Should -Throw '*Access denied*'

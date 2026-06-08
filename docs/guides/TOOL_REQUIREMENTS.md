@@ -2,6 +2,8 @@
 
 This document lists all tools and packages required or recommended for running the PowerShell profile test suite.
 
+> **See also:** [Testing Guide](TESTING.md) (running tests), [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) (stubbing unavailable tools), [Testing Patterns](../examples/TESTING_PATTERNS.md). Full index: [Related Testing Documentation](TESTING.md#related-testing-documentation).
+
 ## Overview
 
 The test suite uses a tool detection framework (`TestSupport/ToolDetection.ps1`) to gracefully handle missing tools. Tests will skip with clear messages when optional tools are missing, and provide installation recommendations.
@@ -280,16 +282,18 @@ It 'Tests docker functionality' {
 }
 ```
 
-### Pattern 2: Using Mock-CommandAvailabilityPester
+### Pattern 2: Using Set-TestCommandAvailabilityState
 
 ```powershell
 It 'Tests function when tool is unavailable' {
-    Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
+    Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
 
     # Test that function handles missing tool gracefully
     { Get-DockerInfo } | Should -Not -Throw
 }
 ```
+
+For several tools at once, use `Mark-TestCommandsUnavailable -CommandNames @('docker', 'podman')`.
 
 ### Pattern 3: Using Package Helpers
 
@@ -370,3 +374,15 @@ Tests gracefully skip when tools are missing, so the test suite will always run 
 ### Test Skipping Unexpectedly
 
 Check the skip message - it will indicate which tool/package is missing and how to install it.
+
+## Related Testing Documentation
+
+| Guide | Purpose |
+| ----- | ------- |
+| [Testing Guide](TESTING.md) | **Primary** — structure, running tests, runner flags |
+| [Tool Requirements](TOOL_REQUIREMENTS.md) | This doc — required and optional test tools |
+| [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | Stub tools that are unavailable on your system |
+| [Testing Patterns](../examples/TESTING_PATTERNS.md) | Code examples including tool-skip patterns |
+| [Coverage Verification](VERIFY_COVERAGE.md) | `analyze-coverage.ps1` workflows |
+| [Development Guide](DEVELOPMENT.md) | Setup, workflow, advanced runner features |
+| [Contributing](../../CONTRIBUTING.md) | Validation workflow before commits |

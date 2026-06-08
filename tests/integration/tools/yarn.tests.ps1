@@ -45,11 +45,22 @@ Describe 'Yarn Tools Integration Tests' {
 
     Context 'Yarn helpers (yarn.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'yarn' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'yarn' } -MockWith { $null }
-            # Mock yarn command before loading fragment - make available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'yarn' -Available $true
+            Mark-TestCommandsUnavailable -CommandNames @('yarn')
+            Set-TestCommandAvailabilityState -CommandName 'yarn' -Available $true
             . (Join-Path $script:ProfileDir 'yarn.ps1')
+            Register-TestFragmentAliases @{
+                yarn                = 'Invoke-Yarn'
+                'yarn-add'          = 'Add-YarnPackage'
+                'yarn-install'      = 'Install-YarnDependencies'
+                'yarn-outdated'     = 'Test-YarnOutdated'
+                'yarn-upgrade'      = 'Update-YarnPackages'
+                'yarn-global-upgrade' = 'Update-YarnGlobalPackages'
+                'yarn-update'       = 'Update-YarnSelf'
+            }
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-Yarn function' {
@@ -89,17 +100,13 @@ Describe 'Yarn Tools Integration Tests' {
         }
 
         It 'Test-YarnOutdated calls yarn outdated' {
-            Mock -CommandName yarn -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'outdated') {
-                    Write-Output 'Package    Current  Wanted  Latest'
-                    Write-Output 'package1  1.0.0    1.1.0   1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'yarn' -Output @(
+                'Package    Current  Wanted  Latest'
+                'package1  1.0.0    1.1.0   1.2.0'
+            )
 
             Test-YarnOutdated
-            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-YarnOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -113,16 +120,10 @@ Describe 'Yarn Tools Integration Tests' {
         }
 
         It 'Update-YarnPackages calls yarn upgrade' {
-            Mock -CommandName yarn -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'upgrade') {
-                    Write-Output 'Packages upgraded successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'yarn' -Output 'Packages upgraded successfully'
 
             Update-YarnPackages
-            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-YarnPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -136,16 +137,10 @@ Describe 'Yarn Tools Integration Tests' {
         }
 
         It 'Update-YarnGlobalPackages calls yarn global upgrade' {
-            Mock -CommandName yarn -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'global' -and $args -contains 'upgrade') {
-                    Write-Output 'Global packages upgraded successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'yarn' -Output 'Global packages upgraded successfully'
 
             Update-YarnGlobalPackages
-            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-YarnGlobalPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -159,16 +154,10 @@ Describe 'Yarn Tools Integration Tests' {
         }
 
         It 'Update-YarnSelf calls yarn set version latest' {
-            Mock -CommandName yarn -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'set' -and $args -contains 'version' -and $args -contains 'latest') {
-                    Write-Output 'Yarn updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'yarn' -Output 'Yarn updated successfully'
 
             Update-YarnSelf
-            Should -Invoke -CommandName 'yarn' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-YarnSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -180,7 +169,7 @@ Describe 'Yarn Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'yarn' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'yarn' -Available $false
 
             $output = Invoke-Yarn --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'yarn not found'
@@ -195,7 +184,7 @@ Describe 'Yarn Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'yarn' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'yarn' -Available $false
 
             $output = Add-YarnPackage 'lodash' 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'yarn not found'

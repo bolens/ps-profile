@@ -508,8 +508,7 @@ try {
             }
         }
         
-        # Preserve array type when a single terminal is detected (PowerShell unwraps one-element arrays)
-        return ,@($terminals)
+        return [object[]]($terminals)
     }
 
     # Register functions

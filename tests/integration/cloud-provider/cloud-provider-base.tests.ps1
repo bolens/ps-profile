@@ -47,13 +47,7 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
                 Clear-EventCollection | Out-Null
             }
             
-            # Stub command (Pester cannot mock the call operator)
-            Mock-CommandAvailabilityPester -CommandName 'test-cloud-cmd' -Available $true
-
-            function test-cloud-cmd {
-                $script:LASTEXITCODE = 0
-                return '{"test":"value"}'
-            }
+            Setup-CapturingCommandMock -CommandName 'test-cloud-cmd' -ExitCode 0 -Output '{"test":"value"}'
             
             $result = Invoke-CloudCommand -CommandName 'test-cloud-cmd' -Arguments @('test', 'arg')
             
@@ -70,7 +64,8 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
     Context 'Provider-Specific Usage Patterns' {
         It 'Supports AWS-style service/action pattern' {
             # Verifies Get-CloudResources handles missing aws CLI without throwing
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('aws')
+            Set-TestCommandAvailabilityState -CommandName 'aws' -Available $false
             $result = Get-CloudResources -CommandName 'aws' -Service 's3' -Action 'list-buckets' -ErrorAction SilentlyContinue
             # When aws is not available, result should be null/empty (graceful degradation)
             $result | Should -BeNullOrEmpty
@@ -78,7 +73,8 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
         
         It 'Supports Azure-style direct arguments pattern' {
             # Verifies Get-CloudResources handles missing az CLI without throwing
-            Mock-CommandAvailabilityPester -CommandName 'az' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('az')
+            Set-TestCommandAvailabilityState -CommandName 'az' -Available $false
             $result = Get-CloudResources -CommandName 'az' -Arguments @('account', 'show') -ErrorAction SilentlyContinue
             # When az is not available, result should be null/empty (graceful degradation)
             $result | Should -BeNullOrEmpty
@@ -126,12 +122,7 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
             }
             
             try {
-                Mock-CommandAvailabilityPester -CommandName 'test-cmd' -Available $true
-
-                function test-cmd {
-                    $script:LASTEXITCODE = 0
-                    return 'test output'
-                }
+                Setup-CapturingCommandMock -CommandName 'test-cmd' -ExitCode 0 -Output 'test output'
                 
                 $result = Invoke-CloudCommand -CommandName 'test-cmd' -Arguments @('test') -ErrorAction SilentlyContinue
                 

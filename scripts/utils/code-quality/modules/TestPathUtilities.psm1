@@ -175,9 +175,39 @@ function Filter-TestPaths {
     return $filteredPaths | Select-Object -Unique | Sort-Object
 }
 
+<#
+.SYNOPSIS
+    Returns test paths in randomized execution order.
+
+.DESCRIPTION
+    Shuffles the provided test file paths using Get-Random. Pester 5 does not
+    expose a built-in randomization option, so the runner randomizes file order
+    before execution when -Randomize is specified.
+
+.PARAMETER TestPaths
+    Array of test file paths to shuffle.
+
+.OUTPUTS
+    System.String[] - Shuffled test paths
+#>
+function Get-ShuffledTestPaths {
+    param(
+        [Parameter(Mandatory)]
+        [string[]]$TestPaths
+    )
+
+    $uniquePaths = @($TestPaths | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    if ($uniquePaths.Count -le 1) {
+        return $uniquePaths
+    }
+
+    return @($uniquePaths | Get-Random -Count $uniquePaths.Count)
+}
+
 Export-ModuleMember -Function @(
     'Test-TestPaths',
     'Write-TestDiscoveryInfo',
-    'Filter-TestPaths'
+    'Filter-TestPaths',
+    'Get-ShuffledTestPaths'
 )
 

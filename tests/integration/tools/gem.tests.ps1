@@ -45,9 +45,12 @@ Describe 'gem Tools Integration Tests' {
 
     Context 'gem helpers (gem.ps1)' {
         BeforeAll {
-            # Mock gem as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'gem' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'gem' -Available $true
             . (Join-Path $script:ProfileDir 'gem.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-GemOutdated function' {
@@ -60,16 +63,10 @@ Describe 'gem Tools Integration Tests' {
         }
 
         It 'Test-GemOutdated calls gem outdated' {
-            Mock -CommandName gem -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'outdated') {
-                    Write-Output 'package1 (1.0.0 < 1.2.0)'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'gem' -Output 'package1 (1.0.0 < 1.2.0)'
 
             Test-GemOutdated
-            Should -Invoke -CommandName 'gem' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-GemOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -83,16 +80,10 @@ Describe 'gem Tools Integration Tests' {
         }
 
         It 'Update-GemPackages calls gem update' {
-            Mock -CommandName gem -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'gem' -Output 'Packages updated successfully'
 
             Update-GemPackages
-            Should -Invoke -CommandName 'gem' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-GemPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -106,16 +97,10 @@ Describe 'gem Tools Integration Tests' {
         }
 
         It 'Update-GemSelf calls gem update --system' {
-            Mock -CommandName gem -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args -contains '--system') {
-                    Write-Output 'RubyGems updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'gem' -Output 'RubyGems updated successfully'
 
             Update-GemSelf
-            Should -Invoke -CommandName 'gem' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-GemSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -134,7 +119,7 @@ Describe 'gem unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'gem' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'gem' -Available $false
             . (Join-Path $script:ProfileDir 'gem.ps1')
             Get-Command Install-GemPackage -ErrorAction SilentlyContinue
         }
@@ -148,7 +133,7 @@ Describe 'gem unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'gem' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'gem' -Available $false
             . (Join-Path $script:ProfileDir 'gem.ps1')
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'gem not found'

@@ -38,7 +38,7 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
         }
 
         It 'Returns error when path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'osv-scanner'
+            Set-TestCommandAvailabilityState -CommandName 'osv-scanner'
 
             $result = Invoke-OSVScan -Path (Join-Path $script:TestRoot 'Missing') -ErrorAction SilentlyContinue
 
@@ -103,7 +103,7 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
         }
 
         It 'Validates OutputFormat parameter' {
-            Setup-AvailableCommandMock -CommandName 'osv-scanner'
+            Set-TestCommandAvailabilityState -CommandName 'osv-scanner'
 
             { Invoke-OSVScan -Path $script:TestRepoPath -OutputFormat 'invalid' -ErrorAction Stop } | Should -Throw
         }
@@ -132,7 +132,7 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
         }
 
         It 'Handles osv-scanner path not found' {
-            Setup-AvailableCommandMock -CommandName 'osv-scanner'
+            Set-TestCommandAvailabilityState -CommandName 'osv-scanner'
 
             $result = Invoke-OSVScan -Path (Join-Path $script:TestRoot 'Missing') -ErrorAction SilentlyContinue
 

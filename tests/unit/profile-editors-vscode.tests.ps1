@@ -54,7 +54,7 @@ Describe 'editors.ps1 - VS Code Functions' {
         }
 
         It 'Calls code-insiders when available' {
-            Setup-AvailableCommandMock -CommandName 'code-insiders'
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders'
 
             Edit-WithVSCode -Path $script:TestEditorPath -ErrorAction SilentlyContinue
 
@@ -64,7 +64,7 @@ Describe 'editors.ps1 - VS Code Functions' {
         }
 
         It 'Falls back to code when code-insiders not available' {
-            Setup-AvailableCommandMock -CommandName 'code'
+            Set-TestCommandAvailabilityState -CommandName 'code'
             Mark-TestCommandsUnavailable -CommandNames 'code-insiders'
 
             Edit-WithVSCode -Path $script:TestEditorPath -ErrorAction SilentlyContinue
@@ -74,7 +74,7 @@ Describe 'editors.ps1 - VS Code Functions' {
         }
 
         It 'Falls back to codium when code-insiders and code not available' {
-            Setup-AvailableCommandMock -CommandName 'codium'
+            Set-TestCommandAvailabilityState -CommandName 'codium'
             Mark-TestCommandsUnavailable -CommandNames @('code-insiders', 'code')
 
             Edit-WithVSCode -Path $script:TestEditorPath -ErrorAction SilentlyContinue
@@ -84,7 +84,7 @@ Describe 'editors.ps1 - VS Code Functions' {
         }
 
         It 'Calls VS Code with new window flag when provided' {
-            Setup-AvailableCommandMock -CommandName 'code-insiders'
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders'
 
             Edit-WithVSCode -Path $script:TestEditorPath -NewWindow -ErrorAction SilentlyContinue
 
@@ -93,7 +93,7 @@ Describe 'editors.ps1 - VS Code Functions' {
         }
 
         It 'Calls VS Code with wait flag when provided' {
-            Setup-AvailableCommandMock -CommandName 'code-insiders'
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders'
 
             Edit-WithVSCode -Path $script:TestEditorPath -Wait -ErrorAction SilentlyContinue
 
@@ -104,7 +104,7 @@ Describe 'editors.ps1 - VS Code Functions' {
         }
 
         It 'Handles VS Code exit code when Wait is used' {
-            Setup-AvailableCommandMock -CommandName 'code-insiders'
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders'
 
             Edit-WithVSCode -Path $script:TestEditorPath -Wait -ErrorAction SilentlyContinue
 
@@ -113,14 +113,14 @@ Describe 'editors.ps1 - VS Code Functions' {
         }
 
         It 'Handles Start-Process errors gracefully' {
-            Setup-AvailableCommandMock -CommandName 'code-insiders'
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders'
             Set-TestStartProcessFailure -Message 'Process start failed'
 
             { Edit-WithVSCode -Path $script:TestEditorPath -ErrorAction Stop } | Should -Throw '*Process start failed*'
         }
 
         It 'Returns null when path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'code-insiders'
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders'
             $missingPath = Join-Path (New-TestTempDirectory -Prefix 'VSCodeMissingPath') 'nonexistent'
 
             $result = Edit-WithVSCode -Path $missingPath -ErrorAction SilentlyContinue

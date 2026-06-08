@@ -96,7 +96,7 @@ Describe 'api-tools.ps1 - Invoke-Httpie' {
         }
 
         It 'Returns error when URL is null or whitespace' {
-            Setup-AvailableCommandMock -CommandName 'http'
+            Set-TestCommandAvailabilityState -CommandName 'http'
 
             $result = Invoke-Httpie -Url '   ' -ErrorAction SilentlyContinue
 

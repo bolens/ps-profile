@@ -72,7 +72,7 @@ Describe 'api-tools.ps1 - Invoke-Insomnia' {
         }
 
         It 'Returns error when collection path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'insomnia'
+            Set-TestCommandAvailabilityState -CommandName 'insomnia'
             $missingPath = Join-Path (New-TestTempDirectory -Prefix 'InsomniaMissingParent') 'nonexistent-collection'
 
             $result = Invoke-Insomnia -CollectionPath $missingPath -ErrorAction SilentlyContinue

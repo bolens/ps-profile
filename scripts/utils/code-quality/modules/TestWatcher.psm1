@@ -22,6 +22,184 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 
 <#
 .SYNOPSIS
+    Determines whether a changed file should trigger watch-mode callbacks.
+
+.DESCRIPTION
+    Matches file names against configured test/source patterns and falls back to
+    common PowerShell file extensions when no explicit pattern matches.
+
+.PARAMETER FileName
+    Leaf file name of the changed file.
+
+.PARAMETER FullPath
+    Full path of the changed file.
+
+.PARAMETER TestFiles
+    Test file patterns to match (for example, *.tests.ps1).
+
+.PARAMETER SourceFiles
+    Source file patterns to match (for example, *.ps1, *.psm1).
+
+.OUTPUTS
+    System.Boolean
+#>
+function Test-WatcherFileMatch {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$FileName,
+
+        [Parameter(Mandatory)]
+        [string]$FullPath,
+
+        [string[]]$TestFiles = @('*.tests.ps1'),
+
+        [string[]]$SourceFiles = @('*.ps1', '*.psm1')
+    )
+
+    $patterns = @($TestFiles + $SourceFiles | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+
+    foreach ($pattern in $patterns) {
+        if ($FileName -like $pattern) {
+            return $true
+        }
+    }
+
+    if ($FullPath -like '*.tests.ps1' -or $FullPath -like '*.ps1' -or $FullPath -like '*.psm1') {
+        return $true
+    }
+
+    return $false
+}
+
+$script:TestWatcherConfig = @{
+    TestFiles       = @('*.tests.ps1')
+    SourceFiles     = @('*.ps1', '*.psm1')
+    DebounceSeconds = 1
+    OnChange        = $null
+}
+$script:TestWatcherChangeTimer = $null
+
+<#
+.SYNOPSIS
+    Creates and registers a FileSystemWatcher for a single watch path.
+
+.DESCRIPTION
+    Internal helper that configures watcher filters and registers change events.
+
+.OUTPUTS
+    System.IO.FileSystemWatcher
+#>
+function New-RegisteredTestWatcher {
+    [CmdletBinding()]
+    [OutputType([System.IO.FileSystemWatcher])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$WatchPath
+    )
+
+    $watcher = New-Object System.IO.FileSystemWatcher
+    $watcher.Path = $WatchPath
+    $watcher.IncludeSubdirectories = $true
+    $watcher.NotifyFilter = [System.IO.NotifyFilters]::LastWrite -bor [System.IO.NotifyFilters]::FileName -bor [System.IO.NotifyFilters]::DirectoryName
+    $watcher.EnableRaisingEvents = $true
+
+    $fileChangeAction = {
+        param($source, $e)
+
+        $config = $Event.MessageData
+        if (-not $config) {
+            return
+        }
+
+        $fileName = Split-Path $e.FullPath -Leaf
+        if (-not (Test-WatcherFileMatch -FileName $fileName -FullPath $e.FullPath -TestFiles $config.TestFiles -SourceFiles $config.SourceFiles)) {
+            return
+        }
+
+        if ($script:TestWatcherChangeTimer) {
+            $script:TestWatcherChangeTimer.Stop()
+            $script:TestWatcherChangeTimer.Dispose()
+            $script:TestWatcherChangeTimer = $null
+        }
+
+        $debounceState = @{
+            OnChange = $config.OnChange
+            FileName = $e.Name
+        }
+
+        $script:TestWatcherChangeTimer = New-Object System.Timers.Timer
+        $script:TestWatcherChangeTimer.Interval = ($config.DebounceSeconds * 1000)
+        $script:TestWatcherChangeTimer.AutoReset = $false
+
+        Register-ObjectEvent -InputObject $script:TestWatcherChangeTimer -EventName 'Elapsed' -Action {
+            param($sender, $eventArgs)
+
+            $state = $Event.MessageData
+            if ($script:TestWatcherChangeTimer) {
+                $script:TestWatcherChangeTimer.Stop()
+                $script:TestWatcherChangeTimer.Dispose()
+                $script:TestWatcherChangeTimer = $null
+            }
+
+            if (-not $state) {
+                return
+            }
+
+            $timeStr = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
+                Format-LocaleDate (Get-Date) -Format 'HH:mm:ss'
+            }
+            else {
+                (Get-Date -Format 'HH:mm:ss')
+            }
+
+            Write-Host "`n[$timeStr] File changed: $($state.FileName)" -ForegroundColor Cyan
+            if ($state.OnChange) {
+                & $state.OnChange
+            }
+        } -MessageData $debounceState -SourceIdentifier "TestWatcher.Debounce.$([guid]::NewGuid().ToString())" | Out-Null
+        $script:TestWatcherChangeTimer.Start()
+    }
+
+    Register-ObjectEvent -InputObject $watcher -EventName 'Changed' -Action $fileChangeAction -MessageData $script:TestWatcherConfig | Out-Null
+    Register-ObjectEvent -InputObject $watcher -EventName 'Created' -Action $fileChangeAction -MessageData $script:TestWatcherConfig | Out-Null
+    Register-ObjectEvent -InputObject $watcher -EventName 'Deleted' -Action $fileChangeAction -MessageData $script:TestWatcherConfig | Out-Null
+    Register-ObjectEvent -InputObject $watcher -EventName 'Renamed' -Action $fileChangeAction -MessageData $script:TestWatcherConfig | Out-Null
+
+    return $watcher
+}
+
+<#
+.SYNOPSIS
+    Disposes watcher resources and debounce timers.
+#>
+function Stop-TestWatcherResources {
+    [CmdletBinding()]
+    param(
+        [System.IO.FileSystemWatcher[]]$Watchers
+    )
+
+    foreach ($watcher in @($Watchers)) {
+        if ($watcher) {
+            $watcher.EnableRaisingEvents = $false
+            $watcher.Dispose()
+        }
+    }
+
+    if ($script:TestWatcherChangeTimer) {
+        $script:TestWatcherChangeTimer.Stop()
+        $script:TestWatcherChangeTimer.Dispose()
+        $script:TestWatcherChangeTimer = $null
+    }
+
+    Get-EventSubscriber -ErrorAction SilentlyContinue |
+        Where-Object { $_.SourceIdentifier -like 'TestWatcher.Debounce.*' } |
+        ForEach-Object { Unregister-Event -SubscriptionId $_.SubscriptionId -ErrorAction SilentlyContinue }
+}
+
+<#
+.SYNOPSIS
     Watches for file changes and triggers test execution.
 
 .DESCRIPTION
@@ -46,8 +224,12 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 .PARAMETER RepoRoot
     Repository root directory path.
 
+.PARAMETER MaximumDurationSeconds
+    Optional bounded runtime for watch mode. When greater than zero, watch mode exits
+    automatically after the specified number of seconds. Defaults to zero (run until canceled).
+
 .OUTPUTS
-    None - runs until canceled
+    None - runs until canceled or MaximumDurationSeconds elapses
 #>
 function Start-TestWatcher {
     [CmdletBinding()]
@@ -59,27 +241,18 @@ function Start-TestWatcher {
         [int]$DebounceSeconds = 1,
         [Parameter(Mandatory)]
         [scriptblock]$OnChange,
-        [string]$RepoRoot
+        [string]$RepoRoot,
+        [int]$MaximumDurationSeconds = 0
     )
 
-    $watchers = @()
-    $changeTimer = $null
-    $lastChangeTime = $null
+    $watchers = [System.Collections.Generic.List[System.IO.FileSystemWatcher]]::new()
     $isRunning = $true
+    $watchStartedAt = Get-Date
 
-    # Cleanup function
     $cleanup = {
-        foreach ($watcher in $watchers) {
-            if ($watcher) {
-                $watcher.Dispose()
-            }
-        }
-        if ($changeTimer) {
-            $changeTimer.Dispose()
-        }
+        Stop-TestWatcherResources -Watchers $watchers.ToArray()
     }
 
-    # Register cleanup on script exit
     Register-ObjectEvent -InputObject ([System.AppDomain]::CurrentDomain) -EventName 'ProcessExit' -Action $cleanup | Out-Null
 
     try {
@@ -91,100 +264,34 @@ function Start-TestWatcher {
         Write-Host "`nPress Ctrl+C to stop watching" -ForegroundColor Yellow
         Write-Host ""
 
-        # Create file system watchers for each path
+        $script:TestWatcherConfig = @{
+            TestFiles       = $TestFiles
+            SourceFiles     = $SourceFiles
+            DebounceSeconds = $DebounceSeconds
+            OnChange        = $OnChange
+        }
+
         foreach ($watchPath in $WatchPaths) {
             if ($watchPath -and -not [string]::IsNullOrWhiteSpace($watchPath) -and -not (Test-Path -LiteralPath $watchPath)) {
                 Write-ScriptMessage -Message "Warning: Watch path does not exist: $watchPath" -LogLevel 'Warning'
                 continue
             }
 
-            $watcher = New-Object System.IO.FileSystemWatcher
-            $watcher.Path = $watchPath
-            $watcher.IncludeSubdirectories = $true
-            $watcher.NotifyFilter = [System.IO.NotifyFilters]::LastWrite -bor [System.IO.NotifyFilters]::FileName -bor [System.IO.NotifyFilters]::DirectoryName
-            $watcher.EnableRaisingEvents = $true
-
-            # Filter for relevant file types - capture in local scope for closure
-            $localTestFiles = $TestFiles
-            $localSourceFiles = $SourceFiles
-            $localDebounceSeconds = $DebounceSeconds
-            $localOnChange = $OnChange
-            $allPatterns = $localTestFiles + $localSourceFiles
-
-            # Register change event - capture variables in closure
-            $action = {
-                param($source, $e)
-                
-                # Capture variables from outer scope
-                $patterns = $localTestFiles + $localSourceFiles
-                $debounceSecs = $localDebounceSeconds
-                $onChangeScript = $localOnChange
-                
-                # Check if file matches our patterns
-                $fileName = Split-Path $e.FullPath -Leaf
-                $matchesPattern = $false
-                
-                foreach ($pattern in $patterns) {
-                    if ($fileName -like $pattern) {
-                        $matchesPattern = $true
-                        break
-                    }
-                }
-                
-                # Also check if it's a test file or source file
-                if (-not $matchesPattern) {
-                    if ($e.FullPath -like '*.tests.ps1' -or $e.FullPath -like '*.ps1' -or $e.FullPath -like '*.psm1') {
-                        $matchesPattern = $true
-                    }
-                }
-                
-                if ($matchesPattern) {
-                    # Capture file name for timer event
-                    $changedFileName = $e.Name
-                    
-                    # Debounce: wait for quiet period before triggering
-                    if ($script:changeTimer) {
-                        $script:changeTimer.Stop()
-                        $script:changeTimer.Dispose()
-                    }
-                    
-                    $script:changeTimer = New-Object System.Timers.Timer
-                    $script:changeTimer.Interval = ($debounceSecs * 1000)
-                    $script:changeTimer.AutoReset = $false
-                    $script:changeTimer.Add_Elapsed({
-                            param($sender, $eventArgs)
-                            $script:changeTimer.Stop()
-                            $timeStr = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
-                                Format-LocaleDate (Get-Date) -Format 'HH:mm:ss'
-                            }
-                            else {
-                                (Get-Date -Format 'HH:mm:ss')
-                            }
-                            Write-Host "`n[$timeStr] File changed: $changedFileName" -ForegroundColor Cyan
-                            & $onChangeScript
-                        })
-                    $script:changeTimer.Start()
-                }
-            }
-
-            Register-ObjectEvent -InputObject $watcher -EventName 'Changed' -Action $action | Out-Null
-            Register-ObjectEvent -InputObject $watcher -EventName 'Created' -Action $action | Out-Null
-            Register-ObjectEvent -InputObject $watcher -EventName 'Deleted' -Action $action | Out-Null
-            Register-ObjectEvent -InputObject $watcher -EventName 'Renamed' -Action $action | Out-Null
-
-            $watchers += $watcher
+            $watchers.Add((New-RegisteredTestWatcher -WatchPath $watchPath))
         }
 
-        # Wait for user to cancel
         Write-Host "Watching for changes... (Press Ctrl+C to stop)" -ForegroundColor Green
-        
+
         try {
             while ($isRunning) {
+                if ($MaximumDurationSeconds -gt 0 -and ((Get-Date) - $watchStartedAt).TotalSeconds -ge $MaximumDurationSeconds) {
+                    break
+                }
+
                 Start-Sleep -Seconds 1
             }
         }
         catch {
-            # User canceled (Ctrl+C)
             $cancelMsg = if (Get-Command Get-LocalizedMessage -ErrorAction SilentlyContinue) {
                 Get-LocalizedMessage -USMessage "Watch mode canceled by user" -UKMessage "Watch mode cancelled by user"
             }
@@ -200,6 +307,7 @@ function Start-TestWatcher {
 }
 
 Export-ModuleMember -Function @(
-    'Start-TestWatcher'
+    'Start-TestWatcher',
+    'Test-WatcherFileMatch',
+    'Stop-TestWatcherResources'
 )
-

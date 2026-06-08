@@ -44,7 +44,7 @@ Describe 'network-analysis.ps1 - Invoke-NetworkScan' {
 
     Context 'Sniffnet tool' {
         It 'Launches sniffnet' {
-            Setup-AvailableCommandMock -CommandName 'sniffnet'
+            Set-TestCommandAvailabilityState -CommandName 'sniffnet'
 
             Invoke-NetworkScan -Target '192.168.1.0/24' -Tool 'sniffnet' -ErrorAction SilentlyContinue | Out-Null
 
@@ -54,7 +54,7 @@ Describe 'network-analysis.ps1 - Invoke-NetworkScan' {
         }
 
         It 'Handles Start-Process errors for sniffnet' {
-            Setup-AvailableCommandMock -CommandName 'sniffnet'
+            Set-TestCommandAvailabilityState -CommandName 'sniffnet'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Invoke-NetworkScan -Target '192.168.1.0/24' -Tool 'sniffnet' -ErrorAction Stop } | Should -Throw '*Access denied*'

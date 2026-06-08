@@ -54,9 +54,12 @@ Describe 'Scoop Tools Integration Tests' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            # Mock scoop as available before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'scoop' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'scoop' -Available $true
             . (Join-Path $script:ProfileDir 'scoop.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Install-ScoopPackage function exists when scoop is available' {
@@ -97,15 +100,9 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Export-ScoopPackages calls scoop export' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output '{"git": "2.40.0"}'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output '{"git": "2.40.0"}'
             { Export-ScoopPackages -Path (Get-TestArtifactPath -FileName 'test-scoopfile.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Import-ScoopPackages function exists when scoop is available' {
@@ -120,21 +117,11 @@ Describe 'Scoop Tools Integration Tests' {
         It 'Import-ScoopPackages calls scoop import' {
             $testFile = Get-TestArtifactPath -FileName 'test-scoopfile.json'
             '{"git": "2.40.0"}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
-            
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages imported successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'Packages imported successfully'
             { Import-ScoopPackages -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'import'
-                $script:capturedArgs | Should -Contain $testFile
-            }
-
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'import'
+                Assert-TestCommandInvocationContains $testFile
             Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
 
@@ -154,30 +141,18 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Import-ScoopPackages handles missing file gracefully' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-            }
+            Setup-CapturingCommandMock -CommandName 'scoop'
 
             { Import-ScoopPackages -Path (Get-TestArtifactPath -FileName 'nonexistent.json') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 0 -Exactly
+            $global:TestCommandInvocationCaptures.Count | Should -Be 0
         }
 
         It 'Install-ScoopPackage calls scoop install' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'Package installed successfully'
             { Install-ScoopPackage git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain 'git'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates sinstall alias for Install-ScoopPackage' {
@@ -186,19 +161,11 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Find-ScoopPackage calls scoop search' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'git 2.40.0'
             { Find-ScoopPackage git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'search'
-                $script:capturedArgs | Should -Contain 'git'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'search'
+                Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates ss alias for Find-ScoopPackage' {
@@ -206,19 +173,11 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Update-ScoopPackage calls scoop update' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package updated successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'Package updated successfully'
             { Update-ScoopPackage git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'update'
-                $script:capturedArgs | Should -Contain 'git'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'update'
+                Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates su alias for Update-ScoopPackage' {
@@ -226,19 +185,11 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Update-ScoopAll calls scoop update *' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'All packages updated successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'All packages updated successfully'
             { Update-ScoopAll -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'update'
-                $script:capturedArgs | Should -Contain '*'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'update'
+                Assert-TestCommandInvocationContains '*'
         }
 
         It 'Creates suu alias for Update-ScoopAll' {
@@ -247,19 +198,11 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Uninstall-ScoopPackage calls scoop uninstall' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package uninstalled successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'Package uninstalled successfully'
             { Uninstall-ScoopPackage git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'uninstall'
-                $script:capturedArgs | Should -Contain 'git'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'uninstall'
+                Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates sr alias for Uninstall-ScoopPackage' {
@@ -268,19 +211,13 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Get-ScoopPackage calls scoop list' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Installed packages:'
-                Write-Output 'git 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output @(
+                'Installed packages:'
+                'git 2.40.0'
+            )
             { Get-ScoopPackage -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'list'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'list'
         }
 
         It 'Creates slist alias for Get-ScoopPackage' {
@@ -288,20 +225,14 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Get-ScoopPackageInfo calls scoop info' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Name: git'
-                Write-Output 'Version: 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output @(
+                'Name: git'
+                'Version: 2.40.0'
+            )
             { Get-ScoopPackageInfo git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'info'
-                $script:capturedArgs | Should -Contain 'git'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'info'
+                Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates sh alias for Get-ScoopPackageInfo' {
@@ -309,20 +240,12 @@ Describe 'Scoop Tools Integration Tests' {
         }
 
         It 'Clear-ScoopCache calls scoop cleanup and cache rm' {
-            $script:capturedArgs = @()
-            Mock -CommandName 'scoop' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs += , $Arguments
-                Write-Output 'Cache cleaned successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'Cache cleaned successfully'
             { Clear-ScoopCache -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'scoop' -Times 2 -Exactly
-            if ($script:capturedArgs.Count -ge 2) {
-                $script:capturedArgs[0] | Should -Contain 'cleanup'
-                $script:capturedArgs[1] | Should -Contain 'cache'
-                $script:capturedArgs[1] | Should -Contain 'rm'
-            }
+            $global:TestCommandInvocationCaptures.Count | Should -Be 2
+            $global:TestCommandInvocationCaptures[0] | Should -Contain 'cleanup'
+            $global:TestCommandInvocationCaptures[1] | Should -Contain 'cache'
+            $global:TestCommandInvocationCaptures[1] | Should -Contain 'rm'
         }
 
         It 'Creates scleanup alias for Clear-ScoopCache' {
@@ -351,7 +274,7 @@ Describe 'Scoop unavailable graceful degradation' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'scoop' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'scoop' -Available $false
             . (Join-Path $script:ProfileDir 'scoop.ps1')
             Get-Command Install-ScoopPackage -ErrorAction SilentlyContinue
         }
@@ -371,7 +294,7 @@ Describe 'Scoop unavailable graceful degradation' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'scoop' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'scoop' -Available $false
             . (Join-Path $script:ProfileDir 'scoop.ps1')
         } 2>&1 3>&1 | Out-String
 

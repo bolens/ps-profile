@@ -141,7 +141,7 @@ Describe 'lang-java - Integration Tests' {
             }
 
             foreach ($cmd in @('mvn', 'gradle', 'ant', 'kotlinc', 'scalac', 'java')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
         }
 
@@ -199,7 +199,7 @@ Describe 'lang-java - Integration Tests' {
     Context 'Parameter validation' {
         BeforeEach {
             foreach ($cmd in @('mvn', 'gradle', 'ant', 'kotlinc', 'scalac', 'java')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
         }
 

@@ -45,9 +45,12 @@ Describe 'NuGet Tools Integration Tests' {
 
     Context 'NuGet helpers (nuget.ps1)' {
         BeforeAll {
-            # Mock nuget as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'nuget' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'nuget' -Available $true
             . (Join-Path $script:ProfileDir 'nuget.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-NuGetPackage function' {
@@ -65,16 +68,10 @@ Describe 'NuGet Tools Integration Tests' {
         }
 
         It 'Install-NuGetPackage calls nuget install' {
-            Mock -CommandName nuget -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install') {
-                    Write-Output 'Package installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'nuget' -Output 'Package installed successfully'
 
             Install-NuGetPackage -Packages 'Newtonsoft.Json'
-            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Restore-NuGetPackages function' {
@@ -87,16 +84,10 @@ Describe 'NuGet Tools Integration Tests' {
         }
 
         It 'Restore-NuGetPackages calls nuget restore' {
-            Mock -CommandName nuget -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'restore') {
-                    Write-Output 'Packages restored successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'nuget' -Output 'Packages restored successfully'
 
             Restore-NuGetPackages
-            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-NuGetPackages function' {
@@ -109,29 +100,17 @@ Describe 'NuGet Tools Integration Tests' {
         }
 
         It 'Update-NuGetPackages calls nuget update' {
-            Mock -CommandName nuget -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'nuget' -Output 'Packages updated successfully'
 
             Update-NuGetPackages
-            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Update-NuGetPackages supports -Id parameter for individual packages' {
-            Mock -CommandName nuget -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args -contains '-Id' -and $args -contains 'Newtonsoft.Json') {
-                    Write-Output 'Newtonsoft.Json updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'nuget' -Output 'Newtonsoft.Json updated successfully'
 
             Update-NuGetPackages -Id Newtonsoft.Json
-            Should -Invoke -CommandName 'nuget' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -153,7 +132,7 @@ Describe 'NuGet unavailable graceful degradation' {
             @('Install-NuGetPackage', 'Restore-NuGetPackages', 'Update-NuGetPackages') | ForEach-Object {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
-            Mock-CommandAvailabilityPester -CommandName 'nuget' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'nuget' -Available $false
             . (Join-Path $script:ProfileDir 'nuget.ps1')
             Get-Command Install-NuGetPackage -ErrorAction SilentlyContinue
         }
@@ -167,7 +146,7 @@ Describe 'NuGet unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'nuget' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'nuget' -Available $false
             . (Join-Path $script:ProfileDir 'nuget.ps1')
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'nuget not found'

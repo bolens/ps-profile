@@ -66,7 +66,7 @@ Describe 'containers-enhanced.ps1 - Deploy-Balena' {
         }
 
         It 'Returns error when Device is missing for ssh action' {
-            Setup-AvailableCommandMock -CommandName 'balena'
+            Set-TestCommandAvailabilityState -CommandName 'balena'
 
             $result = Deploy-Balena -Action 'ssh' -ErrorAction SilentlyContinue
 

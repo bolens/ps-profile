@@ -70,14 +70,24 @@ Describe 'Utility Functions Integration Tests' {
             else {
                 $weatherCommand | Should -Not -Be $null
             }
-            # Mock Invoke-WebRequest to avoid network dependency in tests using network mocking helper
-            Mock-WebRequestSuccess -Content "Mocked weather data"
+            Setup-CapturingCommandMock -CommandName 'Invoke-WebRequest' -MarkAvailable:$false -OnInvoke {
+                [PSCustomObject]@{
+                    StatusCode = 200
+                    Content    = 'Mocked weather data'
+                    Headers    = @{}
+                }
+            }
             { Get-Weather -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
 
         It 'Get-Weather function handles location argument' {
-            # Mock Invoke-WebRequest to avoid network dependency in tests using network mocking helper
-            Mock-WebRequestSuccess -Content "Mocked weather data"
+            Setup-CapturingCommandMock -CommandName 'Invoke-WebRequest' -MarkAvailable:$false -OnInvoke {
+                [PSCustomObject]@{
+                    StatusCode = 200
+                    Content    = 'Mocked weather data'
+                    Headers    = @{}
+                }
+            }
             { Get-Weather 'New York' -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
 

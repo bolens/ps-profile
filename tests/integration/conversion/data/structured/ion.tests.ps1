@@ -17,36 +17,10 @@ Describe 'Ion Format Conversion Tests' {
     BeforeAll {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'ion.tests.ps1')
-        
-        # Ensure Python module is loaded (provides Get-PythonPath, Invoke-PythonScript)
-        $repoRoot = Split-Path -Parent $script:ProfileDir
-        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'Python.psm1'
-        if ($pythonModulePath -and -not [string]::IsNullOrWhiteSpace($pythonModulePath) -and (Test-Path -LiteralPath $pythonModulePath)) {
-            Import-Module $pythonModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force -Global
+
+                foreach ($entry in (Get-ConversionPythonTestContext -ProfileDir $script:ProfileDir -IncludeInvokePythonScriptCheck).GetEnumerator()) {
+            Set-Variable -Scope Script -Name $entry.Key -Value $entry.Value
         }
-        
-        # Check if Python/UV is available
-        $script:PythonAvailable = $false
-        $script:UVAvailable = (Get-Command uv -ErrorAction SilentlyContinue) -ne $null
-        
-        if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {
-            try {
-                $pythonPath = Get-PythonPath
-                if ($pythonPath) {
-                    $script:PythonAvailable = $true
-                }
-            }
-            catch {
-                $script:PythonAvailable = $false
-            }
-        }
-        
-        # Also check direct python/python3 commands
-        if (-not $script:PythonAvailable) {
-            $script:PythonAvailable = (Get-Command python -ErrorAction SilentlyContinue) -ne $null -or (Get-Command python3 -ErrorAction SilentlyContinue) -ne $null
-        }
-        
-        $script:InvokePythonScriptAvailable = (Get-Command Invoke-PythonScript -ErrorAction SilentlyContinue) -ne $null
     }
 
     Context 'Ion Conversions' {

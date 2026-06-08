@@ -111,7 +111,7 @@ Describe 'git-enhanced.ps1 - Alias Registration' {
 Describe 'git-enhanced.ps1 - Graceful Degradation' {
     BeforeEach {
         foreach ($cmd in @('git-cliff', 'git-tower', 'gitkraken', 'gitbutler', 'gitbutler-nightly', 'jj', 'git')) {
-            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
         }
     }
 

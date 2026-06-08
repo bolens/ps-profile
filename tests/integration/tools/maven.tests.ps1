@@ -45,9 +45,12 @@ Describe 'maven Tools Integration Tests' {
 
     Context 'maven helpers (maven.ps1)' {
         BeforeAll {
-            # Mock mvn as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'mvn' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'mvn' -Available $true
             . (Join-Path $script:ProfileDir 'maven.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-MavenOutdated function' {
@@ -60,17 +63,13 @@ Describe 'maven Tools Integration Tests' {
         }
 
         It 'Test-MavenOutdated calls mvn versions:display-dependency-updates' {
-            Mock -CommandName mvn -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'versions:display-dependency-updates') {
-                    Write-Output 'The following dependencies have updates available:'
-                    Write-Output '  package1: 1.0.0 -> 1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mvn' -Output @(
+                'The following dependencies have updates available:'
+                '  package1: 1.0.0 -> 1.2.0'
+            )
 
             Test-MavenOutdated
-            Should -Invoke -CommandName 'mvn' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-MavenOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,16 +83,10 @@ Describe 'maven Tools Integration Tests' {
         }
 
         It 'Update-MavenDependencies calls mvn versions:use-latest-versions' {
-            Mock -CommandName mvn -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'versions:use-latest-versions') {
-                    Write-Output 'Dependencies updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mvn' -Output 'Dependencies updated successfully'
 
             Update-MavenDependencies
-            Should -Invoke -CommandName 'mvn' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-MavenDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -114,7 +107,7 @@ Describe 'maven Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'mvn' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'mvn' -Available $false
             $script:MissingMavenOutput = & { . (Join-Path $script:ProfileDir 'maven.ps1') } 2>&1 3>&1 | Out-String
         }
 

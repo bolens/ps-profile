@@ -45,9 +45,12 @@ Describe 'Chocolatey Tools Integration Tests' {
 
     Context 'Chocolatey helpers (chocolatey.ps1)' {
         BeforeAll {
-            # Mock choco as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'choco' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'choco' -Available $true
             . (Join-Path $script:ProfileDir 'chocolatey.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-ChocoPackage function' {
@@ -66,23 +69,14 @@ Describe 'Chocolatey Tools Integration Tests' {
 
         It 'Install-ChocoPackage calls choco install' {
             # Capture arguments
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Package installed successfully'
             # Execute
             { Install-ChocoPackage -Packages git 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'install'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates Remove-ChocoPackage function' {
@@ -101,23 +95,14 @@ Describe 'Chocolatey Tools Integration Tests' {
 
         It 'Remove-ChocoPackage calls choco uninstall' {
             # Capture arguments using the direct pattern
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package removed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Package removed successfully'
             # Execute
             { Remove-ChocoPackage -Packages git 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'uninstall'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'uninstall'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates Test-ChocoOutdated function' {
@@ -131,22 +116,13 @@ Describe 'Chocolatey Tools Integration Tests' {
 
         It 'Test-ChocoOutdated calls choco outdated' {
             # Capture arguments using the direct pattern
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'package1|1.0.0|1.2.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'package1|1.0.0|1.2.0'
             # Execute
             { Test-ChocoOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'outdated'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'outdated'
         }
 
         It 'Creates Update-ChocoPackages function' {
@@ -160,45 +136,27 @@ Describe 'Chocolatey Tools Integration Tests' {
 
         It 'Update-ChocoPackages calls choco upgrade all for all packages' {
             # Capture arguments using the direct pattern
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'All packages upgraded successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'All packages upgraded successfully'
             # Execute
             { Update-ChocoPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'upgrade'
-            $script:capturedArgs | Should -Contain 'all'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'upgrade'
+            Assert-TestCommandInvocationContains 'all'
         }
 
         It 'Update-ChocoPackages calls choco upgrade for specific packages' {
             # Capture arguments using the direct pattern
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git upgraded successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'git upgraded successfully'
             # Execute
             { Update-ChocoPackages -Packages git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'upgrade'
-            $script:capturedArgs | Should -Contain 'git'
-            $script:capturedArgs | Should -Not -Contain 'all'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'upgrade'
+            Assert-TestCommandInvocationContains 'git'
+            Get-TestCommandInvocationArgsFlat | Should -Not -Contain 'all'
         }
 
         It 'Creates Update-ChocoSelf function' {
@@ -212,24 +170,15 @@ Describe 'Chocolatey Tools Integration Tests' {
 
         It 'Update-ChocoSelf calls choco upgrade chocolatey -y' {
             # Capture arguments using the direct pattern
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Chocolatey updated successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Chocolatey updated successfully'
             # Execute
             { Update-ChocoSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'upgrade'
-            $script:capturedArgs | Should -Contain 'chocolatey'
-            $script:capturedArgs | Should -Contain '-y'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'upgrade'
+            Assert-TestCommandInvocationContains 'chocolatey'
+            Assert-TestCommandInvocationContains '-y'
         }
 
         It 'Creates Clear-ChocoCache function' {
@@ -247,42 +196,24 @@ Describe 'Chocolatey Tools Integration Tests' {
         }
 
         It 'Clear-ChocoCache calls choco clean' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cache cleaned successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Cache cleaned successfully'
             # Execute
             { Clear-ChocoCache -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'clean'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'clean'
         }
 
         It 'Clear-ChocoCache with Yes passes -y flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cache cleaned successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Cache cleaned successfully'
             # Execute
             { Clear-ChocoCache -Yes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'clean'
-            $script:capturedArgs | Should -Contain '-y'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'clean'
+            Assert-TestCommandInvocationContains '-y'
         }
 
         It 'Creates Find-ChocoPackage function' {
@@ -300,44 +231,26 @@ Describe 'Chocolatey Tools Integration Tests' {
         }
 
         It 'Find-ChocoPackage calls choco search' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git|2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'git|2.40.0'
             # Execute
             { Find-ChocoPackage -Query git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'search'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'search'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Find-ChocoPackage with Exact passes --exact flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git|2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'git|2.40.0'
             # Execute
             { Find-ChocoPackage -Query git -Exact -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'search'
-            $script:capturedArgs | Should -Contain '--exact'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'search'
+            Assert-TestCommandInvocationContains '--exact'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates Get-ChocoPackage function' {
@@ -350,43 +263,25 @@ Describe 'Chocolatey Tools Integration Tests' {
         }
 
         It 'Get-ChocoPackage calls choco list --local-only' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git|2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'git|2.40.0'
             # Execute
             { Get-ChocoPackage -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'list'
-            $script:capturedArgs | Should -Contain '--local-only'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'list'
+            Assert-TestCommandInvocationContains '--local-only'
         }
 
         It 'Get-ChocoPackage with IncludePrograms calls choco list' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git|2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'git|2.40.0'
             # Execute
             { Get-ChocoPackage -IncludePrograms -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'list'
-            $script:capturedArgs | Should -Not -Contain '--local-only'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'list'
+            Get-TestCommandInvocationArgsFlat | Should -Not -Contain '--local-only'
         }
 
         It 'Creates Get-ChocoPackageInfo function' {
@@ -399,45 +294,29 @@ Describe 'Chocolatey Tools Integration Tests' {
         }
 
         It 'Get-ChocoPackageInfo calls choco info' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Chocolatey v2.0.0'
-                Write-Output 'git 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output @(
+                'Chocolatey v2.0.0'
+                'git 2.40.0'
+            )
             # Execute
             { Get-ChocoPackageInfo -Packages git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'info'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'info'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Get-ChocoPackageInfo with Source passes --source flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'git 2.40.0'
             # Execute
             { Get-ChocoPackageInfo -Packages git -Source chocolatey -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'info'
-            $script:capturedArgs | Should -Contain '--source'
-            $script:capturedArgs | Should -Contain 'chocolatey'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'info'
+            Assert-TestCommandInvocationContains '--source'
+            Assert-TestCommandInvocationContains 'chocolatey'
         }
 
         It 'Creates Export-ChocoPackages function' {
@@ -455,46 +334,28 @@ Describe 'Chocolatey Tools Integration Tests' {
         }
 
         It 'Export-ChocoPackages calls choco export' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages exported successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Packages exported successfully'
             $testPath = Get-TestArtifactPath -FileName 'test-packages.config'
 
             # Execute
             { Export-ChocoPackages -Path $testPath -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'export'
-            $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain $testPath
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'export'
+            Assert-TestCommandInvocationContains '-o'
+            Assert-TestCommandInvocationContains $testPath
         }
 
         It 'Export-ChocoPackages with IncludeVersions passes --include-version-numbers flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'choco' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages exported with versions'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Packages exported with versions'
             # Execute
             { Export-ChocoPackages -Path (Get-TestArtifactPath -FileName 'test-packages.config') -IncludeVersions -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'export'
-            $script:capturedArgs | Should -Contain '--include-version-numbers'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'export'
+            Assert-TestCommandInvocationContains '--include-version-numbers'
         }
 
         It 'Creates Import-ChocoPackages function' {
@@ -522,13 +383,11 @@ Describe 'Chocolatey Tools Integration Tests' {
             '<?xml version="1.0"?><packages><package id="git" /></packages>' | Set-Content -Path $testFile
             Test-Path -LiteralPath $testFile | Should -Be $true
 
-            Mock -CommandName 'choco' -MockWith {
-                Write-Output 'Packages imported successfully'
-            }
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Packages imported successfully'
 
             { Import-ChocoPackages -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly -ParameterFilter {
+            Assert-TestCommandInvokedExactlyOnce -ParameterFilter {
                 $flatArgs = [System.Collections.Generic.List[object]]::new()
                 foreach ($arg in $args) {
                     if ($arg -is [System.Array]) {
@@ -555,13 +414,11 @@ Describe 'Chocolatey Tools Integration Tests' {
             '<?xml version="1.0"?><packages><package id="git" /></packages>' | Set-Content -Path $testFile
             Test-Path -LiteralPath $testFile | Should -Be $true
 
-            Mock -CommandName 'choco' -MockWith {
-                Write-Output 'Packages imported successfully'
-            }
+            Setup-CapturingCommandMock -CommandName 'choco' -Output 'Packages imported successfully'
 
             { Import-ChocoPackages -Path $testFile -Yes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
-            Should -Invoke -CommandName 'choco' -Times 1 -Exactly -ParameterFilter {
+            Assert-TestCommandInvokedExactlyOnce -ParameterFilter {
                 $flatArgs = [System.Collections.Generic.List[object]]::new()
                 foreach ($arg in $args) {
                     if ($arg -is [System.Array]) {
@@ -592,7 +449,7 @@ Describe 'Chocolatey Tools Integration Tests' {
             }
             Remove-Item Function:choco -ErrorAction SilentlyContinue
             Remove-Item Function:global:choco -ErrorAction SilentlyContinue
-            Mock-CommandAvailabilityPester -CommandName 'choco' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false
 
             @(
                 'Install-ChocoPackage', 'Remove-ChocoPackage', 'Update-ChocoPackages',

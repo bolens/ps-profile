@@ -165,7 +165,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('gh', [ref]$null)
             }
             # Mock gh command availability as missing
-            Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope 'It'
+            Set-TestCommandAvailabilityState -CommandName 'gh' -Available $false -Scope 'It'
             # Function should still exist even if gh is not available
             Get-Command Open-GitHubRepository -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             # Verify installation recommendation is provided
@@ -189,7 +189,7 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('gh', [ref]$null)
             }
             # Mock gh command availability as missing
-            Mock-CommandAvailabilityPester -CommandName 'gh' -Available $false -Scope 'It'
+            Set-TestCommandAvailabilityState -CommandName 'gh' -Available $false -Scope 'It'
             # Function should still exist even if gh is not available
             Get-Command Invoke-GitHubPullRequest -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
             # Verify installation recommendation is provided

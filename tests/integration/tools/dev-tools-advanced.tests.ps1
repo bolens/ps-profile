@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for advanced development tool fragments (ollama, ngrok, firebase, rustup, tailscale).
@@ -41,11 +45,19 @@ Describe 'Advanced Development Tools Integration Tests' {
 
     Context 'Ollama helpers (ollama.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'ollama' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'ollama' } -MockWith { $null }
-            # Mock ollama command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'ollama' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('ollama')
+            Set-TestCommandAvailabilityState -CommandName 'ollama' -Available $true
             . (Join-Path $script:ProfileDir 'ollama.ps1')
+            Register-TestFragmentAliases @{
+                ol       = 'Invoke-Ollama'
+                'ol-list' = 'Get-OllamaModelList'
+                'ol-run'  = 'Start-OllamaModel'
+                'ol-pull' = 'Get-OllamaModel'
+            }
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-Ollama function' {
@@ -61,7 +73,9 @@ Describe 'Advanced Development Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('ollama', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'ollama' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('ollama')
+            Set-TestCommandAvailabilityState -CommandName 'ollama' -Available $false
+            Set-Alias -Name ol -Value Invoke-Ollama -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = ol --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'ollama not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ollama'
@@ -97,11 +111,14 @@ Describe 'Advanced Development Tools Integration Tests' {
 
     Context 'Ngrok helpers (ngrok.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'ngrok' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'ngrok' } -MockWith { $null }
-            # Mock ngrok command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'ngrok' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('ngrok')
+            Set-TestCommandAvailabilityState -CommandName 'ngrok' -Available $true
             . (Join-Path $script:ProfileDir 'ngrok.ps1')
+            Register-TestFragmentAliases @{
+                ngrok      = 'Invoke-Ngrok'
+                'ngrok-http' = 'Start-NgrokHttpTunnel'
+                'ngrok-tcp'  = 'Start-NgrokTcpTunnel'
+            }
         }
 
         It 'Creates Invoke-Ngrok function' {
@@ -117,7 +134,9 @@ Describe 'Advanced Development Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('ngrok', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'ngrok' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('ngrok')
+            Set-TestCommandAvailabilityState -CommandName 'ngrok' -Available $false
+            Set-Alias -Name ngrok -Value Invoke-Ngrok -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = ngrok version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'ngrok not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ngrok'
@@ -144,11 +163,14 @@ Describe 'Advanced Development Tools Integration Tests' {
 
     Context 'Firebase helpers (firebase.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'firebase' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'firebase' } -MockWith { $null }
-            # Mock firebase command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'firebase' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('firebase')
+            Set-TestCommandAvailabilityState -CommandName 'firebase' -Available $true
             . (Join-Path $script:ProfileDir 'firebase.ps1')
+            Register-TestFragmentAliases @{
+                fb         = 'Invoke-Firebase'
+                'fb-deploy' = 'Publish-FirebaseDeployment'
+                'fb-serve'  = 'Start-FirebaseServer'
+            }
         }
 
         It 'Creates Invoke-Firebase function' {
@@ -164,7 +186,9 @@ Describe 'Advanced Development Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('firebase', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'firebase' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('firebase')
+            Set-TestCommandAvailabilityState -CommandName 'firebase' -Available $false
+            Set-Alias -Name fb -Value Invoke-Firebase -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = fb --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'firebase not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'firebase-tools'
@@ -191,13 +215,21 @@ Describe 'Advanced Development Tools Integration Tests' {
 
     Context 'Rustup helpers (rustup.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'rustup' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rustup' } -MockWith { $null }
-            # Mock rustup command before loading fragment
-            # Mock-CommandAvailabilityPester handles Test-CachedCommand mocking internally
-            Mock-CommandAvailabilityPester -CommandName 'rustup' -Available $true
-            Mock-CommandAvailabilityPester -CommandName 'cargo' -Available $true
+            Mark-TestCommandsUnavailable -CommandNames @('rustup')
+            Set-TestCommandAvailabilityState -CommandName 'rustup' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'cargo' -Available $true
             . (Join-Path $script:ProfileDir 'rustup.ps1')
+            Register-TestFragmentAliases @{
+                rustup         = 'Invoke-Rustup'
+                'rustup-update' = 'Update-RustupToolchain'
+                'rustup-install' = 'Install-RustupToolchain'
+                'rustup-check'  = 'Test-RustupUpdates'
+                'cargo-update'  = 'Update-CargoPackages'
+            }
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-Rustup function' {
@@ -249,16 +281,10 @@ Describe 'Advanced Development Tools Integration Tests' {
         }
 
         It 'Test-RustupUpdates calls rustup check' {
-            Mock -CommandName rustup -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'check') {
-                    Write-Output 'stable-x86_64-pc-windows-msvc (default) - Up to date'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'rustup' -Output 'stable-x86_64-pc-windows-msvc (default) - Up to date'
 
             Test-RustupUpdates
-            Should -Invoke -CommandName 'rustup' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-RustupUpdates -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -272,27 +298,22 @@ Describe 'Advanced Development Tools Integration Tests' {
         }
 
         It 'Update-CargoPackages calls cargo install-update --all' {
-            Mock -CommandName cargo -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install-update' -and $args -contains '--all') {
-                    Write-Output 'All cargo packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'cargo' -Output 'All cargo packages updated successfully'
 
             Update-CargoPackages
-            Should -Invoke -CommandName 'cargo' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-CargoPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
 
     Context 'Tailscale helpers (tailscale.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'tailscale' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'tailscale' } -MockWith { $null }
-            # Mock tailscale command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'tailscale' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('tailscale')
+            Set-TestCommandAvailabilityState -CommandName 'tailscale' -Available $true
             . (Join-Path $script:ProfileDir 'tailscale.ps1')
+            Register-TestFragmentAliases @{
+                tailscale = 'Invoke-Tailscale'
+            }
         }
 
         It 'Creates Invoke-Tailscale function' {
@@ -308,7 +329,9 @@ Describe 'Advanced Development Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('tailscale', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'tailscale' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('tailscale')
+            Set-TestCommandAvailabilityState -CommandName 'tailscale' -Available $false
+            Set-Alias -Name tailscale -Value Invoke-Tailscale -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = tailscale status 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'tailscale not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'tailscale'

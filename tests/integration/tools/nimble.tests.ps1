@@ -45,9 +45,12 @@ Describe 'nimble Tools Integration Tests' {
 
     Context 'nimble helpers (nimble.ps1)' {
         BeforeAll {
-            # Mock nimble as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'nimble' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'nimble' -Available $true
             . (Join-Path $script:ProfileDir 'nimble.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-NimbleOutdated function' {
@@ -60,17 +63,13 @@ Describe 'nimble Tools Integration Tests' {
         }
 
         It 'Test-NimbleOutdated calls nimble outdated' {
-            Mock -CommandName nimble -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'outdated') {
-                    Write-Output 'Package    Current  Latest'
-                    Write-Output 'package1  1.0.0    1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'nimble' -Output @(
+                'Package    Current  Latest'
+                'package1  1.0.0    1.2.0'
+            )
 
             Test-NimbleOutdated
-            Should -Invoke -CommandName 'nimble' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-NimbleOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,16 +83,10 @@ Describe 'nimble Tools Integration Tests' {
         }
 
         It 'Update-NimblePackages calls nimble update' {
-            Mock -CommandName nimble -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'nimble' -Output 'Packages updated successfully'
 
             Update-NimblePackages
-            Should -Invoke -CommandName 'nimble' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-NimblePackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -117,7 +110,7 @@ Describe 'nimble Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'nimble' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'nimble' -Available $false
             $script:MissingNimbleOutput = & { . (Join-Path $script:ProfileDir 'nimble.ps1') } 2>&1 3>&1 | Out-String
         }
 

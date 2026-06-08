@@ -80,53 +80,19 @@ Overview of SQLite databases used for persistent storage in the profile.
 
 ### Testing
 
-#### [Testing Guide](TESTING.md)
+**Start here:** [Testing Guide](TESTING.md) — canonical reference for structure, running tests, runner flags, batch scripts, and coverage. All testing docs cross-link from [Related Testing Documentation](TESTING.md#related-testing-documentation).
 
-Comprehensive testing guide:
+| Guide | When to use |
+| ----- | ----------- |
+| **[Testing Guide](TESTING.md)** | Writing, running, or debugging tests; runner CLI flags; batch runners |
+| [Development Guide](DEVELOPMENT.md) | Project setup, workflow, advanced runner features (retry, baselines, reporting) |
+| [Testing Patterns](../examples/TESTING_PATTERNS.md) | Copy-paste examples for test file structure and TestSupport usage |
+| [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | Stubbing commands, network, and environment state |
+| [Coverage Verification](VERIFY_COVERAGE.md) | Per-module coverage checks with `analyze-coverage.ps1` |
+| [Tool Requirements](TOOL_REQUIREMENTS.md) | Installing optional tools; understanding test skips |
+| [Development Quick Start](DEVELOPMENT_QUICK_START.md) | Fast profile reload during iterative development |
 
-- Test structure and organization
-- Best practices
-- Mocking frameworks
-- Tool detection
-- Performance testing
-
-**When to use**: When writing tests, debugging test failures, or working on the test infrastructure.
-
-#### [Development Guide](DEVELOPMENT.md)
-
-Advanced developer guide covering:
-
-- Advanced testing with Pester
-- Performance monitoring and baselining
-- Test retry logic and flaky test handling
-- Environment health checks
-- Detailed analysis and reporting
-
-**When to use**: When writing tests, debugging test failures, or working on the test infrastructure.
-
-#### [Development Quick Start](DEVELOPMENT_QUICK_START.md)
-
-Quick reference for developers — fast profile loading, common commands, and setup shortcuts.
-
-**When to use**: When onboarding to the project or quickly orienting to the development workflow.
-
-#### [Test Verification Mocking Guide](TEST_VERIFICATION_MOCKING_GUIDE.md)
-
-Guide for using mocking frameworks in tests.
-
-**When to use**: When writing tests that require mocking.
-
-#### [Verify Coverage Guide](VERIFY_COVERAGE.md)
-
-Guide for verifying test coverage for utility modules.
-
-**When to use**: When verifying test coverage or understanding coverage requirements.
-
-#### [Tool Requirements](TOOL_REQUIREMENTS.md)
-
-Documentation of tool requirements for tests, with links to [requirements.txt](../../requirements.txt), [requirements/scoop.txt](../../requirements/scoop.txt), [requirements/linux.txt](../../requirements/linux.txt), and [check-missing-packages.ps1](../../scripts/utils/dependencies/check-missing-packages.ps1).
-
-**When to use**: Understanding which tools are required for tests or installing optional conversion dependencies.
+**Runner scripts:** `scripts/utils/code-quality/run-pester.ps1` · `analyze-coverage.ps1` · batch wrappers (see [Batch Runners](TESTING.md#batch-runners))
 
 ### Code Quality
 
@@ -213,6 +179,7 @@ Troubleshooting guide for prompt performance issues.
 ## Related Documentation
 
 - **Main Documentation**: [../README.md](../README.md)
+- **Testing Hub**: [TESTING.md#related-testing-documentation](TESTING.md#related-testing-documentation) - Cross-linked testing documentation index
 - **API Reference**: [../api/README.md](../api/README.md)
 - **Fragment Documentation**: [../fragments/README.md](../fragments/README.md)
 - **Architecture**: [../../ARCHITECTURE.md](../../ARCHITECTURE.md)

@@ -67,7 +67,7 @@ Describe 'beads.ps1 - Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'bd' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'bd' -Available $false
         }
 
         It 'Handles missing bd command gracefully' {

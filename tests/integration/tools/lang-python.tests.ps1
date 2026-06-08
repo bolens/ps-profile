@@ -111,38 +111,38 @@ Describe 'lang-python Integration Tests' {
         }
 
         It 'Install-PythonApp handles missing pipx gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'pipx' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pipx' -Available $false
             $output = & { Install-PythonApp -Packages @('test-package') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pipx not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pipx'
         }
 
         It 'Invoke-Pipx handles missing pipx gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'pipx' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pipx' -Available $false
             $output = & { Invoke-Pipx -Package 'test-package' } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pipx not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'pipx'
         }
 
         It 'Invoke-PythonScript handles missing python gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'python3' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'python' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'python3' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'python' -Available $false
             $output = & { Invoke-PythonScript -Script 'script.py' } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'python not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'python'
         }
 
         It 'New-PythonVirtualEnv handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'python' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'python3' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'uv' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'python' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'python3' -Available $false
             $output = & { New-PythonVirtualEnv } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'python not found'
         }
 
         It 'Install-PythonPackage handles missing tools gracefully' {
             foreach ($cmd in @('uv', 'pip', 'pip3')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
             $output = & { Install-PythonPackage -Packages @('requests') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pip not found'

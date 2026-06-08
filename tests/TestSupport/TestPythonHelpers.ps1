@@ -88,6 +88,84 @@ function Test-PythonPackageAvailable {
 
 <#
 .SYNOPSIS
+    Resolves Python availability for conversion integration tests.
+.DESCRIPTION
+    Imports Python.psm1 and detects real Python/packages. Returns a hashtable for
+    registration via Register-ConversionPythonTestContext (dot-sourced from BeforeAll).
+#>
+function Get-ConversionPythonTestContext {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ProfileDir,
+
+        [switch]$IncludePackageAvailability,
+
+        [switch]$IncludeInvokePythonScriptCheck
+    )
+
+    $repoRoot = Split-Path -Parent $ProfileDir
+    $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'Python.psm1'
+    if ($pythonModulePath -and (Test-Path -LiteralPath $pythonModulePath)) {
+        Import-Module $pythonModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force -Global
+    }
+
+    $pythonAvailable = $false
+    $pythonCmd = $null
+
+    if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {
+        try {
+            $pythonCmd = Get-PythonPath
+            if (-not [string]::IsNullOrWhiteSpace($pythonCmd)) {
+                $pythonAvailable = $true
+            }
+        }
+        catch {
+            $pythonAvailable = $false
+        }
+    }
+
+    if (-not $pythonAvailable) {
+        foreach ($candidate in @('python', 'python3')) {
+            if (Get-Command $candidate -ErrorAction SilentlyContinue) {
+                $pythonCmd = $candidate
+                $pythonAvailable = $true
+                break
+            }
+        }
+    }
+
+    $context = @{
+        PythonAvailable = $pythonAvailable
+        PythonCmd       = $pythonCmd
+        UVAvailable     = (Get-Command uv -ErrorAction SilentlyContinue) -ne $null
+    }
+
+    if ($IncludeInvokePythonScriptCheck) {
+        $context['InvokePythonScriptAvailable'] = (Get-Command Invoke-PythonScript -ErrorAction SilentlyContinue) -ne $null
+    }
+
+    if ($IncludePackageAvailability) {
+        $pandasAvailable = $false
+        $polarsAvailable = $false
+        $pyreadstatAvailable = $false
+
+        if ($pythonAvailable -and (Get-Command Test-PythonPackageAvailable -ErrorAction SilentlyContinue)) {
+            $pandasAvailable = Test-PythonPackageAvailable -PackageName 'pandas'
+            $polarsAvailable = Test-PythonPackageAvailable -PackageName 'polars'
+            $pyreadstatAvailable = Test-PythonPackageAvailable -PackageName 'pyreadstat'
+        }
+
+        $context['PandasAvailable'] = $pandasAvailable
+        $context['PolarsAvailable'] = $polarsAvailable
+        $context['PyreadstatAvailable'] = $pyreadstatAvailable
+    }
+
+    return $context
+}
+
+<#
+.SYNOPSIS
     Gets installation recommendation for a missing Python package.
 .DESCRIPTION
     Returns installation instructions for a Python package, similar to how npm packages

@@ -534,7 +534,11 @@ $env:PS_PROFILE_DEBUG = '2'  # Level 2+ includes timing information
 - **CONTRIBUTING.md** - Detailed contribution guidelines
 - **ARCHITECTURE.md** - Technical architecture details
 - **PROFILE_README.md** - Comprehensive profile documentation
+- **docs/guides/TESTING.md** - Primary testing guide (structure, runner flags, batch scripts, coverage)
 - **docs/guides/DEVELOPMENT.md** - Developer guide and advanced testing
+- **docs/examples/TESTING_PATTERNS.md** - Code examples for writing tests
+- **docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md** - TestSupport stubs and isolation
+- **docs/guides/VERIFY_COVERAGE.md** - Per-module coverage verification
 - **docs/guides/ERROR_HANDLING_STANDARD.md** - Error handling, logging, and color coding standards
 - **PROFILE_DEBUG.md** - Debugging and instrumentation
 - **Taskfile.yml** - Available tasks
@@ -563,7 +567,7 @@ The test runner (`scripts/utils/code-quality/run-pester.ps1`) supports:
 - **Environment health checks**
 - **Detailed analysis and reporting** (HTML, JSON, Markdown)
 
-See `docs/guides/DEVELOPMENT.md` for detailed examples.
+See [docs/guides/TESTING.md](docs/guides/TESTING.md) for runner flags and batch scripts; [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) for advanced features.
 
 ### Module Structure
 
@@ -597,5 +601,6 @@ For detailed information, see:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) - How to contribute
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Technical details
+- [docs/guides/TESTING.md](docs/guides/TESTING.md) - Primary testing guide
 - [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) - Developer guide
 - [WARP.md](WARP.md) - WARP-specific guidance

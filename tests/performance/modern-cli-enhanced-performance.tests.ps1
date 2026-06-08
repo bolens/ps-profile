@@ -48,7 +48,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
         }
         
         It 'Find-WithFd executes quickly when tools not available' {
-            Mock-CommandAvailabilityPester -CommandName 'fd' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'fd' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Find-WithFd -Pattern "test" -ErrorAction SilentlyContinue
@@ -58,7 +58,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
         }
         
         It 'Grep-WithRipgrep executes quickly when tools not available' {
-            Mock-CommandAvailabilityPester -CommandName 'rg' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'rg' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Grep-WithRipgrep -Pattern "test" -ErrorAction SilentlyContinue
@@ -68,7 +68,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
         }
         
         It 'Navigate-WithZoxide executes quickly when tools not available' {
-            Mock-CommandAvailabilityPester -CommandName 'zoxide' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'zoxide' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Navigate-WithZoxide -Query "test" -ErrorAction SilentlyContinue
@@ -78,7 +78,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
         }
         
         It 'View-WithBat executes quickly when tools not available' {
-            Mock-CommandAvailabilityPester -CommandName 'bat' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'bat' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             View-WithBat -Path (Get-TestArtifactPath -FileName 'test.txt') -ErrorAction SilentlyContinue
@@ -94,7 +94,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions Performance Tests' {
         }
         
         It 'Test-CachedCommand is fast on repeated calls' {
-            Mock-CommandAvailabilityPester -CommandName 'fd' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'fd' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             for ($i = 0; $i -lt 100; $i++) {

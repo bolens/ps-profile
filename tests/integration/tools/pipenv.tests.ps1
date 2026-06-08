@@ -45,9 +45,12 @@ Describe 'Pipenv Tools Integration Tests' {
 
     Context 'Pipenv helpers (pipenv.ps1)' {
         BeforeAll {
-            # Mock pipenv as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'pipenv' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'pipenv' -Available $true
             . (Join-Path $script:ProfileDir 'pipenv.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-PipenvPackage function' {
@@ -65,29 +68,17 @@ Describe 'Pipenv Tools Integration Tests' {
         }
 
         It 'Install-PipenvPackage calls pipenv install' {
-            Mock -CommandName pipenv -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install') {
-                    Write-Output 'Package installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pipenv' -Output 'Package installed successfully'
 
             Install-PipenvPackage -Packages requests
-            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Install-PipenvPackage supports --dev flag' {
-            Mock -CommandName pipenv -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install' -and $args -contains '--dev') {
-                    Write-Output 'Dev package installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pipenv' -Output 'Dev package installed successfully'
 
             Install-PipenvPackage -Packages pytest -Dev
-            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Remove-PipenvPackage function' {
@@ -105,16 +96,10 @@ Describe 'Pipenv Tools Integration Tests' {
         }
 
         It 'Remove-PipenvPackage calls pipenv uninstall' {
-            Mock -CommandName pipenv -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'uninstall') {
-                    Write-Output 'Package removed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pipenv' -Output 'Package removed successfully'
 
             Remove-PipenvPackage -Packages requests
-            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-PipenvPackages function' {
@@ -127,29 +112,17 @@ Describe 'Pipenv Tools Integration Tests' {
         }
 
         It 'Update-PipenvPackages calls pipenv update for all packages' {
-            Mock -CommandName pipenv -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args.Count -eq 1) {
-                    Write-Output 'All packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pipenv' -Output 'All packages updated successfully'
 
             Update-PipenvPackages
-            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Update-PipenvPackages calls pipenv update for specific packages' {
-            Mock -CommandName pipenv -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args -contains 'requests') {
-                    Write-Output 'requests updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pipenv' -Output 'requests updated successfully'
 
             Update-PipenvPackages -Packages requests
-            Should -Invoke -CommandName 'pipenv' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -172,7 +145,7 @@ Describe 'Pipenv Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'pipenv' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pipenv' -Available $false
             $script:MissingPipenvOutput = & { . (Join-Path $script:ProfileDir 'pipenv.ps1') } 2>&1 3>&1 | Out-String
         }
 

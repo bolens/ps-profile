@@ -52,7 +52,7 @@ Describe 'database.ps1 - Enhanced Functions Performance Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
             
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'psql' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $result = Query-Database -DatabaseType PostgreSQL -Database 'testdb' -Query 'SELECT 1' -ErrorAction SilentlyContinue

@@ -56,8 +56,8 @@ Describe "Starship Module Tests" {
         Remove-Variable -Name LastCommandDuration -Scope Global -ErrorAction SilentlyContinue
         Remove-Variable -Name LastCommandSucceeded -Scope Global -ErrorAction SilentlyContinue
 
-        Mock-CommandAvailabilityPester -CommandName 'starship' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'git' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'starship' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'git' -Available $false
     }
 
     Context "Test-StarshipInitialized" {
@@ -121,13 +121,13 @@ Describe "Starship Module Tests" {
 
     Context "Initialize-StarshipModule" {
         It "Stores starship module globally when available" {
-            Mock Get-Module { [PSCustomObject]@{ Name = 'starship' } }
+            Register-TestGetModuleStub -ReturnValue ([PSCustomObject]@{ Name = 'starship' })
             Initialize-StarshipModule
             $global:StarshipModule | Should -Not -BeNullOrEmpty
         }
 
         It "Handles missing starship module gracefully" {
-            Mock Get-Module { $null }
+            Register-TestGetModuleStub -ReturnValue $null
             { Initialize-StarshipModule } | Should -Not -Throw
         }
     }
@@ -153,16 +153,18 @@ Describe "Starship Module Tests" {
 
     Context "Initialize-Starship" {
         It "Uses smart prompt when starship not available" {
-            Mock Get-Command { $null } -ParameterFilter { $Name -eq 'starship' }
-            Mock-CommandAvailabilityPester -CommandName 'starship' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('starship')
+            Set-TestCommandAvailabilityState -CommandName 'starship' -Available $false
             { Initialize-Starship } | Should -Not -Throw
-            # Should initialize smart prompt as fallback
             $global:SmartPromptInitialized | Should -Be $true
         }
 
         It "Handles starship initialization errors gracefully" {
-            Mock Get-Command { [PSCustomObject]@{ Source = "fake-starship" } } -ParameterFilter { $Name -eq 'starship' }
-            Mock Invoke-StarshipInitScript { throw "Init failed" }
+            Mark-TestCommandsUnavailable -CommandNames @('starship')
+            Set-TestCommandAvailabilityState -CommandName 'starship' -Available $true
+            Register-TestProfileFunctionStub -Name 'Invoke-StarshipInitScript' -Body {
+                throw 'Init failed'
+            }
             { Initialize-Starship } | Should -Not -Throw
         }
     }
@@ -194,15 +196,11 @@ Describe "Starship Module Tests" {
             $global:SmartPromptInitialized = $true
             $originalPrompt = $function:prompt
 
-            $script:capturedOutput = @()
-            Mock -CommandName Write-Host -MockWith {
-                param($Object)
-                $script:capturedOutput += $Object
-            }
+            Register-TestWriteHostCapture
 
             Initialize-SmartPrompt
 
-            @($script:capturedOutput).Count | Should -Be 0
+            Get-TestWriteHostCaptureCount | Should -Be 0
             $function:prompt | Should -Be $originalPrompt
         }
     }

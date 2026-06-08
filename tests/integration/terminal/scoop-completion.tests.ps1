@@ -1,5 +1,9 @@
 
 
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 Describe 'Scoop Completion Integration Tests' {
     BeforeAll {
         try {
@@ -65,16 +69,24 @@ Describe 'Scoop Completion Integration Tests' {
         }
 
         It 'Does not create Enable-ScoopCompletion when no scoop installation found' {
-            # Mock Get-ScoopCompletionPath to return null (no scoop found)
-            if (Get-Command Get-ScoopCompletionPath -ErrorAction SilentlyContinue) {
-                Mock -CommandName 'Get-ScoopCompletionPath' -MockWith { return $null }
+            $isolatedHome = New-TestTempDirectory -Prefix 'ScoopNone'
+            $originalHome = $env:HOME
+            $originalUserProfile = $env:USERPROFILE
+            try {
+                $env:HOME = $isolatedHome
+                $env:USERPROFILE = $isolatedHome
+                $env:SCOOP = $null
+                $env:SCOOP_GLOBAL = $null
+
+                Remove-Variable -Name 'ScoopCompletionLoaded' -Scope Global -ErrorAction SilentlyContinue
+                . (Join-Path $script:ProfileDir 'scoop-completion.ps1')
+
+                Get-Command Enable-ScoopCompletion -CommandType Function -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
             }
-            # Mock Test-Path to prevent finding any scoop installations
-            Mock-FileSystem -Operation 'Test-Path' -Path '*' -ReturnValue $false -UsePesterMock
-
-            . (Join-Path $script:ProfileDir 'scoop-completion.ps1')
-
-            Get-Command Enable-ScoopCompletion -CommandType Function -ErrorAction SilentlyContinue | Should -Be $null
+            finally {
+                $env:HOME = $originalHome
+                $env:USERPROFILE = $originalUserProfile
+            }
         }
 
         It 'Creates Enable-ScoopCompletion when scoop found via SCOOP environment variable' {

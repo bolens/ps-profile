@@ -93,6 +93,21 @@ Describe 'TestExecution Module Tests' {
             # Verify delays increase exponentially (approximately)
             $state.delays[1].TotalSeconds | Should -BeGreaterThan $state.delays[0].TotalSeconds
         }
+
+        It 'Retries when result reports failures and RetryOnFailure is enabled' {
+            $state = @{ attempts = 0 }
+
+            $result = Invoke-TestWithRetry -ScriptBlock {
+                $state.attempts++
+                if ($state.attempts -lt 2) {
+                    return @{ PassedCount = 0; FailedCount = 1 }
+                }
+                return @{ PassedCount = 1; FailedCount = 0 }
+            } -MaxRetries 2 -RetryOnFailure -RetryDelaySeconds 0 -WarningAction SilentlyContinue
+
+            $state.attempts | Should -Be 2
+            $result.FailedCount | Should -Be 0
+        }
     }
 
     Context 'Measure-TestPerformance' {

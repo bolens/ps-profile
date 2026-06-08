@@ -80,21 +80,21 @@ Describe 'containers-enhanced.ps1 - Graceful Degradation' {
     }
 
     It 'Start-PodmanDesktop handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'podman-desktop' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'podman-desktop' -Available $false
         $output = & { Start-PodmanDesktop -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'podman-desktop not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'podman-desktop'
     }
     
     It 'Start-RancherDesktop handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'rancher-desktop' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'rancher-desktop' -Available $false
         $output = & { Start-RancherDesktop -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'rancher-desktop not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'rancher-desktop'
     }
     
     It 'Convert-ComposeToK8s handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'kompose' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'kompose' -Available $false
         $output = & {
             Convert-ComposeToK8s -ComposeFile 'docker-compose.yml' -ErrorAction SilentlyContinue
         } 2>&1 3>&1 | Out-String
@@ -103,43 +103,43 @@ Describe 'containers-enhanced.ps1 - Graceful Degradation' {
     }
     
     It 'Deploy-Balena handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'balena' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'balena' -Available $false
         $output = & { Deploy-Balena -Application 'test' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'balena not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'balena-cli'
     }
     
     It 'Clean-Containers handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
         $output = & { Clean-Containers -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Export-ContainerLogs handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
         $output = & { Export-ContainerLogs -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Get-ContainerStats handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
         $output = & { Get-ContainerStats -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Backup-ContainerVolumes handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
         $output = & { Backup-ContainerVolumes -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Restore-ContainerVolumes handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
         $output = & {
             Restore-ContainerVolumes -BackupPath (Get-TestArtifactPath -FileName 'backup.tar.gz') -ErrorAction SilentlyContinue
         } 2>&1 3>&1 | Out-String
@@ -147,8 +147,8 @@ Describe 'containers-enhanced.ps1 - Graceful Degradation' {
     }
     
     It 'Health-CheckContainers handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-        Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
         $output = & { Health-CheckContainers -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }

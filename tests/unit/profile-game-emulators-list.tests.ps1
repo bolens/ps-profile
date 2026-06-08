@@ -54,9 +54,9 @@ Describe 'game-emulators.ps1 - Get-EmulatorList' {
 
     Context 'Some emulators available' {
         It 'Returns list of available emulators' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
-            Setup-AvailableCommandMock -CommandName 'ryujinx-canary'
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'ryujinx-canary'
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly'
 
             $result = Get-EmulatorList
 
@@ -71,9 +71,9 @@ Describe 'game-emulators.ps1 - Get-EmulatorList' {
         }
 
         It 'Prefers preferred command variants' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
-            Setup-AvailableCommandMock -CommandName 'dolphin-nightly'
-            Setup-AvailableCommandMock -CommandName 'dolphin'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin'
             Mark-TestCommandsUnavailable -CommandNames @('dolphin-nightly', 'dolphin')
 
             $result = Get-EmulatorList
@@ -84,9 +84,9 @@ Describe 'game-emulators.ps1 - Get-EmulatorList' {
         }
 
         It 'Groups emulators by category' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
-            Setup-AvailableCommandMock -CommandName 'rpcs3'
-            Setup-AvailableCommandMock -CommandName 'xemu'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'rpcs3'
+            Set-TestCommandAvailabilityState -CommandName 'xemu'
 
             $result = Get-EmulatorList
 

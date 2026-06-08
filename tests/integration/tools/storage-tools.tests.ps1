@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for storage tool fragments (rclone, minio).
@@ -41,13 +45,13 @@ Describe 'Storage Tools Integration Tests' {
 
     Context 'rclone helpers (rclone.ps1)' {
         BeforeAll {
-            # Mock Get-Command so Set-AgentModeAlias creates aliases (host may ship rcopy/rclone/rls binaries)
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rclone' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rcopy' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rls' } -MockWith { $null }
-            # Mock rclone command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'rclone' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('rclone', 'rcopy', 'rls')
+            Set-TestCommandAvailabilityState -CommandName 'rclone' -Available $true
             . (Join-Path $script:ProfileDir 'rclone.ps1')
+            Register-TestFragmentAliases @{
+                rcopy = 'Copy-RcloneFile'
+                rls   = 'Get-RcloneFileList'
+            }
         }
 
         It 'Creates Copy-RcloneFile function' {
@@ -63,7 +67,9 @@ Describe 'Storage Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('rclone', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'rclone' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('rclone')
+            Set-TestCommandAvailabilityState -CommandName 'rclone' -Available $false
+            Set-Alias -Name rcopy -Value Copy-RcloneFile -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = rcopy source dest 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'rclone not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'rclone'
@@ -81,11 +87,13 @@ Describe 'Storage Tools Integration Tests' {
 
     Context 'MinIO helpers (minio.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'mc' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'mc' } -MockWith { $null }
-            # Mock mc command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'mc' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('mc')
+            Set-TestCommandAvailabilityState -CommandName 'mc' -Available $true
             . (Join-Path $script:ProfileDir 'minio.ps1')
+            Register-TestFragmentAliases @{
+                'mc-ls' = 'Get-MinioFileList'
+                'mc-cp' = 'Copy-MinioFile'
+            }
         }
 
         It 'Creates Get-MinioFileList function' {
@@ -101,7 +109,9 @@ Describe 'Storage Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('mc', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'mc' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('mc')
+            Set-TestCommandAvailabilityState -CommandName 'mc' -Available $false
+            Set-Alias -Name mc-ls -Value Get-MinioFileList -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = mc-ls path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'mc not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'minio-client'

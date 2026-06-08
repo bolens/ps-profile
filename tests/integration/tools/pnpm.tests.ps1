@@ -45,9 +45,12 @@ Describe 'pnpm Tools Integration Tests' {
 
     Context 'pnpm helpers (pnpm.ps1)' {
         BeforeAll {
-            # Mock pnpm as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'pnpm' -Available $true
             . (Join-Path $script:ProfileDir 'pnpm.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-PnpmInstall function' {
@@ -87,17 +90,13 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Test-PnpmOutdated calls pnpm outdated' {
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'outdated') {
-                    Write-Output 'Package    Current  Wanted  Latest'
-                    Write-Output 'package1  1.0.0    1.1.0   1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output @(
+                'Package    Current  Wanted  Latest'
+                'package1  1.0.0    1.1.0   1.2.0'
+            )
 
             Test-PnpmOutdated
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-PnpmOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -111,16 +110,10 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Update-PnpmPackages calls pnpm update' {
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Packages updated successfully'
 
             Update-PnpmPackages
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-PnpmPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -134,100 +127,54 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Update-PnpmSelf calls pnpm add -g pnpm@latest' {
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'add' -and $args -contains '-g' -and $args -contains 'pnpm@latest') {
-                    Write-Output 'pnpm updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'pnpm updated successfully'
 
             Update-PnpmSelf
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-PnpmSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
         It 'Invoke-PnpmInstall calls pnpm add with packages' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package installed successfully'
             { Invoke-PnpmInstall express -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'add'
-                $script:capturedArgs | Should -Contain 'express'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'add'
+                Assert-TestCommandInvocationContains 'express'
         }
 
         It 'Invoke-PnpmInstall with Dev passes -D flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package installed successfully'
             { Invoke-PnpmInstall typescript -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'add'
-                $script:capturedArgs | Should -Contain '-D'
-                $script:capturedArgs | Should -Contain 'typescript'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'add'
+                Assert-TestCommandInvocationContains '-D'
+                Assert-TestCommandInvocationContains 'typescript'
         }
 
         It 'Invoke-PnpmInstall with Global passes -g flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package installed successfully'
             { Invoke-PnpmInstall nodemon -Global -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'add'
-                $script:capturedArgs | Should -Contain '-g'
-                $script:capturedArgs | Should -Contain 'nodemon'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'add'
+                Assert-TestCommandInvocationContains '-g'
+                Assert-TestCommandInvocationContains 'nodemon'
         }
 
         It 'Invoke-PnpmDevInstall calls pnpm add -D with packages' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package installed successfully'
             { Invoke-PnpmDevInstall typescript -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'add'
-                $script:capturedArgs | Should -Contain '-D'
-                $script:capturedArgs | Should -Contain 'typescript'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'add'
+                Assert-TestCommandInvocationContains '-D'
+                Assert-TestCommandInvocationContains 'typescript'
         }
 
         It 'Invoke-PnpmRun calls pnpm run with script and args' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Script executed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Script executed successfully'
             { Invoke-PnpmRun -Script 'test' -Args @('--watch') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'run'
-                $script:capturedArgs | Should -Contain 'test'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'run'
+                Assert-TestCommandInvocationContains 'test'
         }
 
         It 'Creates Remove-PnpmPackage function' {
@@ -245,53 +192,29 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Remove-PnpmPackage calls pnpm remove with packages' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package removed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package removed successfully'
             { Remove-PnpmPackage express -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'remove'
-                $script:capturedArgs | Should -Contain 'express'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'remove'
+                Assert-TestCommandInvocationContains 'express'
         }
 
         It 'Remove-PnpmPackage with Dev passes -D flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package removed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package removed successfully'
             { Remove-PnpmPackage typescript -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'remove'
-                $script:capturedArgs | Should -Contain '-D'
-                $script:capturedArgs | Should -Contain 'typescript'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'remove'
+                Assert-TestCommandInvocationContains '-D'
+                Assert-TestCommandInvocationContains 'typescript'
         }
 
         It 'Remove-PnpmPackage with Global passes -g flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package removed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package removed successfully'
             { Remove-PnpmPackage nodemon -Global -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'remove'
-                $script:capturedArgs | Should -Contain '-g'
-                $script:capturedArgs | Should -Contain 'nodemon'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'remove'
+                Assert-TestCommandInvocationContains '-g'
+                Assert-TestCommandInvocationContains 'nodemon'
         }
 
         It 'Creates Install-PnpmPackage function' {
@@ -304,18 +227,10 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Install-PnpmPackage calls pnpm install' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Dependencies installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Dependencies installed successfully'
             { Install-PnpmPackage -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
         }
 
         It 'Creates Add-PnpmPackage function' {
@@ -328,19 +243,11 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Add-PnpmPackage calls pnpm add' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package added successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Package added successfully'
             { Add-PnpmPackage express -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'add'
-                $script:capturedArgs | Should -Contain 'express'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'add'
+                Assert-TestCommandInvocationContains 'express'
         }
 
         It 'Creates Add-PnpmDevPackage function' {
@@ -353,20 +260,12 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Add-PnpmDevPackage calls pnpm add -D' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Dev package added successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Dev package added successfully'
             { Add-PnpmDevPackage typescript -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'add'
-                $script:capturedArgs | Should -Contain '-D'
-                $script:capturedArgs | Should -Contain 'typescript'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'add'
+                Assert-TestCommandInvocationContains '-D'
+                Assert-TestCommandInvocationContains 'typescript'
         }
 
         It 'Creates Invoke-PnpmScript function' {
@@ -379,19 +278,11 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Invoke-PnpmScript calls pnpm run' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Script executed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Script executed successfully'
             { Invoke-PnpmScript test -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'run'
-                $script:capturedArgs | Should -Contain 'test'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'run'
+                Assert-TestCommandInvocationContains 'test'
         }
 
         It 'Creates Start-PnpmProject function' {
@@ -404,18 +295,10 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Start-PnpmProject calls pnpm start' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Project started successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Project started successfully'
             { Start-PnpmProject -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'start'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'start'
         }
 
         It 'Creates Build-PnpmProject function' {
@@ -428,19 +311,11 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Build-PnpmProject calls pnpm run build' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Build completed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Build completed successfully'
             { Build-PnpmProject -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'run'
-                $script:capturedArgs | Should -Contain 'build'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'run'
+                Assert-TestCommandInvocationContains 'build'
         }
 
         It 'Creates Test-PnpmProject function' {
@@ -453,19 +328,11 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Test-PnpmProject calls pnpm run test' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Tests completed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Tests completed successfully'
             { Test-PnpmProject -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'run'
-                $script:capturedArgs | Should -Contain 'test'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'run'
+                Assert-TestCommandInvocationContains 'test'
         }
 
         It 'Creates Start-PnpmDev function' {
@@ -478,19 +345,11 @@ Describe 'pnpm Tools Integration Tests' {
         }
 
         It 'Start-PnpmDev calls pnpm run dev' {
-            $script:capturedArgs = $null
-            Mock -CommandName pnpm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Dev server started successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pnpm' -Output 'Dev server started successfully'
             { Start-PnpmDev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pnpm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'run'
-                $script:capturedArgs | Should -Contain 'dev'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'run'
+                Assert-TestCommandInvocationContains 'dev'
         }
 
         It 'Invoke-PnpmInstall emits missing-tool warning when pnpm is unavailable' {
@@ -501,7 +360,7 @@ Describe 'pnpm Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pnpm' -Available $false
 
             $output = Invoke-PnpmInstall install 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pnpm not found'
@@ -537,7 +396,7 @@ Describe 'pnpm Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pnpm' -Available $false
             $script:MissingPnpmOutput = & { . (Join-Path $script:ProfileDir 'pnpm.ps1') } 2>&1 3>&1 | Out-String
         }
 

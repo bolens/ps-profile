@@ -57,9 +57,10 @@ pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1                 
 pwsh -NoProfile -File scripts/utils/code-quality/run-markdownlint.ps1             # Markdownlint
 pwsh -NoProfile -File scripts/utils/code-quality/validate-function-naming.ps1     # Validate function naming
 
-# Run tests
+# Run tests (see docs/guides/TESTING.md for runner flags, batch scripts, and coverage)
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap
 
 # Check for module updates
 pwsh -NoProfile -File scripts/utils/dependencies/check-module-updates.ps1
@@ -259,4 +260,7 @@ Merge and revert commits are allowed.
 - **PROFILE_README.md**: Comprehensive profile documentation
 - **PROFILE_DEBUG.md**: Debug and instrumentation guide
 - **AGENTS.md**: AI coding assistant guidance (general)
+- **docs/guides/TESTING.md**: Primary testing guide (structure, runner flags, batch scripts)
+- **docs/guides/DEVELOPMENT.md**: Setup, workflow, and advanced runner features
+- **docs/examples/TESTING_PATTERNS.md**: Code examples for writing tests
 - **.github/workflows/**: CI workflows

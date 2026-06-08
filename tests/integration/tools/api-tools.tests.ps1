@@ -3,6 +3,10 @@
 # Integration tests for API tools fragment (api-tools.ps1)
 # ===============================================
 
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for API tools fragment (api-tools.ps1).
@@ -52,12 +56,14 @@ Describe 'API Tools Integration Tests' {
 
     Context 'Bruno helpers (Invoke-Bruno)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'bruno' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'bruno' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('bruno')
+            Set-TestCommandAvailabilityState -CommandName 'bruno' -Available $true
             Remove-Item Function:\Invoke-Bruno -ErrorAction SilentlyContinue
             Remove-Item Alias:\bruno -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'api-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                bruno = 'Invoke-Bruno'
+            }
         }
 
         It 'Creates Invoke-Bruno function' {
@@ -85,7 +91,9 @@ Describe 'API Tools Integration Tests' {
             if (Get-Command Clear-CommandCache -ErrorAction SilentlyContinue) {
                 Clear-CommandCache -CommandName 'bruno' -ErrorAction SilentlyContinue
             }
-            Mock-CommandAvailabilityPester -CommandName 'bruno' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('bruno')
+            Set-TestCommandAvailabilityState -CommandName 'bruno' -Available $false
+            Set-Alias -Name bruno -Value Invoke-Bruno -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = bruno -CollectionPath (Get-Location).Path 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'bruno not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'bruno'
@@ -94,12 +102,14 @@ Describe 'API Tools Integration Tests' {
 
     Context 'Hurl helpers (Invoke-Hurl)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'hurl' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'hurl' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('hurl')
+            Set-TestCommandAvailabilityState -CommandName 'hurl' -Available $true
             Remove-Item Function:\Invoke-Hurl -ErrorAction SilentlyContinue
             Remove-Item Alias:\hurl -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'api-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                hurl = 'Invoke-Hurl'
+            }
         }
 
         It 'Creates Invoke-Hurl function' {
@@ -127,7 +137,9 @@ Describe 'API Tools Integration Tests' {
             if (Get-Command Clear-CommandCache -ErrorAction SilentlyContinue) {
                 Clear-CommandCache -CommandName 'hurl' -ErrorAction SilentlyContinue
             }
-            Mock-CommandAvailabilityPester -CommandName 'hurl' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('hurl')
+            Set-TestCommandAvailabilityState -CommandName 'hurl' -Available $false
+            Set-Alias -Name hurl -Value Invoke-Hurl -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $testFile = Get-TestArtifactPath -FileName 'test.hurl'
             $output = hurl -TestFile $testFile 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'hurl not found'
@@ -162,7 +174,7 @@ Describe 'API Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('http', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'http' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'http' -Available $false
             $output = Invoke-Httpie -Url 'https://api.example.com/test' 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'httpie not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'httpie'
@@ -171,12 +183,14 @@ Describe 'API Tools Integration Tests' {
 
     Context 'HTTP Toolkit helpers (Start-HttpToolkit)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'httptoolkit' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'httptoolkit' } -MockWith { $null }
-            # Reload fragment to ensure alias is created
+            Mark-TestCommandsUnavailable -CommandNames @('httptoolkit')
+            Set-TestCommandAvailabilityState -CommandName 'httptoolkit' -Available $true
             Remove-Item Function:\Start-HttpToolkit -ErrorAction SilentlyContinue
             Remove-Item Alias:\httptoolkit -ErrorAction SilentlyContinue
             . (Join-Path $script:ProfileDir 'api-tools.ps1') -ErrorAction SilentlyContinue
+            Register-TestFragmentAliases @{
+                httptoolkit = 'Start-HttpToolkit'
+            }
         }
 
         It 'Creates Start-HttpToolkit function' {
@@ -204,7 +218,9 @@ Describe 'API Tools Integration Tests' {
             if (Get-Command Clear-CommandCache -ErrorAction SilentlyContinue) {
                 Clear-CommandCache -CommandName 'httptoolkit' -ErrorAction SilentlyContinue
             }
-            Mock-CommandAvailabilityPester -CommandName 'httptoolkit' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('httptoolkit')
+            Set-TestCommandAvailabilityState -CommandName 'httptoolkit' -Available $false
+            Set-Alias -Name httptoolkit -Value Start-HttpToolkit -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = httptoolkit 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'httptoolkit not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'httptoolkit'
@@ -233,7 +249,7 @@ Describe 'API Tools Integration Tests' {
             $afterFunction = Get-Command Invoke-Bruno -ErrorAction SilentlyContinue
             $afterFunction | Should -Not -BeNullOrEmpty -Because "Function should still exist after reload"
             # Callable without executing external bruno (profile alias would satisfy Test-CachedCommand)
-            Mock-CommandAvailabilityPester -CommandName 'bruno' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'bruno' -Available $false
             { Invoke-Bruno -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }

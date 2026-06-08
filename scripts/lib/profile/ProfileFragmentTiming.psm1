@@ -9,12 +9,23 @@
 .DESCRIPTION
     Sets up global list for tracking fragment load times.
 #>
+function Set-ProfileFragmentTimingList {
+    [CmdletBinding()]
+    param()
+
+    $timingList = Get-Variable -Name 'PSProfileFragmentTimes' -Scope Global -ValueOnly -ErrorAction SilentlyContinue
+    if ($null -eq $timingList) {
+        $list = [System.Collections.Generic.List[PSCustomObject]]::new()
+        Set-Item -Path 'Variable:Global:PSProfileFragmentTimes' -Value $list -Force
+    }
+}
+
 function Initialize-FragmentTiming {
     [CmdletBinding()]
     param()
 
-    if ($env:PS_PROFILE_DEBUG -and -not $global:PSProfileFragmentTimes) {
-        $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
+    if ($env:PS_PROFILE_DEBUG) {
+        Set-ProfileFragmentTimingList
     }
 }
 
@@ -85,9 +96,7 @@ function Measure-FragmentLoadTime {
                 Timestamp = [DateTime]::Now
             }
 
-            if (-not $global:PSProfileFragmentTimes) {
-                $global:PSProfileFragmentTimes = [System.Collections.Generic.List[PSCustomObject]]::new()
-            }
+            Set-ProfileFragmentTimingList
             $global:PSProfileFragmentTimes.Add($timing)
             
             $debugLevel = 0

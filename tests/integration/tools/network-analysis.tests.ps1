@@ -59,7 +59,7 @@ Describe 'network-analysis.ps1 - Graceful Degradation' {
         }
 
         foreach ($cmd in @('wireshark', 'sniffnet', 'trippy', 'nali', 'ipinfo', 'cloudflared', 'ntfy')) {
-            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
         }
     }
 

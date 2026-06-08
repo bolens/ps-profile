@@ -92,7 +92,7 @@ Guide for writing tests following project standards:
 
 - Test structure with TestSupport.ps1
 - Path resolution in tests
-- Mocking external dependencies
+- Stubbing external dependencies with TestSupport
 - Test data setup and cleanup
 - Best practices for unit and integration tests
 
@@ -150,8 +150,20 @@ Write-MissingToolWarning -Tool 'docker' -InstallHint 'Install with: scoop instal
 
 ## Related Documentation
 
+### Testing
+
+- [Testing Guide](../guides/TESTING.md) - **Primary** testing reference (structure, runner flags, batch scripts)
+- [Testing Patterns](TESTING_PATTERNS.md) - Code examples for writing tests (this directory)
+- [Test Stub Guide](../guides/TEST_VERIFICATION_MOCKING_GUIDE.md) - TestSupport stubs and isolation
+- [Coverage Verification](../guides/VERIFY_COVERAGE.md) - `analyze-coverage.ps1` workflows
+- [Tool Requirements](../guides/TOOL_REQUIREMENTS.md) - Required and optional test tools
+- [Development Guide](../guides/DEVELOPMENT.md) - Setup, workflow, advanced runner features
+
+### General
+
 - [AGENTS.md](../../AGENTS.md) - Quick start guide for AI assistants
 - [Module Loading Standard](../guides/MODULE_LOADING_STANDARD.md) - Detailed module loading specification
+- [Guide Index](../guides/README.md#testing) - Full testing documentation index
 
 ## Contributing
 

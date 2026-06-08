@@ -45,9 +45,12 @@ Describe 'Hatch Tools Integration Tests' {
 
     Context 'Hatch helpers (hatch.ps1)' {
         BeforeAll {
-            # Mock hatch as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'hatch' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'hatch' -Available $true
             . (Join-Path $script:ProfileDir 'hatch.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates New-HatchEnvironment function' {
@@ -60,16 +63,10 @@ Describe 'Hatch Tools Integration Tests' {
         }
 
         It 'New-HatchEnvironment calls hatch env create' {
-            Mock -CommandName hatch -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'env' -and $args -contains 'create') {
-                    Write-Output 'Environment created successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'hatch' -Output 'Environment created successfully'
 
             New-HatchEnvironment
-            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Build-HatchProject function' {
@@ -82,16 +79,10 @@ Describe 'Hatch Tools Integration Tests' {
         }
 
         It 'Build-HatchProject calls hatch build' {
-            Mock -CommandName hatch -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'build') {
-                    Write-Output 'Project built successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'hatch' -Output 'Project built successfully'
 
             Build-HatchProject
-            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Get-HatchVersion function' {
@@ -108,29 +99,17 @@ Describe 'Hatch Tools Integration Tests' {
         }
 
         It 'Get-HatchVersion calls hatch version' {
-            Mock -CommandName hatch -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'version' -and $args.Count -eq 1) {
-                    Write-Output '1.2.3'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'hatch' -Output '1.2.3'
 
             Get-HatchVersion
-            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Set-HatchVersion calls hatch version with version' {
-            Mock -CommandName hatch -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'version' -and $args -contains '2.0.0') {
-                    Write-Output 'Version set to 2.0.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'hatch' -Output 'Version set to 2.0.0'
 
             Set-HatchVersion -Version '2.0.0'
-            Should -Invoke -CommandName 'hatch' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -154,7 +133,7 @@ Describe 'Hatch Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'hatch' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'hatch' -Available $false
             $script:MissingHatchOutput = & { . (Join-Path $script:ProfileDir 'hatch.ps1') } 2>&1 3>&1 | Out-String
         }
 

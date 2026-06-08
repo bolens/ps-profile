@@ -37,7 +37,7 @@ Describe 'database-clients.ps1 - Start-TablePlus' {
 
     Context 'Tool available' {
         It 'Starts tableplus without connection' {
-            Setup-AvailableCommandMock -CommandName 'tableplus'
+            Set-TestCommandAvailabilityState -CommandName 'tableplus'
 
             $result = Start-TablePlus
 
@@ -47,7 +47,7 @@ Describe 'database-clients.ps1 - Start-TablePlus' {
         }
 
         It 'Starts tableplus with connection' {
-            Setup-AvailableCommandMock -CommandName 'tableplus'
+            Set-TestCommandAvailabilityState -CommandName 'tableplus'
 
             $connection = 'my-connection'
             $result = Start-TablePlus -Connection $connection
@@ -58,7 +58,7 @@ Describe 'database-clients.ps1 - Start-TablePlus' {
         }
 
         It 'Handles process start errors' {
-            Setup-AvailableCommandMock -CommandName 'tableplus'
+            Set-TestCommandAvailabilityState -CommandName 'tableplus'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Start-TablePlus -ErrorAction Stop } | Should -Throw '*Access denied*'

@@ -49,42 +49,44 @@ pwsh -NoProfile -File scripts\utils\validate-dependencies.ps1 -InstallMissing
 
 ## Development Workflow
 
+> **Testing docs:** [Testing Guide](TESTING.md) is the canonical reference for structure, runner flags, batch scripts, and coverage. This guide covers setup, workflow, and advanced runner features. See also [Testing Patterns](../examples/TESTING_PATTERNS.md), [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md), and [Coverage Verification](VERIFY_COVERAGE.md).
+
 ### Running Tests
 
 Run all tests:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\run-pester.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1
 ```
 
 Run only the unit suite:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\run-pester.ps1 -Suite Unit
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit
 ```
 
 Run only the integration suite:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\run-pester.ps1 -Suite Integration
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Integration
 ```
 
 Run only the performance suite:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\run-pester.ps1 -Suite Performance
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performance
 ```
 
 Run a specific test file:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\run-pester.ps1 -TestFile tests\unit\library-common.tests.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestFile tests/unit/library-common.tests.ps1
 ```
 
 Run tests with code coverage:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\run-pester.ps1 -Coverage
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage
 ```
 
 Or use task runner shortcuts (works with task, just, make, npm run):
@@ -471,6 +473,19 @@ If `Get-RepoRoot` fails:
 - Verify script path resolution using `$PSScriptRoot`
 
 ## Additional Resources
+
+### Testing documentation
+
+| Guide | Purpose |
+| ----- | ------- |
+| [Testing Guide](TESTING.md) | **Primary** — structure, running tests, runner flags, batch scripts |
+| [Development Guide](DEVELOPMENT.md) | This doc — setup, workflow, advanced runner features |
+| [Testing Patterns](../examples/TESTING_PATTERNS.md) | Code examples for writing tests |
+| [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | TestSupport stubs and isolation |
+| [Coverage Verification](VERIFY_COVERAGE.md) | `analyze-coverage.ps1` workflows |
+| [Tool Requirements](TOOL_REQUIREMENTS.md) | Required and optional test tools |
+
+### General
 
 - [CONTRIBUTING.md](../../CONTRIBUTING.md) - Contribution guidelines
 - [requirements/](../../requirements/) - Modular dependency requirements (PSD1) and install manifests:

@@ -70,7 +70,7 @@ function Measure-TestPerformance {
             $monitorRunspace = [PowerShell]::Create()
             $monitorRunspace.RunspacePool = $monitorPool
             
-            $scriptBlock = {
+            $monitorScriptBlock = {
                 param($TrackMemory, $TrackCPU, $ParentProcessId)
 
                 $samples = New-Object System.Collections.ArrayList
@@ -148,7 +148,7 @@ function Measure-TestPerformance {
                 return $result
             }
             
-            $null = $monitorRunspace.AddScript($scriptBlock)
+            $null = $monitorRunspace.AddScript($monitorScriptBlock)
             $null = $monitorRunspace.AddArgument($TrackMemory)
             $null = $monitorRunspace.AddArgument($TrackCPU)
             $null = $monitorRunspace.AddArgument($PID)

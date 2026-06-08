@@ -45,9 +45,12 @@ Describe 'asdf Tools Integration Tests' {
 
     Context 'asdf helpers (asdf.ps1)' {
         BeforeAll {
-            # Mock asdf as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'asdf' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'asdf' -Available $true
             . (Join-Path $script:ProfileDir 'asdf.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-AsdfTool function' {
@@ -65,16 +68,10 @@ Describe 'asdf Tools Integration Tests' {
         }
 
         It 'Install-AsdfTool calls asdf install' {
-            Mock -CommandName asdf -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install' -and $args -contains 'nodejs' -and $args -contains '18.0.0') {
-                    Write-Output 'Node.js 18.0.0 installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'asdf' -Output 'Node.js 18.0.0 installed successfully'
 
             Install-AsdfTool nodejs 18.0.0
-            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Get-AsdfTools function' {
@@ -87,33 +84,25 @@ Describe 'asdf Tools Integration Tests' {
         }
 
         It 'Get-AsdfTools calls asdf list' {
-            Mock -CommandName asdf -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list' -and $args.Count -eq 1) {
-                    Write-Output 'nodejs'
-                    Write-Output '  18.0.0'
-                    Write-Output 'python'
-                    Write-Output '  3.11.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'asdf' -Output @(
+                'nodejs'
+                '  18.0.0'
+                'python'
+                '  3.11.0'
+            )
 
             Get-AsdfTools
-            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Get-AsdfTools calls asdf list for specific tool' {
-            Mock -CommandName asdf -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list' -and $args -contains 'nodejs') {
-                    Write-Output '  18.0.0'
-                    Write-Output '  20.0.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'asdf' -Output @(
+                '  18.0.0'
+                '  20.0.0'
+            )
 
             Get-AsdfTools nodejs
-            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Remove-AsdfTool function' {
@@ -131,16 +120,10 @@ Describe 'asdf Tools Integration Tests' {
         }
 
         It 'Remove-AsdfTool calls asdf uninstall' {
-            Mock -CommandName asdf -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'uninstall' -and $args -contains 'nodejs' -and $args -contains '18.0.0') {
-                    Write-Output 'Node.js 18.0.0 uninstalled successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'asdf' -Output 'Node.js 18.0.0 uninstalled successfully'
 
             Remove-AsdfTool nodejs 18.0.0
-            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-AsdfSelf function' {
@@ -153,16 +136,10 @@ Describe 'asdf Tools Integration Tests' {
         }
 
         It 'Update-AsdfSelf calls asdf update' {
-            Mock -CommandName asdf -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'asdf updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'asdf' -Output 'asdf updated successfully'
 
             Update-AsdfSelf
-            Should -Invoke -CommandName 'asdf' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -183,7 +160,7 @@ Describe 'asdf Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'asdf' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'asdf' -Available $false
             $script:MissingAsdfOutput = & { . (Join-Path $script:ProfileDir 'asdf.ps1') } 2>&1 3>&1 | Out-String
         }
 

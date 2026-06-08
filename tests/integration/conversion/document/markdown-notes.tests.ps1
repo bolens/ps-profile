@@ -33,15 +33,15 @@ Describe 'Markdown Notes Migration Tests' {
         }
 
         It 'Export-NotionPageToMarkdown warns when no CLI is available' {
-            Mock-CommandAvailabilityPester -CommandName 'notion2md' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'notionify-cli' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'notion2markdown' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'notion2md' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'notionify-cli' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'notion2markdown' -Available $false
 
             { Export-NotionPageToMarkdown -Url 'https://notion.so/test' -ErrorAction Stop } | Should -Throw
         }
 
         It 'Sync-JoplinObsidianNotes warns when job CLI is unavailable' {
-            Mock-CommandAvailabilityPester -CommandName 'job' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'job' -Available $false
 
             { Sync-JoplinObsidianNotes -ErrorAction Stop } | Should -Throw
         }

@@ -42,12 +42,12 @@ function Get-PerformanceGrade {
     elseif ($PerformanceData.CPUUsage -gt 70) { $score -= 5 }
 
     # Convert score to grade
-    switch {
-        ($score -ge 90) { 'A' }
-        ($score -ge 80) { 'B' }
-        ($score -ge 70) { 'C' }
-        ($score -ge 60) { 'D' }
-        default { 'F' }
+    switch ($true) {
+        { $score -ge 90 } { return 'A' }
+        { $score -ge 80 } { return 'B' }
+        { $score -ge 70 } { return 'C' }
+        { $score -ge 60 } { return 'D' }
+        default { return 'F' }
     }
 }
 

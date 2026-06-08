@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for lazydocker tool fragment.
@@ -41,12 +45,12 @@ Describe 'LazyDocker Integration Tests' {
 
     Context 'lazydocker helpers (lazydocker.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'lazydocker' and 'ld' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'lazydocker' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'ld' } -MockWith { $null }
-            # Mock lazydocker command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'lazydocker' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('lazydocker', 'ld')
+            Set-TestCommandAvailabilityState -CommandName 'lazydocker' -Available $true
             . (Join-Path $script:ProfileDir 'lazydocker.ps1')
+            Register-TestFragmentAliases @{
+                ld = 'Invoke-LazyDocker'
+            }
         }
 
         It 'Creates Invoke-LazyDocker function' {
@@ -62,7 +66,9 @@ Describe 'LazyDocker Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('lazydocker', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'lazydocker' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('lazydocker')
+            Set-TestCommandAvailabilityState -CommandName 'lazydocker' -Available $false
+            Set-Alias -Name ld -Value Invoke-LazyDocker -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = ld 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'lazydocker not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'lazydocker'

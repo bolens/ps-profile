@@ -45,9 +45,12 @@ Describe 'swift Tools Integration Tests' {
 
     Context 'swift helpers (swift.ps1)' {
         BeforeAll {
-            # Mock swift as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'swift' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'swift' -Available $true
             . (Join-Path $script:ProfileDir 'swift.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Update-SwiftPackages function' {
@@ -60,16 +63,10 @@ Describe 'swift Tools Integration Tests' {
         }
 
         It 'Update-SwiftPackages calls swift package update' {
-            Mock -CommandName swift -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'package' -and $args -contains 'update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'swift' -Output 'Packages updated successfully'
 
             Update-SwiftPackages
-            Should -Invoke -CommandName 'swift' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-SwiftPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -83,16 +80,10 @@ Describe 'swift Tools Integration Tests' {
         }
 
         It 'Resolve-SwiftPackages calls swift package resolve' {
-            Mock -CommandName swift -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'package' -and $args -contains 'resolve') {
-                    Write-Output 'Packages resolved successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'swift' -Output 'Packages resolved successfully'
 
             Resolve-SwiftPackages
-            Should -Invoke -CommandName 'swift' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Resolve-SwiftPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -116,7 +107,7 @@ Describe 'swift Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'swift' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'swift' -Available $false
             $script:MissingSwiftOutput = & { . (Join-Path $script:ProfileDir 'swift.ps1') } 2>&1 3>&1 | Out-String
         }
 

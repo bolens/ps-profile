@@ -92,8 +92,8 @@ Describe 'containers-enhanced.ps1 - Performance Tests' {
     
     Context 'Command Cache Performance' {
         It 'Test-CachedCommand is fast on repeated calls' {
-            Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'podman' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
 
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             for ($i = 0; $i -lt 100; $i++) {

@@ -69,7 +69,7 @@ Describe 'Infrastructure Tools Integration Tests' {
         }
 
         It 'k alias handles missing tool gracefully and recommends installation' {
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false -Scope It
             # Directly mock Test-HasCommand to ensure it takes precedence (working pattern from tfd test)
             $output = k version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
@@ -90,7 +90,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('kubectl', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false -Scope It
             $output = kn my-context 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
@@ -110,7 +110,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('kubectl', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false -Scope It
             $output = kg pods 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
@@ -130,7 +130,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('kubectl', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false -Scope It
             $output = kd pod my-pod 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
@@ -150,7 +150,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('kubectl', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false -Scope It
             $output = kctx 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'kubectl not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'kubectl'
@@ -172,7 +172,7 @@ Describe 'Infrastructure Tools Integration Tests' {
         }
 
         It 'tf alias handles missing tool gracefully and recommends installation' {
-            Mock-CommandAvailabilityPester -CommandName 'terraform' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false -Scope It
             $output = tf version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
@@ -192,7 +192,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('terraform', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'terraform' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false -Scope It
             $output = tfi 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
@@ -212,7 +212,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('terraform', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'terraform' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false -Scope It
             $output = tfp 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
@@ -232,7 +232,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('terraform', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'terraform' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false -Scope It
             $output = tfa 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'
@@ -252,7 +252,7 @@ Describe 'Infrastructure Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('terraform', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'terraform' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false -Scope It
             $output = tfd 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'terraform not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'terraform'

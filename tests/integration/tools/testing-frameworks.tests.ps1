@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for JavaScript testing framework fragments.
@@ -46,16 +50,21 @@ Describe 'Testing Frameworks Integration Tests' {
                 throw "Testing frameworks fragment not found at: $testingFrameworksPath"
             }
             
-            # Mock Get-Command to return null for tools so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -in @('jest', 'vitest', 'playwright', 'cypress', 'mocha', 'npx') } -MockWith { $null }
-            # Mock commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'jest' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'vitest' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'playwright' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'cypress' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'mocha' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('jest', 'vitest', 'playwright', 'cypress', 'mocha', 'npx')
+            Set-TestCommandAvailabilityState -CommandName 'jest' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'vitest' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'playwright' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'cypress' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'mocha' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $true
             . $testingFrameworksPath
+            Register-TestFragmentAliases @{
+                jest       = 'Invoke-Jest'
+                vitest     = 'Invoke-Vitest'
+                playwright = 'Invoke-Playwright'
+                cypress    = 'Invoke-Cypress'
+                mocha      = 'Invoke-Mocha'
+            }
         }
 
         It 'Creates Invoke-Jest function' {
@@ -71,8 +80,10 @@ Describe 'Testing Frameworks Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('jest or npx', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'jest' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('jest', 'npx')
+            Set-TestCommandAvailabilityState -CommandName 'jest' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+            Set-Alias -Name jest -Value Invoke-Jest -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = jest --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'jest or npx not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('jest', 'nodejs') -ToolType 'node-package'

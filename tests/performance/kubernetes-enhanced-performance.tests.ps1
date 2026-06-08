@@ -70,7 +70,7 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
         }
 
         It 'Exec-KubePod executes quickly when tools not available' {
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false
 
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Exec-KubePod -Pod 'test-pod' -Command 'ls' -ErrorAction SilentlyContinue
@@ -80,7 +80,7 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
         }
 
         It 'Describe-KubeResource executes quickly when tools not available' {
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false
 
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Describe-KubeResource -ResourceType 'pods' -ErrorAction SilentlyContinue
@@ -90,11 +90,12 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
         }
 
         It 'Apply-KubeManifests executes quickly when tools not available' {
-            Mock-CommandAvailabilityPester -CommandName 'kubectl' -Available $false
-            Mock Test-Path -MockWith { return $true }
+            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false
+            $manifestDir = Join-Path $TestDrive 'manifests'
+            New-Item -ItemType Directory -Path $manifestDir -Force | Out-Null
 
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-            Apply-KubeManifests -Path 'manifests/' -ErrorAction SilentlyContinue
+            Apply-KubeManifests -Path $manifestDir -ErrorAction SilentlyContinue
             $stopwatch.Stop()
 
             $stopwatch.ElapsedMilliseconds | Should -BeLessThan $script:MaxFunctionExecTimeMs

@@ -48,8 +48,7 @@ Describe "Modern CLI Tools" {
 
     Context "bat function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'bat' -Available $false -CommandType 'Application' -Scope 'It'
-        }
+            Set-TestCommandAvailabilityState -CommandName 'bat' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command bat -ErrorAction SilentlyContinue)) {
@@ -66,8 +65,7 @@ Describe "Modern CLI Tools" {
 
     Context "fd function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'fd' -Available $false -CommandType 'Application' -Scope 'It'
-        }
+            Set-TestCommandAvailabilityState -CommandName 'fd' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command fd -ErrorAction SilentlyContinue)) {
@@ -84,8 +82,7 @@ Describe "Modern CLI Tools" {
 
     Context "http function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'http' -Available $false -CommandType 'Application' -Scope 'It'
-        }
+            Set-TestCommandAvailabilityState -CommandName 'http' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command http -ErrorAction SilentlyContinue)) {
@@ -102,8 +99,7 @@ Describe "Modern CLI Tools" {
 
     Context "zoxide function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'zoxide' -Available $false -CommandType 'Application' -Scope 'It'
-        }
+            Set-TestCommandAvailabilityState -CommandName 'zoxide' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command zoxide -ErrorAction SilentlyContinue)) {
@@ -120,8 +116,7 @@ Describe "Modern CLI Tools" {
 
     Context "delta function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'delta' -Available $false -CommandType 'Application' -Scope 'It'
-        }
+            Set-TestCommandAvailabilityState -CommandName 'delta' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command delta -ErrorAction SilentlyContinue)) {
@@ -138,8 +133,7 @@ Describe "Modern CLI Tools" {
 
     Context "tldr function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'tldr' -Available $false -CommandType 'Application' -Scope 'It'
-        }
+            Set-TestCommandAvailabilityState -CommandName 'tldr' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command tldr -ErrorAction SilentlyContinue)) {
@@ -156,8 +150,7 @@ Describe "Modern CLI Tools" {
 
     Context "procs function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'procs' -Available $false -CommandType 'Application' -Scope It
-        }
+            Set-TestCommandAvailabilityState -CommandName 'procs' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command procs -ErrorAction SilentlyContinue)) {
@@ -174,8 +167,7 @@ Describe "Modern CLI Tools" {
 
     Context "dust function" {
         BeforeEach {
-            Mock-CommandAvailabilityPester -CommandName 'dust' -Available $false -CommandType 'Application' -Scope 'It'
-        }
+            Set-TestCommandAvailabilityState -CommandName 'dust' -Available $false        }
 
         It "Executes without error when wrapper or binary exists" {
             if (-not (Get-Command dust -ErrorAction SilentlyContinue)) {
@@ -202,10 +194,10 @@ Describe "Modern CLI Tools" {
                 $global:MissingToolWarnings.Clear()
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'fd' -Available $false -CommandType 'Application' -Scope 'It'
-            Mock-CommandAvailabilityPester -CommandName 'rg' -Available $false -CommandType 'Application' -Scope 'It'
-            Mock-CommandAvailabilityPester -CommandName 'zoxide' -Available $false -CommandType 'Application' -Scope 'It'
-            Mock-CommandAvailabilityPester -CommandName 'bat' -Available $false -CommandType 'Application' -Scope 'It'
+            Set-TestCommandAvailabilityState -CommandName 'fd' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'rg' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'zoxide' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'bat' -Available $false
         }
         
         It "Find-WithFd function is defined" {

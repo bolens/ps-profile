@@ -38,7 +38,7 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
         }
 
         It 'Returns error when path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'trufflehog'
+            Set-TestCommandAvailabilityState -CommandName 'trufflehog'
 
             $result = Invoke-TruffleHogScan -Path (Join-Path $script:TestRoot 'Missing') -ErrorAction SilentlyContinue
 
@@ -87,7 +87,7 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
         }
 
         It 'Validates OutputFormat parameter' {
-            Setup-AvailableCommandMock -CommandName 'trufflehog'
+            Set-TestCommandAvailabilityState -CommandName 'trufflehog'
 
             { Invoke-TruffleHogScan -Path $script:TestRepoPath -OutputFormat 'invalid' -ErrorAction Stop } | Should -Throw
         }
@@ -115,7 +115,7 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
         }
 
         It 'Handles trufflehog path not found' {
-            Setup-AvailableCommandMock -CommandName 'trufflehog'
+            Set-TestCommandAvailabilityState -CommandName 'trufflehog'
 
             $result = Invoke-TruffleHogScan -Path (Join-Path $script:TestRoot 'Missing') -ErrorAction SilentlyContinue
 

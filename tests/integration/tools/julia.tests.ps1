@@ -45,9 +45,12 @@ Describe 'julia Tools Integration Tests' {
 
     Context 'julia helpers (julia.ps1)' {
         BeforeAll {
-            # Mock julia as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'julia' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'julia' -Available $true
             . (Join-Path $script:ProfileDir 'julia.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Update-JuliaPackages function' {
@@ -60,16 +63,10 @@ Describe 'julia Tools Integration Tests' {
         }
 
         It 'Update-JuliaPackages calls julia -e "using Pkg; Pkg.update()"' {
-            Mock -CommandName julia -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$ArgumentList)
-                $args = @($ArgumentList)
-                if ($args -contains '-e' -and ($args -join ' ') -match 'Pkg\.update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'julia' -Output 'Packages updated successfully'
 
             Update-JuliaPackages
-            Should -Invoke -CommandName 'julia' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-JuliaPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -83,17 +80,13 @@ Describe 'julia Tools Integration Tests' {
         }
 
         It 'Get-JuliaPackages calls julia -e "using Pkg; Pkg.status()"' {
-            Mock -CommandName julia -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$ArgumentList)
-                $args = @($ArgumentList)
-                if ($args -contains '-e' -and ($args -join ' ') -match 'Pkg\.status') {
-                    Write-Output 'Package    Version'
-                    Write-Output 'package1  1.0.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'julia' -Output @(
+                'Package    Version'
+                'package1  1.0.0'
+            )
 
             Get-JuliaPackages
-            Should -Invoke -CommandName 'julia' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Get-JuliaPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -117,7 +110,7 @@ Describe 'julia Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'julia' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'julia' -Available $false
             $script:MissingJuliaOutput = & { . (Join-Path $script:ProfileDir 'julia.ps1') } 2>&1 3>&1 | Out-String
         }
 

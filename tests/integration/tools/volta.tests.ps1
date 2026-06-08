@@ -45,9 +45,12 @@ Describe 'Volta Tools Integration Tests' {
 
     Context 'Volta helpers (volta.ps1)' {
         BeforeAll {
-            # Mock volta as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'volta' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'volta' -Available $true
             . (Join-Path $script:ProfileDir 'volta.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-VoltaTool function' {
@@ -65,16 +68,10 @@ Describe 'Volta Tools Integration Tests' {
         }
 
         It 'Install-VoltaTool calls volta install' {
-            Mock -CommandName volta -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install') {
-                    Write-Output 'Tool installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'volta' -Output 'Tool installed successfully'
 
             Install-VoltaTool node@18
-            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Pin-VoltaTool function' {
@@ -87,16 +84,10 @@ Describe 'Volta Tools Integration Tests' {
         }
 
         It 'Pin-VoltaTool calls volta pin' {
-            Mock -CommandName volta -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'pin') {
-                    Write-Output 'Tool pinned successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'volta' -Output 'Tool pinned successfully'
 
             Pin-VoltaTool node@18
-            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Get-VoltaTools function' {
@@ -109,17 +100,13 @@ Describe 'Volta Tools Integration Tests' {
         }
 
         It 'Get-VoltaTools calls volta list' {
-            Mock -CommandName volta -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list') {
-                    Write-Output 'node v18.0.0'
-                    Write-Output 'npm v9.0.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'volta' -Output @(
+                'node v18.0.0'
+                'npm v9.0.0'
+            )
 
             Get-VoltaTools
-            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Remove-VoltaTool function' {
@@ -137,16 +124,10 @@ Describe 'Volta Tools Integration Tests' {
         }
 
         It 'Remove-VoltaTool calls volta uninstall' {
-            Mock -CommandName volta -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'uninstall') {
-                    Write-Output 'Tool uninstalled successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'volta' -Output 'Tool uninstalled successfully'
 
             Remove-VoltaTool node@18
-            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-VoltaSelf function' {
@@ -159,16 +140,10 @@ Describe 'Volta Tools Integration Tests' {
         }
 
         It 'Update-VoltaSelf calls volta upgrade' {
-            Mock -CommandName volta -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'upgrade') {
-                    Write-Output 'Volta updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'volta' -Output 'Volta updated successfully'
 
             Update-VoltaSelf
-            Should -Invoke -CommandName 'volta' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -187,7 +162,7 @@ Describe 'Volta unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'volta' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'volta' -Available $false
             . (Join-Path $script:ProfileDir 'volta.ps1')
             Get-Command Install-VoltaTool -ErrorAction SilentlyContinue
         }
@@ -201,7 +176,7 @@ Describe 'Volta unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'volta' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'volta' -Available $false
             . (Join-Path $script:ProfileDir 'volta.ps1')
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'volta not found'

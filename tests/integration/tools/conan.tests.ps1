@@ -45,9 +45,12 @@ Describe 'Conan Tools Integration Tests' {
 
     Context 'Conan helpers (conan.ps1)' {
         BeforeAll {
-            # Mock conan as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'conan' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'conan' -Available $true
             . (Join-Path $script:ProfileDir 'conan.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-ConanPackages function' {
@@ -60,16 +63,10 @@ Describe 'Conan Tools Integration Tests' {
         }
 
         It 'Install-ConanPackages calls conan install' {
-            Mock -CommandName conan -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install') {
-                    Write-Output 'Packages installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'conan' -Output 'Packages installed successfully'
 
             Install-ConanPackages
-            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates New-ConanPackage function' {
@@ -82,16 +79,10 @@ Describe 'Conan Tools Integration Tests' {
         }
 
         It 'New-ConanPackage calls conan create' {
-            Mock -CommandName conan -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'create') {
-                    Write-Output 'Package created successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'conan' -Output 'Package created successfully'
 
             New-ConanPackage ./conanfile.py
-            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Find-ConanPackage function' {
@@ -104,16 +95,10 @@ Describe 'Conan Tools Integration Tests' {
         }
 
         It 'Find-ConanPackage calls conan search' {
-            Mock -CommandName conan -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'search' -and $args -contains 'boost') {
-                    Write-Output 'boost/1.82.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'conan' -Output 'boost/1.82.0'
 
             Find-ConanPackage boost
-            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-ConanPackages function' {
@@ -126,16 +111,10 @@ Describe 'Conan Tools Integration Tests' {
         }
 
         It 'Update-ConanPackages calls conan install --update' {
-            Mock -CommandName conan -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install' -and $args -contains '--update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'conan' -Output 'Packages updated successfully'
 
             Update-ConanPackages
-            Should -Invoke -CommandName 'conan' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -154,7 +133,7 @@ Describe 'Conan unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'conan' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'conan' -Available $false
             . (Join-Path $script:ProfileDir 'conan.ps1')
             Get-Command Install-ConanPackages -ErrorAction SilentlyContinue
         }
@@ -168,7 +147,7 @@ Describe 'Conan unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'conan' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'conan' -Available $false
             . (Join-Path $script:ProfileDir 'conan.ps1')
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'conan not found'

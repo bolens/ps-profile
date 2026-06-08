@@ -6,6 +6,8 @@
 # Pre-initialize script-scoped state for Set-StrictMode compatibility
 $script:OriginalEditorCommands = @{}
 $script:OriginalStartProcess = $null
+$script:TestDocumentLatexEngineOriginal = $null
+$script:TestDocumentLatexEngineWasStubbed = $false
 $global:TestStartProcessMockBlock = $null
 $global:TestCommandInvocationCaptures = [System.Collections.Generic.List[object[]]]::new()
 $global:TestCommandCaptureState = $null
@@ -32,6 +34,10 @@ function Reset-TestIsolationState {
         Restore-TestSupportFunctions
     }
 
+    if (Get-Command Restore-TestTerminalStubs -ErrorAction SilentlyContinue) {
+        Restore-TestTerminalStubs
+    }
+
     Initialize-TestProfileGlobals
 
     if (Get-Command Clear-TestCommandInvocationCapture -ErrorAction SilentlyContinue) {
@@ -46,6 +52,10 @@ function Reset-TestIsolationState {
 
     if (Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue) {
         $global:TestCommandAvailabilityOverrides.Clear()
+    }
+
+    if (Get-Command Clear-TestCommandAvailabilityStub -ErrorAction SilentlyContinue) {
+        Clear-TestCommandAvailabilityStub
     }
 
     if (Get-Variable -Name 'TestRegisteredMockCommands' -Scope Global -ErrorAction SilentlyContinue) {
@@ -455,21 +465,50 @@ function Get-TestCommandInvocationArgs {
 }
 
 function Get-TestCommandInvocationArgsFlat {
-    $capturedArgs = Get-TestCommandInvocationArgs
-    $flatArgs = [System.Collections.Generic.List[object]]::new()
-
-    foreach ($arg in $capturedArgs) {
-        if ($arg -is [System.Array]) {
-            foreach ($nestedArg in $arg) {
-                $flatArgs.Add($nestedArg)
-            }
-        }
-        else {
-            $flatArgs.Add($arg)
+    $queue = [System.Collections.Generic.Queue[object]]::new()
+    foreach ($arg in (Get-TestCommandInvocationArgs)) {
+        if ($null -ne $arg) {
+            $null = $queue.Enqueue($arg)
         }
     }
 
-    return ,@($flatArgs.ToArray())
+    $flatArgs = [System.Collections.Generic.List[object]]::new()
+    while ($queue.Count -gt 0) {
+        $current = $queue.Dequeue()
+        if ($null -eq $current) {
+            continue
+        }
+
+        if ($current -is [System.Array]) {
+            foreach ($item in $current) {
+                if ($null -ne $item) {
+                    $null = $queue.Enqueue($item)
+                }
+            }
+            continue
+        }
+
+        $flatArgs.Add($current)
+    }
+
+    return $flatArgs.ToArray()
+}
+
+function Assert-TestCommandInvokedExactlyOnce {
+    $global:TestCommandInvocationCaptures.Count | Should -Be 1
+}
+
+function Assert-TestCommandInvocationContains {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, ValueFromRemainingArguments = $true)]
+        [string[]]$Expected
+    )
+
+    $argsFlat = @((Get-TestCommandInvocationArgsFlat))
+    foreach ($item in $Expected) {
+        $argsFlat | Should -Contain $item
+    }
 }
 
 function Setup-CapturingCommandMock {
@@ -480,14 +519,18 @@ function Setup-CapturingCommandMock {
 
         [int]$ExitCode = 0,
 
-        [string]$Output = '',
+        [object]$Output = '',
 
-        [scriptblock]$OnInvoke
+        [scriptblock]$OnInvoke,
+
+        [bool]$MarkAvailable = $true
     )
 
     Clear-TestCommandInvocationCapture
 
-    Set-TestCommandAvailabilityState -CommandName $CommandName -Available $true
+    if ($MarkAvailable) {
+        Set-TestCommandAvailabilityState -CommandName $CommandName -Available $true
+    }
 
     if (-not (Get-Variable -Name 'TestRegisteredMockCommands' -Scope Global -ErrorAction SilentlyContinue)) {
         $global:TestRegisteredMockCommands = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
@@ -530,8 +573,16 @@ function Setup-CapturingCommandMock {
         $exitCode = if ($null -ne $captureState -and $captureState.ContainsKey('ExitCode')) { [int]$captureState['ExitCode'] } else { 0 }
         Set-Variable -Name LASTEXITCODE -Value $exitCode -Scope Global -Force
 
-        if ($null -ne $captureState -and $captureState.ContainsKey('Output') -and $captureState['Output']) {
-            Write-Output $captureState['Output']
+        if ($null -ne $captureState -and $captureState.ContainsKey('Output') -and $null -ne $captureState['Output'] -and "$($captureState['Output'])" -ne '') {
+            $outputValue = $captureState['Output']
+            if ($outputValue -is [System.Array]) {
+                foreach ($line in $outputValue) {
+                    Write-Output $line
+                }
+            }
+            else {
+                Write-Output $outputValue
+            }
         }
         elseif ($null -ne $invokeOutput) {
             Write-Output $invokeOutput
@@ -615,9 +666,9 @@ function Restore-TestSupportFunctions {
         . $coreFunctionsPath
     }
 
-    $pesterMocksPath = Join-Path $PSScriptRoot 'Mocking' 'PesterMocks.ps1'
-    if (Test-Path -LiteralPath $pesterMocksPath) {
-        . $pesterMocksPath
+    $testCommandAvailabilityPath = Join-Path $PSScriptRoot 'TestCommandAvailability.ps1'
+    if (Test-Path -LiteralPath $testCommandAvailabilityPath) {
+        . $testCommandAvailabilityPath
     }
 }
 
@@ -689,6 +740,82 @@ function Clear-TestRepoRootSpillover {
     if (Test-Path -LiteralPath $testWorktreePath) {
         Remove-Item -LiteralPath $testWorktreePath -Recurse -Force -ErrorAction SilentlyContinue
     }
+}
+
+<#
+.SYNOPSIS
+    Stubs Ensure-DocumentLatexEngine so document conversion tests avoid LaTeX engine probes.
+#>
+function Set-TestDocumentLatexEngineStub {
+    [CmdletBinding()]
+    param(
+        [string]$Engine = 'pdflatex'
+    )
+
+    if (-not $script:TestDocumentLatexEngineWasStubbed) {
+        $existing = Get-Command Ensure-DocumentLatexEngine -ErrorAction SilentlyContinue
+        if ($existing -and $existing.CommandType -eq 'Function') {
+            $script:TestDocumentLatexEngineOriginal = $existing.ScriptBlock
+        }
+        $script:TestDocumentLatexEngineWasStubbed = $true
+    }
+
+    $stub = [scriptblock]::Create("return '$Engine'")
+    Set-Item -Path 'Function:\global:Ensure-DocumentLatexEngine' -Value $stub -Force -ErrorAction SilentlyContinue
+}
+
+<#
+.SYNOPSIS
+    Restores Ensure-DocumentLatexEngine after document conversion test stubs.
+#>
+function Clear-TestDocumentLatexEngineStub {
+    if (-not $script:TestDocumentLatexEngineWasStubbed) {
+        return
+    }
+
+    Remove-Item -Path 'Function:\Ensure-DocumentLatexEngine' -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path 'Function:\global:Ensure-DocumentLatexEngine' -Force -ErrorAction SilentlyContinue
+
+    if ($script:TestDocumentLatexEngineOriginal) {
+        Set-Item -Path 'Function:\global:Ensure-DocumentLatexEngine' -Value $script:TestDocumentLatexEngineOriginal -Force -ErrorAction SilentlyContinue
+    }
+
+    $script:TestDocumentLatexEngineOriginal = $null
+    $script:TestDocumentLatexEngineWasStubbed = $false
+}
+
+<#
+.SYNOPSIS
+    Configures stub-based mocks for document conversion integration tests.
+.DESCRIPTION
+    Marks pandoc/LaTeX tools unavailable and stubs Ensure-DocumentLatexEngine without
+    Pester Mock Get-Command, which breaks batch runs and fragment dot-sourcing.
+#>
+function Initialize-DocumentConversionTestStubs {
+    [CmdletBinding()]
+    param(
+        [string[]]$UnavailableCommands = @('pandoc', 'pdflatex', 'xelatex', 'luatex'),
+
+        [string]$LatexEngine = 'pdflatex'
+    )
+
+    if (Get-Command Clear-TestCommandInvocationCapture -ErrorAction SilentlyContinue) {
+        Clear-TestCommandInvocationCapture
+    }
+
+    foreach ($cmd in $UnavailableCommands) {
+        Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
+    }
+
+    Set-TestDocumentLatexEngineStub -Engine $LatexEngine
+}
+
+<#
+.SYNOPSIS
+    Clears document conversion test stubs.
+#>
+function Clear-DocumentConversionTestStubs {
+    Clear-TestDocumentLatexEngineStub
 }
 
 <#

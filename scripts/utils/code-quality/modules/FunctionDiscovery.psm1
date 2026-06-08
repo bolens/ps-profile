@@ -50,9 +50,12 @@ function Get-FunctionsFromPath {
     $profileDFiles = @()
     $scriptFiles = @()
 
-    # Find all PowerShell files
+    # Find all PowerShell files (normalize path separators for cross-platform filtering)
     $psFiles = Get-ChildItem -Path $Path -Recurse -Filter '*.ps1' -ErrorAction SilentlyContinue |
-    Where-Object { $_.FullName -notlike '*\node_modules\*' -and $_.FullName -notlike '*\.git\*' }
+    Where-Object {
+        $normalizedPath = $_.FullName.Replace('\', '/')
+        $normalizedPath -notlike '*/node_modules/*' -and $normalizedPath -notlike '*/.git/*'
+    }
 
     foreach ($file in $psFiles) {
         # Use FileContent module if available, otherwise fallback
@@ -64,8 +67,10 @@ function Get-FunctionsFromPath {
         }
         if (-not $content) { continue }
 
+        $normalizedFilePath = $file.FullName.Replace('\', '/')
+
         # Track profile.d files separately
-        if ($file.FullName -like '*\profile.d\*') {
+        if ($normalizedFilePath -like '*/profile.d/*') {
             $profileDFiles += $file
         }
         else {
@@ -90,7 +95,7 @@ function Get-FunctionsFromPath {
                 HasApprovedVerb          = if ($parts.Verb) { Test-ApprovedVerb -Verb $parts.Verb } else { $false }
                 FilePath                 = $file.FullName
                 RelativePath             = $file.FullName.Replace($RepoRoot, '').TrimStart('\', '/')
-                IsProfileDFile           = $file.FullName -like '*\profile.d\*'
+                IsProfileDFile           = $normalizedFilePath -like '*/profile.d/*'
                 UsesSetAgentModeFunction = $usesAgentMode
             }
         }
@@ -115,7 +120,7 @@ function Get-FunctionsFromPath {
                 HasApprovedVerb          = if ($parts.Verb) { Test-ApprovedVerb -Verb $parts.Verb } else { $false }
                 FilePath                 = $file.FullName
                 RelativePath             = $file.FullName.Replace($RepoRoot, '').TrimStart('\', '/')
-                IsProfileDFile           = $file.FullName -like '*\profile.d\*'
+                IsProfileDFile           = $normalizedFilePath -like '*/profile.d/*'
                 UsesSetAgentModeFunction = $true
             }
         }

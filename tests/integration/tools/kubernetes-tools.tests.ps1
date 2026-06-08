@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for Kubernetes tool fragments (helm, minikube).
@@ -41,11 +45,15 @@ Describe 'Kubernetes Tools Integration Tests' {
 
     Context 'Helm helpers (helm.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'helm' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'helm' } -MockWith { $null }
-            # Mock helm command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'helm' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('helm')
+            Set-TestCommandAvailabilityState -CommandName 'helm' -Available $true
             . (Join-Path $script:ProfileDir 'helm.ps1')
+            Register-TestFragmentAliases @{
+                helm         = 'Invoke-Helm'
+                'helm-install' = 'Install-HelmChart'
+                'helm-upgrade' = 'Update-HelmRelease'
+                'helm-list'    = 'Get-HelmReleases'
+            }
         }
 
         It 'Creates Invoke-Helm function' {
@@ -61,7 +69,9 @@ Describe 'Kubernetes Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('helm', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'helm' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('helm')
+            Set-TestCommandAvailabilityState -CommandName 'helm' -Available $false
+            Set-Alias -Name helm -Value Invoke-Helm -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = helm --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'helm not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'helm'
@@ -97,11 +107,13 @@ Describe 'Kubernetes Tools Integration Tests' {
 
     Context 'Minikube helpers (kube.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'minikube' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'minikube' } -MockWith { $null }
-            # Mock minikube command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'minikube' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('minikube')
+            Set-TestCommandAvailabilityState -CommandName 'minikube' -Available $true
             . (Join-Path $script:ProfileDir 'kube.ps1')
+            Register-TestFragmentAliases @{
+                'minikube-start' = 'Start-MinikubeCluster'
+                'minikube-stop'  = 'Stop-MinikubeCluster'
+            }
         }
 
         It 'Creates Start-MinikubeCluster function' {
@@ -117,7 +129,9 @@ Describe 'Kubernetes Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('minikube', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'minikube' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('minikube')
+            Set-TestCommandAvailabilityState -CommandName 'minikube' -Available $false
+            Set-Alias -Name minikube-start -Value Start-MinikubeCluster -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = minikube-start 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'minikube not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'minikube'

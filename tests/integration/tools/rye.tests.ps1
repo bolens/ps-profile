@@ -45,9 +45,12 @@ Describe 'Rye Tools Integration Tests' {
 
     Context 'Rye helpers (rye.ps1)' {
         BeforeAll {
-            # Mock rye as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'rye' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'rye' -Available $true
             . (Join-Path $script:ProfileDir 'rye.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Add-RyePackage function' {
@@ -65,29 +68,17 @@ Describe 'Rye Tools Integration Tests' {
         }
 
         It 'Add-RyePackage calls rye add' {
-            Mock -CommandName rye -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'add') {
-                    Write-Output 'Package added successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'rye' -Output 'Package added successfully'
 
             Add-RyePackage -Packages requests
-            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Add-RyePackage supports --dev flag' {
-            Mock -CommandName rye -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'add' -and $args -contains '--dev') {
-                    Write-Output 'Dev package added successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'rye' -Output 'Dev package added successfully'
 
             Add-RyePackage -Packages pytest -Dev
-            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Remove-RyePackage function' {
@@ -105,16 +96,10 @@ Describe 'Rye Tools Integration Tests' {
         }
 
         It 'Remove-RyePackage calls rye remove' {
-            Mock -CommandName rye -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'remove') {
-                    Write-Output 'Package removed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'rye' -Output 'Package removed successfully'
 
             Remove-RyePackage -Packages requests
-            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Sync-RyeDependencies function' {
@@ -127,16 +112,10 @@ Describe 'Rye Tools Integration Tests' {
         }
 
         It 'Sync-RyeDependencies calls rye sync' {
-            Mock -CommandName rye -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'sync') {
-                    Write-Output 'Dependencies synced successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'rye' -Output 'Dependencies synced successfully'
 
             Sync-RyeDependencies
-            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-RyePackages function' {
@@ -149,29 +128,17 @@ Describe 'Rye Tools Integration Tests' {
         }
 
         It 'Update-RyePackages calls rye sync --update-all for all packages' {
-            Mock -CommandName rye -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'sync' -and $args -contains '--update-all') {
-                    Write-Output 'All packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'rye' -Output 'All packages updated successfully'
 
             Update-RyePackages
-            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Update-RyePackages calls rye add --upgrade for specific packages' {
-            Mock -CommandName rye -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'add' -and $args -contains '--upgrade' -and $args -contains 'requests') {
-                    Write-Output 'requests updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'rye' -Output 'requests updated successfully'
 
             Update-RyePackages -Packages requests
-            Should -Invoke -CommandName 'rye' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -192,7 +159,7 @@ Describe 'Rye Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'rye' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'rye' -Available $false
             $script:MissingRyeOutput = & { . (Join-Path $script:ProfileDir 'rye.ps1') } 2>&1 3>&1 | Out-String
         }
 

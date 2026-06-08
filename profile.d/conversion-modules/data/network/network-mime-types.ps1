@@ -166,8 +166,8 @@ function Initialize-FileConversion-NetworkMimeTypes {
             
             # Add extensions if available
             $fullMime = "$($parsed.Type)/$($parsed.Subtype)"
-            if ($script:MimeTypeToExtension.ContainsKey($fullMime)) {
-                $parsed.Extensions = $script:MimeTypeToExtension[$fullMime]
+            if ($global:MimeTypeToExtension.ContainsKey($fullMime)) {
+                $parsed.Extensions = $global:MimeTypeToExtension[$fullMime]
             }
             
             # Convert to JSON

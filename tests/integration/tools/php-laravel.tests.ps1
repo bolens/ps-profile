@@ -45,13 +45,18 @@ Describe 'PHP and Laravel Tools Integration Tests' {
 
     Context 'PHP helpers (php.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'php' and 'composer' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'php' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'composer' } -MockWith { $null }
-            # Mock php and composer commands before loading fragment - make available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'php' -Available $true
-            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $true
+            Mark-TestCommandsUnavailable -CommandNames @('php', 'composer')
+            Set-TestCommandAvailabilityState -CommandName 'php' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'composer' -Available $true
             . (Join-Path $script:ProfileDir 'php.ps1')
+            Register-TestFragmentAliases @{
+                php      = 'Invoke-Php'
+                composer = 'Invoke-Composer'
+            }
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-Php function' {
@@ -74,7 +79,7 @@ Describe 'PHP and Laravel Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'php' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'php' -Available $false
             $output = & { Invoke-Php --version } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'php not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'php'
@@ -109,7 +114,7 @@ Describe 'PHP and Laravel Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'composer' -Available $false
             $output = & { Invoke-Composer --version } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'composer not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'composer'
@@ -128,19 +133,15 @@ Describe 'PHP and Laravel Tools Integration Tests' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'composer' -Available $true
 
-            Mock -CommandName composer -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'outdated') {
-                    Write-Output 'Package    Current  Latest'
-                    Write-Output 'package1  1.0.0    1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'composer' -Output @(
+                'Package    Current  Latest'
+                'package1  1.0.0    1.2.0'
+            )
 
             Test-ComposerOutdated
-            Should -Invoke -CommandName 'composer' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-ComposerOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -157,18 +158,12 @@ Describe 'PHP and Laravel Tools Integration Tests' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'composer' -Available $true
 
-            Mock -CommandName composer -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'composer' -Output 'Packages updated successfully'
 
             Update-ComposerPackages
-            Should -Invoke -CommandName 'composer' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-ComposerPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -185,31 +180,22 @@ Describe 'PHP and Laravel Tools Integration Tests' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'composer' -Available $true
 
-            Mock -CommandName composer -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'self-update') {
-                    Write-Output 'Composer updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'composer' -Output 'Composer updated successfully'
 
             Update-ComposerSelf
-            Should -Invoke -CommandName 'composer' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-ComposerSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
 
     Context 'Laravel helpers (laravel.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'artisan' and 'art' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'artisan' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'art' } -MockWith { $null }
-            # Mock artisan, art, and composer commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'artisan' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'art' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('artisan', 'art')
+            Set-TestCommandAvailabilityState -CommandName 'artisan' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'art' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'composer' -Available $false
             . (Join-Path $script:ProfileDir 'laravel.ps1')
         }
 
@@ -251,7 +237,7 @@ Describe 'PHP and Laravel Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'composer' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'composer' -Available $false
             $output = & { New-LaravelApp 'my-app' } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'composer not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'composer'
@@ -268,7 +254,7 @@ Describe 'PHP and Laravel Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'artisan' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'artisan' -Available $false
             $output = & { Invoke-LaravelArtisan --version } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'artisan not found'
         }

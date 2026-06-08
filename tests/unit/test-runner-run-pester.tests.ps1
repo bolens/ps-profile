@@ -730,3 +730,97 @@ Describe 'run-pester.ps1 Parameter Combinations' {
         }
     }
 }
+
+Describe 'run-pester.ps1 Additional Flags' {
+    BeforeEach {
+        Clear-TestRunnerFlag
+        Skip-IfModulesUnavailable
+    }
+
+    It 'Accepts MaxParallelThreads as parallel override' {
+        { Invoke-RunPesterDryRun @{ MaxParallelThreads = 4 } } | Should -Not -Throw
+    }
+
+    It 'Accepts Repeat parameter' {
+        { Invoke-RunPesterDryRun @{ Repeat = 2 } } | Should -Not -Throw
+    }
+
+    It 'Accepts FailFast and SkipRemainingOnFailure' {
+        { Invoke-RunPesterDryRun @{ FailFast = $true } } | Should -Not -Throw
+        { Invoke-RunPesterDryRun @{ SkipRemainingOnFailure = $true } } | Should -Not -Throw
+    }
+
+    It 'Accepts ExcludeTag and ExcludeCategories' {
+        { Invoke-RunPesterDryRun @{ ExcludeTag = 'Slow' } } | Should -Not -Throw
+        { Invoke-RunPesterDryRun @{ ExcludeCategories = 'Slow' } } | Should -Not -Throw
+    }
+
+    It 'Accepts Quiet switch' {
+        { Invoke-RunPesterDryRun @{ Quiet = $true } } | Should -Not -Throw
+    }
+
+    It 'Accepts SuppressRetryWarnings with retry configuration' {
+        $result = Invoke-RunPesterDryRun @{
+            MaxRetries             = 2
+            RetryOnFailure         = $true
+            SuppressRetryWarnings  = $true
+        } 2>&1
+
+        $result | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Accepts Randomize and reports randomized order for multiple test files' {
+        $testFiles = @(
+            'tests/unit/library-common.tests.ps1',
+            'tests/unit/test-runner-test-discovery.tests.ps1'
+        ) | ForEach-Object { Join-Path $script:TestRepoRoot $_ } | Where-Object { Test-Path -LiteralPath $_ }
+
+        if (@($testFiles).Count -lt 2) {
+            Set-ItResult -Skipped -Because 'Need at least two test files for randomization check'
+            return
+        }
+
+        { & $script:RunPesterPath -DryRun -Randomize -TestFile $testFiles } | Should -Not -Throw
+        $LASTEXITCODE | Should -Be 0
+    }
+
+    It 'Accepts FailOnWarnings switch' {
+        { Invoke-RunPesterDryRun @{ FailOnWarnings = $true } } | Should -Not -Throw
+    }
+
+    It 'Accepts Progress switch' {
+        { Invoke-RunPesterDryRun @{ Progress = $true } } | Should -Not -Throw
+    }
+
+    It 'Accepts IncludeUntracked with ChangedFiles' {
+        Push-Location $script:TestRepoRoot
+        try {
+            $isGitRepo = git rev-parse --git-dir 2>$null
+            if ($LASTEXITCODE -eq 0) {
+                { Invoke-RunPesterDryRun @{ ChangedFiles = $true; IncludeUntracked = $true } } | Should -Not -Throw
+            }
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'Accepts CodeCoverageOutputFormat values' {
+        foreach ($format in @('JaCoCo', 'CoverageGutters', 'Cobertura')) {
+            { Invoke-RunPesterDryRun @{ Coverage = $true; CodeCoverageOutputFormat = $format } } | Should -Not -Throw
+        }
+    }
+
+    It 'Accepts ExponentialBackoff with MaxRetries' {
+        { Invoke-RunPesterDryRun @{ MaxRetries = 2; ExponentialBackoff = $true } } | Should -Not -Throw
+    }
+
+    It 'Accepts TestTimeoutSeconds override' {
+        { Invoke-RunPesterDryRun @{ TestTimeoutSeconds = 120 } } | Should -Not -Throw
+    }
+
+    It 'Documents SuppressRetryWarnings in comment help' {
+        $content = Get-Content -LiteralPath $script:RunPesterPath -Raw
+        $content | Should -Match '\.PARAMETER SuppressRetryWarnings'
+    }
+}

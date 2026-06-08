@@ -45,9 +45,12 @@ Describe 'Poetry Tools Integration Tests' {
 
     Context 'Poetry helpers (poetry.ps1)' {
         BeforeAll {
-            # Mock poetry as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $true
             . (Join-Path $script:ProfileDir 'poetry.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-PoetryDependencies function' {
@@ -69,17 +72,13 @@ Describe 'Poetry Tools Integration Tests' {
         }
 
         It 'Test-PoetryOutdated calls poetry show --outdated' {
-            Mock -CommandName poetry -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'show' -and $args -contains '--outdated') {
-                    Write-Output 'Package    Version  Latest'
-                    Write-Output 'package1  1.0.0    1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'poetry' -Output @(
+                'Package    Version  Latest'
+                'package1  1.0.0    1.2.0'
+            )
 
             Test-PoetryOutdated
-            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-PoetryOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -93,16 +92,10 @@ Describe 'Poetry Tools Integration Tests' {
         }
 
         It 'Update-PoetryDependencies calls poetry update' {
-            Mock -CommandName poetry -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Dependencies updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'poetry' -Output 'Dependencies updated successfully'
 
             Update-PoetryDependencies
-            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-PoetryDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -116,16 +109,10 @@ Describe 'Poetry Tools Integration Tests' {
         }
 
         It 'Update-PoetrySelf calls poetry self update' {
-            Mock -CommandName poetry -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'self' -and $args -contains 'update') {
-                    Write-Output 'Poetry updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'poetry' -Output 'Poetry updated successfully'
 
             Update-PoetrySelf
-            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-PoetrySelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -139,36 +126,20 @@ Describe 'Poetry Tools Integration Tests' {
         }
 
         It 'Export-PoetryDependencies calls poetry export' {
-            $script:capturedArgs = $null
-            Mock -CommandName poetry -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'requests==2.31.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'poetry' -Output 'requests==2.31.0'
             { Export-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'export'
-                $script:capturedArgs | Should -Contain '-f'
-                $script:capturedArgs | Should -Contain 'requirements.txt'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'export'
+                Assert-TestCommandInvocationContains '-f'
+                Assert-TestCommandInvocationContains 'requirements.txt'
         }
 
         It 'Export-PoetryDependencies with WithoutHashes passes --without-hashes flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName poetry -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'requests==2.31.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'poetry' -Output 'requests==2.31.0'
             { Export-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -WithoutHashes -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'export'
-                $script:capturedArgs | Should -Contain '--without-hashes'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'export'
+                Assert-TestCommandInvocationContains '--without-hashes'
         }
 
         It 'Creates Import-PoetryDependencies function' {
@@ -184,21 +155,12 @@ Describe 'Poetry Tools Integration Tests' {
             $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
-            $script:capturedArgs = @()
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Packages installed successfully'
             { Import-PoetryDependencies -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '-r'
-                $script:capturedArgs | Should -Contain $testFile
-            }
-
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '-r'
+                Assert-TestCommandInvocationContains $testFile
             Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
 
@@ -206,20 +168,11 @@ Describe 'Poetry Tools Integration Tests' {
             $testFile = Get-TestArtifactPath -FileName 'test-requirements.txt'
             'requests==2.31.0' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
-            $script:capturedArgs = @()
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages installed'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Packages installed'
             { Import-PoetryDependencies -Path $testFile -NoDeps -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs -and $script:capturedArgs.Count -gt 0) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '--no-deps'
-            }
-
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '--no-deps'
             Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
 
@@ -234,31 +187,16 @@ Describe 'Poetry Tools Integration Tests' {
         }
 
         It 'Export-PoetryDependencies with Dev passes --dev flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName poetry -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'requests==2.31.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'poetry' -Output 'requests==2.31.0'
             { Export-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'test-requirements.txt') -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'poetry' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'export'
-                $script:capturedArgs | Should -Contain '--dev'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'export' '--with' 'dev'
         }
 
         It 'Import-PoetryDependencies handles missing file gracefully' {
-            $script:capturedArgs = @()
-            Mock -CommandName pip -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages installed'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'pip' -Output 'Packages installed'
             { Import-PoetryDependencies -Path (Get-TestArtifactPath -FileName 'nonexistent.txt') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'pip' -Times 0 -Exactly
+            $global:TestCommandInvocationCaptures.Count | Should -Be 0
         }
     }
 
@@ -290,7 +228,7 @@ Describe 'Poetry Tools Integration Tests' {
             Remove-Item Alias:poetryimport -ErrorAction SilentlyContinue
             Remove-Item Alias:poetryrestore -ErrorAction SilentlyContinue
 
-            Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $false
             $script:MissingPoetryOutput = & { . (Join-Path $script:ProfileDir 'poetry.ps1') } 2>&1 3>&1 | Out-String
         }
 

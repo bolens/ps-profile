@@ -40,7 +40,7 @@ Describe 'game-emulators.ps1 - Start-RetroArch' {
 
     Context 'Tool available' {
         It 'Calls retroarch-nightly when available' {
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly'
 
             Start-RetroArch -ErrorAction SilentlyContinue
 
@@ -51,7 +51,7 @@ Describe 'game-emulators.ps1 - Start-RetroArch' {
 
         It 'Falls back to retroarch when retroarch-nightly not available' {
             Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly' -Available $false
-            Setup-AvailableCommandMock -CommandName 'retroarch'
+            Set-TestCommandAvailabilityState -CommandName 'retroarch'
 
             Start-RetroArch -ErrorAction SilentlyContinue
 
@@ -61,7 +61,7 @@ Describe 'game-emulators.ps1 - Start-RetroArch' {
         }
 
         It 'Calls retroarch with core when provided' {
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly'
 
             Start-RetroArch -Core 'snes9x' -ErrorAction SilentlyContinue
 
@@ -71,7 +71,7 @@ Describe 'game-emulators.ps1 - Start-RetroArch' {
         }
 
         It 'Calls retroarch with ROM path when provided' {
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly'
             $romPath = Join-Path (New-TestTempDirectory -Prefix 'RetroArchRom') 'game.sfc'
             New-Item -ItemType File -Path $romPath -Force | Out-Null
 
@@ -82,7 +82,7 @@ Describe 'game-emulators.ps1 - Start-RetroArch' {
         }
 
         It 'Calls retroarch with fullscreen flag when provided' {
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly'
 
             Start-RetroArch -Fullscreen -ErrorAction SilentlyContinue
 
@@ -91,7 +91,7 @@ Describe 'game-emulators.ps1 - Start-RetroArch' {
         }
 
         It 'Errors when ROM path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'retroarch-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly'
             $missingRom = Join-Path (New-TestTempDirectory -Prefix 'RetroArchMissingRom') 'nonexistent.sfc'
 
             $result = Start-RetroArch -RomPath $missingRom -ErrorAction SilentlyContinue

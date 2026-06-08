@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for JavaScript build tool fragments.
@@ -46,16 +50,21 @@ Describe 'Build Tools Integration Tests' {
                 throw "Build tools fragment not found at: $buildToolsPath"
             }
             
-            # Mock Get-Command to return null for tools so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -in @('turbo', 'esbuild', 'rollup', 'serve', 'http-server', 'npx') } -MockWith { $null }
-            # Mock commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'turbo' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'esbuild' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'rollup' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'serve' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'http-server' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('turbo', 'esbuild', 'rollup', 'serve', 'http-server', 'npx')
+            Set-TestCommandAvailabilityState -CommandName 'turbo' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'esbuild' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'rollup' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'serve' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'http-server' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $true
             . $buildToolsPath
+            Register-TestFragmentAliases @{
+                turbo        = 'Invoke-Turbo'
+                esbuild      = 'Invoke-Esbuild'
+                rollup       = 'Invoke-Rollup'
+                serve        = 'Invoke-Serve'
+                'http-server' = 'Invoke-HttpServer'
+            }
         }
 
         It 'Creates Invoke-Turbo function' {
@@ -71,8 +80,10 @@ Describe 'Build Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('turbo or npx', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'turbo' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('turbo', 'npx')
+            Set-TestCommandAvailabilityState -CommandName 'turbo' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+            Set-Alias -Name turbo -Value Invoke-Turbo -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = turbo --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'turbo or npx not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('turbo', 'nodejs') -ToolType 'node-package'

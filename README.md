@@ -80,7 +80,7 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage
 
 ### Advanced Testing Features
 
-The test runner includes advanced features for robust testing:
+See [docs/guides/TESTING.md](docs/guides/TESTING.md) for the full runner reference (flags, batch scripts, exit codes). The test runner includes advanced features for robust testing:
 
 **New Features:**
 
@@ -133,7 +133,8 @@ Performance test thresholds can be tuned with environment variables:
 - [PROFILE_README.md](PROFILE_README.md) — Comprehensive technical guide
 - [CONTRIBUTING.md](CONTRIBUTING.md) — Development and contribution guidelines
 - [PROFILE_DEBUG.md](PROFILE_DEBUG.md) — Debugging and instrumentation
-- [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) — Developer guide and advanced testing
+- [docs/guides/TESTING.md](docs/guides/TESTING.md) — Primary testing guide (structure, runner flags, batch scripts)
+- [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) — Setup, workflow, and advanced testing
 - [docs/README.md](docs/README.md) — API documentation (auto-generated)
 - [AGENTS.md](AGENTS.md) — AI coding assistant guidance
 - [WARP.md](WARP.md) — WARP terminal guidance

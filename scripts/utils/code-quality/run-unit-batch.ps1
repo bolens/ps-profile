@@ -54,12 +54,18 @@ function Get-PesterRunStats {
     $failed = -1
     $skipped = 0
 
-    if ($Output -match 'Tests Passed:\s*(\d+)') {
-        $passed = [int]$Matches[1]
-        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
-        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
+    # Prefer the final summary line (quiet mode); avoid loose Failed: matches in runner logs.
+    $completedMatches = [regex]::Matches(
+        $Output,
+        'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)'
+    )
+    if ($completedMatches.Count -gt 0) {
+        $last = $completedMatches[$completedMatches.Count - 1]
+        $passed = [int]$last.Groups[1].Value
+        $failed = [int]$last.Groups[2].Value
+        $skipped = [int]$last.Groups[3].Value
     }
-    elseif ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
+    elseif ($Output -match 'Tests Passed:\s*(\d+),\s*Failed:\s*(\d+),\s*Skipped:\s*(\d+)') {
         $passed = [int]$Matches[1]
         $failed = [int]$Matches[2]
         $skipped = [int]$Matches[3]

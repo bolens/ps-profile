@@ -19,43 +19,8 @@ Describe 'Stata Format Conversion Tests' {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'stata.tests.ps1')
 
-        $repoRoot = Split-Path -Parent $script:ProfileDir
-        $pythonModulePath = Join-Path $repoRoot 'scripts' 'lib' 'runtime' 'Python.psm1'
-        if ($pythonModulePath -and -not [string]::IsNullOrWhiteSpace($pythonModulePath) -and (Test-Path -LiteralPath $pythonModulePath)) {
-            Import-Module $pythonModulePath -DisableNameChecking -ErrorAction SilentlyContinue -Force -Global
-        }
-
-        # Initialize Python mocks if in test mode
-        if ($env:PS_PROFILE_TEST_MODE -eq '1' -and (Get-Command Initialize-PythonMocks -ErrorAction SilentlyContinue)) {
-            Initialize-PythonMocks -Scenario 'both'
-        }
-        
-        # Check if Python is available (use real check if not mocked)
-        $script:PythonAvailable = $false
-        $script:PythonCmd = $null
-        if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {
-            try {
-                $script:PythonCmd = Get-PythonPath
-                if ($script:PythonCmd) {
-                    $script:PythonAvailable = $true
-                }
-            }
-            catch {
-                $script:PythonAvailable = $false
-            }
-        }
-        
-        # Check pandas and polars availability (use real check if not mocked)
-        $script:PandasAvailable = $false
-        $script:PolarsAvailable = $false
-        $script:PyreadstatAvailable = $false
-        
-        if ($script:PythonAvailable -and $script:PythonCmd) {
-            if (Get-Command Test-PythonPackageAvailable -ErrorAction SilentlyContinue) {
-                $script:PandasAvailable = Test-PythonPackageAvailable -PackageName 'pandas'
-                $script:PolarsAvailable = Test-PythonPackageAvailable -PackageName 'polars'
-                $script:PyreadstatAvailable = Test-PythonPackageAvailable -PackageName 'pyreadstat'
-            }
+                foreach ($entry in (Get-ConversionPythonTestContext -ProfileDir $script:ProfileDir -IncludePackageAvailability).GetEnumerator()) {
+            Set-Variable -Scope Script -Name $entry.Key -Value $entry.Value
         }
     }
 
@@ -120,10 +85,14 @@ Describe 'Stata Format Conversion Tests' {
             
             if ($error) {
                 $errorMessage = $error.Exception.Message
-                # Error should mention pandas/polars or pyreadstat
-                ($errorMessage -match 'pandas|polars|pyreadstat') | Should -Be $true
-                # Error should include installation recommendation
-                ($errorMessage -match 'uv pip install|pip install') | Should -Be $true
+                $missingDataFrameLib = -not $script:PandasAvailable -and -not $script:PolarsAvailable
+                if ($missingDataFrameLib -or -not $script:PyreadstatAvailable) {
+                    ($errorMessage -match 'pandas|polars|pyreadstat') | Should -Be $true
+                    ($errorMessage -match 'uv pip install|pip install') | Should -Be $true
+                }
+                else {
+                    ($errorMessage -match 'not found|does not exist|cannot find|InputPath|missing|\.dta') | Should -Be $true
+                }
             }
         }
 

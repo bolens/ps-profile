@@ -65,7 +65,7 @@ Describe 'aws.ps1 - Enhanced Functions Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'aws' -Available $false
         }
 
         BeforeAll {

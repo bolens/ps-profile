@@ -11,11 +11,8 @@ BeforeAll {
 
 Describe 'editors.ps1 - Integration Tests' {
     BeforeEach {
-        # Always mock Start-Process to prevent actual process launches
-        Mock Start-Process -MockWith {
-            # Default mock - just capture the call, don't launch anything
-            return $null
-        }
+        Clear-TestStartProcessCapture
+        Reset-TestStartProcessMock
     }
     
     Context 'Module Loading' {
@@ -83,9 +80,9 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Edit-WithVSCode handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'code-insiders' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'code' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'codium' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'code' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'codium' -Available $false
 
             $output = & { Edit-WithVSCode -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'vscode not found'
@@ -100,7 +97,7 @@ Describe 'editors.ps1 - Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'cursor' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cursor' -Available $false
 
             $output = Edit-WithCursor 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cursor not found'
@@ -108,11 +105,11 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Edit-WithNeovim handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'neovim-qt' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'nvim-qt' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'neovim-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'nvim' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'neovim' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'neovim-qt' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'nvim-qt' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'neovim-nightly' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'nvim' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'neovim' -Available $false
 
             $output = & { Edit-WithNeovim -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'neovim-nightly not found'
@@ -127,7 +124,7 @@ Describe 'editors.ps1 - Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'emacs' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'emacs' -Available $false
 
             $output = Launch-Emacs 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'emacs not found'
@@ -135,8 +132,8 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Launch-Lapce handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'lapce-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'lapce' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'lapce-nightly' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'lapce' -Available $false
 
             $output = & { Launch-Lapce -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'lapce-nightly not found'
@@ -144,8 +141,8 @@ Describe 'editors.ps1 - Integration Tests' {
         }
         
         It 'Launch-Zed handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'zed-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'zed' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'zed-nightly' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'zed' -Available $false
 
             $output = & { Launch-Zed -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'zed-nightly not found'

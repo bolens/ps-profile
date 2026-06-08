@@ -86,7 +86,7 @@ Describe 'cloud-enhanced.ps1 - Deploy-Heroku' {
 
     Context 'Tool available' {
         It 'Deploys using git push for deploy action' {
-            Setup-AvailableCommandMock -CommandName 'heroku'
+            Set-TestCommandAvailabilityState -CommandName 'heroku'
             Setup-CapturingCommandMock -CommandName 'git' -Output 'Deployed'
 
             $result = Deploy-Heroku -AppName 'my-app' -Action 'deploy' -ErrorAction SilentlyContinue

@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for JavaScript framework tool fragments (Next.js, Vite, Angular, Vue, Nuxt).
@@ -41,11 +45,15 @@ Describe 'JavaScript Framework Tools Integration Tests' {
 
     Context 'Next.js helpers (nextjs.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'npx' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'npx' } -MockWith { $null }
-            # Mock npx command before loading fragment to prevent conflicts
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('npx')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $true
             . (Join-Path $script:ProfileDir 'nextjs.ps1')
+            Register-TestFragmentAliases @{
+                'next-dev'        = 'Start-NextJsDev'
+                'next-build'      = 'Build-NextJsApp'
+                'next-start'      = 'Start-NextJsProduction'
+                'create-next-app' = 'New-NextJsApp'
+            }
         }
 
         It 'Creates Start-NextJsDev function' {
@@ -62,7 +70,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('npx', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('npx')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+            Set-Alias -Name next-dev -Value Start-NextJsDev -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = next-dev 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'npx not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nodejs' -ToolType 'node-package'
@@ -81,7 +91,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('npx', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('npx')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+            Set-Alias -Name next-build -Value Build-NextJsApp -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = next-build 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'npx not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nodejs' -ToolType 'node-package'
@@ -108,13 +120,16 @@ Describe 'JavaScript Framework Tools Integration Tests' {
 
     Context 'Vite helpers (vite.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'vite' and 'npx' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'vite' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'npx' } -MockWith { $null }
-            # Mock vite and npx commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'vite' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('vite', 'npx')
+            Set-TestCommandAvailabilityState -CommandName 'vite' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $true
             . (Join-Path $script:ProfileDir 'vite.ps1')
+            Register-TestFragmentAliases @{
+                vite         = 'Invoke-Vite'
+                'create-vite' = 'New-ViteProject'
+                'vite-dev'   = 'Start-ViteDev'
+                'vite-build' = 'Build-ViteApp'
+            }
         }
 
         It 'Creates Invoke-Vite function' {
@@ -130,7 +145,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('vite', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'vite' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('vite')
+            Set-TestCommandAvailabilityState -CommandName 'vite' -Available $false
+            Set-Alias -Name vite -Value Invoke-Vite -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = vite --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'vite not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'vite' -ToolType 'node-package'
@@ -166,13 +183,15 @@ Describe 'JavaScript Framework Tools Integration Tests' {
 
     Context 'Angular CLI helpers (angular.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'npx' and 'ng' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'npx' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'ng' } -MockWith { $null }
-            # Mock npx and ng commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'ng' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('npx', 'ng')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'ng' -Available $true
             . (Join-Path $script:ProfileDir 'angular.ps1')
+            Register-TestFragmentAliases @{
+                ng       = 'Invoke-Angular'
+                'ng-new' = 'New-AngularApp'
+                'ng-serve' = 'Start-AngularDev'
+            }
         }
 
         It 'Creates Invoke-Angular function' {
@@ -188,8 +207,10 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('npx or ng', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'ng' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('npx', 'ng')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'ng' -Available $false
+            Set-Alias -Name ng -Value Invoke-Angular -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = ng --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'npx or ng not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('nodejs', '@angular/cli') -ToolType 'node-package'
@@ -216,13 +237,15 @@ Describe 'JavaScript Framework Tools Integration Tests' {
 
     Context 'Vue.js helpers (vue.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'npx' and 'vue' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'npx' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'vue' } -MockWith { $null }
-            # Mock npx and vue commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'vue' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('npx', 'vue')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'vue' -Available $true
             . (Join-Path $script:ProfileDir 'vue.ps1')
+            Register-TestFragmentAliases @{
+                vue        = 'Invoke-Vue'
+                'vue-create' = 'New-VueApp'
+                'vue-serve'  = 'Start-VueDev'
+            }
         }
 
         It 'Creates Invoke-Vue function' {
@@ -238,8 +261,10 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('npx or vue', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
-            Mock-CommandAvailabilityPester -CommandName 'vue' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('npx', 'vue')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'vue' -Available $false
+            Set-Alias -Name vue -Value Invoke-Vue -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = vue --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'npx or vue not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolNames @('nodejs', '@vue/cli') -ToolType 'node-package'
@@ -266,13 +291,16 @@ Describe 'JavaScript Framework Tools Integration Tests' {
 
     Context 'Nuxt.js helpers (nuxt.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'npx' and 'nuxi' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'npx' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'nuxi' } -MockWith { $null }
-            # Mock npx and nuxi commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'nuxi' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('npx', 'nuxi')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'nuxi' -Available $true
             . (Join-Path $script:ProfileDir 'nuxt.ps1')
+            Register-TestFragmentAliases @{
+                nuxi            = 'Invoke-Nuxt'
+                'nuxt-dev'      = 'Start-NuxtDev'
+                'nuxt-build'    = 'Build-NuxtApp'
+                'create-nuxt-app' = 'New-NuxtApp'
+            }
         }
 
         It 'Creates Invoke-Nuxt function' {
@@ -288,7 +316,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('nuxi', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'nuxi' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('nuxi')
+            Set-TestCommandAvailabilityState -CommandName 'nuxi' -Available $false
+            Set-Alias -Name nuxi -Value Invoke-Nuxt -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = nuxi --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'nuxi not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nuxi' -ToolType 'node-package'
@@ -307,7 +337,9 @@ Describe 'JavaScript Framework Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('npx', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'npx' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('npx')
+            Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+            Set-Alias -Name nuxt-dev -Value Start-NuxtDev -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = nuxt-dev 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'npx not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'nodejs' -ToolType 'node-package'

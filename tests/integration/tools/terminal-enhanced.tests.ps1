@@ -71,7 +71,7 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
         }
 
         It 'Launch-Alacritty handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'alacritty' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'alacritty' -Available $false
 
             $output = & { Launch-Alacritty -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'alacritty not found'
@@ -79,7 +79,7 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
         }
 
         It 'Launch-Kitty handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'kitty' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'kitty' -Available $false
 
             $output = & { Launch-Kitty -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'kitty not found'
@@ -87,8 +87,8 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
         }
 
         It 'Launch-WezTerm handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'wezterm-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'wezterm' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'wezterm-nightly' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'wezterm' -Available $false
 
             $output = & { Launch-WezTerm -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'wezterm-nightly not found'
@@ -96,7 +96,7 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
         }
 
         It 'Launch-Tabby handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'tabby' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'tabby' -Available $false
 
             $output = & { Launch-Tabby -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'tabby not found'
@@ -104,7 +104,7 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
         }
 
         It 'Start-Tmux handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'tmux' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'tmux' -Available $false
 
             $output = & { Start-Tmux -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'tmux not found'
@@ -113,7 +113,7 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
 
         It 'Get-TerminalInfo returns empty list when no terminals available' {
             foreach ($cmd in @('alacritty', 'kitty', 'wezterm-nightly', 'wezterm', 'tabby', 'tmux', 'screen')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
 
             $result = Get-TerminalInfo
@@ -126,11 +126,24 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
         BeforeAll {
             . (Join-Path $script:ProfileDir 'terminal-enhanced.ps1')
         }
-        
-        It 'Get-TerminalInfo returns array of terminal objects' {
-            $result = @(Get-TerminalInfo)
 
-            $result | Should -BeOfType [System.Array]
+        BeforeEach {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            if (Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue) {
+                $global:TestCommandAvailabilityOverrides.Clear()
+            }
+        }
+
+        It 'Get-TerminalInfo returns array of terminal objects' {
+            $terminals = Get-TerminalInfo
+            if ($null -eq $terminals) {
+                Set-ItResult -Inconclusive -Because 'No terminal emulators detected on PATH in this environment'
+                return
+            }
+
+            $result = if ($terminals -is [System.Array]) { @($terminals) } else { @($terminals) }
             if ($result.Count -eq 0) {
                 Set-ItResult -Inconclusive -Because 'No terminal emulators detected on PATH in this environment'
                 return

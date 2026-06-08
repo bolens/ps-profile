@@ -123,7 +123,7 @@ $categories = @(
     @{ Name = 'Terminal'; Path = 'tests/integration/terminal'; Priority = 3; Type = 'Integration' },
     @{ Name = 'System'; Path = 'tests/integration/system'; Priority = 3; Type = 'Integration' },
     @{ Name = 'Test-Runner'; Path = 'tests/integration/test-runner'; Priority = 3; Type = 'Integration' },
-    @{ Name = 'Tools'; Path = 'tests/integration/tools'; Priority = 3; Type = 'Integration' },
+    @{ Name = 'Tools'; Path = 'tests/integration/tools'; Priority = 3; Type = 'Integration'; UsePerFileBatch = $true; BatchScript = 'run-tools-integration-batch.ps1' },
     
     # Priority 4: Large categories (run after fixing smaller issues)
     @{ Name = 'Conversion-Data'; Path = 'tests/integration/conversion/data'; Priority = 4; Type = 'Integration' },
@@ -131,7 +131,7 @@ $categories = @(
     @{ Name = 'Conversion-Media'; Path = 'tests/integration/conversion/media'; Priority = 4; Type = 'Integration' },
     
     # Priority 5: Unit tests (run after integration tests are stable)
-    @{ Name = 'Unit'; Path = 'tests/unit'; Priority = 5; Type = 'Unit' },
+    @{ Name = 'Unit'; Path = 'tests/unit'; Priority = 5; Type = 'Unit'; UsePerFileBatch = $true; BatchScript = 'run-unit-batch.ps1' },
     
     # Priority 6: Performance tests (run last)
     @{ Name = 'Performance'; Path = 'tests/performance'; Priority = 6; Type = 'Performance' }
@@ -184,7 +184,21 @@ foreach ($cat in $categories) {
         # This avoids recursion detection and environment variable issues
         # Ensure TestSupport.ps1 is available by setting working directory and loading it
         $testSupportPath = Join-Path $repoRoot 'tests' 'TestSupport.ps1'
-        $testScript = @"
+        if ($cat.UsePerFileBatch) {
+            $batchScriptName = if ($cat.BatchScript) { $cat.BatchScript } else { 'run-tools-integration-batch.ps1' }
+            $batchRunnerPath = Join-Path $repoRoot 'scripts' 'utils' 'code-quality' $batchScriptName
+            $testScript = @"
+`$env:PS_PROFILE_TEST_RUNNER_ACTIVE = `$null
+`$env:PS_PROFILE_TEST_MODE = '1'
+Set-Location '$($repoRoot.Replace("'", "''"))'
+if (Test-Path '$($testSupportPath.Replace("'", "''"))') {
+    . '$($testSupportPath.Replace("'", "''"))'
+}
+& '$($batchRunnerPath.Replace("'", "''"))'
+"@
+        }
+        else {
+            $testScript = @"
 `$env:PS_PROFILE_TEST_RUNNER_ACTIVE = `$null
 `$env:PS_PROFILE_TEST_MODE = '1'
 Set-Location '$($repoRoot.Replace("'", "''"))'
@@ -193,6 +207,7 @@ if (Test-Path '$($testSupportPath.Replace("'", "''"))') {
 }
 & '$($runPesterPath.Replace("'", "''"))' -TestFile '$($cat.Path.Replace("'", "''"))' -OutputFormat Minimal -OutputPath '$($resultPath.Replace("'", "''"))'
 "@
+        }
         
         # Execute in separate process
         $stdoutPath = Join-Path $reportDir "$($cat.Name)-stdout.txt"
@@ -241,7 +256,29 @@ if (Test-Path '$($testSupportPath.Replace("'", "''"))') {
         $skipped = 0
         $total = 0
         
-        if (Test-Path $resultPath) {
+        if ($cat.UsePerFileBatch -and (Test-Path $stdoutPath)) {
+            try {
+                $batchOutput = Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction Stop
+                $statMatches = [regex]::Matches($batchOutput, '(?m)^\s+(\d+)P / (\d+)F / (\d+)S\s*$')
+                foreach ($statMatch in $statMatches) {
+                    $passed += [int]$statMatch.Groups[1].Value
+                    $failed += [int]$statMatch.Groups[2].Value
+                    $skipped += [int]$statMatch.Groups[3].Value
+                }
+                $total = $passed + $failed + $skipped
+                if ($total -eq 0 -and $process.ExitCode -ne 0) {
+                    $failed = 1
+                    $total = 1
+                }
+            }
+            catch {
+                if ($process.ExitCode -ne 0) {
+                    $failed = 1
+                    $total = 1
+                }
+            }
+        }
+        elseif (Test-Path $resultPath) {
             try {
                 [xml]$xmlResult = Get-Content $resultPath -ErrorAction Stop
                 if ($xmlResult -and $xmlResult.'test-results') {

@@ -37,7 +37,7 @@ Describe 'api-tools.ps1 - Start-HttpToolkit' {
 
     Context 'Tool available' {
         It 'Starts httptoolkit with default port' {
-            Setup-AvailableCommandMock -CommandName 'httptoolkit'
+            Set-TestCommandAvailabilityState -CommandName 'httptoolkit'
 
             $result = Start-HttpToolkit
 
@@ -49,7 +49,7 @@ Describe 'api-tools.ps1 - Start-HttpToolkit' {
         }
 
         It 'Starts httptoolkit with specified port' {
-            Setup-AvailableCommandMock -CommandName 'httptoolkit'
+            Set-TestCommandAvailabilityState -CommandName 'httptoolkit'
 
             $result = Start-HttpToolkit -Port 9000
 
@@ -60,7 +60,7 @@ Describe 'api-tools.ps1 - Start-HttpToolkit' {
         }
 
         It 'Includes passthrough parameter when specified' {
-            Setup-AvailableCommandMock -CommandName 'httptoolkit'
+            Set-TestCommandAvailabilityState -CommandName 'httptoolkit'
 
             $result = Start-HttpToolkit -Passthrough
 
@@ -70,7 +70,7 @@ Describe 'api-tools.ps1 - Start-HttpToolkit' {
         }
 
         It 'Uses PassThru and NoNewWindow parameters for Start-Process' {
-            Setup-AvailableCommandMock -CommandName 'httptoolkit'
+            Set-TestCommandAvailabilityState -CommandName 'httptoolkit'
 
             $result = Start-HttpToolkit
 
@@ -81,7 +81,7 @@ Describe 'api-tools.ps1 - Start-HttpToolkit' {
         }
 
         It 'Handles Start-Process errors' {
-            Setup-AvailableCommandMock -CommandName 'httptoolkit'
+            Set-TestCommandAvailabilityState -CommandName 'httptoolkit'
             Set-TestStartProcessFailure -Message 'Failed to start process'
 
             { Start-HttpToolkit -ErrorAction Stop } | Should -Throw '*Failed to start process*'

@@ -38,7 +38,7 @@ Describe 'game-dev.ps1 - Build-GodotProject' {
 
     Context 'Project path validation' {
         It 'Returns null when project path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'godot'
+            Set-TestCommandAvailabilityState -CommandName 'godot'
             $missingProject = Join-Path (New-TestTempDirectory -Prefix 'GodotMissingProject') 'nonexistent'
 
             $result = Build-GodotProject -ProjectPath $missingProject -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
@@ -73,7 +73,7 @@ Describe 'game-dev.ps1 - Build-GodotProject' {
         }
 
         It 'Warns when neither ExportPreset nor Platform provided' {
-            Setup-AvailableCommandMock -CommandName 'godot'
+            Set-TestCommandAvailabilityState -CommandName 'godot'
 
             $result = Build-GodotProject -ProjectPath $script:TestProjectDir -ErrorAction SilentlyContinue
 

@@ -40,7 +40,7 @@ Describe 'security-tools.ps1 - Invoke-YaraScan' {
         }
 
         It 'Returns error when file path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'yara'
+            Set-TestCommandAvailabilityState -CommandName 'yara'
 
             $result = Invoke-YaraScan -FilePath (Join-Path $script:TestRoot 'Missing.txt') -RulesPath $script:TestRulesPath -ErrorAction SilentlyContinue
 
@@ -48,7 +48,7 @@ Describe 'security-tools.ps1 - Invoke-YaraScan' {
         }
 
         It 'Returns error when rules path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'yara'
+            Set-TestCommandAvailabilityState -CommandName 'yara'
 
             $result = Invoke-YaraScan -FilePath $script:TestFile -RulesPath (Join-Path $script:TestRoot 'Missing.yar') -ErrorAction SilentlyContinue
 
@@ -77,7 +77,7 @@ Describe 'security-tools.ps1 - Invoke-YaraScan' {
         }
 
         It 'Handles YARA file path not found' {
-            Setup-AvailableCommandMock -CommandName 'yara'
+            Set-TestCommandAvailabilityState -CommandName 'yara'
 
             $result = Invoke-YaraScan -FilePath (Join-Path $script:TestRoot 'Missing.exe') -RulesPath $script:TestRulesPath -ErrorAction SilentlyContinue
 
@@ -85,7 +85,7 @@ Describe 'security-tools.ps1 - Invoke-YaraScan' {
         }
 
         It 'Handles YARA rules path not found' {
-            Setup-AvailableCommandMock -CommandName 'yara'
+            Set-TestCommandAvailabilityState -CommandName 'yara'
 
             $result = Invoke-YaraScan -FilePath $script:TestFile -RulesPath (Join-Path $script:TestRoot 'Missing.yar') -ErrorAction SilentlyContinue
 

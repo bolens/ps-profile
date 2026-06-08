@@ -67,7 +67,7 @@ Describe '3d-cad.ps1 - Integration Tests' {
         }
 
         It 'Launch-Blender handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'blender' -Available $false
 
             $output = & { Launch-Blender -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'blender not found'
@@ -75,7 +75,7 @@ Describe '3d-cad.ps1 - Integration Tests' {
         }
 
         It 'Launch-FreeCAD handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'freecad' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'freecad' -Available $false
 
             $output = & { Launch-FreeCAD -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'freecad not found'
@@ -83,8 +83,8 @@ Describe '3d-cad.ps1 - Integration Tests' {
         }
 
         It 'Launch-OpenSCAD handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'openscad-dev' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'openscad' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'openscad-dev' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'openscad' -Available $false
 
             $output = & { Launch-OpenSCAD -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'openscad-dev not found'
@@ -92,7 +92,7 @@ Describe '3d-cad.ps1 - Integration Tests' {
         }
 
         It 'Convert-3DFormat handles missing blender gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'blender' -Available $false
 
             $output = & {
                 Convert-3DFormat -InputFile 'model.obj' -OutputFile 'model.stl' -ErrorAction SilentlyContinue
@@ -102,7 +102,7 @@ Describe '3d-cad.ps1 - Integration Tests' {
         }
 
         It 'Render-3DScene handles missing blender gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'blender' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'blender' -Available $false
 
             $output = & {
                 Render-3DScene -ProjectPath (Get-TestArtifactPath -FileName 'scene.blend') -OutputPath (Get-TestArtifactPath -FileName 'render.png') -ErrorAction SilentlyContinue

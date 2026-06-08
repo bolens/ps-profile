@@ -45,9 +45,12 @@ Describe 'dotnet Tools Integration Tests' {
 
     Context 'dotnet helpers (dotnet.ps1)' {
         BeforeAll {
-            # Mock dotnet as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'dotnet' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'dotnet' -Available $true
             . (Join-Path $script:ProfileDir 'dotnet.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-DotnetOutdated function' {
@@ -60,17 +63,13 @@ Describe 'dotnet Tools Integration Tests' {
         }
 
         It 'Test-DotnetOutdated calls dotnet list package --outdated' {
-            Mock -CommandName dotnet -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list' -and $args -contains 'package' -and $args -contains '--outdated') {
-                    Write-Output 'Package    Version  Latest'
-                    Write-Output 'package1  1.0.0    1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'dotnet' -Output @(
+                'Package    Version  Latest'
+                'package1  1.0.0    1.2.0'
+            )
 
             Test-DotnetOutdated
-            Should -Invoke -CommandName 'dotnet' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-DotnetOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -93,16 +92,10 @@ Describe 'dotnet Tools Integration Tests' {
         }
 
         It 'Update-DotnetTools calls dotnet tool update --all' {
-            Mock -CommandName dotnet -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'tool' -and $args -contains 'update' -and $args -contains '--all') {
-                    Write-Output 'All tools updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'dotnet' -Output 'All tools updated successfully'
 
             Update-DotnetTools
-            Should -Invoke -CommandName 'dotnet' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-DotnetTools -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -126,7 +119,7 @@ Describe 'dotnet Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'dotnet' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'dotnet' -Available $false
             $script:MissingDotnetOutput = & { . (Join-Path $script:ProfileDir 'dotnet.ps1') } 2>&1 3>&1 | Out-String
         }
 

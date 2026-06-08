@@ -59,17 +59,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'uv'
             }
             finally {
@@ -85,26 +81,21 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
                 
-                # Mock uv python list to return a version
-                Mock -CommandName uv -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains 'python' -and $ArgumentList -contains 'list') {
-                        $global:LASTEXITCODE = 0
-                        Write-Output "Python 3.11.5"
+                Setup-CapturingCommandMock -CommandName 'uv' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains 'python' -and $Arguments -contains 'list') {
+                        Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+                        return 'Python 3.11.5'
                     }
                 }
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 # Should contain uv indicator (may be "uv" or "uv:py3.11.5" depending on version detection)
                 $outputString | Should -Match 'uv'
             }
@@ -122,17 +113,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path ".python-version" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'uv'
             }
             finally {
@@ -149,17 +136,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType Directory -Path ".venv" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'uv'
             }
             finally {
@@ -176,17 +159,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'uv' -Available $false -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $false
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'uv'
             }
             finally {
@@ -203,19 +182,18 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'uv' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
                 
-                # Mock uv python list to fail
-                Mock -CommandName uv -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains 'python') {
-                        $global:LASTEXITCODE = 1
-                        throw "Command failed"
+                Setup-CapturingCommandMock -CommandName 'uv' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains 'python') {
+                        Set-Variable -Name LASTEXITCODE -Value 1 -Scope Global -Force
+                        throw 'Command failed'
                     }
                 }
-                
-                Mock -CommandName Write-Host -MockWith { }
-                
+
+                Register-TestWriteHostCapture
+
                 { prompt | Out-Null } | Should -Not -Throw
             }
             finally {
@@ -243,17 +221,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "package.json" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'npm' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'npm'
             }
             finally {
@@ -269,27 +243,22 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "package.json" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
-                Mock-CommandAvailabilityPester -CommandName 'node' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'npm' -Available $true
+                Set-TestCommandAvailabilityState -CommandName 'node' -Available $true
                 
-                # Mock node --version to return a version
-                Mock -CommandName node -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains '--version') {
-                        $global:LASTEXITCODE = 0
-                        Write-Output "v20.10.0"
+                Setup-CapturingCommandMock -CommandName 'node' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains '--version') {
+                        Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+                        return 'v20.10.0'
                     }
                 }
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 # Should contain npm indicator (may be "npm" or "npm:node20.10.0" depending on version detection)
                 $outputString | Should -Match 'npm'
             }
@@ -307,17 +276,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "package.json" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'npm' -Available $false -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'npm' -Available $false
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'npm'
             }
             finally {
@@ -334,27 +299,22 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "package.json" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'npm' -Available $true
                 
-                # Mock node --version to fail
-                Mock -CommandName node -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains '--version') {
-                        $global:LASTEXITCODE = 1
-                        throw "Command failed"
+                Setup-CapturingCommandMock -CommandName 'node' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains '--version') {
+                        Set-Variable -Name LASTEXITCODE -Value 1 -Scope Global -Force
+                        throw 'Command failed'
                     }
                 }
-                
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
-                
+
+                Register-TestWriteHostCapture
+
                 { prompt | Out-Null } | Should -Not -Throw
-                
+
                 # Should still show npm even if node version fails
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'npm'
             }
             finally {
@@ -374,17 +334,13 @@ Describe "SmartPrompt Detection Tests" {
                 
                 Push-Location $testDir
                 
-                Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'npm' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'npm'
             }
             finally {
@@ -408,15 +364,11 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "Cargo.toml" -Force | Out-Null
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'rust'
             }
             finally {
@@ -432,25 +384,21 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "Cargo.toml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'rustc' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'rustc' -Available $true
                 
-                Mock -CommandName rustc -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains '--version') {
-                        $global:LASTEXITCODE = 0
-                        Write-Output "rustc 1.75.0"
+                Setup-CapturingCommandMock -CommandName 'rustc' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains '--version') {
+                        Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+                        return 'rustc 1.75.0'
                     }
                 }
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'rust'
             }
             finally {
@@ -467,17 +415,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "Cargo.toml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'rustc' -Available $false -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'rustc' -Available $false
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'rust'
             }
             finally {
@@ -501,15 +445,11 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "go.mod" -Force | Out-Null
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'go'
             }
             finally {
@@ -525,25 +465,21 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "go.mod" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'go' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'go' -Available $true
                 
-                Mock -CommandName go -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains 'version') {
-                        $global:LASTEXITCODE = 0
-                        Write-Output "go version go1.21.5"
+                Setup-CapturingCommandMock -CommandName 'go' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains 'version') {
+                        Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+                        return 'go version go1.21.5'
                     }
                 }
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'go'
             }
             finally {
@@ -560,17 +496,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "go.mod" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'go' -Available $false -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'go' -Available $false
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'go'
             }
             finally {
@@ -594,15 +526,11 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "Dockerfile" -Force | Out-Null
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'docker'
             }
             finally {
@@ -618,15 +546,11 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "Dockerfile" -Force | Out-Null
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'docker'
             }
             finally {
@@ -643,15 +567,11 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "docker-compose.yml" -Force | Out-Null
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'docker'
             }
             finally {
@@ -675,17 +595,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "poetry.lock" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'poetry'
             }
             finally {
@@ -701,25 +617,21 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "poetry.lock" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $true
                 
-                Mock -CommandName poetry -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains 'env' -and $ArgumentList -contains 'info') {
-                        $global:LASTEXITCODE = 0
-                        Write-Output "Python: 3.11.5"
+                Setup-CapturingCommandMock -CommandName 'poetry' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains 'env' -and $Arguments -contains 'info') {
+                        Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+                        return 'Python: 3.11.5'
                     }
                 }
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'poetry'
             }
             finally {
@@ -736,17 +648,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'poetry'
             }
             finally {
@@ -763,17 +671,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "poetry.lock" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'poetry' -Available $false -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'poetry' -Available $false
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'poetry'
             }
             finally {
@@ -797,17 +701,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pnpm-lock.yaml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'pnpm' -Available $true
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Not -Match 'pnpm'
             }
             finally {
@@ -823,25 +723,21 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pnpm-lock.yaml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'pnpm' -Available $true
                 
-                Mock -CommandName pnpm -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains '--version') {
-                        $global:LASTEXITCODE = 0
-                        Write-Output "8.15.0"
+                Setup-CapturingCommandMock -CommandName 'pnpm' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains '--version') {
+                        Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+                        return '8.15.0'
                     }
                 }
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'pnpm'
             }
             finally {
@@ -858,25 +754,21 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "yarn.lock" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'yarn' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'yarn' -Available $true
                 
-                Mock -CommandName yarn -MockWith {
-                    param([string[]]$ArgumentList)
-                    if ($ArgumentList -contains '--version') {
-                        $global:LASTEXITCODE = 0
-                        Write-Output "3.6.4"
+                Setup-CapturingCommandMock -CommandName 'yarn' -OnInvoke {
+                    param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+                    if ($Arguments -contains '--version') {
+                        Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+                        return '3.6.4'
                     }
                 }
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'yarn'
             }
             finally {
@@ -893,17 +785,13 @@ Describe "SmartPrompt Detection Tests" {
                 Push-Location $testDir
                 New-Item -ItemType File -Path "pnpm-lock.yaml" -Force | Out-Null
                 
-                Mock-CommandAvailabilityPester -CommandName 'pnpm' -Available $false -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'pnpm' -Available $false
                 
-                $script:capturedOutput = @()
-                Mock -CommandName Write-Host -MockWith {
-                    param([object]$Object)
-                    $script:capturedOutput += $Object
-                }
+                Register-TestWriteHostCapture
                 
                 prompt | Out-Null
                 
-                $outputString = $script:capturedOutput -join ''
+                $outputString = Get-TestWriteHostOutputString
                 $outputString | Should -Match 'pnpm'
             }
             finally {

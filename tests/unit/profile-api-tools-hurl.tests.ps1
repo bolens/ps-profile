@@ -75,7 +75,7 @@ Describe 'api-tools.ps1 - Invoke-Hurl' {
         }
 
         It 'Returns error when test file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'hurl'
+            Set-TestCommandAvailabilityState -CommandName 'hurl'
             $missingFile = Join-Path (New-TestTempDirectory -Prefix 'HurlMissingParent') 'test.hurl'
 
             $result = Invoke-Hurl -TestFile $missingFile -ErrorAction SilentlyContinue

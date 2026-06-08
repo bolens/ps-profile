@@ -75,8 +75,8 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
         }
         
         It 'Connect-Database handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'dbeaver' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'dbeaver' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'psql' -Available $false
             
             $output = & {
                 Connect-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
@@ -86,7 +86,7 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
         }
         
         It 'Query-Database handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'psql' -Available $false
             
             $output = & {
                 Query-Database -DatabaseType PostgreSQL -Database 'testdb' -Query 'SELECT 1' -ErrorAction SilentlyContinue
@@ -96,7 +96,7 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
         }
         
         It 'Export-Database handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'pg_dump' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pg_dump' -Available $false
             
             $output = & {
                 Export-Database -DatabaseType PostgreSQL -Database 'testdb' -OutputPath (Get-TestArtifactPath -FileName 'backup.sql') -ErrorAction SilentlyContinue
@@ -109,7 +109,7 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
             $testFile = Join-Path $TestDrive 'backup.sql'
             'CREATE TABLE test (id INT);' | Out-File -FilePath $testFile
             
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'psql' -Available $false
             
             $output = & {
                 Import-Database -DatabaseType PostgreSQL -Database 'testdb' -InputPath $testFile -ErrorAction SilentlyContinue
@@ -119,7 +119,7 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
         }
         
         It 'Backup-Database handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'pg_dump' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pg_dump' -Available $false
             
             $output = & {
                 Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
@@ -132,7 +132,7 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
             $testFile = Join-Path $TestDrive 'backup.dump'
             'test content' | Out-File -FilePath $testFile
             
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'psql' -Available $false
             
             $output = & {
                 Restore-Database -DatabaseType PostgreSQL -Database 'testdb' -BackupPath $testFile -ErrorAction SilentlyContinue
@@ -142,7 +142,7 @@ Describe 'database.ps1 - Enhanced Functions Integration Tests' {
         }
         
         It 'Get-DatabaseSchema handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'psql' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'psql' -Available $false
             
             $output = & {
                 Get-DatabaseSchema -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue

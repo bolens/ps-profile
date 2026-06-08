@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for programming language tool fragments (go).
@@ -41,11 +45,13 @@ Describe 'Language Tools Integration Tests' {
 
     Context 'Go helpers (lang-go-basic.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'go' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'go' } -MockWith { $null }
-            # Mock go command before loading fragment - make available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'go' -Available $true
+            Mark-TestCommandsUnavailable -CommandNames @('go')
+            Set-TestCommandAvailabilityState -CommandName 'go' -Available $true
             . (Join-Path $script:ProfileDir 'lang-go-basic.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-GoRun function' {
@@ -61,7 +67,7 @@ Describe 'Language Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('go', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'go' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'go' -Available $false 
             $output = go-run main.go 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'go not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'go'
@@ -107,17 +113,11 @@ Describe 'Language Tools Integration Tests' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'go' -Available $true -Scope It
-            Mock -CommandName go -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'get' -and $args -contains '-u' -and $args -contains './...') {
-                    Write-Output 'Dependencies updated successfully'
-                }
-            }
+            Set-TestCommandAvailabilityState -CommandName 'go' -Available $true 
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Dependencies updated successfully'
 
             Update-GoDependencies
-            Should -Invoke -CommandName 'go' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-GoDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -134,17 +134,11 @@ Describe 'Language Tools Integration Tests' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'go' -Available $true -Scope It
-            Mock -CommandName go -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install' -and $args -contains 'golang.org/x/tools/cmd/...@latest') {
-                    Write-Output 'Go tools updated successfully'
-                }
-            }
+            Set-TestCommandAvailabilityState -CommandName 'go' -Available $true 
+            Setup-CapturingCommandMock -CommandName 'go' -Output 'Go tools updated successfully'
 
             Update-GoTools
-            Should -Invoke -CommandName 'go' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-GoTools -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }

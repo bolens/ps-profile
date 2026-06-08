@@ -100,7 +100,7 @@ Describe 'aws.ps1 - Enhanced Functions' {
         }
 
         It 'Parses credentials file correctly' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             $result = Get-AwsCredentials -ErrorAction SilentlyContinue
 
@@ -111,7 +111,7 @@ Describe 'aws.ps1 - Enhanced Functions' {
         }
 
         It 'Masks access keys when ShowKeys is specified' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             $result = Get-AwsCredentials -ShowKeys -ErrorAction SilentlyContinue
 
@@ -172,7 +172,7 @@ Describe 'aws.ps1 - Enhanced Functions' {
         }
 
         It 'Switches profile and tests connection' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
             Install-TestAwsProfileStubs -ConnectionResult $true
 
             $result = Switch-AwsAccount -ProfileName 'production' -ErrorAction SilentlyContinue
@@ -182,7 +182,7 @@ Describe 'aws.ps1 - Enhanced Functions' {
         }
 
         It 'Skips test when SkipTest is specified' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
             Install-TestAwsProfileStubs -ConnectionResult $true
 
             $result = Switch-AwsAccount -ProfileName 'dev' -SkipTest -ErrorAction SilentlyContinue

@@ -109,7 +109,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
         }
 
         It 'Executes command when available' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -126,7 +126,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
 
     Context 'Operation Name Generation' {
         It 'Generates operation name from command and first argument' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -139,7 +139,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
         }
 
         It 'Uses provided operation name' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -154,7 +154,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
 
     Context 'JSON Parsing' {
         It 'Parses JSON output by default' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -168,7 +168,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
         }
 
         It 'Returns raw output when ParseJson is false' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -181,7 +181,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
         }
 
         It 'Handles invalid JSON gracefully' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -196,7 +196,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
 
     Context 'Error Handling' {
         It 'Throws error on non-zero exit code by default' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 1
@@ -209,7 +209,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
         }
 
         It 'Returns output when ErrorOnNonZeroExit is false' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 1
@@ -224,7 +224,7 @@ Describe 'CloudProviderBase.ps1 - Invoke-CloudCommand' {
 
     Context 'Context Tracking' {
         It 'Includes command and arguments in context' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -255,7 +255,7 @@ Describe 'CloudProviderBase.ps1 - Set-CloudProfile' {
 
     Context 'Profile Setting' {
         It 'Sets environment variable' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             $result = Set-CloudProfile -ProviderName 'aws' -ProfileType 'Profile' -Value 'production' -EnvVarName 'AWS_PROFILE' -CommandName 'aws' -DisplayName 'AWS profile'
 
@@ -272,7 +272,7 @@ Describe 'CloudProviderBase.ps1 - Set-CloudProfile' {
         }
 
         It 'Validates setting when ValidateCommand provided' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -306,7 +306,7 @@ Describe 'CloudProviderBase.ps1 - Get-CloudResources' {
 
     Context 'Service/Action Pattern' {
         It 'Builds command arguments from service and action' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -321,7 +321,7 @@ Describe 'CloudProviderBase.ps1 - Get-CloudResources' {
         }
 
         It 'Generates operation name from service and action' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -336,7 +336,7 @@ Describe 'CloudProviderBase.ps1 - Get-CloudResources' {
 
     Context 'Direct Arguments Pattern' {
         It 'Uses provided arguments directly' {
-            Setup-AvailableCommandMock -CommandName 'az'
+            Set-TestCommandAvailabilityState -CommandName 'az'
 
             Set-Item -Path 'Function:\Global:az' -Value {
                 $global:LASTEXITCODE = 0
@@ -371,7 +371,7 @@ Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
 
     Context 'Connection Testing' {
         It 'Tests connection successfully' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -384,7 +384,7 @@ Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
         }
 
         It 'Returns false when connection fails' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 1
@@ -397,7 +397,7 @@ Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
         }
 
         It 'Validates success indicator' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -410,7 +410,7 @@ Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
         }
 
         It 'Returns false when success indicator not found' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0
@@ -423,7 +423,7 @@ Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
         }
 
         It 'Handles nested success indicators' {
-            Setup-AvailableCommandMock -CommandName 'aws'
+            Set-TestCommandAvailabilityState -CommandName 'aws'
 
             Set-Item -Path 'Function:\Global:aws' -Value {
                 $global:LASTEXITCODE = 0

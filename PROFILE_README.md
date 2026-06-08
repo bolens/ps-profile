@@ -536,6 +536,7 @@ Outputs to `docs/*.md`. See [docs/README.md](docs/README.md) for the generated i
 - [CONTRIBUTING.md](CONTRIBUTING.md) — Development guidelines
 - [PROFILE_DEBUG.md](PROFILE_DEBUG.md) — Debugging and instrumentation
 - [powershell.config.README.md](powershell.config.README.md) — Configuration details
-- [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) — Developer guide and advanced testing
+- [docs/guides/TESTING.md](docs/guides/TESTING.md) — Primary testing guide (structure, runner flags, batch scripts)
+- [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) — Setup, workflow, and advanced testing
 - [WARP.md](WARP.md) — WARP development guide
 - [AGENTS.md](AGENTS.md) — AI coding assistant guidance

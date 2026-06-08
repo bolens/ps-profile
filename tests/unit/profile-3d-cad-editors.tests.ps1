@@ -39,7 +39,7 @@ Describe '3d-cad.ps1 - Editor Functions' {
         }
 
         It 'Calls blender when available' {
-            Setup-AvailableCommandMock -CommandName 'blender'
+            Set-TestCommandAvailabilityState -CommandName 'blender'
 
             Launch-Blender -ErrorAction SilentlyContinue
 
@@ -49,7 +49,7 @@ Describe '3d-cad.ps1 - Editor Functions' {
         }
 
         It 'Calls blender with background flag when provided' {
-            Setup-AvailableCommandMock -CommandName 'blender'
+            Set-TestCommandAvailabilityState -CommandName 'blender'
 
             Launch-Blender -Background -ErrorAction SilentlyContinue
 
@@ -58,7 +58,7 @@ Describe '3d-cad.ps1 - Editor Functions' {
         }
 
         It 'Calls blender with project path when provided' {
-            Setup-AvailableCommandMock -CommandName 'blender'
+            Set-TestCommandAvailabilityState -CommandName 'blender'
             $projectPath = Join-Path (New-TestTempDirectory -Prefix 'BlenderProject') 'scene.blend'
             New-Item -ItemType File -Path $projectPath -Force | Out-Null
 
@@ -79,7 +79,7 @@ Describe '3d-cad.ps1 - Editor Functions' {
         }
 
         It 'Calls freecad when available' {
-            Setup-AvailableCommandMock -CommandName 'freecad'
+            Set-TestCommandAvailabilityState -CommandName 'freecad'
 
             Launch-FreeCAD -ErrorAction SilentlyContinue
 
@@ -100,7 +100,7 @@ Describe '3d-cad.ps1 - Editor Functions' {
         }
 
         It 'Calls openscad-dev when available' {
-            Setup-AvailableCommandMock -CommandName 'openscad-dev'
+            Set-TestCommandAvailabilityState -CommandName 'openscad-dev'
             $scriptPath = Join-Path (New-TestTempDirectory -Prefix 'OpenScadScript') 'model.scad'
             New-Item -ItemType File -Path $scriptPath -Force | Out-Null
 
@@ -113,7 +113,7 @@ Describe '3d-cad.ps1 - Editor Functions' {
 
         It 'Falls back to openscad when openscad-dev not available' {
             Set-TestCommandAvailabilityState -CommandName 'openscad-dev' -Available $false
-            Setup-AvailableCommandMock -CommandName 'openscad'
+            Set-TestCommandAvailabilityState -CommandName 'openscad'
             $scriptPath = Join-Path (New-TestTempDirectory -Prefix 'OpenScadFallback') 'model.scad'
             New-Item -ItemType File -Path $scriptPath -Force | Out-Null
 

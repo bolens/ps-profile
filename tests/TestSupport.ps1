@@ -152,35 +152,28 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
         . $testMocksPath
     }
 
-    # Load Mocking modules (comprehensive mocking framework)
-    # Import all mocking sub-modules in dependency order
-    $mockingDir = Join-Path $testSupportDir 'Mocking'
-    if ($mockingDir -and -not [string]::IsNullOrWhiteSpace($mockingDir) -and (Test-Path -LiteralPath $mockingDir)) {
-        # Import MockRegistry first (used by other modules)
-        $mockRegistryPath = Join-Path $mockingDir 'MockRegistry.ps1'
-        if ($mockRegistryPath -and -not [string]::IsNullOrWhiteSpace($mockRegistryPath) -and (Test-Path -LiteralPath $mockRegistryPath)) {
-            . $mockRegistryPath
-        }
-        
-        # Dot-source mock helpers (.ps1) so Pester Mock runs in the test script scope.
-        $mockingModules = @(
-            'PesterMocks.ps1',
-            'MockCommand.ps1',
-            'MockFileSystem.ps1',
-            'MockNetwork.ps1',
-            'MockEnvironment.ps1',
-            'MockPython.ps1',
-            'MockReflection.ps1'
-        )
-        
-        foreach ($module in $mockingModules) {
-            $modulePath = Join-Path $mockingDir $module
-            if ($modulePath -and -not [string]::IsNullOrWhiteSpace($modulePath) -and (Test-Path -LiteralPath $modulePath)) {
-                # Dot-source Pester-aware mock helpers so Mock runs in the test script scope.
-                # Import-Module isolates Mock calls and causes "Mock data are not setup for this scope".
-                . $modulePath
-            }
-        }
+    # Load TerminalTestStubs (Write-Host / Get-History / Read-Host stubs for terminal tests)
+    $terminalStubsPath = Join-Path $testSupportDir 'TerminalTestStubs.ps1'
+    if ($terminalStubsPath -and -not [string]::IsNullOrWhiteSpace($terminalStubsPath) -and (Test-Path -LiteralPath $terminalStubsPath)) {
+        . $terminalStubsPath
+    }
+
+    # Load command availability stubs (depends on TestMocks for TestRegisteredMockCommands)
+    $testCommandAvailabilityPath = Join-Path $testSupportDir 'TestCommandAvailability.ps1'
+    if ($testCommandAvailabilityPath -and -not [string]::IsNullOrWhiteSpace($testCommandAvailabilityPath) -and (Test-Path -LiteralPath $testCommandAvailabilityPath)) {
+        . $testCommandAvailabilityPath
+    }
+
+    # Load environment variable stubs for integration tests
+    $testEnvironmentStubsPath = Join-Path $testSupportDir 'TestEnvironmentStubs.ps1'
+    if ($testEnvironmentStubsPath -and -not [string]::IsNullOrWhiteSpace($testEnvironmentStubsPath) -and (Test-Path -LiteralPath $testEnvironmentStubsPath)) {
+        . $testEnvironmentStubsPath
+    }
+
+    # Load reflection wrappers for Collections module error-path tests
+    $testReflectionHelpersPath = Join-Path $testSupportDir 'TestReflectionHelpers.ps1'
+    if ($testReflectionHelpersPath -and -not [string]::IsNullOrWhiteSpace($testReflectionHelpersPath) -and (Test-Path -LiteralPath $testReflectionHelpersPath)) {
+        . $testReflectionHelpersPath
     }
     
     # Load TestModuleLoading (depends on nothing, but used by tests)

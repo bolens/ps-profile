@@ -45,9 +45,12 @@ Describe 'Conda Tools Integration Tests' {
 
     Context 'Conda helpers (conda.ps1)' {
         BeforeAll {
-            # Mock conda as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'conda' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'conda' -Available $true
             . (Join-Path $script:ProfileDir 'conda.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-CondaOutdated function' {
@@ -60,17 +63,13 @@ Describe 'Conda Tools Integration Tests' {
         }
 
         It 'Test-CondaOutdated calls conda list --outdated' {
-            Mock -CommandName conda -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list' -and $args -contains '--outdated') {
-                    Write-Output 'Package    Version  Latest'
-                    Write-Output 'package1  1.0.0    1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'conda' -Output @(
+                'Package    Version  Latest'
+                'package1  1.0.0    1.2.0'
+            )
 
             Test-CondaOutdated
-            Should -Invoke -CommandName 'conda' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-CondaOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,16 +83,10 @@ Describe 'Conda Tools Integration Tests' {
         }
 
         It 'Update-CondaPackages calls conda update --all -y' {
-            Mock -CommandName conda -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args -contains '--all' -and $args -contains '-y') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'conda' -Output 'Packages updated successfully'
 
             Update-CondaPackages
-            Should -Invoke -CommandName 'conda' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-CondaPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -107,16 +100,10 @@ Describe 'Conda Tools Integration Tests' {
         }
 
         It 'Update-CondaSelf calls conda update conda -y' {
-            Mock -CommandName conda -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args -contains 'conda' -and $args -contains '-y') {
-                    Write-Output 'Conda updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'conda' -Output 'Conda updated successfully'
 
             Update-CondaSelf
-            Should -Invoke -CommandName 'conda' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-CondaSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -139,7 +126,7 @@ Describe 'Conda Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'conda' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'conda' -Available $false
             $script:MissingCondaOutput = & { . (Join-Path $script:ProfileDir 'conda.ps1') } 2>&1 3>&1 | Out-String
         }
 

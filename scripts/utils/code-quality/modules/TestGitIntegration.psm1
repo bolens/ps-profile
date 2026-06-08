@@ -90,7 +90,7 @@ function Get-GitChangedFiles {
             }
         }
 
-        return $changedFiles | Select-Object -Unique
+        return @($changedFiles | Select-Object -Unique)
     }
     finally {
         Pop-Location
@@ -156,12 +156,12 @@ function Get-GitChangedFilesSince {
         # Get changed files
         $changedFiles = git diff --name-only "$Since" 2>$null
         if ($LASTEXITCODE -eq 0 -and $changedFiles) {
-            return $changedFiles | ForEach-Object {
+            return @($changedFiles | ForEach-Object {
                 $fullPath = Join-Path $RepoRoot $_
                 if ($fullPath -and -not [string]::IsNullOrWhiteSpace($fullPath) -and (Test-Path -LiteralPath $fullPath)) {
                     (Resolve-Path $fullPath).ProviderPath
                 }
-            } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+            } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
         }
 
         return @()

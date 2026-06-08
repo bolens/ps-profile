@@ -61,7 +61,7 @@ Describe 'terraform.ps1 - Graceful Degradation' {
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
-        Mock-CommandAvailabilityPester -CommandName 'terraform' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'terraform' -Available $false
     }
 
     It 'Invoke-Terraform handles missing tool gracefully' {

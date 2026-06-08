@@ -223,10 +223,10 @@ Describe 'Developer Tools Integration Tests' {
             # Mock diff command if available to ensure consistent test behavior
             $diffAvailable = (Get-Command diff -ErrorAction SilentlyContinue) -ne $null
             if ($diffAvailable) {
-                Mock-CommandAvailabilityPester -CommandName 'diff' -Available $true -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'diff' -Available $true -Scope It
             }
             else {
-                Mock-CommandAvailabilityPester -CommandName 'diff' -Available $false -Scope It
+                Set-TestCommandAvailabilityState -CommandName 'diff' -Available $false -Scope It
             }
             
             $file1 = Join-Path $TestDrive 'test1.txt'
@@ -248,7 +248,7 @@ Describe 'Developer Tools Integration Tests' {
 
         It 'Compare-TextFiles handles missing diff command gracefully' {
             # Mock diff as unavailable
-            Mock-CommandAvailabilityPester -CommandName 'diff' -Available $false -Scope It
+            Set-TestCommandAvailabilityState -CommandName 'diff' -Available $false -Scope It
             
             $file1 = Join-Path $TestDrive 'test1.txt'
             $file2 = Join-Path $TestDrive 'test2.txt'

@@ -59,7 +59,7 @@ Describe 'content-tools.ps1 - Graceful Degradation' {
         }
 
         foreach ($cmd in @('yt-dlp', 'gallery-dl', 'monolith', 'twitchdownloader-cli', 'twitchdownloader')) {
-            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
         }
     }
 

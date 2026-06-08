@@ -73,7 +73,9 @@ scripts/utils/run-pester.ps1
     execution benefits.
 
 .PARAMETER Randomize
-    Run tests in random order to detect order dependencies.
+    Randomize test file execution order to detect order dependencies between
+    test files. Pester 5 does not support per-test randomization; this shuffles
+    the discovered *.tests.ps1 file list before execution.
 
 .PARAMETER Repeat
     Run the test suite multiple times. Useful for detecting flaky tests.
@@ -84,7 +86,9 @@ scripts/utils/run-pester.ps1
     Default is no timeout.
 
 .PARAMETER FailOnWarnings
-    Treat warnings as failures, causing the script to exit with an error code.
+    Treat warnings as failures by setting $WarningPreference to Stop during
+    test execution. Combine with -CI only when you explicitly want warnings
+    to fail the run (CI mode does not enable this automatically).
 
 .PARAMETER SkipRemainingOnFailure
     Stop execution immediately after the first test failure, rather than
@@ -96,8 +100,9 @@ scripts/utils/run-pester.ps1
 
 .PARAMETER CI
     Enable CI mode with optimized settings for continuous integration environments.
-    Sets output format to Normal, enables coverage if not specified, and treats
-    warnings as failures.
+    Sets output format to Normal, enables coverage when -Coverage is not
+    explicitly disabled, and writes NUnit XML results. Use -FailOnWarnings to
+    treat warnings as failures.
 
 .PARAMETER Verbose
     Enable verbose output with additional diagnostic information.
@@ -128,6 +133,10 @@ scripts/utils/run-pester.ps1
 .PARAMETER RetryOnFailure
     Only retry tests that actually fail, not tests that encounter setup errors.
     Used with -MaxRetries. Defaults to true when retries are enabled.
+
+.PARAMETER SuppressRetryWarnings
+    Log retry attempts at debug level instead of warning level. Useful when
+    retries are expected and warning noise should be reduced.
 
 .PARAMETER TrackPerformance
     Enable performance monitoring during test execution. Tracks execution time
@@ -161,7 +170,8 @@ scripts/utils/run-pester.ps1
     Used with -ReportFormat.
 
 .PARAMETER Progress
-    Display progress indicators during test execution for long-running test suites.
+    Display a Write-Progress indicator during test execution. Useful for
+    long-running suites in interactive terminals.
 
 .PARAMETER MaxParallelThreads
     Override the maximum number of parallel threads for test execution (1-100).
@@ -1022,8 +1032,8 @@ try {
     }
 
     # Log parallel execution configuration if verbose
-    if ($Verbose -and $configParams.Parallel) {
-        Write-ScriptMessage -Message "Parallel execution enabled with $($configParams.Parallel) thread(s)" -LogLevel 'Info'
+    if ($Verbose -and $configParams.ContainsKey('Parallel') -and $configParams['Parallel']) {
+        Write-ScriptMessage -Message "Parallel execution enabled with $($configParams['Parallel']) thread(s)" -LogLevel 'Info'
     }
 
     if ($null -ne $Timeout) {
@@ -1097,10 +1107,10 @@ try {
         $gitStartTime = Get-Date
     
         if ($ChangedSince) {
-            $changedSourceFiles = Get-GitChangedFilesSince -Since $ChangedSince -RepoRoot $repoRoot
+            $changedSourceFiles = @(Get-GitChangedFilesSince -Since $ChangedSince -RepoRoot $repoRoot)
         }
         else {
-            $changedSourceFiles = Get-GitChangedFiles -IncludeUntracked:$IncludeUntracked -RepoRoot $repoRoot
+            $changedSourceFiles = @(Get-GitChangedFiles -IncludeUntracked:$IncludeUntracked -RepoRoot $repoRoot)
         }
         
         $gitDuration = ((Get-Date) - $gitStartTime).TotalMilliseconds
@@ -1126,7 +1136,7 @@ try {
             
             # Map changed files to test files
             $mappingStartTime = Get-Date
-            $changedTestFiles = Get-TestFilesForSourceFiles -SourceFiles $changedSourceFiles -RepoRoot $repoRoot
+            $changedTestFiles = @(Get-TestFilesForSourceFiles -SourceFiles $changedSourceFiles -RepoRoot $repoRoot)
             $mappingDuration = ((Get-Date) - $mappingStartTime).TotalMilliseconds
             
             # Level 2: Test file mapping timing
@@ -1193,6 +1203,11 @@ try {
         }
     
         Write-Host "Filtered to $(@($filteredTestPaths).Count) test file(s) matching pattern: $TestFilePattern" -ForegroundColor Green
+    }
+
+    if ($Randomize -and @($filteredTestPaths).Count -gt 1) {
+        $filteredTestPaths = @(Get-ShuffledTestPaths -TestPaths $filteredTestPaths)
+        Write-Host "Randomized test file execution order ($(@($filteredTestPaths).Count) file(s))" -ForegroundColor Yellow
     }
 
     if (@($filteredTestPaths).Count -eq 0) {
@@ -1392,6 +1407,9 @@ try {
     }
 
 
+    $script:FailOnWarningsEnabled = [bool]$FailOnWarnings
+    $script:ShowProgressEnabled = [bool]$Progress
+
     # Define test execution function for watch mode (store in script scope)
     $script:executeTests = {
         param($testPaths, $testConfig, $timeoutVal)
@@ -1399,6 +1417,15 @@ try {
         # Start output interception
         Start-TestOutputInterceptor
     
+        $originalWarningPreference = $WarningPreference
+        if ($script:FailOnWarningsEnabled) {
+            $WarningPreference = 'Stop'
+        }
+
+        if ($script:ShowProgressEnabled) {
+            Write-Progress -Activity 'Running Pester Tests' -Status 'Starting test execution...' -PercentComplete 0
+        }
+
         try {
             $capturedTestPaths = $testPaths
             $execScript = {
@@ -1445,10 +1472,20 @@ try {
             }
         
             Write-Host "Tests completed: Passed=$($testResult.PassedCount), Failed=$($testResult.FailedCount), Skipped=$($testResult.SkippedCount)" -ForegroundColor $(if ($testResult.FailedCount -eq 0) { 'Green' } else { 'Red' })
+
+            if ($script:ShowProgressEnabled) {
+                Write-Progress -Activity 'Running Pester Tests' -Completed
+            }
         
             return $testResult
         }
         finally {
+            $WarningPreference = $originalWarningPreference
+
+            if ($script:ShowProgressEnabled) {
+                Write-Progress -Activity 'Running Pester Tests' -Completed
+            }
+
             if (Get-Command -Name 'Stop-TestOutputInterceptor' -ErrorAction SilentlyContinue) {
                 Stop-TestOutputInterceptor
             }

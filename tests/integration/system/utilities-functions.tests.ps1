@@ -74,26 +74,37 @@ Describe 'System Utility Functions' {
 
         It 'Get-NetworkPorts function exists' {
             Get-Command Get-NetworkPorts -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            Mock-CommandAvailabilityPester -CommandName 'netstat' -Available $true -Scope It
-            Mock -CommandName netstat -MockWith { "Active Connections`nTCP    0.0.0.0:80" }
+            Setup-CapturingCommandMock -CommandName 'netstat' -Output @(
+                'Active Connections',
+                'TCP    0.0.0.0:80'
+            )
             $result = Get-NetworkPorts -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
-            Should -Invoke netstat -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Get-NetworkPorts handles missing netstat command gracefully' {
             Get-Command Get-NetworkPorts -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            Mock-CommandAvailabilityPester -CommandName 'netstat' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('netstat')
+            Set-TestCommandAvailabilityState -CommandName 'netstat' -Available $false
             { Get-NetworkPorts -ErrorAction Stop } | Should -Throw '*netstat*'
         }
 
         It 'Test-NetworkConnection function exists' {
             Get-Command Test-NetworkConnection -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Mock Test-Connection to avoid actual network calls
-            Mock-TestConnection -Success $true -ResponseTime 1 -ComputerName 'localhost'
-            # Test with localhost which should always work
+            Register-TestProfileFunctionStub -Name 'Test-Connection' -Body {
+                param(
+                    [Parameter(ValueFromRemainingArguments = $true)]
+                    [object[]]$Arguments
+                )
+
+                return [PSCustomObject]@{
+                    ComputerName = 'localhost'
+                    ResponseTime = 1
+                    Status       = 'Success'
+                }
+            }
             $result = Test-NetworkConnection -ComputerName localhost -Count 1 -ErrorAction SilentlyContinue
-            # Result may be null if ping fails, but function should exist
             { Test-NetworkConnection -ComputerName localhost -Count 1 -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
 
@@ -167,30 +178,28 @@ Describe 'System Utility Functions' {
 
         It 'Invoke-RestApi function exists' {
             Get-Command Invoke-RestApi -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $returnValue = @{ success = $true }
-            $returnValueJson = ($returnValue | ConvertTo-Json -Compress -Depth 10)
-            $mockWith = [scriptblock]::Create("('$returnValueJson' | ConvertFrom-Json)")
-            Mock -CommandName Invoke-RestMethod -MockWith $mockWith
+            Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
+                return [PSCustomObject]@{ success = $true }
+            }
             $result = Invoke-RestApi -Uri 'http://test.example.com' -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
             $result.success | Should -Be $true
-            Should -Invoke Invoke-RestMethod -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Invoke-WebRequestCustom function exists' {
             Get-Command Invoke-WebRequestCustom -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            $values = @{
-                StatusCode = 200
-                Content    = "Test response"
-                Headers    = @{}
+            Setup-CapturingCommandMock -CommandName 'Invoke-WebRequest' -OnInvoke {
+                return [PSCustomObject]@{
+                    StatusCode = 200
+                    Content    = 'Test response'
+                    Headers    = @{}
+                }
             }
-            $valuesJson = ($values | ConvertTo-Json -Compress -Depth 10)
-            $mockWith = [scriptblock]::Create("`$v = ('$valuesJson' | ConvertFrom-Json); [PSCustomObject]@{ StatusCode = `$v.StatusCode; Content = `$v.Content; Headers = `$v.Headers }")
-            Mock -CommandName Invoke-WebRequest -MockWith $mockWith
             $result = Invoke-WebRequestCustom -Uri 'http://test.example.com' -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
             $result.StatusCode | Should -Be 200
-            Should -Invoke Invoke-WebRequest -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Expand-ArchiveCustom function exists' {

@@ -151,14 +151,14 @@ Describe 'ai-tools.ps1 - Integration Tests' {
         }
 
         It 'Handles missing ollama gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'ollama' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'ollama' -Available $false
             $output = & { Invoke-OllamaEnhanced -Arguments @('list') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'ollama not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ollama'
         }
 
         It 'Handles missing lms gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'lms' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'lms' -Available $false
             $originalHome = $env:HOME
             $env:HOME = $TestDrive
             try {
@@ -172,14 +172,14 @@ Describe 'ai-tools.ps1 - Integration Tests' {
         }
 
         It 'Handles missing koboldcpp gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'koboldcpp' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'koboldcpp' -Available $false
             $output = & { Invoke-KoboldCpp -Arguments @('--help') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'koboldcpp not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'koboldcpp'
         }
 
         It 'Handles missing llamafile gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'llamafile' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'llamafile' -Available $false
             $output = & { Invoke-Llamafile -Arguments @('--help') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'llamafile not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'llamafile'
@@ -187,7 +187,7 @@ Describe 'ai-tools.ps1 - Integration Tests' {
 
         It 'Handles missing llama-cpp gracefully' {
             foreach ($cmd in @('llama-cpp-cuda', 'llama-cpp', 'llama.cpp')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
             $output = & { Invoke-LlamaCpp -Arguments @('--help') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'llama-cpp not found'
@@ -195,7 +195,7 @@ Describe 'ai-tools.ps1 - Integration Tests' {
         }
 
         It 'Handles missing comfy gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'comfy' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'comfy' -Available $false
             $output = & { Invoke-ComfyUI -Arguments @('install') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'comfy not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'comfy'

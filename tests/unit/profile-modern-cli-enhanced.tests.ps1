@@ -221,7 +221,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions' {
         }
 
         It 'Warns when no query specified' {
-            Setup-AvailableCommandMock -CommandName 'zoxide'
+            Set-TestCommandAvailabilityState -CommandName 'zoxide'
 
             $result = Navigate-WithZoxide -ErrorAction SilentlyContinue
 
@@ -274,7 +274,7 @@ Describe 'modern-cli.ps1 - Enhanced Functions' {
         }
 
         It 'Warns when file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'bat'
+            Set-TestCommandAvailabilityState -CommandName 'bat'
             $missingFile = Join-Path (New-TestTempDirectory -Prefix 'BatMissing') 'nonexistent.txt'
 
             View-WithBat -Path $missingFile -ErrorAction SilentlyContinue | Out-Null

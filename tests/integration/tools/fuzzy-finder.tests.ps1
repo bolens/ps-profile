@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for fzf fuzzy finder tool fragment.
@@ -41,11 +45,13 @@ Describe 'Fuzzy Finder Integration Tests' {
 
     Context 'fzf helpers (fzf.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'fzf' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'fzf' } -MockWith { $null }
-            # Mock fzf command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'fzf' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('fzf')
+            Set-TestCommandAvailabilityState -CommandName 'fzf' -Available $true
             . (Join-Path $script:ProfileDir 'fzf.ps1')
+            Register-TestFragmentAliases @{
+                ff   = 'Find-FileFuzzy'
+                fcmd = 'Find-CommandFuzzy'
+            }
         }
 
         It 'Creates Find-FileFuzzy function' {
@@ -61,7 +67,9 @@ Describe 'Fuzzy Finder Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('fzf', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'fzf' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('fzf')
+            Set-TestCommandAvailabilityState -CommandName 'fzf' -Available $false
+            Set-Alias -Name ff -Value Find-FileFuzzy -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = ff 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'fzf not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'fzf'
@@ -80,7 +88,9 @@ Describe 'Fuzzy Finder Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('fzf', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'fzf' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('fzf')
+            Set-TestCommandAvailabilityState -CommandName 'fzf' -Available $false
+            Set-Alias -Name fcmd -Value Find-CommandFuzzy -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = fcmd 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'fzf not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'fzf'

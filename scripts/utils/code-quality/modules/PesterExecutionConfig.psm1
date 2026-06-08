@@ -32,11 +32,8 @@ function Set-PesterExecutionOptions {
         }
     }
 
-    # Configure randomization
-    if ($Randomize) {
-        # Similarly, 'Randomize' is not on 'Run'.
-        # $Config.Run.Randomize = $true
-    }
+    # Randomization is handled at the runner level by shuffling discovered test
+    # file paths before execution (Pester 5 has no Run.Randomize option).
 
     # Configure timeout
     # if ($null -ne $Timeout) {
@@ -48,11 +45,8 @@ function Set-PesterExecutionOptions {
         $Config.Run.SkipRemainingOnFailure = 'Block'
     }
 
-    # Configure warning handling
-    if ($FailOnWarnings) {
-        # WarningAction is not a property of RunConfiguration in Pester 5.
-        # $Config.Run.WarningAction = 'Error'
-    }
+    # FailOnWarnings is handled at the runner level by setting $WarningPreference
+    # to Stop for the duration of test execution.
 
     return $Config
 }

@@ -1,43 +1,40 @@
 
 
-Describe "Oh My Posh Module" {
-    BeforeAll {
-        try {
-            # Source the test support
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-                throw "Get-TestPath returned null or empty value for ProfileDir"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-                throw "Profile directory not found at: $script:ProfileDir"
-            }
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+    try {
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize oh-my-posh tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
         }
     }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize oh-my-posh tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
+    }
+}
 
+Describe "Oh My Posh Module" {
     Context "Initialize-OhMyPosh" {
         BeforeEach {
-            # Load bootstrap fragment first to make Test-HasCommand available
             $bootstrapFragment = Join-Path $script:ProfileDir 'bootstrap.ps1'
             if ($bootstrapFragment -and -not [string]::IsNullOrWhiteSpace($bootstrapFragment) -and (Test-Path -LiteralPath $bootstrapFragment)) {
                 . $bootstrapFragment
             }
 
-            # Remove any existing prompt function and variables
             if (Get-Command -Name prompt -CommandType Function -ErrorAction SilentlyContinue) {
                 Remove-Item Function:\global:prompt -ErrorAction SilentlyContinue
             }
             Remove-Variable -Name 'OhMyPoshInitialized' -Scope Global -ErrorAction SilentlyContinue
 
-            # Load the oh-my-posh fragment directly
             $ohMyPoshFragment = Get-TestPath "profile.d\oh-my-posh.ps1" -StartPath $PSScriptRoot -EnsureExists
             . $ohMyPoshFragment
         }
@@ -58,41 +55,35 @@ Describe "Oh My Posh Module" {
         }
 
         It "Should skip initialization if already initialized" {
-            # Set the global variable first
             $global:OhMyPoshInitialized = $true
 
             { Initialize-OhMyPosh } | Should -Not -Throw
 
-            # Global variable should still be true
             $global:OhMyPoshInitialized | Should -Be $true
         }
 
         It "Should handle oh-my-posh not available gracefully" {
-            # Mock oh-my-posh as unavailable using standardized mocking pattern
-            Mock-CommandAvailabilityPester -CommandName 'oh-my-posh' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('oh-my-posh')
+            Set-TestCommandAvailabilityState -CommandName 'oh-my-posh' -Available $false
             { Initialize-OhMyPosh } | Should -Not -Throw
         }
     }
 
     Context "prompt function" {
         BeforeEach {
-            # Load bootstrap fragment first to make Test-HasCommand available
             $bootstrapFragment = Join-Path $script:ProfileDir 'bootstrap.ps1'
             if ($bootstrapFragment -and -not [string]::IsNullOrWhiteSpace($bootstrapFragment) -and (Test-Path -LiteralPath $bootstrapFragment)) {
                 . $bootstrapFragment
             }
 
-            # Mock oh-my-posh as unavailable using standardized mocking pattern
-            Mock-CommandAvailabilityPester -CommandName 'oh-my-posh' -Available $false -Scope It
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'oh-my-posh' } -MockWith { $null }
+            Mark-TestCommandsUnavailable -CommandNames @('oh-my-posh')
+            Set-TestCommandAvailabilityState -CommandName 'oh-my-posh' -Available $false
 
-            # Remove any existing prompt function and variables
             if (Get-Command -Name prompt -CommandType Function -ErrorAction SilentlyContinue) {
                 Remove-Item Function:\global:prompt -ErrorAction SilentlyContinue
             }
             Remove-Variable -Name 'OhMyPoshInitialized' -Scope Global -ErrorAction SilentlyContinue
 
-            # Load the oh-my-posh fragment directly
             $ohMyPoshFragment = Get-TestPath "profile.d\oh-my-posh.ps1" -StartPath $PSScriptRoot -EnsureExists
             . $ohMyPoshFragment
         }
@@ -110,4 +101,3 @@ Describe "Oh My Posh Module" {
         }
     }
 }
-

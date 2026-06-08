@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for text processing tool fragments (jq-yq, rg).
@@ -41,13 +45,14 @@ Describe 'Text Processing Tools Integration Tests' {
 
     Context 'jq/yq helpers (jq-yq.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'jq' and 'yq' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'jq' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'yq' } -MockWith { $null }
-            # Mock jq and yq commands before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'jq' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'yq' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('jq', 'yq')
+            Set-TestCommandAvailabilityState -CommandName 'jq' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'yq' -Available $true
             . (Join-Path $script:ProfileDir 'jq-yq.ps1')
+            Register-TestFragmentAliases @{
+                jq2json = 'Convert-JqToJson'
+                yq2json = 'Convert-YqToJson'
+            }
         }
 
         It 'Creates Convert-JqToJson function' {
@@ -63,7 +68,9 @@ Describe 'Text Processing Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('jq', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'jq' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('jq')
+            Set-TestCommandAvailabilityState -CommandName 'jq' -Available $false
+            Set-Alias -Name jq2json -Value Convert-JqToJson -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = jq2json file.json 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'jq not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'jq'
@@ -82,7 +89,9 @@ Describe 'Text Processing Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('yq', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'yq' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('yq')
+            Set-TestCommandAvailabilityState -CommandName 'yq' -Available $false
+            Set-Alias -Name yq2json -Value Convert-YqToJson -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = yq2json file.yaml 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'yq not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'yq'
@@ -91,11 +100,12 @@ Describe 'Text Processing Tools Integration Tests' {
 
     Context 'ripgrep helpers (rg.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'rg' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'rg' } -MockWith { $null }
-            # Mock rg command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'rg' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('rg')
+            Set-TestCommandAvailabilityState -CommandName 'rg' -Available $true
             . (Join-Path $script:ProfileDir 'rg.ps1')
+            Register-TestFragmentAliases @{
+                rgf = 'Find-RipgrepText'
+            }
         }
 
         It 'Creates Find-RipgrepText function' {
@@ -111,7 +121,9 @@ Describe 'Text Processing Tools Integration Tests' {
             if ($global:MissingToolWarnings) {
                 $null = $global:MissingToolWarnings.TryRemove('rg', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'rg' -Available $false -Scope It
+            Mark-TestCommandsUnavailable -CommandNames @('rg')
+            Set-TestCommandAvailabilityState -CommandName 'rg' -Available $false
+            Set-Alias -Name rgf -Value Find-RipgrepText -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = rgf pattern 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'rg not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'ripgrep'

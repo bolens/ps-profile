@@ -10,15 +10,20 @@ function Mark-TestCommandsUnavailable {
         [string[]]$CommandNames
     )
 
-    if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue)) {
-        $global:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new()
-    }
-
-    if (-not (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue)) {
-        $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
-    }
-
     foreach ($command in $CommandNames) {
+        if (Get-Command Set-TestCommandAvailabilityState -ErrorAction SilentlyContinue) {
+            Set-TestCommandAvailabilityState -CommandName $command -Available $false
+            continue
+        }
+
+        if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue)) {
+            $global:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new()
+        }
+
+        if (-not (Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue)) {
+            $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+        }
+
         Remove-Item -Path "Function:\$command" -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "Function:\global:$command" -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "Alias:\$command" -Force -ErrorAction SilentlyContinue
@@ -31,6 +36,24 @@ function Mark-TestCommandsUnavailable {
         $global:TestCachedCommandCache[$cacheKey] = [pscustomobject]@{
             Result  = $false
             Expires = (Get-Date).AddHours(24)
+        }
+    }
+}
+
+function Register-TestFragmentAliases {
+    <#
+    .SYNOPSIS
+        Force-registers profile aliases when host binaries would shadow Set-AgentModeAlias.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [hashtable]$AliasTargets
+    )
+
+    foreach ($entry in $AliasTargets.GetEnumerator()) {
+        if (Get-Command $entry.Value -CommandType Function -ErrorAction SilentlyContinue) {
+            Set-Alias -Name $entry.Key -Value $entry.Value -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
         }
     }
 }

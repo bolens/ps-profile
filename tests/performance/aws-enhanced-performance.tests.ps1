@@ -54,7 +54,7 @@ Describe 'aws.ps1 - Enhanced Functions Performance Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
             
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'aws' -Available $false
             
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $result = Get-AwsCredentials -ErrorAction SilentlyContinue

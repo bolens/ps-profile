@@ -45,9 +45,12 @@ Describe 'mise Tools Integration Tests' {
 
     Context 'mise helpers (mise.ps1)' {
         BeforeAll {
-            # Mock mise as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'mise' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'mise' -Available $true
             . (Join-Path $script:ProfileDir 'mise.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-MiseOutdated function' {
@@ -60,17 +63,13 @@ Describe 'mise Tools Integration Tests' {
         }
 
         It 'Test-MiseOutdated calls mise outdated' {
-            Mock -CommandName mise -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'outdated') {
-                    Write-Output 'Runtime    Current  Latest'
-                    Write-Output 'nodejs     20.0.0   22.0.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mise' -Output @(
+                'Runtime    Current  Latest'
+                'nodejs     20.0.0   22.0.0'
+            )
 
             Test-MiseOutdated
-            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-MiseOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,16 +83,10 @@ Describe 'mise Tools Integration Tests' {
         }
 
         It 'Update-MiseRuntimes calls mise update' {
-            Mock -CommandName mise -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Runtimes updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mise' -Output 'Runtimes updated successfully'
 
             Update-MiseRuntimes
-            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-MiseRuntimes -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -107,16 +100,10 @@ Describe 'mise Tools Integration Tests' {
         }
 
         It 'Update-MiseSelf calls mise self-update' {
-            Mock -CommandName mise -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'self-update') {
-                    Write-Output 'Mise updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mise' -Output 'Mise updated successfully'
 
             Update-MiseSelf
-            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-MiseSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -130,18 +117,14 @@ Describe 'mise Tools Integration Tests' {
         }
 
         It 'Get-MiseRuntimes calls mise list' {
-            Mock -CommandName mise -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list') {
-                    Write-Output 'Runtime    Version'
-                    Write-Output 'nodejs     20.0.0'
-                    Write-Output 'python     3.11.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mise' -Output @(
+                'Runtime    Version'
+                'nodejs     20.0.0'
+                'python     3.11.0'
+            )
 
             Get-MiseRuntimes
-            Should -Invoke -CommandName 'mise' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Get-MiseRuntimes -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -164,7 +147,7 @@ Describe 'mise Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'mise' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'mise' -Available $false
             $script:MissingMiseOutput = & { . (Join-Path $script:ProfileDir 'mise.ps1') } 2>&1 3>&1 | Out-String
         }
 

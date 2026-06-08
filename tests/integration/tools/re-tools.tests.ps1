@@ -28,6 +28,12 @@ Describe 're-tools.ps1 - Integration Tests' {
             . (Join-Path $script:ProfileDir 're-tools.ps1')
         }
         
+
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
+        }
+
         It 'Registers Decompile-Java function' {
             Get-Command -Name 'Decompile-Java' -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
@@ -67,7 +73,7 @@ Describe 're-tools.ps1 - Integration Tests' {
         }
 
         It 'Decompile-Java handles missing jadx gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'jadx' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'jadx' -Available $false
 
             $output = & { Decompile-Java -InputFile 'test.dex' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'jadx not found'
@@ -75,8 +81,8 @@ Describe 're-tools.ps1 - Integration Tests' {
         }
 
         It 'Decompile-DotNet handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'dnspyex' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'dnspy' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'dnspyex' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'dnspy' -Available $false
 
             $output = & { Decompile-DotNet -InputFile 'test.dll' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'dnspyex not found'
@@ -84,9 +90,9 @@ Describe 're-tools.ps1 - Integration Tests' {
         }
 
         It 'Analyze-PE handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'pe-bear' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'exeinfo-pe' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'detect-it-easy' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pe-bear' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'exeinfo-pe' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'detect-it-easy' -Available $false
 
             $output = & { Analyze-PE -InputFile 'test.exe' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pe-bear not found'
@@ -94,7 +100,7 @@ Describe 're-tools.ps1 - Integration Tests' {
         }
 
         It 'Extract-AndroidApk handles missing apktool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'apktool' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'apktool' -Available $false
 
             $output = & { Extract-AndroidApk -InputFile 'test.apk' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'apktool not found'
@@ -102,7 +108,7 @@ Describe 're-tools.ps1 - Integration Tests' {
         }
 
         It 'Dump-IL2CPP handles missing il2cppdumper gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'il2cppdumper' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'il2cppdumper' -Available $false
 
             $output = & {
                 Dump-IL2CPP -MetadataFile 'metadata.dat' -BinaryFile 'GameAssembly.dll' -ErrorAction SilentlyContinue
@@ -122,16 +128,20 @@ Describe 're-tools.ps1 - Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
             
-            Setup-AvailableCommandMock -CommandName 'jadx'
-            Mock Test-Path -MockWith { return $true }
-            Mock New-Item -MockWith { return [PSCustomObject]@{ FullName = $TestDrive } }
-            Mock -CommandName 'jadx' -MockWith { 
-                $global:LASTEXITCODE = 0
-                return 'Success'
-            }
-            
+            Set-TestCommandAvailabilityState -CommandName 'jadx'
+            Set-Item -Path 'Function:\global:Test-Path' -Value { return $true } -Force
+            Set-Item -Path 'Function:\global:New-Item' -Value {
+                param(
+                    [string]$Path,
+                    [string]$ItemType,
+                    [switch]$Force
+                )
+                return [PSCustomObject]@{ FullName = $Path }
+            } -Force
+            Setup-CapturingCommandMock -CommandName 'jadx'
+
             Decompile-Java -InputFile 'test.dex' -OutputPath $TestDrive -ErrorAction Stop
-            Should -Invoke -CommandName 'jadx' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
         
         It 'Decompile-DotNet accepts parameters' {
@@ -139,16 +149,20 @@ Describe 're-tools.ps1 - Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
             
-            Setup-AvailableCommandMock -CommandName 'dnspyex'
-            Mock Test-Path -MockWith { return $true }
-            Mock New-Item -MockWith { return [PSCustomObject]@{ FullName = $TestDrive } }
-            Mock -CommandName 'dnspyex' -MockWith { 
-                $global:LASTEXITCODE = 0
-                return 'Success'
-            }
-            
+            Set-TestCommandAvailabilityState -CommandName 'dnspyex'
+            Set-Item -Path 'Function:\global:Test-Path' -Value { return $true } -Force
+            Set-Item -Path 'Function:\global:New-Item' -Value {
+                param(
+                    [string]$Path,
+                    [string]$ItemType,
+                    [switch]$Force
+                )
+                return [PSCustomObject]@{ FullName = $Path }
+            } -Force
+            Setup-CapturingCommandMock -CommandName 'dnspyex'
+
             Decompile-DotNet -InputFile 'test.dll' -OutputPath $TestDrive -ErrorAction Stop
-            Should -Invoke -CommandName 'dnspyex' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
     }
 }

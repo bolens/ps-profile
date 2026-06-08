@@ -39,7 +39,7 @@ Describe 'database.ps1 - Enhanced Functions' {
 
     Context 'Connect-Database' {
         It 'Opens DBeaver for PostgreSQL when available' {
-            Setup-AvailableCommandMock -CommandName 'dbeaver'
+            Set-TestCommandAvailabilityState -CommandName 'dbeaver'
 
             Connect-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
 
@@ -103,7 +103,7 @@ Describe 'database.ps1 - Enhanced Functions' {
         }
 
         It 'Requires Database for SQLite' {
-            Setup-AvailableCommandMock -CommandName 'sqlite3'
+            Set-TestCommandAvailabilityState -CommandName 'sqlite3'
 
             $result = Query-Database -DatabaseType SQLite -Query 'SELECT 1' -ErrorAction SilentlyContinue
 
@@ -111,7 +111,7 @@ Describe 'database.ps1 - Enhanced Functions' {
         }
 
         It 'Requires Database for MongoDB' {
-            Setup-AvailableCommandMock -CommandName 'mongosh'
+            Set-TestCommandAvailabilityState -CommandName 'mongosh'
 
             $result = Query-Database -DatabaseType MongoDB -Query 'db.users.find()' -ErrorAction SilentlyContinue
 
@@ -262,7 +262,7 @@ Describe 'database.ps1 - Enhanced Functions' {
         }
 
         It 'Calls Query-Database with schema query for PostgreSQL' {
-            Setup-AvailableCommandMock -CommandName 'psql'
+            Set-TestCommandAvailabilityState -CommandName 'psql'
             Set-Item -Path Function:\Query-Database -Value {
                 param(
                     [string]$DatabaseType,
@@ -278,7 +278,7 @@ Describe 'database.ps1 - Enhanced Functions' {
         }
 
         It 'Filters by TableName when specified' {
-            Setup-AvailableCommandMock -CommandName 'psql'
+            Set-TestCommandAvailabilityState -CommandName 'psql'
             Set-Item -Path Function:\Query-Database -Value {
                 param(
                     [string]$DatabaseType,

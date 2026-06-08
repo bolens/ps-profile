@@ -45,9 +45,12 @@ Describe 'mix Tools Integration Tests' {
 
     Context 'mix helpers (mix.ps1)' {
         BeforeAll {
-            # Mock mix as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'mix' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'mix' -Available $true
             . (Join-Path $script:ProfileDir 'mix.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-MixOutdated function' {
@@ -60,17 +63,13 @@ Describe 'mix Tools Integration Tests' {
         }
 
         It 'Test-MixOutdated calls mix deps.outdated' {
-            Mock -CommandName mix -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'deps.outdated') {
-                    Write-Output 'Dependency    Current  Latest'
-                    Write-Output 'package1      1.0.0    1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mix' -Output @(
+                'Dependency    Current  Latest'
+                'package1      1.0.0    1.2.0'
+            )
 
             Test-MixOutdated
-            Should -Invoke -CommandName 'mix' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-MixOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,16 +83,10 @@ Describe 'mix Tools Integration Tests' {
         }
 
         It 'Update-MixDependencies calls mix deps.update --all' {
-            Mock -CommandName mix -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'deps.update' -and $args -contains '--all') {
-                    Write-Output 'Dependencies updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'mix' -Output 'Dependencies updated successfully'
 
             Update-MixDependencies
-            Should -Invoke -CommandName 'mix' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-MixDependencies -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -117,7 +110,7 @@ Describe 'mix Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'mix' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'mix' -Available $false
             $script:MissingMixOutput = & { . (Join-Path $script:ProfileDir 'mix.ps1') } 2>&1 3>&1 | Out-String
         }
 

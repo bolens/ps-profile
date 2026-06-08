@@ -64,42 +64,42 @@ Describe 'cloud-enhanced.ps1 - Graceful Degradation' {
     }
 
     It 'Set-AzureSubscription handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'az' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'az' -Available $false
         $output = & { Set-AzureSubscription -List -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'az not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'az'
     }
 
     It 'Set-GcpProject handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'gcloud' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'gcloud' -Available $false
         $output = & { Set-GcpProject -List -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'gcloud not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'gcloud'
     }
 
     It 'Get-DopplerSecrets handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'doppler' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'doppler' -Available $false
         $output = & { Get-DopplerSecrets -Project 'test' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'doppler not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'doppler'
     }
 
     It 'Deploy-Heroku handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'heroku' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'heroku' -Available $false
         $output = & { Deploy-Heroku -AppName 'test' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'heroku not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'heroku'
     }
 
     It 'Deploy-Vercel handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'vercel' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'vercel' -Available $false
         $output = & { Deploy-Vercel -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'vercel not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'vercel'
     }
 
     It 'Deploy-Netlify handles missing tool gracefully' {
-        Mock-CommandAvailabilityPester -CommandName 'netlify' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'netlify' -Available $false
         $output = & { Deploy-Netlify -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'netlify not found'
         Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'netlify'

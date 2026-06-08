@@ -45,9 +45,12 @@ Describe 'Homebrew Tools Integration Tests' {
 
     Context 'Homebrew helpers (homebrew.ps1)' {
         BeforeAll {
-            # Mock brew as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'brew' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'brew' -Available $true
             . (Join-Path $script:ProfileDir 'homebrew.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-BrewPackage function' {
@@ -66,45 +69,27 @@ Describe 'Homebrew Tools Integration Tests' {
 
         It 'Install-BrewPackage calls brew install' {
             # Capture arguments using Pattern 6
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Package installed successfully'
             # Execute
             { Install-BrewPackage -Packages git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'install'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Install-BrewPackage supports --cask flag' {
             # Capture arguments using Pattern 6
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cask installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Cask installed successfully'
             # Execute
             { Install-BrewPackage -Packages visual-studio-code -Cask -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain '--cask'
-            $script:capturedArgs | Should -Contain 'visual-studio-code'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'install'
+            Assert-TestCommandInvocationContains '--cask'
+            Assert-TestCommandInvocationContains 'visual-studio-code'
         }
 
         It 'Creates Remove-BrewPackage function' {
@@ -123,23 +108,14 @@ Describe 'Homebrew Tools Integration Tests' {
 
         It 'Remove-BrewPackage calls brew uninstall' {
             # Capture arguments using Pattern 6
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package removed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Package removed successfully'
             # Execute
             { Remove-BrewPackage -Packages git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'uninstall'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'uninstall'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates Test-BrewOutdated function' {
@@ -153,22 +129,13 @@ Describe 'Homebrew Tools Integration Tests' {
 
         It 'Test-BrewOutdated calls brew outdated' {
             # Capture arguments using Pattern 6
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'package1 (1.0.0 < 1.2.0)'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'package1 (1.0.0 < 1.2.0)'
             # Execute
             { Test-BrewOutdated -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'outdated'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'outdated'
         }
 
         It 'Creates Update-BrewPackages function' {
@@ -182,45 +149,27 @@ Describe 'Homebrew Tools Integration Tests' {
 
         It 'Update-BrewPackages calls brew upgrade for all packages' {
             # Capture arguments using Pattern 6
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'All packages upgraded successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'All packages upgraded successfully'
             # Execute
             { Update-BrewPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'upgrade'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'upgrade'
             # When no packages specified, only 'upgrade' should be in arguments
-            $script:capturedArgs.Count | Should -Be 1
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
         }
 
         It 'Update-BrewPackages calls brew upgrade for specific packages' {
             # Capture arguments using Pattern 6
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git upgraded successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'git upgraded successfully'
             # Execute
             { Update-BrewPackages -Packages git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'upgrade'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'upgrade'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Creates Update-BrewSelf function' {
@@ -234,22 +183,13 @@ Describe 'Homebrew Tools Integration Tests' {
 
         It 'Update-BrewSelf calls brew update' {
             # Capture arguments using Pattern 6
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Homebrew updated successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Homebrew updated successfully'
             # Execute
             { Update-BrewSelf -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'update'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'update'
         }
 
         It 'Creates Clear-BrewCache function' {
@@ -267,102 +207,57 @@ Describe 'Homebrew Tools Integration Tests' {
         }
 
         It 'Clear-BrewCache calls brew cleanup' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cleanup completed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Cleanup completed successfully'
             # Execute
             { Clear-BrewCache -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'cleanup'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'cleanup'
         }
 
         It 'Clear-BrewCache with Formula calls brew cleanup with formula' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Formula cleaned successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Formula cleaned successfully'
             # Execute
             { Clear-BrewCache -Formula git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'cleanup'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'cleanup'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Clear-BrewCache with Scrub passes -s flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cache scrubbed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Cache scrubbed successfully'
             # Execute
             { Clear-BrewCache -Scrub -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'cleanup'
-            $script:capturedArgs | Should -Contain '-s'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'cleanup'
+            Assert-TestCommandInvocationContains '-s'
         }
 
         It 'Clear-BrewCache with DryRun passes -n flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Dry run completed'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Dry run completed'
             # Execute
             { Clear-BrewCache -DryRun -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'cleanup'
-            $script:capturedArgs | Should -Contain '-n'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'cleanup'
+            Assert-TestCommandInvocationContains '-n'
         }
 
         It 'Clear-BrewCache with Prune passes --prune flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Pruned cache successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Pruned cache successfully'
             # Execute
             { Clear-BrewCache -Prune 30 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'cleanup'
-            $script:capturedArgs | Should -Contain '--prune=30'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'cleanup'
+            Assert-TestCommandInvocationContains '--prune=30'
         }
 
         It 'Creates Find-BrewPackage function' {
@@ -380,44 +275,26 @@ Describe 'Homebrew Tools Integration Tests' {
         }
 
         It 'Find-BrewPackage calls brew search' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'git'
             # Execute
             { Find-BrewPackage -Query git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'search'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'search'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Find-BrewPackage with Cask passes --cask flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'visual-studio-code'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'visual-studio-code'
             # Execute
             { Find-BrewPackage -Query visual-studio-code -Cask -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'search'
-            $script:capturedArgs | Should -Contain '--cask'
-            $script:capturedArgs | Should -Contain 'visual-studio-code'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'search'
+            Assert-TestCommandInvocationContains '--cask'
+            Assert-TestCommandInvocationContains 'visual-studio-code'
         }
 
         It 'Creates Get-BrewPackage function' {
@@ -430,62 +307,35 @@ Describe 'Homebrew Tools Integration Tests' {
         }
 
         It 'Get-BrewPackage calls brew list' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'git'
             # Execute
             { Get-BrewPackage -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'list'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'list'
         }
 
         It 'Get-BrewPackage with Cask passes --cask flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'visual-studio-code'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'visual-studio-code'
             # Execute
             { Get-BrewPackage -Cask -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'list'
-            $script:capturedArgs | Should -Contain '--cask'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'list'
+            Assert-TestCommandInvocationContains '--cask'
         }
 
         It 'Get-BrewPackage with Versions passes --versions flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'git 2.40.0'
             # Execute
             { Get-BrewPackage -Versions -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'list'
-            $script:capturedArgs | Should -Contain '--versions'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'list'
+            Assert-TestCommandInvocationContains '--versions'
         }
 
         It 'Creates Get-BrewPackageInfo function' {
@@ -498,44 +348,26 @@ Describe 'Homebrew Tools Integration Tests' {
         }
 
         It 'Get-BrewPackageInfo calls brew info' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'git: stable 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'git: stable 2.40.0'
             # Execute
             { Get-BrewPackageInfo -Packages git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'info'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'info'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Get-BrewPackageInfo with Cask passes --cask flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'visual-studio-code: 1.80.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'visual-studio-code: 1.80.0'
             # Execute
             { Get-BrewPackageInfo -Packages visual-studio-code -Cask -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'info'
-            $script:capturedArgs | Should -Contain '--cask'
-            $script:capturedArgs | Should -Contain 'visual-studio-code'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'info'
+            Assert-TestCommandInvocationContains '--cask'
+            Assert-TestCommandInvocationContains 'visual-studio-code'
         }
 
         It 'Creates Export-BrewPackages function' {
@@ -553,69 +385,42 @@ Describe 'Homebrew Tools Integration Tests' {
         }
 
         It 'Export-BrewPackages calls brew bundle dump' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Brewfile created successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Brewfile created successfully'
             $testPath = Get-TestArtifactPath -FileName 'test-Brewfile'
 
             # Execute
             { Export-BrewPackages -Path $testPath -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'bundle'
-            $script:capturedArgs | Should -Contain 'dump'
-            $script:capturedArgs | Should -Contain '--file'
-            $script:capturedArgs | Should -Contain $testPath
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'bundle'
+            Assert-TestCommandInvocationContains 'dump'
+            Assert-TestCommandInvocationContains '--file'
+            Assert-TestCommandInvocationContains $testPath
         }
 
         It 'Export-BrewPackages with Describe passes --describe flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Brewfile created with descriptions'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Brewfile created with descriptions'
             # Execute
             { Export-BrewPackages -Path (Get-TestArtifactPath -FileName 'test-Brewfile') -Describe -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'bundle'
-            $script:capturedArgs | Should -Contain 'dump'
-            $script:capturedArgs | Should -Contain '--describe'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'bundle'
+            Assert-TestCommandInvocationContains 'dump'
+            Assert-TestCommandInvocationContains '--describe'
         }
 
         It 'Export-BrewPackages with Force passes --force flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'brew' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Brewfile overwritten'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'brew' -Output 'Brewfile overwritten'
             # Execute
             { Export-BrewPackages -Path (Get-TestArtifactPath -FileName 'test-Brewfile') -Force -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'brew' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'bundle'
-            $script:capturedArgs | Should -Contain 'dump'
-            $script:capturedArgs | Should -Contain '--force'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'bundle'
+            Assert-TestCommandInvocationContains 'dump'
+            Assert-TestCommandInvocationContains '--force'
         }
 
         It 'Creates Import-BrewPackages function' {
@@ -639,18 +444,18 @@ Describe 'Homebrew Tools Integration Tests' {
             Test-Path -LiteralPath $testFile | Should -Be $true
 
             if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-                Mock Invoke-WithWideEvent -MockWith {
+                Set-Item -Path 'Function:\global:Invoke-WithWideEvent' -Value {
                     param(
                         [Parameter(Mandatory)]
                         [string]$OperationName,
                         [Parameter(Mandatory)]
                         [scriptblock]$ScriptBlock,
-                        [hashtable]$Context,
-                        [string]$Level,
+                        [hashtable]$Context = @{},
+                        [string]$Level = 'INFO',
                         [switch]$AlwaysKeep
                     )
                     & $ScriptBlock
-                }
+                } -Force
             }
 
             Setup-CapturingCommandMock -CommandName 'brew' -Output 'Packages imported successfully'
@@ -671,18 +476,18 @@ Describe 'Homebrew Tools Integration Tests' {
             Test-Path -LiteralPath $testFile | Should -Be $true
 
             if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-                Mock Invoke-WithWideEvent -MockWith {
+                Set-Item -Path 'Function:\global:Invoke-WithWideEvent' -Value {
                     param(
                         [Parameter(Mandatory)]
                         [string]$OperationName,
                         [Parameter(Mandatory)]
                         [scriptblock]$ScriptBlock,
-                        [hashtable]$Context,
-                        [string]$Level,
+                        [hashtable]$Context = @{},
+                        [string]$Level = 'INFO',
                         [switch]$AlwaysKeep
                     )
                     & $ScriptBlock
-                }
+                } -Force
             }
 
             Setup-CapturingCommandMock -CommandName 'brew' -Output 'Packages imported successfully'
@@ -710,7 +515,7 @@ Describe 'Homebrew Tools Integration Tests' {
             }
             Remove-Item Function:brew -ErrorAction SilentlyContinue
             Remove-Item Function:global:brew -ErrorAction SilentlyContinue
-            Mock-CommandAvailabilityPester -CommandName 'brew' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'brew' -Available $false
 
             @(
                 'Install-BrewPackage', 'Remove-BrewPackage', 'Update-BrewPackages',

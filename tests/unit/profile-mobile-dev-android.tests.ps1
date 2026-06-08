@@ -67,7 +67,7 @@ Describe 'mobile-dev.ps1 - Android Functions' {
         }
 
         It 'Calls scrcpy with fullscreen flag' {
-            Setup-AvailableCommandMock -CommandName 'scrcpy'
+            Set-TestCommandAvailabilityState -CommandName 'scrcpy'
 
             Mirror-AndroidScreen -Fullscreen -ErrorAction SilentlyContinue | Out-Null
 
@@ -78,7 +78,7 @@ Describe 'mobile-dev.ps1 - Android Functions' {
         }
 
         It 'Calls scrcpy with device ID when provided' {
-            Setup-AvailableCommandMock -CommandName 'scrcpy'
+            Set-TestCommandAvailabilityState -CommandName 'scrcpy'
 
             Mirror-AndroidScreen -DeviceId 'device123' -ErrorAction SilentlyContinue | Out-Null
 
@@ -96,7 +96,7 @@ Describe 'mobile-dev.ps1 - Android Functions' {
         }
 
         It 'Returns false when APK file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'adb'
+            Set-TestCommandAvailabilityState -CommandName 'adb'
             $missingApk = Join-Path (New-TestTempDirectory -Prefix 'MissingApkParent') 'nonexistent.apk'
 
             $result = Install-Apk -ApkPath $missingApk -ErrorAction SilentlyContinue
@@ -134,7 +134,7 @@ Describe 'mobile-dev.ps1 - Android Functions' {
         }
 
         It 'Calls pixelflasher when available' {
-            Setup-AvailableCommandMock -CommandName 'pixelflasher'
+            Set-TestCommandAvailabilityState -CommandName 'pixelflasher'
 
             Flash-Android -ErrorAction SilentlyContinue | Out-Null
 
@@ -152,7 +152,7 @@ Describe 'mobile-dev.ps1 - Android Functions' {
         }
 
         It 'Calls android-studio-canary when available' {
-            Setup-AvailableCommandMock -CommandName 'android-studio-canary'
+            Set-TestCommandAvailabilityState -CommandName 'android-studio-canary'
 
             Start-AndroidStudio -ErrorAction SilentlyContinue | Out-Null
 
@@ -162,7 +162,7 @@ Describe 'mobile-dev.ps1 - Android Functions' {
         }
 
         It 'Falls back to android-studio when canary not available' {
-            Setup-AvailableCommandMock -CommandName 'android-studio'
+            Set-TestCommandAvailabilityState -CommandName 'android-studio'
             Mark-TestCommandsUnavailable -CommandNames 'android-studio-canary'
 
             Start-AndroidStudio -ErrorAction SilentlyContinue | Out-Null

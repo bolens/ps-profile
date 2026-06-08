@@ -45,9 +45,12 @@ Describe 'npm Tools Integration Tests' {
 
     Context 'npm helpers (npm.ps1)' {
         BeforeAll {
-            # Mock npm as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'npm' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'npm' -Available $true
             . (Join-Path $script:ProfileDir 'npm.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-NpmOutdated function' {
@@ -60,17 +63,13 @@ Describe 'npm Tools Integration Tests' {
         }
 
         It 'Test-NpmOutdated calls npm outdated' {
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'outdated') {
-                    Write-Output 'Package    Current  Wanted  Latest'
-                    Write-Output 'package1  1.0.0    1.1.0   1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'npm' -Output @(
+                'Package    Current  Wanted  Latest'
+                'package1  1.0.0    1.1.0   1.2.0'
+            )
 
             Test-NpmOutdated
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-NpmOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,16 +83,10 @@ Describe 'npm Tools Integration Tests' {
         }
 
         It 'Update-NpmPackages calls npm update' {
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update') {
-                    Write-Output 'Packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Packages updated successfully'
 
             Update-NpmPackages
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-NpmPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -107,16 +100,10 @@ Describe 'npm Tools Integration Tests' {
         }
 
         It 'Update-NpmSelf calls npm install -g npm@latest' {
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install' -and $args -contains '-g' -and $args -contains 'npm@latest') {
-                    Write-Output 'npm updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'npm updated successfully'
 
             Update-NpmSelf
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-NpmSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -137,16 +124,10 @@ Describe 'npm Tools Integration Tests' {
                 }
             } | ConvertTo-Json -Depth 10
 
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list' -and $args -contains '-g' -and $args -contains '--depth=0' -and $args -contains '--json') {
-                    Write-Output $mockJson
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'npm'
 
             { Export-NpmGlobalPackages -Path (Get-TestArtifactPath -FileName 'test-npm-global.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Import-NpmGlobalPackages function' {
@@ -162,15 +143,9 @@ Describe 'npm Tools Integration Tests' {
             $testFile = Get-TestArtifactPath -FileName 'test-npm-global.json'
             '{"dependencies": {"typescript": "5.0.0", "nodemon": "2.0.0"}}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
             
-            $script:capturedArgs = @()
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs += , $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package installed successfully'
             { Import-NpmGlobalPackages -Path $testFile -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 2 -Exactly
+            $global:TestCommandInvocationCaptures.Count | Should -Be 2
 
             Remove-Item -Path $testFile -ErrorAction SilentlyContinue
         }
@@ -200,70 +175,38 @@ Describe 'npm Tools Integration Tests' {
         }
 
         It 'Install-NpmPackage calls npm install with packages' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package installed successfully'
             { Install-NpmPackage express -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain 'express'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains 'express'
         }
 
         It 'Install-NpmPackage with Dev passes --save-dev flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package installed successfully'
             { Install-NpmPackage typescript -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '--save-dev'
-                $script:capturedArgs | Should -Contain 'typescript'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '--save-dev'
+                Assert-TestCommandInvocationContains 'typescript'
         }
 
         It 'Install-NpmPackage with Global passes --global flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package installed successfully'
             { Install-NpmPackage nodemon -Global -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '--global'
-                $script:capturedArgs | Should -Contain 'nodemon'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '--global'
+                Assert-TestCommandInvocationContains 'nodemon'
         }
 
         It 'Install-NpmPackage with Prod passes --save-prod flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package installed successfully'
             { Install-NpmPackage express -Prod -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'install'
-                $script:capturedArgs | Should -Contain '--save-prod'
-                $script:capturedArgs | Should -Contain 'express'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'install'
+                Assert-TestCommandInvocationContains '--save-prod'
+                Assert-TestCommandInvocationContains 'express'
         }
 
         It 'Creates Remove-NpmPackage function' {
@@ -281,97 +224,53 @@ Describe 'npm Tools Integration Tests' {
         }
 
         It 'Remove-NpmPackage calls npm uninstall with packages' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package uninstalled successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package uninstalled successfully'
             { Remove-NpmPackage express -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'uninstall'
-                $script:capturedArgs | Should -Contain 'express'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'uninstall'
+                Assert-TestCommandInvocationContains 'express'
         }
 
         It 'Remove-NpmPackage with Dev passes --save-dev flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package uninstalled successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package uninstalled successfully'
             { Remove-NpmPackage typescript -Dev -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'uninstall'
-                $script:capturedArgs | Should -Contain '--save-dev'
-                $script:capturedArgs | Should -Contain 'typescript'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'uninstall'
+                Assert-TestCommandInvocationContains '--save-dev'
+                Assert-TestCommandInvocationContains 'typescript'
         }
 
         It 'Remove-NpmPackage with Global passes --global flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package uninstalled successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package uninstalled successfully'
             { Remove-NpmPackage nodemon -Global -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'uninstall'
-                $script:capturedArgs | Should -Contain '--global'
-                $script:capturedArgs | Should -Contain 'nodemon'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'uninstall'
+                Assert-TestCommandInvocationContains '--global'
+                Assert-TestCommandInvocationContains 'nodemon'
         }
 
         It 'Remove-NpmPackage with Prod passes --save-prod flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs = $ArgumentList
-                Write-Output 'Package uninstalled successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package uninstalled successfully'
             { Remove-NpmPackage express -Prod -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
-            if ($null -ne $script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'uninstall'
-                $script:capturedArgs | Should -Contain '--save-prod'
-                $script:capturedArgs | Should -Contain 'express'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'uninstall'
+                Assert-TestCommandInvocationContains '--save-prod'
+                Assert-TestCommandInvocationContains 'express'
         }
 
         It 'Export-NpmGlobalPackages handles no dependencies gracefully' {
             $mockJson = @{} | ConvertTo-Json -Depth 10
 
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'list' -and $args -contains '-g' -and $args -contains '--depth=0' -and $args -contains '--json') {
-                    Write-Output $mockJson
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'npm'
 
             { Export-NpmGlobalPackages -Path (Get-TestArtifactPath -FileName 'test-npm-global-empty.json') -Verbose 4>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Import-NpmGlobalPackages handles missing file gracefully' {
-            $script:capturedArgs = @()
-            Mock -CommandName npm -MockWith {
-                param([string[]]$ArgumentList)
-                $script:capturedArgs += , $ArgumentList
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'npm' -Output 'Package installed successfully'
             { Import-NpmGlobalPackages -Path (Get-TestArtifactPath -FileName 'nonexistent.json') -ErrorAction SilentlyContinue 2>&1 | Out-Null } | Should -Not -Throw
-            Should -Invoke -CommandName 'npm' -Times 0 -Exactly
+            $global:TestCommandInvocationCaptures.Count | Should -Be 0
         }
     }
 
@@ -416,7 +315,7 @@ Describe 'npm Tools Integration Tests' {
 
             Remove-Item Function:npm -ErrorAction SilentlyContinue
             Remove-Item Function:global:npm -ErrorAction SilentlyContinue
-            Mock-CommandAvailabilityPester -CommandName 'npm' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'npm' -Available $false
 
             $script:MissingNpmOutput = & { . (Join-Path $script:ProfileDir 'npm.ps1') } 2>&1 3>&1 | Out-String
         }

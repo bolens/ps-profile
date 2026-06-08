@@ -41,7 +41,7 @@ Describe 'game-emulators.ps1 - Start-Dolphin' {
 
     Context 'Tool available' {
         It 'Calls dolphin-dev when available' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
 
             Start-Dolphin -ErrorAction SilentlyContinue
 
@@ -52,7 +52,7 @@ Describe 'game-emulators.ps1 - Start-Dolphin' {
 
         It 'Falls back to dolphin-nightly when dolphin-dev not available' {
             Set-TestCommandAvailabilityState -CommandName 'dolphin-dev' -Available $false
-            Setup-AvailableCommandMock -CommandName 'dolphin-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-nightly'
 
             Start-Dolphin -ErrorAction SilentlyContinue
 
@@ -64,7 +64,7 @@ Describe 'game-emulators.ps1 - Start-Dolphin' {
         It 'Falls back to dolphin when dolphin-dev and dolphin-nightly not available' {
             Set-TestCommandAvailabilityState -CommandName 'dolphin-dev' -Available $false
             Set-TestCommandAvailabilityState -CommandName 'dolphin-nightly' -Available $false
-            Setup-AvailableCommandMock -CommandName 'dolphin'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin'
 
             Start-Dolphin -ErrorAction SilentlyContinue
 
@@ -74,7 +74,7 @@ Describe 'game-emulators.ps1 - Start-Dolphin' {
         }
 
         It 'Calls dolphin with ROM path when provided' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
             $romPath = Join-Path (New-TestTempDirectory -Prefix 'DolphinRom') 'game.iso'
             New-Item -ItemType File -Path $romPath -Force | Out-Null
 
@@ -85,7 +85,7 @@ Describe 'game-emulators.ps1 - Start-Dolphin' {
         }
 
         It 'Calls dolphin with fullscreen flag when provided' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
 
             Start-Dolphin -Fullscreen -ErrorAction SilentlyContinue
 
@@ -94,7 +94,7 @@ Describe 'game-emulators.ps1 - Start-Dolphin' {
         }
 
         It 'Returns null when ROM path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
             $missingRom = Join-Path (New-TestTempDirectory -Prefix 'DolphinMissingRom') 'nonexistent.iso'
 
             $result = Start-Dolphin -RomPath $missingRom -ErrorAction SilentlyContinue
@@ -104,7 +104,7 @@ Describe 'game-emulators.ps1 - Start-Dolphin' {
         }
 
         It 'Handles Start-Process errors gracefully' {
-            Setup-AvailableCommandMock -CommandName 'dolphin-dev'
+            Set-TestCommandAvailabilityState -CommandName 'dolphin-dev'
             Set-TestStartProcessFailure -Message 'Process start failed'
 
             { Start-Dolphin -ErrorAction Stop } | Should -Throw '*Process start failed*'

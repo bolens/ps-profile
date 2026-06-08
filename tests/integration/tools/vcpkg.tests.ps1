@@ -45,9 +45,12 @@ Describe 'vcpkg Tools Integration Tests' {
 
     Context 'vcpkg helpers (vcpkg.ps1)' {
         BeforeAll {
-            # Mock vcpkg as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'vcpkg' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'vcpkg' -Available $true
             . (Join-Path $script:ProfileDir 'vcpkg.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-VcpkgPackage function' {
@@ -65,16 +68,10 @@ Describe 'vcpkg Tools Integration Tests' {
         }
 
         It 'Install-VcpkgPackage calls vcpkg install' {
-            Mock -CommandName vcpkg -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install') {
-                    Write-Output 'Package installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'vcpkg' -Output 'Package installed successfully'
 
             Install-VcpkgPackage -Packages boost
-            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Remove-VcpkgPackage function' {
@@ -92,16 +89,10 @@ Describe 'vcpkg Tools Integration Tests' {
         }
 
         It 'Remove-VcpkgPackage calls vcpkg remove' {
-            Mock -CommandName vcpkg -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'remove') {
-                    Write-Output 'Package removed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'vcpkg' -Output 'Package removed successfully'
 
             Remove-VcpkgPackage -Packages boost
-            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-VcpkgPackages function' {
@@ -114,29 +105,17 @@ Describe 'vcpkg Tools Integration Tests' {
         }
 
         It 'Update-VcpkgPackages calls vcpkg upgrade --dry-run by default' {
-            Mock -CommandName vcpkg -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'upgrade' -and $args -contains '--dry-run') {
-                    Write-Output 'Dry-run: packages that would be upgraded'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'vcpkg' -Output 'Dry-run: packages that would be upgraded'
 
             Update-VcpkgPackages
-            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Update-VcpkgPackages calls vcpkg upgrade for specific packages with -NoDryRun' {
-            Mock -CommandName vcpkg -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'upgrade' -and $args -contains 'boost' -and -not ($args -contains '--dry-run')) {
-                    Write-Output 'boost upgraded successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'vcpkg' -Output 'boost upgraded successfully'
 
             Update-VcpkgPackages -Packages boost -NoDryRun
-            Should -Invoke -CommandName 'vcpkg' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -158,7 +137,7 @@ Describe 'vcpkg unavailable graceful degradation' {
             @('Install-VcpkgPackage', 'Remove-VcpkgPackage', 'Update-VcpkgPackages') | ForEach-Object {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
-            Mock-CommandAvailabilityPester -CommandName 'vcpkg' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'vcpkg' -Available $false
             . (Join-Path $script:ProfileDir 'vcpkg.ps1')
             Get-Command Install-VcpkgPackage -ErrorAction SilentlyContinue
         }
@@ -172,7 +151,7 @@ Describe 'vcpkg unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'vcpkg' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'vcpkg' -Available $false
             . (Join-Path $script:ProfileDir 'vcpkg.ps1')
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'vcpkg not found'

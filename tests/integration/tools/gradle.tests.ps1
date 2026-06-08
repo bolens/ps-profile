@@ -45,9 +45,12 @@ Describe 'gradle Tools Integration Tests' {
 
     Context 'gradle helpers (gradle.ps1)' {
         BeforeAll {
-            # Mock gradle as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'gradle' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'gradle' -Available $true
             . (Join-Path $script:ProfileDir 'gradle.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-GradleOutdated function' {
@@ -60,17 +63,14 @@ Describe 'gradle Tools Integration Tests' {
         }
 
         It 'Test-GradleOutdated calls gradle dependencyUpdates' {
-            Mock -CommandName gradle -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'dependencyUpdates') {
-                    Write-Output 'The following dependencies have updates:'
-                    Write-Output '  package1: 1.0.0 -> 1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'gradle' -Output @(
+                'The following dependencies have updates:'
+                '  package1: 1.0.0 -> 1.2.0'
+            )
 
             Test-GradleOutdated
-            Should -Invoke -CommandName 'gradle' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'dependencyUpdates'
             Get-Command Test-GradleOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,16 +84,13 @@ Describe 'gradle Tools Integration Tests' {
         }
 
         It 'Update-GradleWrapper calls gradle wrapper --gradle-version latest' {
-            Mock -CommandName gradle -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'wrapper' -and $args -contains '--gradle-version' -and $args -contains 'latest') {
-                    Write-Output 'Gradle wrapper updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'gradle' -Output 'Gradle wrapper updated successfully'
 
             Update-GradleWrapper
-            Should -Invoke -CommandName 'gradle' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'wrapper'
+            Assert-TestCommandInvocationContains '--gradle-version'
+            Assert-TestCommandInvocationContains 'latest'
             Get-Command Update-GradleWrapper -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -114,7 +111,7 @@ Describe 'gradle Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'gradle' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'gradle' -Available $false
             $script:MissingGradleOutput = & { . (Join-Path $script:ProfileDir 'gradle.ps1') } 2>&1 3>&1 | Out-String
         }
 

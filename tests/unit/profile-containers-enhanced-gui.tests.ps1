@@ -34,7 +34,7 @@ Describe 'containers-enhanced.ps1 - Start-PodmanDesktop' {
 
     Context 'Tool available' {
         It 'Launches podman-desktop' {
-            Setup-AvailableCommandMock -CommandName 'podman-desktop'
+            Set-TestCommandAvailabilityState -CommandName 'podman-desktop'
 
             Start-PodmanDesktop -ErrorAction SilentlyContinue
 
@@ -44,7 +44,7 @@ Describe 'containers-enhanced.ps1 - Start-PodmanDesktop' {
         }
 
         It 'Handles Start-Process errors' {
-            Setup-AvailableCommandMock -CommandName 'podman-desktop'
+            Set-TestCommandAvailabilityState -CommandName 'podman-desktop'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             Start-PodmanDesktop -ErrorAction SilentlyContinue | Out-Null
@@ -78,7 +78,7 @@ Describe 'containers-enhanced.ps1 - Start-RancherDesktop' {
 
     Context 'Tool available' {
         It 'Launches rancher-desktop' {
-            Setup-AvailableCommandMock -CommandName 'rancher-desktop'
+            Set-TestCommandAvailabilityState -CommandName 'rancher-desktop'
 
             Start-RancherDesktop -ErrorAction SilentlyContinue
 
@@ -88,7 +88,7 @@ Describe 'containers-enhanced.ps1 - Start-RancherDesktop' {
         }
 
         It 'Handles Start-Process errors' {
-            Setup-AvailableCommandMock -CommandName 'rancher-desktop'
+            Set-TestCommandAvailabilityState -CommandName 'rancher-desktop'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             Start-RancherDesktop -ErrorAction SilentlyContinue | Out-Null

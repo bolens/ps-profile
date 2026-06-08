@@ -37,7 +37,7 @@ Describe 'database-clients.ps1 - Start-MongoDbCompass' {
 
     Context 'Tool available' {
         It 'Starts mongodb-compass without connection string' {
-            Setup-AvailableCommandMock -CommandName 'mongodb-compass'
+            Set-TestCommandAvailabilityState -CommandName 'mongodb-compass'
 
             $result = Start-MongoDbCompass
 
@@ -48,7 +48,7 @@ Describe 'database-clients.ps1 - Start-MongoDbCompass' {
         }
 
         It 'Starts mongodb-compass with connection string' {
-            Setup-AvailableCommandMock -CommandName 'mongodb-compass'
+            Set-TestCommandAvailabilityState -CommandName 'mongodb-compass'
 
             $connectionString = 'mongodb://localhost:27017'
             $result = Start-MongoDbCompass -ConnectionString $connectionString
@@ -59,7 +59,7 @@ Describe 'database-clients.ps1 - Start-MongoDbCompass' {
         }
 
         It 'Handles process start errors' {
-            Setup-AvailableCommandMock -CommandName 'mongodb-compass'
+            Set-TestCommandAvailabilityState -CommandName 'mongodb-compass'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Start-MongoDbCompass -ErrorAction Stop } | Should -Throw '*Access denied*'

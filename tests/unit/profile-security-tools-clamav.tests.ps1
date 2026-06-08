@@ -38,7 +38,7 @@ Describe 'security-tools.ps1 - Invoke-ClamAVScan' {
         }
 
         It 'Returns error when path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'clamscan'
+            Set-TestCommandAvailabilityState -CommandName 'clamscan'
 
             $result = Invoke-ClamAVScan -Path (Join-Path $script:TestRoot 'Missing') -ErrorAction SilentlyContinue
 
@@ -78,7 +78,7 @@ Describe 'security-tools.ps1 - Invoke-ClamAVScan' {
         }
 
         It 'Handles ClamAV path not found' {
-            Setup-AvailableCommandMock -CommandName 'clamscan'
+            Set-TestCommandAvailabilityState -CommandName 'clamscan'
 
             $result = Invoke-ClamAVScan -Path (Join-Path $script:TestRoot 'Missing') -ErrorAction SilentlyContinue
 

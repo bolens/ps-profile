@@ -45,9 +45,12 @@ Describe 'CocoaPods Tools Integration Tests' {
 
     Context 'CocoaPods helpers (cocoapods.ps1)' {
         BeforeAll {
-            # Mock pod as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'pod' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'pod' -Available $true
             . (Join-Path $script:ProfileDir 'cocoapods.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Install-CocoaPodsDependencies function' {
@@ -60,16 +63,10 @@ Describe 'CocoaPods Tools Integration Tests' {
         }
 
         It 'Install-CocoaPodsDependencies calls pod install' {
-            Mock -CommandName pod -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'install') {
-                    Write-Output 'Dependencies installed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pod' -Output 'Dependencies installed successfully'
 
             Install-CocoaPodsDependencies
-            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-CocoaPodsDependencies function' {
@@ -82,29 +79,17 @@ Describe 'CocoaPods Tools Integration Tests' {
         }
 
         It 'Update-CocoaPodsDependencies calls pod update for all packages' {
-            Mock -CommandName pod -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args.Count -eq 1) {
-                    Write-Output 'All dependencies updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pod' -Output 'All dependencies updated successfully'
 
             Update-CocoaPodsDependencies
-            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Update-CocoaPodsDependencies calls pod update for specific pods' {
-            Mock -CommandName pod -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args -contains 'Alamofire') {
-                    Write-Output 'Alamofire updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pod' -Output 'Alamofire updated successfully'
 
             Update-CocoaPodsDependencies Alamofire
-            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Remove-CocoaPodsIntegration function' {
@@ -117,16 +102,10 @@ Describe 'CocoaPods Tools Integration Tests' {
         }
 
         It 'Remove-CocoaPodsIntegration calls pod deintegrate' {
-            Mock -CommandName pod -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'deintegrate') {
-                    Write-Output 'CocoaPods integration removed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pod' -Output 'CocoaPods integration removed successfully'
 
             Remove-CocoaPodsIntegration
-            Should -Invoke -CommandName 'pod' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -145,7 +124,7 @@ Describe 'CocoaPods unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'pod' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pod' -Available $false
             . (Join-Path $script:ProfileDir 'cocoapods.ps1')
             Get-Command Install-CocoaPodsDependencies -ErrorAction SilentlyContinue
         }
@@ -159,7 +138,7 @@ Describe 'CocoaPods unavailable graceful degradation' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
-            Mock-CommandAvailabilityPester -CommandName 'pod' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pod' -Available $false
             . (Join-Path $script:ProfileDir 'cocoapods.ps1')
         } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'pod not found'

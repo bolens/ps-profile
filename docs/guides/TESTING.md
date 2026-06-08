@@ -8,9 +8,13 @@ This guide provides comprehensive information about testing in the PowerShell pr
 - [Test Structure](#test-structure)
 - [Writing Tests](#writing-tests)
 - [Running Tests](#running-tests)
+- [Batch Runners](#batch-runners)
+- [Coverage Analysis](#coverage-analysis)
 - [Advanced Features](#advanced-features)
+- [Exit Codes](#exit-codes)
 - [Best Practices](#best-practices)
 - [Troubleshooting](#troubleshooting)
+- [Related Testing Documentation](#related-testing-documentation)
 
 ## Overview
 
@@ -21,6 +25,8 @@ The project uses **Pester 5+** for testing with a comprehensive test runner that
 - **Performance tests** - Tests that measure and track performance metrics
 
 The test runner (`scripts/utils/code-quality/run-pester.ps1`) provides advanced features including retry logic, performance monitoring, baselining, and detailed reporting.
+
+> **Start here.** This is the canonical testing guide. For code examples see [Testing Patterns](../examples/TESTING_PATTERNS.md); for stubs see [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md); for coverage workflows see [Coverage Verification](VERIFY_COVERAGE.md). Full index: [Related Testing Documentation](#related-testing-documentation).
 
 ## Test Structure
 
@@ -204,6 +210,8 @@ The module uses a structured approach where module configurations are separated 
 
 ## Writing Tests
 
+For copy-paste examples and a test checklist, see [Testing Patterns](../examples/TESTING_PATTERNS.md). For stubbing external commands and environment state, see [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md).
+
 ### Basic Test Structure
 
 All tests follow the Pester 5 structure with `Describe`, `Context`, and `It` blocks:
@@ -386,30 +394,32 @@ Describe 'Profile Performance' {
 }
 ```
 
-### Using Mocks
+### Using TestSupport Stubs
 
-Use Pester mocks to isolate units under test:
+Use TestSupport stubs (not Pester `Mock`) to isolate units under test. Load TestSupport in `BeforeAll`:
 
 ```powershell
 Describe 'Function with External Dependency' {
-    It 'should handle external command failure' {
-        Mock -CommandName 'Get-Content' -MockWith {
-            throw "File not found"
-        }
-
-        { MyFunction -Path 'test.txt' } | Should -Throw
+    BeforeAll {
+        . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     }
 
-    It 'should process file content correctly' {
-        Mock -CommandName 'Get-Content' -MockWith {
-            return @('line1', 'line2', 'line3')
-        }
+    It 'should handle external command failure' {
+        Set-TestCommandThrowingMock -CommandName 'mytool' -Message 'Execution failed'
+
+        { MyFunction -Path 'test.txt' } | Should -Not -Throw
+    }
+
+    It 'should process command output correctly' {
+        Setup-CapturingCommandMock -CommandName 'mytool' -Output @('line1', 'line2', 'line3')
 
         $result = MyFunction -Path 'test.txt'
         $result.Count | Should -Be 3
     }
 }
 ```
+
+See `docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md` for full stub patterns.
 
 ### Test Tags
 
@@ -559,7 +569,66 @@ task test-performance
 
 # Run with coverage
 task test-coverage
+
+# Pass extra flags through task CLI_ARGS
+task test-unit -- -TestName "*MyFunc*" -Quiet
+task test-unit-batch -- -Filter profile-
+task test-tools -- -RelativePath network
+task test-conversion-batch -- -RelativePath data/compression
 ```
+
+## Batch Runners
+
+For large suites that can exhaust memory in a single PowerShell session, use the
+per-file batch wrappers. Each spawns a separate `run-pester.ps1` process per
+`*.tests.ps1` file and prints a summary table.
+
+| Script | Task shortcut | Purpose |
+|--------|---------------|---------|
+| `run-unit-batch.ps1` | `task test-unit-batch` | Unit tests, one file per process |
+| `run-performance-batch.ps1` | `task test-performance-batch` | Performance tests, one file per process |
+| `run-tools-integration-batch.ps1` | `task test-tools` | Tools integration tests (per-file default) |
+| `run-conversion-integration-batch.ps1` | `task test-conversion-batch` | Conversion integration tests |
+
+```powershell
+# Unit batch with optional name filter
+pwsh -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 -Filter profile- -Quiet
+
+# Tools integration (per-file isolation by default)
+pwsh -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 -RelativePath network -Quiet
+
+# Conversion integration (single session by default; use -PerFile for isolation)
+pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 -RelativePath data/compression -Parallel 4
+```
+
+Batch scripts forward a subset of flags (`-Quiet`, `-Parallel` on conversion batch).
+For full runner features (coverage, retries, baselines), call `run-pester.ps1` directly
+or use `task test -- <flags>`.
+
+## Coverage Analysis
+
+During development, `analyze-coverage.ps1` is the recommended entry point. It maps
+source files to matching tests, runs Pester with coverage enabled, and reports per-file
+coverage gaps:
+
+```powershell
+# Analyze bootstrap coverage (default path)
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1
+
+# Analyze specific source paths
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap
+
+# Multiple paths
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/11-git.ps1,profile.d/02-files.ps1
+
+# Custom report output directory
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap -OutputPath scripts/data/coverage
+```
+
+See [VERIFY_COVERAGE.md](VERIFY_COVERAGE.md) for interpretation guidance.
 
 ## Advanced Features
 
@@ -570,6 +639,9 @@ Handle flaky tests with automatic retries:
 ```powershell
 # Retry failed tests up to 3 times
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -MaxRetries 3 -RetryOnFailure
+
+# Suppress retry warning noise (logs retries at debug level instead)
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -MaxRetries 3 -SuppressRetryWarnings
 
 # Use exponential backoff (delays: 1s, 2s, 4s, ...)
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -MaxRetries 3 -ExponentialBackoff
@@ -667,8 +739,11 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestResultPath 
 Optimized settings for continuous integration:
 
 ```powershell
-# CI mode (sets Normal output, enables coverage, treats warnings as failures)
+# CI mode (Normal output, auto-coverage, NUnit XML results)
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -CI
+
+# Treat warnings as failures (not enabled automatically by -CI)
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -CI -FailOnWarnings
 ```
 
 ### Dry Run
@@ -862,9 +937,9 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Path file1.test
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestFile tests/unit/*.tests.ps1
 ```
 
-#### Enhanced Exit Codes
+## Exit Codes
 
-The test runner now provides granular exit codes:
+The test runner provides granular exit codes:
 
 - `0` - Success (all tests passed)
 - `1` - Validation failure
@@ -926,12 +1001,14 @@ It 'should work'
 - Clean up temporary files and resources
 - Don't rely on global state
 
-### Mocking Guidelines
+### Stub Guidelines
 
-- Mock external dependencies (file system, network, etc.)
-- Don't mock the code under test
-- Use mocks to control behavior, not just to avoid side effects
-- Verify mock calls when behavior matters
+- Stub external dependencies (commands, network, environment) via TestSupport helpers
+- Don't stub the code under test
+- Use `Setup-CapturingCommandMock` when verifying command arguments or output
+- Prefer real temp directories (`TestDrive`, `Get-TestPath`) over stubbing filesystem cmdlets
+
+See `docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md` for details.
 
 ### Performance Test Guidelines
 
@@ -1049,18 +1126,28 @@ It 'Tests docker functionality' {
 }
 ```
 
-#### Using Mock-CommandAvailabilityPester
+#### Using Set-TestCommandAvailabilityState
 
-For tests that need to verify behavior when tools are unavailable:
+For tests that need to verify behavior when tools are unavailable (even if the real binary exists on PATH):
 
 ```powershell
 It 'Tests function when tool is unavailable' {
-    Mock-CommandAvailabilityPester -CommandName 'docker' -Available $false -Scope It
+    Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
 
     # Test that function handles missing tool gracefully
     { Get-DockerInfo } | Should -Not -Throw
 }
 ```
+
+For multiple commands, prefer `Mark-TestCommandsUnavailable`:
+
+```powershell
+BeforeEach {
+    Mark-TestCommandsUnavailable -CommandNames @('docker', 'podman', 'kubectl')
+}
+```
+
+When real binaries on PATH would shadow stubs, also call `Clear-TestCachedCommandCache` in `BeforeEach`.
 
 #### Package Detection
 
@@ -1306,13 +1393,32 @@ If coverage is lower than expected:
 2. **Review test scope** - Ensure tests cover all branches
 3. **Check excluded paths** - Review coverage exclusions
 4. **Add missing tests** - Write tests for uncovered code paths
+5. **Verify per-module coverage** - See [Coverage Verification](VERIFY_COVERAGE.md) for `analyze-coverage.ps1` workflows
 
-## Additional Resources
+## Related Testing Documentation
+
+| Guide | Purpose |
+| ----- | ------- |
+| **[Testing Guide](TESTING.md)** (this doc) | Structure, running tests, runner flags, batch scripts, exit codes |
+| [Development Guide](DEVELOPMENT.md) | Setup, workflow, advanced runner features |
+| [Testing Patterns](../examples/TESTING_PATTERNS.md) | Copy-paste examples for writing tests |
+| [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | TestSupport stubs, command capture, environment isolation |
+| [Coverage Verification](VERIFY_COVERAGE.md) | `analyze-coverage.ps1` per-module verification |
+| [Tool Requirements](TOOL_REQUIREMENTS.md) | Required and optional tools for test suites |
+| [Development Quick Start](DEVELOPMENT_QUICK_START.md) | Fast profile reload during development |
+| [Examples Index](../examples/README.md#testing-patterns) | All code examples including testing |
+| [Contributing](../../CONTRIBUTING.md) | Validation workflow before commits |
+| [AGENTS.md](../../AGENTS.md) | AI assistant testing guidelines |
+
+**Runner entry points:**
+
+- `scripts/utils/code-quality/run-pester.ps1` — main test runner
+- `scripts/utils/code-quality/analyze-coverage.ps1` — development coverage analysis
+- Batch wrappers — see [Batch Runners](#batch-runners)
+
+**External:**
 
 - [Pester Documentation](https://pester.dev/docs/quick-start)
-- [AGENTS.md](../../AGENTS.md) - AI assistant guidelines
-- [CONTRIBUTING.md](../../CONTRIBUTING.md) - Contribution guidelines
-- [docs/guides/DEVELOPMENT.md](DEVELOPMENT.md) - Development guide
 
 ## Quick Reference
 
@@ -1336,6 +1442,13 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -MaxRetries 3 -T
 
 # Generate HTML report
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -AnalyzeResults -ReportFormat HTML -ReportPath "report.html"
+
+# Batch runners (per-file isolation)
+task test-unit-batch -- -Filter test-runner-
+task test-tools -- -RelativePath network -Quiet
+
+# Development coverage analysis
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap
 ```
 
 ### Test File Template

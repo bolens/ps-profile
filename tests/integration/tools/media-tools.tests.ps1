@@ -63,7 +63,7 @@ Describe 'media-tools.ps1 - Graceful Degradation' {
         }
 
         foreach ($cmd in @('handbrake-cli', 'HandBrakeCLI', 'ffmpeg', 'cyanrip', 'mediainfo', 'MediaInfo', 'mkvmerge', 'mp3tag')) {
-            Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
         }
 
         $script:TestMediaFile = Join-Path $TestDrive 'test.mp4'

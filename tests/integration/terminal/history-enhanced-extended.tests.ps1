@@ -1,9 +1,12 @@
 
 
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 Describe "Enhanced History Module - Additional Tests" {
     BeforeAll {
         try {
-            # Load bootstrap fragment first to make Set-AgentModeFunction/Set-AgentModeAlias available
             $profileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
             if ($null -eq $profileDir -or [string]::IsNullOrWhiteSpace($profileDir)) {
                 throw "Get-TestPath returned null or empty value for profileDir"
@@ -14,7 +17,6 @@ Describe "Enhanced History Module - Additional Tests" {
                 . $bootstrapFragment
             }
 
-            # Load the enhanced history fragment directly
             $enhancedHistoryFragment = Join-Path $profileDir 'history-enhanced.ps1'
             if (-not (Test-Path -LiteralPath $enhancedHistoryFragment)) {
                 throw "Enhanced history fragment not found at: $enhancedHistoryFragment"
@@ -22,8 +24,7 @@ Describe "Enhanced History Module - Additional Tests" {
             Remove-Variable -Name 'EnhancedHistoryLoaded' -Scope Global -ErrorAction SilentlyContinue
             . $enhancedHistoryFragment
 
-            # Mock Read-Host for interactive functions
-            Mock Read-Host { return "n" }
+            Set-TestReadHostResponse -Response 'n'
         }
         catch {
             $errorDetails = @{
@@ -33,6 +34,12 @@ Describe "Enhanced History Module - Additional Tests" {
             }
             Write-Error "Failed to initialize enhanced history extended tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
             throw
+        }
+    }
+
+    AfterAll {
+        if (Get-Command Restore-TestTerminalStubs -ErrorAction SilentlyContinue) {
+            Restore-TestTerminalStubs
         }
     }
 
@@ -61,20 +68,18 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
             Show-HistoryStats
 
-            # The function must call Get-History exactly once
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
 
         It "Should handle empty history gracefully" {
-            Mock Get-History { return $null }
+            Register-TestGetHistoryStub -ReturnValue $null
 
-            # Should not throw when history is empty
             { Show-HistoryStats } | Should -Not -Throw
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
     }
 
@@ -98,12 +103,11 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
             Find-HistoryFuzzy -Pattern "Process"
 
-            # Must query history exactly once per call
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
 
         It "Should not throw when pattern produces no matches" {
@@ -115,18 +119,17 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
             { Find-HistoryFuzzy -Pattern "nonexistent" } | Should -Not -Throw
         }
 
         It "Should return early (warn) when pattern is empty without calling Get-History" {
-            Mock Get-History { return @() }
+            Register-TestGetHistoryStub -ReturnValue @()
 
             Find-HistoryFuzzy -Pattern ""
 
-            # Empty pattern is rejected before querying history
-            Should -Invoke Get-History -Exactly 0
+            Assert-TestGetHistoryInvoked -Times 0
         }
 
         It "Should match case-insensitively by default" {
@@ -138,11 +141,10 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
-            # Lowercase search against uppercase command — must not throw and must query history
             { Find-HistoryFuzzy -Pattern "process" } | Should -Not -Throw
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
     }
 
@@ -161,19 +163,19 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
             Find-HistoryQuick -Pattern "Get-"
 
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
 
         It "Should return early (warn) when pattern is empty without calling Get-History" {
-            Mock Get-History { return @() }
+            Register-TestGetHistoryStub -ReturnValue @()
 
             Find-HistoryQuick -Pattern ""
 
-            Should -Invoke Get-History -Exactly 0
+            Assert-TestGetHistoryInvoked -Times 0
         }
     }
 
@@ -192,25 +194,25 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
             Invoke-LastCommand -Pattern "Service"
 
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
 
         It "Should warn when no matches found without throwing" {
-            Mock Get-History { return @() }
+            Register-TestGetHistoryStub -ReturnValue @()
 
             { Invoke-LastCommand -Pattern "nonexistent" } | Should -Not -Throw
         }
 
         It "Should return early (warn) when pattern is empty without calling Get-History" {
-            Mock Get-History { return @() }
+            Register-TestGetHistoryStub -ReturnValue @()
 
             Invoke-LastCommand -Pattern ""
 
-            Should -Invoke Get-History -Exactly 0
+            Assert-TestGetHistoryInvoked -Times 0
         }
     }
 
@@ -229,15 +231,15 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
             Show-RecentCommands
 
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
 
         It "Should not throw when history is null" {
-            Mock Get-History { return $null }
+            Register-TestGetHistoryStub -ReturnValue $null
 
             { Show-RecentCommands } | Should -Not -Throw
         }
@@ -251,16 +253,15 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
 
             { Show-RecentCommands -Count 5 } | Should -Not -Throw
-            Should -Invoke Get-History -Exactly 1
+            Assert-TestGetHistoryInvoked -Times 1
         }
     }
 
     Context "Remove-HistoryDuplicates" {
         It "Should call Clear-History for duplicate entries" {
-            # History with Get-Process appearing twice (ids 1 and 3 are duplicates)
             $mockHistory = @(
                 [PSCustomObject]@{
                     Id                 = 1
@@ -279,13 +280,12 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
-            Mock Clear-History { }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
+            Register-TestClearHistoryStub
 
             Remove-HistoryDuplicates
 
-            # One duplicate exists (Get-Process appears twice), Clear-History must be called once
-            Should -Invoke Clear-History -Exactly 1
+            Assert-TestClearHistoryInvoked -Times 1
         }
 
         It "Should not call Clear-History when history has no duplicates" {
@@ -302,16 +302,16 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
-            Mock Clear-History { }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
+            Register-TestClearHistoryStub
 
             Remove-HistoryDuplicates
 
-            Should -Invoke Clear-History -Exactly 0
+            Assert-TestClearHistoryInvoked -Times 0
         }
 
         It "Should not throw when history is null" {
-            Mock Get-History { return $null }
+            Register-TestGetHistoryStub -ReturnValue $null
 
             { Remove-HistoryDuplicates } | Should -Not -Throw
         }
@@ -328,13 +328,12 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
-            Mock Clear-History { }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
+            Register-TestClearHistoryStub
 
             Remove-OldHistory -Days 30
 
-            # The old entry must be cleared
-            Should -Invoke Clear-History -Exactly 1
+            Assert-TestClearHistoryInvoked -Times 1
         }
 
         It "Should not call Clear-History when all entries are within the retention window" {
@@ -347,12 +346,12 @@ Describe "Enhanced History Module - Additional Tests" {
                 }
             )
 
-            Mock Get-History { return $mockHistory }
-            Mock Clear-History { }
+            Register-TestGetHistoryStub -ReturnValue $mockHistory
+            Register-TestClearHistoryStub
 
             Remove-OldHistory -Days 30
 
-            Should -Invoke Clear-History -Exactly 0
+            Assert-TestClearHistoryInvoked -Times 0
         }
     }
 }

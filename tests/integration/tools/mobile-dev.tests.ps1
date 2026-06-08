@@ -71,7 +71,7 @@ Describe 'mobile-dev.ps1 - Integration Tests' {
         }
 
         It 'Connect-AndroidDevice handles missing adb gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'adb' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'adb' -Available $false
 
             $output = & { Connect-AndroidDevice -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'adb not found'
@@ -79,7 +79,7 @@ Describe 'mobile-dev.ps1 - Integration Tests' {
         }
 
         It 'Mirror-AndroidScreen handles missing scrcpy gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'scrcpy' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'scrcpy' -Available $false
 
             $output = & { Mirror-AndroidScreen -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'scrcpy not found'
@@ -87,7 +87,7 @@ Describe 'mobile-dev.ps1 - Integration Tests' {
         }
 
         It 'Install-Apk handles missing adb gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'adb' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'adb' -Available $false
 
             $output = & { Install-Apk -ApkPath 'test.apk' -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'adb not found'
@@ -95,7 +95,7 @@ Describe 'mobile-dev.ps1 - Integration Tests' {
         }
 
         It 'Connect-IOSDevice handles missing libimobiledevice gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'idevice_id' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'idevice_id' -Available $false
 
             $output = & { Connect-IOSDevice -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'libimobiledevice not found'
@@ -103,7 +103,7 @@ Describe 'mobile-dev.ps1 - Integration Tests' {
         }
 
         It 'Flash-Android handles missing pixelflasher gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'pixelflasher' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pixelflasher' -Available $false
 
             $output = & { Flash-Android -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'pixelflasher not found'
@@ -111,8 +111,8 @@ Describe 'mobile-dev.ps1 - Integration Tests' {
         }
 
         It 'Start-AndroidStudio handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'android-studio-canary' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'android-studio' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'android-studio-canary' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'android-studio' -Available $false
 
             $output = & { Start-AndroidStudio -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'android-studio-canary not found'

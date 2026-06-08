@@ -68,7 +68,7 @@ Describe 're-tools.ps1 - Decompile-Java' {
         }
 
         It 'Handles missing input file' {
-            Setup-AvailableCommandMock -CommandName 'jadx'
+            Set-TestCommandAvailabilityState -CommandName 'jadx'
             $missingFile = Join-Path $script:TestWorkDir 'missing.dex'
 
             $result = Decompile-Java -InputFile $missingFile -ErrorAction SilentlyContinue

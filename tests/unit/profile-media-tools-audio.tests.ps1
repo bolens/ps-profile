@@ -47,7 +47,7 @@ Describe 'media-tools.ps1 - Tag-Audio' {
 
     Context 'Tool available' {
         It 'Launches mp3tag with audio file' {
-            Setup-AvailableCommandMock -CommandName 'mp3tag'
+            Set-TestCommandAvailabilityState -CommandName 'mp3tag'
 
             Tag-Audio -AudioPath $script:TestAudioFile -ErrorAction SilentlyContinue | Out-Null
 
@@ -57,7 +57,7 @@ Describe 'media-tools.ps1 - Tag-Audio' {
         }
 
         It 'Launches picard when specified' {
-            Setup-AvailableCommandMock -CommandName 'picard'
+            Set-TestCommandAvailabilityState -CommandName 'picard'
 
             Tag-Audio -AudioPath $script:TestAudioFile -Tool 'picard' -ErrorAction SilentlyContinue | Out-Null
 
@@ -66,7 +66,7 @@ Describe 'media-tools.ps1 - Tag-Audio' {
         }
 
         It 'Launches tagscanner when specified' {
-            Setup-AvailableCommandMock -CommandName 'tagscanner'
+            Set-TestCommandAvailabilityState -CommandName 'tagscanner'
 
             Tag-Audio -AudioPath $script:TestAudioFile -Tool 'tagscanner' -ErrorAction SilentlyContinue | Out-Null
 
@@ -75,7 +75,7 @@ Describe 'media-tools.ps1 - Tag-Audio' {
         }
 
         It 'Handles Start-Process errors' {
-            Setup-AvailableCommandMock -CommandName 'mp3tag'
+            Set-TestCommandAvailabilityState -CommandName 'mp3tag'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Tag-Audio -AudioPath $script:TestAudioFile -ErrorAction Stop } | Should -Throw '*Access denied*'

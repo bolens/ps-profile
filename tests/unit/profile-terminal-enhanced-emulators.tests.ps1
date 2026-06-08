@@ -36,7 +36,7 @@ Describe 'terminal-enhanced.ps1 - Terminal Emulator Functions' {
         }
 
         It 'Calls alacritty when available' {
-            Setup-AvailableCommandMock -CommandName 'alacritty'
+            Set-TestCommandAvailabilityState -CommandName 'alacritty'
 
             Launch-Alacritty -ErrorAction SilentlyContinue | Out-Null
 
@@ -46,7 +46,7 @@ Describe 'terminal-enhanced.ps1 - Terminal Emulator Functions' {
         }
 
         It 'Calls alacritty with command when provided' {
-            Setup-AvailableCommandMock -CommandName 'alacritty'
+            Set-TestCommandAvailabilityState -CommandName 'alacritty'
 
             Launch-Alacritty -Command 'git status' -ErrorAction SilentlyContinue | Out-Null
 
@@ -56,7 +56,7 @@ Describe 'terminal-enhanced.ps1 - Terminal Emulator Functions' {
         }
 
         It 'Calls alacritty with working directory when provided' {
-            Setup-AvailableCommandMock -CommandName 'alacritty'
+            Set-TestCommandAvailabilityState -CommandName 'alacritty'
 
             Launch-Alacritty -WorkingDirectory $script:TestWorkingDirectory -ErrorAction SilentlyContinue | Out-Null
 
@@ -74,7 +74,7 @@ Describe 'terminal-enhanced.ps1 - Terminal Emulator Functions' {
         }
 
         It 'Calls kitty when available' {
-            Setup-AvailableCommandMock -CommandName 'kitty'
+            Set-TestCommandAvailabilityState -CommandName 'kitty'
 
             Launch-Kitty -ErrorAction SilentlyContinue | Out-Null
 
@@ -94,7 +94,7 @@ Describe 'terminal-enhanced.ps1 - Terminal Emulator Functions' {
         }
 
         It 'Calls wezterm-nightly when available' {
-            Setup-AvailableCommandMock -CommandName 'wezterm-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'wezterm-nightly'
 
             Launch-WezTerm -ErrorAction SilentlyContinue | Out-Null
 
@@ -105,7 +105,7 @@ Describe 'terminal-enhanced.ps1 - Terminal Emulator Functions' {
 
         It 'Falls back to wezterm when wezterm-nightly not available' {
             Mark-TestCommandsUnavailable -CommandNames 'wezterm-nightly'
-            Setup-AvailableCommandMock -CommandName 'wezterm'
+            Set-TestCommandAvailabilityState -CommandName 'wezterm'
 
             Launch-WezTerm -ErrorAction SilentlyContinue | Out-Null
 
@@ -122,7 +122,7 @@ Describe 'terminal-enhanced.ps1 - Terminal Emulator Functions' {
         }
 
         It 'Calls tabby when available' {
-            Setup-AvailableCommandMock -CommandName 'tabby'
+            Set-TestCommandAvailabilityState -CommandName 'tabby'
 
             Launch-Tabby -ErrorAction SilentlyContinue | Out-Null
 

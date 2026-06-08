@@ -72,7 +72,7 @@ Describe 'api-tools.ps1 - Invoke-Bruno' {
         }
 
         It 'Returns error when collection path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'bruno'
+            Set-TestCommandAvailabilityState -CommandName 'bruno'
             $missingPath = Join-Path (New-TestTempDirectory -Prefix 'BrunoMissingParent') 'nonexistent-collection'
 
             $result = Invoke-Bruno -CollectionPath $missingPath -ErrorAction SilentlyContinue

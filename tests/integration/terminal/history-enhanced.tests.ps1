@@ -1,5 +1,9 @@
 
 
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 Describe 'Enhanced History Integration Tests' {
     BeforeAll {
         try {
@@ -44,8 +48,13 @@ Describe 'Enhanced History Integration Tests' {
             $fragmentLoaded = Get-Command Find-HistoryFuzzy -CommandType Function -ErrorAction SilentlyContinue
             Write-Host "Fragment loaded successfully: $($null -ne $fragmentLoaded)" -ForegroundColor Yellow
 
-            # Mock Read-Host to avoid interactive prompts in tests
-            Mock Read-Host { return "n" }
+            # Non-interactive Read-Host for tests that may prompt
+            Set-TestReadHostResponse -Response 'n'
+
+            # Use real Get-History/Clear-History (extended tests may leave stubs active in the same session)
+            if (Get-Command Restore-TestTerminalStubs -ErrorAction SilentlyContinue) {
+                Restore-TestTerminalStubs
+            }
         }
 
         It 'Find-HistoryFuzzy function is available' {

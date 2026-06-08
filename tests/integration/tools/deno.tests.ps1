@@ -45,11 +45,19 @@ Describe 'Deno Tools Integration Tests' {
 
     Context 'Deno helpers (deno.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'deno' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'deno' } -MockWith { $null }
-            # Mock deno command before loading fragment
-            Mock-CommandAvailabilityPester -CommandName 'deno' -Available $true
+            Mark-TestCommandsUnavailable -CommandNames @('deno')
+            Set-TestCommandAvailabilityState -CommandName 'deno' -Available $true
             . (Join-Path $script:ProfileDir 'deno.ps1')
+            Register-TestFragmentAliases @{
+                deno          = 'Invoke-Deno'
+                'deno-run'    = 'Invoke-DenoRun'
+                'deno-task'   = 'Invoke-DenoTask'
+                'deno-upgrade' = 'Update-DenoSelf'
+            }
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-Deno function' {
@@ -89,16 +97,10 @@ Describe 'Deno Tools Integration Tests' {
         }
 
         It 'Update-DenoSelf calls deno upgrade' {
-            Mock -CommandName deno -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'upgrade') {
-                    Write-Output 'Deno updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'deno' -Output 'Deno updated successfully'
 
             Update-DenoSelf
-            Should -Invoke -CommandName 'deno' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-DenoSelf -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -110,7 +112,7 @@ Describe 'Deno Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'deno' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'deno' -Available $false
 
             $output = Invoke-Deno --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'deno not found'
@@ -125,7 +127,7 @@ Describe 'Deno Tools Integration Tests' {
                 Clear-TestCachedCommandCache | Out-Null
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'deno' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'deno' -Available $false
 
             $output = Invoke-DenoRun 'main.ts' 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'deno not found'

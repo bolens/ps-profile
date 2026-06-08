@@ -265,10 +265,63 @@ function Get-TestMissingToolOutput {
     return ($outputCandidates | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique) -join "`n"
 }
 
+function Set-TestContainerComposeVersionMock {
+    <#
+    .SYNOPSIS
+        Stubs docker/podman to succeed on 'compose version' checks.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet('docker', 'podman')]
+        [string]$Engine,
+
+        [string]$VersionOutput
+    )
+
+    if ([string]::IsNullOrWhiteSpace($VersionOutput)) {
+        $VersionOutput = if ($Engine -eq 'docker') {
+            'Docker Compose version 2.0.0'
+        }
+        else {
+            'Podman Compose version 1.0.0'
+        }
+    }
+
+    Setup-CapturingCommandMock -CommandName $Engine -OnInvoke {
+        param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+
+        if ($Arguments.Count -ge 2 -and "$($Arguments[0])" -eq 'compose' -and "$($Arguments[1])" -eq 'version') {
+            Set-Variable -Name LASTEXITCODE -Value 0 -Scope Global -Force
+            return $using:VersionOutput
+        }
+
+        Set-Variable -Name LASTEXITCODE -Value 1 -Scope Global -Force
+        return ''
+    }.GetNewClosure()
+}
+
+function Set-TestContainerEngineBinaryFailureMock {
+    <#
+    .SYNOPSIS
+        Stubs docker/podman invocations to fail when real binaries may exist on PATH.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateSet('docker', 'podman')]
+        [string[]]$Engine
+    )
+
+    foreach ($commandName in $Engine) {
+        Setup-CapturingCommandMock -CommandName $commandName -ExitCode 1 -Output '' -MarkAvailable:$false
+    }
+}
+
 function Initialize-ContainerEngineAvailabilityMocks {
     <#
     .SYNOPSIS
-        Configures per-command availability mocks for container engine tests.
+        Configures per-command availability stubs for container engine tests.
     #>
     [CmdletBinding()]
     param(
@@ -281,17 +334,14 @@ function Initialize-ContainerEngineAvailabilityMocks {
 
     $engineCommands = @('docker', 'docker-compose', 'podman', 'podman-compose')
 
-    if (Get-Variable -Name '__ContainerEnginePreference' -Scope Script -ErrorAction SilentlyContinue) {
-        Remove-Variable -Name '__ContainerEnginePreference' -Scope Script -Force -ErrorAction SilentlyContinue
-    }
-
-    if (Get-Variable -Name '__ContainerEngineInfo' -Scope Script -ErrorAction SilentlyContinue) {
-        Remove-Variable -Name '__ContainerEngineInfo' -Scope Script -Force -ErrorAction SilentlyContinue
-    }
+    Set-Variable -Name '__ContainerEnginePreference' -Scope Script -Value $null -Force
+    Set-Variable -Name '__ContainerEngineInfo' -Scope Script -Value $null -Force
 
     if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
         Clear-TestCachedCommandCache | Out-Null
     }
+
+    Mark-TestCommandsUnavailable -CommandNames $engineCommands
 
     foreach ($commandName in $engineCommands) {
         $isAvailable = $false
@@ -304,25 +354,22 @@ function Initialize-ContainerEngineAvailabilityMocks {
             }
         }
 
-        Mock-CommandAvailabilityPester -CommandName $commandName -Available $isAvailable
+        Set-TestCommandAvailabilityState -CommandName $commandName -Available $isAvailable
     }
 
-    if (Get-Command Mock -ErrorAction SilentlyContinue) {
-        if ($MockDockerBinary -or ($null -ne $Availability -and -not [bool]$Availability['docker'])) {
-            Mock -CommandName docker -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $global:LASTEXITCODE = 1
-                Write-Output ''
-            }
-        }
+    $shouldMockDocker = $MockDockerBinary.IsPresent -or (
+        $null -ne $Availability -and $Availability.ContainsKey('docker') -and -not [bool]$Availability['docker']
+    )
+    $shouldMockPodman = $MockPodmanBinary.IsPresent -or (
+        $null -ne $Availability -and $Availability.ContainsKey('podman') -and -not [bool]$Availability['podman']
+    )
 
-        if ($MockPodmanBinary -or ($null -ne $Availability -and -not [bool]$Availability['podman'])) {
-            Mock -CommandName podman -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $global:LASTEXITCODE = 1
-                Write-Output ''
-            }
-        }
+    if ($shouldMockDocker) {
+        Set-TestContainerEngineBinaryFailureMock -Engine @('docker')
+    }
+
+    if ($shouldMockPodman) {
+        Set-TestContainerEngineBinaryFailureMock -Engine @('podman')
     }
 }
 

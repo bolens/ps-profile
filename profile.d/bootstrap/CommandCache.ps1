@@ -388,6 +388,14 @@ function global:Get-CachedExternalCommand {
             continue
         }
 
+        # Prefer explicit test mocks over host binaries with the same name.
+        if ($global:TestRegisteredMockCommands -and $global:TestRegisteredMockCommands.Contains($candidate)) {
+            $mockFunction = Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue
+            if ($mockFunction -and $mockFunction.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
+                return $mockFunction
+            }
+        }
+
         $application = Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue
         if ($application) {
             if ($isYqLookup -and -not (Test-IsMikefarahYqExecutable -Executable $application.Source)) {
@@ -397,8 +405,7 @@ function global:Get-CachedExternalCommand {
             return $application
         }
 
-        # Test mocks register a Function with the tool name; prefer that over profile aliases
-        # (aliases with the same name as a binary would otherwise recurse into wrapper functions).
+        # Profile aliases with the same name as a binary would otherwise recurse into wrapper functions.
         $functionCmd = Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue
         if ($functionCmd -and $functionCmd.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
             return $functionCmd

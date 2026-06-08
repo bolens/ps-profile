@@ -95,7 +95,7 @@ function Initialize-ProfileVersion {
                     }
                 }
                 return $global:PSProfileGitCommit
-            }
+            }.GetNewClosure()
         }
 
         $debugLevel = 0

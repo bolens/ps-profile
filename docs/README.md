@@ -39,7 +39,11 @@ Fragments are modular components of the profile, loaded in dependency-aware orde
 Comprehensive guides for developers working on or contributing to the profile.
 
 - **Guide Index**: [Browse all guides](guides/README.md) - Full categorized guide index
-- **Development Guide**: [DEVELOPMENT.md](guides/DEVELOPMENT.md) - Developer guide and advanced testing
+- **Testing Guide**: [TESTING.md](guides/TESTING.md) - **Primary** testing reference (structure, runner flags, batch scripts, coverage)
+- **Development Guide**: [DEVELOPMENT.md](guides/DEVELOPMENT.md) - Setup, workflow, and advanced runner features
+- **Testing Patterns**: [TESTING_PATTERNS.md](examples/TESTING_PATTERNS.md) - Code examples for writing tests
+- **Test Stub Guide**: [TEST_VERIFICATION_MOCKING_GUIDE.md](guides/TEST_VERIFICATION_MOCKING_GUIDE.md) - TestSupport stubs and isolation
+- **Coverage Verification**: [VERIFY_COVERAGE.md](guides/VERIFY_COVERAGE.md) - Per-module `analyze-coverage.ps1` workflows
 - **Quick Start**: [DEVELOPMENT_QUICK_START.md](guides/DEVELOPMENT_QUICK_START.md) - Fast profile loading and common dev commands
 - **Error Handling Standard**: [ERROR_HANDLING_STANDARD.md](guides/ERROR_HANDLING_STANDARD.md) - Error handling, logging, and color coding standards
 - **Fragment Command Access**: [FRAGMENT_COMMAND_ACCESS.md](guides/FRAGMENT_COMMAND_ACCESS.md) - How to access fragment-defined commands

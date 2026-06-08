@@ -67,7 +67,7 @@ Describe 'game-dev.ps1 - Integration Tests' {
         }
 
         It 'Launch-Blockbench handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'blockbench' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'blockbench' -Available $false
 
             $output = & { Launch-Blockbench -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'blockbench not found'
@@ -75,7 +75,7 @@ Describe 'game-dev.ps1 - Integration Tests' {
         }
 
         It 'Launch-Tiled handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'tiled' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'tiled' -Available $false
 
             $output = & { Launch-Tiled -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'tiled not found'
@@ -83,7 +83,7 @@ Describe 'game-dev.ps1 - Integration Tests' {
         }
 
         It 'Launch-Godot handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'godot' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'godot' -Available $false
 
             $output = & { Launch-Godot -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'godot not found'
@@ -91,7 +91,7 @@ Describe 'game-dev.ps1 - Integration Tests' {
         }
 
         It 'Build-GodotProject handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'godot' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'godot' -Available $false
 
             $output = & {
                 Build-GodotProject -ProjectPath 'C:\Projects\MyGame' -ExportPreset 'Windows Desktop' -ErrorAction SilentlyContinue
@@ -101,8 +101,8 @@ Describe 'game-dev.ps1 - Integration Tests' {
         }
 
         It 'Launch-Unity handles missing tools gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'unity-hub' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'unity' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'unity-hub' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'unity' -Available $false
 
             $output = & { Launch-Unity -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'unity-hub not found'

@@ -34,7 +34,7 @@ Describe 'git-enhanced.ps1 - Invoke-GitTower' {
 
     Context 'Tool available' {
         It 'Launches git-tower with default path' {
-            Setup-AvailableCommandMock -CommandName 'git-tower'
+            Set-TestCommandAvailabilityState -CommandName 'git-tower'
 
             Invoke-GitTower -ErrorAction SilentlyContinue | Out-Null
 
@@ -45,7 +45,7 @@ Describe 'git-enhanced.ps1 - Invoke-GitTower' {
         }
 
         It 'Launches git-tower with custom repository path' {
-            Setup-AvailableCommandMock -CommandName 'git-tower'
+            Set-TestCommandAvailabilityState -CommandName 'git-tower'
 
             Invoke-GitTower -RepositoryPath 'C:\Projects\MyRepo' -ErrorAction SilentlyContinue | Out-Null
 
@@ -54,7 +54,7 @@ Describe 'git-enhanced.ps1 - Invoke-GitTower' {
         }
 
         It 'Handles Start-Process errors' {
-            Setup-AvailableCommandMock -CommandName 'git-tower'
+            Set-TestCommandAvailabilityState -CommandName 'git-tower'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Invoke-GitTower -ErrorAction Stop } | Should -Throw '*Access denied*'
@@ -86,7 +86,7 @@ Describe 'git-enhanced.ps1 - Invoke-GitKraken' {
 
     Context 'Tool available' {
         It 'Launches gitkraken with default path' {
-            Setup-AvailableCommandMock -CommandName 'gitkraken'
+            Set-TestCommandAvailabilityState -CommandName 'gitkraken'
 
             Invoke-GitKraken -ErrorAction SilentlyContinue | Out-Null
 
@@ -97,7 +97,7 @@ Describe 'git-enhanced.ps1 - Invoke-GitKraken' {
         }
 
         It 'Launches gitkraken with custom repository path' {
-            Setup-AvailableCommandMock -CommandName 'gitkraken'
+            Set-TestCommandAvailabilityState -CommandName 'gitkraken'
 
             Invoke-GitKraken -RepositoryPath 'C:\Projects\MyRepo' -ErrorAction SilentlyContinue | Out-Null
 
@@ -106,7 +106,7 @@ Describe 'git-enhanced.ps1 - Invoke-GitKraken' {
         }
 
         It 'Handles Start-Process errors' {
-            Setup-AvailableCommandMock -CommandName 'gitkraken'
+            Set-TestCommandAvailabilityState -CommandName 'gitkraken'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Invoke-GitKraken -ErrorAction Stop } | Should -Throw '*Access denied*'

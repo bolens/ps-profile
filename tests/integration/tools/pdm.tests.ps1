@@ -45,9 +45,12 @@ Describe 'PDM Tools Integration Tests' {
 
     Context 'PDM helpers (pdm.ps1)' {
         BeforeAll {
-            # Mock pdm as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'pdm' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'pdm' -Available $true
             . (Join-Path $script:ProfileDir 'pdm.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Add-PdmPackage function' {
@@ -65,29 +68,17 @@ Describe 'PDM Tools Integration Tests' {
         }
 
         It 'Add-PdmPackage calls pdm add' {
-            Mock -CommandName pdm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'add') {
-                    Write-Output 'Package added successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pdm' -Output 'Package added successfully'
 
             Add-PdmPackage -Packages requests
-            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Add-PdmPackage supports --dev flag' {
-            Mock -CommandName pdm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'add' -and $args -contains '--dev') {
-                    Write-Output 'Dev package added successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pdm' -Output 'Dev package added successfully'
 
             Add-PdmPackage -Packages pytest -Dev
-            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Remove-PdmPackage function' {
@@ -105,16 +96,10 @@ Describe 'PDM Tools Integration Tests' {
         }
 
         It 'Remove-PdmPackage calls pdm remove' {
-            Mock -CommandName pdm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'remove') {
-                    Write-Output 'Package removed successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pdm' -Output 'Package removed successfully'
 
             Remove-PdmPackage -Packages requests
-            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Creates Update-PdmPackages function' {
@@ -127,29 +112,17 @@ Describe 'PDM Tools Integration Tests' {
         }
 
         It 'Update-PdmPackages calls pdm update for all packages' {
-            Mock -CommandName pdm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args.Count -eq 1) {
-                    Write-Output 'All packages updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pdm' -Output 'All packages updated successfully'
 
             Update-PdmPackages
-            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
         It 'Update-PdmPackages calls pdm update for specific packages' {
-            Mock -CommandName pdm -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'update' -and $args -contains 'requests') {
-                    Write-Output 'requests updated successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'pdm' -Output 'requests updated successfully'
 
             Update-PdmPackages -Packages requests
-            Should -Invoke -CommandName 'pdm' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
         }
 
     }
@@ -170,7 +143,7 @@ Describe 'PDM Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'pdm' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'pdm' -Available $false
             $script:MissingPdmOutput = & { . (Join-Path $script:ProfileDir 'pdm.ps1') } 2>&1 3>&1 | Out-String
         }
 

@@ -38,7 +38,7 @@ Describe '3d-cad.ps1 - Operation Functions' {
         }
 
         It 'Errors when input file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'blender'
+            Set-TestCommandAvailabilityState -CommandName 'blender'
             $missingInput = Join-Path (New-TestTempDirectory -Prefix 'Convert3DMissing') 'nonexistent.obj'
 
             { Convert-3DFormat -InputFile $missingInput -OutputFile 'model.stl' -ErrorAction Stop } | Should -Throw
@@ -93,7 +93,7 @@ Describe '3d-cad.ps1 - Operation Functions' {
         }
 
         It 'Errors when project file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'blender'
+            Set-TestCommandAvailabilityState -CommandName 'blender'
             $missingProject = Join-Path (New-TestTempDirectory -Prefix 'Render3DMissing') 'nonexistent.blend'
 
             { Render-3DScene -ProjectPath $missingProject -OutputPath $script:TestRenderPng -ErrorAction Stop } | Should -Throw

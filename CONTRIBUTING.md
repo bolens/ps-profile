@@ -629,7 +629,15 @@ Use numeric prefixes to control load order:
 - Function/alias documentation is auto-generated from comment-based help
 - Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1` to regenerate
 - See [PROFILE_README.md](PROFILE_README.md) — Detailed technical information
-- [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) — Developer guide and advanced testing
+
+### Testing documentation
+
+- [docs/guides/TESTING.md](docs/guides/TESTING.md) — **Primary** testing guide (structure, runner flags, batch scripts, coverage)
+- [docs/guides/DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) — Setup, workflow, and advanced runner features
+- [docs/examples/TESTING_PATTERNS.md](docs/examples/TESTING_PATTERNS.md) — Code examples for writing tests
+- [docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md](docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md) — TestSupport stubs and isolation
+- [docs/guides/VERIFY_COVERAGE.md](docs/guides/VERIFY_COVERAGE.md) — Per-module coverage verification
+- [docs/guides/TOOL_REQUIREMENTS.md](docs/guides/TOOL_REQUIREMENTS.md) — Required and optional test tools
 
 ## Questions
 

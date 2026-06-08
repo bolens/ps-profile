@@ -108,20 +108,16 @@ function New-ComprehensiveTestReport {
     }
 
     # Quality metrics
-    $report.QualityMetrics = @{
-        TestCoverage     = Calculate-TestCoverage -TestResult $TestResult
-        StabilityScore   = Calculate-StabilityScore -TestResult $TestResult
-        PerformanceScore = Calculate-PerformanceScore -PerformanceData $PerformanceData
-        OverallQuality   = 0  # Calculated below
-    }
+    $coverageScore = [double](Calculate-TestCoverage -TestResult $TestResult)
+    $stabilityScore = [double](Calculate-StabilityScore -TestResult $TestResult)
+    $performanceScore = [double](Calculate-PerformanceScore -PerformanceData $PerformanceData)
 
-    # Calculate overall quality score
-    $qualityComponents = @(
-        $report.QualityMetrics.TestCoverage * 0.4,
-        $report.QualityMetrics.StabilityScore * 0.4,
-        $report.QualityMetrics.PerformanceScore * 0.2
-    )
-    $report.QualityMetrics.OverallQuality = [Math]::Round(($qualityComponents | Measure-Object -Average).Average, 2)
+    $report.QualityMetrics = @{
+        TestCoverage     = $coverageScore
+        StabilityScore   = $stabilityScore
+        PerformanceScore = $performanceScore
+        OverallQuality   = [Math]::Round(($coverageScore * 0.4) + ($stabilityScore * 0.4) + ($performanceScore * 0.2), 2)
+    }
 
     # Generate recommendations
     $report.Recommendations = Get-ComprehensiveRecommendations -Report $report

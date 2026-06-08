@@ -41,7 +41,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls blockbench when available' {
-            Setup-AvailableCommandMock -CommandName 'blockbench'
+            Set-TestCommandAvailabilityState -CommandName 'blockbench'
 
             Launch-Blockbench -ErrorAction SilentlyContinue
 
@@ -51,7 +51,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls blockbench with project path when provided' {
-            Setup-AvailableCommandMock -CommandName 'blockbench'
+            Set-TestCommandAvailabilityState -CommandName 'blockbench'
 
             Launch-Blockbench -ProjectPath $script:TestModelFile -ErrorAction SilentlyContinue
 
@@ -60,7 +60,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Returns null when project path does not exist' {
-            Setup-AvailableCommandMock -CommandName 'blockbench'
+            Set-TestCommandAvailabilityState -CommandName 'blockbench'
             $missingPath = Join-Path (New-TestTempDirectory -Prefix 'BlockbenchMissing') 'nonexistent.bbmodel'
 
             $result = Launch-Blockbench -ProjectPath $missingPath -ErrorAction SilentlyContinue
@@ -78,7 +78,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls tiled when available' {
-            Setup-AvailableCommandMock -CommandName 'tiled'
+            Set-TestCommandAvailabilityState -CommandName 'tiled'
 
             Launch-Tiled -ErrorAction SilentlyContinue
 
@@ -88,7 +88,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls tiled with map path when provided' {
-            Setup-AvailableCommandMock -CommandName 'tiled'
+            Set-TestCommandAvailabilityState -CommandName 'tiled'
 
             Launch-Tiled -ProjectPath $script:TestMapFile -ErrorAction SilentlyContinue
 
@@ -105,7 +105,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls godot when available' {
-            Setup-AvailableCommandMock -CommandName 'godot'
+            Set-TestCommandAvailabilityState -CommandName 'godot'
 
             Launch-Godot -ErrorAction SilentlyContinue
 
@@ -115,7 +115,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls godot with headless flag when provided' {
-            Setup-AvailableCommandMock -CommandName 'godot'
+            Set-TestCommandAvailabilityState -CommandName 'godot'
 
             Launch-Godot -Headless -ErrorAction SilentlyContinue
 
@@ -124,7 +124,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls godot with project path when provided' {
-            Setup-AvailableCommandMock -CommandName 'godot'
+            Set-TestCommandAvailabilityState -CommandName 'godot'
 
             Launch-Godot -ProjectPath $script:TestProjectDir -ErrorAction SilentlyContinue
 
@@ -142,7 +142,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Calls unity-hub when available' {
-            Setup-AvailableCommandMock -CommandName 'unity-hub'
+            Set-TestCommandAvailabilityState -CommandName 'unity-hub'
 
             Launch-Unity -ErrorAction SilentlyContinue
 
@@ -152,7 +152,7 @@ Describe 'game-dev.ps1 - Editor Functions' {
         }
 
         It 'Falls back to unity when unity-hub not available' {
-            Setup-AvailableCommandMock -CommandName 'unity'
+            Set-TestCommandAvailabilityState -CommandName 'unity'
             Mark-TestCommandsUnavailable -CommandNames 'unity-hub'
 
             Launch-Unity -ErrorAction SilentlyContinue

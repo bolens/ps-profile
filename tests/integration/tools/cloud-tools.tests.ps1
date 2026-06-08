@@ -1,3 +1,7 @@
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\..\TestSupport.ps1')
+}
+
 <#
 .SYNOPSIS
     Integration tests for cloud tool fragments (AWS, Azure, gcloud).
@@ -41,11 +45,14 @@ Describe 'Cloud Tools Integration Tests' {
 
     Context 'AWS CLI helpers (aws.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'aws' so Set-AgentModeAlias creates the alias
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'aws' } -MockWith { $null }
-            # Mock aws command before loading fragment to prevent conflicts
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('aws')
+            Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
             . (Join-Path $script:ProfileDir 'aws.ps1')
+            Register-TestFragmentAliases @{
+                aws         = 'Invoke-Aws'
+                'aws-profile' = 'Set-AwsProfile'
+                'aws-region'  = 'Set-AwsRegion'
+            }
         }
 
         It 'Creates Invoke-Aws function' {
@@ -76,10 +83,9 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'aws alias handles missing tool gracefully and recommends installation' {
-            # Re-apply mocks for this specific test
-            Mock-CommandAvailabilityPester -CommandName 'aws' -Available $false -Scope It
-            # Also directly mock Test-HasCommand to ensure it takes precedence (working pattern from infrastructure-tools.tests.ps1)
-            # Capture warnings by redirecting warning stream (3) to output stream (1)
+            Mark-TestCommandsUnavailable -CommandNames @('aws')
+            Set-TestCommandAvailabilityState -CommandName 'aws' -Available $false
+            Set-Alias -Name aws -Value Invoke-Aws -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $allOutput = (aws --version 2>&1 3>&1 | Out-String)
             Assert-TestMissingToolWarning -Output $allOutput -Pattern 'aws not found'
             Assert-TestOutputContainsInstallCommand -Output $allOutput -ToolName 'aws'
@@ -98,9 +104,9 @@ Describe 'Cloud Tools Integration Tests' {
             if (Get-Command Set-AwsProfile -CommandType Function -ErrorAction SilentlyContinue) {
                 $originalProfile = $env:AWS_PROFILE
                 try {
-                    Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true -Scope It
-                    Mock -CommandName Write-Host -MockWith { }
-                    aws-profile 'test-profile'
+                    Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
+                    Set-Alias -Name aws-profile -Value Set-AwsProfile -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+                    aws-profile 'test-profile' 2>&1 | Out-Null
                     $env:AWS_PROFILE | Should -Be 'test-profile'
                 }
                 finally {
@@ -122,9 +128,9 @@ Describe 'Cloud Tools Integration Tests' {
             if (Get-Command Set-AwsRegion -CommandType Function -ErrorAction SilentlyContinue) {
                 $originalRegion = $env:AWS_REGION
                 try {
-                    Mock-CommandAvailabilityPester -CommandName 'aws' -Available $true -Scope It
-                    Mock -CommandName Write-Host -MockWith { }
-                    aws-region 'us-east-1'
+                    Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
+                    Set-Alias -Name aws-region -Value Set-AwsRegion -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+                    aws-region 'us-east-1' 2>&1 | Out-Null
                     $env:AWS_REGION | Should -Be 'us-east-1'
                 }
                 finally {
@@ -136,13 +142,16 @@ Describe 'Cloud Tools Integration Tests' {
 
     Context 'Azure CLI helpers (azure.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'az' and 'azd' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'az' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'azd' } -MockWith { $null }
-            # Mock az and azd commands before loading fragment to prevent conflicts and recursion
-            Mock-CommandAvailabilityPester -CommandName 'az' -Available $false -Scope Context
-            Mock-CommandAvailabilityPester -CommandName 'azd' -Available $false -Scope Context
+            Mark-TestCommandsUnavailable -CommandNames @('az', 'azd')
+            Set-TestCommandAvailabilityState -CommandName 'az' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'azd' -Available $true
             . (Join-Path $script:ProfileDir 'azure.ps1')
+            Register-TestFragmentAliases @{
+                az       = 'Invoke-Azure'
+                azd      = 'Invoke-AzureDeveloper'
+                'az-login' = 'Connect-AzureAccount'
+                'azd-up'   = 'Start-AzureDeveloperUp'
+            }
         }
 
         It 'Creates Invoke-Azure function' {
@@ -162,9 +171,9 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'az alias handles missing tool gracefully and recommends installation' {
-            # Re-apply mocks for this specific test
-            Mock-CommandAvailabilityPester -CommandName 'az' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('az')
+            Set-TestCommandAvailabilityState -CommandName 'az' -Available $false
+            Set-Alias -Name az -Value Invoke-Azure -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = az --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'az not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'azure-cli'
@@ -187,9 +196,9 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'azd alias handles missing tool gracefully and recommends installation' {
-            # Re-apply mocks for this specific test to prevent recursion
-            Mock-CommandAvailabilityPester -CommandName 'azd' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('azd')
+            Set-TestCommandAvailabilityState -CommandName 'azd' -Available $false
+            Set-Alias -Name azd -Value Invoke-AzureDeveloper -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = azd --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'azd not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'azure-developer-cli'
@@ -205,8 +214,9 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'az-login alias handles missing tool gracefully and recommends installation' {
-            Mock-CommandAvailabilityPester -CommandName 'az' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('az')
+            Set-TestCommandAvailabilityState -CommandName 'az' -Available $false
+            Set-Alias -Name az-login -Value Connect-AzureAccount -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = az-login 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern '(Azure CLI \(az\)|az) not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'azure-cli'
@@ -222,8 +232,9 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'azd-up alias handles missing tool gracefully and recommends installation' {
-            Mock-CommandAvailabilityPester -CommandName 'azd' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('azd')
+            Set-TestCommandAvailabilityState -CommandName 'azd' -Available $false
+            Set-Alias -Name azd-up -Value Start-AzureDeveloperUp -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = azd-up 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern '(Azure Developer CLI \(azd\)|azd) not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'azure-developer-cli'
@@ -232,7 +243,15 @@ Describe 'Cloud Tools Integration Tests' {
 
     Context 'Google Cloud CLI helpers (gcloud.ps1)' {
         BeforeAll {
+            Mark-TestCommandsUnavailable -CommandNames @('gcloud')
+            Set-TestCommandAvailabilityState -CommandName 'gcloud' -Available $true
             . (Join-Path $script:ProfileDir 'gcloud.ps1')
+            Register-TestFragmentAliases @{
+                gcloud          = 'Invoke-GCloud'
+                'gcloud-auth'   = 'Set-GCloudAuth'
+                'gcloud-config' = 'Set-GCloudConfig'
+                'gcloud-projects' = 'Get-GCloudProjects'
+            }
         }
 
         It 'Creates Invoke-GCloud function' {
@@ -245,8 +264,9 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'gcloud alias handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'gcloud' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('gcloud')
+            Set-TestCommandAvailabilityState -CommandName 'gcloud' -Available $false
+            Set-Alias -Name gcloud -Value Invoke-GCloud -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = gcloud --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'gcloud not found'
         }
@@ -261,8 +281,9 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'gcloud-auth alias handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'gcloud' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('gcloud')
+            Set-TestCommandAvailabilityState -CommandName 'gcloud' -Available $false
+            Set-Alias -Name gcloud-auth -Value Set-GCloudAuth -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = gcloud-auth login 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern '(Google Cloud CLI \(gcloud\)|gcloud) not found'
         }
@@ -282,8 +303,9 @@ Describe 'Cloud Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('Google Cloud CLI (gcloud)', [ref]$null)
                 $null = $global:MissingToolWarnings.TryRemove('gcloud', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'gcloud' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('gcloud')
+            Set-TestCommandAvailabilityState -CommandName 'gcloud' -Available $false
+            Set-Alias -Name gcloud-config -Value Set-GCloudConfig -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = gcloud-config list 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern '(Google Cloud CLI \(gcloud\)|gcloud) not found'
         }
@@ -303,8 +325,9 @@ Describe 'Cloud Tools Integration Tests' {
                 $null = $global:MissingToolWarnings.TryRemove('Google Cloud CLI (gcloud)', [ref]$null)
                 $null = $global:MissingToolWarnings.TryRemove('gcloud', [ref]$null)
             }
-            Mock-CommandAvailabilityPester -CommandName 'gcloud' -Available $false -Scope It
-            # Capture both stderr and warning stream (3>&1 redirects warnings to stdout)
+            Mark-TestCommandsUnavailable -CommandNames @('gcloud')
+            Set-TestCommandAvailabilityState -CommandName 'gcloud' -Available $false
+            Set-Alias -Name gcloud-projects -Value Get-GCloudProjects -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
             $output = gcloud-projects list 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern '(Google Cloud CLI \(gcloud\)|gcloud) not found'
         }

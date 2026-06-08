@@ -45,12 +45,19 @@ Describe 'Bun Tools Integration Tests' {
 
     Context 'Bun helpers (bun.ps1)' {
         BeforeAll {
-            # Mock Get-Command to return null for 'bun' and 'bunx' so Set-AgentModeAlias creates the aliases
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'bun' } -MockWith { $null }
-            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'bunx' } -MockWith { $null }
-            # Mock bun command before loading fragment - make available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'bun' -Available $true
+            Mark-TestCommandsUnavailable -CommandNames @('bun', 'bunx')
+            Set-TestCommandAvailabilityState -CommandName 'bun' -Available $true
             . (Join-Path $script:ProfileDir 'bun.ps1')
+            Register-TestFragmentAliases @{
+                bunx        = 'Invoke-Bunx'
+                'bun-run'   = 'Invoke-BunRun'
+                'bun-add'   = 'Add-BunPackage'
+                'bun-upgrade' = 'Update-BunSelf'
+            }
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Invoke-Bunx function' {
@@ -90,29 +97,20 @@ Describe 'Bun Tools Integration Tests' {
         }
 
         It 'Update-BunSelf calls bun upgrade' {
-            Mock-CommandAvailabilityPester -CommandName 'bun' -Available $true
-
-            $script:capturedArgs = $null
-            Mock -CommandName 'bun' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Bun updated successfully'
-            }
-
+            Set-TestCommandAvailabilityState -CommandName 'bun' -Available $true
+            Setup-CapturingCommandMock -CommandName 'bun' -Output 'Bun updated successfully'
             Update-BunSelf
 
-            Should -Invoke -CommandName 'bun' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw 'Mock was called but capturedArgs is null.'
-            }
-            $script:capturedArgs | Should -Contain 'upgrade'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'upgrade'
         }
     }
 
     Context 'Graceful degradation when bun is unavailable' {
         BeforeAll {
-            Mock-CommandAvailabilityPester -CommandName 'bun' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'bunx' -Available $false
+            Mark-TestCommandsUnavailable -CommandNames @('bun', 'bunx')
+            Set-TestCommandAvailabilityState -CommandName 'bun' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'bunx' -Available $false
             . (Join-Path $script:ProfileDir 'bun.ps1')
         }
 
@@ -123,6 +121,11 @@ Describe 'Bun Tools Integration Tests' {
             if ($global:CollectedMissingToolWarnings) {
                 $global:CollectedMissingToolWarnings.Clear()
             }
+
+            Mark-TestCommandsUnavailable -CommandNames @('bun', 'bunx')
+            Set-TestCommandAvailabilityState -CommandName 'bun' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'bunx' -Available $false
+            Set-Alias -Name bunx -Value Invoke-Bunx -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
 
             $output = bunx --version 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'bun not found'

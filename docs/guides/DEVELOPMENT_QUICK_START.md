@@ -98,6 +98,16 @@ $env:PS_PROFILE_DEV_MODE
 
 ## 📚 Full Documentation
 
+### Testing
+
+- [TESTING.md](./TESTING.md) - **Primary** testing guide (structure, runner flags, batch scripts)
+- [TESTING_PATTERNS.md](../examples/TESTING_PATTERNS.md) - Code examples for writing tests
+- [TEST_VERIFICATION_MOCKING_GUIDE.md](./TEST_VERIFICATION_MOCKING_GUIDE.md) - TestSupport stubs
+- [VERIFY_COVERAGE.md](./VERIFY_COVERAGE.md) - Coverage verification with `analyze-coverage.ps1`
+- [TOOL_REQUIREMENTS.md](./TOOL_REQUIREMENTS.md) - Required and optional test tools
+
+### Performance and workflow
+
 - [DEVELOPMENT_PERFORMANCE.md](./DEVELOPMENT_PERFORMANCE.md) - Complete guide
 - [PROFILE_LOAD_TIME_OPTIMIZATION.md](./PROFILE_LOAD_TIME_OPTIMIZATION.md) - General optimizations
 - [DEVELOPMENT.md](./DEVELOPMENT.md) - Development workflow

@@ -34,7 +34,7 @@ Describe 'network-analysis.ps1 - Start-Wireshark' {
 
     Context 'Tool available' {
         It 'Launches wireshark without arguments' {
-            Setup-AvailableCommandMock -CommandName 'wireshark'
+            Set-TestCommandAvailabilityState -CommandName 'wireshark'
 
             Start-Wireshark -ErrorAction SilentlyContinue | Out-Null
 
@@ -45,7 +45,7 @@ Describe 'network-analysis.ps1 - Start-Wireshark' {
         }
 
         It 'Launches wireshark with capture file' {
-            Setup-AvailableCommandMock -CommandName 'wireshark'
+            Set-TestCommandAvailabilityState -CommandName 'wireshark'
             $testDir = New-TestTempDirectory -Prefix 'WiresharkCapture'
             $testFile = Join-Path $testDir 'capture.pcap'
             'test content' | Out-File -FilePath $testFile -Encoding utf8
@@ -57,7 +57,7 @@ Describe 'network-analysis.ps1 - Start-Wireshark' {
         }
 
         It 'Launches wireshark with interface' {
-            Setup-AvailableCommandMock -CommandName 'wireshark'
+            Set-TestCommandAvailabilityState -CommandName 'wireshark'
 
             Start-Wireshark -Interface 'Ethernet' -ErrorAction SilentlyContinue | Out-Null
 
@@ -67,7 +67,7 @@ Describe 'network-analysis.ps1 - Start-Wireshark' {
         }
 
         It 'Returns error when capture file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'wireshark'
+            Set-TestCommandAvailabilityState -CommandName 'wireshark'
 
             Start-Wireshark -CaptureFile 'nonexistent.pcap' -ErrorAction SilentlyContinue | Out-Null
 
@@ -75,7 +75,7 @@ Describe 'network-analysis.ps1 - Start-Wireshark' {
         }
 
         It 'Handles Start-Process errors' {
-            Setup-AvailableCommandMock -CommandName 'wireshark'
+            Set-TestCommandAvailabilityState -CommandName 'wireshark'
             Set-TestStartProcessFailure -Message 'Access denied'
 
             { Start-Wireshark -ErrorAction Stop } | Should -Throw '*Access denied*'

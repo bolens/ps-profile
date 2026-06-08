@@ -68,7 +68,7 @@ Describe 'game-emulators.ps1 - Integration Tests' {
 
         It 'Start-Dolphin handles missing tool gracefully' {
             foreach ($cmd in @('dolphin-dev', 'dolphin-nightly', 'dolphin')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
 
             $output = & { Start-Dolphin -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
@@ -77,8 +77,8 @@ Describe 'game-emulators.ps1 - Integration Tests' {
         }
 
         It 'Start-Ryujinx handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'ryujinx-canary' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'ryujinx' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'ryujinx-canary' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'ryujinx' -Available $false
 
             $output = & { Start-Ryujinx -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'ryujinx-canary not found'
@@ -86,8 +86,8 @@ Describe 'game-emulators.ps1 - Integration Tests' {
         }
 
         It 'Start-RetroArch handles missing tool gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'retroarch-nightly' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'retroarch' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'retroarch-nightly' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'retroarch' -Available $false
 
             $output = & { Start-RetroArch -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'retroarch-nightly not found'
@@ -95,7 +95,18 @@ Describe 'game-emulators.ps1 - Integration Tests' {
         }
 
         It 'Get-EmulatorList returns empty list when no emulators available' {
-            Mock Test-CachedCommand -MockWith { return $false }
+            $emulatorCommands = @(
+                'dolphin-dev', 'dolphin-nightly', 'dolphin', 'ryujinx-canary', 'ryujinx', 'yuzu',
+                'cemu-dev', 'cemu', 'project64', 'mupen64plus', 'lime3ds', 'melonds',
+                'bsnes', 'bsnes-hd-beta', 'bsnes-mt', 'snes9x-dev', 'snes9x',
+                'rpcs3', 'pcsx2-dev', 'pcsx2', 'duckstation-preview', 'duckstation',
+                'ppsspp-dev', 'ppsspp', 'vita3k', 'xemu', 'xenia-canary', 'xenia',
+                'flycast', 'redream-dev', 'redream', 'retroarch-nightly', 'retroarch',
+                'pegasus', 'steam-rom-manager', 'mame'
+            )
+            foreach ($cmd in $emulatorCommands) {
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
+            }
 
             $result = Get-EmulatorList
 
@@ -103,15 +114,22 @@ Describe 'game-emulators.ps1 - Integration Tests' {
         }
 
         It 'Launch-Game handles missing ROM file gracefully' {
-            Mock Test-Path -ParameterFilter { $LiteralPath -eq 'nonexistent.iso' } -MockWith { return $false }
+            $missingRom = Join-Path $TestDrive 'nonexistent.iso'
 
-            { Launch-Game -RomPath 'nonexistent.iso' -ErrorAction SilentlyContinue } | Should -Not -Throw
+            { Launch-Game -RomPath $missingRom -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
     }
     
     Context 'Function Behavior' {
         BeforeAll {
             . (Join-Path $script:ProfileDir 'game-emulators.ps1')
+        }
+
+        BeforeEach {
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
+            }
+            Set-TestCommandAvailabilityState -CommandName 'dolphin' -Available $true
         }
         
         It 'Get-EmulatorList returns array of emulator objects' {

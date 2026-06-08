@@ -115,7 +115,7 @@ Describe 'lang-go.ps1 - Integration Tests' {
             }
 
             foreach ($cmd in @('go', 'goreleaser', 'mage', 'golangci-lint')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
         }
 
@@ -171,7 +171,7 @@ Describe 'lang-go.ps1 - Integration Tests' {
     Context 'Parameter validation' {
         BeforeEach {
             foreach ($cmd in @('go', 'goreleaser', 'mage', 'golangci-lint')) {
-                Mock-CommandAvailabilityPester -CommandName $cmd -Available $false
+                Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
         }
 

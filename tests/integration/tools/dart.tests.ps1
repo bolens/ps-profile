@@ -45,9 +45,12 @@ Describe 'dart Tools Integration Tests' {
 
     Context 'dart helpers (dart.ps1)' {
         BeforeAll {
-            # Mock dart as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'dart' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'dart' -Available $true
             . (Join-Path $script:ProfileDir 'dart.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-DartOutdated function' {
@@ -60,17 +63,13 @@ Describe 'dart Tools Integration Tests' {
         }
 
         It 'Test-DartOutdated calls dart pub outdated' {
-            Mock -CommandName dart -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'pub' -and $args -contains 'outdated') {
-                    Write-Output 'Package    Current  Upgradable  Resolvable'
-                    Write-Output 'package1  1.0.0    1.2.0       1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'dart' -Output @(
+                'Package    Current  Upgradable  Resolvable'
+                'package1  1.0.0    1.2.0       1.2.0'
+            )
 
             Test-DartOutdated
-            Should -Invoke -CommandName 'dart' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-DartOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,24 +83,17 @@ Describe 'dart Tools Integration Tests' {
         }
 
         It 'Update-DartPackages calls dart pub upgrade' {
-            Mock -CommandName dart -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'pub' -and $args -contains 'upgrade') {
-                    Write-Output 'Packages upgraded successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'dart' -Output 'Packages upgraded successfully'
 
             Update-DartPackages
-            Should -Invoke -CommandName 'dart' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-DartPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
 
     Context 'flutter helpers (dart.ps1)' {
         BeforeAll {
-            # Mock flutter as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'flutter' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'flutter' -Available $true
             . (Join-Path $script:ProfileDir 'dart.ps1')
         }
 
@@ -115,17 +107,13 @@ Describe 'dart Tools Integration Tests' {
         }
 
         It 'Test-FlutterOutdated calls flutter pub outdated' {
-            Mock -CommandName flutter -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'pub' -and $args -contains 'outdated') {
-                    Write-Output 'Package    Current  Upgradable  Resolvable'
-                    Write-Output 'package1  1.0.0    1.2.0       1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'flutter' -Output @(
+                'Package    Current  Upgradable  Resolvable'
+                'package1  1.0.0    1.2.0       1.2.0'
+            )
 
             Test-FlutterOutdated
-            Should -Invoke -CommandName 'flutter' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-FlutterOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -139,16 +127,10 @@ Describe 'dart Tools Integration Tests' {
         }
 
         It 'Update-FlutterPackages calls flutter pub upgrade' {
-            Mock -CommandName flutter -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'pub' -and $args -contains 'upgrade') {
-                    Write-Output 'Packages upgraded successfully'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'flutter' -Output 'Packages upgraded successfully'
 
             Update-FlutterPackages
-            Should -Invoke -CommandName 'flutter' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Update-FlutterPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
     }
@@ -172,8 +154,8 @@ Describe 'dart Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'dart' -Available $false
-            Mock-CommandAvailabilityPester -CommandName 'flutter' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'dart' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'flutter' -Available $false
             $script:MissingDartOutput = & { . (Join-Path $script:ProfileDir 'dart.ps1') } 2>&1 3>&1 | Out-String
         }
 
@@ -206,8 +188,8 @@ Describe 'dart Tools Integration Tests' {
                 Remove-Item "Function:$_" -ErrorAction SilentlyContinue
             }
 
-            Mock-CommandAvailabilityPester -CommandName 'dart' -Available $true
-            Mock-CommandAvailabilityPester -CommandName 'flutter' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'dart' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'flutter' -Available $false
             $script:MissingFlutterOutput = & { . (Join-Path $script:ProfileDir 'dart.ps1') } 2>&1 3>&1 | Out-String
         }
 

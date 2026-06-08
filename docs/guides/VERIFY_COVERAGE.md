@@ -1,5 +1,7 @@
 # Coverage Verification Guide
 
+Supplement to the [Testing Guide](TESTING.md#coverage-analysis) for verifying per-module coverage with `analyze-coverage.ps1`. For writing tests, see [Testing Patterns](../examples/TESTING_PATTERNS.md). For the full testing doc index, see [Related Testing Documentation](TESTING.md#related-testing-documentation).
+
 ## Quick Verification Commands
 
 Run these commands in your PowerShell terminal to verify coverage for each utility module:
@@ -63,3 +65,15 @@ If commands hang or prompt for input:
 - **2 test files expanded**: Command (+25 tests), DataFile (+10 tests)
 - **60+ new tests added** across all modules
 - **All test file mappings updated** in analyze-coverage.ps1
+
+## Related Testing Documentation
+
+| Guide | Purpose |
+| ----- | ------- |
+| [Testing Guide](TESTING.md) | **Primary** — structure, running tests, [coverage analysis](TESTING.md#coverage-analysis) |
+| [Coverage Verification](VERIFY_COVERAGE.md) | This doc — per-module `analyze-coverage.ps1` checks |
+| [Development Guide](DEVELOPMENT.md) | Setup, workflow, advanced runner features |
+| [Testing Patterns](../examples/TESTING_PATTERNS.md) | Code examples for writing tests |
+| [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | TestSupport stubs and isolation |
+| [Tool Requirements](TOOL_REQUIREMENTS.md) | Required and optional test tools |
+| [Contributing](../../CONTRIBUTING.md) | Validation workflow before commits |

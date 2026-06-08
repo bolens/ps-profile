@@ -45,9 +45,12 @@ Describe 'winget Tools Integration Tests' {
 
     Context 'winget helpers (winget.ps1)' {
         BeforeAll {
-            # Mock winget as available so functions are created
-            Mock-CommandAvailabilityPester -CommandName 'winget' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'winget' -Available $true
             . (Join-Path $script:ProfileDir 'winget.ps1')
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Creates Test-WingetOutdated function' {
@@ -60,17 +63,13 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Test-WingetOutdated calls winget upgrade' {
-            Mock -CommandName winget -MockWith {
-                param([string[]]$ArgumentList)
-                $args = $ArgumentList
-                if ($args -contains 'upgrade' -and $args.Count -eq 1) {
-                    Write-Output 'Name    Id    Version    Available'
-                    Write-Output 'App1    app1  1.0.0      1.2.0'
-                }
-            }
+            Setup-CapturingCommandMock -CommandName 'winget' -Output @(
+                'Name    Id    Version    Available'
+                'App1    app1  1.0.0      1.2.0'
+            )
 
             Test-WingetOutdated
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
+            Assert-TestCommandInvokedExactlyOnce
             Get-Command Test-WingetOutdated -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -84,23 +83,14 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Update-WingetPackages calls winget upgrade --all' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'All packages updated successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'All packages updated successfully'
             # Execute
             { Update-WingetPackages -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'upgrade'
-            $script:capturedArgs | Should -Contain '--all'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'upgrade'
+            Assert-TestCommandInvocationContains '--all'
             Get-Command Update-WingetPackages -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
@@ -119,23 +109,14 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Clear-WingetCache calls winget cache clean' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cache cleaned successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Cache cleaned successfully'
             # Execute
             { Clear-WingetCache -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'cache'
-            $script:capturedArgs | Should -Contain 'clean'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'cache'
+            Assert-TestCommandInvocationContains 'clean'
         }
 
         It 'Creates Install-WingetPackage function' {
@@ -153,46 +134,28 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Install-WingetPackage calls winget install' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Package installed successfully'
             # Execute
             { Install-WingetPackage -Packages Git.Git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain 'Git.Git'
-            $script:capturedArgs | Should -Contain '--accept-package-agreements'
-            $script:capturedArgs | Should -Contain '--accept-source-agreements'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'install'
+            Assert-TestCommandInvocationContains 'Git.Git'
+            Assert-TestCommandInvocationContains '--accept-package-agreements'
+            Assert-TestCommandInvocationContains '--accept-source-agreements'
         }
 
         It 'Install-WingetPackage with Version passes --version flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package installed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Package installed successfully'
             # Execute
             { Install-WingetPackage -Packages Git.Git -Version 2.40.0 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'install'
-            $script:capturedArgs | Should -Contain '--version'
-            $script:capturedArgs | Should -Contain '2.40.0'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'install'
+            Assert-TestCommandInvocationContains '--version'
+            Assert-TestCommandInvocationContains '2.40.0'
         }
 
         It 'Creates Remove-WingetPackage function' {
@@ -210,24 +173,15 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Remove-WingetPackage calls winget uninstall' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Package removed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Package removed successfully'
             # Execute
             { Remove-WingetPackage -Packages Git.Git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'uninstall'
-            $script:capturedArgs | Should -Contain 'Git.Git'
-            $script:capturedArgs | Should -Contain '--accept-source-agreements'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'uninstall'
+            Assert-TestCommandInvocationContains 'Git.Git'
+            Assert-TestCommandInvocationContains '--accept-source-agreements'
         }
 
         It 'Creates Find-WingetPackage function' {
@@ -245,46 +199,32 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Find-WingetPackage calls winget search' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Name    Id    Version'
-                Write-Output 'Git     Git.Git    2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output @(
+                'Name    Id    Version'
+                'Git     Git.Git    2.40.0'
+            )
             # Execute
             { Find-WingetPackage -Query git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'search'
-            $script:capturedArgs | Should -Contain 'git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'search'
+            Assert-TestCommandInvocationContains 'git'
         }
 
         It 'Find-WingetPackage with Exact passes --exact flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Name    Id    Version'
-                Write-Output 'Git     Git.Git    2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output @(
+                'Name    Id    Version'
+                'Git     Git.Git    2.40.0'
+            )
             # Execute
             { Find-WingetPackage -Query Git.Git -Exact -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'search'
-            $script:capturedArgs | Should -Contain '--exact'
-            $script:capturedArgs | Should -Contain 'Git.Git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'search'
+            Assert-TestCommandInvocationContains '--exact'
+            Assert-TestCommandInvocationContains 'Git.Git'
         }
 
         It 'Creates Get-WingetPackage function' {
@@ -297,23 +237,16 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Get-WingetPackage calls winget list' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Name    Id    Version'
-                Write-Output 'Git     Git.Git    2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output @(
+                'Name    Id    Version'
+                'Git     Git.Git    2.40.0'
+            )
             # Execute
             { Get-WingetPackage -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'list'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'list'
         }
 
         It 'Creates Get-WingetPackageInfo function' {
@@ -331,46 +264,32 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Get-WingetPackageInfo calls winget show' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Found Git [Git.Git]'
-                Write-Output 'Version: 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output @(
+                'Found Git [Git.Git]'
+                'Version: 2.40.0'
+            )
             # Execute
             { Get-WingetPackageInfo -Packages Git.Git -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'show'
-            $script:capturedArgs | Should -Contain 'Git.Git'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'show'
+            Assert-TestCommandInvocationContains 'Git.Git'
         }
 
         It 'Get-WingetPackageInfo with Version passes --version flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Found Git [Git.Git]'
-                Write-Output 'Version: 2.40.0'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output @(
+                'Found Git [Git.Git]'
+                'Version: 2.40.0'
+            )
             # Execute
             { Get-WingetPackageInfo -Packages Git.Git -Version 2.40.0 -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'show'
-            $script:capturedArgs | Should -Contain '--version'
-            $script:capturedArgs | Should -Contain '2.40.0'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'show'
+            Assert-TestCommandInvocationContains '--version'
+            Assert-TestCommandInvocationContains '2.40.0'
         }
 
         It 'Creates Export-WingetPackages function' {
@@ -388,47 +307,29 @@ Describe 'winget Tools Integration Tests' {
         }
 
         It 'Export-WingetPackages calls winget export' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages exported successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages exported successfully'
             $testPath = Get-TestArtifactPath -FileName 'test-winget-packages.json'
 
             # Execute
             { Export-WingetPackages -Path $testPath -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'export'
-            $script:capturedArgs | Should -Contain '-o'
-            $script:capturedArgs | Should -Contain $testPath
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'export'
+            Assert-TestCommandInvocationContains '-o'
+            Assert-TestCommandInvocationContains $testPath
         }
 
         It 'Export-WingetPackages with Source passes --source flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName winget -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Packages exported from source'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages exported from source'
             # Execute
             { Export-WingetPackages -Path (Get-TestArtifactPath -FileName 'test-winget-packages.json') -Source winget -Verbose 4>&1 | Out-Null } | Should -Not -Throw
 
             # Verify
-            Should -Invoke -CommandName 'winget' -Times 1 -Exactly
-            if ($null -eq $script:capturedArgs) {
-                throw "Mock was called but capturedArgs is null."
-            }
-            $script:capturedArgs | Should -Contain 'export'
-            $script:capturedArgs | Should -Contain '--source'
-            $script:capturedArgs | Should -Contain 'winget'
+            Assert-TestCommandInvokedExactlyOnce
+            Assert-TestCommandInvocationContains 'export'
+            Assert-TestCommandInvocationContains '--source'
+            Assert-TestCommandInvocationContains 'winget'
         }
 
         It 'Creates Import-WingetPackages function' {
@@ -450,18 +351,18 @@ Describe 'winget Tools Integration Tests' {
             '{"Sources":[],"Packages":[{"PackageIdentifier":"Git.Git","Version":"2.40.0"}]}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
 
             if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-                Mock Invoke-WithWideEvent -MockWith {
+                Set-Item -Path 'Function:\global:Invoke-WithWideEvent' -Value {
                     param(
                         [Parameter(Mandatory)]
                         [string]$OperationName,
                         [Parameter(Mandatory)]
                         [scriptblock]$ScriptBlock,
-                        [hashtable]$Context,
-                        [string]$Level,
+                        [hashtable]$Context = @{},
+                        [string]$Level = 'INFO',
                         [switch]$AlwaysKeep
                     )
                     & $ScriptBlock
-                }
+                } -Force
             }
 
             Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages imported successfully'
@@ -482,18 +383,18 @@ Describe 'winget Tools Integration Tests' {
             '{"Sources":[],"Packages":[{"PackageIdentifier":"Git.Git"}]}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
 
             if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-                Mock Invoke-WithWideEvent -MockWith {
+                Set-Item -Path 'Function:\global:Invoke-WithWideEvent' -Value {
                     param(
                         [Parameter(Mandatory)]
                         [string]$OperationName,
                         [Parameter(Mandatory)]
                         [scriptblock]$ScriptBlock,
-                        [hashtable]$Context,
-                        [string]$Level,
+                        [hashtable]$Context = @{},
+                        [string]$Level = 'INFO',
                         [switch]$AlwaysKeep
                     )
                     & $ScriptBlock
-                }
+                } -Force
             }
 
             Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages imported'
@@ -511,18 +412,18 @@ Describe 'winget Tools Integration Tests' {
             '{"Sources":[],"Packages":[{"PackageIdentifier":"Git.Git"}]}' | Out-File -FilePath $testFile -ErrorAction SilentlyContinue
 
             if (Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue) {
-                Mock Invoke-WithWideEvent -MockWith {
+                Set-Item -Path 'Function:\global:Invoke-WithWideEvent' -Value {
                     param(
                         [Parameter(Mandatory)]
                         [string]$OperationName,
                         [Parameter(Mandatory)]
                         [scriptblock]$ScriptBlock,
-                        [hashtable]$Context,
-                        [string]$Level,
+                        [hashtable]$Context = @{},
+                        [string]$Level = 'INFO',
                         [switch]$AlwaysKeep
                     )
                     & $ScriptBlock
-                }
+                } -Force
             }
 
             Setup-CapturingCommandMock -CommandName 'winget' -Output 'Packages imported'
@@ -558,7 +459,7 @@ Describe 'winget Tools Integration Tests' {
 
             Remove-Item Function:winget -ErrorAction SilentlyContinue
             Remove-Item Function:global:winget -ErrorAction SilentlyContinue
-            Mock-CommandAvailabilityPester -CommandName 'winget' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'winget' -Available $false
 
             $script:MissingWingetOutput = & { . (Join-Path $script:ProfileDir 'winget.ps1') } 2>&1 3>&1 | Out-String
         }

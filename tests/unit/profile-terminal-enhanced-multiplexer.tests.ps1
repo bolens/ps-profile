@@ -147,9 +147,9 @@ Describe 'terminal-enhanced.ps1 - Multiplexer Functions' {
         }
 
         It 'Returns list of available terminals' {
-            Setup-AvailableCommandMock -CommandName 'alacritty'
-            Setup-AvailableCommandMock -CommandName 'kitty'
-            Setup-AvailableCommandMock -CommandName 'tmux'
+            Set-TestCommandAvailabilityState -CommandName 'alacritty'
+            Set-TestCommandAvailabilityState -CommandName 'kitty'
+            Set-TestCommandAvailabilityState -CommandName 'tmux'
 
             $result = Get-TerminalInfo
 
@@ -163,8 +163,8 @@ Describe 'terminal-enhanced.ps1 - Multiplexer Functions' {
         }
 
         It 'Prefers preferred command variants' {
-            Setup-AvailableCommandMock -CommandName 'wezterm-nightly'
-            Setup-AvailableCommandMock -CommandName 'wezterm'
+            Set-TestCommandAvailabilityState -CommandName 'wezterm-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'wezterm'
 
             $result = Get-TerminalInfo
 

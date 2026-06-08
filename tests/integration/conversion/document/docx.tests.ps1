@@ -30,24 +30,11 @@ Describe 'DOCX and Office Document Conversion Tests' {
     }
     
     BeforeEach {
-        # Mock external tools to prevent hangs during conversion function calls
-        Mock-CommandAvailabilityPester -CommandName 'pandoc' -Available $false -Scope It
-        Mock-CommandAvailabilityPester -CommandName 'pdflatex' -Available $false -Scope It
-        Mock-CommandAvailabilityPester -CommandName 'xelatex' -Available $false -Scope It
-        Mock-CommandAvailabilityPester -CommandName 'luatex' -Available $false -Scope It
-        Mock -CommandName Get-Command -ParameterFilter { $Name -in @('pandoc', 'pdflatex', 'xelatex', 'luatex') } -MockWith { $null }
-        # Mock Ensure-DocumentLatexEngine to return a value without checking (prevent hangs)
-        # This function should be loaded by files.ps1 via LoadFilesFragment
-        if (Get-Command Ensure-DocumentLatexEngine -ErrorAction SilentlyContinue) {
-            Mock -CommandName Ensure-DocumentLatexEngine -MockWith { return 'pdflatex' }
-        }
-        else {
-            # If function doesn't exist, create a simple mock function
-            # This handles cases where files.ps1 didn't load LaTeXDetection.ps1
-            function global:Ensure-DocumentLatexEngine {
-                return 'pdflatex'
-            }
-        }
+        Initialize-DocumentConversionTestStubs
+    }
+
+    AfterEach {
+        Clear-DocumentConversionTestStubs
     }
 
     Context 'PDF conversion utilities' {

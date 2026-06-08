@@ -56,7 +56,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls cursor when available' {
-            Setup-AvailableCommandMock -CommandName 'cursor'
+            Set-TestCommandAvailabilityState -CommandName 'cursor'
 
             Edit-WithCursor -Path $script:TestEditorPath -ErrorAction SilentlyContinue
 
@@ -66,7 +66,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls cursor with new window flag when provided' {
-            Setup-AvailableCommandMock -CommandName 'cursor'
+            Set-TestCommandAvailabilityState -CommandName 'cursor'
 
             Edit-WithCursor -Path $script:TestEditorPath -NewWindow -ErrorAction SilentlyContinue
 
@@ -75,7 +75,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Handles Start-Process errors gracefully for cursor' {
-            Setup-AvailableCommandMock -CommandName 'cursor'
+            Set-TestCommandAvailabilityState -CommandName 'cursor'
             Set-TestStartProcessFailure -Message 'Process start failed'
 
             { Edit-WithCursor -Path $script:TestEditorPath -ErrorAction Stop } | Should -Throw '*Process start failed*'
@@ -90,7 +90,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls neovim-nightly when available' {
-            Setup-AvailableCommandMock -CommandName 'neovim-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'neovim-nightly'
 
             Edit-WithNeovim -Path $script:TestEditorPath -ErrorAction SilentlyContinue
 
@@ -99,7 +99,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Uses GUI version when UseGui specified' {
-            Setup-AvailableCommandMock -CommandName 'neovim-qt'
+            Set-TestCommandAvailabilityState -CommandName 'neovim-qt'
 
             Edit-WithNeovim -Path $script:TestEditorPath -UseGui -ErrorAction SilentlyContinue
 
@@ -108,7 +108,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Falls back to nvim when neovim-nightly not available' {
-            Setup-AvailableCommandMock -CommandName 'nvim'
+            Set-TestCommandAvailabilityState -CommandName 'nvim'
             Mark-TestCommandsUnavailable -CommandNames 'neovim-nightly'
 
             Edit-WithNeovim -Path $script:TestEditorPath -ErrorAction SilentlyContinue
@@ -118,7 +118,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Handles Start-Process errors gracefully for neovim' {
-            Setup-AvailableCommandMock -CommandName 'neovim-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'neovim-nightly'
             Set-TestStartProcessFailure -Message 'Process start failed'
 
             Edit-WithNeovim -Path $script:TestEditorPath -ErrorAction SilentlyContinue -ErrorVariable neovimErrors | Out-Null
@@ -136,7 +136,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls emacs when available' {
-            Setup-AvailableCommandMock -CommandName 'emacs'
+            Set-TestCommandAvailabilityState -CommandName 'emacs'
 
             Launch-Emacs -ErrorAction SilentlyContinue
 
@@ -146,7 +146,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls emacs with daemon flag when NoWindow specified' {
-            Setup-AvailableCommandMock -CommandName 'emacs'
+            Set-TestCommandAvailabilityState -CommandName 'emacs'
 
             Launch-Emacs -NoWindow -ErrorAction SilentlyContinue
 
@@ -155,7 +155,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls emacs with path when provided' {
-            Setup-AvailableCommandMock -CommandName 'emacs'
+            Set-TestCommandAvailabilityState -CommandName 'emacs'
 
             Launch-Emacs -Path $script:TestEditorFile -ErrorAction SilentlyContinue
 
@@ -164,7 +164,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Handles Start-Process errors gracefully for emacs' {
-            Setup-AvailableCommandMock -CommandName 'emacs'
+            Set-TestCommandAvailabilityState -CommandName 'emacs'
             Set-TestStartProcessFailure -Message 'Process start failed'
 
             Launch-Emacs -ErrorAction SilentlyContinue -ErrorVariable emacsErrors | Out-Null
@@ -182,7 +182,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls lapce-nightly when available' {
-            Setup-AvailableCommandMock -CommandName 'lapce-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'lapce-nightly'
 
             Launch-Lapce -Path $script:TestEditorPath -ErrorAction SilentlyContinue
 
@@ -191,7 +191,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Falls back to lapce when lapce-nightly not available' {
-            Setup-AvailableCommandMock -CommandName 'lapce'
+            Set-TestCommandAvailabilityState -CommandName 'lapce'
             Mark-TestCommandsUnavailable -CommandNames 'lapce-nightly'
 
             Launch-Lapce -Path $script:TestEditorPath -ErrorAction SilentlyContinue
@@ -201,7 +201,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Handles Start-Process errors gracefully for lapce' {
-            Setup-AvailableCommandMock -CommandName 'lapce-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'lapce-nightly'
             Set-TestStartProcessFailure -Message 'Process start failed'
 
             Launch-Lapce -Path $script:TestEditorPath -ErrorAction SilentlyContinue -ErrorVariable lapceErrors | Out-Null
@@ -219,7 +219,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Calls zed-nightly when available' {
-            Setup-AvailableCommandMock -CommandName 'zed-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'zed-nightly'
 
             Launch-Zed -Path $script:TestEditorPath -ErrorAction SilentlyContinue
 
@@ -228,7 +228,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Falls back to zed when zed-nightly not available' {
-            Setup-AvailableCommandMock -CommandName 'zed'
+            Set-TestCommandAvailabilityState -CommandName 'zed'
             Mark-TestCommandsUnavailable -CommandNames 'zed-nightly'
 
             Launch-Zed -Path $script:TestEditorPath -ErrorAction SilentlyContinue
@@ -238,7 +238,7 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Handles Start-Process errors gracefully for zed' {
-            Setup-AvailableCommandMock -CommandName 'zed-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'zed-nightly'
             Set-TestStartProcessFailure -Message 'Process start failed'
 
             Launch-Zed -Path $script:TestEditorPath -ErrorAction SilentlyContinue -ErrorVariable zedErrors | Out-Null
@@ -256,9 +256,9 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Returns list of available editors' {
-            Setup-AvailableCommandMock -CommandName 'code-insiders'
-            Setup-AvailableCommandMock -CommandName 'cursor'
-            Setup-AvailableCommandMock -CommandName 'neovim-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'code-insiders'
+            Set-TestCommandAvailabilityState -CommandName 'cursor'
+            Set-TestCommandAvailabilityState -CommandName 'neovim-nightly'
 
             $result = Get-EditorInfo
 
@@ -272,8 +272,8 @@ Describe 'editors.ps1 - Other Editor Functions' {
         }
 
         It 'Prefers preferred command variants' {
-            Setup-AvailableCommandMock -CommandName 'lapce-nightly'
-            Setup-AvailableCommandMock -CommandName 'lapce'
+            Set-TestCommandAvailabilityState -CommandName 'lapce-nightly'
+            Set-TestCommandAvailabilityState -CommandName 'lapce'
 
             $result = Get-EditorInfo
 

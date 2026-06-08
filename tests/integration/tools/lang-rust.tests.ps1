@@ -181,49 +181,49 @@ Describe 'lang-rust Integration Tests' {
         }
 
         It 'Install-RustBinary handles missing cargo-binstall gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo-binstall' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cargo-binstall' -Available $false
             $output = & { Install-RustBinary -Packages @('test-package') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cargo-binstall not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cargo-binstall'
         }
 
         It 'Watch-RustProject handles missing cargo-watch gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo-watch' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cargo-watch' -Available $false
             $output = & { Watch-RustProject } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cargo-watch not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cargo-watch'
         }
 
         It 'Audit-RustProject handles missing cargo-audit gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo-audit' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cargo-audit' -Available $false
             $output = & { Audit-RustProject } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cargo-audit not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cargo-audit'
         }
 
         It 'Test-RustOutdated handles missing cargo-outdated gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo-outdated' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cargo-outdated' -Available $false
             $output = & { Test-RustOutdated } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cargo-outdated not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cargo-outdated'
         }
 
         It 'Build-RustRelease handles missing cargo gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cargo' -Available $false
             $output = & { Build-RustRelease } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cargo not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cargo'
         }
 
         It 'Update-RustDependencies handles missing cargo gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cargo' -Available $false
             $output = & { Update-RustDependencies } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cargo not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cargo'
         }
 
         It 'Clear-CargoCache handles missing cargo gracefully' {
-            Mock-CommandAvailabilityPester -CommandName 'cargo' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'cargo' -Available $false
             $output = & { Clear-CargoCache } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'cargo not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'cargo'
@@ -232,60 +232,37 @@ Describe 'lang-rust Integration Tests' {
 
     Context 'Clear-CargoCache Function Tests' {
         BeforeAll {
-            Mock-CommandAvailabilityPester -CommandName 'cargo' -Available $true
-            Mock-CommandAvailabilityPester -CommandName 'cargo-cache' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'cargo' -Available $true
+            Set-TestCommandAvailabilityState -CommandName 'cargo-cache' -Available $true
+        }
+
+        BeforeEach {
+            Clear-TestCommandInvocationCapture
         }
 
         It 'Clear-CargoCache calls cargo-cache with --autoclean by default' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo-cache' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cache cleaned successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'cargo-cache' -Output 'Cache cleaned successfully'
             Clear-CargoCache -ErrorAction SilentlyContinue 4>&1 | Out-Null
-            Should -Invoke -CommandName 'cargo-cache' -Times 1 -Exactly
-
-            if ($script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'cache'
-                $script:capturedArgs | Should -Contain '--autoclean'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'cache'
+                Assert-TestCommandInvocationContains '--autoclean'
         }
 
         It 'Clear-CargoCache with Autoclean passes --autoclean flag' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo-cache' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'Cache cleaned successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'cargo-cache' -Output 'Cache cleaned successfully'
             Clear-CargoCache -Autoclean -ErrorAction SilentlyContinue 4>&1 | Out-Null
-            Should -Invoke -CommandName 'cargo-cache' -Times 1 -Exactly
-
-            if ($script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'cache'
-                $script:capturedArgs | Should -Contain '--autoclean'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'cache'
+                Assert-TestCommandInvocationContains '--autoclean'
         }
 
         It 'Clear-CargoCache with All passes --remove-dir all' {
-            $script:capturedArgs = $null
-            Mock -CommandName 'cargo-cache' -MockWith {
-                param([Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
-                $script:capturedArgs = $Arguments
-                Write-Output 'All cache removed successfully'
-            }
-
+            Setup-CapturingCommandMock -CommandName 'cargo-cache' -Output 'All cache removed successfully'
             Clear-CargoCache -All -ErrorAction SilentlyContinue 4>&1 | Out-Null
-            Should -Invoke -CommandName 'cargo-cache' -Times 1 -Exactly
-
-            if ($script:capturedArgs) {
-                $script:capturedArgs | Should -Contain 'cache'
-                $script:capturedArgs | Should -Contain '--remove-dir'
-                $script:capturedArgs | Should -Contain 'all'
-            }
+            Assert-TestCommandInvokedExactlyOnce
+                Assert-TestCommandInvocationContains 'cache'
+                Assert-TestCommandInvocationContains '--remove-dir'
+                Assert-TestCommandInvocationContains 'all'
         }
     }
 

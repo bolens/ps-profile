@@ -99,7 +99,7 @@ Describe 'api-tools.ps1 - Invoke-Postman' {
         }
 
         It 'Returns error when collection path does not exist and is not a URL' {
-            Setup-AvailableCommandMock -CommandName 'newman'
+            Set-TestCommandAvailabilityState -CommandName 'newman'
             $missingPath = Join-Path (New-TestTempDirectory -Prefix 'PostmanMissingParent') 'collection.json'
 
             $result = Invoke-Postman -CollectionPath $missingPath -ErrorAction SilentlyContinue
@@ -108,7 +108,7 @@ Describe 'api-tools.ps1 - Invoke-Postman' {
         }
 
         It 'Returns error when environment file does not exist' {
-            Setup-AvailableCommandMock -CommandName 'newman'
+            Set-TestCommandAvailabilityState -CommandName 'newman'
             $missingEnv = Join-Path (New-TestTempDirectory -Prefix 'PostmanMissingEnv') 'environment.json'
 
             $result = Invoke-Postman -CollectionPath $script:TestCollectionFile -Environment $missingEnv -ErrorAction SilentlyContinue
