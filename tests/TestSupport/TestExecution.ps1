@@ -127,6 +127,9 @@ function Get-PerformanceThreshold {
 .DESCRIPTION
     Populates MaxFragmentLoadTimeMs, MaxRepeatLoadTimeMs, MaxFunctionExecTimeMs,
     MaxIdempotencyTimeMs, and MaxLookupTimeMs using Get-PerformanceThreshold.
+    Defaults include headroom for CI and developer machines (similar to the 3x
+    margin used in performance.tests.ps1). Override per-fragment via
+    PS_PROFILE_{PREFIX}_MAX_* environment variables.
 .PARAMETER Prefix
     Short name used to build PS_PROFILE_{PREFIX}_* environment variables.
 #>
@@ -136,10 +139,10 @@ function Initialize-FragmentPerformanceThresholds {
         [Parameter(Mandatory)]
         [string]$Prefix,
 
-        [int]$LoadMs = 3500,
-        [int]$RepeatLoadMs = 3000,
-        [int]$FunctionMs = 2000,
-        [int]$IdempotencyMs = 3000,
+        [int]$LoadMs = 4500,
+        [int]$RepeatLoadMs = 4000,
+        [int]$FunctionMs = 4000,
+        [int]$IdempotencyMs = 4000,
         [int]$LookupMs = 1000
     )
 

@@ -2,7 +2,17 @@
 
 ## Overview
 
-The fragment cache system stores parsed fragment results in a SQLite database to dramatically improve profile load times. Cache entries persist between PowerShell sessions.
+The fragment cache stores parsed fragment results in a SQLite database (`fragment-cache.db`) to speed up command pre-registration and fragment parsing. Cache entries persist between PowerShell sessions.
+
+**Key modules and scripts:**
+
+| Component | Path |
+| --------- | ---- |
+| Cache path resolution | `scripts/lib/fragment/FragmentCachePath.psm1` |
+| Build / warm cache | `scripts/utils/build-fragment-cache.ps1` |
+| Clear cache | `scripts/utils/clear-fragment-cache.ps1` |
+
+See [Fragment Loading Optimization](FRAGMENT_LOADING_OPTIMIZATION.md) for how caching fits into lazy loading and pre-registration.
 
 ## Cache Modes
 
@@ -138,17 +148,16 @@ Cache entries are automatically invalidated when:
    Get-Command sqlite3 -ErrorAction SilentlyContinue
    ```
 
-2. **Check cache database:**
+2. **Check cache database path:**
 
    ```powershell
-   # Get cache database path
-   Import-Module .\scripts\lib\fragment\FragmentCache.psm1
+   Import-Module .\scripts\lib\fragment\FragmentCachePath.psm1
    Get-FragmentCacheDbPath
+   Test-Path (Get-FragmentCacheDbPath)
    ```
 
-3. **Check cache statistics:**
+3. **Check cache statistics** (when cache modules are loaded in your session):
    ```powershell
-   Import-Module .\scripts\lib\fragment\FragmentCache.psm1
    Get-FragmentCacheStats
    ```
 

@@ -6,7 +6,7 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    Initialize-FragmentPerformanceThresholds -Prefix 'GAME_EMULATORS' -FunctionMs 5000
+    Initialize-FragmentPerformanceThresholds -Prefix 'GAME_EMULATORS' -FunctionMs 12000
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 

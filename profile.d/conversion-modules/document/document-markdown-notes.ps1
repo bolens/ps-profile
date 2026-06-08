@@ -19,8 +19,8 @@ function Initialize-FileConversion-DocumentMarkdownNotes {
 .SYNOPSIS
     Converts markdown link syntax to Obsidian wikilinks.
 .DESCRIPTION
-    Transforms [text](page.md) and [text](page.md#anchor) into [[page|text]] or
-    [[page#anchor|text]]. Skips absolute URLs and non-markdown targets.
+    Transforms markdown links with relative .md paths into Obsidian wikilinks such as
+    [[page|text]] or [[page#anchor|text]]. Skips absolute URLs and non-markdown targets.
 .PARAMETER Content
     Markdown content to transform.
 .PARAMETER InputPath

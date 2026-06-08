@@ -6,7 +6,7 @@ Converts markdown link syntax to Obsidian wikilinks.
 
 ## Description
 
-Transforms [text](page.md) and [text](page.md#anchor) into [[page|text]] or [[page#anchor|text]]. Skips absolute URLs and non-markdown targets.
+Transforms markdown links with relative .md paths into Obsidian wikilinks such as [[page|text]] or [[page#anchor|text]]. Skips absolute URLs and non-markdown targets.
 
 ## Signature
 

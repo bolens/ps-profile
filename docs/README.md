@@ -47,12 +47,16 @@ Comprehensive guides for developers working on or contributing to the profile.
 - **Quick Start**: [DEVELOPMENT_QUICK_START.md](guides/DEVELOPMENT_QUICK_START.md) - Fast profile loading and common dev commands
 - **Error Handling Standard**: [ERROR_HANDLING_STANDARD.md](guides/ERROR_HANDLING_STANDARD.md) - Error handling, logging, and color coding standards
 - **Fragment Command Access**: [FRAGMENT_COMMAND_ACCESS.md](guides/FRAGMENT_COMMAND_ACCESS.md) - How to access fragment-defined commands
-- **Type Safety Guide**: [TYPE_SAFETY.md](guides/TYPE_SAFETY.md) - Improving type safety with enums, classes, and validation
-- **Type Safety Implementation**: [TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md](guides/TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md) - Summary of implemented type safety improvements
-- **Type Safety Migration Status**: [TYPE_SAFETY_MIGRATION_STATUS.md](guides/TYPE_SAFETY_MIGRATION_STATUS.md) - Current migration status from constants to enums
+- **Type Safety Guide**: [TYPE_SAFETY.md](guides/TYPE_SAFETY.md) - Enums, classes, validation, and strict mode
 - **Function Naming Exceptions**: [FUNCTION_NAMING_EXCEPTIONS.md](guides/FUNCTION_NAMING_EXCEPTIONS.md) - Exceptions to standard naming conventions
 - **Security Allowlist**: [SECURITY_ALLOWLIST.md](guides/SECURITY_ALLOWLIST.md) - Security scanning allowlist
 - **Tool Requirements**: [TOOL_REQUIREMENTS.md](guides/TOOL_REQUIREMENTS.md) - Test/conversion dependencies ([requirements.txt](../requirements.txt), [scoop.txt](../requirements/scoop.txt), [linux.txt](../requirements/linux.txt))
+- **Fragment Cache**: [FRAGMENT_CACHE_USAGE.md](guides/FRAGMENT_CACHE_USAGE.md) - SQLite fragment cache and utility scripts
+- **Fragment Loading**: [FRAGMENT_LOADING_OPTIMIZATION.md](guides/FRAGMENT_LOADING_OPTIMIZATION.md) - Lazy loading and command pre-registration
+- **Module Loading**: [MODULE_LOADING_STANDARD.md](guides/MODULE_LOADING_STANDARD.md) - `Import-FragmentModule` patterns
+- **Preference-Aware Hints**: [PREFERENCE_AWARE_INSTALL_HINTS.md](guides/PREFERENCE_AWARE_INSTALL_HINTS.md) - Install hint preferences
+
+See the [full guide index](guides/README.md) for performance, SQLite, and advanced topics.
 
 ## Quick Links
 
@@ -69,13 +73,17 @@ All documentation is automatically generated from source code:
 - **Fragment Documentation**: Run `task generate-fragment-readmes` or `pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1`
 - **All Documentation**: Run `task all-docs` to generate both
 
+After editing guides or the source files they describe, refresh drift bindings:
+
+```powershell
+task drift-link    # updates drift.lock for tests and guides
+task drift-check   # included in quality-check
+```
+
 ## Statistics
 
 - **Total Functions**: See [API index](api/README.md) for current count
 - **Total Aliases**: See [API index](api/README.md) for current count
 - **Total Fragments**: See [Fragment index](fragments/README.md) for current count
 
----
-
-_Last updated: 2025-01-XX_
 

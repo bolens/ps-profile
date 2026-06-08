@@ -366,6 +366,12 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{.CLI_ARGS}}
 
+  drift-link:
+    desc: Link tests and guides to source targets (drift.lock)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh
+      - pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh
+
   drift-check:
     desc: Check that doc links and bindings are current (drift)
     cmds:

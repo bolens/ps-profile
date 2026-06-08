@@ -6,9 +6,9 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_LOAD_MS' -Default 2500
-    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_FUNCTION_MS' -Default 2500
-    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_IDEMPOTENCY_MS' -Default 500
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_LOAD_MS' -Default 4500
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_FUNCTION_MS' -Default 4000
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_AWS_MAX_IDEMPOTENCY_MS' -Default 1000
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
 

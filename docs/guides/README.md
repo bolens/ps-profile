@@ -1,186 +1,76 @@
 # Developer Guides
 
-This directory contains comprehensive guides for developers working on or contributing to the PowerShell profile.
+Guides for developing, testing, and operating the PowerShell profile.
 
-## Available Guides
-
-### Implementation & Planning
-
-#### [Module Loading Standard](MODULE_LOADING_STANDARD.md)
-
-Standardized module loading pattern specification:
-
-- `Import-FragmentModule` function design
-- Path caching infrastructure
-- Dependency validation
-- Retry logic
-- Error handling
-
-**When to use**: When implementing or using module loading patterns.
-
-#### [Fragment Command Access](FRAGMENT_COMMAND_ACCESS.md)
-
-How to access commands and functions defined inside profile fragments.
-
-**When to use**: When a function defined in a fragment is not visible in your session.
-
-#### [Fragment Cache Usage](FRAGMENT_CACHE_USAGE.md)
-
-How the SQLite-backed fragment cache works and how to interact with it.
-
-**When to use**: When working with fragment parsing, caching, or cache invalidation.
-
-#### [Fragment Cache Refactoring](FRAGMENT_CACHE_REFACTORING.md)
-
-Analysis and plan for refactoring the `FragmentCache.psm1` module.
-
-**When to use**: When modifying or extending the fragment cache system.
-
-#### [Fragment Loading Optimization](FRAGMENT_LOADING_OPTIMIZATION.md)
-
-Strategies for optimizing fragment load times.
-
-**When to use**: When investigating slow profile startup or fragment loading.
-
-#### [Profile Fragment Loader Modularization](PROFILE_FRAGMENT_LOADER_MODULARIZATION.md)
-
-Analysis of `ProfileFragmentLoader.psm1` modularization opportunities.
-
-**When to use**: When refactoring or extending the profile fragment loader.
-
-#### [Modularization Analysis](MODULARIZATION_ANALYSIS.md)
-
-Identifies monolithic files that could benefit from modularization.
-
-**When to use**: When planning large refactors or splitting oversized files.
-
-#### [Module Documentation Template](MODULE_DOCUMENTATION_TEMPLATE.md)
-
-Standardized template for documenting PowerShell profile modules.
-
-**When to use**: When writing new module documentation.
-
-#### [Preference-Aware Install Hints](PREFERENCE_AWARE_INSTALL_HINTS.md)
-
-How the preference-aware install hint system works.
-
-**When to use**: When adding new tool install hints or customizing hint output.
-
-#### [Preference Awareness Implementation](PREFERENCE_AWARENESS_IMPLEMENTATION.md)
-
-Summary of all places where preference-awareness is implemented.
-
-**When to use**: When auditing or extending preference-aware behavior.
-
-#### [SQLite Databases](SQLITE_DATABASES.md)
-
-Overview of SQLite databases used for persistent storage in the profile.
-
-**When to use**: When working with fragment cache, metrics history, or other persistent data.
-
-### Testing
-
-**Start here:** [Testing Guide](TESTING.md) — canonical reference for structure, running tests, runner flags, batch scripts, and coverage. All testing docs cross-link from [Related Testing Documentation](TESTING.md#related-testing-documentation).
+## Getting Started
 
 | Guide | When to use |
 | ----- | ----------- |
-| **[Testing Guide](TESTING.md)** | Writing, running, or debugging tests; runner CLI flags; batch runners |
-| [Development Guide](DEVELOPMENT.md) | Project setup, workflow, advanced runner features (retry, baselines, reporting) |
-| [Testing Patterns](../examples/TESTING_PATTERNS.md) | Copy-paste examples for test file structure and TestSupport usage |
-| [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | Stubbing commands, network, and environment state |
-| [Coverage Verification](VERIFY_COVERAGE.md) | Per-module coverage checks with `analyze-coverage.ps1` |
-| [Tool Requirements](TOOL_REQUIREMENTS.md) | Installing optional tools; understanding test skips |
-| [Development Quick Start](DEVELOPMENT_QUICK_START.md) | Fast profile reload during iterative development |
+| [Development Quick Start](DEVELOPMENT_QUICK_START.md) | Fast profile reload during iterative work |
+| [Development Guide](DEVELOPMENT.md) | Setup, workflow, advanced test runner features |
+| [Testing Guide](TESTING.md) | **Primary** testing reference — structure, runner flags, coverage |
+| [Testing Patterns](../examples/TESTING_PATTERNS.md) | Copy-paste test examples |
+| [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | Stubbing commands, network, environment |
+| [Coverage Verification](VERIFY_COVERAGE.md) | Per-module `analyze-coverage.ps1` checks |
+| [Tool Requirements](TOOL_REQUIREMENTS.md) | Optional tools and test skips |
 
-**Runner scripts:** `scripts/utils/code-quality/run-pester.ps1` · `analyze-coverage.ps1` · batch wrappers (see [Batch Runners](TESTING.md#batch-runners))
+## Architecture & Loading
 
-### Code Quality
+| Guide | When to use |
+| ----- | ----------- |
+| [Fragment Command Access](FRAGMENT_COMMAND_ACCESS.md) | On-demand loading and standalone wrappers |
+| [Module Loading Standard](MODULE_LOADING_STANDARD.md) | `Import-FragmentModule` / `Import-FragmentModules` |
+| [Fragment Cache Usage](FRAGMENT_CACHE_USAGE.md) | SQLite fragment cache, pre-warming, utilities |
+| [Fragment Loading Optimization](FRAGMENT_LOADING_OPTIMIZATION.md) | Startup and fragment load strategies |
+| [SQLite Databases](SQLITE_DATABASES.md) | Persistent cache, metrics, and history databases |
+| [Parallel Loading State Merge Analysis](PARALLEL_LOADING_STATE_MERGE_ANALYSIS.md) | Why parallel runspace state merge is hard |
 
-#### [Error Handling Standard](ERROR_HANDLING_STANDARD.md)
+See also [ARCHITECTURE.md](../../ARCHITECTURE.md) for loader design and implemented optimizations.
 
-Standardized error handling approach, including `Write-StructuredError`, color coding conventions, and catch-block patterns.
+## Code Quality
 
-**When to use**: When adding error handling to fragments, modules, or scripts.
+| Guide | When to use |
+| ----- | ----------- |
+| [Error Handling Standard](ERROR_HANDLING_STANDARD.md) | Structured errors, logging, color conventions |
+| [Type Safety Guide](TYPE_SAFETY.md) | Enums, classes, validation, strict mode |
+| [Function Naming Exceptions](FUNCTION_NAMING_EXCEPTIONS.md) | Approved naming deviations |
+| [Security Allowlist](SECURITY_ALLOWLIST.md) | Intentional PSScriptAnalyzer suppressions |
+| [Module Documentation Template](MODULE_DOCUMENTATION_TEMPLATE.md) | Template for module comment-based help |
 
-#### [Function Naming Exceptions](FUNCTION_NAMING_EXCEPTIONS.md)
+## Preferences & Install Hints
 
-List of functions that don't follow standard PowerShell naming conventions and the reasons why.
+| Guide | When to use |
+| ----- | ----------- |
+| [Preference-Aware Install Hints](PREFERENCE_AWARE_INSTALL_HINTS.md) | User preferences, hints API, integration points |
 
-**When to use**: When reviewing function names or understanding naming decisions.
+## Performance
 
-#### [Security Allowlist](SECURITY_ALLOWLIST.md)
+| Guide | When to use |
+| ----- | ----------- |
+| [Profile Load Time Optimization](PROFILE_LOAD_TIME_OPTIMIZATION.md) | **Start here** — disable fragments, env tuning, quick wins |
+| [Profile Performance Optimization](PROFILE_PERFORMANCE_OPTIMIZATION.md) | Code-level optimization opportunities |
+| [Development Performance](DEVELOPMENT_PERFORMANCE.md) | Faster iteration while developing the profile |
+| [Prompt Performance Troubleshooting](PROMPT_PERFORMANCE_TROUBLESHOOTING.md) | Slow or broken prompts |
 
-Security scanning allowlist for PSScriptAnalyzer rules that are intentionally suppressed.
+## Documentation Maintenance
 
-**When to use**: When adding new security suppressions or reviewing security configurations.
+| Task | When |
+| ---- | ---- |
+| `task generate-docs` | After changing comment-based help on profile functions |
+| `task generate-fragment-readmes` | After changing fragment behavior or exports |
+| `task drift-link` | After editing guides or the source files they document |
+| `task drift-check` | Before commits (`quality-check` runs this automatically) |
 
-#### [Type Safety Guide](TYPE_SAFETY.md)
+Drift links guides and tests to source files in `drift.lock`. Scripts:
 
-Strategies for improving type safety in PowerShell codebases.
-
-**When to use**: When adding enums, classes, or type-validated parameters.
-
-#### [Type Safety Implementation Summary](TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md)
-
-Summary of implemented type safety improvements.
-
-**When to use**: Understanding what type safety improvements are already in place.
-
-#### [Type Safety Migration Status](TYPE_SAFETY_MIGRATION_STATUS.md)
-
-Tracks the migration from backward-compatible enum usage to direct enum usage.
-
-**When to use**: When continuing or auditing the type safety migration.
-
-#### [Type Safety Remaining Improvements](TYPE_SAFETY_REMAINING_IMPROVEMENTS.md)
-
-Outlines additional type safety improvements that could be implemented.
-
-**When to use**: When planning future type safety work.
-
-### Performance
-
-#### [Profile Performance Optimization](PROFILE_PERFORMANCE_OPTIMIZATION.md)
-
-Detailed performance optimization guide.
-
-**When to use**: When optimizing profile performance.
-
-#### [Development Performance Optimization](DEVELOPMENT_PERFORMANCE.md)
-
-Performance optimization specifically for developers working on the profile itself.
-
-**When to use**: When profiling or improving the development iteration cycle.
-
-#### [Profile Loading Performance Analysis](PROFILE_LOADING_PERFORMANCE_ANALYSIS.md)
-
-Analysis of profile loading performance.
-
-**When to use**: Understanding profile loading performance.
-
-#### [Profile Load Time Optimization](PROFILE_LOAD_TIME_OPTIMIZATION.md)
-
-Actionable recommendations for improving PowerShell profile load times.
-
-**When to use**: When profile startup is slow and you want concrete fixes.
-
-#### [Parallel Loading State Merge Analysis](PARALLEL_LOADING_STATE_MERGE_ANALYSIS.md)
-
-Technical analysis of parallel loading state merging challenges and alternatives.
-
-**When to use**: Understanding why state merging is difficult and what alternatives exist.
-
-#### [Prompt Performance Troubleshooting](PROMPT_PERFORMANCE_TROUBLESHOOTING.md)
-
-Troubleshooting guide for prompt performance issues.
-
-**When to use**: When debugging prompt performance problems.
+- `scripts/utils/code-quality/link-guide-drift.ps1`
+- `scripts/utils/code-quality/link-test-drift.ps1`
 
 ## Related Documentation
 
-- **Main Documentation**: [../README.md](../README.md)
-- **Testing Hub**: [TESTING.md#related-testing-documentation](TESTING.md#related-testing-documentation) - Cross-linked testing documentation index
-- **API Reference**: [../api/README.md](../api/README.md)
-- **Fragment Documentation**: [../fragments/README.md](../fragments/README.md)
-- **Architecture**: [../../ARCHITECTURE.md](../../ARCHITECTURE.md)
-- **Contributing**: [../../CONTRIBUTING.md](../../CONTRIBUTING.md)
+- [docs/README.md](../README.md) — Documentation index
+- [API Reference](../api/README.md)
+- [Fragment Documentation](../fragments/README.md)
+- [ARCHITECTURE.md](../../ARCHITECTURE.md)
+- [CONTRIBUTING.md](../../CONTRIBUTING.md)
+- [AGENTS.md](../../AGENTS.md)

@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 1472
-**Total Aliases:** 1536
-**Generated:** 2026-06-07 23:36:51
+**Total Functions:** 1493
+**Total Aliases:** 1557
+**Generated:** 2026-06-08 08:56:53
 
 ## Functions by Fragment
 
@@ -2349,11 +2349,35 @@ This documentation is automatically generated from comment-based help in the pro
 - [Find-History](functions/Find-History.md) - Searches command history.
 - [Get-History](functions/Get-History.md) - Shows recent command history.
 
-### utilities-isbn (4 functions)
+### utilities-isbn-extended (19 functions)
 
+- [Add-IsbnLibraryEntry](functions/Add-IsbnLibraryEntry.md) - Adds a book to the local ISBN reading-list library.
+- [Compare-Isbn](functions/Compare-Isbn.md) - Compares two ISBN values and reports whether they refer to the same book.
+- [Complete-Isbn](functions/Complete-Isbn.md) - Completes a partial ISBN by calculating the missing check digit.
+- [ConvertTo-IsbnNormalizedList](functions/ConvertTo-IsbnNormalizedList.md) - Normalizes and deduplicates a list of ISBN values.
+- [Export-IsbnBibliography](functions/Export-IsbnBibliography.md) - Exports bibliography records for one or more ISBN values.
+- [Find-Isbn](functions/Find-Isbn.md) - Searches for books by title and/or author.
+- [Get-IsbnEditions](functions/Get-IsbnEditions.md) - Lists alternate editions for a book ISBN.
+- [Get-IsbnFromClipboard](functions/Get-IsbnFromClipboard.md) - Reads an ISBN from the clipboard and optionally looks it up.
+- [Get-IsbnFromText](functions/Get-IsbnFromText.md) - Extracts valid ISBN values from arbitrary text.
+- [Get-IsbnLibrary](functions/Get-IsbnLibrary.md) - Reads the local ISBN reading-list library.
+- [Get-IsbnUri](functions/Get-IsbnUri.md) - Returns linked-data style URIs for an ISBN.
+- [Import-IsbnListFile](functions/Import-IsbnListFile.md) - Imports ISBN values from a text file and optionally looks them up.
+- [Save-IsbnBarcode](functions/Save-IsbnBarcode.md) - Generates an EAN-13 barcode image for an ISBN.
+- [Save-IsbnQrCode](functions/Save-IsbnQrCode.md) - Generates a QR code containing ISBN metadata.
+- [Search-CalibreIsbn](functions/Search-CalibreIsbn.md) - Searches the local Calibre library for an ISBN.
+- [Show-IsbnCover](functions/Show-IsbnCover.md) - Opens a book cover image for an ISBN.
+- [Start-IsbnWatchFolder](functions/Start-IsbnWatchFolder.md) - Watches a folder for new files containing ISBN values and processes them.
+- [Test-IsmnValid](functions/Test-IsmnValid.md) - Validates an ISMN checksum.
+- [Test-IssnValid](functions/Test-IssnValid.md) - Validates an ISSN checksum.
+
+### utilities-isbn (6 functions)
+
+- [Clear-IsbnCache](functions/Clear-IsbnCache.md) - Clears cached ISBN lookup results.
 - [ConvertTo-IsbnNormalized](functions/ConvertTo-IsbnNormalized.md) - Normalizes and validates an ISBN from any supported format.
 - [Format-Isbn](functions/Format-Isbn.md) - Formats a normalized ISBN with standard hyphen groups.
 - [Get-IsbnInfo](functions/Get-IsbnInfo.md) - Looks up book metadata by ISBN.
+- [Save-IsbnCover](functions/Save-IsbnCover.md) - Downloads a book cover image for an ISBN.
 - [Test-IsbnValid](functions/Test-IsbnValid.md) - Tests whether an ISBN is valid.
 
 ### utilities-network-advanced (4 functions)
@@ -4720,9 +4744,33 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [hg](aliases/hg.md) - Searches command history. (alias for `Find-History`)
 
-### utilities-isbn (5 aliases)
+### utilities-isbn-extended (19 aliases)
+
+- [isbn-barcode](aliases/isbn-barcode.md) - Generates an EAN-13 barcode image for an ISBN. (alias for `Save-IsbnBarcode`)
+- [isbn-calibre](aliases/isbn-calibre.md) - Searches the local Calibre library for an ISBN. (alias for `Search-CalibreIsbn`)
+- [isbn-compare](aliases/isbn-compare.md) - Compares two ISBN values and reports whether they refer to the same book. (alias for `Compare-Isbn`)
+- [isbn-complete](aliases/isbn-complete.md) - Completes a partial ISBN by calculating the missing check digit. (alias for `Complete-Isbn`)
+- [isbn-cover-show](aliases/isbn-cover-show.md) - Opens a book cover image for an ISBN. (alias for `Show-IsbnCover`)
+- [isbn-dedupe](aliases/isbn-dedupe.md) - Normalizes and deduplicates a list of ISBN values. (alias for `ConvertTo-IsbnNormalizedList`)
+- [isbn-editions](aliases/isbn-editions.md) - Lists alternate editions for a book ISBN. (alias for `Get-IsbnEditions`)
+- [isbn-export](aliases/isbn-export.md) - Exports bibliography records for one or more ISBN values. (alias for `Export-IsbnBibliography`)
+- [isbn-extract](aliases/isbn-extract.md) - Extracts valid ISBN values from arbitrary text. (alias for `Get-IsbnFromText`)
+- [isbn-find](aliases/isbn-find.md) - Searches for books by title and/or author. (alias for `Find-Isbn`)
+- [isbn-from-clipboard](aliases/isbn-from-clipboard.md) - Reads an ISBN from the clipboard and optionally looks it up. (alias for `Get-IsbnFromClipboard`)
+- [isbn-import](aliases/isbn-import.md) - Imports ISBN values from a text file and optionally looks them up. (alias for `Import-IsbnListFile`)
+- [isbn-library](aliases/isbn-library.md) - Reads the local ISBN reading-list library. (alias for `Get-IsbnLibrary`)
+- [isbn-library-add](aliases/isbn-library-add.md) - Adds a book to the local ISBN reading-list library. (alias for `Add-IsbnLibraryEntry`)
+- [isbn-qrcode](aliases/isbn-qrcode.md) - Generates a QR code containing ISBN metadata. (alias for `Save-IsbnQrCode`)
+- [isbn-uri](aliases/isbn-uri.md) - Returns linked-data style URIs for an ISBN. (alias for `Get-IsbnUri`)
+- [isbn-watch](aliases/isbn-watch.md) - Watches a folder for new files containing ISBN values and processes them. (alias for `Start-IsbnWatchFolder`)
+- [ismn-validate](aliases/ismn-validate.md) - Validates an ISMN checksum. (alias for `Test-IsmnValid`)
+- [issn-validate](aliases/issn-validate.md) - Validates an ISSN checksum. (alias for `Test-IssnValid`)
+
+### utilities-isbn (7 aliases)
 
 - [isbn](aliases/isbn.md) - Looks up book metadata by ISBN. (alias for `Get-IsbnInfo`)
+- [isbn-cache-clear](aliases/isbn-cache-clear.md) - Clears cached ISBN lookup results. (alias for `Clear-IsbnCache`)
+- [isbn-cover](aliases/isbn-cover.md) - Downloads a book cover image for an ISBN. (alias for `Save-IsbnCover`)
 - [isbn-format](aliases/isbn-format.md) - Formats a normalized ISBN with standard hyphen groups. (alias for `Format-Isbn`)
 - [isbn-lookup](aliases/isbn-lookup.md) - Looks up book metadata by ISBN. (alias for `Get-IsbnInfo`)
 - [isbn-normalize](aliases/isbn-normalize.md) - Normalizes and validates an ISBN from any supported format. (alias for `ConvertTo-IsbnNormalized`)

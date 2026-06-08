@@ -4,6 +4,18 @@
 
 The preference-aware install hint system provides intelligent, user-customizable installation recommendations for missing tools. It respects user preferences for package managers, runtimes, and system package managers across multiple languages and platforms.
 
+## Integration Points
+
+| Area | Location |
+| ---- | -------- |
+| Core API | `profile.d/bootstrap/MissingToolWarnings.ps1` — `Get-PreferenceAwareInstallHint`, `Set-PreferenceAwareInstallPreferences`, `Test-PreferenceAwareInstallPreferences` |
+| Profile fragments | Language and tool fragments under `profile.d/` (for example `pip.ps1`, `pnpm.ps1`, `lang-rust.ps1`) |
+| Shared utilities | `scripts/lib/utilities/Command.psm1` — `Get-ToolInstallHint`, `Resolve-InstallCommand` |
+| Dependency checks | `scripts/utils/dependencies/check-missing-packages.ps1` |
+| Code quality scripts | `scripts/utils/code-quality/spellcheck.ps1`, `run-markdownlint.ps1` |
+| Runtime helpers | `scripts/lib/runtime/Python.psm1`, `scripts/lib/runtime/NodeJs.psm1` |
+| Tests | `tests/TestSupport/ToolDetection.ps1`; integration tests in `tests/integration/bootstrap/` |
+
 ## Supported Preferences
 
 ### Language-Specific Package Managers
@@ -135,70 +147,30 @@ When the preferred package manager is unavailable, the system automatically show
 
 ## Considerations and Best Practices
 
-### 1. **Platform Compatibility**
+### Platform compatibility
 
-- ✅ **Implemented**: Platform detection (Windows/Linux/macOS)
-- ✅ **Implemented**: Platform-specific system package manager suggestions
-- ⚠️ **Consider**: Some tools may have platform-specific installation methods (e.g., curl scripts)
+Platform detection drives system package manager suggestions (Windows/Linux/macOS). Some tools still need tool-specific install methods (curl scripts, direct downloads)—extend `Get-ToolSpecificInstallMethod` when adding those.
 
-### 2. **Performance**
+### Performance
 
-- ✅ **Current**: Uses `Test-CachedCommand` for efficient command detection
-- ✅ **Current**: Preference functions check availability once
-- 💡 **Future Enhancement**: Could cache preference lookups to avoid repeated checks
+Uses `Test-CachedCommand` for command detection. Preference resolution runs per hint request; avoid calling `Get-PreferenceAwareInstallHint` in tight loops.
 
-### 3. **Error Handling**
+### Error handling and fallbacks
 
-- ✅ **Current**: Try-catch blocks around preference function calls
-- ✅ **Current**: Graceful fallback to defaults if preferences fail
-- ✅ **Current**: Fallback to hardcoded defaults if helper function unavailable
+Preference helpers use try/catch with graceful degradation: invalid values are treated as `auto`, missing helpers fall back to hardcoded install commands, and unavailable package managers trigger the next option in the fallback chain (up to three alternatives).
 
-### 4. **Consistency**
+### Consistency
 
-- ✅ **Current**: All language fragments use same pattern
-- ✅ **Current**: Consistent fallback behavior across languages
-- ⚠️ **Note**: Some fragments may still use `Get-ToolInstallHint` for backward compatibility
+Language fragments share the same `Get-PreferenceAwareInstallHint` pattern. Some older call sites still use `Get-ToolInstallHint`, which delegates to the preference-aware path when available.
 
-### 5. **Tool Availability Verification**
+### Testing
 
-- ✅ **Current**: Preference functions verify tool availability before suggesting
-- ✅ **Current**: Falls back to alternatives if preferred tool unavailable
-- ✅ **Implemented**: Provides multiple prioritized suggestions when multiple managers available
-- ✅ **Implemented**: Fallback chains show up to 3 alternatives in priority order
+- Unit: `tests/unit/profile-preference-aware-install-hints.tests.ps1`
+- Integration: `tests/integration/bootstrap/preference-aware-install-hints-*.tests.ps1`
 
-### 6. **Documentation**
+### Cross-platform notes
 
-- ✅ **Current**: `.env.example` documents all preferences
-- ✅ **Current**: Function help includes examples
-- 💡 **Enhancement**: Could add user guide with examples
-
-### 7. **Testing** ✅ **Implemented**
-
-- ✅ **Implemented**: Unit tests for preference detection logic
-- ✅ **Implemented**: Integration tests for fallback chains
-- ✅ **Implemented**: Cross-platform tests for platform-specific suggestions
-- ✅ **Implemented**: Edge case tests (missing tools, invalid preferences, etc.)
-- See `tests/unit/profile-preference-aware-install-hints.tests.ps1` and `tests/integration/bootstrap/preference-aware-install-hints-*.tests.ps1`
-
-### 8. **Edge Cases**
-
-- ✅ **Handled**: Missing preference functions (falls back gracefully)
-- ✅ **Handled**: Invalid preference values (treats as 'auto')
-- ✅ **Handled**: No available package managers (suggests generic install)
-- 💡 **Consider**: Tools with multiple installation methods (e.g., deno has curl script, scoop, brew)
-
-### 9. **User Experience**
-
-- ✅ **Current**: Preferences are optional (defaults work without configuration)
-- ✅ **Current**: Auto-detection reduces need to specify tool types
-- ✅ **Implemented**: Interactive preference setup via `Set-PreferenceAwareInstallPreferences`
-- ✅ **Implemented**: Preference validation via `Test-PreferenceAwareInstallPreferences`
-
-### 10. **Cross-Platform Considerations**
-
-- ✅ **Current**: Platform detection works on Windows, Linux, macOS
-- ✅ **Current**: Platform-specific install commands
-- ⚠️ **Note**: Some tools may require different commands per platform (e.g., `python3` vs `python`)
+Platform detection drives system package manager suggestions. Runtime names may differ by platform (`python3` vs `python`). Tools with non-package-manager installs (curl scripts, direct downloads) can be added via `Get-ToolSpecificInstallMethod`.
 
 ## Available Functions
 
@@ -249,53 +221,12 @@ When the preferred package manager is unavailable, the system automatically show
    - Maps package manager names to actual commands
    - Parameters: `-CommandName`
 
-## Future Enhancements
+## Possible Future Enhancements
 
-### Potential Improvements
-
-1. **Interactive Preference Setup** ✅ **Implemented**
-
-   - Command to detect available tools and set preferences interactively
-   - Function: `Set-PreferenceAwareInstallPreferences`
-   - Supports interactive and non-interactive modes
-
-2. **Preference Validation** ✅ **Implemented**
-
-   - Validate preference values and check availability
-   - Function: `Test-PreferenceAwareInstallPreferences`
-   - Warns about invalid or unavailable preferences
-
-3. **Multiple Suggestions** ✅ **Implemented**
-
-   - When multiple package managers available, suggest all options in priority order
-   - Example: "Install with: scoop install tool (or: winget install tool, or: choco install tool -y)"
-   - Automatically detects available package managers and shows them as fallbacks
-
-4. **Tool-Specific Installation Methods** ✅ **Partially Implemented**
-
-   - Registry system for tool-specific installation methods
-   - Functions: `Get-ToolInstallMethodRegistry`, `Get-ToolSpecificInstallMethod`
-   - Currently includes: `pnpm`, `uv`, `poetry`, `cargo-binstall`
-   - 💡 **Enhancement**: Expand registry with more tools and special installation methods (curl scripts, direct downloads)
-
-5. **Version Preferences**
-
-   - Support version preferences (e.g., prefer Python 3.11 over 3.10)
-   - Currently only supports runtime name preference
-
-6. **Project-Level Preferences**
-
-   - Support project-specific preferences (e.g., `.preferences.json` in project root)
-   - Override user-level preferences for specific projects
-
-7. **Preference Inheritance**
-
-   - Allow preferences to inherit from parent directories
-   - Useful for monorepos with different tool preferences per project
-
-8. **Preference Export/Import**
-   - Export preferences to share across machines
-   - Import preferences from other developers
+- Expand the tool-specific install method registry (`Get-ToolSpecificInstallMethod`) beyond current entries (`pnpm`, `uv`, `poetry`, `cargo-binstall`)
+- Version preferences (for example prefer Python 3.12 over 3.11)
+- Project-level preferences (for example `.preferences.json` in a repo root)
+- Preference profiles or export/import for syncing across machines
 
 ## Usage Examples
 

@@ -6,7 +6,7 @@ Looks up book metadata by ISBN.
 
 ## Description
 
-Accepts ISBN-10, ISBN-13, SBN, and common prefixed or separated forms. Queries Open Library first, then Google Books as a fallback.
+Accepts ISBN-10, ISBN-13, SBN, and common prefixed or separated forms. Queries Open Library first, then Google Books as a fallback. Results are cached locally unless -Refresh is specified.
 
 ## Alias Information
 

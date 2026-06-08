@@ -145,6 +145,7 @@ The `tests/TestSupport.ps1` file is a thin loader that imports modular test util
 
 - `Invoke-TestPwshScript` - Executes scripts in isolated PowerShell processes
 - `Get-PerformanceThreshold` - Resolves performance thresholds from environment variables
+- `Initialize-FragmentPerformanceThresholds` - Sets fragment perf defaults (load 4500ms, function 4000ms; override via `PS_PROFILE_{PREFIX}_MAX_*`)
 
 **TestModuleLoading Module** (`TestSupport/TestModuleLoading.ps1`):
 
@@ -1433,6 +1434,7 @@ If coverage is lower than expected:
 | [Examples Index](../examples/README.md#testing-patterns) | All code examples including testing |
 | [Contributing](../../CONTRIBUTING.md) | Validation workflow before commits |
 | [AGENTS.md](../../AGENTS.md) | AI assistant testing guidelines |
+| [Guides README](README.md#documentation-maintenance) | Doc generation and drift binding |
 
 **Runner entry points:**
 

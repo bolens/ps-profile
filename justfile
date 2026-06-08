@@ -233,6 +233,11 @@ pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 {{argument
 generate-task-parity:
 pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{arguments()}}
 
+# Link tests and guides to source targets (drift.lock)
+drift-link:
+pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh
+pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh
+
 # Check that doc links and bindings are current (drift)
 drift-check:
 drift check
@@ -278,5 +283,27 @@ install-scoop:
 pnpm run install-scoop
 
 # Default: run lint (common first task)
-default: lint
+# Run default task
+default:
+task --list-all
 
+# Run performance tests per file with summary
+test-performance-batch:
+pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 {{arguments()}}
+
+# Run unit tests per file with summary (use -Filter profile- etc.)
+test-unit-batch:
+pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 {{arguments()}}
+
+# Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)
+test-conversion-batch:
+pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 {{arguments()}}
+
+# Run all conversion integration sub-batches (document, media/*, data/*)
+test-conversion-all-batch:
+pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 {{arguments()}}
+
+# Run tools integration tests (per-file isolation)
+test-tools:
+pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{arguments()}}
+default: lint

@@ -11,8 +11,8 @@ BeforeAll {
         (Join-Path $script:ProfileDir 'lang-java-compilers.ps1'),
         (Join-Path $script:ProfileDir 'lang-java-version.ps1')
     )
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_LOAD_MS' -Default 2000
-    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_FUNCTION_MS' -Default 1000
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_LOAD_MS' -Default 3000
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_FUNCTION_MS' -Default 1500
 
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }

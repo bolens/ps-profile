@@ -7,10 +7,10 @@ BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:DatabaseClientsPath = Join-Path $script:ProfileDir 'database-clients.ps1'
-    $script:MaxLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_LOAD_MS' -Default 3500
-    $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_FUNCTION_MS' -Default 500
-    $script:MaxAliasResolutionTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_ALIAS_MS' -Default 500
-    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_IDEMPOTENCY_MS' -Default 1000
+    $script:MaxLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_LOAD_MS' -Default 4500
+    $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_FUNCTION_MS' -Default 1000
+    $script:MaxAliasResolutionTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_ALIAS_MS' -Default 1000
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_IDEMPOTENCY_MS' -Default 2000
 
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }

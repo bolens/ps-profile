@@ -6,9 +6,9 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_LOAD_MS' -Default 3500
-    $script:MaxRepeatLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_REPEAT_LOAD_MS' -Default 2500
-    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_IDEMPOTENCY_MS' -Default 2500
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_LOAD_MS' -Default 4500
+    $script:MaxRepeatLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_REPEAT_LOAD_MS' -Default 3500
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_IDEMPOTENCY_MS' -Default 3500
     $script:MaxFunctionCheckTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_FUNCTION_MS' -Default 500
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')

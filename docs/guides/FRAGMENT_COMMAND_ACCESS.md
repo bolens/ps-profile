@@ -1,8 +1,5 @@
 # Fragment Command Access
 
-**Status**: ✅ Complete  
-**Version**: 1.0.0
-
 ## Overview
 
 The Fragment Command Access system enables running commands from PowerShell profile fragments without requiring the full profile to be loaded or manually referencing fragment files. This provides seamless command execution, on-demand fragment loading, and standalone script wrappers.
@@ -259,6 +256,7 @@ If wrapper generation fails:
 
 ## Related Documentation
 
+- [Fragment Loading Optimization](FRAGMENT_LOADING_OPTIMIZATION.md) - Lazy loading and pre-registration
 - [ARCHITECTURE.md](../../ARCHITECTURE.md) - Profile architecture
 - [AGENTS.md](../../AGENTS.md) - AI coding assistant guidance
 - [PROFILE_README.md](../../PROFILE_README.md) - Profile documentation

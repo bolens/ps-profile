@@ -288,6 +288,8 @@ task spellcheck               # Spellcheck
 task markdownlint             # Markdownlint
 task validate-function-naming # Validate function naming conventions
 task pre-commit-checks        # Run pre-commit checks manually
+task drift-link               # Refresh drift.lock after doc or test binding changes
+task drift-check              # Verify doc anchors and markdown links (included in quality-check)
 ```
 
 ### Direct Script Execution
@@ -544,6 +546,8 @@ task spellcheck               # Spellcheck
 task markdownlint             # Markdownlint
 task validate-function-naming # Validate function naming conventions
 task pre-commit-checks        # Run pre-commit checks manually
+task drift-link               # Refresh drift.lock after doc or test binding changes
+task drift-check              # Verify doc anchors and markdown links (included in quality-check)
 ```
 
 ### Direct Script Execution
@@ -628,6 +632,8 @@ Use numeric prefixes to control load order:
 
 - Function/alias documentation is auto-generated from comment-based help
 - Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1` to regenerate
+- Developer guides live in [docs/guides/README.md](docs/guides/README.md)
+- After editing guides or documented source files, run `task drift-link` then `task drift-check`
 - See [PROFILE_README.md](PROFILE_README.md) — Detailed technical information
 
 ### Testing documentation

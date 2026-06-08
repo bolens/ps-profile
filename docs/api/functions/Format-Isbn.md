@@ -24,6 +24,10 @@ The ISBN value to format.
 
 Target format: Auto, ISBN-10, or ISBN-13.
 
+### -Hyphenation
+
+Hyphenation style: Standard uses fixed groups; Registrant uses ISBN agency registrant rules.
+
 
 ## Outputs
 
@@ -36,6 +40,12 @@ System.String
 
 `powershell
 Format-Isbn -Isbn "9780306406157"
+``
+
+### Example 2
+
+`powershell
+Format-Isbn -Isbn "9780201367860" -Hyphenation Registrant
 ``
 
 ## Aliases

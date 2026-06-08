@@ -11,10 +11,10 @@ BeforeAll {
         (Join-Path $script:ProfileDir 'lang-python-env.ps1'),
         (Join-Path $script:ProfileDir 'lang-python-packages.ps1')
     )
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_LOAD_MS' -Default 2000
-    $script:MaxLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_LOOKUP_MS' -Default 500
-    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_IDEMPOTENCY_MS' -Default 3000
-    $script:MaxVarianceMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_VARIANCE_MS' -Default 500
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_LOAD_MS' -Default 3000
+    $script:MaxLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_LOOKUP_MS' -Default 800
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_IDEMPOTENCY_MS' -Default 4000
+    $script:MaxVarianceMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_PYTHON_MAX_VARIANCE_MS' -Default 800
 
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }

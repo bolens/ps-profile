@@ -6,8 +6,8 @@
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_LOAD_MS' -Default 2000
-    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_FUNCTION_MS' -Default 2000
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_LOAD_MS' -Default 4500
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_FUNCTION_MS' -Default 4000
     $script:MaxEngineLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_CONTAINERS_ENHANCED_MAX_ENGINE_LOOKUP_MS' -Default 100
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }

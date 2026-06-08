@@ -195,6 +195,10 @@ check-task-parity: ## Check task parity across all task runner files
 generate-task-parity: ## Generate missing tasks to achieve parity across all task runner files
 	pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate $(ARGS)
 
+drift-link: ## Link tests and guides to source targets (drift.lock)
+	pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh
+	pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh
+
 drift-check: ## Check that doc links and bindings are current (drift)
 	drift check
 
@@ -225,6 +229,19 @@ install-python-local: ## Install optional Python data packages locally
 install-scoop: ## Install recommended CLI tools via Scoop
 	pnpm run install-scoop
 
+test-performance-batch: ## Run performance tests per file with summary
+	pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 $(ARGS)
+
+test-unit-batch: ## Run unit tests per file with summary (use -Filter profile- etc.)
+	pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 $(ARGS)
+
+test-conversion-batch: ## Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)
+	pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 $(ARGS)
+
+test-conversion-all-batch: ## Run all conversion integration sub-batches (document, media/*, data/*)
+	pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 $(ARGS)
+
+test-tools: ## Run tools integration tests (per-file isolation)
+	pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 $(ARGS)
 default: ## Show make target help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
-

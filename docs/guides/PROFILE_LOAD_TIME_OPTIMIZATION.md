@@ -404,6 +404,6 @@ Actual times depend on:
 ## Related Documentation
 
 - [ARCHITECTURE.md](../../ARCHITECTURE.md) - System architecture and design decisions
-- [PROFILE_LOADING_PERFORMANCE_ANALYSIS.md](./PROFILE_LOADING_PERFORMANCE_ANALYSIS.md) - Detailed performance analysis
-- [PROFILE_PERFORMANCE_OPTIMIZATION.md](./PROFILE_PERFORMANCE_OPTIMIZATION.md) - Code-level optimizations
+- [PROFILE_PERFORMANCE_OPTIMIZATION.md](./PROFILE_PERFORMANCE_OPTIMIZATION.md) - Code-level optimization opportunities
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Loader design and built-in optimizations
 - [MODULE_LOADING_STANDARD.md](./MODULE_LOADING_STANDARD.md) - Module loading best practices

@@ -1,6 +1,8 @@
-# Profile Loading Performance Optimization Analysis
+# Profile Loading Performance Optimization
 
-This document identifies areas where profile loading performance can be improved, based on analysis of the current implementation.
+Code-level opportunities to reduce profile startup time.
+
+> **See also:** [Profile Load Time Optimization](PROFILE_LOAD_TIME_OPTIMIZATION.md) for user-facing changes (disabling fragments, environment variables). [ARCHITECTURE.md](../../ARCHITECTURE.md) documents optimizations already in the loader (caching, lazy git hash, dependency parsing cache, and similar).
 
 ## Executive Summary
 
@@ -11,21 +13,11 @@ The profile loader already implements several performance optimizations (lazy lo
 3. **Fragment file processing** - Inefficient collection operations during load order calculation
 4. **Scoop detection** - Multiple filesystem checks that could be consolidated
 
-## Current Performance Optimizations
-
-The profile already implements these optimizations (documented in `ARCHITECTURE.md`):
-
-✅ **Lazy Git Commit Hash Calculation** - Git hash calculated on-demand  
-✅ **Fragment File List Caching** - Single `Get-ChildItem` call, cached result  
-✅ **Fragment Dependency Parsing Cache** - Dependencies cached with file modification times  
-✅ **Optimized Path Checks** - `Test-Path` results cached for modules  
-✅ **Module Path Caching** - Paths computed once and reused
-
 ## Identified Optimization Opportunities
 
 ### 1. Collection Filtering in Profile Loader (High Impact)
 
-**Location:** `Microsoft.PowerShell_profile.ps1` lines 359-360, 370, 377, 442-445, 454-457
+**Location:** `Microsoft.PowerShell_profile.ps1` — fragment list partitioning and tier batching
 
 **Issue:** Multiple `Where-Object` calls on fragment collections create new collections and iterate multiple times.
 

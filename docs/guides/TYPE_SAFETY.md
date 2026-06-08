@@ -2,17 +2,18 @@
 
 This guide outlines strategies for improving type safety in PowerShell codebases, with specific recommendations for this profile repository.
 
-## Current State
+## Current State in This Repository
 
-The codebase currently uses:
+Type safety improvements are already in use across `scripts/lib/` and profile fragments:
 
-- ✅ `[OutputType()]` attributes (321 instances) - documentation only
-- ✅ `[CmdletBinding()]` (676 instances) - enables advanced function features
-- ✅ Parameter type annotations (`[string]`, `[int]`, `[bool]`, etc.)
-- ❌ No strict mode usage
-- ❌ No validation attributes (`[ValidateSet]`, `[ValidateRange]`, etc.)
-- ❌ No PowerShell classes for complex data structures
-- ❌ Many functions return `[object]` instead of specific types
+- **Enums** — Defined in `scripts/lib/core/CommonEnums.psm1` (for example `ExitCode`, `LogLevel`, `TestSuite`, `SeverityLevel`, `FileSystemPathType`, `DatabaseStatus`) and `FragmentCommandType` in `scripts/lib/fragment/FragmentCommandRegistry.psm1`. Import `CommonEnums.psm1` before modules that reference these types.
+- **Exit codes** — `scripts/lib/core/ExitCodes.psm1` exports `$EXIT_*` constants and `Exit-WithCode`. Prefer `[ExitCode]::Value` in modules; use `$EXIT_*` in `-File` scripts to avoid PowerShell argument-parsing quirks with enum syntax.
+- **Classes** — `EventSamplingStats` (`profile.d/bootstrap/ErrorHandlingStandard.ps1`), `ModuleImportResult` (`profile.d/bootstrap/ModuleLoading.ps1`), `FragmentDependencyTestResult` (`scripts/lib/fragment/FragmentLoading.psm1`).
+- **Validation** — `[ValidateNotNullOrEmpty()]` and enum-typed parameters on many lib functions; major `[ValidateSet()]` usages were converted to enums.
+- **Strict mode** — Enabled in `tests/TestSupport.ps1` for all Pester tests. Lib modules adopt `Set-StrictMode -Version Latest` incrementally; global bootstrap strict mode is not enabled yet.
+- **Generic returns** — `[object]` and `[OutputType([object])]` remain intentional on helpers like `Invoke-WithErrorHandling` and `Invoke-WithRetry` where return types vary.
+
+The sections below describe patterns for new code and incremental hardening—not a backlog of unfinished migration work.
 
 ## PowerShell Type Safety Limitations
 
@@ -251,29 +252,6 @@ Consider creating custom PSScriptAnalyzer rules for:
 [int]$count = 0         # Variable can only hold integers
 ```
 
-## Implementation Roadmap
-
-### Phase 1: Foundation (Low Risk)
-
-1. ✅ Document type safety patterns (this guide)
-2. Add validation attributes to new functions
-3. Use enums for constrained values in new code
-4. Replace `[object]` return types with specific types where obvious
-
-### Phase 2: Incremental Improvements (Medium Risk)
-
-1. Enable strict mode in new modules/fragments
-2. Convert complex hashtables to classes in new code
-3. Add validation attributes to existing high-traffic functions
-4. Create enums for commonly used string constants
-
-### Phase 3: Comprehensive Migration (Higher Risk)
-
-1. Enable strict mode globally (with thorough testing)
-2. Migrate existing complex data structures to classes
-3. Add validation attributes to all public functions
-4. Replace all `[object]` return types
-
 ## Examples for This Codebase
 
 ### Example 1: Fragment Command Registry
@@ -439,17 +417,16 @@ Invoke-ScriptAnalyzer -Path . -IncludeRule @(
 - **Strict Mode**: `Get-Help Set-StrictMode -Full`
 - **Validation Attributes**: `Get-Help about_Functions_Advanced_Parameters`
 
-## Migration Checklist
+## Checklist for New Code
 
-When improving type safety in existing code:
+When adding or refactoring functions:
 
-- [ ] Identify functions with `[object]` return types
-- [ ] Find string parameters that should be enums
-- [ ] Locate hashtables that could be classes
-- [ ] Add validation attributes to public functions
-- [ ] Test with strict mode enabled
-- [ ] Update documentation
-- [ ] Update tests to verify types
+- Prefer existing enums in `CommonEnums.psm1` over new `[ValidateSet()]` attributes
+- Add `[ValidateNotNullOrEmpty()]` on required string paths and names
+- Use typed classes instead of hashtables when the shape is stable
+- Enable `Set-StrictMode -Version Latest` in new `scripts/lib/` modules
+- Document `[object]` parameters when flexibility is intentional
+- Add Pester tests that reject invalid enum values
 
 ## Conclusion
 

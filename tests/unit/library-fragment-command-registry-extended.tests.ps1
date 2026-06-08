@@ -23,5 +23,7 @@ Describe 'scripts/lib/fragment/FragmentCommandRegistry.psm1 extended scenarios' 
         $c | Should -Match 'Get-FragmentForCommand'
         $c | Should -Match 'Export-CommandRegistry'
         $c | Should -Match 'Register-AllFragmentCommands'
+        $c | Should -Match 'Register-CommandsFromFragment'
+        $c | Should -Match 'Create-CommandProxiesForAutocomplete'
     }
 }

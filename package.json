@@ -72,8 +72,14 @@
     "dev-setup": "pwsh -NoProfile -File scripts/dev/setup.ps1",
     "check-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1",
     "generate-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate",
+    "drift-link": "pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh && pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh",
     "drift-check": "drift check",
-    "drift-status": "drift status"
+    "drift-status": "drift status",
+    "test-performance-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1",
+    "test-unit-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1",
+    "test-conversion-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1",
+    "test-conversion-all-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1",
+    "test-tools": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",

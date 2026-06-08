@@ -1,14 +1,14 @@
 # Module Loading Standard
 
-This document defines a robust, standardized solution for module loading in fragments to replace the current error-prone patterns.
+Standard module loading for profile fragments via `Import-FragmentModule` and `Import-FragmentModules`.
 
-## Current Problems
+**Implementation:** `profile.d/bootstrap/ModuleLoading.ps1` (loaded by bootstrap). All fragments should use these functions instead of ad-hoc dot-sourcing.
 
-**Note**: This standard has been **IMPLEMENTED** in `profile.d/00-bootstrap/ModuleLoading.ps1`. The previous fragment-specific `Import-FragmentModule` in `02-files.ps1` has been removed and replaced with the standardized version. All fragments should now use the global `Import-FragmentModule` and `Import-FragmentModules` functions.
+## Background: Patterns This Replaces
 
 ### 1. Repetitive Path Validation
 
-**Current Pattern** (repeated in many fragments):
+**Legacy pattern** (do not use in new code):
 
 ```powershell
 $devToolsModulesDir = Join-Path $PSScriptRoot 'dev-tools-modules'
@@ -57,15 +57,15 @@ if ($devToolsModulesDir -and -not [string]::IsNullOrWhiteSpace($devToolsModulesD
 
 ---
 
-## Proposed Solution: Standardized Module Loading System
+## Standard Module Loading System
 
 ### Core Functions
 
-**Note**: These functions should be added to `profile.d/bootstrap/ModuleLoading.ps1` (or `scripts/lib/fragment/ModuleLoading.psm1`) to be available to all fragments. The existing `Import-FragmentModule` in `02-files.ps1` is fragment-specific and should be replaced or enhanced.
+**Location**: `profile.d/bootstrap/ModuleLoading.ps1` — loaded by bootstrap and available to all fragments. Use `Import-FragmentModule` and `Import-FragmentModules` instead of ad-hoc dot-sourcing with nested `Test-Path` checks.
 
-#### 1. Import-FragmentModule (Enhanced - New Standard)
+#### 1. Import-FragmentModule
 
-**Location**: `profile.d/bootstrap/ModuleLoading.ps1` (or `scripts/lib/fragment/ModuleLoading.psm1`)
+**Location**: `profile.d/bootstrap/ModuleLoading.ps1`
 
 **Purpose**: Robust, cached, dependency-aware module loading
 
@@ -664,87 +664,27 @@ if (Test-ModulePath -FragmentRoot $PSScriptRoot -ModulePath @('optional-modules'
 
 ---
 
-## Implementation Plan
+## Migrating Legacy Fragments
 
-### Phase 1: Create Core Functions
-
-1. **Add to bootstrap** (`profile.d/bootstrap/ModuleLoading.ps1`):
-
-   - `Import-FragmentModule` (with all features)
-   - `Import-FragmentModules` (batch loading)
-   - `Test-ModulePath` (validation helper)
-
-2. **Add path caching** (if not exists):
-
-   - `Get-CachedPathExists`
-   - `Set-CachedPathExists`
-   - Or use existing `ModulePathCache.ps1`
-
-3. **Add dependency checking**:
-   - `Test-ModuleDependencies`
-   - `Get-LoadedModules`
-
-### Phase 2: Migrate Existing Fragments
-
-**Priority Order**:
-
-1. High-traffic fragments (`02-files.ps1`, `22-containers.ps1`)
-2. Medium-traffic fragments (`57-testing.ps1`, `58-build-tools.ps1`)
-3. Low-traffic fragments (others)
-
-**Migration Pattern**:
+Replace nested `Test-Path` + dot-source blocks with:
 
 ```powershell
-# OLD
-try {
-    $devToolsModulesDir = Join-Path $PSScriptRoot 'dev-tools-modules'
-    # ... repetitive code ...
-}
-catch {
-    # ... error handling ...
-}
-
-# NEW
 Import-FragmentModule -FragmentRoot $PSScriptRoot `
     -ModulePath @('dev-tools-modules', 'build', 'build-tools.ps1') `
     -Context "Fragment: build-tools (build-tools.ps1)" `
     -CacheResults
 ```
 
-### Phase 3: Update New Modules
-
-All new modules use `Import-FragmentModule` from the start.
+Use `Import-FragmentModules` when loading many modules from the same fragment. See `tests/integration/bootstrap/module-loading-standard.tests.ps1` for expected behavior.
 
 ---
 
 ## Benefits
 
-### Reliability
-
-- ✅ **Comprehensive validation**: Path, file type, syntax (optional)
-- ✅ **Dependency checking**: Ensures dependencies are loaded
-- ✅ **Retry logic**: Handles transient failures
-- ✅ **Error context**: Detailed error messages with context
-
-### Performance
-
-- ✅ **Path caching**: Avoids repeated `Test-Path` calls
-- ✅ **Batch validation**: Validates all paths before loading
-- ✅ **Lazy validation**: Only validates when needed
-
-### Maintainability
-
-- ✅ **Single source of truth**: One function handles all loading
-- ✅ **Consistent error handling**: Standardized across all modules
-- ✅ **Easy to use**: Simple API, less boilerplate
-- ✅ **Self-documenting**: Clear function names and parameters
-
-### Developer Experience
-
-- ✅ **Less code**: ~80% reduction in boilerplate
-- ✅ **Fewer errors**: Validation catches issues early
-- ✅ **Better debugging**: Detailed error messages
-- ✅ **Easier testing**: Can test path validation separately
+- Path caching and batch validation reduce redundant filesystem checks
+- Dependency and retry support with structured error context
+- Single API across fragments (~80% less boilerplate than manual dot-sourcing)
+- Validation catches path and dependency issues early with detailed error messages
 
 ---
 

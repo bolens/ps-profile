@@ -1603,6 +1603,131 @@
         "reveal": "always"
       },
       "type": "shell"
+    },
+    {
+      "command": "pwsh",
+      "presentation": {
+        "reveal": "always"
+      },
+      "args": [
+        "pwsh",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/link-test-drift.ps1",
+        "-Refresh",
+        "pwsh",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/link-guide-drift.ps1",
+        "-Refresh"
+      ],
+      "detail": "Link tests and guides to source targets (drift.lock)",
+      "type": "shell",
+      "label": "drift-link",
+      "problemMatcher": []
+    },
+    {
+      "command": "pwsh",
+      "presentation": {
+        "reveal": "always"
+      },
+      "args": [
+        "pwsh",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester.ps1",
+        "-Coverage",
+        "-Parallel"
+      ],
+      "detail": "Run Pester Tests",
+      "type": "shell",
+      "label": "test",
+      "problemMatcher": []
+    },
+    {
+      "command": "pwsh",
+      "presentation": {
+        "reveal": "always"
+      },
+      "args": [
+        "pwsh",
+        "-NonInteractive",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-performance-batch.ps1"
+      ],
+      "detail": "Run performance tests per file with summary",
+      "type": "shell",
+      "label": "test-performance-batch",
+      "problemMatcher": []
+    },
+    {
+      "command": "pwsh",
+      "presentation": {
+        "reveal": "always"
+      },
+      "args": [
+        "pwsh",
+        "-NonInteractive",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-unit-batch.ps1"
+      ],
+      "detail": "Run unit tests per file with summary (use -Filter profile- etc.)",
+      "type": "shell",
+      "label": "test-unit-batch",
+      "problemMatcher": []
+    },
+    {
+      "command": "pwsh",
+      "presentation": {
+        "reveal": "always"
+      },
+      "args": [
+        "pwsh",
+        "-NonInteractive",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-conversion-integration-batch.ps1"
+      ],
+      "detail": "Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)",
+      "type": "shell",
+      "label": "test-conversion-batch",
+      "problemMatcher": []
+    },
+    {
+      "command": "pwsh",
+      "presentation": {
+        "reveal": "always"
+      },
+      "args": [
+        "pwsh",
+        "-NonInteractive",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-conversion-all-batch.ps1"
+      ],
+      "detail": "Run all conversion integration sub-batches (document, media/*, data/*)",
+      "type": "shell",
+      "label": "test-conversion-all-batch",
+      "problemMatcher": []
+    },
+    {
+      "command": "pwsh",
+      "presentation": {
+        "reveal": "always"
+      },
+      "args": [
+        "pwsh",
+        "-NonInteractive",
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-tools-integration-batch.ps1"
+      ],
+      "detail": "Run tools integration tests (per-file isolation)",
+      "type": "shell",
+      "label": "test-tools",
+      "problemMatcher": []
     }
   ]
 }

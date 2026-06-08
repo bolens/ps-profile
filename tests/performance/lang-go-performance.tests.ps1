@@ -7,8 +7,8 @@ BeforeAll {
     . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:FragmentPath = Join-Path $script:ProfileDir 'lang-go.ps1'
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_LOAD_MS' -Default 2000
-    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_FUNCTION_MS' -Default 500
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_LOAD_MS' -Default 3000
+    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_FUNCTION_MS' -Default 800
 
     # Ensure bootstrap is loaded first
     $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'

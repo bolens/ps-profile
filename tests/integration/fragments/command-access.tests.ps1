@@ -173,6 +173,29 @@ Describe 'Fragment Command Access - Integration Tests' {
                 }
             }
         }
+
+        It 'Loads a registered fragment when Invoke-CommandDispatcher is called' {
+            if ((Get-Command Invoke-CommandDispatcher -ErrorAction SilentlyContinue) -and
+                (Get-Command Register-FragmentCommand -ErrorAction SilentlyContinue)) {
+                $commandName = "Test-DispatcherAccess_$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
+                $null = Register-FragmentCommand -CommandName $commandName -FragmentName 'bootstrap' -CommandType 'Function'
+
+                $originalAutoLoad = $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS
+                try {
+                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '1'
+                    { Invoke-CommandDispatcher -CommandName $commandName } | Should -Not -Throw
+                    Test-CommandInRegistry -CommandName $commandName | Should -Be $true
+                }
+                finally {
+                    if ($null -ne $originalAutoLoad) {
+                        $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalAutoLoad
+                    }
+                    else {
+                        Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
+                    }
+                }
+            }
+        }
     }
     
     Context 'End-to-End Command Access' {

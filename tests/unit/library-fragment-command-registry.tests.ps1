@@ -476,23 +476,25 @@ Describe 'FragmentCommandRegistry.psm1' {
     }
 
     Describe 'Register-CommandsFromFragment and Register-AllFragmentCommands' {
-        It 'Registers commands from a fragment file path' {
+        It 'Registers Set-AgentModeFunction commands discovered in a fragment file' {
             if (Get-Command Register-CommandsFromFragment -ErrorAction SilentlyContinue) {
-                $fragmentPath = Join-Path $script:RepoRoot 'profile.d' 'bootstrap.ps1'
+                $fragmentPath = Join-Path $script:RepoRoot 'profile.d' 'scoop.ps1'
                 Test-Path -LiteralPath $fragmentPath | Should -Be $true
 
-                $count = Register-CommandsFromFragment -FragmentPath $fragmentPath -FragmentName 'bootstrap'
-                $count | Should -BeGreaterOrEqual 0
+                $count = Register-CommandsFromFragment -FragmentPath $fragmentPath -FragmentName 'scoop'
+                $count | Should -BeGreaterThan 0
+                Test-CommandInRegistry -CommandName 'scoopbackup' | Should -Be $true
             }
         }
 
         It 'Accepts Register-AllFragmentCommands for batch fragment files' {
             if (Get-Command Register-AllFragmentCommands -ErrorAction SilentlyContinue) {
-                $fragmentPath = Join-Path $script:RepoRoot 'profile.d' 'bootstrap.ps1'
+                $fragmentPath = Join-Path $script:RepoRoot 'profile.d' 'scoop.ps1'
                 $fragmentFile = Get-Item -LiteralPath $fragmentPath
                 $stats = Register-AllFragmentCommands -FragmentFiles @($fragmentFile) -ForceBothParsingModes
                 $stats | Should -Not -BeNullOrEmpty
                 $stats.ParsedFragments | Should -Be 1
+                $stats.RegisteredCommands | Should -BeGreaterThan 0
             }
         }
     }

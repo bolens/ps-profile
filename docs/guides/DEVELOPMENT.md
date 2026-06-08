@@ -375,8 +375,9 @@ pwsh -NoProfile -File scripts\utils\benchmark-startup.ps1 -Iterations 5 -UpdateB
 
 Performance regression tests respect optional thresholds:
 
-- `PS_PROFILE_MAX_LOAD_MS` (default 6000)
-- `PS_PROFILE_MAX_FRAGMENT_MS` (default 500)
+- `PS_PROFILE_MAX_LOAD_MS` (default ~7500, or 3× baseline when `scripts/data/performance-baseline.json` exists)
+- `PS_PROFILE_MAX_FRAGMENT_MS` (default ~1200, or 3× slowest fragment from baseline)
+- Fragment performance tests use `Initialize-FragmentPerformanceThresholds` defaults (load 4500ms, function 4000ms) with per-fragment `PS_PROFILE_{PREFIX}_MAX_*` overrides
 
 ## Documentation Generation
 

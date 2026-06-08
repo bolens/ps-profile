@@ -299,6 +299,13 @@ task generate-docs              # API documentation (or: just generate-docs, mak
 task generate-fragment-readmes  # Fragment READMEs (or: just generate-fragment-readmes, make generate-fragment-readmes, npm run generate-fragment-readmes)
 ```
 
+After editing `docs/guides/` or sources those guides document:
+
+```powershell
+task drift-link   # Refresh drift.lock bindings
+task drift-check  # Included in quality-check
+```
+
 ## Common Development Tasks
 
 ### Running Tests

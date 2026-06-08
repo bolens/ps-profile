@@ -20,7 +20,8 @@ BeforeAll {
 Describe 'Markdown note content transforms' {
     Context 'ConvertTo-WikilinksFromMarkdownLinks' {
         It 'Converts relative markdown links to wikilinks' {
-            $input = 'See [My Page](notes/my-page.md) for details.'
+            $notePath = 'notes/my-page.md'
+            $input = "See [My Page]($notePath) for details."
             $result = ConvertTo-WikilinksFromMarkdownLinks -Content $input
             $result | Should -Be 'See [[notes/my-page|My Page]] for details.'
         }
